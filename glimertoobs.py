@@ -12,6 +12,7 @@ get_ipython().magic('reset -sf')
 
 from obspy.signal.invsim import corn_freq_2_paz
 from obspy.core import *
+from obspy.clients.iris import Client as iClient # To calculate angular distance and backazimuth
 from obspy.clients.fdsn import Client,header #web sevice
 from obspy.core.event.base import *
 from obspy.geodetics.base import locations2degrees #calculate angular distances
@@ -117,6 +118,9 @@ ei = 0 #event index
 bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
 bi = 0 #progressbar index
 
+# Define class for backazimuth calculation
+iclient = iClient()
+
 for event in event_cat:
     ni = 0 #network index
     requ[0].append(event.origins[0].time)
@@ -133,22 +137,26 @@ for event in event_cat:
             # check if station was active at event time and if station has channels:
             if station.total_number_of_channels and station.is_active(time=requ[0][ei]):
                 
-                # calculate epicentral distance:
-                ang_d = locations2degrees(event.origins[0].latitude, event.origins[0].longitude,
-                                  station.latitude, station.longitude)
+                # calculate epicentral distance and backazimuth:
+                #ang_d = locations2degrees(event.origins[0].latitude, event.origins[0].longitude,
+                  #                station.latitude, station.longitude)
+                result = iclient.distaz(station.latitude, stalon=station.longitude, evtlat=event.origins[0].latitude,
+
+                       evtlon=event.origins[0].longitude)
                 
                 # check if station is within defined epicentral distance limits:
-                if min_epid < ang_d < max_epid:
+                if min_epid < result['distance'] < max_epid:
                     requ[1][ei].append(station_inv[ni].code) #add network code
                     requ[2][ei].append(station_inv[ni][si].code) #add station code
                     requ[3][ei].append(requ[0][ei]+model.get_travel_times(source_depth_in_km=event.origins[0].depth/1000,
-                                     distance_in_degree=ang_d,
+                                     distance_in_degree=result['distance'],
                                      phase_list=["P"])[0].time) # calculate arrival times in UTC
                                                                 #index [0] = P-arrival
                                                                 #.time /.ray_param/.incident_angle
                     
                     # fetch waveforms; client is already set to IRIS
                     # download Brodband if available, else download HH
+                    # Are there really 3 channels available? - THat should be checked here
                     if station.get_contents()["channels"][0].find("BHZ"):
                         cha = "BH*"
                     else:
@@ -156,7 +164,7 @@ for event in event_cat:
                     
                     #if error FDSNNoDataException occurs (data is for some reason not available)
                     try:
-                        requ[4][ei].append(client.get_waveforms(requ[1][ei][si], requ[2][ei][si], "*", cha, requ[3][ei][si]-20, requ[3][ei][si]+120, attach_response=True))
+                        requ[4][ei].append(client.get_waveforms(requ[1][ei][si], requ[2][ei][si], "*", cha, requ[3][ei][si]-30, requ[3][ei][si]+120, attach_response=True))
                     
                     ###### DEMEAN AND DETREND #########
                         requ[4][ei][si].detrend(type='demean')
@@ -171,7 +179,7 @@ for event in event_cat:
                         requ[4][ei][si].simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True) #simulate has a fuction paz_remove='self', which does not seem to work properly
                         
                     #  rotate from NEZ to radial, transverse, z
-                        #requ[4][ei][si].rotate(method='NE->RT',inventory=station_inv)
+                        requ[4][ei][si].rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
                         # A back-azimuth has to be defined
                         # obpsy assumes the data to be properly alined alreadty ( has to be done before)
                     except header.FDSNException as e: 
