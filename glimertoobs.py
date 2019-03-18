@@ -10,7 +10,7 @@ Created on Tue Jan  8 16:33:41 2019
 from IPython import get_ipython
 get_ipython().magic('reset -sf')
 
-from obspy.signal.invsim import corn_freq_2_paz
+#from obspy.signal.invsim import corn_freq_2_paz
 from obspy.core import *
 from obspy.clients.iris import Client as iClient # To calculate angular distance and backazimuth
 from obspy.clients.fdsn import Client,header #web sevice
@@ -164,7 +164,7 @@ for event in event_cat:
                     
                     #if error FDSNNoDataException occurs (data is for some reason not available)
                     try:
-                        requ[4][ei].append(client.get_waveforms(requ[1][ei][si], requ[2][ei][si], "*", cha, requ[3][ei][si]-30, requ[3][ei][si]+120, attach_response=True))
+                        requ[4][ei].append(client.get_waveforms(requ[1][ei][si], requ[2][ei][si], "*", cha, requ[3][ei][si]-30, requ[3][ei][si]+120,minimumlength=150, attach_response=True))
                     
                     ###### DEMEAN AND DETREND #########
                         requ[4][ei][si].detrend(type='demean')
