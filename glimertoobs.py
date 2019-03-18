@@ -171,8 +171,9 @@ for event in event_cat:
                         requ[4][ei][si].simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True) #simulate has a fuction paz_remove='self', which does not seem to work properly
                         
                     #  rotate from NEZ to radial, transverse, z
-                        requ[4][ei][si].rotate(method='NE->RT',inventory=station_inv)
-                        
+                        #requ[4][ei][si].rotate(method='NE->RT',inventory=station_inv)
+                        # A back-azimuth has to be defined
+                        # obpsy assumes the data to be properly alined alreadty ( has to be done before)
                     except header.FDSNException as e: 
                         logging.exception(e,'for (Event,Network,Station)',ei,ni,si)
                         requ[4][ei].append('exception')
