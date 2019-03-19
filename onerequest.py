@@ -31,10 +31,10 @@ from obspy.clients.fdsn.mass_downloader import CircularDomain, \
 
 # station values:
 # Set values to "None" if they aren't requried / desired
-MINLAT = 56.0
-MAXLAT = 62.0
-MINLON = -150.0
-MAXLON = -145.0
+#MINLAT = 56.0
+#MAXLAT = 62.0
+#MINLON = -150.0
+#MAXLON = -145.0
 starttime = UTCDateTime("2018-01-01")
 endtime = UTCDateTime("2018-06-02")
 
@@ -80,11 +80,12 @@ logging.info('%(asctime)s')
 
 
 #################### CREATE STATION INVENTORY ###############################
-station_inv = client.get_stations(starttime = starttime,
+# Not needed as all available staitons in the given radius will be requested
+"""station_inv = client.get_stations(starttime = starttime,
                                 endtime = endtime, level = "response",
-                                minlongitude = MINLON, maxlongitude = MAXLON,
+                               minlongitude = MINLON, maxlongitude = MAXLON,
                                 minlatitude = MINLAT, maxlatitude = MAXLAT,
-                                channel = 'BH*,HH*') #level="channel"
+                                channel = 'BH*,HH*') #level="channel""""
 
 ############# Download simulation station's response function #################
 station_simulate = client.get_stations(level = "response",channel = 'BH*',network = 'IU',station = 'HRV') #a proper network and station has to be inserted here
@@ -103,49 +104,61 @@ event_cat = client.get_events(starttime = starttime, endtime = endtime,
                               minmagnitude = minMag, maxmagnitude = maxMag)
 
 
+# Calculate the min and max theoretical arrival time after event time
+min_time = model.get_travel_times(source_depth_in_km=500,
+                                     distance_in_degree=min_epid,
+                                     phase_list=["P"])
 
-
+max_time = model.get_travel_times(source_depth_in_km=0.001,
+                                     distance_in_degree=max_epid,
+                                     phase_list=["P"])
 
 
 
 
 ########## NEW PART OF THE PROGRAM ###################
-
 # Circular domain around the epicenter. This will download all data between
 # 70 and 90 degrees distance from the epicenter. This module also offers
 # rectangular and global domains. More complex domains can be defined by
 # inheriting from the Domain class.
 
-# here latitude and longitude should be the eventlongitude
-domain = CircularDomain(latitude=37.52, longitude=143.04,
-                        minradius=min_epid, maxradius=max_epid)
 
 
-restrictions = Restrictions(
-    # Get data from 5 minutes before the event to one hour after the
-    # event. This defines the temporal bounds of the waveform data.
-    starttime=origin_time - 5 * 60,
-    endtime=origin_time + 3600,
-    # You might not want to deal with gaps in the data. If this setting is
-    # True, any trace with a gap/overlap will be discarded.
-    reject_channels_with_gaps=True,
-    # And you might only want waveforms that have data for at least 95 % of
-    # the requested time span. Any trace that is shorter than 95 % of the
-    # desired total duration will be discarded.
-    minimum_length=1.00,
-    # No two stations should be closer than 10 km to each other. This is
-    # useful to for example filter out stations that are part of different
-    # networks but at the same physical station. Settings this option to
-    # zero or None will disable that filtering.
-    # Guard against the same station having different names.
-    minimum_interstation_distance_in_m=100.0,
-    # Only HH or BH channels. If a station has BH channels, those will be
-    # downloaded, otherwise the HH. Nothing will be downloaded if it has
-    # neither. You can add more/less patterns if you like.
-    channel_priorities=["BH[ZNE]","HH[ZNE]"],
-    # Location codes are arbitrary and there is no rule as to which
-    # location is best. Same logic as for the previous setting.
-    location_priorities=["", "00", "10"])
+# Loop over each event
+for event in event_cat:
+    # fetch event-data   
+    origin_time = event.origins[0].time
+    evtlat=event.origins[0].latitude
+    evtlon=event.origins[0].longitude
+    
+     domain = CircularDomain(latitude=evtlat, longitude=evtlong,
+                            minradius=min_epid, maxradius=max_epid)
+    
+    restrictions = Restrictions(
+        # Get data from sufficient time before earliest arrival and after the latest arrival
+        # Note: All the traces will still have the same length
+        starttime=origin_time + min_time - 30,
+        endtime=origin_time + max_time + 120,
+        # You might not want to deal with gaps in the data. If this setting is
+        # True, any trace with a gap/overlap will be discarded.
+        reject_channels_with_gaps=True,
+        # And you might only want waveforms that have data for at least 95 % of
+        # the requested time span. Any trace that is shorter than 95 % of the
+        # desired total duration will be discarded.
+        minimum_length=1.00,
+        # No two stations should be closer than 1 km to each other. This is
+        # useful to for example filter out stations that are part of different
+        # networks but at the same physical station. Settings this option to
+        # zero or None will disable that filtering.
+        # Guard against the same station having different names.
+        minimum_interstation_distance_in_m=1000.0,
+        # Only HH or BH channels. If a station has BH channels, those will be
+        # downloaded, otherwise the HH. Nothing will be downloaded if it has
+        # neither. You can add more/less patterns if you like.
+        channel_priorities=["BH[ZNE]","HH[ZNE]"],
+        # Location codes are arbitrary and there is no rule as to which
+        # location is best. Same logic as for the previous setting.
+        location_priorities=["", "00", "10"])
 
 
 
