@@ -85,7 +85,7 @@ logging.info('%(asctime)s')
                                 endtime = endtime, level = "response",
                                minlongitude = MINLON, maxlongitude = MAXLON,
                                 minlatitude = MINLAT, maxlatitude = MAXLAT,
-                                channel = 'BH*,HH*') #level="channel""""
+                                channel = 'BH*,HH*')""" #level="channel""
 
 ############# Download simulation station's response function #################
 station_simulate = client.get_stations(level = "response",channel = 'BH*',network = 'IU',station = 'HRV') #a proper network and station has to be inserted here
@@ -104,25 +104,27 @@ event_cat = client.get_events(starttime = starttime, endtime = endtime,
                               minmagnitude = minMag, maxmagnitude = maxMag)
 
 
+########## NEW PART OF THE PROGRAM ###################
+
 # Calculate the min and max theoretical arrival time after event time
 min_time = model.get_travel_times(source_depth_in_km=500,
                                      distance_in_degree=min_epid,
-                                     phase_list=["P"])
+                                     phase_list=["P"])[0].time
 
 max_time = model.get_travel_times(source_depth_in_km=0.001,
                                      distance_in_degree=max_epid,
-                                     phase_list=["P"])
+                                     phase_list=["P"])[0].time
 
 
 
 
-########## NEW PART OF THE PROGRAM ###################
-# Circular domain around the epicenter. This will download all data between
-# 70 and 90 degrees distance from the epicenter. This module also offers
+
+# Circular domain around the epicenter. This module also offers
 # rectangular and global domains. More complex domains can be defined by
 # inheriting from the Domain class.
 
-
+# No specified providers will result in all known ones being queried.
+mdl = MassDownloader()
 
 # Loop over each event
 for event in event_cat:
@@ -131,7 +133,7 @@ for event in event_cat:
     evtlat=event.origins[0].latitude
     evtlon=event.origins[0].longitude
     
-     domain = CircularDomain(latitude=evtlat, longitude=evtlong,
+    domain = CircularDomain(latitude=evtlat, longitude=evtlon,
                             minradius=min_epid, maxradius=max_epid)
     
     restrictions = Restrictions(
@@ -159,6 +161,12 @@ for event in event_cat:
         # Location codes are arbitrary and there is no rule as to which
         # location is best. Same logic as for the previous setting.
         location_priorities=["", "00", "10"])
+        
+
+    # The data will be downloaded to the ``./waveforms/`` and ``./stations/``
+    # folders with automatically chosen file names.
+    mdl.download(domain, restrictions, mseed_storage="waveforms",
+             stationxml_storage="stations")
 
 
 
