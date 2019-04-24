@@ -77,7 +77,7 @@ def preprocess(taper_perc,taper_type,loc,outputloc,event_cat,webclient):
             
             # write to new file
             st.write(outputloc+'/'+file, format="MSEED") 
-            #print("success") #test
+            print("success") #test
         except:
-            #print("failed") #test
-            break
+            print("failed") #test
+            # Perhaps a good idea to move the files for which the preprocessing failed to a different folder here, or just copy
