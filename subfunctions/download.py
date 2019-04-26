@@ -5,7 +5,7 @@ Created on Wed Apr 24 20:42:51 2019
 
 @author: pm
 """
-
+import subfunctions.config as config
 from obspy.core import *
 from obspy.clients.iris import Client as iClient # To calculate angular distance and backazimuth
 from obspy.clients.fdsn import Client,header #web sevice
@@ -18,14 +18,14 @@ import os
 import logging
 import time
 import progressbar
+import subprocess
 from pathlib import Path
 
 
 
 
 ####### DOWNLOAD SUBFUNCTION ############
-def downloadwav(client,starttime,endtime,eMINLAT,eMAXLAT,eMINLON,eMAXLON,minMag,maxMag,min_epid,max_epid,model,event_cat):
-
+def downloadwav(client,min_epid,max_epid,model,event_cat):
     ############# CREATE ERROR LOG #####################
     logging.info('%(asctime)s')
     
@@ -71,17 +71,21 @@ def downloadwav(client,starttime,endtime,eMINLAT,eMAXLAT,eMINLON,eMAXLON,minMag,
     
     
     
-    
     # Circular domain around the epicenter. This module also offers
     # rectangular and global domains. More complex domains can be defined by
     # inheriting from the Domain class.
     
     # No specified providers will result in all known ones being queried.
     mdl = MassDownloader()
-    global ii
-    ii = 0
     # Loop over each event
     for event in event_cat:
+        
+        # create folder for each event
+        try:
+            subprocess.call(["mkdir",config.waveform+'/'+str(config.ei)])
+        except:
+            pass #The folder exists already
+            
         # fetch event-data   
         origin_time = event.origins[0].time
         evtlat=event.origins[0].latitude
@@ -120,7 +124,9 @@ def downloadwav(client,starttime,endtime,eMINLAT,eMAXLAT,eMINLON,eMAXLON,minMag,
         # The data will be downloaded to the ``./waveforms/`` and ``./stations/``
         # folders with automatically chosen file names.
         mdl.download(domain, restrictions, mseed_storage = get_mseed_storage, stationxml_storage=get_stationxml_storage)
-        ii = ii+1 #The event ID has to be recorded
+        config.ei = config.ei+1 #The event ID has to be recorded
+    
+    config.state = True #tell the preprocessing process that download is done
 
 
 
@@ -138,7 +144,7 @@ def get_mseed_storage(network, station, location, channel, starttime,
         return True
 
     # If a string is returned the file will be saved in that location.
-    return os.path.join("waveforms", "%s.%s.%s.%s.%s.mseed" % (ii,network, station,
+    return os.path.join(config.waveform+'/'+str(config.ei), "%s.%s.%s.%s.%s.mseed" % (config.ei,network, station,
                                                      location, channel))
 
 
@@ -156,7 +162,7 @@ def get_stationxml_storage(network, station, channels, starttime, endtime):
         else:
             missing_channels.append((location, channel))
 
-    filename = os.path.join("stations", "%s.%s.xml" % (network, station))
+    filename = os.path.join(config.statloc, "%s.%s.xml" % (network, station))
 
     return {
         "available_channels": available_channels,
@@ -164,14 +170,14 @@ def get_stationxml_storage(network, station, channels, starttime, endtime):
         "filename": filename}
 
 def stat_in_db(network, station, location, channel, starttime, endtime):
-    path = Path("stations/%s.%s.xml" % (network, station))
+    path = Path(config.statloc+"/%s.%s.xml" % (network, station))
     if path.is_file():
         return True
     else:
         return False
 
 def wav_in_db(network, station, location, channel, starttime, endtime):
-    path = Path("waveforms", "%s.%s.%s.%s.%s.mseed" % (ii,network, station,
+    path = Path(config.waveform+'/'+str(config.ei), "%s.%s.%s.%s.%s.mseed" % (config.ei,network, station,
                                                      location, channel))
     if path.is_file():
         return True

@@ -5,7 +5,8 @@ Created on Wed Apr 24 20:31:05 2019
 
 @author: pm
 """
-
+# import config
+import subfunctions.config as config
 ####### PREPROCESSING SUBFUNCTION ############
 from obspy.core import *
 from obspy.clients.iris import Client as iClient # To calculate angular distance and backazimuth
@@ -20,6 +21,7 @@ import os
 import logging
 import time
 import progressbar
+import subprocess
 #from multiprocessing import Process,Queue #multi-thread processing - preprocess while downloading
 from pathlib import Path
 from obspy.clients.fdsn import Client as Webclient #as Webclient #web sevice
@@ -30,7 +32,7 @@ from obspy import read_inventory
 
 #######################
 
-def preprocess(taper_perc,taper_type,loc,outputloc,event_cat,webclient):
+def preprocess(taper_perc,taper_type,event_cat,webclient):
     # needed for a station simulation
     station_simulate = webclient.get_stations(level = "response",channel = 'BH*',network = 'IU',station = 'HRV') #a proper network and station has to be inserted here
     paz_sim = station_simulate[0][0][0].response #instrument response of the channel downloaded above
@@ -40,44 +42,50 @@ def preprocess(taper_perc,taper_type,loc,outputloc,event_cat,webclient):
     
     # Define class for backazimuth calculation
     iclient = iClient()
-    for file in os.listdir(loc):
-        try: #There are sometimes bugs occuring here - an errorlog needs to be created to see for which files the preprocessing failed
-            st = read(loc+'/'+file)
-            station = st[0].stats.station
-            network = st[0].stats.network
-            station_inv = read_inventory("stations/"+network+"."+station+".xml")
-        ###### DEMEAN AND DETREND #########
-            st.detrend(type='demean')
+    for file in os.listdir(config.waveform): #This has to be changed so it checks for new files perhaps work with event folders after all
+        while file[0:len(str(config.ei))] == str(config.ei) and config.state==False:  #only start preprocessing after all waveforms for the first event have been downloaded
+            time.sleep(5)
+        else:
+            try: #There are sometimes bugs occuring here - an errorlog needs to be created to see for which files the preprocessing failed
+                st = read(config.waveform+'/'+file)
+                station = st[0].stats.station
+                network = st[0].stats.network
+                station_inv = read_inventory(config.statloc+"/"+network+"."+station+".xml")
+            ###### DEMEAN AND DETREND #########
+                st.detrend(type='demean')
+                
+            ############# TAPER ###############
+                st.taper(max_percentage=taper_perc,type=taper_type,max_length=None,side='both')
             
-        ############# TAPER ###############
-            st.taper(max_percentage=taper_perc,type=taper_type,max_length=None,side='both')
-        
-        ### REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE ####
-            #st.remove_response(inventory=station_inv,output='VEL',water_level=60)
-            #st.remove_sensitivity(inventory=station_inv) #Should this step be done?
-        # simulate for another instrument like harvard (a stable good one)
-            #st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True) #simulate has a fuction paz_remove='self', which does not seem to work properly
+            ### REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE ####
+                st.remove_response(inventory=station_inv,output='VEL',water_level=60)
+                st.remove_sensitivity(inventory=station_inv) #Should this step be done?
+            # simulate for another instrument like harvard (a stable good one)
+                st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True) #simulate has a fuction paz_remove='self', which does not seem to work properly
+                
+            # figure out event ID
+                ei =''
+                for digit in file:
+                    try:
+                        ei=ei+str(int(digit))
+                    except:
+                        break    
+                ei = int(ei)
+                
+            # calculate backazimuth
+                result = iclient.distaz(station_inv[0][0].latitude, stalon=station_inv[0][0].longitude, evtlat=event_cat[ei].origins[0].latitude,
+                                        evtlon=event_cat[ei].origins[0].longitude)    
+            #  rotate from NEZ to radial, transverse, z
+                st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
+    
+                # obpsy assumes the data to be properly alined alreadty ( has to be done before)
+                
+                # write to new file
+                st.write(config.outputloc+'/'+file, format="MSEED") 
+                print("success") #test
+            except:
+                print("failed") #test
+                logging.exception(file)
+                subprocess.call(["cp",config.waveform+'/'+file,config.failloc+'/']) #copy the mseed file for which the process failed
             
-        # figure out event ID
-            ei =''
-            for digit in file:
-                try:
-                    ei=ei+str(int(digit))
-                except:
-                    break    
-            ei = int(ei)
             
-        # calculate backazimuth
-            result = iclient.distaz(station_inv[0][0].latitude, stalon=station_inv[0][0].longitude, evtlat=event_cat[ei].origins[0].latitude,
-                                    evtlon=event_cat[ei].origins[0].longitude)    
-        #  rotate from NEZ to radial, transverse, z
-            st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
-            # A back-azimuth has to be defined
-            # obpsy assumes the data to be properly alined alreadty ( has to be done before)
-            
-            # write to new file
-            st.write(outputloc+'/'+file, format="MSEED") 
-            print("success") #test
-        except:
-            print("failed") #test
-            # Perhaps a good idea to move the files for which the preprocessing failed to a different folder here, or just copy

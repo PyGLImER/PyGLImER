@@ -17,6 +17,7 @@ get_ipython().magic('reset -sf')
 #### IMPORT PREDEFINED SUBFUNCTIONS
 from subfunctions.download import downloadwav
 from subfunctions.preprocess import preprocess
+import subfunctions.config as config
 
 from obspy.core import *
 from obspy.clients.iris import Client as iClient # To calculate angular distance and backazimuth
@@ -34,6 +35,7 @@ import progressbar
 #from multiprocessing import Process,Queue #multi-thread processing - preprocess while downloading
 from pathlib import Path
 from obspy.clients.fdsn import Client as Webclient #as Webclient #web sevice
+from threading import Thread #multi-thread processing
 
 
 
@@ -41,9 +43,7 @@ from obspy.clients.fdsn import Client as Webclient #as Webclient #web sevice
 ############## DEFINE VARIABLES - may be changed by user ###################
 
 
-#### file location input and output
-waveform = "waveforms"
-outputloc = "preprocessed"
+
 
 
 webclient = Webclient("IRIS") #needs to be defined to download event catalogue - is it enough to
@@ -82,6 +82,12 @@ taper_type = 'hann' #define type of taper, Options: {cosine,barthann,bartlett,bl
                                                     #hamming,hann,kaiser,nuttall,parzen,slepian,triang}
                     # type = string                 ('hann')
 
+
+
+
+##############################################################################
+##############################################################################
+
 # logging
 logging.basicConfig(filename='waveform.log',level=logging.DEBUG) #DEBUG
 
@@ -91,9 +97,20 @@ event_cat = webclient.get_events(starttime = starttime, endtime = endtime,
                                   minlongitude = eMINLON, maxlongitude = eMAXLON,
                                   minmagnitude = minMag, maxmagnitude = maxMag)
 
+#state = downloadwav(webclient,starttime,endtime,eMINLAT,eMAXLAT,eMINLON,eMAXLON,minMag,maxMag,min_epid,max_epid,model,event_cat)
+#preprocess(taper_perc,taper_type,waveform,outputloc,event_cat,webclient,state)
+config.state = False #is download finished?
+config.ei = 0 #event ID
 
+if __name__ == '__main__':
+    Thread(target = downloadwav,
+           args = (webclient,min_epid,max_epid,model,event_cat)).start()
+#    time.sleep(30)
+#    Thread(target = preprocess,
+#           args = (taper_perc,taper_type,event_cat,webclient)).start()
 
-##############################################################################
-##############################################################################
-preprocess(taper_perc,taper_type,waveform,outputloc,event_cat,webclient)
-#downloadwav(webclient,starttime,endtime,eMINLAT,eMAXLAT,eMINLON,eMAXLON,minMag,maxMag,min_epid,max_epid,model,event_cat)
+    
+
+    # New thought: Toss waveforms in a folder that is named by event-ID 
+   
+   
