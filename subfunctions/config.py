@@ -19,5 +19,4 @@ statloc = "stations"
 
 
 ###### DON'T change program will change automatically.
-state = False
 ei = 0 #event ID

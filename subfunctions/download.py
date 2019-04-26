@@ -125,8 +125,6 @@ def downloadwav(client,min_epid,max_epid,model,event_cat):
         # folders with automatically chosen file names.
         mdl.download(domain, restrictions, mseed_storage = get_mseed_storage, stationxml_storage=get_stationxml_storage)
         config.ei = config.ei+1 #The event ID has to be recorded
-    
-    config.state = True #tell the preprocessing process that download is done
 
 
 
@@ -144,7 +142,7 @@ def get_mseed_storage(network, station, location, channel, starttime,
         return True
 
     # If a string is returned the file will be saved in that location.
-    return os.path.join(config.waveform+'/'+str(config.ei), "%s.%s.%s.%s.%s.mseed" % (config.ei,network, station,
+    return os.path.join(config.waveform+'/'+str(config.ei), "%s.%s.%s.%s.mseed" % (network, station,
                                                      location, channel))
 
 
@@ -177,7 +175,7 @@ def stat_in_db(network, station, location, channel, starttime, endtime):
         return False
 
 def wav_in_db(network, station, location, channel, starttime, endtime):
-    path = Path(config.waveform+'/'+str(config.ei), "%s.%s.%s.%s.%s.mseed" % (config.ei,network, station,
+    path = Path(config.waveform+'/'+str(config.ei), "%s.%s.%s.%s.mseed" % (network, station,
                                                      location, channel))
     if path.is_file():
         return True

@@ -41,26 +41,17 @@ from threading import Thread #multi-thread processing
 
 
 ############## DEFINE VARIABLES - may be changed by user ###################
-
-
-
-
+# some values are located in subfunctions/config.py
 
 webclient = Webclient("IRIS") #needs to be defined to download event catalogue - is it enough to
 # exclusively use IRIS?
 
-# station values:
-# Set values to "None" if they aren't requried / desired
-#MINLAT = 56.0
-#MAXLAT = 62.0
-#MINLON = -150.0
-#MAXLON = -145.0
-starttime = UTCDateTime("2018-01-01")
-endtime = UTCDateTime("2018-06-02")
 
 ###### EVENT VALUES ######
 # Set values to "None" if they aren't requried / desired
 # Time frame is identical to the station inventory
+starttime = UTCDateTime("2018-01-01")
+endtime = UTCDateTime("2018-06-02")
 eMINLAT = -30.00
 eMAXLAT = 20.0
 eMINLON = -100.0
@@ -97,20 +88,14 @@ event_cat = webclient.get_events(starttime = starttime, endtime = endtime,
                                   minlongitude = eMINLON, maxlongitude = eMAXLON,
                                   minmagnitude = minMag, maxmagnitude = maxMag)
 
-#state = downloadwav(webclient,starttime,endtime,eMINLAT,eMAXLAT,eMINLON,eMAXLON,minMag,maxMag,min_epid,max_epid,model,event_cat)
-#preprocess(taper_perc,taper_type,waveform,outputloc,event_cat,webclient,state)
-config.state = False #is download finished?
+
 config.ei = 0 #event ID
 
+# multi-threading
 if __name__ == '__main__':
     Thread(target = downloadwav,
            args = (webclient,min_epid,max_epid,model,event_cat)).start()
-#    time.sleep(30)
-#    Thread(target = preprocess,
-#           args = (taper_perc,taper_type,event_cat,webclient)).start()
-
-    
-
-    # New thought: Toss waveforms in a folder that is named by event-ID 
+    Thread(target = preprocess,
+           args = (taper_perc,taper_type,event_cat,webclient)).start()
    
    

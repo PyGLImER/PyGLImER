@@ -37,55 +37,57 @@ def preprocess(taper_perc,taper_type,event_cat,webclient):
     station_simulate = webclient.get_stations(level = "response",channel = 'BH*',network = 'IU',station = 'HRV') #a proper network and station has to be inserted here
     paz_sim = station_simulate[0][0][0].response #instrument response of the channel downloaded above
         
-    #create dictionary with necassary data - no correction for sensitivity is conducted
+    #create dictionary with necassary data
     paz_sim = {"gain":paz_sim._get_overall_sensitivity_and_gain(output="VEL")[0],"sensitivity":paz_sim._get_overall_sensitivity_and_gain(output="VEL")[1], "poles":paz_sim.get_paz().poles,"zeros":paz_sim.get_paz().zeros}
     
     # Define class for backazimuth calculation
     iclient = iClient()
-    for file in os.listdir(config.waveform): #This has to be changed so it checks for new files perhaps work with event folders after all
-        while file[0:len(str(config.ei))] == str(config.ei) and config.state==False:  #only start preprocessing after all waveforms for the first event have been downloaded
+    for counter, event in enumerate(event_cat,0): #For each event
+        while counter==config.ei:  #only start preprocessing after all waveforms for the first event have been downloaded
             time.sleep(5)
         else:
-            try: #There are sometimes bugs occuring here - an errorlog needs to be created to see for which files the preprocessing failed
-                st = read(config.waveform+'/'+file)
-                station = st[0].stats.station
-                network = st[0].stats.network
-                station_inv = read_inventory(config.statloc+"/"+network+"."+station+".xml")
-            ###### DEMEAN AND DETREND #########
-                st.detrend(type='demean')
-                
-            ############# TAPER ###############
-                st.taper(max_percentage=taper_perc,type=taper_type,max_length=None,side='both')
+            for file in os.listdir(config.waveform+"/"+str(counter)): #preprocess each file per event
+                if not file_in_db(config.outputloc,file):
+                    try: #There are sometimes bugs occuring here - an errorlog needs to be created to see for which files the preprocessing failed
+                        st = read(config.waveform+'/'+str(counter)+'/'+file)
+                        station = st[0].stats.station
+                        network = st[0].stats.network
+                        station_inv = read_inventory(config.statloc+"/"+network+"."+station+".xml")
+                    ###### DEMEAN AND DETREND #########
+                        st.detrend(type='demean')
+                        
+                    ############# TAPER ###############
+                        st.taper(max_percentage=taper_perc,type=taper_type,max_length=None,side='both')
+                    
+                    ### REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE ####
+                        st.remove_response(inventory=station_inv,output='VEL',water_level=60)
+                        st.remove_sensitivity(inventory=station_inv) #Should this step be done?
+                    # simulate for another instrument like harvard (a stable good one)
+                        st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True) #simulate has a fuction paz_remove='self', which does not seem to work properly
+                        
+
+                        
+                    # calculate backazimuth
+                        result = iclient.distaz(station_inv[0][0].latitude, stalon=station_inv[0][0].longitude, evtlat=event_cat[counter].origins[0].latitude,
+                                                evtlon=event_cat[counter].origins[0].longitude)    
+                    #  rotate from NEZ to radial, transverse, z
+                        st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
             
-            ### REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE ####
-                st.remove_response(inventory=station_inv,output='VEL',water_level=60)
-                st.remove_sensitivity(inventory=station_inv) #Should this step be done?
-            # simulate for another instrument like harvard (a stable good one)
-                st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True) #simulate has a fuction paz_remove='self', which does not seem to work properly
-                
-            # figure out event ID
-                ei =''
-                for digit in file:
-                    try:
-                        ei=ei+str(int(digit))
+                        # obpsy assumes the data to be properly alined alreadty ( has to be done before)
+                        
+                        # write to new file
+                        st.write(config.outputloc+'/'+file, format="MSEED") 
+                        print("success") #test
                     except:
-                        break    
-                ei = int(ei)
-                
-            # calculate backazimuth
-                result = iclient.distaz(station_inv[0][0].latitude, stalon=station_inv[0][0].longitude, evtlat=event_cat[ei].origins[0].latitude,
-                                        evtlon=event_cat[ei].origins[0].longitude)    
-            #  rotate from NEZ to radial, transverse, z
-                st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
-    
-                # obpsy assumes the data to be properly alined alreadty ( has to be done before)
-                
-                # write to new file
-                st.write(config.outputloc+'/'+file, format="MSEED") 
-                print("success") #test
-            except:
-                print("failed") #test
-                logging.exception(file)
-                subprocess.call(["cp",config.waveform+'/'+file,config.failloc+'/']) #copy the mseed file for which the process failed
-            
-            
+                        print("failed") #test
+                        logging.exception(file)
+                        if file_in_db(config.failloc,file):
+                            subprocess.call(["cp",config.waveform+'/'+str(counter)+file,config.failloc+'/']) #copy the mseed file for which the process failed
+                    
+# Check if file is already preprocessed          
+def file_in_db(loc,filename):
+    path = Path(loc+"/"+filename)
+    if path.is_file():
+        return True
+    else:
+        return False
