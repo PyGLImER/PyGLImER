@@ -59,8 +59,8 @@ eMAXLON = -90.0
 minMag = 5.5
 maxMag = 10.0
 # epicentral distances:
-min_epid = 30
-max_epid = 90
+min_epid = 28.1
+max_epid = 95.8
 
 
 # define 1D velocity model
@@ -89,13 +89,13 @@ event_cat = webclient.get_events(starttime = starttime, endtime = endtime,
                                   minmagnitude = minMag, maxmagnitude = maxMag)
 
 
-config.ei = 0 #event ID
+config.folder = "undefined" #resetting momentary event download folder
 
 # multi-threading
 if __name__ == '__main__':
     Thread(target = downloadwav,
            args = (webclient,min_epid,max_epid,model,event_cat)).start()
     Thread(target = preprocess,
-           args = (taper_perc,taper_type,event_cat,webclient)).start()
+           args = (taper_perc,taper_type,event_cat,webclient,model)).start()
    
    

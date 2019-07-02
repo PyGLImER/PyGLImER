@@ -79,18 +79,18 @@ def downloadwav(client,min_epid,max_epid,model,event_cat):
     mdl = MassDownloader()
     # Loop over each event
     for event in event_cat:
-        
-        # create folder for each event
-        try:
-            subprocess.call(["mkdir",config.waveform+'/'+str(config.ei)])
-        except:
-            pass #The folder exists already
-            
         # fetch event-data   
         origin_time = event.origins[0].time
         evtlat=event.origins[0].latitude
         evtlon=event.origins[0].longitude
         
+        config.folder = config.waveform+"/"+str(evtlat)+"_"+str(evtlon)+"_"+str(origin_time) # Download location
+        # create folder for each event
+        try:
+            subprocess.call(["mkdir",config.folder])
+        except:
+            pass #The folder already exists
+            
         domain = CircularDomain(latitude=evtlat, longitude=evtlon,
                                 minradius=min_epid, maxradius=max_epid)
         
@@ -124,7 +124,7 @@ def downloadwav(client,min_epid,max_epid,model,event_cat):
         # The data will be downloaded to the ``./waveforms/`` and ``./stations/``
         # folders with automatically chosen file names.
         mdl.download(domain, restrictions, mseed_storage = get_mseed_storage, stationxml_storage=get_stationxml_storage)
-        config.ei = config.ei+1 #The event ID has to be recorded
+#        config.ei = config.ei+1 #The event ID has to be recorded
 
 
 
@@ -142,7 +142,7 @@ def get_mseed_storage(network, station, location, channel, starttime,
         return True
 
     # If a string is returned the file will be saved in that location.
-    return os.path.join(config.waveform+'/'+str(config.ei), "%s.%s.%s.%s.mseed" % (network, station,
+    return os.path.join(config.folder, "%s.%s.%s.%s.mseed" % (network, station,
                                                      location, channel))
 
 
@@ -175,7 +175,7 @@ def stat_in_db(network, station, location, channel, starttime, endtime):
         return False
 
 def wav_in_db(network, station, location, channel, starttime, endtime):
-    path = Path(config.waveform+'/'+str(config.ei), "%s.%s.%s.%s.mseed" % (network, station,
+    path = Path(config.folder, "%s.%s.%s.%s.mseed" % (network, station,
                                                      location, channel))
     if path.is_file():
         return True

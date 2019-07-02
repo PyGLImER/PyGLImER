@@ -19,4 +19,5 @@ statloc = "stations"
 
 
 ###### DON'T change program will change automatically.
-ei = 0 #event ID
+#ei = 0 #event ID
+folder = "undefined" #Subdirectory inside of waveforms folder - the download is happening here right now
