@@ -20,44 +20,13 @@ import time
 import progressbar
 import subprocess
 from pathlib import Path
+from obspy import read
 
 
 
 
 ####### DOWNLOAD SUBFUNCTION ############
 def downloadwav(client,min_epid,max_epid,model,event_cat):
-    ############# CREATE ERROR LOG #####################
-    logging.info('%(asctime)s')
-    
-    
-    
-    
-    #################### CREATE STATION INVENTORY ###############################
-    # Not needed as all available staitons in the given radius will be requested
-    """station_inv = client.get_stations(starttime = starttime,
-                                    endtime = endtime, level = "response",
-                                   minlongitude = MINLON, maxlongitude = MAXLON,
-                                    minlatitude = MINLAT, maxlatitude = MAXLAT,
-                                    channel = 'BH*,HH*')""" #level="channel""
-    
-    ############# Download simulation station's response function #################
-#    station_simulate = client.get_stations(level = "response",channel = 'BH*',network = 'IU',station = 'HRV') #a proper network and station has to be inserted here
-#    paz_sim = station_simulate[0][0][0].response #instrument response of the channel downloaded above
-    
-    # create dictionary with necassary data - no correction for sensitivity is conducted
-#    paz_sim = {"gain":paz_sim._get_overall_sensitivity_and_gain(output="VEL")[0],"sensitivity":paz_sim._get_overall_sensitivity_and_gain(output="VEL")[1], "poles":paz_sim.get_paz().poles,"zeros":paz_sim.get_paz().zeros}
-    
-    
-    ##################### CREATE EVENT CATALOGUE ################################
-    # By default only the preferred origin is downloaded
-    # Meaning, there will always be only one origin
-#    event_cat = client.get_events(starttime = starttime, endtime = endtime,
-#                                  minlatitude = eMINLAT, maxlatitude = eMAXLAT,
-#                                  minlongitude = eMINLON, maxlongitude = eMAXLON,
-#                                  minmagnitude = minMag, maxmagnitude = maxMag)
-    
-    
-    ########## NEW PART OF THE PROGRAM ###################
     
     # Calculate the min and max theoretical arrival time after event time according to minimum and maximum epicentral distance
     min_time = model.get_travel_times(source_depth_in_km=500,
@@ -101,7 +70,7 @@ def downloadwav(client,min_epid,max_epid,model,event_cat):
             endtime=origin_time + max_time + 120,
             # You might not want to deal with gaps in the data. If this setting is
             # True, any trace with a gap/overlap will be discarded.
-            reject_channels_with_gaps=True,
+            reject_channels_with_gaps=False, #This will delete streams with several traces!
             # And you might only want waveforms that have data for at least 95 % of
             # the requested time span. Any trace that is shorter than 95 % of the
             # desired total duration will be discarded.
@@ -124,7 +93,8 @@ def downloadwav(client,min_epid,max_epid,model,event_cat):
         # The data will be downloaded to the ``./waveforms/`` and ``./stations/``
         # folders with automatically chosen file names.
         mdl.download(domain, restrictions, mseed_storage = get_mseed_storage, stationxml_storage=get_stationxml_storage)
-#        config.ei = config.ei+1 #The event ID has to be recorded
+    config.folder = "finished" #removes the restriction for preprocess.py
+
 
 
 
@@ -142,8 +112,11 @@ def get_mseed_storage(network, station, location, channel, starttime,
         return True
 
     # If a string is returned the file will be saved in that location.
-    return os.path.join(config.folder, "%s.%s.%s.%s.mseed" % (network, station,
-                                                     location, channel))
+    return os.path.join(config.folder, "%s.%s.%s.mseed" % (network, station,
+                                                     location))
+#    return os.path.join(config.folder, "%s.%s.%s.%s.mseed" % (network, station,
+#                                                     location, channel))
+
 
 
 # Download the station.xml for the stations. Check chanels that are already available
@@ -175,9 +148,20 @@ def stat_in_db(network, station, location, channel, starttime, endtime):
         return False
 
 def wav_in_db(network, station, location, channel, starttime, endtime):
-    path = Path(config.folder, "%s.%s.%s.%s.mseed" % (network, station,
-                                                     location, channel))
+    path = Path(config.folder, "%s.%s.%s.mseed" % (network, station,
+                                                     location))
     if path.is_file():
+        st = read(config.folder+'/'+network+"."+station+'.'+location+'.mseed')
+    else:
+        return False
+#    path = Path(config.folder, "%s.%s.%s.%s.mseed" % (network, station,
+#                                                     location, channel))
+    if len(st)==3:
+        return True #All three channels are downloaded
+    elif len(st)==2:
+        if st[0].stats.channel==channel or st[1].stats.channel==channel: #the other two cases: channel has already been downlaoded
+            return True
+    elif st[0].stats.channel==channel:
         return True
     else:
         return False

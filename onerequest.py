@@ -38,64 +38,37 @@ from obspy.clients.fdsn import Client as Webclient #as Webclient #web sevice
 from threading import Thread #multi-thread processing
 
 
-
-
 ############## DEFINE VARIABLES - may be changed by user ###################
-# some values are located in subfunctions/config.py
+# values are located in subfunctions/config.py
 
 webclient = Webclient("IRIS") #needs to be defined to download event catalogue - is it enough to
 # exclusively use IRIS?
-
-
-###### EVENT VALUES ######
-# Set values to "None" if they aren't requried / desired
-# Time frame is identical to the station inventory
-starttime = UTCDateTime("2018-01-01")
-endtime = UTCDateTime("2018-06-02")
-eMINLAT = -30.00
-eMAXLAT = 20.0
-eMINLON = -100.0
-eMAXLON = -90.0
-minMag = 5.5
-maxMag = 10.0
-# epicentral distances:
-min_epid = 28.1
-max_epid = 95.8
-
-
-# define 1D velocity model
-model = TauPyModel(model="iasp91")
-
-### PRE-PROCESSING VALUES #####
-taper_perc = 0.05 #max taping percentage - float (0.05)
-taper_type = 'hann' #define type of taper, Options: {cosine,barthann,bartlett,blackman,blackmannharris,
-                                                    #bohman,boxcar,chebwin,flattop,gaussian,general_gaussian,
-                                                    #hamming,hann,kaiser,nuttall,parzen,slepian,triang}
-                    # type = string                 ('hann')
-
-
-
 
 ##############################################################################
 ##############################################################################
 
 # logging
-logging.basicConfig(filename='waveform.log',level=logging.DEBUG) #DEBUG
+logging.basicConfig(filename='preprocess.log',level=logging.DEBUG) #DEBUG
+
+logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
+#logger.setLevel(logging.DEBUG)
+#logger.basicConfig(filename='download.log',level=logging.DEBUG) #DEBUG
 
 # download event catalogue
-event_cat = webclient.get_events(starttime = starttime, endtime = endtime,
-                                  minlatitude = eMINLAT, maxlatitude = eMAXLAT,
-                                  minlongitude = eMINLON, maxlongitude = eMAXLON,
-                                  minmagnitude = minMag, maxmagnitude = maxMag)
+event_cat = webclient.get_events(starttime = config.starttime, endtime = config.endtime,
+                                  minlatitude = config.eMINLAT, maxlatitude = config.eMAXLAT,
+                                  minlongitude = config.eMINLON, maxlongitude = config.eMAXLON,
+                                  minmagnitude = config.minMag, maxmagnitude = config.maxMag)
 
 
-config.folder = "undefined" #resetting momentary event download folder
+config.folder = "not_started" #resetting momentary event download folder
 
 # multi-threading
 if __name__ == '__main__':
     Thread(target = downloadwav,
-           args = (webclient,min_epid,max_epid,model,event_cat)).start()
+           args = (webclient,config.min_epid,config.max_epid,config.model,event_cat)).start()
+    
     Thread(target = preprocess,
-           args = (taper_perc,taper_type,event_cat,webclient,model)).start()
+           args = (config.taper_perc,config.taper_type,event_cat,webclient,config.model)).start()
    
    
