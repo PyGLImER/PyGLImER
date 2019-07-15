@@ -14,6 +14,7 @@ from obspy.geodetics.base import locations2degrees #calculate angular distances
 from obspy.taup import TauPyModel #arrival times in 1D v-model
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
+from obspy.clients.fdsn.mass_downloader import *
 import os
 import logging
 import time
@@ -21,12 +22,18 @@ import progressbar
 import subprocess
 from pathlib import Path
 from obspy import read
+from datetime import datetime
 
 
 
 
 ####### DOWNLOAD SUBFUNCTION ############
 def downloadwav(client,min_epid,max_epid,model,event_cat):
+    
+    # logging for the download
+    #logging.basicConfig(filename='download.log',level=logging.DEBUG) #
+    fdsn_mass_logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
+    fdsn_mass_logger.setLevel(logging.WARNING)
     
     # Calculate the min and max theoretical arrival time after event time according to minimum and maximum epicentral distance
     min_time = model.get_travel_times(source_depth_in_km=500,
@@ -46,6 +53,7 @@ def downloadwav(client,min_epid,max_epid,model,event_cat):
     
     # No specified providers will result in all known ones being queried.
     mdl = MassDownloader()
+    
     # Loop over each event
     for event in event_cat:
         # fetch event-data   

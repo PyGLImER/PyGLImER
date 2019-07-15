@@ -52,7 +52,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
         prepro_folder = config.waveform+"/"+str(evtlat)+"_"+str(evtlon)+"_"+str(origin_time) #Folder, in which the preprocessing is actually happening
 
         while prepro_folder==config.folder or config.folder=="not_started":  #only start preprocessing after all waveforms for the first event have been downloaded
-            print('preprocessing suspended, waiting for download')
+            print('preprocessing suspended, awaiting download')
             time.sleep(5)
         else:
             for file in os.listdir(prepro_folder): #preprocess each file per event
@@ -61,7 +61,10 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                 network = st[0].stats.network
                 if not file_in_db(config.outputloc+'/'+network+'/'+station,file): #If the file hasn't been downloaded and preprocessed in an earlier iteration of the program
                     try: #There are sometimes bugs occuring here - an errorlog needs to be created to see for which files the preprocessing failed
-
+                        subprocess.call(["mkdir",config.failloc]) #create folder for rejected streams
+                        
+                        if len(st) < 3: #If the stream does not contain all three components 
+                            raise Exception("The stream contains less than three traces")
                         # create directory
                         subprocess.call(["mkdir",config.outputloc+'/'+network])
                         subprocess.call(["mkdir",config.outputloc+'/'+network+'/'+station])
@@ -100,17 +103,16 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                     ##### rotate from NEZ to radial, transverse, z ######
                         st.rotate(method='->ZNE', inventory=station_inv) #If channeles weren't properly aligned it will be done here
                         st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
-            
-                        # obpsy assumes the data to be properly alined alreadty ( has to be done before)
-                        
+                                    
                         # write to new file
                         st.write(config.outputloc+'/'+network+'/'+station+'/'+network+'.'+station+'.'+str(starttime)+'.mseed', format="MSEED") 
                         print("preprocessing successful") #test
                     except:
                         print("preprocessing failed") #test
                         logging.exception(file)
-                        if not file_in_db(config.failloc,file):
-                            subprocess.call(["cp",config.folder+file,config.failloc+'/'+str(starttime)+file]) #copy the mseed file for which the process failed
+                        if not file_in_db(config.failloc,str(origin_time)+file):
+                #            subprocess.call(["mkdir",config.failloc+'/'+str(evtlat)+"_"+str(evtlon)+"_"+str(origin_time)])
+                            subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+str(origin_time)+file]) #copy the mseed file for which the process failed
                     
 # Check if file is already preprocessed          
 def file_in_db(loc,filename):

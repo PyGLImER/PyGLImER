@@ -36,6 +36,7 @@ import progressbar
 from pathlib import Path
 from obspy.clients.fdsn import Client as Webclient #as Webclient #web sevice
 from threading import Thread #multi-thread processing
+from datetime import datetime
 
 
 ############## DEFINE VARIABLES - may be changed by user ###################
@@ -48,11 +49,7 @@ webclient = Webclient("IRIS") #needs to be defined to download event catalogue -
 ##############################################################################
 
 # logging
-logging.basicConfig(filename='preprocess.log',level=logging.DEBUG) #DEBUG
-
-logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
-#logger.setLevel(logging.DEBUG)
-#logger.basicConfig(filename='download.log',level=logging.DEBUG) #DEBUG
+logging.basicConfig(filename='preprocess.log',level=logging.WARNING,format='%(asctime)s %(message)s') #DEBUG
 
 # download event catalogue
 event_cat = webclient.get_events(starttime = config.starttime, endtime = config.endtime,

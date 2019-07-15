@@ -13,7 +13,7 @@ from obspy.taup import TauPyModel #arrival times in 1D v-model
 #### DIRECTORY CONFIGURATION
 waveform = "waveforms"
 outputloc = "preprocessed"
-failloc = "failpreprocess"
+failloc = "rejected"
 statloc = "stations"
 
 ###### EVENT VALUES ######
