@@ -43,8 +43,8 @@ taper_type = 'hann' #define type of taper, Options: {cosine,barthann,bartlett,bl
                                                     #hamming,hann,kaiser,nuttall,parzen,slepian,triang}
                     # type = string                 ('hann')
 
-
-
+# low-cut-off frequencies for SNR check
+lowco = [0.03, 0.1, 0.5]
 
 
 

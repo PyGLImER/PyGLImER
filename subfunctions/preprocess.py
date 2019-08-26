@@ -27,6 +27,9 @@ from pathlib import Path
 from obspy.clients.fdsn import Client as Webclient #as Webclient #web sevice
 from obspy import read
 from obspy import read_inventory
+from obspy.signal import filter
+
+import numpy as np
 
 
 
@@ -34,7 +37,10 @@ from obspy import read_inventory
 
 def preprocess(taper_perc,taper_type,event_cat,webclient,model):
     # create output folder
-    subprocess.call(["mkdir",config.outputloc])
+    try:
+        subprocess.call(["mkdir",config.outputloc])
+    except:
+        pass #exists already
     # needed for a station simulation
     station_simulate = webclient.get_stations(level = "response",channel = 'BH*',network = 'IU',station = 'HRV') #simulate one of the harvard instruments
     paz_sim = station_simulate[0][0][0].response #instrument response of the channel downloaded above
@@ -61,13 +67,14 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                 network = st[0].stats.network
                 if not file_in_db(config.outputloc+'/'+network+'/'+station,file): #If the file hasn't been downloaded and preprocessed in an earlier iteration of the program
                     try: #There are sometimes bugs occuring here - an errorlog needs to be created to see for which files the preprocessing failed
-                        subprocess.call(["mkdir",config.failloc]) #create folder for rejected streams
-                        
+                        try:
+                            subprocess.call(["mkdir",config.failloc]) #create folder for rejected streams
+                        except:
+                            pass
+                       
                         if len(st) < 3: #If the stream does not contain all three components 
                             raise Exception("The stream contains less than three traces")
-                        # create directory
-                        subprocess.call(["mkdir",config.outputloc+'/'+network])
-                        subprocess.call(["mkdir",config.outputloc+'/'+network+'/'+station])
+                            
                         # read station inventory
                         station_inv = read_inventory(config.statloc+"/"+network+"."+station+".xml")
                         
@@ -103,8 +110,81 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                     ##### rotate from NEZ to radial, transverse, z ######
                         st.rotate(method='->ZNE', inventory=station_inv) #If channeles weren't properly aligned it will be done here
                         st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
+                        
+                    ##### SNR CRITERIA #####
+                        # according to the original Matlab script, we will be workng with several bandpass (low-cut) filters to evaluate the SNR
+                        # Then, the SNR will be evaluated for each of the traces and the traces will be accepted or rejected depending on their SNR.
+                        
+                        # Find channel type - obspy does usually use the order TRZ
+                        # create stream dictionary
+                        stream = {
+                                st[0].stats.channel[2]: st[0],
+                                st[1].stats.channel[2]: st[1],
+                                st[2].stats.channel[2]: st[2]}
+                        # 25.08.2019
+                        # 
+                        
+                        dt = st[0].stats.delta #sampling interval
+                        df = st[0].stats.sampling_rate
+                        tz = 30 #that's a bit clumpsy and should be integrated in config.py
+                        
+                        # noise
+                        ptn1=round(5/dt)
+                        ptn2=round((tz-5)/dt)
+                        nptn=ptn2-ptn1+1
+                        #First part of the signal
+                        pts1=round(tz/dt)
+                        pts2=round((tz+7.5)/dt)
+                        npts=pts2-pts1+1;
+                        #Second part of the signal
+                        ptp1=round((tz+15)/dt)
+                        ptp2=round((tz+22.5)/dt)
+                        nptp=ptp2-ptp1+1
+                        # The original script does check the length of the traces here and pads them with zeroes if necassary.
+                        # However,  would not consider this necassary as the bulkdownload should have already filtered anything that is shorter then wanted.
+                        #Then, I'll have to filter in the for-loop and calculate the SNR
+                        crit = False #criterium for accepting
+                        
+                        noisemat = np.zeros((len(config.lowco),3)) #matrix to save SNR
+                        
+                        for ii,f in enumerate(config.lowco):
+                            #ftcomp = filter.highpass(stream["T"], f, df, corners=1, zerophase=True)
+                            frcomp = filter.highpass(stream["R"], f, df, corners=1, zerophase=True)
+                            fzcomp = filter.highpass(stream["Z"], f, df, corners=1, zerophase=True)      
+                            
+                            # Compute the SNR for given frequency bands
+                            snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
+                            snrr2 = (sum(np.square(frcomp[ptp1:ptp2]))/nptp)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
+                            snrz = (sum(np.square(fzcomp[pts1:pts2]))/npts)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
+                            snrz2 = (sum(np.square(fzcomp[ptp1:ptp2]))/nptp)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
+                            
+                            # Reject or accept traces depending on their SNR
+                            # #1: snr1 > 10 (30-37.5s, near P)
+                            # snr2/snr1 < 1 (where snr2 is 45-52.5 s, in the coda of P)
+                            # note: - next possibility might be to remove those events that
+                            # generate high snr between 200-250 s
+                            
+                            noisemat[ii,0] = snrr
+                            noisemat[ii,1] = snrr2/snrr
+                            noisemat[ii,2] = snrz
+                            
+                        if snrr > 7.5 and snrr2/snrr <1 and snrz > 10: #accept
+                            crit = True
+                            break #waveform is accepted no further tests needed
+                            
+                        if not crit:
+                            raise Exception("The SNR is too low with",noisemat)
                                     
                         # write to new file
+                        # create directory
+                        try:
+                            subprocess.call(["mkdir",config.outputloc+'/'+network])
+                        except:
+                            pass
+                        try:
+                            subprocess.call(["mkdir",config.outputloc+'/'+network+'/'+station])
+                        except:
+                            pass
                         st.write(config.outputloc+'/'+network+'/'+station+'/'+network+'.'+station+'.'+str(starttime)+'.mseed', format="MSEED") 
                         print("preprocessing successful") #test
                     except:
@@ -112,7 +192,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         logging.exception(file)
                         if not file_in_db(config.failloc,str(origin_time)+file):
                 #            subprocess.call(["mkdir",config.failloc+'/'+str(evtlat)+"_"+str(evtlon)+"_"+str(origin_time)])
-                            subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+str(origin_time)+file]) #copy the mseed file for which the process failed
+                            subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+str(origin_time)+file]) #move the mseed file for which the process failed
                     
 # Check if file is already preprocessed          
 def file_in_db(loc,filename):
