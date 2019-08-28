@@ -156,7 +156,8 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                             snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
                             snrr2 = (sum(np.square(frcomp[ptp1:ptp2]))/nptp)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
                             snrz = (sum(np.square(fzcomp[pts1:pts2]))/npts)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
-                            snrz2 = (sum(np.square(fzcomp[ptp1:ptp2]))/nptp)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
+#                            snrz2 = (sum(np.square(fzcomp[ptp1:ptp2]))/nptp)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
+                            #snrz2 is not used (yet), so I commented it
                             
                             # Reject or accept traces depending on their SNR
                             # #1: snr1 > 10 (30-37.5s, near P)
@@ -168,13 +169,25 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                             noisemat[ii,1] = snrr2/snrr
                             noisemat[ii,2] = snrz
                             
-                        if snrr > 7.5 and snrr2/snrr <1 and snrz > 10: #accept
-                            crit = True
-                            break #waveform is accepted no further tests needed
-                            
+                            if snrr > 7.5 and snrr2/snrr <1 and snrz > 10: #accept
+                                crit = True
+                                break #waveform is accepted no further tests needed
+                        # Now, the signals are not saved bandpass-filtered. I might want to do that here.
+                        
                         if not crit:
                             raise Exception("The SNR is too low with",noisemat)
-                                    
+                        
+                        
+                 ####### FIND VS ACCORDING TO BOSTOCK, RONDENAY (1999) #########
+                        tpn1 = round((tz-10)/dt)
+                        tpn2 = round(tz/dt)
+                        tpn3 = round((tz+10)/dt)
+                        
+                        # . . Integration in the frequency domain
+                        drcmp=integr(rcmp,dt)
+                        dtcmp=integr(tcmp,dt)
+                        dzcmp=integr(zcmp,dt)
+                        
                         # write to new file
                         # create directory
                         try:
@@ -186,9 +199,9 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         except:
                             pass
                         st.write(config.outputloc+'/'+network+'/'+station+'/'+network+'.'+station+'.'+str(starttime)+'.mseed', format="MSEED") 
-                        print("preprocessing successful") #test
+                        print("Stream accepted. Preprocessing successful") #test
                     except:
-                        print("preprocessing failed") #test
+                        print("Stream rejected") #test
                         logging.exception(file)
                         if not file_in_db(config.failloc,str(origin_time)+file):
                 #            subprocess.call(["mkdir",config.failloc+'/'+str(evtlat)+"_"+str(evtlon)+"_"+str(origin_time)])
