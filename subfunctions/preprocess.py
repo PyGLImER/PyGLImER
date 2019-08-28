@@ -37,10 +37,8 @@ import numpy as np
 
 def preprocess(taper_perc,taper_type,event_cat,webclient,model):
     # create output folder
-    try:
+    if not Path(config.outputloc).is_dir():
         subprocess.call(["mkdir",config.outputloc])
-    except:
-        pass #exists already
     # needed for a station simulation
     station_simulate = webclient.get_stations(level = "response",channel = 'BH*',network = 'IU',station = 'HRV') #simulate one of the harvard instruments
     paz_sim = station_simulate[0][0][0].response #instrument response of the channel downloaded above
@@ -67,10 +65,8 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                 network = st[0].stats.network
                 if not file_in_db(config.outputloc+'/'+network+'/'+station,file): #If the file hasn't been downloaded and preprocessed in an earlier iteration of the program
                     try: #There are sometimes bugs occuring here - an errorlog needs to be created to see for which files the preprocessing failed
-                        try:
+                        if not Path(config.failloc).is_dir():
                             subprocess.call(["mkdir",config.failloc]) #create folder for rejected streams
-                        except:
-                            pass
                        
                         if len(st) < 3: #If the stream does not contain all three components 
                             raise Exception("The stream contains less than three traces")
@@ -89,8 +85,8 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         first_arrival = origin_time + model.get_travel_times(source_depth_in_km=event.origins[0].depth/1000,
                                          distance_in_degree=result['distance'],
                                          phase_list=["P"])[0].time
-                        starttime = first_arrival-30
-                        endtime = first_arrival+120
+                        starttime = first_arrival-config.tz
+                        endtime = first_arrival+config.ta
                                                                              
                         #clip to according length
                         st.trim(starttime=starttime,endtime=endtime)
@@ -126,19 +122,18 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         
                         dt = st[0].stats.delta #sampling interval
                         df = st[0].stats.sampling_rate
-                        tz = 30 #that's a bit clumpsy and should be integrated in config.py
                         
                         # noise
                         ptn1=round(5/dt)
-                        ptn2=round((tz-5)/dt)
+                        ptn2=round((config.tz-5)/dt)
                         nptn=ptn2-ptn1+1
                         #First part of the signal
-                        pts1=round(tz/dt)
-                        pts2=round((tz+7.5)/dt)
+                        pts1=round(config.tz/dt)
+                        pts2=round((config.tz+7.5)/dt)
                         npts=pts2-pts1+1;
                         #Second part of the signal
-                        ptp1=round((tz+15)/dt)
-                        ptp2=round((tz+22.5)/dt)
+                        ptp1=round((config.tz+15)/dt)
+                        ptp2=round((config.tz+22.5)/dt)
                         nptp=ptp2-ptp1+1
                         # The original script does check the length of the traces here and pads them with zeroes if necassary.
                         # However,  would not consider this necassary as the bulkdownload should have already filtered anything that is shorter then wanted.
@@ -179,25 +174,22 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         
                         
                  ####### FIND VS ACCORDING TO BOSTOCK, RONDENAY (1999) #########
-                        tpn1 = round((tz-10)/dt)
-                        tpn2 = round(tz/dt)
-                        tpn3 = round((tz+10)/dt)
+                        tpn1 = round((config.tz-10)/dt)
+                        tpn2 = round(config.tz/dt)
+                        tpn3 = round((config.tz+10)/dt)
                         
                         # . . Integration in the frequency domain
-                        drcmp=integr(rcmp,dt)
-                        dtcmp=integr(tcmp,dt)
-                        dzcmp=integr(zcmp,dt)
+                        # I'll have to find out how to proceed from here on
+#                        drcmp=integr(rcmp,dt)
+#                        dtcmp=integr(tcmp,dt)
+#                        dzcmp=integr(zcmp,dt)
                         
                         # write to new file
                         # create directory
-                        try:
+                        if not Path(config.outputloc+'/'+network).is_dir():
                             subprocess.call(["mkdir",config.outputloc+'/'+network])
-                        except:
-                            pass
-                        try:
+                        if not Path(config.outputloc+'/'+network+'/'+station).is_dir():
                             subprocess.call(["mkdir",config.outputloc+'/'+network+'/'+station])
-                        except:
-                            pass
                         st.write(config.outputloc+'/'+network+'/'+station+'/'+network+'.'+station+'.'+str(starttime)+'.mseed', format="MSEED") 
                         print("Stream accepted. Preprocessing successful") #test
                     except:

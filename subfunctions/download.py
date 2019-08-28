@@ -63,10 +63,8 @@ def downloadwav(client,min_epid,max_epid,model,event_cat):
         
         config.folder = config.waveform+"/"+str(evtlat)+"_"+str(evtlon)+"_"+str(origin_time) # Download location
         # create folder for each event
-        try:
+        if not Path(config.folder).is_dir():
             subprocess.call(["mkdir",config.folder])
-        except:
-            pass #The folder already exists
             
         domain = CircularDomain(latitude=evtlat, longitude=evtlon,
                                 minradius=min_epid, maxradius=max_epid)

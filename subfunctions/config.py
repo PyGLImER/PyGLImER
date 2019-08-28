@@ -37,6 +37,10 @@ max_epid = 95.8
 model = TauPyModel(model="iasp91")
 
 ### PRE-PROCESSING VALUES #####
+# time window before and after first arrival
+tz = 30 #time window before 
+ta = 120 #time window after
+
 taper_perc = 0.05 #max taping percentage - float (0.05)
 taper_type = 'hann' #define type of taper, Options: {cosine,barthann,bartlett,blackman,blackmannharris,
                                                     #bohman,boxcar,chebwin,flattop,gaussian,general_gaussian,
