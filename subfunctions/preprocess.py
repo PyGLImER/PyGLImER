@@ -104,7 +104,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True) #simulate has a fuction paz_remove='self', which does not seem to work properly
     
                     ##### rotate from NEZ to radial, transverse, z ######
-                        st.rotate(method='->ZNE', inventory=station_inv) #If channeles weren't properly aligned it will be done here
+                        st.rotate(method='->ZNE', inventory=station_inv) #If channeles weren't properly aligned it will be done here, I doubt that's even necassary. Assume the next method does that as well
                         st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
                         
                     ##### SNR CRITERIA #####
@@ -196,7 +196,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         print("Stream rejected") #test
                         logging.exception(file)
                         if not file_in_db(config.failloc,str(origin_time)+file):
-                #            subprocess.call(["mkdir",config.failloc+'/'+str(evtlat)+"_"+str(evtlon)+"_"+str(origin_time)])
+                #            subprocess.call(["mkdir",config.failloc+'/'+str(evtlat)+"_"+str(evtlon)+"_"+str(origin_time)]) I changed the folder structure there
                             subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+str(origin_time)+file]) #move the mseed file for which the process failed
                     
 # Check if file is already preprocessed          
@@ -206,3 +206,27 @@ def file_in_db(loc,filename):
         return True
     else:
         return False
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
