@@ -166,6 +166,9 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                             
                             if snrr > 7.5 and snrr2/snrr <1 and snrz > 10: #accept
                                 crit = True
+                                # overwirte the old traces with the sucessfully filtered ones
+                                st[1] = frcomp
+                                st[2] = fzcomp
                                 break #waveform is accepted no further tests needed
                         # Now, the signals are not saved bandpass-filtered. I might want to do that here.
                         
@@ -174,10 +177,11 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         
                         
                  ####### FIND VS ACCORDING TO BOSTOCK, RONDENAY (1999) #########
-                        tpn1 = round((config.tz-10)/dt)
-                        tpn2 = round(config.tz/dt)
-                        tpn3 = round((config.tz+10)/dt)
-                        
+                 # suspended for now
+#                        tpn1 = round((config.tz-10)/dt)
+#                        tpn2 = round(config.tz/dt)
+#                        tpn3 = round((config.tz+10)/dt)
+#                        
                         # . . Integration in the frequency domain
                         # I'll have to find out how to proceed from here on
 #                        drcmp=integr(rcmp,dt)
