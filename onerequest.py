@@ -17,6 +17,7 @@ get_ipython().magic('reset -sf')
 #### IMPORT PREDEFINED SUBFUNCTIONS
 from subfunctions.download import downloadwav
 from subfunctions.preprocess import preprocess
+from subfunctions.preprocess import file_in_db
 import subfunctions.config as config
 
 from obspy.core import *
@@ -31,12 +32,13 @@ from obspy.clients.fdsn.mass_downloader import CircularDomain, \
 import os
 import logging
 import time
-import progressbar
+#import progressbar
 #from multiprocessing import Process,Queue #multi-thread processing - preprocess while downloading
 from pathlib import Path
 from obspy.clients.fdsn import Client as Webclient #as Webclient #web sevice
 from threading import Thread #multi-thread processing
 from datetime import datetime
+from pathlib import Path
 
 
 ############## DEFINE VARIABLES - may be changed by user ###################
@@ -56,6 +58,11 @@ event_cat = webclient.get_events(starttime = config.starttime, endtime = config.
                                   minlatitude = config.eMINLAT, maxlatitude = config.eMAXLAT,
                                   minlongitude = config.eMINLON, maxlongitude = config.eMAXLON,
                                   minmagnitude = config.minMag, maxmagnitude = config.maxMag)
+
+# There should be some section that checks if events are already downloaded and skips them if that is the case
+if not Path(config.evtloc).is_dir():
+    subprocess.call(["mkdir",config.evtloc])
+event_cat.write(config.evtloc+'/'+str(datetime.now()),format="QUAKEML")
 
 
 config.folder = "not_started" #resetting momentary event download folder

@@ -18,7 +18,7 @@ from obspy.clients.fdsn.mass_downloader import *
 import os
 import logging
 import time
-import progressbar
+#import progressbar
 import subprocess
 from pathlib import Path
 from obspy import read
@@ -69,11 +69,14 @@ def downloadwav(client,min_epid,max_epid,model,event_cat):
         domain = CircularDomain(latitude=evtlat, longitude=evtlon,
                                 minradius=min_epid, maxradius=max_epid)
         
+
+        
         restrictions = Restrictions(
             # Get data from sufficient time before earliest arrival and after the latest arrival
             # Note: All the traces will still have the same length
             starttime=origin_time + min_time - 30,
             endtime=origin_time + max_time + 120,
+            #network="IU", station="HRV", #GEOV-277
             # You might not want to deal with gaps in the data. If this setting is
             # True, any trace with a gap/overlap will be discarded.
             reject_channels_with_gaps=False, #This will delete streams with several traces!
@@ -86,7 +89,7 @@ def downloadwav(client,min_epid,max_epid,model,event_cat):
             # networks but at the same physical station. Settings this option to
             # zero or None will disable that filtering.
             # Guard against the same station having different names.
-            minimum_interstation_distance_in_m=1000.0,
+            minimum_interstation_distance_in_m=100.0,
             # Only HH or BH channels. If a station has BH channels, those will be
             # downloaded, otherwise the HH. Nothing will be downloaded if it has
             # neither. You can add more/less patterns if you like.
@@ -94,6 +97,7 @@ def downloadwav(client,min_epid,max_epid,model,event_cat):
             # Location codes are arbitrary and there is no rule as to which
             # location is best. Same logic as for the previous setting.
             location_priorities=["", "00", "10"])
+            
             
     
         # The data will be downloaded to the ``./waveforms/`` and ``./stations/``

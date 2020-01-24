@@ -15,17 +15,18 @@ waveform = "waveforms"
 outputloc = "preprocessed"
 failloc = "rejected"
 statloc = "stations"
+evtloc = "event_catalogues"
 
 ###### EVENT VALUES ######
 # Set values to "None" if they aren't requried / desired
 # Time frame is identical to the station inventory
-starttime = UTCDateTime("2018-01-01")
-endtime = UTCDateTime("2018-06-02")
-eMINLAT = -30.00
-eMAXLAT = 20.0
-eMINLON = -100.0
-eMAXLON = -90.0
-minMag = 5.5
+starttime = UTCDateTime("2011-04-10")
+endtime = UTCDateTime("2015-04-12")
+eMINLAT = -90
+eMAXLAT = 90
+eMINLON = -180
+eMAXLON = 180
+minMag = 4.5
 maxMag = 10.0
 
 # epicentral distances:

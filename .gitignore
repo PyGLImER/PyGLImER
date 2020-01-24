@@ -4,3 +4,7 @@ waveforms/
 stations/
 preprocessed/
 rejected/
+event_catalogues/
+*.xml
+*.mseed
+*cache*
