@@ -70,7 +70,7 @@ config.folder = "not_started" #resetting momentary event download folder
 # multi-threading
 if __name__ == '__main__':
     Thread(target = downloadwav,
-           args = (webclient,config.min_epid,config.max_epid,config.model,event_cat)).start()
+           args = (config.min_epid,config.max_epid,config.model,event_cat)).start()
     
     Thread(target = preprocess,
            args = (config.taper_perc,config.taper_type,event_cat,webclient,config.model)).start()

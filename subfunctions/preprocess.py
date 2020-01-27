@@ -35,8 +35,45 @@ import numpy as np
 
 
 #######################
-
 def preprocess(taper_perc,taper_type,event_cat,webclient,model):
+    """ Preprocesses waveforms to create receiver functions with the following steps:
+
+        1. Clips waveform to the right length (config.tz before and config.ta after theorethical arrival.)
+        2. Demean & Detrend
+        3. Tapering
+        4. Remove Instrument response, convert to velocity & simulate havard station.
+        5. Rotation to NEZ and, subsequently, to RTZ.
+        6. Compute SNR for highpass filtered waveforms (highpass f defined in config.lowco).
+         If SNR lower than in config.SNR_criteria for all filters, it rejects waveform.
+        7. Write finished and filtered waveforms to folder specified in config.outputloc.
+        8. Write info file with shelf containing station, event and waveform information.
+        
+        Only starts after all waveforms of the event have been downloaded by download.py.
+        (checked over the dynamic variables prepro_folder and config.folder)
+        
+        INPUT:
+            taper_perc: taper percentage (config)
+            taper_type: taper_type (config)
+            event_cat: event catalogue
+            webclient: webclient that is used to fetch response of Havard station
+            model: velocity model to calculate arrival time (config)
+            
+            only in config file:
+            outputloc: output location for preprocessed files
+            failloc: location for files that were not preprocessed
+            waveform: folder, in which the raw data is dumped
+            folder: folder, in which  the download is happening
+            statloc: location of station inventory
+            tz: clip time before theoretical arrival
+            ta: clip time after theoretical arrival
+            lowco: list with low cut-off frequencies for SNR check
+            SNR_criteria: SNR criteria for accepting/rejecting stream
+            
+         OUTPUT:
+             saves preprocessed waveform files
+             copies failed files
+             creates info file to save parameters.     
+        """
     # create output folder
     if not Path(config.outputloc).is_dir():
         subprocess.call(["mkdir",config.outputloc])
@@ -51,7 +88,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
     iclient = iClient()
     for event in event_cat: #For each event
         # fetch event-data   
-        # is it ok to always use the first origin ([0])?
+        # is it ok to always use the first origin ([0])? - THere seems to be always only one
         origin_time = event.origins[0].time
         evtlat = event.origins[0].latitude
         evtlon = event.origins[0].longitude
@@ -122,17 +159,17 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         # according to the original Matlab script, we will be workng with several bandpass (low-cut) filters to evaluate the SNR
                         # Then, the SNR will be evaluated for each of the traces and the traces will be accepted or rejected depending on their SNR.
                         
-                        # Find channel type - obspy uses the order T-R-Z
-                        # create stream dictionary
+                        #Find channel type - obspy uses the order T-R-Z
+                        #create stream dictionary
                         stream = {
-                                st[0].stats.channel[2]: st[0],
-                                st[1].stats.channel[2]: st[1],
-                                st[2].stats.channel[2]: st[2]}
+                                st[0].stats.channel[2]: st[0].data,
+                                st[1].stats.channel[2]: st[1].data,
+                                st[2].stats.channel[2]: st[2].data}
                         # 25.08.2019
                         # 
                         
                         dt = st[0].stats.delta #sampling interval
-                        df = st[0].stats.sampling_rate
+                        sampling_f = st[0].stats.sampling_rate
                         
                         # noise
                         ptn1=round(5/dt)
@@ -148,15 +185,15 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         nptp=ptp2-ptp1+1
                         # The original script does check the length of the traces here and pads them with zeroes if necassary.
                         # However,  would not consider this necassary as the bulkdownload should have already filtered anything that is shorter then wanted.
-                        #Then, I'll have to filter in the for-loop and calculate the SNR
+                        # Then, I'll have to filter in the for-loop and calculate the SNR
                         crit = False #criterium for accepting
                         
                         noisemat = np.zeros((len(config.lowco),3),dtype=float) #matrix to save SNR
                         
                         for ii,f in enumerate(config.lowco):
-                            #ftcomp = filter.highpass(stream["T"], f, df, corners=1, zerophase=True)
-                            frcomp = filter.highpass(stream["R"], f, df, corners=1, zerophase=True)
-                            fzcomp = filter.highpass(stream["Z"], f, df, corners=1, zerophase=True)      
+                            ftcomp = filter.highpass(stream["T"], f, sampling_f, corners=1, zerophase=True)
+                            frcomp = filter.highpass(stream["R"], f, sampling_f, corners=1, zerophase=True)
+                            fzcomp = filter.highpass(stream["Z"], f, sampling_f, corners=1, zerophase=True)      
                             
                             # Compute the SNR for given frequency bands
                             snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
@@ -175,16 +212,17 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                             noisemat[ii,1] = snrr2/snrr
                             noisemat[ii,2] = snrz
                             
-                            if snrr > 7.5 and snrr2/snrr <1 and snrz > 10: #accept
+                            if snrr > config.SNR_citeria[0] and snrr2/snrr < config.SNR_citeria[1] and snrz > config.SNR_criteria[2]: #accept
                                 crit = True
                                 # overwrite the old traces with the sucessfully filtered ones
+                                st[0].data = ftcomp
                                 st[1].data = frcomp
                                 st[2].data = fzcomp
                                 break #waveform is accepted no further tests needed
                         # Now, the signals are not saved bandpass-filtered. I might want to do that here.
                         
                         if not crit:
-                            raise Exception("The SNR is too low with",noisemat)
+                            raise SNRError("The SNR is too low with",noisemat)
                         
                         
                  ####### FIND VS ACCORDING TO BOSTOCK, RONDENAY (1999) #########
@@ -213,24 +251,31 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         # This is important so the lists can be created that I will append to later
                         # Also, it might save a bit of computational power
                         old_info = file_in_db(config.outputloc+'/'+network+'/'+station,'info.dat')
-                        info = shelve.open(config.outputloc+'/'+network+'/'+station+'/'+info,writeback=True)
+                        info = shelve.open(config.outputloc+'/'+network+'/'+station+'/'+'info',writeback=True)
                         if not old_info:
                             # station specific parameters
                             info['dt'] = dt
-                            info['df'] = df
+                            info['sampling_rate'] = sampling_f
                             info['network'] = network
                             info['station'] = station
                             info['statlat'] = station_inv[0][0][0].latitude
                             info['statlon'] = station_inv[0][0][0].longitude
                             info['elevation'] = station_inv[0][0][0].elevation
                             
-                            # create list for event parameters
+                            # create list for event/waveform parameters
                             info['magnitude'] = []
                             info['magnitude_type'] = []
                             info['evtlat'] = []
                             info['evtlon'] = []
                             info['orign_time'] = []
                             info['evt_depth'] = []
+                            info['noisemat'] = []
+                            info['lowco_f'] = []
+                            info['npts'] = []
+                            info['N_events'] = 0
+                            info['T'] = []
+                            info['R'] = []
+                            info['Z'] = []
                         # Append information for this event
                         info['magnitude'].append(magnitude)
                         info['magnitude_type'].append(magnitude_type)
@@ -238,6 +283,13 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         info['evtlon'].append(evtlon)
                         info['origin_time'].append(origin_time)
                         info['evt_depth'] = depth
+                        info['noisemat'].append(noisemat)
+                        info['lowco_f'].append(f)
+                        info['npts'].append(st[1].stats.npts)
+                        info['N_events'] = info['N_events']+1
+                        info['T'].append(st[0].data)
+                        info['R'].append(st[1].data)
+                        info['Z'].append(st[2].data)
                         
                         
                         info.close() #After writing all the information into the file
@@ -245,25 +297,44 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         
 #                        # When writing pay attention that variables aren't 1 overwritten 2: written twice 3: One can append variables to arrays
 #                        finfo.writelines([dt, network, station, ])
-                        print("Stream accepted. Preprocessing successful") #test
+                        print("Stream accepted. Preprocessing successful") #
+                    except SNRError: #These should not be in the log as they mask real errors
+                        print("Stream rejected - SNR too low") #test
+                        if not file_in_db(config.failloc,str(origin_time)+file):
+                            subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+str(origin_time)+file])                        
                     except:
                         print("Stream rejected") #test
                         logging.exception(file)
                         if not file_in_db(config.failloc,str(origin_time)+file):
-                            if not Path(config.failloc).is_dir():
-                                subprocess.call(["mkdir",config.failloc])
                             subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+str(origin_time)+file]) #move the mseed file for which the process failed
                             # The mseed file that I copy is the raw one (as downloaded from webservvice)
                             # Does that make sense?
                     
 # Check if file is already preprocessed          
 def file_in_db(loc,filename):
+    """Checks if file "filename" is already in location "loc"."""
     path = Path(loc+"/"+filename)
     if path.is_file():
         return True
     else:
         return False
 
+
+class Error(Exception):
+        """Base class for exceptions in this module."""
+        pass
+    
+class SNRError(Error):
+    """raised when SNR is too low
+    
+        Attributes:
+        expression -- input expression in which the error occurred
+        message -- explanation of the error
+    """
+    
+    def __init__(self,expression,message):
+        self.expression = expression
+        self.message = message
 
     
     

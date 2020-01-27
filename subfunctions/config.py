@@ -37,6 +37,11 @@ max_epid = 95.8
 # define 1D velocity model
 model = TauPyModel(model="iasp91")
 
+# Clients to download waveform
+# !No specified providers (None) will result in all known ones being queued.!
+# Else "IRIS","ORFEUS",etc.
+waveform_client = None
+
 ### PRE-PROCESSING VALUES #####
 # time window before and after first arrival
 tz = 30 #time window before 
@@ -50,6 +55,9 @@ taper_type = 'hann' #define type of taper, Options: {cosine,barthann,bartlett,bl
 
 # low-cut-off frequencies for SNR check
 lowco = [0.03, 0.1, 0.5]
+
+# SNR criteria
+SNR_citeria = [7.5, 1, 10] #[snrr, snrr2/snrr, snrz]
 
 
 

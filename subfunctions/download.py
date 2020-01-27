@@ -28,7 +28,20 @@ from datetime import datetime
 
 
 ####### DOWNLOAD SUBFUNCTION ############
-def downloadwav(client,min_epid,max_epid,model,event_cat):
+def downloadwav(min_epid,max_epid,model,event_cat):
+    """ Downloads the waveforms for all events in the catalogue
+     for a circular domain around the epicentre with dfefined epicentral 
+     distances from Clients defined in config.waveform_client.
+    
+    INPUT:
+        min_epid: minimal epicentral distance of station
+        max_epid: maximal epicentral distance of station
+        model: velocity model
+        event_cat: event catalogue that the program will loop over
+        
+    OUTPUT:
+        saves station xml in folder defined in config.py
+        saves waveforms in folder defined in config.py"""
     
     # logging for the download
     #logging.basicConfig(filename='download.log',level=logging.DEBUG) #
@@ -47,12 +60,10 @@ def downloadwav(client,min_epid,max_epid,model,event_cat):
     
     
     
-    # Circular domain around the epicenter. This module also offers
-    # rectangular and global domains. More complex domains can be defined by
-    # inheriting from the Domain class.
+
     
-    # No specified providers will result in all known ones being queried.
-    mdl = MassDownloader()
+
+    mdl = MassDownloader(config.waveform_client)
     
     # Loop over each event
     for event in event_cat:
@@ -65,6 +76,11 @@ def downloadwav(client,min_epid,max_epid,model,event_cat):
         # create folder for each event
         if not Path(config.folder).is_dir():
             subprocess.call(["mkdir",config.folder])
+            
+            
+            # Circular domain around the epicenter. This module also offers
+            # rectangular and global domains. More complex domains can be defined by
+            # inheriting from the Domain class.
             
         domain = CircularDomain(latitude=evtlat, longitude=evtlon,
                                 minradius=min_epid, maxradius=max_epid)
