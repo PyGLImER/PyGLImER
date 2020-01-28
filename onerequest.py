@@ -32,6 +32,7 @@ from obspy.clients.fdsn.mass_downloader import CircularDomain, \
 import os
 import logging
 import time
+import subprocess
 #import progressbar
 #from multiprocessing import Process,Queue #multi-thread processing - preprocess while downloading
 from pathlib import Path
@@ -61,8 +62,8 @@ event_cat = webclient.get_events(starttime = config.starttime, endtime = config.
 
 # There should be some section that checks if events are already downloaded and skips them if that is the case
 if not Path(config.evtloc).is_dir():
-    subprocess.call(["mkdir",config.evtloc])
-event_cat.write(config.evtloc+'/'+str(datetime.now()),format="QUAKEML")
+    subprocess.call(["mkdir", "-p",config.evtloc])
+event_cat.write(config.evtloc+'/'+str(datetime.now()),format="CNV") #QUAKEML
 
 
 config.folder = "not_started" #resetting momentary event download folder

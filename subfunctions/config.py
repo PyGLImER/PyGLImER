@@ -11,9 +11,9 @@ from obspy.taup import TauPyModel #arrival times in 1D v-model
 
 ### changeable by user
 #### DIRECTORY CONFIGURATION
-waveform = "waveforms"
-outputloc = "preprocessed"
-failloc = "rejected"
+waveform = "waveforms/raw"
+outputloc = "waveforms/preprocessed"
+failloc = "waveforms/rejected" #Not in use anymore
 statloc = "stations"
 evtloc = "event_catalogues"
 

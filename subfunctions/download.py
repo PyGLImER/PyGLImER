@@ -76,7 +76,7 @@ def downloadwav(min_epid,max_epid,model,event_cat):
         config.folder = config.waveform+"/"+str(evtlat)+"_"+str(evtlon)+"_"+ot_fiss # Download location
         # create folder for each event
         if not Path(config.folder).is_dir():
-            subprocess.call(["mkdir",config.folder])
+            subprocess.call(["mkdir","-p",config.folder])
             
             
             # Circular domain around the epicenter. This module also offers

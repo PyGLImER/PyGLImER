@@ -74,9 +74,6 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
              copies failed files
              creates info file to save parameters.     
         """
-    # create output folder
-    if not Path(config.outputloc).is_dir():
-        subprocess.call(["mkdir",config.outputloc])
     # needed for a station simulation
     station_simulate = webclient.get_stations(level = "response",channel = 'BH*',network = 'IU',station = 'HRV') #simulate one of the harvard instruments
     paz_sim = station_simulate[0][0][0].response #instrument response of the channel downloaded above
@@ -87,6 +84,10 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
     # Define class for backazimuth calculation
     iclient = iClient()
     for event in event_cat: #For each event
+        
+        # make folder that will contain softlinks
+        if not Path(config.outputloc+'/'+'by_event/'+ot_fiss).is_dir():
+            subprocess.call(["mkdir","-p",config.outputloc+'/'+'by_event/'+ot_fiss])
         # fetch event-data   
         # is it ok to always use the first origin ([0])? - THere seems to be always only one
         origin_time = event.origins[0].time
@@ -115,24 +116,25 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                 
                 
                 # Create directory for preprocessed file
-                if not Path(config.outputloc+'/'+network).is_dir():
-                    subprocess.call(["mkdir",config.outputloc+'/'+network])
-                if not Path(config.outputloc+'/'+network+'/'+station).is_dir():
-                    subprocess.call(["mkdir",config.outputloc+'/'+network+'/'+station])
+                if not Path(config.outputloc+'/'+'by_station/'+network+'/'+station).is_dir():
+                    subprocess.call(["mkdir","-p",config.outputloc+'/'+'by_station/'+network+'/'+station])
+                    
                 
                 # Has there already an event been recorded on this station?
                 # This is important so the lists can be created that I will append to later
                 # Also, it might save a bit of computational power
-                old_info = file_in_db(config.outputloc+'/'+network+'/'+station,'info.dat') #either True or False
-                info = shelve.open(config.outputloc+'/'+network+'/'+station+'/'+'info',writeback=True)
+                old_info = file_in_db(config.outputloc+'/'+'by_station/'+network+'/'+station,'info.dat') #either True or False
+                info = shelve.open(config.outputloc+'/'+'by_station/'+network+'/'+station+'/'+'info',writeback=True)
                 if not old_info:
                     info['events_all'] = []
                 info['events_all'].append(ot_fiss)
                 
-                if not file_in_db(config.outputloc+'/'+network+'/'+station,file): #If the file hasn't been downloaded and preprocessed in an earlier iteration of the program
+                if not file_in_db(config.outputloc+'/by_station/'+network+'/'+station,file): #If the file hasn't been downloaded and preprocessed in an earlier iteration of the program
                     try: #There are sometimes bugs occuring here - an errorlog needs to be created to see for which files the preprocessing failed
-                        if not Path(config.failloc).is_dir():
-                            subprocess.call(["mkdir",config.failloc]) #create folder for rejected streams
+                        
+                        # I don't copy the failed files anymore as it's a waste of harddisk space
+                        # if not Path(config.failloc).is_dir():
+                        #     subprocess.call(["mkdir","-p",config.failloc]) #create folder for rejected streams
                         
                             
                         # read station inventory
@@ -154,18 +156,18 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                    ##### Check if stream has three channels   
                         # This might be a bit cumbersome, but should work.
                         # Right now its trying two times to redownload the data
-                        if len(st<3):
+                        if len(st) < 3:
                             client = Client("IRIS") # I have not found out how to find the original Client that has been used for the download
                             # to solve that I could implement another try / except loop in the except part down there, very cumbersome though
                             for iii in range(3):
                                 try:
                                     if len(st) < 3: #If the stream does not contain all three components 
-                                        raise LengthError
-                                except LengthError:
+                                        raise Exception
+                                except:
                                     st = client.get_waveforms(network,station,'*',st[0].stats.channel[0:2]+'*',starttime,endtime)
                                 finally: # Check one last time. If stream to short raise Exception
                                     if len(st) <3:
-                                        raise Exception("The stream contains less than three traces")
+                                        raise Exception("The stream contains less than three traces") from None
                                                                              
                         #clip to according length
                         st.trim(starttime=starttime,endtime=endtime)
@@ -271,7 +273,8 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         # create directory
                         
 
-                        st.write(config.outputloc+'/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', format="MSEED") 
+                        st.write(config.outputloc+'/by_station/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', format="MSEED") 
+                        subprocess.call(["ln","-s",config.outputloc+'/by_station/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', config.outputloc+'/by_event/'+ot_fiss+'/'+network+station])
                     ############# WRITE AN INFO FILE #################
                         
 
@@ -326,17 +329,16 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
 #                        # When writing pay attention that variables aren't 1 overwritten 2: written twice 3: One can append variables to arrays
 #                        finfo.writelines([dt, network, station, ])
                         print("Stream accepted. Preprocessing successful") #
-                    except SNRError: #These should not be in the log as they mask real errors
+                    except SNRError('SNR too low'): #These should not be in the log as they mask real errors
                         print("Stream rejected - SNR too low") #test
-                        if not file_in_db(config.failloc,file):
-                            subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+file])
-                    except LengthError: #Here a new download of the raw data has to be attempted
+                        # if not file_in_db(config.failloc,file):
+                        #     subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+file])
                         
                     except:
                         print("Stream rejected") #test
                         logging.exception(file)
-                        if not file_in_db(config.failloc,file):
-                            subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+file]) #move the mseed file for which the process failed
+                        # if not file_in_db(config.failloc,file):
+                        #     subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+file]) #move the mseed file for which the process failed
                             # The mseed file that I copy is the raw one (as downloaded from webservvice)
                             # Does that make sense?
                     finally: #Is executed regardless if an exception occurs or not
@@ -352,33 +354,33 @@ def file_in_db(loc,filename):
         return False
 
 
-class Error(Exception):
-        """Base class for exceptions in this module."""
+
+# Exceptions
+class SNRError(Exception):
+        """raised when SNR too low."""
         pass
     
-class SNRError(Error):
-    """raised when SNR is too low
+# class SNRError(Error):
+#     """raised when SNR is too low
     
-        Attributes:
-        expression -- input expression in which the error occurred
-        message -- explanation of the error
-    """
+#         Attributes:
+#         expression -- input expression in which the error occurred
+#         message -- explanation of the error
+#     """
     
-    def __init__(self,expression,message):
-        self.expression = expression
-        self.message = message
+#     def __init__(self,message):
+#         self.message = message
 
-class LengthError(Error):
-    """raised when stream contains less than three traces
+# class LengthError(Error):
+#     """raised when stream contains less than three traces
     
-        Attributes:
-        expression -- input expression in which the error occurred
-        message -- explanation of the error
-    """
+#         Attributes:
+#         expression -- input expression in which the error occurred
+#         message -- explanation of the error
+#     """
     
-    def __init__(self,expression,message):
-        self.expression = expression
-        self.message = message
+#     def __init__(self,message):
+#         self.message = message
     
     
     
