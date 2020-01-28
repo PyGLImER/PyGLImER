@@ -26,7 +26,7 @@ eMINLAT = -90
 eMAXLAT = 90
 eMINLON = -180
 eMAXLON = 180
-minMag = 4.5
+minMag = 5.5
 maxMag = 10.0
 
 # epicentral distances:

@@ -69,10 +69,11 @@ def downloadwav(min_epid,max_epid,model,event_cat):
     for event in event_cat:
         # fetch event-data   
         origin_time = event.origins[0].time
+        ot_fiss = UTCDateTime(origin_time).format_fissures() 
         evtlat=event.origins[0].latitude
         evtlon=event.origins[0].longitude
         
-        config.folder = config.waveform+"/"+str(evtlat)+"_"+str(evtlon)+"_"+str(origin_time) # Download location
+        config.folder = config.waveform+"/"+str(evtlat)+"_"+str(evtlon)+"_"+ot_fiss # Download location
         # create folder for each event
         if not Path(config.folder).is_dir():
             subprocess.call(["mkdir",config.folder])

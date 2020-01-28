@@ -17,6 +17,7 @@ from obspy.geodetics.base import locations2degrees #calculate angular distances
 from obspy.taup import TauPyModel #arrival times in 1D v-model
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
+from obspy.core.utcdatetime import UTCDateTime
 import os
 import logging
 import time
@@ -24,7 +25,6 @@ import time
 import subprocess
 #from multiprocessing import Process,Queue #multi-thread processing - preprocess while downloading
 from pathlib import Path
-from obspy.clients.fdsn import Client as Webclient #as Webclient #web sevice
 from obspy import read
 from obspy import read_inventory
 from obspy.signal import filter
@@ -90,18 +90,19 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
         # fetch event-data   
         # is it ok to always use the first origin ([0])? - THere seems to be always only one
         origin_time = event.origins[0].time
+        ot_fiss = UTCDateTime(origin_time).format_fissures()
         evtlat = event.origins[0].latitude
         evtlon = event.origins[0].longitude
         depth = event.origins[0].depth
         
-        # Usually, only the moment Magnitude is given
-        magnitude = []
-        magnitude_type = []
-        for mag in event.magnitudes: #append all the different magnitudes
-            magnitude.append(mag.mag)
-            magnitude_type.append(mag.magnitude_type)
+        # # Not necassary, there is never more than one gien
+        # magnitude = []
+        # magnitude_type = []
+        # for mag in event.magnitudes: #append all the different magnitudes
+        #     magnitude.append(mag.mag)
+        #     magnitude_type.append(mag.magnitude_type)
 
-        prepro_folder = config.waveform+"/"+str(evtlat)+"_"+str(evtlon)+"_"+str(origin_time) #Folder, in which the preprocessing is actually happening
+        prepro_folder = config.waveform+"/"+str(evtlat)+"_"+str(evtlon)+"_"+ot_fiss #Folder, in which the preprocessing is actually happening
 
         while prepro_folder==config.folder or config.folder=="not_started":  #only start preprocessing after all waveforms for the first event have been downloaded
             print('preprocessing suspended, awaiting download')
@@ -111,13 +112,28 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                 st = read(prepro_folder+'/'+file)
                 station = st[0].stats.station
                 network = st[0].stats.network
+                
+                
+                # Create directory for preprocessed file
+                if not Path(config.outputloc+'/'+network).is_dir():
+                    subprocess.call(["mkdir",config.outputloc+'/'+network])
+                if not Path(config.outputloc+'/'+network+'/'+station).is_dir():
+                    subprocess.call(["mkdir",config.outputloc+'/'+network+'/'+station])
+                
+                # Has there already an event been recorded on this station?
+                # This is important so the lists can be created that I will append to later
+                # Also, it might save a bit of computational power
+                old_info = file_in_db(config.outputloc+'/'+network+'/'+station,'info.dat') #either True or False
+                info = shelve.open(config.outputloc+'/'+network+'/'+station+'/'+'info',writeback=True)
+                if not old_info:
+                    info['events_all'] = []
+                info['events_all'].append(ot_fiss)
+                
                 if not file_in_db(config.outputloc+'/'+network+'/'+station,file): #If the file hasn't been downloaded and preprocessed in an earlier iteration of the program
                     try: #There are sometimes bugs occuring here - an errorlog needs to be created to see for which files the preprocessing failed
                         if not Path(config.failloc).is_dir():
                             subprocess.call(["mkdir",config.failloc]) #create folder for rejected streams
-                       
-                        if len(st) < 3: #If the stream does not contain all three components 
-                            raise Exception("The stream contains less than three traces")
+                        
                             
                         # read station inventory
                         station_inv = read_inventory(config.statloc+"/"+network+"."+station+".xml", format = "STATIONXML")
@@ -129,12 +145,27 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                                                 evtlon=evtlon)
                         
                         # compute time of first arrival
-                        origin_time = event.origins[0].time
                         first_arrival = origin_time + model.get_travel_times(source_depth_in_km=depth/1000,
                                          distance_in_degree=result['distance'],
                                          phase_list=["P"])[0].time
                         starttime = first_arrival-config.tz
                         endtime = first_arrival+config.ta
+                        
+                   ##### Check if stream has three channels   
+                        # This might be a bit cumbersome, but should work.
+                        # Right now its trying two times to redownload the data
+                        if len(st<3):
+                            client = Client("IRIS") # I have not found out how to find the original Client that has been used for the download
+                            # to solve that I could implement another try / except loop in the except part down there, very cumbersome though
+                            for iii in range(3):
+                                try:
+                                    if len(st) < 3: #If the stream does not contain all three components 
+                                        raise LengthError
+                                except LengthError:
+                                    st = client.get_waveforms(network,station,'*',st[0].stats.channel[0:2]+'*',starttime,endtime)
+                                finally: # Check one last time. If stream to short raise Exception
+                                    if len(st) <3:
+                                        raise Exception("The stream contains less than three traces")
                                                                              
                         #clip to according length
                         st.trim(starttime=starttime,endtime=endtime)
@@ -191,9 +222,9 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         noisemat = np.zeros((len(config.lowco),3),dtype=float) #matrix to save SNR
                         
                         for ii,f in enumerate(config.lowco):
-                            ftcomp = filter.highpass(stream["T"], f, sampling_f, corners=1, zerophase=True)
-                            frcomp = filter.highpass(stream["R"], f, sampling_f, corners=1, zerophase=True)
-                            fzcomp = filter.highpass(stream["Z"], f, sampling_f, corners=1, zerophase=True)      
+                            ftcomp = filter.bandpass(stream["T"], f,2.5, sampling_f, corners=4, zerophase=True)
+                            frcomp = filter.bandpass(stream["R"], f,2.5, sampling_f, corners=4, zerophase=True)
+                            fzcomp = filter.bandpass(stream["Z"], f,2.5, sampling_f, corners=4, zerophase=True)      
                             
                             # Compute the SNR for given frequency bands
                             snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
@@ -219,7 +250,6 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                                 st[1].data = frcomp
                                 st[2].data = fzcomp
                                 break #waveform is accepted no further tests needed
-                        # Now, the signals are not saved bandpass-filtered. I might want to do that here.
                         
                         if not crit:
                             raise SNRError("The SNR is too low with",noisemat)
@@ -240,18 +270,11 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         # write to new file
                         # create directory
                         
-                        if not Path(config.outputloc+'/'+network).is_dir():
-                            subprocess.call(["mkdir",config.outputloc+'/'+network])
-                        if not Path(config.outputloc+'/'+network+'/'+station).is_dir():
-                            subprocess.call(["mkdir",config.outputloc+'/'+network+'/'+station])
-                        st.write(config.outputloc+'/'+network+'/'+station+'/'+network+'.'+station+'.'+str(starttime)+'.mseed', format="MSEED") 
+
+                        st.write(config.outputloc+'/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', format="MSEED") 
                     ############# WRITE AN INFO FILE #################
                         
-                        # Has there already an event been recorded on this station?
-                        # This is important so the lists can be created that I will append to later
-                        # Also, it might save a bit of computational power
-                        old_info = file_in_db(config.outputloc+'/'+network+'/'+station,'info.dat')
-                        info = shelve.open(config.outputloc+'/'+network+'/'+station+'/'+'info',writeback=True)
+
                         if not old_info:
                             # station specific parameters
                             info['dt'] = dt
@@ -260,39 +283,44 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                             info['station'] = station
                             info['statlat'] = station_inv[0][0][0].latitude
                             info['statlon'] = station_inv[0][0][0].longitude
-                            info['elevation'] = station_inv[0][0][0].elevation
+                            info['statel'] = station_inv[0][0][0].elevation
                             
                             # create list for event/waveform parameters
                             info['magnitude'] = []
                             info['magnitude_type'] = []
                             info['evtlat'] = []
                             info['evtlon'] = []
-                            info['orign_time'] = []
+                            info['origin_time'] = []
                             info['evt_depth'] = []
                             info['noisemat'] = []
                             info['lowco_f'] = []
                             info['npts'] = []
-                            info['N_events'] = 0
+                            info['numret'] = 0
                             info['T'] = []
                             info['R'] = []
                             info['Z'] = []
+                            info['rbaz'] = []
+                            info['rdelta'] = []
+                            info['events_ret'] = []
                         # Append information for this event
-                        info['magnitude'].append(magnitude)
-                        info['magnitude_type'].append(magnitude_type)
+                        info['magnitude'].append(event.magnitudes[0].mag)
+                        info['magnitude_type'].append(event.magnitudes[0].magnitude_type)
                         info['evtlat'].append(evtlat)
                         info['evtlon'].append(evtlon)
-                        info['origin_time'].append(origin_time)
+                        info['origin_time'].append(ot_fiss)
                         info['evt_depth'] = depth
                         info['noisemat'].append(noisemat)
                         info['lowco_f'].append(f)
                         info['npts'].append(st[1].stats.npts)
-                        info['N_events'] = info['N_events']+1
+                        info['numret'] = info['numret']+1
                         info['T'].append(st[0].data)
                         info['R'].append(st[1].data)
                         info['Z'].append(st[2].data)
+                        info['rbaz'].append(result["backazimuth"])
+                        info['rdelta'].append(result["distance"])
+                        info['events_ret'].append(ot_fiss)
                         
                         
-                        info.close() #After writing all the information into the file
                         
                         
 #                        # When writing pay attention that variables aren't 1 overwritten 2: written twice 3: One can append variables to arrays
@@ -300,15 +328,19 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         print("Stream accepted. Preprocessing successful") #
                     except SNRError: #These should not be in the log as they mask real errors
                         print("Stream rejected - SNR too low") #test
-                        if not file_in_db(config.failloc,str(origin_time)+file):
-                            subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+str(origin_time)+file])                        
+                        if not file_in_db(config.failloc,file):
+                            subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+file])
+                    except LengthError: #Here a new download of the raw data has to be attempted
+                        
                     except:
                         print("Stream rejected") #test
                         logging.exception(file)
-                        if not file_in_db(config.failloc,str(origin_time)+file):
-                            subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+str(origin_time)+file]) #move the mseed file for which the process failed
+                        if not file_in_db(config.failloc,file):
+                            subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+file]) #move the mseed file for which the process failed
                             # The mseed file that I copy is the raw one (as downloaded from webservvice)
                             # Does that make sense?
+                    finally: #Is executed regardless if an exception occurs or not
+                        info.close()
                     
 # Check if file is already preprocessed          
 def file_in_db(loc,filename):
@@ -336,6 +368,17 @@ class SNRError(Error):
         self.expression = expression
         self.message = message
 
+class LengthError(Error):
+    """raised when stream contains less than three traces
+    
+        Attributes:
+        expression -- input expression in which the error occurred
+        message -- explanation of the error
+    """
+    
+    def __init__(self,expression,message):
+        self.expression = expression
+        self.message = message
     
     
     
