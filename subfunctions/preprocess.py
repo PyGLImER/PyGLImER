@@ -135,7 +135,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                 info['events_all'].append(ot_fiss)
                 
                 if not file_in_db(config.outputloc+'/by_station/'+network+'/'+station,file): #If the file hasn't been downloaded and preprocessed in an earlier iteration of the program
-                    try: #There are sometimes bugs occuring here - an errorlog needs to be created to see for which files the preprocessing failed
+                    try:
                         
                         # I don't copy the failed files anymore as it's a waste of harddisk space
                         # if not Path(config.failloc).is_dir():
@@ -201,10 +201,12 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         
                         #Find channel type - obspy uses the order T-R-Z
                         #create stream dictionary
-                        stream = {
-                                st[0].stats.channel[2]: st[0].data,
-                                st[1].stats.channel[2]: st[1].data,
-                                st[2].stats.channel[2]: st[2].data}
+                        
+                        # This way is actually not robust
+                        # stream = {
+                        #         st[0].stats.channel[2]: st[0].data,
+                        #         st[1].stats.channel[2]: st[1].data,
+                        #         st[2].stats.channel[2]: st[2].data}
                         # 25.08.2019
                         # 
                         
@@ -231,9 +233,9 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         noisemat = np.zeros((len(config.lowco),3),dtype=float) #matrix to save SNR
                         
                         for ii,f in enumerate(config.lowco):
-                            ftcomp = filter.bandpass(stream["T"], f,2.5, sampling_f, corners=4, zerophase=True)
-                            frcomp = filter.bandpass(stream["R"], f,2.5, sampling_f, corners=4, zerophase=True)
-                            fzcomp = filter.bandpass(stream["Z"], f,2.5, sampling_f, corners=4, zerophase=True)      
+                            ftcomp = filter.bandpass(st[0], f,2.5, sampling_f, corners=4, zerophase=True)
+                            frcomp = filter.bandpass(st[1], f,2.5, sampling_f, corners=4, zerophase=True)
+                            fzcomp = filter.bandpass(st[2], f,2.5, sampling_f, corners=4, zerophase=True)      
                             
                             # Compute the SNR for given frequency bands
                             snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
@@ -281,7 +283,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         
 
                         st.write(config.outputloc+'/by_station/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', format="MSEED") 
-                        subprocess.call(["ln","-s",config.outputloc+'/by_station/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', config.outputloc+'/by_event/'+ot_fiss+'/'+network+station])
+                        subprocess.call(["ln","-s",'../../by_station/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', config.outputloc+'/by_event/'+ot_fiss+'/'+network+station])
                     ############# WRITE AN INFO FILE #################
                         
 

@@ -71,7 +71,7 @@ while event_cat_done == False:
 # There should be some section that checks if events are already downloaded and skips them if that is the case
 if not Path(config.evtloc).is_dir():
     subprocess.call(["mkdir","-p",config.evtloc])
-event_cat.write(config.evtloc+'/'+str(datetime.now()),format="CNV") #QUAKEML
+event_cat.write(config.evtloc+'/'+str(datetime.now()),format="QUAKEML") #CNV
 
 
 config.folder = "not_started" #resetting momentary event download folder
