@@ -40,6 +40,7 @@ from obspy.clients.fdsn import Client as Webclient #as Webclient #web sevice
 from threading import Thread #multi-thread processing
 from datetime import datetime
 from pathlib import Path
+from http.client import IncompleteRead
 
 
 ############## DEFINE VARIABLES - may be changed by user ###################
@@ -55,14 +56,21 @@ webclient = Webclient("IRIS") #needs to be defined to download event catalogue -
 logging.basicConfig(filename='preprocess.log',level=logging.WARNING,format='%(asctime)s %(message)s') #DEBUG
 
 # download event catalogue
-event_cat = webclient.get_events(starttime = config.starttime, endtime = config.endtime,
-                                  minlatitude = config.eMINLAT, maxlatitude = config.eMAXLAT,
-                                  minlongitude = config.eMINLON, maxlongitude = config.eMAXLON,
-                                  minmagnitude = config.minMag, maxmagnitude = config.maxMag)
+event_cat_done = 0 #The server is often not reachable and returns an "IncompleteRead" Error, just try downloading until sucessful
+while event_cat_done == False:
+    try:
+        event_cat = webclient.get_events(starttime = config.starttime, endtime = config.endtime,
+                                          minlatitude = config.eMINLAT, maxlatitude = config.eMAXLAT,
+                                          minlongitude = config.eMINLON, maxlongitude = config.eMAXLON,
+                                          minmagnitude = config.minMag, maxmagnitude = config.maxMag)
+        event_cat_done = True
+    except IncompleteRead:
+        # Server interrupted connection, just try again
+        continue
 
 # There should be some section that checks if events are already downloaded and skips them if that is the case
 if not Path(config.evtloc).is_dir():
-    subprocess.call(["mkdir", "-p",config.evtloc])
+    subprocess.call(["mkdir","-p",config.evtloc])
 event_cat.write(config.evtloc+'/'+str(datetime.now()),format="CNV") #QUAKEML
 
 

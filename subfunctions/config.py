@@ -57,7 +57,7 @@ taper_type = 'hann' #define type of taper, Options: {cosine,barthann,bartlett,bl
 lowco = [0.03, 0.1, 0.5]
 
 # SNR criteria
-SNR_citeria = [7.5, 1, 10] #[snrr, snrr2/snrr, snrz]
+SNR_criteria = [7.5, 1, 10] #[snrr, snrr2/snrr, snrz]
 
 
 

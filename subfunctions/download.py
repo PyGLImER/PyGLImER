@@ -73,7 +73,7 @@ def downloadwav(min_epid,max_epid,model,event_cat):
         evtlat=event.origins[0].latitude
         evtlon=event.origins[0].longitude
         
-        config.folder = config.waveform+"/"+str(evtlat)+"_"+str(evtlon)+"_"+ot_fiss # Download location
+        config.folder = config.waveform+"/"+ot_fiss+'_'+str(evtlat)+"_"+str(evtlon) # Download location
         # create folder for each event
         if not Path(config.folder).is_dir():
             subprocess.call(["mkdir","-p",config.folder])
@@ -129,8 +129,7 @@ def downloadwav(min_epid,max_epid,model,event_cat):
         
 # Define the function, which stores the files and priorly checks if the files
 # are already available
-def get_mseed_storage(network, station, location, channel, starttime,
-                      endtime):
+def get_mseed_storage(network, station, location, channel, starttime,endtime):
 
     # Returning True means that neither the data nor the StationXML file
     # will be downloaded.

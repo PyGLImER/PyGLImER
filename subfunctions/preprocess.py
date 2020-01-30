@@ -35,6 +35,10 @@ import numpy as np
 
 
 #######################
+
+
+
+
 def preprocess(taper_perc,taper_type,event_cat,webclient,model):
     """ Preprocesses waveforms to create receiver functions with the following steps:
 
@@ -85,9 +89,6 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
     iclient = iClient()
     for event in event_cat: #For each event
         
-        # make folder that will contain softlinks
-        if not Path(config.outputloc+'/'+'by_event/'+ot_fiss).is_dir():
-            subprocess.call(["mkdir","-p",config.outputloc+'/'+'by_event/'+ot_fiss])
         # fetch event-data   
         # is it ok to always use the first origin ([0])? - THere seems to be always only one
         origin_time = event.origins[0].time
@@ -96,6 +97,10 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
         evtlon = event.origins[0].longitude
         depth = event.origins[0].depth
         
+        # make folder that will contain softlinks
+        if not Path(config.outputloc+'/'+'by_event/'+ot_fiss).is_dir():
+            subprocess.call(["mkdir","-p",config.outputloc+'/'+'by_event/'+ot_fiss])
+        
         # # Not necassary, there is never more than one gien
         # magnitude = []
         # magnitude_type = []
@@ -103,7 +108,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
         #     magnitude.append(mag.mag)
         #     magnitude_type.append(mag.magnitude_type)
 
-        prepro_folder = config.waveform+"/"+str(evtlat)+"_"+str(evtlon)+"_"+ot_fiss #Folder, in which the preprocessing is actually happening
+        prepro_folder = config.waveform+"/"+ot_fiss+'_'+str(evtlat)+"_"+str(evtlon) #Folder, in which the preprocessing is actually happening
 
         while prepro_folder==config.folder or config.folder=="not_started":  #only start preprocessing after all waveforms for the first event have been downloaded
             print('preprocessing suspended, awaiting download')
@@ -163,11 +168,13 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                                 try:
                                     if len(st) < 3: #If the stream does not contain all three components 
                                         raise Exception
+                                    else:
+                                        break
                                 except:
                                     st = client.get_waveforms(network,station,'*',st[0].stats.channel[0:2]+'*',starttime,endtime)
-                                finally: # Check one last time. If stream to short raise Exception
-                                    if len(st) <3:
-                                        raise Exception("The stream contains less than three traces") from None
+                                #finally: # Check one last time. If stream to short raise Exception
+                        if len(st) <3:
+                            raise Exception("The stream contains less than three traces")
                                                                              
                         #clip to according length
                         st.trim(starttime=starttime,endtime=endtime)
@@ -245,7 +252,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                             noisemat[ii,1] = snrr2/snrr
                             noisemat[ii,2] = snrz
                             
-                            if snrr > config.SNR_citeria[0] and snrr2/snrr < config.SNR_citeria[1] and snrz > config.SNR_criteria[2]: #accept
+                            if snrr > config.SNR_criteria[0] and snrr2/snrr < config.SNR_criteria[1] and snrz > config.SNR_criteria[2]: #accept
                                 crit = True
                                 # overwrite the old traces with the sucessfully filtered ones
                                 st[0].data = ftcomp
@@ -254,7 +261,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                                 break #waveform is accepted no further tests needed
                         
                         if not crit:
-                            raise SNRError("The SNR is too low with",noisemat)
+                            raise SNRError(noisemat)
                         
                         
                  ####### FIND VS ACCORDING TO BOSTOCK, RONDENAY (1999) #########
@@ -329,8 +336,8 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
 #                        # When writing pay attention that variables aren't 1 overwritten 2: written twice 3: One can append variables to arrays
 #                        finfo.writelines([dt, network, station, ])
                         print("Stream accepted. Preprocessing successful") #
-                    except SNRError('SNR too low'): #These should not be in the log as they mask real errors
-                        print("Stream rejected - SNR too low") #test
+                    except SNRError as e: #These should not be in the log as they mask real errors
+                        print("Stream rejected - SNR too low with",e) #test
                         # if not file_in_db(config.failloc,file):
                         #     subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+file])
                         
@@ -355,11 +362,15 @@ def file_in_db(loc,filename):
 
 
 
-# Exceptions
+# program-specific Exceptions 
 class SNRError(Exception):
-        """raised when SNR too low."""
-        pass
-    
+   """raised when the SNR is too high"""
+   # Constructor method
+   def __init__(self, value):
+      self.value = value
+   # __str__ display function
+   def __str__(self):
+      return(repr(self.value))
 # class SNRError(Error):
 #     """raised when SNR is too low
     
