@@ -113,7 +113,9 @@ def downloadwav(min_epid,max_epid,model,event_cat):
             channel_priorities=["BH[ZNE]","HH[ZNE]"],
             # Location codes are arbitrary and there is no rule as to which
             # location is best. Same logic as for the previous setting.
-            location_priorities=["", "00", "10"])
+            location_priorities=["", "00", "10"],
+            sanitize=True #discards all mseeds for which no station information is available
+            )
             
             
     

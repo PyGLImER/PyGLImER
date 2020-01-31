@@ -41,6 +41,10 @@ model = TauPyModel(model="iasp91")
 # !No specified providers (None) will result in all known ones being queued.!
 # Else "IRIS","ORFEUS",etc.
 waveform_client = None
+#
+# clients on which the download should be retried:
+re_clients = ["IRIS","ORFEUS","ODC","GFZ","SCEDC","TEXNET","BGR","ETH","GEONET","ICGC","INGV","IPGP","KNMI",
+              "KOERI","LMU","NCEDC","NIEP","NOA","RESIF",'USP']
 
 ### PRE-PROCESSING VALUES #####
 # time window before and after first arrival
