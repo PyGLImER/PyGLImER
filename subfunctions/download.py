@@ -93,7 +93,7 @@ def downloadwav(min_epid,max_epid,model,event_cat):
             # Note: All the traces will still have the same length
             starttime=origin_time + min_time - 30,
             endtime=origin_time + max_time + 120,
-            #network="IU", station="HRV", #GEOV-277
+            #network="IU", station="HRV", #data comparison with old script
             # You might not want to deal with gaps in the data. If this setting is
             # True, any trace with a gap/overlap will be discarded.
             reject_channels_with_gaps=False, #This will delete streams with several traces!
@@ -110,10 +110,10 @@ def downloadwav(min_epid,max_epid,model,event_cat):
             # Only HH or BH channels. If a station has BH channels, those will be
             # downloaded, otherwise the HH. Nothing will be downloaded if it has
             # neither. You can add more/less patterns if you like.
-            channel_priorities=["BH[ZNE]","HH[ZNE]"],
+            channel_priorities=["BH*","HH*"],#channel_priorities=["BH[ZNE]","HH[ZNE]"],
             # Location codes are arbitrary and there is no rule as to which
             # location is best. Same logic as for the previous setting.
-            location_priorities=["", "00", "10"],
+            location_priorities= ["", "00", "10"],
             sanitize=True #discards all mseeds for which no station information is available
             )
             
@@ -140,8 +140,8 @@ def get_mseed_storage(network, station, location, channel, starttime,endtime):
         return True
 
     # If a string is returned the file will be saved in that location.
-    return os.path.join(config.folder, "%s.%s.%s.mseed" % (network, station,
-                                                     location))
+    return os.path.join(config.folder, "%s.%s.mseed" % (network, station))
+                                                     #location))
 #    return os.path.join(config.folder, "%s.%s.%s.%s.mseed" % (network, station,
 #                                                     location, channel))
 

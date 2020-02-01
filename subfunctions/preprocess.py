@@ -83,7 +83,8 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
     paz_sim = station_simulate[0][0][0].response #instrument response of the channel downloaded above
         
     #create dictionary with necassary data
-    paz_sim = {"gain":paz_sim._get_overall_sensitivity_and_gain(output="VEL")[0],"sensitivity":paz_sim._get_overall_sensitivity_and_gain(output="VEL")[1], "poles":paz_sim.get_paz().poles,"zeros":paz_sim.get_paz().zeros}
+    paz_sim = {"gain":paz_sim._get_overall_sensitivity_and_gain(output="VEL")[0],"sensitivity":paz_sim._get_overall_sensitivity_and_gain(output="VEL")[1],
+               "poles":paz_sim.get_paz().poles,"zeros":paz_sim.get_paz().zeros}
     
     # Define class for backazimuth calculation
     iclient = iClient()
@@ -198,14 +199,60 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         
                         # maybe I don't need to do these two steps, I will just want an output in velocity
                         # Bugs occur here due to station inventories without response information
-                        st.remove_response(inventory=station_inv,output='VEL',water_level=60)
+                        # Looks like the bulk downloader sometimes donwloads station inventories without response files
+                        # I could fix that here by redowloading the response file (alike to the 3 traces problem)
+                        try:
+                            st.remove_response(inventory=station_inv,output='VEL',water_level=60)
+                            
+                        except ValueError: #Occurs for "No matching response file found"
+                            print("The stationxml has to be redownloaded")
+                            #01.02.20: This bug occurs because the channels are named 1 & 2 instead of N and E
+                            
+                            # for c in config.re_clients:
+                            #     try:
+                            #         client = Client(c)
+                            #         station_inv = client.get_stations(level = "response",channel = st[0].stats.channel,network = network,station = station) #simulate one of the harvard instruments
+                            #         station_inv.write(config.statloc+"/"+network+"."+station+".xml", format = "STATIONXML") #write the new, working stationxml file
+                            #         st.remove_response(inventory=station_inv,output='VEL',water_level=60)
+                            #     except (header.FDSNNoDataException, header.FDSNException): #wrong client
+                            #         pass
+                            #     except ValueError: #the response file doesn't seem to be available at all
+                            #         break
+                            
+                            # Turns out the problem is in the stream not in the response file, so just redownload the stream
+                            # Not sure how necassary the whole thing is after changing download.py
+                            # But better safe than sorry, leave it inside - doesn't take any computation power
+                            # as long as it isn't called.
+                            for c in config.re_clients:
+                                try:
+                                    client = Client(c)
+                                    #st = client.get_waveforms(network,station,'*',st[0].stats.channel[0:2]+'*',starttime,endtime)
+                                    station_inv = client.get_stations(level = "response",channel = st[0].stats.channel[0:2]+'*',network = network,station = station) #simulate one of the harvard instruments
+                                    st.remove_response(inventory=station_inv,output='VEL',water_level=60)
+                                    station_inv.write(config.statloc+"/"+network+"."+station+".xml", format = "STATIONXML") #write the new, working stationxml file
+                                    if len(st) <3:
+                                        raise Exception("The stream contains less than three traces")
+                                    break
+                                except (header.FDSNNoDataException, header.FDSNException): #wrong client
+                                    pass
+                                except ValueError: #the response file doesn't seem to be available at all
+                                    break
+                                
+                                
                         st.remove_sensitivity(inventory=station_inv) #Should this step be done?
+                        # st.remove_response(inventory=station_simulate,output='VEL',water_level=60)
+                        # st.remove_sensitivity(inventory=station_simulate) #Should this step be done?
                     # simulate for another instrument like harvard (a stable good one)
                         st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True) #simulate has a fuction paz_remove='self', which does not seem to work properly
     
                     ##### rotate from NEZ to radial, transverse, z ######
                         st.rotate(method='->ZNE', inventory=station_inv) #If channeles weren't properly aligned it will be done here, I doubt that's even necassary. Assume the next method does that as well
                         st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
+                        
+                        
+                    ##### OVERWRITE OLD STRING FILE #####
+                        #  that should be done here as corrupt miniseeds may have been fixed and files have been truncated and thus we can save some space
+                        st.write(prepro_folder+'/'+network+'.'+station+'.mseed', format="MSEED") 
                         
                     ##### SNR CRITERIA #####
                         # according to the original Matlab script, we will be workng with several bandpass (low-cut) filters to evaluate the SNR

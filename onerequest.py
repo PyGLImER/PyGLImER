@@ -66,6 +66,7 @@ while event_cat_done == False:
         event_cat_done = True
     except IncompleteRead:
         # Server interrupted connection, just try again
+        print("Warning: Server interrupted connection, catalogue download is restarted.")
         continue
 
 # There should be some section that checks if events are already downloaded and skips them if that is the case
