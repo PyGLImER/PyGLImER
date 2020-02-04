@@ -8,11 +8,15 @@ Created on Thu Apr 25 14:14:47 2019
 from obspy.core import UTCDateTime
 from obspy.taup import TauPyModel #arrival times in 1D v-model
 
-
 ### changeable by user
+
+
+#### P or S ####
+phase = "S" #put string either "P" or "S" - case-sensitive
+
 #### DIRECTORY CONFIGURATION
-waveform = "waveforms/raw"
-outputloc = "waveforms/preprocessed"
+waveform = "waveforms/raw/"+phase
+outputloc = "waveforms/preprocessed/"+phase
 failloc = "waveforms/rejected" #Not in use anymore
 statloc = "stations"
 evtloc = "event_catalogues"
@@ -20,8 +24,8 @@ evtloc = "event_catalogues"
 ###### EVENT VALUES ######
 # Set values to "None" if they aren't requried / desired
 # Time frame is identical to the station inventory
-starttime = UTCDateTime("2011-04-10")
-endtime = UTCDateTime("2015-04-12")
+starttime = UTCDateTime("2004-04-25")
+endtime = UTCDateTime("2008-01-02")
 eMINLAT = -90
 eMAXLAT = 90
 eMINLON = -180
@@ -48,8 +52,12 @@ re_clients = ["IRIS","ORFEUS","ODC","GFZ","SCEDC","TEXNET","BGR","ETH","GEONET",
 
 ### PRE-PROCESSING VALUES #####
 # time window before and after first arrival
-tz = 30 #time window before 
-ta = 120 #time window after
+if phase == "P":
+    tz = 30 #time window before 
+    ta = 120 #time window after
+else:
+    tz = 45
+    ta = 120
 
 taper_perc = 0.05 #max taping percentage - float (0.05)
 taper_type = 'hann' #define type of taper, Options: {cosine,barthann,bartlett,blackman,blackmannharris,

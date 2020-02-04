@@ -51,11 +51,11 @@ def downloadwav(min_epid,max_epid,model,event_cat):
     # Calculate the min and max theoretical arrival time after event time according to minimum and maximum epicentral distance
     min_time = model.get_travel_times(source_depth_in_km=500,
                                          distance_in_degree=min_epid,
-                                         phase_list=["P"])[0].time
+                                         phase_list=[config.phase])[0].time
     
     max_time = model.get_travel_times(source_depth_in_km=0.001,
                                          distance_in_degree=max_epid,
-                                         phase_list=["P"])[0].time
+                                         phase_list=[config.phase])[0].time
     
     
     
@@ -93,7 +93,7 @@ def downloadwav(min_epid,max_epid,model,event_cat):
             # Note: All the traces will still have the same length
             starttime=origin_time + min_time - 30,
             endtime=origin_time + max_time + 120,
-            #network="IU", station="HRV", #data comparison with old script
+            network="BK", station="YBH", #data comparison with old script
             # You might not want to deal with gaps in the data. If this setting is
             # True, any trace with a gap/overlap will be discarded.
             reject_channels_with_gaps=False, #This will delete streams with several traces!

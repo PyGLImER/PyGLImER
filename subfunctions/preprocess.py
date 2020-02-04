@@ -143,8 +143,20 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         
                             
                         # read station inventory
-                        station_inv = read_inventory(config.statloc+"/"+network+"."+station+".xml", format = "STATIONXML")
-                        
+                        try:
+                            station_inv = read_inventory(config.statloc+"/"+network+"."+station+".xml", format = "STATIONXML")
+                        except FileNotFoundError:
+                            for c in config.re_clients:
+                                try:
+                                    client = Client(c)
+                                    #st = client.get_waveforms(network,station,'*',st[0].stats.channel[0:2]+'*',starttime,endtime)
+                                    station_inv = client.get_stations(level = "response",channel = st[0].stats.channel[0:2]+'*',network = network,station = station) 
+                                    station_inv.write(config.statloc+"/"+network+"."+station+".xml", format = "STATIONXML") #write the new, working stationxml file
+                                    break
+                                except (header.FDSNNoDataException, header.FDSNException): #wrong client
+                                    pass
+
+                            
                         
                     ###### CLIP TO RIGHT LENGTH BEFORE AND AFTER FIRST ARRIVAL #####
                         # calculate backazimuth, distance
@@ -154,7 +166,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         # compute time of first arrival
                         first_arrival = origin_time + model.get_travel_times(source_depth_in_km=depth/1000,
                                          distance_in_degree=result['distance'],
-                                         phase_list=["P"])[0].time
+                                         phase_list=config.phase)[0].time
                         starttime = first_arrival-config.tz
                         endtime = first_arrival+config.ta
                         
@@ -246,15 +258,36 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True) #simulate has a fuction paz_remove='self', which does not seem to work properly
     
                     ##### rotate from NEZ to radial, transverse, z ######
-                        st.rotate(method='->ZNE', inventory=station_inv) #If channeles weren't properly aligned it will be done here, I doubt that's even necassary. Assume the next method does that as well
+                        try:
+                            st.rotate(method='->ZNE', inventory=station_inv) #If channeles weren't properly aligned it will be done here, I doubt that's even necassary. Assume the next method does that as well
+                        except ValueError: #Error: The directions are not linearly independent, for some reason redownloading seems to help here
+                            for c in config.re_clients:
+                                client = Client(c) # I have not found out how to find the original Client that has been used for the download
+                                # to solve that I could implement another try / except loop in the except part down there, very cumbersome though
+                                while len(st) < 3:
+                                    try:
+                                        st = client.get_waveforms(network,station,'*',st[0].stats.channel[0:2]+'*',starttime,endtime)
+                                        st.remove_response(inventory=station_inv,output='VEL',water_level=60)
+                                        st.remove_sensitivity(inventory=station_inv)
+                                        st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True)
+                                        st.rotate(method='->ZNE', inventory=station_inv)
+                                    except (header.FDSNNoDataException,ValueError): #wrong client chosen
+                                        break
+
+                            
                         st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
                         
                         
                     ##### OVERWRITE OLD STRING FILE #####
+                        # That's a bad idea because in the next iteration it will not be able anymore to find response files for the rotated channels
+                        # I need to implement a condition that checks at the beginning if all steps up to here have already been done
                         #  that should be done here as corrupt miniseeds may have been fixed and files have been truncated and thus we can save some space
-                        st.write(prepro_folder+'/'+network+'.'+station+'.mseed', format="MSEED") 
+                        #st.write(prepro_folder+'/'+network+'.'+station+'.mseed', format="MSEED") 
                         
                     ##### SNR CRITERIA #####
+                        # 04.02.2020: 
+                        # Now, as I start implementing S receiver functions I will have to figure criteria to put here
+                        
                         # according to the original Matlab script, we will be workng with several bandpass (low-cut) filters to evaluate the SNR
                         # Then, the SNR will be evaluated for each of the traces and the traces will be accepted or rejected depending on their SNR.
                         
@@ -272,57 +305,63 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         dt = st[0].stats.delta #sampling interval
                         sampling_f = st[0].stats.sampling_rate
                         
+                        if config.phase == "P":
                         # noise
-                        ptn1=round(5/dt)
-                        ptn2=round((config.tz-5)/dt)
-                        nptn=ptn2-ptn1+1
-                        #First part of the signal
-                        pts1=round(config.tz/dt)
-                        pts2=round((config.tz+7.5)/dt)
-                        npts=pts2-pts1+1;
-                        #Second part of the signal
-                        ptp1=round((config.tz+15)/dt)
-                        ptp2=round((config.tz+22.5)/dt)
-                        nptp=ptp2-ptp1+1
-                        # The original script does check the length of the traces here and pads them with zeroes if necassary.
-                        # However,  would not consider this necassary as the bulkdownload should have already filtered anything that is shorter then wanted.
-                        # Then, I'll have to filter in the for-loop and calculate the SNR
-                        crit = False #criterium for accepting
-                        
-                        noisemat = np.zeros((len(config.lowco),3),dtype=float) #matrix to save SNR
-                        
-                        for ii,f in enumerate(config.lowco):
-                            ftcomp = filter.bandpass(st[0], f,2.5, sampling_f, corners=4, zerophase=True)
-                            frcomp = filter.bandpass(st[1], f,2.5, sampling_f, corners=4, zerophase=True)
-                            fzcomp = filter.bandpass(st[2], f,2.5, sampling_f, corners=4, zerophase=True)      
+                            ptn1=round(5/dt)
+                            ptn2=round((config.tz-5)/dt)
+                            nptn=ptn2-ptn1+1
+                            #First part of the signal
+                            pts1=round(config.tz/dt)
+                            pts2=round((config.tz+7.5)/dt)
+                            npts=pts2-pts1+1;
+                            #Second part of the signal
+                            ptp1=round((config.tz+15)/dt)
+                            ptp2=round((config.tz+22.5)/dt)
+                            nptp=ptp2-ptp1+1
+                            # The original script does check the length of the traces here and pads them with zeroes if necassary.
+                            # However,  would not consider this necassary as the bulkdownload should have already filtered anything that is shorter then wanted.
+                            # Then, I'll have to filter in the for-loop and calculate the SNR
+                            crit = False #criterium for accepting
                             
-                            # Compute the SNR for given frequency bands
-                            snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
-                            snrr2 = (sum(np.square(frcomp[ptp1:ptp2]))/nptp)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
-                            snrz = (sum(np.square(fzcomp[pts1:pts2]))/npts)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
-#                            snrz2 = (sum(np.square(fzcomp[ptp1:ptp2]))/nptp)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
-                            #snrz2 is not used (yet), so I commented it
+                            noisemat = np.zeros((len(config.lowco),3),dtype=float) #matrix to save SNR
                             
-                            # Reject or accept traces depending on their SNR
-                            # #1: snr1 > 10 (30-37.5s, near P)
-                            # snr2/snr1 < 1 (where snr2 is 45-52.5 s, in the coda of P)
-                            # note: - next possibility might be to remove those events that
-                            # generate high snr between 200-250 s
+                            for ii,f in enumerate(config.lowco):
+                                ftcomp = filter.bandpass(st[0], f,2.5, sampling_f, corners=4, zerophase=True)
+                                frcomp = filter.bandpass(st[1], f,2.5, sampling_f, corners=4, zerophase=True)
+                                fzcomp = filter.bandpass(st[2], f,2.5, sampling_f, corners=4, zerophase=True)      
+                                
+                                # Compute the SNR for given frequency bands
+                                snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
+                                snrr2 = (sum(np.square(frcomp[ptp1:ptp2]))/nptp)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
+                                snrz = (sum(np.square(fzcomp[pts1:pts2]))/npts)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
+    #                            snrz2 = (sum(np.square(fzcomp[ptp1:ptp2]))/nptp)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
+                                #snrz2 is not used (yet), so I commented it
+                                
+                                # Reject or accept traces depending on their SNR
+                                # #1: snr1 > 10 (30-37.5s, near P)
+                                # snr2/snr1 < 1 (where snr2 is 45-52.5 s, in the coda of P)
+                                # note: - next possibility might be to remove those events that
+                                # generate high snr between 200-250 s
+                                
+                                noisemat[ii,0] = snrr
+                                noisemat[ii,1] = snrr2/snrr
+                                noisemat[ii,2] = snrz
+                                
+                                if snrr > config.SNR_criteria[0] and snrr2/snrr < config.SNR_criteria[1] and snrz > config.SNR_criteria[2]: #accept
+                                    crit = True
+                                    # overwrite the old traces with the sucessfully filtered ones
+                                    st[0].data = ftcomp
+                                    st[1].data = frcomp
+                                    st[2].data = fzcomp
+                                    break #waveform is accepted no further tests needed
                             
-                            noisemat[ii,0] = snrr
-                            noisemat[ii,1] = snrr2/snrr
-                            noisemat[ii,2] = snrz
-                            
-                            if snrr > config.SNR_criteria[0] and snrr2/snrr < config.SNR_criteria[1] and snrz > config.SNR_criteria[2]: #accept
-                                crit = True
-                                # overwrite the old traces with the sucessfully filtered ones
-                                st[0].data = ftcomp
-                                st[1].data = frcomp
-                                st[2].data = fzcomp
-                                break #waveform is accepted no further tests needed
-                        
-                        if not crit:
-                            raise SNRError(noisemat)
+                            if not crit:
+                                raise SNRError(noisemat)
+                                
+                        elif config.phase=="S": #This is where later the criteria for SP receiver functions have to be defined
+                            noisemat = None #just so it doesn't rise an error
+                            f = None
+                                
                         
                         
                  ####### FIND VS ACCORDING TO BOSTOCK, RONDENAY (1999) #########
@@ -414,17 +453,18 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
 #                        finfo.writelines([dt, network, station, ])
                         print("Stream accepted. Preprocessing successful") #
                     except SNRError as e: #These should not be in the log as they mask real errors
-                        print("Stream rejected - SNR too low with",e) #test
+                        #print("Stream rejected - SNR too low with",e) #test
                         with shelve.open(config.outputloc+'/'+'by_station/'+network+'/'+station+'/'+'info',writeback=True) as info:
-                            info.setdefault('ot_all', []).append(ot_fiss)
-                            info['num'] = len(info['ot_all'])
-                            info.sync()
+                            if not 'ot_all' in info or not ot_fiss in info['ot_all']: #Don't count rejected events double
+                                info.setdefault('ot_all', []).append(ot_fiss)
+                                info['num'] = len(info['ot_all'])
+                                info.sync()
                         # if not file_in_db(config.failloc,file):
                         #     subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+file])
                         
                     except:
                         print("Stream rejected") #test
-                        logging.exception(file)
+                        logging.exception([prepro_folder,file])
                         # if not file_in_db(config.failloc,file):
                         #     subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+file]) #move the mseed file for which the process failed
                             # The mseed file that I copy is the raw one (as downloaded from webservvice)
