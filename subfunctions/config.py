@@ -12,7 +12,7 @@ from obspy.taup import TauPyModel #arrival times in 1D v-model
 
 
 #### P or S ####
-phase = "S" #put string either "P" or "S" - case-sensitive
+phase = "P" #put string either "P" or "S" - case-sensitive
 
 #### DIRECTORY CONFIGURATION
 waveform = "waveforms/raw/"+phase
@@ -34,8 +34,18 @@ minMag = 5.5
 maxMag = 10.0
 
 # epicentral distances:
-min_epid = 28.1
-max_epid = 95.8
+if phase == "P":
+    min_epid = 28.1
+    max_epid = 95.8 
+elif phase == "S": # (see Wilson et. al., 2006)
+    min_epid = 55
+    max_epid = 75 # 80 may be possible     
+    
+# event depth (see Wilson et. al., 2006):
+if phase == "P":
+    maxdepth = None #km
+elif phase == "S":
+    maxdepth = 300 #km
 
 
 # define 1D velocity model
@@ -55,7 +65,7 @@ re_clients = ["IRIS","ORFEUS","ODC","GFZ","SCEDC","TEXNET","BGR","ETH","GEONET",
 if phase == "P":
     tz = 30 #time window before 
     ta = 120 #time window after
-else:
+elif phase == "S":
     tz = 45
     ta = 120
 

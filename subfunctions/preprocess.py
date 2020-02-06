@@ -159,14 +159,20 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                             
                         
                     ###### CLIP TO RIGHT LENGTH BEFORE AND AFTER FIRST ARRIVAL #####
+                        # 06.02.2020: Change function so that it also returns the ray-parameters (later for rotation to LQT)
                         # calculate backazimuth, distance
                         result = iclient.distaz(station_inv[0][0].latitude, stalon=station_inv[0][0].longitude, evtlat=evtlat,
                                                 evtlon=evtlon)
                         
-                        # compute time of first arrival
-                        first_arrival = origin_time + model.get_travel_times(source_depth_in_km=depth/1000,
+                        # compute time of first arrival & ray parameter
+                        arrival = model.get_ray_path(source_depth_in_km=depth/1000,
                                          distance_in_degree=result['distance'],
-                                         phase_list=config.phase)[0].time
+                                         phase_list=config.phase)[0]
+                        rayp = arrival.ray_param
+                        first_arrival = arrival.time
+                        # first_arrival = origin_time + model.get_travel_times(source_depth_in_km=depth/1000,
+                        #                  distance_in_degree=result['distance'],
+                        #                  phase_list=config.phase)[0].time
                         starttime = first_arrival-config.tz
                         endtime = first_arrival+config.ta
                         

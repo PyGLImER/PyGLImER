@@ -62,7 +62,8 @@ while event_cat_done == False:
         event_cat = webclient.get_events(starttime = config.starttime, endtime = config.endtime,
                                           minlatitude = config.eMINLAT, maxlatitude = config.eMAXLAT,
                                           minlongitude = config.eMINLON, maxlongitude = config.eMAXLON,
-                                          minmagnitude = config.minMag, maxmagnitude = config.maxMag)
+                                          minmagnitude = config.minMag, maxmagnitude = config.maxMag,
+                                          maxdepth = config.maxdepth)
         event_cat_done = True
     except IncompleteRead:
         # Server interrupted connection, just try again
