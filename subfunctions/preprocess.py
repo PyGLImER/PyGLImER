@@ -176,6 +176,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         starttime = first_arrival-config.tz
                         endtime = first_arrival+config.ta
                         
+                        
                    ##### Check if stream has three channels   
                         # This might be a bit cumbersome, but should work.
                         # Right now its trying three times to redownload the data for each client
@@ -212,6 +213,10 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         
                     ############# TAPER ###############
                         st.taper(max_percentage=taper_perc,type=taper_type,max_length=None,side='both')
+                        
+                    ##### Write clipped and resampled files into raw-file folder to save space ####
+                        st.resample(10) # resample streams with 10Hz sampling rate
+                        st.write(prepro_folder+'/'+file,format="mseed") #write file
                     
                     ### REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE ####
                         
@@ -263,6 +268,9 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                     # simulate for another instrument like harvard (a stable good one)
                         st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True) #simulate has a fuction paz_remove='self', which does not seem to work properly
     
+    
+    
+    ########################### ROTATION ###################################
                     ##### rotate from NEZ to radial, transverse, z ######
                         try:
                             st.rotate(method='->ZNE', inventory=station_inv) #If channeles weren't properly aligned it will be done here, I doubt that's even necassary. Assume the next method does that as well
@@ -332,9 +340,9 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                             noisemat = np.zeros((len(config.lowco),3),dtype=float) #matrix to save SNR
                             
                             for ii,f in enumerate(config.lowco):
-                                ftcomp = filter.bandpass(st[0], f,2.5, sampling_f, corners=4, zerophase=True)
-                                frcomp = filter.bandpass(st[1], f,2.5, sampling_f, corners=4, zerophase=True)
-                                fzcomp = filter.bandpass(st[2], f,2.5, sampling_f, corners=4, zerophase=True)      
+                                ftcomp = filter.bandpass(st[0], f,4.99, sampling_f, corners=4, zerophase=True)
+                                frcomp = filter.bandpass(st[1], f,4.99, sampling_f, corners=4, zerophase=True)
+                                fzcomp = filter.bandpass(st[2], f,4.99, sampling_f, corners=4, zerophase=True)      
                                 
                                 # Compute the SNR for given frequency bands
                                 snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)

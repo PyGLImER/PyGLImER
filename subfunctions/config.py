@@ -15,6 +15,8 @@ from obspy.taup import TauPyModel #arrival times in 1D v-model
 phase = "P" #put string either "P" or "S" - case-sensitive
 
 #### DIRECTORY CONFIGURATION
+lith1 = '/home/pm/LITHO1.0/bin/access_litho' #location of lith1 file
+
 waveform = "waveforms/raw/"+phase
 outputloc = "waveforms/preprocessed/"+phase
 failloc = "waveforms/rejected" #Not in use anymore
