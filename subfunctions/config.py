@@ -14,6 +14,9 @@ from obspy.taup import TauPyModel #arrival times in 1D v-model
 #### P or S ####
 phase = "S" #put string either "P" or "S" - case-sensitive
 
+#### Rotation ####
+rot = "LQT" #"RTZ","LQT","PSS" latter is not implemented yet
+
 #### DIRECTORY CONFIGURATION
 lith1 = '/home/pm/LITHO1.0/bin/access_litho' #location of lith1 file
 

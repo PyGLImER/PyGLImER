@@ -146,14 +146,14 @@ def sshift(s,N2,dt,shift):
 #         name.append(item[-1]) #name of the boundary
     
 def rotate_LQT(st):
-    #13.02 For some reason this alters also the input stream?
     """rotates a stream given in RTZ to LQT using Singular Value Decomposition
     INPUT:
         st: stream given in RTZ
     RETURNS:
         LQT: stream in LQT"""
     dt = st[0].stats.delta # sampling interval
-    LQT = st
+    LQT = st.copy()
+    del st
     
     # 1. Find which component is which one and put them in a dict
     stream = {
@@ -171,7 +171,7 @@ def rotate_LQT(st):
     # the maximum energy around theoretical S-wave arrival - that one would
     # be Q
     tas = config.tz/dt #theoretical arrival sample
-    # enery windows - 3 seconds before and after (is that enough?)
+    # enery windows - 5 seconds before and after (is that enough?)
     ws = round(tas - 5/dt)
     we = round(tas + 5/dt)
     a = np.sum(np.square(vh[0,ws:we]))
@@ -179,6 +179,9 @@ def rotate_LQT(st):
     
     # maybe I should have a factor of 1.5 here? See how it works out
     # 13.02: ok, that doesn't work should think of a different method
+    # It seems like the iasp91 arrival is not precise enough
+    # Maybe it is also the data. The testdata was downloaded for different
+    # epicentral distance, so perhaps I'm seeing different phases
     if a > b:
         Q = vh[0]
         L = vh[1]
@@ -186,7 +189,7 @@ def rotate_LQT(st):
         Q = vh[1]
         L = vh[0]
     
-    # 3. save L and Q trace and change the label of the stream
+    #3. save L and Q trace and change the label of the stream
     for tr in LQT:
         if tr.stats.channel[2] == "R":
             tr.stats.channel = tr.stats.channel[0:2] +"Q"

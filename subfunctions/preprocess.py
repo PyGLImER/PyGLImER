@@ -31,6 +31,7 @@ from obspy.signal import filter
 #from importlib import import_module
 import shelve
 import numpy as np
+from subfunctions.SignalProcessingTB import rotate_LQT
 
 
 
@@ -291,6 +292,13 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                             
                         st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
                         
+                        # Rotate to LQT
+                        if config.rot == "LQT":
+                            st = rotate_LQT(st)
+                        elif config.rot == "PSS":
+                            continue #to be implemented
+                        
+                        
                         
                     ##### OVERWRITE OLD STRING FILE #####
                         # That's a bad idea because in the next iteration it will not be able anymore to find response files for the rotated channels
@@ -305,15 +313,11 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         # according to the original Matlab script, we will be workng with several bandpass (low-cut) filters to evaluate the SNR
                         # Then, the SNR will be evaluated for each of the traces and the traces will be accepted or rejected depending on their SNR.
                         
-                        #Find channel type - obspy uses the order T-R-Z - that not true I will have to change this
                         #create stream dictionary
-                        """13.02.2020 BUG: THe order is not always T-R-Z but I think the old
-                        bug occurred due to the Z-trace sometimes being called 3"""
-                        # This way is actually not robust
-                        # stream = {
-                        #         st[0].stats.channel[2]: st[0].data,
-                        #         st[1].stats.channel[2]: st[1].data,
-                        #         st[2].stats.channel[2]: st[2].data}
+                        stream = {
+                                st[0].stats.channel[2]: st[0].data,
+                                st[1].stats.channel[2]: st[1].data,
+                                st[2].stats.channel[2]: st[2].data}
                         # 25.08.2019
                         # 
                         
@@ -341,10 +345,12 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                             noisemat = np.zeros((len(config.lowco),3),dtype=float) #matrix to save SNR
                             
                             for ii,f in enumerate(config.lowco):
-                                ftcomp = filter.bandpass(st[0], f,4.99, sampling_f, corners=4, zerophase=True)
-                                frcomp = filter.bandpass(st[1], f,4.99, sampling_f, corners=4, zerophase=True)
-                                fzcomp = filter.bandpass(st[2], f,4.99, sampling_f, corners=4, zerophase=True)      
-                                
+                                ftcomp = filter.bandpass(stream["T"], f,4.99, sampling_f, corners=4, zerophase=True)
+                                frcomp = filter.bandpass(stream["R"], f,4.99, sampling_f, corners=4, zerophase=True)
+                                if "Z" in stream:
+                                    fzcomp = filter.bandpass(stream["Z"], f,4.99, sampling_f, corners=4, zerophase=True)      
+                                elif "3" in stream:
+                                    fzcomp = filter.bandpass(stream["3"], f,4.99, sampling_f, corners=4, zerophase=True)
                                 # Compute the SNR for given frequency bands
                                 snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
                                 snrr2 = (sum(np.square(frcomp[ptp1:ptp2]))/nptp)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
@@ -365,10 +371,18 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                                 if snrr > config.SNR_criteria[0] and snrr2/snrr < config.SNR_criteria[1] and snrz > config.SNR_criteria[2]: #accept
                                     crit = True
                                     # overwrite the old traces with the sucessfully filtered ones
-                                    st[0].data = ftcomp
-                                    st[1].data = frcomp
-                                    st[2].data = fzcomp
-                                    break #waveform is accepted no further tests needed
+                                    # st[0].data = ftcomp
+                                    # st[1].data = frcomp
+                                    # st[2].data = fzcomp
+                                for tr in st:
+                                    if tr.stats.channel[2] == "R":
+                                        tr.data = frcomp
+                                    elif tr.stats.channel[2] == "Z" or tr.stats.channel[2] == "3":
+                                        tr.data = fzcomp
+                                    elif tr.stats.channel[2] == "T":
+                                        tr.data = ftcomp
+                                        
+                                break #waveform is accepted no further tests needed
                             
                             if not crit:
                                 raise SNRError(noisemat)
