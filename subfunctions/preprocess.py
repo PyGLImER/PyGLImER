@@ -305,9 +305,10 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         # according to the original Matlab script, we will be workng with several bandpass (low-cut) filters to evaluate the SNR
                         # Then, the SNR will be evaluated for each of the traces and the traces will be accepted or rejected depending on their SNR.
                         
-                        #Find channel type - obspy uses the order T-R-Z
+                        #Find channel type - obspy uses the order T-R-Z - that not true I will have to change this
                         #create stream dictionary
-                        
+                        """13.02.2020 BUG: THe order is not always T-R-Z but I think the old
+                        bug occurred due to the Z-trace sometimes being called 3"""
                         # This way is actually not robust
                         # stream = {
                         #         st[0].stats.channel[2]: st[0].data,
