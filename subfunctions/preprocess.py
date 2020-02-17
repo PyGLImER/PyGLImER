@@ -417,7 +417,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                                       ['evtlat',evtlat],['evtlon',evtlon],['ot_ret',ot_fiss],['ot_all',ot_fiss],
                                       ['evt_depth',depth],['noisemat',noisemat],['lowco_f',f],['npts',st[1].stats.npts],
                                       ['T',st[0].data],['R',st[1].data],["Z",st[2].data],['rbaz',result["backazimuth"]],
-                                      ['rdelta',result["distance"]]]
+                                      ['rdelta',result["distance"]],['rayp',rayp]]
                         #append_info: put first key for dic then value. [key,value]
                         
                         with shelve.open(config.outputloc+'/'+'by_station/'+network+'/'+station+'/'+'info',writeback=True) as info:
@@ -437,41 +437,6 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                             info['statlat'] = station_inv[0][0][0].latitude
                             info['statlon'] = station_inv[0][0][0].longitude
                             info['statel'] = station_inv[0][0][0].elevation
-                                
-                                # create list for event/waveform parameters
-                                # info['magnitude'] = []
-                                # info['magnitude_type'] = []
-                                # info['evtlat'] = []
-                                # info['evtlon'] = []
-                                # info['origin_time'] = []
-                                # info['evt_depth'] = []
-                                # info['noisemat'] = []
-                                # info['lowco_f'] = []
-                                # info['npts'] = []
-                                # info['numret'] = 0
-                                # info['num'] = 0
-                                # info['T'] = []
-                                # info['R'] = []
-                                # info['Z'] = []
-                                #  info['rbaz'] = []
-                                #  info['rdelta'] = []
-                            # # Append information for his event
-                            # info['magnitude'].append(event.magnitudes[0].mag)
-                            # info['magnitude_type'].append(event.magnitudes[0].magnitude_type)
-                            # info['evtlat'].append(evtlat)
-                            # info['evtlon'].append(evtlon)
-                            # info['origin_time'].append(ot_fiss)
-                            # info['evt_depth'] = depth
-                            # info['noisemat'].append(noisemat)
-                            # info['lowco_f'].append(f)
-                            # info['npts'].append(st[1].stats.npts)
-                            # info['numret'] = info['numret']+1
-                            # info['T'].append(st[0].data)
-                            # info['R'].append(st[1].data)
-                            # info['Z'].append(st[2].data)
-                            # info['rbaz'].append(result["backazimuth"])
-                            # info['rdelta'].append(result["distance"])
-                            # info['num'] = info['num']+1
                         
                             info.sync()
                         
@@ -481,7 +446,7 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
 #                        # When writing pay attention that variables aren't 1 overwritten 2: written twice 3: One can append variables to arrays
 #                        finfo.writelines([dt, network, station, ])
                         print("Stream accepted. Preprocessing successful") #
-                    except SNRError as e: #These should not be in the log as they mask real errors
+                    except SNRError: #These should not be in the log as they mask real errors
                         #print("Stream rejected - SNR too low with",e) #test
                         with shelve.open(config.outputloc+'/'+'by_station/'+network+'/'+station+'/'+'info',writeback=True) as info:
                             if not 'ot_all' in info or not ot_fiss in info['ot_all']: #Don't count rejected events double

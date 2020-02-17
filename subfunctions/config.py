@@ -12,10 +12,12 @@ from obspy.taup import TauPyModel #arrival times in 1D v-model
 
 
 #### P or S ####
-phase = "S" #put string either "P" or "S" - case-sensitive
+#put string either "P" or "S" - case-sensitive
+phase = "S"
 
 #### Rotation ####
-rot = "LQT" #"RTZ","LQT","PSS" latter is not implemented yet
+# "RTZ","LQT","PSS" latter is not implemented yet
+rot = "RTZ"
 
 #### DIRECTORY CONFIGURATION
 lith1 = '/home/pm/LITHO1.0/bin/access_litho' #location of lith1 file
@@ -41,16 +43,16 @@ maxMag = 10.0
 # epicentral distances:
 if phase == "P":
     min_epid = 28.1
-    max_epid = 95.8 
-elif phase == "S": # (see Wilson et. al., 2006)
-    min_epid = 55
-    max_epid = 75 # 80 may be possible     
-    
-# event depth (see Wilson et. al., 2006):
-if phase == "P":
-    maxdepth = None #km
+    max_epid = 95.8
+# (see Wilson et. al., 2006)
 elif phase == "S":
-    maxdepth = 300 #km
+    min_epid = 55
+    max_epid = 80
+# event depth in km (see Wilson et. al., 2006):
+if phase == "P":
+    maxdepth = None
+elif phase == "S":
+    maxdepth = 300
 
 
 # define 1D velocity model
@@ -62,23 +64,27 @@ model = TauPyModel(model="iasp91")
 waveform_client = None
 #
 # clients on which the download should be retried:
-re_clients = ["IRIS","ORFEUS","ODC","GFZ","SCEDC","TEXNET","BGR","ETH","GEONET","ICGC","INGV","IPGP","KNMI",
-              "KOERI","LMU","NCEDC","NIEP","NOA","RESIF",'USP']
+re_clients = ["IRIS", "ORFEUS", "ODC", "GFZ", "SCEDC", "TEXNET", "BGR", "ETH",
+              "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "LMU",
+              "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
 
 ### PRE-PROCESSING VALUES #####
 # time window before and after first arrival
 if phase == "P":
-    tz = 30 #time window before 
-    ta = 120 #time window after
-elif phase == "S":
-    tz = 45
+    # time window before
+    tz = 30
+# time window after
     ta = 120
+elif phase == "S":
+    tz = 120
+    ta = 30
 
 taper_perc = 0.05 #max taping percentage - float (0.05)
-taper_type = 'hann' #define type of taper, Options: {cosine,barthann,bartlett,blackman,blackmannharris,
-                                                    #bohman,boxcar,chebwin,flattop,gaussian,general_gaussian,
-                                                    #hamming,hann,kaiser,nuttall,parzen,slepian,triang}
-                    # type = string                 ('hann')
+taper_type = 'hann'
+# define type of taper, Options: {cosine,barthann,bartlett,blackman,
+# blackmannharris, bohman,boxcar,chebwin, flattop,gaussian,general_gaussian,
+# hamming,hann,kaiser,nuttall,parzen,slepian,triang}
+# type = string                 ('hann')
 
 # low-cut-off frequencies for SNR check
 lowco = [0.03, 0.1, 0.5]
@@ -88,7 +94,7 @@ SNR_criteria = [7.5, 1, 10] #[snrr, snrr2/snrr, snrz]
 
 
 
-################################################################3
+################################################################
                     
                     
                     
