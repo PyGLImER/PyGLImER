@@ -26,10 +26,7 @@ from datetime import datetime
 from obspy import UTCDateTime
 
 
-
-
-####### DOWNLOAD SUBFUNCTION ############
-def downloadwav(min_epid,max_epid,model,event_cat):
+def downloadwav(min_epid, max_epid, model, event_cat):
     """ Downloads the waveforms for all events in the catalogue
      for a circular domain around the epicentre with dfefined epicentral 
      distances from Clients defined in config.waveform_client.
@@ -39,21 +36,22 @@ def downloadwav(min_epid,max_epid,model,event_cat):
         max_epid: maximal epicentral distance of station
         model: velocity model
         event_cat: event catalogue that the program will loop over
-        
+
     OUTPUT:
         saves station xml in folder defined in config.py
         saves waveforms in folder defined in config.py"""
-    
+
     # logging for the download
-    #logging.basicConfig(filename='download.log',level=logging.DEBUG) #
+    # logging.basicConfig(filename='download.log',level=logging.DEBUG) #
     fdsn_mass_logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
     fdsn_mass_logger.setLevel(logging.WARNING)
-    
-    # Calculate the min and max theoretical arrival time after event time according to minimum and maximum epicentral distance
+
+    # Calculate the min and max theoretical arrival time after event time
+    # according to minimum and maximum epicentral distance
     min_time = model.get_travel_times(source_depth_in_km=500,
                                          distance_in_degree=min_epid,
                                          phase_list=[config.phase])[0].time
-    
+
     max_time = model.get_travel_times(source_depth_in_km=0.001,
                                          distance_in_degree=max_epid,
                                          phase_list=[config.phase])[0].time
@@ -71,33 +69,34 @@ def downloadwav(min_epid,max_epid,model,event_cat):
         # fetch event-data   
         origin_time = event.origins[0].time
         ot_fiss = UTCDateTime(origin_time).format_fissures() 
-        evtlat=event.origins[0].latitude
-        evtlon=event.origins[0].longitude
-        
-        config.folder = config.waveform+"/"+ot_fiss+'_'+str(evtlat)+"_"+str(evtlon) # Download location
+        evtlat = event.origins[0].latitude
+        evtlon = event.origins[0].longitude
+
+        config.folder = config.waveform + "/" + ot_fiss + '_' + str(evtlat)\
+            + "_" + str(evtlon)  # Download location
         # create folder for each event
         if not Path(config.folder).is_dir():
-            subprocess.call(["mkdir","-p",config.folder])
-            
-            
+            subprocess.call(["mkdir", "-p", config.folder])
+
             # Circular domain around the epicenter. This module also offers
-            # rectangular and global domains. More complex domains can be defined by
-            # inheriting from the Domain class.
-            
+            # rectangular and global domains. More complex domains can be
+            # defined by inheriting from the Domain class.
+
         domain = CircularDomain(latitude=evtlat, longitude=evtlon,
                                 minradius=min_epid, maxradius=max_epid)
-        
 
-        
         restrictions = Restrictions(
-            # Get data from sufficient time before earliest arrival and after the latest arrival
+            # Get data from sufficient time before earliest arrival
+            # and after the latest arrival
             # Note: All the traces will still have the same length
-            starttime=origin_time + min_time - 30,
-            endtime=origin_time + max_time + 120,
-            network="BK", station="YBH", #data comparison with old script
-            # You might not want to deal with gaps in the data. If this setting is
+            starttime=origin_time + min_time - config.tz,
+            endtime=origin_time + max_time + config.ta,
+            network="BK", station="YBH",   # data comparison with old script
+            # You might not want to deal with gaps in the data.
+            # If this setting is
             # True, any trace with a gap/overlap will be discarded.
-            reject_channels_with_gaps=False, #This will delete streams with several traces!
+            # This will delete streams with several traces!
+            reject_channels_with_gaps=False,
             # And you might only want waveforms that have data for at least 95 % of
             # the requested time span. Any trace that is shorter than 95 % of the
             # desired total duration will be discarded.

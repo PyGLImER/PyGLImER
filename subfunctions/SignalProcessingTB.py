@@ -109,7 +109,8 @@ def sshift(s, N2, dt, shift):
 
     return s_out
 
-def rotate_PSV(statlat,statlon,rayp,st):
+
+def rotate_PSV(statlat, statlon, rayp, st):
     """Finds the incidence angle of an incoming ray with the weighted average
     of the lithosphere's P velocity
     INPUT:
@@ -137,7 +138,7 @@ def rotate_PSV(statlat,statlon,rayp,st):
         name.append(item[-1])  # name of the boundary
 
     # build weighted average for upper 15km
-    maxd = 15e3
+    maxd = 10e3
     for ii, item in enumerate(depth):
         if item <= maxd:
             break
@@ -147,14 +148,27 @@ def rotate_PSV(statlat,statlon,rayp,st):
     avs = np.multiply(vs[ii+1:], -np.diff(depth)[ii:])
     avs = sum(avs) + vs[ii]*(-np.diff(depth)[ii-1] + maxd - depth[ii-1])
     avs = avs/maxd
+    # 10.02: Ok, I checked the values for the rayp, avs, and avp. They
+    # seem alright. However, P and Sv do look almost identical.
 
-    # Do the rotation as in Rondenay (2009)
+    # # Do the rotation as in Rondenay (2009)
+    # qa = np.sqrt(1/avp**2 - rayp**2)
+    # qb = np.sqrt(1/avs**2 - rayp**2)
+    # a = avs**2*rayp**2 - .5
+    # rotmat = np.array([[a/(avp*qa), rayp*avs**2/avp, 0],
+    #                    [rayp*avs, -a/(avs*qb), 0],
+    #                    [0, 0, 0.5]])
+
+
+    # Bostock (1999)
     qa = np.sqrt(1/avp**2 - rayp**2)
     qb = np.sqrt(1/avs**2 - rayp**2)
-    a = avs**2*rayp**2 - .5
-    rotmat = np.array([[a/(avp*qa), rayp*avs**2/avp, 0],
-                       [rayp*avs, -a/(avs*qb), 0],
-                       [0, 0, 0.5]])
+    Delta = 1 - 4*rayp**2*avs**2 + 4*rayp**4*avs**4 + 4*avs**4*rayp**2*qa*qb
+    rotmat = np.array([[-2*avp*qa*(1 - 2*rayp**2*avs**2)/Delta,
+                        4*avp*avs**2*rayp*qa*qb/Delta, 0],
+                       [4*avs**3*rayp*qa*qb/Delta,
+                        2*avs*qb*(1-2*rayp**2*avs**2)/Delta, 0],
+                       [0, 0, .5]])
     # 1. Find which component is which one and put them in a dict
     stream = {
         st[0].stats.channel[2]: st[0].data,
@@ -176,27 +190,35 @@ def rotate_PSV(statlat,statlon,rayp,st):
     # 3. save P, Sv and Sh trace and change the label of the stream
     for tr in PSvSh:
         if tr.stats.channel[2] == "R":
-            tr.stats.channel = tr.stats.channel[0:2] + "Sv"
+            tr.stats.channel = tr.stats.channel[0:2] + "V"
             tr.data = PSS[1]
         elif tr.stats.channel[2] == "Z" or tr.stats.channel[2] == "3":
             tr.stats.channel = tr.stats.channel[0:2] + "P"
             tr.data = PSS[0]
         elif tr.stats.channel[2] == "T":
-            tr.stats.channel = tr.stats.channel[0:2] + "Sh"
+            tr.stats.channel = tr.stats.channel[0:2] + "H"
             tr.data = PSS[2]
+    PSvSh.normalize()
     return avp, avs, PSvSh
 
 
 def rotate_LQT(st):
     """rotates a stream given in RTZ to LQT using Singular Value Decomposition
     INPUT:
-        st: stream given in RTZ
+        st: stream given in RTZ, normalized
     RETURNS:
         LQT: stream in LQT"""
     dt = st[0].stats.delta  # sampling interval
     LQT = st.copy()
+    # Filter
+    LQT.filter('bandpass', freqmin=.03, freqmax=.33, zerophase=True)
     del st
 
+    # only check around S-arrival
+    tas = config.tz/dt  # theoretical arrival sample
+    # window
+    ws = round(tas - 3/dt)
+    we = round(tas + 15/dt)
     # 1. Find which component is which one and put them in a dict
     stream = {
         LQT[0].stats.channel[2]: LQT[0].data,
@@ -204,32 +226,27 @@ def rotate_LQT(st):
         LQT[2].stats.channel[2]: LQT[2].data}
     # create input matrix, Z component is sometimes called 3
     if "Z" in stream:
-        A_in = np.array([stream["Z"], stream["R"]])
+        A_in = np.array([stream["Z"][ws:we], stream["R"][ws:we]])
+        ZR = np.array([stream["Z"], stream["R"]])
     elif "3" in stream:
-        A_in = np.array([stream["3"], stream["R"]])
+        A_in = np.array([stream["3"][ws:we], stream["R"][ws:we]])
+        ZR = np.array([stream["3"], stream["R"]])
     u, s, vh = np.linalg.svd(A_in, full_matrices=False)
 
     # 2. Now Find out which is L and which Q by finding out which one has
     # the maximum energy around theoretical S-wave arrival - that one would
     # be Q
-    tas = config.tz/dt  # theoretical arrival sample
-    # enery windows - 5 seconds before and after (is that enough?)
-    ws = round(tas - 0.5/dt)
-    we = round(tas + 15/dt)
-    a = np.sum(np.square(vh[0, ws:we]))/np.sum(np.square(vh[0]))
-    b = np.sum(np.square(vh[1, ws:we]))/np.sum(np.square(vh[0]))
 
-    # maybe I should have a factor of 1.5 here? See how it works out
-    # 13.02: ok, that doesn't work should think of a different method
-    # It seems like the iasp91 arrival is not precise enough
-    # Maybe it is also the data. The testdata was downloaded for different
-    # epicentral distance, so perhaps I'm seeing different phases
+    a = np.sum(np.square(vh[0, :]))  # /np.sum(np.square(vh[0]))
+    b = np.sum(np.square(vh[1, :]))  # /np.sum(np.square(vh[0]))
+    A_rot = np.linalg.inv(np.dot(u, np.diag(s)))
+    LQ = np.dot(A_rot, ZR)
     if a > b:
-        Q = vh[0]
-        L = vh[1]
+        Q = LQ[0]
+        L = LQ[1]
     elif a < b:
-        Q = vh[1]
-        L = vh[0]
+        Q = LQ[1]
+        L = LQ[0]
 
     # 3. save L and Q trace and change the label of the stream
     for tr in LQT:
@@ -239,4 +256,5 @@ def rotate_LQT(st):
         elif tr.stats.channel[2] == "Z" or tr.stats.channel[2] == "3":
             tr.stats.channel = tr.stats.channel[0:2] + "L"
             tr.data = L
+    LQT.normalize()
     return LQT

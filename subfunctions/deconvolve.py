@@ -7,9 +7,9 @@ Created on Wed Oct 16 14:23:30 2019
 """
 
 import numpy as np
-from nextPowerOf2 import nextPowerOf2
-import SignalProcessingTB as sptb
-import spectrum
+from subfunctions.nextPowerOf2 import nextPowerOf2
+import subfunctions.SignalProcessingTB as sptb
+# import spectrum
 
 
 

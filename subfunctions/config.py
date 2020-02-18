@@ -8,16 +8,19 @@ Created on Thu Apr 25 14:14:47 2019
 from obspy.core import UTCDateTime
 from obspy.taup import TauPyModel #arrival times in 1D v-model
 
-### changeable by user
-
+# general settings
+# Define if you want to download new files or use old
+evtcat = "2020-02-18 15:26:36.490244"  # either None (downloads new) or filename
+wavdownload = False  # Bool - true for completing download, false: only
+# processes already existing waveforms in waveform of phase phase.
 
 #### P or S ####
-#put string either "P" or "S" - case-sensitive
+# put string either "P" or "S" - case-sensitive
 phase = "S"
 
 #### Rotation ####
 # "RTZ","LQT","PSS" latter is not implemented yet
-rot = "RTZ"
+rot = "LQT"
 
 #### DIRECTORY CONFIGURATION
 lith1 = '/home/pm/LITHO1.0/bin/access_litho' #location of lith1 file
@@ -79,7 +82,7 @@ elif phase == "S":
     tz = 120
     ta = 30
 
-taper_perc = 0.05 #max taping percentage - float (0.05)
+taper_perc = 0.05  # max taping percentage - float (0.05)
 taper_type = 'hann'
 # define type of taper, Options: {cosine,barthann,bartlett,blackman,
 # blackmannharris, bohman,boxcar,chebwin, flattop,gaussian,general_gaussian,
@@ -90,14 +93,9 @@ taper_type = 'hann'
 lowco = [0.03, 0.1, 0.5]
 
 # SNR criteria
-SNR_criteria = [7.5, 1, 10] #[snrr, snrr2/snrr, snrz]
+SNR_criteria = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
 
-
-
-################################################################
-                    
-                    
-                    
+          
 ###### DON'T change program will change automatically. #################
                     
-folder = "undefined" #Subdirectory inside of waveforms folder - the download is happening here right now
+folder = "undefined"  # the download is happening here right now

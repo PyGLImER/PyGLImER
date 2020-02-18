@@ -31,56 +31,57 @@ from obspy.signal import filter
 #from importlib import import_module
 import shelve
 import numpy as np
-from subfunctions.SignalProcessingTB import rotate_LQT
+from subfunctions.SignalProcessingTB import rotate_LQT, rotate_PSV
 
 
+def preprocess(taper_perc, taper_type, event_cat, webclient, model):
+    """ Preprocesses waveforms to create receiver functions
 
-#######################
-
-
-
-
-def preprocess(taper_perc,taper_type,event_cat,webclient,model):
-    """ Preprocesses waveforms to create receiver functions with the following steps:
-
-        1. Clips waveform to the right length (config.tz before and config.ta after theorethical arrival.)
+        1. Clips waveform to the right length
+        (config.tz before and config.ta after theorethical arrival.)
         2. Demean & Detrend
         3. Tapering
-        4. Remove Instrument response, convert to velocity & simulate havard station.
+        4. Remove Instrument response, convert to velocity &
+        simulate havard station.
         5. Rotation to NEZ and, subsequently, to RTZ.
-        6. Compute SNR for highpass filtered waveforms (highpass f defined in config.lowco).
-         If SNR lower than in config.SNR_criteria for all filters, it rejects waveform.
-        7. Write finished and filtered waveforms to folder specified in config.outputloc.
-        8. Write info file with shelf containing station, event and waveform information.
-        
-        Only starts after all waveforms of the event have been downloaded by download.py.
+        6. Compute SNR for highpass filtered waveforms
+        (highpass f defined in config.lowco).
+        If SNR lower than in config.SNR_criteria for all filters,
+        rejects waveform.
+        7. Write finished and filtered waveforms to folder
+        specified in config.outputloc.
+        8. Write info file with shelf containing station,
+        event and waveform information.
+
+        Only starts after all waveforms of the event have been
+        downloaded by download.py.
         (checked over the dynamic variables prepro_folder and config.folder)
-        
+
         INPUT:
-            taper_perc: taper percentage (config)
-            taper_type: taper_type (config)
-            event_cat: event catalogue
-            webclient: webclient that is used to fetch response of Havard station
-            model: velocity model to calculate arrival time (config)
-            
-            only in config file:
-            outputloc: output location for preprocessed files
-            failloc: location for files that were not preprocessed
-            waveform: folder, in which the raw data is dumped
-            folder: folder, in which  the download is happening
-            statloc: location of station inventory
-            tz: clip time before theoretical arrival
-            ta: clip time after theoretical arrival
-            lowco: list with low cut-off frequencies for SNR check
-            SNR_criteria: SNR criteria for accepting/rejecting stream
-            
-         OUTPUT:
-             saves preprocessed waveform files
-             copies failed files
-             creates info file to save parameters.     
+        taper_perc: taper percentage (config)
+        taper_type: taper_type (config)
+        event_cat: event catalogue
+        webclient: webclient that is used to fetch response of Havard station
+        model: velocity model to calculate arrival time (config)
+
+        only in config file:
+        outputloc: output location for preprocessed files
+        failloc: location for files that were not preprocessed
+        waveform: folder, in which the raw data is dumped
+        folder: folder, in which  the download is happening
+        statloc: location of station inventory
+        tz: clip time before theoretical arrival
+        ta: clip time after theoretical arrival
+        lowco: list with low cut-off frequencies for SNR check
+        SNR_criteria: SNR criteria for accepting/rejecting stream
+
+        OUTPUT:
+        saves preprocessed waveform files
+        copies failed files
+        creates info file to save parameters.
         """
     # needed for a station simulation
-    station_simulate = webclient.get_stations(level = "response",channel = 'BH*',network = 'IU',station = 'HRV') #simulate one of the harvard instruments
+    station_simulate = webclient.get_stations(level="response",channel = 'BH*',network = 'IU',station = 'HRV') #simulate one of the harvard instruments
     paz_sim = station_simulate[0][0][0].response #instrument response of the channel downloaded above
         
     #create dictionary with necassary data
@@ -102,17 +103,19 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
         # make folder that will contain softlinks
         if not Path(config.outputloc+'/'+'by_event/'+ot_fiss).is_dir():
             subprocess.call(["mkdir","-p",config.outputloc+'/'+'by_event/'+ot_fiss])
-        
-        # # Not necassary, there is never more than one gien
+
+        # Not necassary, there is never more than one gien
         # magnitude = []
         # magnitude_type = []
         # for mag in event.magnitudes: #append all the different magnitudes
         #     magnitude.append(mag.mag)
         #     magnitude_type.append(mag.magnitude_type)
 
-        prepro_folder = config.waveform+"/"+ot_fiss+'_'+str(evtlat)+"_"+str(evtlon) #Folder, in which the preprocessing is actually happening
-
-        while prepro_folder==config.folder or config.folder=="not_started":  #only start preprocessing after all waveforms for the first event have been downloaded
+# Folder, in which the preprocessing is actually happening
+        prepro_folder = config.waveform + "/" + ot_fiss + '_' + str(evtlat) +\
+            "_" + str(evtlon)
+# only start preprocessing after waveforms for foregoing are downloaded
+        while prepro_folder == config.folder or config.folder == "not_started":
             print('preprocessing suspended, awaiting download')
             time.sleep(5)
         else:
@@ -120,8 +123,8 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                 st = read(prepro_folder+'/'+file)
                 station = st[0].stats.station
                 network = st[0].stats.network
-                
-                
+
+
                 # Create directory for preprocessed file
                 if not Path(config.outputloc+'/'+'by_station/'+network+'/'+station).is_dir():
                     subprocess.call(["mkdir","-p",config.outputloc+'/'+'by_station/'+network+'/'+station])
@@ -166,16 +169,17 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                                                 evtlon=evtlon)
                         
                         # compute time of first arrival & ray parameter
-                        arrival = model.get_ray_path(source_depth_in_km=depth/1000,
+                        arrival = model.get_ray_paths(source_depth_in_km=depth/1000,
                                          distance_in_degree=result['distance'],
                                          phase_list=config.phase)[0]
-                        rayp = arrival.ray_param
-                        first_arrival = arrival.time
+                        # ray parameter in s/m
+                        rayp = arrival.ray_param/(111319.9*result['distance'])
+                        first_arrival = origin_time + arrival.time
                         # first_arrival = origin_time + model.get_travel_times(source_depth_in_km=depth/1000,
                         #                  distance_in_degree=result['distance'],
                         #                  phase_list=config.phase)[0].time
-                        starttime = first_arrival-config.tz
-                        endtime = first_arrival+config.ta
+                        starttime = first_arrival - config.tz
+                        endtime = first_arrival + config.ta
                         
                         
                    ##### Check if stream has three channels   
@@ -198,16 +202,16 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                                             st = client.get_waveforms(network,station,'*',st[0].stats.channel[0:2]+'*',starttime,endtime)
                                         except (header.FDSNNoDataException,ValueError): #wrong client chosen
                                             break
-                                if len(st)==3:
+                                if len(st) == 3:
                                     break
                                 
                                         
                                 #finally: # Check one last time. If stream to short raise Exception
-                        if len(st) <3:
+                        if len(st) < 3:
                             raise Exception("The stream contains less than three traces")
                                                                              
-                        #clip to according length
-                        st.trim(starttime=starttime,endtime=endtime)
+                        # clip to according length
+                        st.trim(starttime = starttime, endtime = endtime)
                         
                     ###### DEMEAN AND DETREND #########
                         st.detrend(type='demean')
@@ -218,9 +222,9 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                     ##### Write clipped and resampled files into raw-file folder to save space ####
                         st.resample(10) # resample streams with 10Hz sampling rate
                         st.write(prepro_folder+'/'+file,format="mseed") #write file
-                    
+
                     ### REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE ####
-                        
+
                         # maybe I don't need to do these two steps, I will just want an output in velocity
                         # Bugs occur here due to station inventories without response information
                         # Looks like the bulk downloader sometimes donwloads station inventories without response files
@@ -268,13 +272,13 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                         # st.remove_sensitivity(inventory=station_simulate) #Should this step be done?
                     # simulate for another instrument like harvard (a stable good one)
                         st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True) #simulate has a fuction paz_remove='self', which does not seem to work properly
-    
-    
-    
-    ########################### ROTATION ###################################
+
+
+############################ ROTATION ########################################
                     ##### rotate from NEZ to radial, transverse, z ######
                         try:
-                            st.rotate(method='->ZNE', inventory=station_inv) #If channeles weren't properly aligned it will be done here, I doubt that's even necassary. Assume the next method does that as well
+                            # If channeles weren't properly aligned
+                            st.rotate(method ='->ZNE', inventory = station_inv)
                         except ValueError: #Error: The directions are not linearly independent, for some reason redownloading seems to help here
                             for c in config.re_clients:
                                 client = Client(c) # I have not found out how to find the original Client that has been used for the download
@@ -289,27 +293,35 @@ def preprocess(taper_perc,taper_type,event_cat,webclient,model):
                                     except (header.FDSNNoDataException,ValueError): #wrong client chosen
                                         break
 
-                            
                         st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
+                        st.normalize
                         
+                        # Sometimes streams contain more than 3 traces:
+                        if st.count() > 3:
+                            stream = {}
+                            for tr in st:
+                                stream[tr.stats.channel[2]] = tr.data
+                            if "Z" in stream:
+                                st = Stream(stream["Z"], stream["R"],
+                                            stream["T"])
+                            elif "3" in stream:
+                                st = Stream(stream["3"], stream["R"],
+                                            stream["T"])
+                            del stream
+
                         # Rotate to LQT
                         if config.rot == "LQT":
                             st = rotate_LQT(st)
                         elif config.rot == "PSS":
-                            continue #to be implemented
-                        
-                        
-                        
-                    ##### OVERWRITE OLD STRING FILE #####
-                        # That's a bad idea because in the next iteration it will not be able anymore to find response files for the rotated channels
-                        # I need to implement a condition that checks at the beginning if all steps up to here have already been done
-                        #  that should be done here as corrupt miniseeds may have been fixed and files have been truncated and thus we can save some space
-                        #st.write(prepro_folder+'/'+network+'.'+station+'.mseed', format="MSEED") 
-                        
+                            avp, avs, st = rotate_PSV(
+                                station_inv[0][0][0].latitude,
+                                station_inv[0][0][0].longitude,
+                                rayp, st)
+
                     ##### SNR CRITERIA #####
                         # 04.02.2020: 
                         # Now, as I start implementing S receiver functions I will have to figure criteria to put here
-                        
+
                         # according to the original Matlab script, we will be workng with several bandpass (low-cut) filters to evaluate the SNR
                         # Then, the SNR will be evaluated for each of the traces and the traces will be accepted or rejected depending on their SNR.
                         

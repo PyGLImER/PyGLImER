@@ -8,3 +8,4 @@ event_catalogues/
 *.xml
 *.mseed
 *cache*
+*.png
