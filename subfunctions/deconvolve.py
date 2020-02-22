@@ -121,7 +121,7 @@ def it(P,H,dt,shift=0,width=2.5,omega_min=0.5,it_max=400):
     """ Iterative deconvolution after Ligorria & Ammon (1999)
 Essentially, H will be deconvolved by P.
  INPUT parameters
- P - the source wavelet estimation, in receiver functions the P-, longitudinal, or vertical component
+ P - the source wavelet estimation, in P receiver functions the P-, longitudinal, or vertical component
  H - the horizontal component (i.e. Sv/Sh, Q/T, radial/transverse component)
  omega_min - convergence control parameter (percentage improvement per iteration), given in per cent [0.01]
  swv - kind of source wavelet (e.g. Gaussian, delta) that the result will be convolved with - not yet implemented
@@ -191,7 +191,7 @@ Essentially, H will be deconvolved by P.
     
 
         
-def damped(P,H,mu):
+def damped(P,H,mu=.1):
     """ A simple damped deconvolution. I just used it to benchmark
     INPUT:
         P: denominator (t-domain)

@@ -211,14 +211,19 @@ def rotate_LQT(st):
     dt = st[0].stats.delta  # sampling interval
     LQT = st.copy()
     # Filter
-    LQT.filter('bandpass', freqmin=.03, freqmax=.33, zerophase=True)
+    if config.phase == "S":
+        LQT.filter('bandpass', freqmin=.03, freqmax=.33, zerophase=True)
     del st
 
-    # only check around S-arrival
+    # only check around phase-arrival
     tas = config.tz/dt  # theoretical arrival sample
     # window
-    ws = round(tas - 3/dt)
-    we = round(tas + 15/dt)
+    if config.phase == "S":
+        ws = round(tas - 3/dt)
+        we = round(tas + 15/dt)
+    elif config.phase == "P":
+        ws = round(tas - 5/dt)
+        we = round(tas + 5/dt)
     # 1. Find which component is which one and put them in a dict
     stream = {
         LQT[0].stats.channel[2]: LQT[0].data,
@@ -233,18 +238,26 @@ def rotate_LQT(st):
         ZR = np.array([stream["3"], stream["R"]])
     u, s, vh = np.linalg.svd(A_in, full_matrices=False)
 
-    # 2. Now Find out which is L and which Q by finding out which one has
+    # 2. Now, find out which is L and which Q by finding out which one has
     # the maximum energy around theoretical S-wave arrival - that one would
-    # be Q
-
-    a = np.sum(np.square(vh[0, :]))  # /np.sum(np.square(vh[0]))
-    b = np.sum(np.square(vh[1, :]))  # /np.sum(np.square(vh[0]))
+    # be Q. Or for Ps: maximum energy around P-wave arrival on L
+    # Note: the energy window has to be different otherwise the normalized
+    # traces sometimes have the energy 1 over the whole time, should work like
+    # this:
+    if config.phase == "S":
+        ews = 1
+        ewe = 10
+    elif config.phase == "P":
+        ews = 1
+        ewe = 8
+    a = np.sum(np.square(vh[0, round(ews/dt):round(ewe/dt)]))
+    b = np.sum(np.square(vh[1, round(ews/dt):round(ewe/dt)]))
     A_rot = np.linalg.inv(np.dot(u, np.diag(s)))
     LQ = np.dot(A_rot, ZR)
-    if a > b:
+    if a > b and config.phase == "S" or a < b and config.phase == "P":
         Q = LQ[0]
         L = LQ[1]
-    elif a < b:
+    elif a < b and config.phase == "S" or a > b and config.phase == "P":
         Q = LQ[1]
         L = LQ[0]
 

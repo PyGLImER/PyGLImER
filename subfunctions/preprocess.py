@@ -32,6 +32,8 @@ from obspy.signal import filter
 import shelve
 import numpy as np
 from subfunctions.SignalProcessingTB import rotate_LQT, rotate_PSV
+from subfunctions.deconvolve import it, damped
+from subfunctions.createRF import createRF
 
 
 def preprocess(taper_perc, taper_type, event_cat, webclient, model):
@@ -80,36 +82,37 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
         copies failed files
         creates info file to save parameters.
         """
-    # needed for a station simulation
-    station_simulate = webclient.get_stations(level="response",channel = 'BH*',network = 'IU',station = 'HRV') #simulate one of the harvard instruments
-    paz_sim = station_simulate[0][0][0].response #instrument response of the channel downloaded above
-        
-    #create dictionary with necassary data
-    paz_sim = {"gain":paz_sim._get_overall_sensitivity_and_gain(output="VEL")[0],"sensitivity":paz_sim._get_overall_sensitivity_and_gain(output="VEL")[1],
-               "poles":paz_sim.get_paz().poles,"zeros":paz_sim.get_paz().zeros}
+    # needed for a station simulation - Harvard
+    station_simulate = webclient.get_stations(level="response",
+                                              channel='BH*', network='IU',
+                                              station='HRV')
+    # instrument response of the channel downloaded above
+    paz_sim = station_simulate[0][0][0].response
     
+    # create dictionary with necassary data
+    paz_sim = {"gain": paz_sim._get_overall_sensitivity_and_gain
+               (output="VEL")[0],
+               "sensitivity": paz_sim._get_overall_sensitivity_and_gain
+                   (output="VEL")[1],
+               "poles": paz_sim.get_paz().poles,
+               "zeros": paz_sim.get_paz().zeros}
+
     # Define class for backazimuth calculation
     iclient = iClient()
-    for event in event_cat: #For each event
-        
-        # fetch event-data   
-        # is it ok to always use the first origin ([0])? - THere seems to be always only one
+    for event in event_cat:  # For each event
+
+        # fetch event-data
         origin_time = event.origins[0].time
         ot_fiss = UTCDateTime(origin_time).format_fissures()
         evtlat = event.origins[0].latitude
         evtlon = event.origins[0].longitude
         depth = event.origins[0].depth
-        
+
         # make folder that will contain softlinks
         if not Path(config.outputloc+'/'+'by_event/'+ot_fiss).is_dir():
-            subprocess.call(["mkdir","-p",config.outputloc+'/'+'by_event/'+ot_fiss])
+            subprocess.call(["mkdir", "-p",
+                             config.outputloc+'/'+'by_event/'+ot_fiss])
 
-        # Not necassary, there is never more than one gien
-        # magnitude = []
-        # magnitude_type = []
-        # for mag in event.magnitudes: #append all the different magnitudes
-        #     magnitude.append(mag.mag)
-        #     magnitude_type.append(mag.magnitude_type)
 
 # Folder, in which the preprocessing is actually happening
         prepro_folder = config.waveform + "/" + ot_fiss + '_' + str(evtlat) +\
@@ -119,45 +122,58 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
             print('preprocessing suspended, awaiting download')
             time.sleep(5)
         else:
-            for file in os.listdir(prepro_folder): #preprocess each file per event
-                st = read(prepro_folder+'/'+file)
+            # preprocess each file per event
+            for file in os.listdir(prepro_folder):
+                try:
+                    st = read(prepro_folder+'/'+file)
+                except FileNotFoundError:  # file has not been downloaded yet
+                    break  # I will still want to have the RF
                 station = st[0].stats.station
                 network = st[0].stats.network
 
-
                 # Create directory for preprocessed file
-                if not Path(config.outputloc+'/'+'by_station/'+network+'/'+station).is_dir():
-                    subprocess.call(["mkdir","-p",config.outputloc+'/'+'by_station/'+network+'/'+station])
-                    
-                
-                # 31.01.2020: This caused stability issues and I changed the way I solve that
-                
-                # Has there already an event been recorded on this station?
-                # This is important so the lists can be created that I will append to later
-                # Also, it might save a bit of computational power
-                #old_info = file_in_db(config.outputloc+'/'+'by_station/'+network+'/'+station,'info.dat') #either True or False
+                if not Path\
+                    (config.outputloc+'/'+'by_station/'+network+'/'+station)\
+                        .is_dir():
+                    subprocess.call(["mkdir", "-p",
+                                     config.outputloc + '/' + 'by_station/' +
+                                         network + '/' + station])
 
-                
-                if not file_in_db(config.outputloc+'/by_station/'+network+'/'+station, network+'.'+station+'.'+ot_fiss+'.mseed'): #If the file hasn't been downloaded and preprocessed in an earlier iteration of the program
+        # If the file hasn't been downloaded and preprocessed
+        # in an earlier iteration of the program
+                if not file_in_db(config.outputloc + '/by_station/' + network
+                                  + '/' + station, network + '.' + station +
+                                  '.' + ot_fiss + '.mseed'):
+                    crit = False  # criterion to retain
+
                     try:
-                        
-                        # I don't copy the failed files anymore as it's a waste of harddisk space
+                        # I don't copy the failed files anymore as it's
+                        # a waste of harddisk space
                         # if not Path(config.failloc).is_dir():
-                        #     subprocess.call(["mkdir","-p",config.failloc]) #create folder for rejected streams
-                        
-                            
+                        #     subprocess.call(["mkdir","-p",config.failloc])
+
                         # read station inventory
                         try:
-                            station_inv = read_inventory(config.statloc+"/"+network+"."+station+".xml", format = "STATIONXML")
+                            station_inv = read_inventory(config.statloc + "/"
+                                                         + network + "." +
+                                                         station + ".xml",
+                                                         format="STATIONXML")
                         except FileNotFoundError:
                             for c in config.re_clients:
                                 try:
                                     client = Client(c)
-                                    #st = client.get_waveforms(network,station,'*',st[0].stats.channel[0:2]+'*',starttime,endtime)
-                                    station_inv = client.get_stations(level = "response",channel = st[0].stats.channel[0:2]+'*',network = network,station = station) 
-                                    station_inv.write(config.statloc+"/"+network+"."+station+".xml", format = "STATIONXML") #write the new, working stationxml file
+                                    station_inv = client.get_stations(
+                                        level="response",
+                                        channel=st[0].stats.channel[0:2] + '*',
+                                        network=network, station=station)
+                                    # write the new, working stationxml file
+                                    station_inv.write(config.statloc + "/"
+                                                      + network + "." +
+                                                      station + ".xml",
+                                                      format="STATIONXML")
                                     break
-                                except (header.FDSNNoDataException, header.FDSNException): #wrong client
+                                except (header.FDSNNoDataException,
+                                        header.FDSNException):  # wrong client
                                     pass
 
                             
@@ -290,7 +306,9 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                                         st.remove_sensitivity(inventory=station_inv)
                                         st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True)
                                         st.rotate(method='->ZNE', inventory=station_inv)
-                                    except (header.FDSNNoDataException,ValueError): #wrong client chosen
+                                    except (header.FDSNNoDataException,
+                                            header.FDSNException,
+                                            ValueError): #wrong client chosen
                                         break
 
                         st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
@@ -300,7 +318,7 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                         if st.count() > 3:
                             stream = {}
                             for tr in st:
-                                stream[tr.stats.channel[2]] = tr.data
+                                stream[tr.stats.channel[2]] = tr
                             if "Z" in stream:
                                 st = Stream(stream["Z"], stream["R"],
                                             stream["T"])
@@ -312,11 +330,23 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                         # Rotate to LQT
                         if config.rot == "LQT":
                             st = rotate_LQT(st)
+                            # channel labels
+                            P = "L"
+                            S = "Q"
+                            T = "T"
                         elif config.rot == "PSS":
                             avp, avs, st = rotate_PSV(
                                 station_inv[0][0][0].latitude,
                                 station_inv[0][0][0].longitude,
                                 rayp, st)
+                            # channel labels
+                            P = "P"
+                            S = "V"
+                            T = "H"
+                        else:
+                            P = "Z"
+                            S = "R"
+                            T = "T"
 
                     ##### SNR CRITERIA #####
                         # 04.02.2020: 
@@ -326,10 +356,11 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                         # Then, the SNR will be evaluated for each of the traces and the traces will be accepted or rejected depending on their SNR.
                         
                         #create stream dictionary
-                        stream = {
-                                st[0].stats.channel[2]: st[0].data,
-                                st[1].stats.channel[2]: st[1].data,
-                                st[2].stats.channel[2]: st[2].data}
+                        # stream = {
+                        #         st[0].stats.channel[2]: st[0].data,
+                        #         st[1].stats.channel[2]: st[1].data,
+                        #         st[2].stats.channel[2]: st[2].data}
+
                         # 25.08.2019
                         # 
                         
@@ -338,36 +369,43 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                         
                         if config.phase == "P":
                         # noise
-                            ptn1=round(5/dt)
-                            ptn2=round((config.tz-5)/dt)
-                            nptn=ptn2-ptn1+1
-                            #First part of the signal
-                            pts1=round(config.tz/dt)
-                            pts2=round((config.tz+7.5)/dt)
-                            npts=pts2-pts1+1;
-                            #Second part of the signal
-                            ptp1=round((config.tz+15)/dt)
-                            ptp2=round((config.tz+22.5)/dt)
-                            nptp=ptp2-ptp1+1
-                            # The original script does check the length of the traces here and pads them with zeroes if necassary.
-                            # However,  would not consider this necassary as the bulkdownload should have already filtered anything that is shorter then wanted.
-                            # Then, I'll have to filter in the for-loop and calculate the SNR
-                            crit = False #criterium for accepting
-                            
-                            noisemat = np.zeros((len(config.lowco),3),dtype=float) #matrix to save SNR
+                            # Create stream dict
+                            stream = {}
+                            for tr in st:
+                                stream[tr.stats.channel[2]] = tr.data
+                            ptn1 = round(5/dt)
+                            ptn2 = round((config.tz-5)/dt)
+                            nptn = ptn2-ptn1+1
+                            # First part of the signal
+                            pts1 = round(config.tz/dt)
+                            pts2 = round((config.tz+7.5)/dt)
+                            npts = pts2-pts1+1;
+                            # Second part of the signal
+                            ptp1 = round((config.tz+15)/dt)
+                            ptp2 = round((config.tz+22.5)/dt)
+                            nptp = ptp2-ptp1+1
+
+                            # Then, I'll have to filter in the for-loop
+                            # and calculate the SNR
+
+                            # matrix to save SNR
+                            noisemat = np.zeros((len(config.lowco),
+                                                 3), dtype=float)
                             
                             for ii,f in enumerate(config.lowco):
-                                ftcomp = filter.bandpass(stream["T"], f,4.99, sampling_f, corners=4, zerophase=True)
-                                frcomp = filter.bandpass(stream["R"], f,4.99, sampling_f, corners=4, zerophase=True)
+                                ftcomp = filter.bandpass(stream[T], f,4.99, sampling_f, corners=4, zerophase=True)
+                                frcomp = filter.bandpass(stream[S], f,4.99, sampling_f, corners=4, zerophase=True)
                                 if "Z" in stream:
                                     fzcomp = filter.bandpass(stream["Z"], f,4.99, sampling_f, corners=4, zerophase=True)      
                                 elif "3" in stream:
                                     fzcomp = filter.bandpass(stream["3"], f,4.99, sampling_f, corners=4, zerophase=True)
+                                else:
+                                    fzcomp = filter.bandpass(stream[P], f,4.99, sampling_f, corners=4, zerophase=True)
                                 # Compute the SNR for given frequency bands
                                 snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
                                 snrr2 = (sum(np.square(frcomp[ptp1:ptp2]))/nptp)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
                                 snrz = (sum(np.square(fzcomp[pts1:pts2]))/npts)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
-    #                            snrz2 = (sum(np.square(fzcomp[ptp1:ptp2]))/nptp)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
+                               # snrz2 = (sum(np.square(fzcomp[ptp1:ptp2]))/nptp)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
                                 #snrz2 is not used (yet), so I commented it
                                 
                                 # Reject or accept traces depending on their SNR
@@ -387,14 +425,16 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                                     # st[1].data = frcomp
                                     # st[2].data = fzcomp
                                 for tr in st:
-                                    if tr.stats.channel[2] == "R":
+                                    if tr.stats.channel[2] == S:
                                         tr.data = frcomp
-                                    elif tr.stats.channel[2] == "Z" or tr.stats.channel[2] == "3":
+                                    elif tr.stats.channel[2] == "Z"\
+                                        or tr.stats.channel[2] == "3" or\
+                                            tr.stats.channel[2] == P:
                                         tr.data = fzcomp
-                                    elif tr.stats.channel[2] == "T":
+                                    elif tr.stats.channel[2] == T:
                                         tr.data = ftcomp
                                         
-                                break #waveform is accepted no further tests needed
+                                break  # waveform is accepted
                             
                             if not crit:
                                 raise SNRError(noisemat)
@@ -451,10 +491,13 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                             info['statel'] = station_inv[0][0][0].elevation
                         
                             info.sync()
-                        
-                        
-                        
-                        
+                            
+                            # I should create an extra script for the RF
+                            # creation, where I can decide if I rather want to
+                            # use mseed files in preprocessed!
+
+
+
 #                        # When writing pay attention that variables aren't 1 overwritten 2: written twice 3: One can append variables to arrays
 #                        finfo.writelines([dt, network, station, ])
                         print("Stream accepted. Preprocessing successful") #
@@ -476,10 +519,34 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                             # The mseed file that I copy is the raw one (as downloaded from webservvice)
                             # Does that make sense?
                     #finally: #Is executed regardless if an exception occurs or not
+
+                else:  # The file was already processed and passed the crit
+                    crit = True
+                    st = read(config.outputloc + '/by_station/' + network
+                                  + '/' + station + '/' + network + '.' +
+                                  station + '.' + ot_fiss + '.mseed')
                         
-                    
+    ################### create RF ##################
+                # Check if RF was already computed and if it should be
+                # computed at all, and if the waveform was retained (SNR)
+                if config.decon_meth and not\
+                    file_in_db(config.RF + '/' + network + '/' + station,
+                               network + '.' + station + '.' + ot_fiss
+                         + '.mseed') and crit == True:
+                    RF = createRF(st, .1)  # dt is always .1
+
+                # Write RF
+                    if not Path(config.RF + '/' + network + '/' + station
+                                ).is_dir():
+                        subprocess.call(["mkdir", "-p",
+                         config.RF + '/' + network + '/' + station])
+                    RF.write(config.RF + '/' + network + '/' + station +
+                             '/' +network + '.' + station + '.' + ot_fiss
+                             + '.mseed', format="MSEED")                        
+
+
 # Check if file is already preprocessed          
-def file_in_db(loc,filename):
+def file_in_db(loc, filename):
     """Checks if file "filename" is already in location "loc"."""
     path = Path(loc+"/"+filename)
     if path.is_file():
@@ -498,46 +565,3 @@ class SNRError(Exception):
    # __str__ display function
    def __str__(self):
       return(repr(self.value))
-# class SNRError(Error):
-#     """raised when SNR is too low
-    
-#         Attributes:
-#         expression -- input expression in which the error occurred
-#         message -- explanation of the error
-#     """
-    
-#     def __init__(self,message):
-#         self.message = message
-
-# class LengthError(Error):
-#     """raised when stream contains less than three traces
-    
-#         Attributes:
-#         expression -- input expression in which the error occurred
-#         message -- explanation of the error
-#     """
-    
-#     def __init__(self,message):
-#         self.message = message
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    

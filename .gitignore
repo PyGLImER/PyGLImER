@@ -5,6 +5,7 @@ stations/
 preprocessed/
 rejected/
 event_catalogues/
+figures/
 *.xml
 *.mseed
 *cache*

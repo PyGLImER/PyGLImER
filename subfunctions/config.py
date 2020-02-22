@@ -6,13 +6,17 @@ Created on Thu Apr 25 14:14:47 2019
 @author: pm
 """
 from obspy.core import UTCDateTime
-from obspy.taup import TauPyModel #arrival times in 1D v-model
+from obspy.taup import TauPyModel  # arrival times in 1D v-model
 
 # general settings
 # Define if you want to download new files or use old
-evtcat = "2020-02-18 15:26:36.490244"  # either None (downloads new) or filename
+evtcat = "2020-02-18 15:26:36.490244"  # either None (downloads new) or file
 wavdownload = False  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
+
+decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999),
+# dampedf=damped frequency deconvolution - not recommended
+# False = don't create RF
 
 #### P or S ####
 # put string either "P" or "S" - case-sensitive
@@ -23,11 +27,12 @@ phase = "S"
 rot = "LQT"
 
 #### DIRECTORY CONFIGURATION
-lith1 = '/home/pm/LITHO1.0/bin/access_litho' #location of lith1 file
+lith1 = '/home/pm/LITHO1.0/bin/access_litho'  # location of lith1 file
 
-waveform = "waveforms/raw/"+phase
-outputloc = "waveforms/preprocessed/"+phase
-failloc = "waveforms/rejected" #Not in use anymore
+RF = "waveforms/RF/" + phase #save RF here
+waveform = "waveforms/raw/" + phase
+outputloc = "waveforms/preprocessed/" + phase
+failloc = "waveforms/rejected"  # Not in use anymore
 statloc = "stations"
 evtloc = "event_catalogues"
 
@@ -95,7 +100,5 @@ lowco = [0.03, 0.1, 0.5]
 # SNR criteria
 SNR_criteria = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
 
-          
 ###### DON'T change program will change automatically. #################
-                    
 folder = "undefined"  # the download is happening here right now
