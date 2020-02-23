@@ -443,23 +443,14 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                             noisemat = None #just so it doesn't rise an error
                             f = None
                                 
-                        
-                        
-                 ####### FIND VS ACCORDING TO BOSTOCK, RONDENAY (1999) #########
-                 # suspended for now
-#                        tpn1 = round((config.tz-10)/dt)
-#                        tpn2 = round(config.tz/dt)
-#                        tpn3 = round((config.tz+10)/dt)
-#                        
-                        # . . Integration in the frequency domain
-                        # I'll have to find out how to proceed from here on
-#                        drcmp=integr(rcmp,dt)
-#                        dtcmp=integr(tcmp,dt)
-#                        dzcmp=integr(zcmp,dt)
-                        
+                        # Write all the data to the stats of the traces
+                        # it does not save these. They only stay in RAM
+                        # for tr in st:
+                        #     tr.stats.onset = first_arrival
+                        #     tr.stats.rayp = rayp
+                        #     tr.stats.ba = result["backazimuth"]
+                        #     tr.stats.ot = ot_fiss
                         # write to new file
-                        # create directory
-                        
 
                         st.write(config.outputloc+'/by_station/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', format="MSEED") 
                         subprocess.call(["ln","-s",'../../by_station/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', config.outputloc+'/by_event/'+ot_fiss+'/'+network+station])
@@ -469,7 +460,7 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                                       ['evtlat',evtlat],['evtlon',evtlon],['ot_ret',ot_fiss],['ot_all',ot_fiss],
                                       ['evt_depth',depth],['noisemat',noisemat],['lowco_f',f],['npts',st[1].stats.npts],
                                       ['T',st[0].data],['R',st[1].data],["Z",st[2].data],['rbaz',result["backazimuth"]],
-                                      ['rdelta',result["distance"]],['rayp',rayp]]
+                                      ['rdelta', result["distance"]], ['rayp', rayp], ["onset", first_arrival]]
                         #append_info: put first key for dic then value. [key,value]
                         
                         with shelve.open(config.outputloc+'/'+'by_station/'+network+'/'+station+'/'+'info',writeback=True) as info:
@@ -543,7 +534,10 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                     RF.write(config.RF + '/' + network + '/' + station +
                              '/' +network + '.' + station + '.' + ot_fiss
                              + '.mseed', format="MSEED")                        
-
+                    # copy info files
+                    subprocess.call(["cp", prepro_folder + "/info*",
+                                     config.RF + '/' + network + '/' +
+                                     station])
 
 # Check if file is already preprocessed          
 def file_in_db(loc, filename):

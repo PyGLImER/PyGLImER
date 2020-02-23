@@ -78,21 +78,21 @@ if not config.evtcat:
 
 else:  # use old/downloaded event catalogue
     event_cat = read_events(config.evtloc + '/' + config.evtcat)
-
+model = config.model  # otherwise it calls the model function twice
 if config.wavdownload:
     config.folder = "not_started"  # resetting momentary event download folder
     # multi-threading
     if __name__ == '__main__':
         Thread(target=downloadwav,
                args=(config.min_epid, config.max_epid,
-                       config.model, event_cat)).start()
+                       model, event_cat)).start()
     
         Thread(target=preprocess,
                args=(config.taper_perc, config.taper_type,
-                       event_cat, webclient, config.model)).start()
+                       event_cat, webclient, model)).start()
         
 else:  # Only preprocess files in waveform location
     config.folder = "finished"
     preprocess(config.taper_perc, config.taper_type, event_cat, webclient,
-               config.model)
+               model)
     

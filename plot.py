@@ -79,6 +79,7 @@ def plot_all_RF(phase, network, station, TAT=config.tz, dpi=300):
         x.xaxis.major.formatter._useMathText = True
         x.yaxis.set_minor_locator(AutoMinorLocator(5))
         x.xaxis.set_minor_locator(AutoMinorLocator(5))
+        plt.grid(color='c', which="both", linewidth=.25)
         # x.yaxis.set_label_coords(0.63, 1.01)
         x.yaxis.tick_right()
         # ax.legend(frameon=False, loc='upper left', ncol=2, handlelength=4)
@@ -141,6 +142,7 @@ def plot_all_wav(phase, network, station, TAT=config.tz, dpi=300):
             x.xaxis.set_minor_locator(AutoMinorLocator(5))
             # x.yaxis.set_label_coords(0.63, 1.01)
             x.yaxis.tick_right()
+            x.grid(color='c', which='both', linewidth=.25)
         # ax.legend(frameon=False, loc='upper left', ncol=2, handlelength=4)
         # plt.legend(['it_max=4000', 'it_max=400'])
         plt.savefig(os.path.join(outloc + file[:-5] + "pdf"), dpi=dpi)
