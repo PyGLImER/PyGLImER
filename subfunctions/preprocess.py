@@ -122,6 +122,10 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
             print('preprocessing suspended, awaiting download')
             time.sleep(5)
         else:
+            try:  # If one event has no folder it interrupts else
+                os.listdir(prepro_folder)
+            except:
+                continue
             # preprocess each file per event
             for file in os.listdir(prepro_folder):
                 try:
@@ -188,8 +192,9 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                         arrival = model.get_ray_paths(source_depth_in_km=depth/1000,
                                          distance_in_degree=result['distance'],
                                          phase_list=config.phase)[0]
-                        # ray parameter in s/m
-                        rayp = arrival.ray_param/(111319.9*result['distance'])
+                        # ray parameter in s/deg
+                        rayp_s_deg = arrival.ray_param_sec_degree
+                        rayp = rayp_s_deg/111319.9  # apparent slowness
                         first_arrival = origin_time + arrival.time
                         # first_arrival = origin_time + model.get_travel_times(source_depth_in_km=depth/1000,
                         #                  distance_in_degree=result['distance'],
@@ -327,26 +332,6 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                                             stream["T"])
                             del stream
 
-                        # Rotate to LQT
-                        if config.rot == "LQT":
-                            st = rotate_LQT(st)
-                            # channel labels
-                            P = "L"
-                            S = "Q"
-                            T = "T"
-                        elif config.rot == "PSS":
-                            avp, avs, st = rotate_PSV(
-                                station_inv[0][0][0].latitude,
-                                station_inv[0][0][0].longitude,
-                                rayp, st)
-                            # channel labels
-                            P = "P"
-                            S = "V"
-                            T = "H"
-                        else:
-                            P = "Z"
-                            S = "R"
-                            T = "T"
 
                     ##### SNR CRITERIA #####
                         # 04.02.2020: 
@@ -425,11 +410,11 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                                     # st[1].data = frcomp
                                     # st[2].data = fzcomp
                                 for tr in st:
-                                    if tr.stats.channel[2] == S:
+                                    if tr.stats.channel[2] == R:
                                         tr.data = frcomp
                                     elif tr.stats.channel[2] == "Z"\
                                         or tr.stats.channel[2] == "3" or\
-                                            tr.stats.channel[2] == P:
+                                            tr.stats.channel[2] == Z:
                                         tr.data = fzcomp
                                     elif tr.stats.channel[2] == T:
                                         tr.data = ftcomp
@@ -441,15 +426,30 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                                 
                         elif config.phase=="S": #This is where later the criteria for SP receiver functions have to be defined
                             noisemat = None #just so it doesn't rise an error
+                            crit = True
                             f = None
-                                
-                        # Write all the data to the stats of the traces
-                        # it does not save these. They only stay in RAM
-                        # for tr in st:
-                        #     tr.stats.onset = first_arrival
-                        #     tr.stats.rayp = rayp
-                        #     tr.stats.ba = result["backazimuth"]
-                        #     tr.stats.ot = ot_fiss
+
+
+                        # Rotate to LQT or PSS
+                        if config.rot == "LQT":
+                            st = rotate_LQT(st)
+                            # channel labels
+                            P = "L"
+                            S = "Q"
+                            T = "T"
+                        elif config.rot == "PSS":
+                            avp, avs, st = rotate_PSV(
+                                station_inv[0][0][0].latitude,
+                                station_inv[0][0][0].longitude,
+                                rayp, st)
+                            # channel labels
+                        #     P = "P"
+                        #     S = "V"
+                        #     T = "H"
+                        # else:
+                        #     P = "Z"
+                        #     S = "R"
+                        #     T = "T"
                         # write to new file
 
                         st.write(config.outputloc+'/by_station/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', format="MSEED") 
@@ -459,11 +459,14 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                         append_inf = [['magnitude',event.magnitudes[0].mag],['magnitude_type',event.magnitudes[0].magnitude_type],
                                       ['evtlat',evtlat],['evtlon',evtlon],['ot_ret',ot_fiss],['ot_all',ot_fiss],
                                       ['evt_depth',depth],['noisemat',noisemat],['lowco_f',f],['npts',st[1].stats.npts],
-                                      ['T',st[0].data],['R',st[1].data],["Z",st[2].data],['rbaz',result["backazimuth"]],
-                                      ['rdelta', result["distance"]], ['rayp', rayp], ["onset", first_arrival]]
+                                      ['rbaz',result["backazimuth"]],
+                                      ['rdelta', result["distance"]],
+                                      ['rayp_s_deg', rayp_s_deg], ["onset", first_arrival],
+                                      ['starttime', st[0].stats.starttime]]
+                        # ['T',st[0].data],['R',st[1].data],["Z",st[2].data],
                         #append_info: put first key for dic then value. [key,value]
                         
-                        with shelve.open(config.outputloc+'/'+'by_station/'+network+'/'+station+'/'+'info',writeback=True) as info:
+                        with shelve.open(config.outputloc + '/by_station/'+network+'/'+station+'/'+'info',writeback=True) as info:
                             # if not old_info:
                             #     # station specific parameters
                             
@@ -524,20 +527,37 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                     file_in_db(config.RF + '/' + network + '/' + station,
                                network + '.' + station + '.' + ot_fiss
                          + '.mseed') and crit == True:
-                    RF = createRF(st, .1)  # dt is always .1
-
-                # Write RF
-                    if not Path(config.RF + '/' + network + '/' + station
-                                ).is_dir():
-                        subprocess.call(["mkdir", "-p",
-                         config.RF + '/' + network + '/' + station])
-                    RF.write(config.RF + '/' + network + '/' + station +
-                             '/' +network + '.' + station + '.' + ot_fiss
-                             + '.mseed', format="MSEED")                        
-                    # copy info files
-                    subprocess.call(["cp", prepro_folder + "/info*",
-                                     config.RF + '/' + network + '/' +
-                                     station])
+                    try:
+                        RF = createRF(st, .1)  # dt is always .1
+    
+                    # Write RF
+                        if not Path(config.RF + '/' + network + '/' + station
+                                    ).is_dir():
+                            subprocess.call(["mkdir", "-p",
+                             config.RF + '/' + network + '/' + station])
+                        RF.write(config.RF + '/' + network + '/' + station +
+                                 '/' +network + '.' + station + '.' + ot_fiss
+                                 + '.mseed', format="MSEED")                        
+                        # copy info files
+                        subprocess.call(["cp", config.outputloc + '/by_station/' +
+                                         network + '/' + station +
+                                         "/info.dir",
+                                         config.RF + '/' + network + '/' +
+                                         station + '/'])
+                        subprocess.call(["cp", config.outputloc + '/by_station/' +
+                                         network + '/' + station +
+                                         "/info.bak",
+                                         config.RF + '/' + network + '/' +
+                                         station + '/'])
+                        subprocess.call(["cp", config.outputloc + '/by_station/' +
+                                         network + '/' + station +
+                                         "/info.dat",
+                                         config.RF + '/' + network + '/' +
+                                         station + '/'])
+                    except:
+                        print("RF creation failed")
+                        logging.exception([network, station, ot_fiss])
+    print("Download and preprocessing finished.")
 
 # Check if file is already preprocessed          
 def file_in_db(loc, filename):

@@ -10,3 +10,4 @@ figures/
 *.mseed
 *cache*
 *.png
+*rating*

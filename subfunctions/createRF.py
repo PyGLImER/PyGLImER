@@ -64,7 +64,20 @@ def createRF(st, dt):
     return RF
 
 
-def MoveoutStack(station, network, phasen=config.phase, TAT=config.tz):
+def stackRF(network, station, phase=config.phase):
+    # moveout correction
+    RF_mo = Moveout(station, network, phasen=phase)
+    # create trace for stack
+    stack = RF_mo[0]
+    stack[0].data = np.zeros(stack[0].stats.npts)
+    for st in RF_mo:
+        st.normalize()  # again, just to be safe
+        stack[0].data = stack[0].data + st[0].data
+    stack.normalize()
+    return stack
+
+
+def Moveout(station, network, phasen=config.phase):
     """Moveout corretion for pS and sP phases. A modified version of the
     original Fortran program written by Xiaohui Yuan
     INPUT:
@@ -82,21 +95,31 @@ def MoveoutStack(station, network, phasen=config.phase, TAT=config.tz):
     for file in os.listdir(ioloc):
         if file[:4] == "info":
             continue
-        st = read(file)
+        try:
+            st = read(ioloc + '/' + file)
+        except IsADirectoryError:
+            continue
         st.normalize()  # make sure traces are normalised
-        RF.append(st[0].data)
-    RF = np.array(RF)
-    dt = st[0].stats.delta
+        RF.append(st.copy())
+    # dt = st[0].stats.delta
     # read info file
     with shelve.open(ioloc + '/info') as info:
         rayp = info["rayp"]
         onset = info["onset"]
     rayp = np.array(rayp)  # create numpy array
-    rayp_km = rayp*1000  # in s/km
+    # rayp_km = rayp*1000  # in s/km
     rayp = 111319.9*rayp  # from s/m to s/deg
-    
+    model = load_model()
+    for ii, st in enumerate(RF):
+        st = model.moveout(st, onset[ii], rayp[ii], phase=phase)
+    return RF
 
-def load_model(fname='iasp91'):
+
+""" Everything from here on is from the RF model by Tom Eulenfeld, modified
+by me"""
+
+
+def load_model(fname='iasp91.dat'):
     """
     Load model from file.
 
@@ -255,14 +278,14 @@ class SimpleModel(object):
             index0 = int(floor((onset - st.starttime) * st.sampling_rate))
             t0, t1 = self.stretch_delay_times(rayp, phase=phase,
                                               ref=ref)
-            # S_multiple = phase[0].upper() == 'S' and len(phase) > 3
-            # if S_multiple:
-            #     time0 = st.starttime - st.onset + index0 * st.delta
-            #     old_data = tr.data[:index0][::-1]
-            #     t = -time0 - np.arange(index0) * st.delta
-            #     new_t = -np.interp(-t, -t0, -t1, left=0, right=0)
-            #     data = np.interp(-t, -new_t, old_data, left=0., right=0.)
-            #     tr.data[:index0] = data[::-1]
+            S_multiple = phase[0].upper() == 'S' and len(phase) > 3
+            if S_multiple:
+                time0 = st.starttime - st.onset + index0 * st.delta
+                old_data = tr.data[:index0][::-1]
+                t = -time0 - np.arange(index0) * st.delta
+                new_t = -np.interp(-t, -t0, -t1, left=0, right=0)
+                data = np.interp(-t, -new_t, old_data, left=0., right=0.)
+                tr.data[:index0] = data[::-1]
             if t0[-1] > t1[-1]:
                 index0 += 1
             time0 = st.starttime - onset + index0 * st.delta
@@ -271,8 +294,12 @@ class SimpleModel(object):
             # stretch old times to new times
             new_t = np.interp(t, t0, t1, left=0, right=None)
             # interpolate data at new times to data samples
-            data = np.interp(t, new_t, old_data, left=None, right=0.)
-            tr.data[index0:] = data
+            print(t)
+            try:
+                data = np.interp(t, new_t, old_data, left=None, right=0.)
+                tr.data[index0:] = data
+            except ValueError:
+                continue
         return stream
 
 

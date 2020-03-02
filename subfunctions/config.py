@@ -10,13 +10,13 @@ from obspy.taup import TauPyModel  # arrival times in 1D v-model
 
 # general settings
 # Define if you want to download new files or use old
-evtcat = "2020-02-18 15:26:36.490244"  # either None (downloads new) or file
+evtcat = "2020-02-29 15:49:43.388928"  # either None (downloads new) or file
 wavdownload = False  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
 decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999),
-# dampedf=damped frequency deconvolution - not recommended
-# False = don't create RF
+# dampedf: damped frequency deconvolution - not recommended
+# False/None: don't create RF
 
 #### P or S ####
 # put string either "P" or "S" - case-sensitive
@@ -24,7 +24,7 @@ phase = "S"
 
 #### Rotation ####
 # "RTZ","LQT","PSS" latter is not implemented yet
-rot = "LQT"
+rot = "PSS"
 
 #### DIRECTORY CONFIGURATION
 lith1 = '/home/pm/LITHO1.0/bin/access_litho'  # location of lith1 file
@@ -39,8 +39,8 @@ evtloc = "event_catalogues"
 ###### EVENT VALUES ######
 # Set values to "None" if they aren't requried / desired
 # Time frame is identical to the station inventory
-starttime = UTCDateTime("2004-04-25")
-endtime = UTCDateTime("2008-01-02")
+starttime = UTCDateTime("1988-01-01")
+endtime = UTCDateTime("2019-01-10")
 eMINLAT = -90
 eMAXLAT = 90
 eMINLON = -180
@@ -85,7 +85,7 @@ if phase == "P":
     ta = 120
 elif phase == "S":
     tz = 120
-    ta = 30
+    ta = 120
 
 taper_perc = 0.05  # max taping percentage - float (0.05)
 taper_type = 'hann'

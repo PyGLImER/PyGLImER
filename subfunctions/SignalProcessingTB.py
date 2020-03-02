@@ -116,7 +116,7 @@ def rotate_PSV(statlat, statlon, rayp, st):
     INPUT:
         statlat: station latitude
         statlon: station longitude
-        rayp: rayparameter in s/m
+        rayp: rayparameter in s/m (i.e. horizontal slowness)
         st: stream in RTZ"""
     x = subprocess.Popen([config.lith1, "-p", str(statlat),
                           str(statlon)], stdout=subprocess.PIPE)
@@ -138,7 +138,7 @@ def rotate_PSV(statlat, statlon, rayp, st):
         name.append(item[-1])  # name of the boundary
 
     # build weighted average for upper 15km
-    maxd = 10e3
+    maxd = 15e3
     for ii, item in enumerate(depth):
         if item <= maxd:
             break
@@ -148,33 +148,37 @@ def rotate_PSV(statlat, statlon, rayp, st):
     avs = np.multiply(vs[ii+1:], -np.diff(depth)[ii:])
     avs = sum(avs) + vs[ii]*(-np.diff(depth)[ii-1] + maxd - depth[ii-1])
     avs = avs/maxd
-    # 10.02: Ok, I checked the values for the rayp, avs, and avp. They
-    # seem alright. However, P and Sv do look almost identical.
 
-    # # Do the rotation as in Rondenay (2009)
-    # qa = np.sqrt(1/avp**2 - rayp**2)
-    # qb = np.sqrt(1/avs**2 - rayp**2)
-    # a = avs**2*rayp**2 - .5
-    # rotmat = np.array([[a/(avp*qa), rayp*avs**2/avp, 0],
-    #                    [rayp*avs, -a/(avs*qb), 0],
-    #                    [0, 0, 0.5]])
+    # Do the rotation as in Rondenay (2009)
+    # Note that in contrast to the paper the z-components have to be
+    # negated as it uses a definition, where depth is positive
+    qa = np.sqrt(1/avp**2 - rayp**2)
+    qb = np.sqrt(1/avs**2 - rayp**2)
+    a = avs**2*rayp**2 - .5
+    rotmat = np.array([[-a/(avp*qa), rayp*avs**2/avp, 0],
+                        [-rayp*avs, -a/(avs*qb), 0],
+                        [0, 0, 0.5]])
 
 
     # Bostock (1999)
-    qa = np.sqrt(1/avp**2 - rayp**2)
-    qb = np.sqrt(1/avs**2 - rayp**2)
-    Delta = 1 - 4*rayp**2*avs**2 + 4*rayp**4*avs**4 + 4*avs**4*rayp**2*qa*qb
-    rotmat = np.array([[-2*avp*qa*(1 - 2*rayp**2*avs**2)/Delta,
-                        4*avp*avs**2*rayp*qa*qb/Delta, 0],
-                       [4*avs**3*rayp*qa*qb/Delta,
-                        2*avs*qb*(1-2*rayp**2*avs**2)/Delta, 0],
-                       [0, 0, .5]])
+    # That doesn't work
+    # qa = np.sqrt(1/avp**2 - rayp**2)
+    # qb = np.sqrt(1/avs**2 - rayp**2)
+    # Delta = 1 - 4*rayp**2*avs**2 + 4*rayp**4*avs**4 + 4*avs**4*rayp**2*qa*qb
+    # rotmat = np.array([[-2*avp*qa*(1 - 2*rayp**2*avs**2)/Delta,
+    #                     4*avp*avs**2*rayp*qa*qb/Delta, 0],
+    #                    [4*avs**3*rayp*qa*qb/Delta,
+    #                     2*avs*qb*(1-2*rayp**2*avs**2)/Delta, 0],
+    #                    [0, 0, .5]])
     # 1. Find which component is which one and put them in a dict
     stream = {
         st[0].stats.channel[2]: st[0].data,
         st[1].stats.channel[2]: st[1].data,
         st[2].stats.channel[2]: st[2].data}
     PSvSh = st.copy()
+    # Filter
+    if config.phase == "S":
+        PSvSh.filter('bandpass', freqmin=.03, freqmax=.33, zerophase=True)
     del st
     # create input matrix, Z component is sometimes called 3
     if "Z" in stream:
@@ -246,7 +250,7 @@ def rotate_LQT(st):
     # this:
     if config.phase == "S":
         ews = 1
-        ewe = 10
+        ewe = 5
     elif config.phase == "P":
         ews = 1
         ewe = 8

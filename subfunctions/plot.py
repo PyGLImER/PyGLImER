@@ -3,7 +3,8 @@
 """
 Created on Sat Feb 22 11:50:58 2020
 
-Module to plot waveforms from receiver functions
+Module to plot waveforms from receiver functions.
+Has to be started with working directory as upper directory of GLImER
 @author: pm
 """
 import os
@@ -21,7 +22,7 @@ import subprocess
 # plotting properties
 # dirFile = os.path.dirname('main.py')
 
-plt.style.use('PaperDoubleFig.mplstyle')
+plt.style.use('data/PaperDoubleFig.mplstyle')
 # Make some style choices for plotting
 colourWheel = ['#329932', '#ff6961', 'b', '#6a3d9a', '#fb9a99', '#e31a1c',
                '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99',
@@ -50,7 +51,11 @@ def plot_all_RF(phase, network, station, TAT=config.tz, dpi=300):
         if file[:4] == "info":   # Skip the info files, they are none for RF
             # but doesn't hurt
             continue
-        RF = read(inloc + file)
+        try:
+            RF = read(inloc + file)
+        except IsADirectoryError as e:
+            print(e)
+            continue
         dt = RF[0].stats.delta
         N = RF[0].stats.npts
         y = RF[0].data
@@ -61,30 +66,46 @@ def plot_all_RF(phase, network, station, TAT=config.tz, dpi=300):
         else:
             TATp = TAT
         # shorten vector
-        y = y[:round((TATp+50)/dt)]
+            
+        # y = y[:round((TATp+50)/dt)]
         # create time vector
-        t = np.linspace(0-TATp, 50, len(y))
+        t = np.linspace(0-TATp, config.ta, len(y))
         plt.close('all')
         fig = plt.figure()
         fig, ax = plt.subplots(1, 1, sharex=True)
-        ax.axvline(color='r')  # should plot at x = 0
-        ax.plot(t, y, color="k")
-        ax.set_ylabel('normalised Amplitude')
-        ax.set_xlabel('time in s')
+        # Move left y-axis and bottim x-axis to centre, passing through (0,0)
+        ax.spines['bottom'].set_position("center")
+        ax.spines['left'].set_visible(False)
+        
+        # Eliminate upper and right axes
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+        
+        # Show ticks in the left and lower axes only
+        ax.xaxis.set_ticks_position('bottom')
+        # ax.axvline(color='r')  # should plot at x = 0
+        ax.plot(t, y, color="k", linewidth=1.5)
+        # ax.set_ylabel('normalised Amplitude')
+        ax.set_ylabel('time in s')
+        # ax.set_position([.5, .5, .1, .1])
         x = ax
-        x.set_xlim(-20, 50)
-        x.yaxis.set_major_formatter(ScalarFormatter())
-        x.yaxis.major.formatter._useMathText = True
+        x.set_xlim(0, 30)
+        x.set_ylim(-0.6, .6)
         x.xaxis.set_major_formatter(ScalarFormatter())
+        x.yaxis.major.formatter._useMathText = True
+        x.yaxis.set_major_formatter(plt.NullFormatter())
         x.xaxis.major.formatter._useMathText = True
         x.yaxis.set_minor_locator(AutoMinorLocator(5))
         x.xaxis.set_minor_locator(AutoMinorLocator(5))
-        plt.grid(color='c', which="both", linewidth=.25)
+        x.tick_params(axis ='y', which ='both', length = 0)
+        # plt.grid(color='c', which="both", linewidth=.25)
         # x.yaxis.set_label_coords(0.63, 1.01)
-        x.yaxis.tick_right()
+        # x.yaxis.tick_right()
         # ax.legend(frameon=False, loc='upper left', ncol=2, handlelength=4)
         # plt.legend(['it_max=4000', 'it_max=400'])
         plt.savefig(os.path.join(outloc + file[:-5] + "pdf"), dpi=dpi)
+        # ax.xaxis.set_ticks_position('left')
+
 
 
 def plot_all_wav(phase, network, station, TAT=config.tz, dpi=300):
@@ -106,7 +127,11 @@ def plot_all_wav(phase, network, station, TAT=config.tz, dpi=300):
     for file in os.listdir(inloc):
         if file[:4] == "info":  # Skip the info files
             continue
-        st = read(inloc + file)
+        try:
+            st = read(inloc + file)
+        except IsADirectoryError as e:
+            print(e)
+            continue
         dt = st[0].stats.delta
         N = st[0].stats.npts
         y = []
@@ -114,35 +139,38 @@ def plot_all_wav(phase, network, station, TAT=config.tz, dpi=300):
         for tr in st:
             y.append(tr.data)
             ch.append(tr.stats.channel[2])
-        if phase == "S":  # flip trace
-            y = np.flip(y)
-            # y = -y  # polarity
-            TATp = (N-1)*dt - TAT
-        else:
-            TATp = TAT
+        # if phase == "S":  # flip trace
+        #     y = np.flip(y)
+        #     # y = -y  # polarity
+        #     TATp = (N-1)*dt - TAT
+        # else:
+        TATp = TAT
         # shorten vector
-        y = y[:][:round((TATp+50)/dt)]
+        # y = y[:][:round((TATp+50)/dt)]
         # create time vector
-        t = np.linspace(0-TATp, 50, len(y[0]))
+        t = np.linspace(-TATp, config.ta, len(y[0]))
         plt.close('all')
         fig = plt.figure()
-        fig, ax = plt.subplots(3, 1, sharex=True)
-        ax[2].set_xlabel('time in s')
-        ax[1].set_ylabel('normalised Amplitude')
+        fig, ax = plt.subplots(1, 3, sharex=True, sharey=True,
+                               gridspec_kw={'wspace': 0})
+        # ax[0].set_ylabel('time in s')
+        # ax[1].set_ylabel('normalised Amplitude')
         for ii, x in enumerate(ax):
-            x.plot(t, y[ii][:], color="k")
-            x.axvline(color='r')
-            x.set_xlim(-20, 50)
+            x.plot(y[ii][:], t, color="k", linewidth=1.5)
+            # x.axvline(color='r')
             x.set_title(ch[ii])
-            x.yaxis.set_major_formatter(ScalarFormatter())
+            x.xaxis.set_major_formatter(plt.NullFormatter())
             x.yaxis.major.formatter._useMathText = True
-            x.xaxis.set_major_formatter(ScalarFormatter())
+            x.yaxis.set_major_formatter(ScalarFormatter())
             x.xaxis.major.formatter._useMathText = True
             x.yaxis.set_minor_locator(AutoMinorLocator(5))
             x.xaxis.set_minor_locator(AutoMinorLocator(5))
-            # x.yaxis.set_label_coords(0.63, 1.01)
-            x.yaxis.tick_right()
-            x.grid(color='c', which='both', linewidth=.25)
-        # ax.legend(frameon=False, loc='upper left', ncol=2, handlelength=4)
-        # plt.legend(['it_max=4000', 'it_max=400'])
+            x.set_ylim(-100, 50)
+            # x.yticks([])
+            x.tick_params(axis ='x', which ='both', length = 0)
+            x.label_outer()
+        #     # x.yaxis.set_label_coords(0.63, 1.01)
+        #     # x.grid(color='c', which='both', linewidth=.25)
+        #             # ax.legend(frameon=False, loc='upper left', ncol=2, handlelength=4)
+        # # plt.legend(['it_max=4000', 'it_max=400'])
         plt.savefig(os.path.join(outloc + file[:-5] + "pdf"), dpi=dpi)
