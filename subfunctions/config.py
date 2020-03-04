@@ -24,7 +24,7 @@ phase = "S"
 
 #### Rotation ####
 # "RTZ","LQT","PSS" latter is not implemented yet
-rot = "PSS"
+rot = "RTZ"
 
 #### DIRECTORY CONFIGURATION
 lith1 = '/home/pm/LITHO1.0/bin/access_litho'  # location of lith1 file

@@ -118,6 +118,9 @@ def rotate_PSV(statlat, statlon, rayp, st):
         statlon: station longitude
         rayp: rayparameter in s/m (i.e. horizontal slowness)
         st: stream in RTZ"""
+    # Filter
+    if config.phase == "S":
+        st.filter('bandpass', freqmin=.03, freqmax=.33, zerophase=True)
     x = subprocess.Popen([config.lith1, "-p", str(statlat),
                           str(statlon)], stdout=subprocess.PIPE)
     ls = str(x.stdout.read()).split("\\n")  # save the output
@@ -176,9 +179,6 @@ def rotate_PSV(statlat, statlon, rayp, st):
         st[1].stats.channel[2]: st[1].data,
         st[2].stats.channel[2]: st[2].data}
     PSvSh = st.copy()
-    # Filter
-    if config.phase == "S":
-        PSvSh.filter('bandpass', freqmin=.03, freqmax=.33, zerophase=True)
     del st
     # create input matrix, Z component is sometimes called 3
     if "Z" in stream:

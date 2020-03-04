@@ -11,3 +11,5 @@ figures/
 *cache*
 *.png
 *rating*
+*info*
+*.tr
