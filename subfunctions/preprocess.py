@@ -231,7 +231,7 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                         if len(st) < 3:
                             raise Exception("The stream contains less than three traces")
                                                                              
-                        # clip to according length
+                        # trim to according length
                         st.trim(starttime = starttime, endtime = endtime)
                         
                     ###### DEMEAN AND DETREND #########
@@ -332,103 +332,19 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                                             stream["T"])
                             del stream
 
-
-                    ##### SNR CRITERIA #####
-                        # 04.02.2020: 
-                        # Now, as I start implementing S receiver functions I will have to figure criteria to put here
-
-                        # according to the original Matlab script, we will be workng with several bandpass (low-cut) filters to evaluate the SNR
-                        # Then, the SNR will be evaluated for each of the traces and the traces will be accepted or rejected depending on their SNR.
-                        
-                        #create stream dictionary
-                        # stream = {
-                        #         st[0].stats.channel[2]: st[0].data,
-                        #         st[1].stats.channel[2]: st[1].data,
-                        #         st[2].stats.channel[2]: st[2].data}
-
-                        # 25.08.2019
-                        # 
-                        
-                        dt = st[0].stats.delta #sampling interval
+                    # SNR CRITERIA
+                        dt = st[0].stats.delta  # sampling interval
                         sampling_f = st[0].stats.sampling_rate
-                        
+
                         if config.phase == "P":
-                        # noise
-                            # Create stream dict
-                            stream = {}
-                            for tr in st:
-                                stream[tr.stats.channel[2]] = tr.data
-                            ptn1 = round(5/dt)
-                            ptn2 = round((config.tz-5)/dt)
-                            nptn = ptn2-ptn1+1
-                            # First part of the signal
-                            pts1 = round(config.tz/dt)
-                            pts2 = round((config.tz+7.5)/dt)
-                            npts = pts2-pts1+1;
-                            # Second part of the signal
-                            ptp1 = round((config.tz+15)/dt)
-                            ptp2 = round((config.tz+22.5)/dt)
-                            nptp = ptp2-ptp1+1
-
-                            # Then, I'll have to filter in the for-loop
-                            # and calculate the SNR
-
-                            # matrix to save SNR
-                            noisemat = np.zeros((len(config.lowco),
-                                                 3), dtype=float)
-                            
-                            for ii,f in enumerate(config.lowco):
-                                ftcomp = filter.bandpass(stream[T], f,4.99, sampling_f, corners=4, zerophase=True)
-                                frcomp = filter.bandpass(stream[S], f,4.99, sampling_f, corners=4, zerophase=True)
-                                if "Z" in stream:
-                                    fzcomp = filter.bandpass(stream["Z"], f,4.99, sampling_f, corners=4, zerophase=True)      
-                                elif "3" in stream:
-                                    fzcomp = filter.bandpass(stream["3"], f,4.99, sampling_f, corners=4, zerophase=True)
-                                else:
-                                    fzcomp = filter.bandpass(stream[P], f,4.99, sampling_f, corners=4, zerophase=True)
-                                # Compute the SNR for given frequency bands
-                                snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
-                                snrr2 = (sum(np.square(frcomp[ptp1:ptp2]))/nptp)/(sum(np.square(frcomp[ptn1:ptn2]))/nptn)
-                                snrz = (sum(np.square(fzcomp[pts1:pts2]))/npts)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
-                               # snrz2 = (sum(np.square(fzcomp[ptp1:ptp2]))/nptp)/(sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
-                                #snrz2 is not used (yet), so I commented it
-                                
-                                # Reject or accept traces depending on their SNR
-                                # #1: snr1 > 10 (30-37.5s, near P)
-                                # snr2/snr1 < 1 (where snr2 is 45-52.5 s, in the coda of P)
-                                # note: - next possibility might be to remove those events that
-                                # generate high snr between 200-250 s
-                                
-                                noisemat[ii,0] = snrr
-                                noisemat[ii,1] = snrr2/snrr
-                                noisemat[ii,2] = snrz
-                                
-                                if snrr > config.SNR_criteria[0] and snrr2/snrr < config.SNR_criteria[1] and snrz > config.SNR_criteria[2]: #accept
-                                    crit = True
-                                    # overwrite the old traces with the sucessfully filtered ones
-                                    # st[0].data = ftcomp
-                                    # st[1].data = frcomp
-                                    # st[2].data = fzcomp
-                                for tr in st:
-                                    if tr.stats.channel[2] == R:
-                                        tr.data = frcomp
-                                    elif tr.stats.channel[2] == "Z"\
-                                        or tr.stats.channel[2] == "3" or\
-                                            tr.stats.channel[2] == Z:
-                                        tr.data = fzcomp
-                                    elif tr.stats.channel[2] == T:
-                                        tr.data = ftcomp
-                                        
-                                break  # waveform is accepted
-                            
+                            st, crit, f, noisemat = QC_P(st, dt, sampling_f)
                             if not crit:
                                 raise SNRError(noisemat)
-                                
-                        elif config.phase=="S": #This is where later the criteria for SP receiver functions have to be defined
-                            noisemat = None #just so it doesn't rise an error
-                            crit = True
-                            f = None
-
+                        elif config.phase == "S":
+                            st, crit, f, noisemat = QC_S(st, dt, sampling_f)
+                            # crit, f, noisemat = None, None, None
+                            if not crit:
+                                raise SNRError(noisemat)
 
                         # Rotate to LQT or PSS
                         if config.rot == "LQT":
@@ -442,15 +358,6 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                                 station_inv[0][0][0].latitude,
                                 station_inv[0][0][0].longitude,
                                 rayp, st)
-                            # channel labels
-                        #     P = "P"
-                        #     S = "V"
-                        #     T = "H"
-                        # else:
-                        #     P = "Z"
-                        #     S = "R"
-                        #     T = "T"
-                        # write to new file
 
                         st.write(config.outputloc+'/by_station/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', format="MSEED") 
                         subprocess.call(["ln","-s",'../../by_station/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', config.outputloc+'/by_event/'+ot_fiss+'/'+network+station])
@@ -463,9 +370,8 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                                       ['rdelta', result["distance"]],
                                       ['rayp_s_deg', rayp_s_deg], ["onset", first_arrival],
                                       ['starttime', st[0].stats.starttime]]
-                        # ['T',st[0].data],['R',st[1].data],["Z",st[2].data],
-                        #append_info: put first key for dic then value. [key,value]
-                        
+                        #append_info: [key,value]
+
                         with shelve.open(config.outputloc + '/by_station/'+network+'/'+station+'/'+'info',writeback=True) as info:
                             # if not old_info:
                             #     # station specific parameters
@@ -559,7 +465,171 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                         logging.exception([network, station, ot_fiss])
     print("Download and preprocessing finished.")
 
-# Check if file is already preprocessed          
+
+def QC_P(st, dt, sampling_f):
+    """Quality control for the downloaded waveforms that are used to create
+    PRFS. Works with various filters and SNR criteria
+    INPUT:
+        st: input st to be checked
+        dt: sampling interval
+        sampling_f: sampling frequency"""
+    # Create stream dict to identify channels
+    stream = {}
+    for tr in st:
+        stream[tr.stats.channel[2]] = tr.data
+    ptn1 = round(5/dt)
+    ptn2 = round((config.tz-5)/dt)
+    nptn = ptn2-ptn1+1
+    # First part of the signal
+    pts1 = round(config.tz/dt)
+    pts2 = round((config.tz+7.5)/dt)
+    npts = pts2-pts1+1
+    # Second part of the signal
+    ptp1 = round((config.tz+15)/dt)
+    ptp2 = round((config.tz+22.5)/dt)
+    nptp = ptp2-ptp1+1
+
+    # Then, I'll have to filter in the for-loop
+    # and calculate the SNR
+
+    # matrix to save SNR
+    noisemat = np.zeros((len(config.lowco),
+                         3), dtype=float)
+
+    for ii, f in enumerate(config.lowco):
+        ftcomp = filter.bandpass(stream["T"], f,
+                                 4.99, sampling_f, corners=2, zerophase=True)
+        frcomp = filter.bandpass(stream["R"], f,
+                                 4.99, sampling_f, corners=2, zerophase=True)
+        if "Z" in stream:
+            fzcomp = filter.bandpass(stream["Z"], f, 4.99,
+                                     sampling_f, corners=2, zerophase=True)
+        elif "3" in stream:
+            fzcomp = filter.bandpass(stream["3"], f, 4.99,
+                                     sampling_f, corners=2, zerophase=True)
+
+        # Compute the SNR for given frequency bands
+        snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)\
+            / (sum(np.square(frcomp[ptn1:ptn2]))/nptn)
+        snrr2 = (sum(np.square(frcomp[ptp1:ptp2]))/nptp)\
+            / (sum(np.square(frcomp[ptn1:ptn2]))/nptn)
+        snrz = (sum(np.square(fzcomp[pts1:pts2]))/npts)\
+            / (sum(np.square(fzcomp[ptn1:ptn2]))/nptn)
+
+        # Reject or accept traces depending on their SNR
+        # #1: snr1 > 10 (30-37.5s, near P)
+        # snr2/snr1 < 1 (where snr2 is 45-52.5 s, in the coda of P)
+        # note: - next possibility might be to remove those events that
+        # generate high snr between 200-250 s
+
+        noisemat[ii, 0] = snrr
+        noisemat[ii, 1] = snrr2/snrr
+        noisemat[ii, 2] = snrz
+
+        if snrr > config.SNR_criteria[0] and\
+            snrr2/snrr < config.SNR_criteria[1] and\
+                snrz > config.SNR_criteria[2]:  # accept
+            crit = True
+            # overwrite the old traces with the sucessfully filtered ones
+
+            for tr in st:
+                if tr.stats.channel[2] == "R":
+                    tr.data = frcomp
+                elif tr.stats.channel[2] == "Z"\
+                    or tr.stats.channel[2] == "3" or\
+                        tr.stats.channel[2] == "Z":
+                    tr.data = fzcomp
+                elif tr.stats.channel[2] == "T":
+                    tr.data = ftcomp
+            break  # waveform is accepted
+        else:
+            crit = False
+    return st, crit, f, noisemat
+
+
+def QC_S(st, dt, sampling_f):
+    """Quality control for waveforms that are used to produce SRF. In contrast
+    to the ones used for PRF this is a very rigid criterion and will reject
+    >95% of the waveforms.
+    INPUT:
+        st: input stream, in RTZ
+        dt: sampling interval
+        sampling_f: sampling frequency"""
+    # Create stream dict to identify channels
+    stream = {}
+    for tr in st:
+        stream[tr.stats.channel[2]] = tr.data
+
+    ptn1 = round(5/dt)  # Hopefully relatively silent time
+    ptn2 = round((config.tz-50)/dt)
+    nptn = ptn2-ptn1+1
+    # First part of the signal
+    pts1 = round(config.tz/dt)  # theoretical arrival time
+    pts2 = round((config.tz+7.5)/dt)
+    npts = pts2-pts1+1
+    # Second part of the signal
+    ptp1 = round((config.tz+20)/dt)
+    ptp2 = round((config.tz+30)/dt)
+    nptp = ptp2-ptp1+1
+    # part where the Sp converted arrival should be strong
+    ptc1 = round((config.tz-30)/dt)
+    ptc2 = round((config.tz-10)/dt)
+    nptc = ptc1-ptc1+1
+    # filter
+    # matrix to save SNR
+    noisemat = np.zeros((len(config.lowco), 4), dtype=float)
+# At some point, I might also want to consider to change the lowcof
+    for ii, hf in enumerate(config.highco):
+        ftcomp = filter.bandpass(stream["T"], .03,
+                                 hf, sampling_f, corners=2, zerophase=True)
+        frcomp = filter.bandpass(stream["R"], .03,
+                                 hf, sampling_f, corners=2, zerophase=True)
+        if "Z" in stream:
+            fzcomp = filter.bandpass(stream["Z"], .03, hf,
+                                     sampling_f, corners=2, zerophase=True)
+        elif "3" in stream:
+            fzcomp = filter.bandpass(stream["3"], .03, hf,
+                                     sampling_f, corners=2, zerophase=True)
+
+        # Compute the SNR for given frequency bands
+        # strength of primary arrival
+        snrr = (sum(np.square(frcomp[pts1:pts2]))/npts)\
+            / (sum(np.square(frcomp[ptn1:ptn2]))/nptn)
+        # how spiky is the arrival?
+        snrr2 = (sum(np.square(frcomp[ptp1:ptp2]))/nptp)\
+            / (sum(np.square(frcomp[ptn1:ptn2]))/nptn)
+        # horizontal vs vertical
+        snrz = (sum(np.square(frcomp[pts1:pts2]))/npts)\
+            / (sum(np.square(fzcomp[pts1:pts2]))/npts)
+        snrc = (sum(np.square(frcomp[ptc1:ptc2]))/nptc)\
+            / sum(np.square(fzcomp[ptc1:ptc2])/nptc)
+
+        noisemat[ii, 0] = snrr
+        noisemat[ii, 1] = snrr2/snrr
+        noisemat[ii, 2] = snrz
+        noisemat[ii, 3] = snrc
+
+        if snrr > config.SNR_criteria[0] and\
+            snrr2/snrr < config.SNR_criteria[1] and\
+                snrz > config.SNR_criteria[2] and\
+                    snrc < config.SNR_criteria[3]:  # accept
+            crit = True
+            # overwrite the old traces with the sucessfully filtered ones
+            for tr in st:
+                if tr.stats.channel[2] == "R":
+                    tr.data = frcomp
+                elif tr.stats.channel[2] == "Z"\
+                    or tr.stats.channel[2] == "3" or\
+                        tr.stats.channel[2] == "Z":
+                    tr.data = fzcomp
+                elif tr.stats.channel[2] == "T":
+                    tr.data = ftcomp
+            break  # waveform is accepted
+        else:
+            crit = False
+    return st, crit, hf, noisemat
+
+
 def file_in_db(loc, filename):
     """Checks if file "filename" is already in location "loc"."""
     path = Path(loc+"/"+filename)
@@ -569,13 +639,32 @@ def file_in_db(loc, filename):
         return False
 
 
-
-# program-specific Exceptions 
+# program-specific Exceptions
 class SNRError(Exception):
-   """raised when the SNR is too high"""
-   # Constructor method
-   def __init__(self, value):
-      self.value = value
-   # __str__ display function
-   def __str__(self):
-      return(repr(self.value))
+    """raised when the SNR is too high"""
+    # Constructor method
+
+    def __init__(self, value):
+        self.value = value
+    # __str__ display function
+
+    def __str__(self):
+        return(repr(self.value))
+
+
+def test_SNR(network, station, phase=config.phase):
+    noisematls = []
+    critls = []
+    loc = config.outputloc[:-1] + phase + '/by_station/' + \
+        network + '/' + station
+    for file in os.listdir(loc):
+        try:
+            st = read(loc + '/' + file)
+        except IsADirectoryError:
+            continue
+        dt = st[0].stats.delta
+        sampling_rate = st[0].stats.sampling_rate
+        _, crit, _, noisemat = QC_S(st, dt, sampling_rate)
+        noisematls.append(noisemat)
+        critls.append(crit)
+    return noisematls, critls

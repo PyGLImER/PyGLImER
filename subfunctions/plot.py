@@ -33,7 +33,7 @@ colourWheel = ['#329932', '#ff6961', 'b', '#6a3d9a', '#fb9a99', '#e31a1c',
 dashesStyles = [[3, 1], [1000, 1], [2, 1, 10, 1], [4, 1, 1, 1, 1, 1]]
 
 
-def plot_all_RF(phase, network, station, TAT=config.tz, dpi=300):
+def plot_all_RF(network, station, phase=config.phase, TAT=config.tz, dpi=300):
     """Plots all receiver functions in config.outputloc until 50s after
     first arrival.
     INPUT:
@@ -166,7 +166,7 @@ def plot_all_wav(phase, network, station, TAT=config.tz, dpi=300):
             x.xaxis.major.formatter._useMathText = True
             x.yaxis.set_minor_locator(AutoMinorLocator(5))
             x.xaxis.set_minor_locator(AutoMinorLocator(5))
-            x.set_ylim(-100, 50)
+            x.set_ylim(-100, 100)
             # x.yticks([])
             x.tick_params(axis ='x', which ='both', length = 0)
             x.label_outer()
@@ -216,5 +216,5 @@ def plot_stack(network, station, dpi=300, phase=config.phase):
     # x.yaxis.tick_right()
     # ax.legend(frameon=False, loc='upper left', ncol=2, handlelength=4)
     # plt.legend(['it_max=4000', 'it_max=400'])
-    plt.savefig(os.path.join(outloc + station[:-2] + "pdf"), dpi=dpi)
+    plt.savefig(os.path.join(outloc + station[:-2] + ".pdf"), dpi=dpi)
     # ax.xaxis.set_ticks_position('left')

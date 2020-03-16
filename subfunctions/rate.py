@@ -19,6 +19,10 @@ from subfunctions import config
 import subprocess
 import shelve
 import time
+from subfunctions.preprocess import QC_S
+from subfunctions.createRF import createRF
+from subfunctions.plot import plot_stack
+from subfunctions.SignalProcessingTB import rotate_PSV, rotate_LQT
 
 rating = {}  # mutable object
 
@@ -130,3 +134,95 @@ def sort_rated(network, station, phase=config.phase):
         if starttime in dic:
             subprocess.call(["cp", inloc + file, inloc + dic[starttime] + '/'
                              + file])
+
+
+def automatic_rate(network, station, phase="S"):
+    """Check the automatic QC criteria for SRF waveforms."""
+    inloc = config.outputloc[:-1] + phase + "/by_station/" + network +\
+        '/' + station + '/'
+    diff = 0
+    ret = 0
+    sts = []
+    crits = []
+    for file in os.listdir(inloc):
+        if file[:4] == "info":   # Skip the info files
+            continue
+        try:
+            st = read(inloc + file)
+        except IsADirectoryError as e:
+            print(e)
+            continue
+        starttime = str(st[0].stats.starttime)
+        st, crit, hf, noisemat = QC_S(st, st[0].stats.delta,
+                                      st[0].stats.sampling_rate)
+        with shelve.open(network + "." + station + "rating") as f:
+            f[starttime + "_auto"] = crit
+            if int(f[starttime]) < 3 and crit:
+                diff = diff + 1
+            if crit:
+                ret = ret + 1
+        sts.append(st)
+        crits.append(crit)
+    return diff, ret, sts, crits
+
+
+def sort_auto_rated(network, station, phase=config.phase):
+    """Puts all retained RF and waveforms in a folder"""
+    inloc = config.outputloc[:-1] + phase + "/by_station/" + network +\
+        '/' + station + '/'
+    inloc_RF = config.RF[:-1] + phase + '/' + network + '/' + station + '/'
+    subprocess.call(["mkdir", "-p", inloc + "ret"])
+    subprocess.call(["mkdir", "-p", inloc_RF + "ret"])
+    dic = shelve.open(network + "." + station + "rating")
+    for file in os.listdir(inloc):
+        if file[:4] == "info":   # Skip the info files
+            continue
+        try:
+            st = read(inloc + file)
+        except IsADirectoryError as e:
+            print(e)
+            continue
+        starttime = str(st[0].stats.starttime) + "_auto"
+        if starttime in dic and dic[starttime]:
+            subprocess.call(["cp", inloc + file, inloc + 'ret/' + file])
+            subprocess.call(["cp", inloc + file, inloc_RF + 'ret/' + file])
+
+
+def auto_rate_stack(network, station, phase=config.phase):
+    """Does a quality control on the downloaded files and shows a plot of the
+    stacked receiver function. Rotation into PSS. Just meant to facilitate
+    the decision for QC parameters (config.SNR_criteria).
+    Returns:
+        diff: number of files that were retained but not rated 3 or 4 in
+        manual QC.
+        ret: number of retained files"""
+    diff, ret, sts, crits = automatic_rate(network, station, phase)
+    sort_auto_rated(network, station, phase)
+    info_file = config.outputloc[:-1] + phase + '/by_station/' + network + \
+        '/' + station + '/info'
+    with shelve.open(info_file) as info:
+        statlat = info["statlat"]
+        statlon = info["statlon"]
+    outloc = config.RF[:-1] + phase + '/' + network + '/' + station + '/test/'
+    if Path(outloc).is_dir():
+        subprocess.call(['rm', '-rf', outloc])
+    subprocess.call(['mkdir', '-p', outloc])
+    for jj, st in enumerate(sts):
+        if not crits[jj]:
+            continue
+        dt = st[0].stats.delta
+        with shelve.open(info_file) as info:
+            ii = info["starttime"].index(st[0].stats.starttime)
+            rayp = info["rayp_s_deg"][ii]/111319.9
+            ot = info["ot_ret"][ii]
+        # _, _, st = rotate_PSV(statlat, statlon, rayp, st)
+        st = rotate_LQT(st)
+        RF = createRF(st, dt)
+        RF.write(outloc + ot + '.mseed', format="MSEED")
+    print("N files that were not 3/4: ", diff, "N retained: ", ret)
+    subprocess.call(['cp', info_file+'.bak', outloc])
+    subprocess.call(['cp', info_file+'.dir', outloc])
+    subprocess.call(['cp', info_file+'.dat', outloc])
+    sta = station + "/test"
+    plot_stack(network, sta, phase=phase)
+    return diff, ret

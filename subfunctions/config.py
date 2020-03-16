@@ -19,12 +19,14 @@ decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999),
 # False/None: don't create RF
 
 #### P or S ####
-# put string either "P" or "S" - case-sensitive
+# put string either "P" or "S" 
 phase = "S"
+# don't change
+phase = phase.upper()
 
 #### Rotation ####
-# "RTZ","LQT","PSS" latter is not implemented yet
-rot = "RTZ"
+# "RTZ","LQT","PSS"
+rot = "LQT"
 
 #### DIRECTORY CONFIGURATION
 lith1 = '/home/pm/LITHO1.0/bin/access_litho'  # location of lith1 file
@@ -45,7 +47,10 @@ eMINLAT = -90
 eMAXLAT = 90
 eMINLON = -180
 eMAXLON = 180
-minMag = 5.5
+if phase == "P":
+    minMag = 5.5
+elif phase == "S":
+    minMag = 5.8
 maxMag = 10.0
 
 # epicentral distances:
@@ -95,10 +100,14 @@ taper_type = 'hann'
 # type = string                 ('hann')
 
 # low-cut-off frequencies for SNR check
-lowco = [0.03, 0.1, 0.5]
+lowco = [.03, .1, .5]  # only for PRF
+highco = [.5, .33, .25]  # only for SRF
 
 # SNR criteria
-SNR_criteria = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
-
+if phase == "P":
+    SNR_criteria = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
+elif phase == "S":
+    SNR_criteria = [10, .2, 2, .5]  # [primary/noise, sidelobe/primary,
+    # r/z(primary), r/z conversions]
 ###### DON'T change program will change automatically. #################
 folder = "undefined"  # the download is happening here right now
