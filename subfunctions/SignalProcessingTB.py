@@ -140,7 +140,7 @@ def rotate_PSV(statlat, statlon, rayp, st):
         vs.append(float(item[3]))  # m/
         name.append(item[-1])  # name of the boundary
 
-    # build weighted average for upper 15km
+    # build weighted average for upper 15km -10
     maxd = 15e3
     for ii, item in enumerate(depth):
         if item <= maxd:
@@ -214,20 +214,20 @@ def rotate_LQT(st):
         LQT: stream in LQT"""
     dt = st[0].stats.delta  # sampling interval
     LQT = st.copy()
-    # Filter
-    if config.phase == "S":
-        LQT.filter('bandpass', freqmin=.03, freqmax=.33, zerophase=True)
+    LQT.normalize()
+    # Filter - is now down before
+    # if config.phase == "S":
+    #     LQT.filter('bandpass', freqmin=.03, freqmax=.33, zerophase=True)
     del st
 
     # only check around phase-arrival
-    tas = config.tz/dt  # theoretical arrival sample
     # window
     if config.phase == "S":
-        ws = round(tas - 3/dt)
-        we = round(tas + 15/dt)
+        ws = round((config.tz-3)/dt)
+        we = round((config.tz+5)/dt)
     elif config.phase == "P":
-        ws = round(tas - 5/dt)
-        we = round(tas + 5/dt)
+        ws = round((config.tz-5)/dt)
+        we = round((config.tz+5)/dt)
     # 1. Find which component is which one and put them in a dict
     stream = {
         LQT[0].stats.channel[2]: LQT[0].data,
@@ -248,20 +248,32 @@ def rotate_LQT(st):
     # Note: the energy window has to be different otherwise the normalized
     # traces sometimes have the energy 1 over the whole time, should work like
     # this:
-    if config.phase == "S":
-        ews = 1
-        ewe = 5
-    elif config.phase == "P":
-        ews = 1
-        ewe = 8
-    a = np.sum(np.square(vh[0, round(ews/dt):round(ewe/dt)]))
-    b = np.sum(np.square(vh[1, round(ews/dt):round(ewe/dt)]))
+    # if config.phase == "S":
+    #     ews = 1
+    #     ewe = 5
+    # elif config.phase == "P":
+    #     ews = 1
+    #     ewe = 8
+    # a = np.sum(np.square(vh[0])  # , round(ews/dt):round(ewe/dt)]))
+    # b = np.sum(np.square(vh[1]  # , round(ews/dt):round(ewe/dt)]))
     A_rot = np.linalg.inv(np.dot(u, np.diag(s)))
     LQ = np.dot(A_rot, ZR)
-    if a > b and config.phase == "S" or a < b and config.phase == "P":
+    # point of primary arrival
+    pp1 = round((config.tz-2)/dt)
+    pp2 = round((config.tz+20)/dt)
+    npp = pp2 - pp1 + 1
+    # point where converted Sp arrive
+    pc1 = round((config.tz-40)/dt)
+    pc2 = round((config.tz-15)/dt)
+    npc = pc2 - pc1 + 1
+    a = np.sum(np.square(LQ[0][pp1:pp2])/npp) /\
+        np.sum(np.square(LQ[0][pc1:pc2])/npc)
+    b = np.sum(np.square(LQ[1][pp1:pp2])/npp) /\
+        np.sum(np.square(LQ[1][pc1:pc2])/npc)
+    if a > b:# and config.phase == "S" or a < b and config.phase == "P":
         Q = LQ[0]
         L = LQ[1]
-    elif a < b and config.phase == "S" or a > b and config.phase == "P":
+    elif a < b:# and config.phase == "S" or a > b and config.phase == "P":
         Q = LQ[1]
         L = LQ[0]
 
@@ -273,5 +285,5 @@ def rotate_LQT(st):
         elif tr.stats.channel[2] == "Z" or tr.stats.channel[2] == "3":
             tr.stats.channel = tr.stats.channel[0:2] + "L"
             tr.data = L
-    LQT.normalize()
-    return LQT
+    # LQT.normalize()
+    return LQT, a/b

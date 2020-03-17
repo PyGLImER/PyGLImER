@@ -608,11 +608,14 @@ def QC_S(st, dt, sampling_f):
         noisemat[ii, 1] = snrr2/snrr
         noisemat[ii, 2] = snrz
         noisemat[ii, 3] = snrc
-
+# accept if
         if snrr > config.SNR_criteria[0] and\
             snrr2/snrr < config.SNR_criteria[1] and\
-                snrz > config.SNR_criteria[2] and\
-                    snrc < config.SNR_criteria[3]:  # accept
+            snrz > config.SNR_criteria[2] and\
+                snrc < config.SNR_criteria[3]:
+            # This bit didn't give good results
+            # max(frcomp) == max(frcomp[round((config.tz-2)/dt):
+            #                           round((config.tz+10)/dt)]):
             crit = True
             # overwrite the old traces with the sucessfully filtered ones
             for tr in st:

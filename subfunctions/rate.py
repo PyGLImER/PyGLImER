@@ -216,7 +216,10 @@ def auto_rate_stack(network, station, phase=config.phase):
             rayp = info["rayp_s_deg"][ii]/111319.9
             ot = info["ot_ret"][ii]
         # _, _, st = rotate_PSV(statlat, statlon, rayp, st)
-        st = rotate_LQT(st)
+        st, rat = rotate_LQT(st)
+        if rat > 0.5 and rat < 2:  # The PCA did not work properly, L & Q too similar
+            ret = ret - 1
+            continue
         RF = createRF(st, dt)
         RF.write(outloc + ot + '.mseed', format="MSEED")
     print("N files that were not 3/4: ", diff, "N retained: ", ret)
