@@ -261,11 +261,11 @@ def rotate_LQT(st):
     # point of primary arrival
     pp1 = round((config.tz-2)/dt)
     pp2 = round((config.tz+20)/dt)
-    npp = pp2 - pp1 + 1
+    npp = pp2 - pp1
     # point where converted Sp arrive
     pc1 = round((config.tz-40)/dt)
     pc2 = round((config.tz-15)/dt)
-    npc = pc2 - pc1 + 1
+    npc = pc2 - pc1
     a = np.sum(np.square(LQ[0][pp1:pp2])/npp) /\
         np.sum(np.square(LQ[0][pc1:pc2])/npc)
     b = np.sum(np.square(LQ[1][pp1:pp2])/npp) /\
@@ -287,3 +287,54 @@ def rotate_LQT(st):
             tr.data = L
     # LQT.normalize()
     return LQT, a/b
+
+
+def rotate_LQT_min(st, phase=config.phase):
+    """Rotates stream to LQT by minimising the energy of the S-wave primary
+    arrival on the L component (SRF) or maximising the primary arrival
+    energy on L (PRF)."""
+    dt = st[0].stats.delta
+    # point of primary arrival
+    pp1 = round((config.tz-2)/dt)
+    pp2 = round((config.tz+10)/dt)
+    npp = pp2 - pp1
+    LQT = st.copy()
+    LQT.normalize()
+    del st
+    # identify components
+    stream = {
+        LQT[0].stats.channel[2]: LQT[0].data,
+        LQT[1].stats.channel[2]: LQT[1].data,
+        LQT[2].stats.channel[2]: LQT[2].data}
+    if "Z" in stream:
+        ZR = np.array([stream["Z"], stream["R"]])
+    elif "3" in stream:
+        ZR = np.array([stream["3"], stream["R"]])
+    # calculate energy of the two components around zero
+    # E_ZR = np.sum(np.square(ZR[:, pp1:pp2]), axis=1)/npp
+    ia = np.linspace(0, np.pi/2, num=360)  # incidence angle
+    E_L = []
+    for ii in ia:
+        A_rot = np.array([[np.cos(ii), np.sin(ii)],
+                          [-np.sin(ii), np.cos(ii)]])
+        LQ = np.dot(A_rot, ZR[:, pp1:pp2])
+        # E_LQ = np.dot(A_rot, E_ZR)
+        E_LQ = np.sum(np.square(LQ), axis=1)
+        E_L.append(E_LQ[0]/E_LQ[1])
+    if phase == "S":
+        ii = E_L.index(min(E_L))
+    elif phase == "P":
+        ii = E_L.index(max(E_L))
+    ia = ia[ii]
+    A_rot = np.array([[np.cos(ia), np.sin(ia)],
+                      [-np.sin(ia), np.cos(ia)]])
+    LQ = np.dot(A_rot, ZR)
+    # 3. save L and Q trace and change the label of the stream
+    for tr in LQT:
+        if tr.stats.channel[2] == "R":
+            tr.stats.channel = tr.stats.channel[0:2] + "Q"
+            tr.data = LQ[1]
+        elif tr.stats.channel[2] == "Z" or tr.stats.channel[2] == "3":
+            tr.stats.channel = tr.stats.channel[0:2] + "L"
+            tr.data = LQ[0]
+    return LQT, ia*180/np.pi

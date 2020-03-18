@@ -10,7 +10,7 @@ toolset to create RFs and RF stacks
 
 import numpy as np
 from subfunctions import config
-from subfunctions.deconvolve import it, damped
+from subfunctions.deconvolve import it, damped, waterlevel
 import subfunctions.config
 from obspy import read
 import shelve
@@ -63,6 +63,8 @@ def createRF(st, dt):
         RF[0].data = it(v, u, dt, shift=config.tz, width=1.25)[0]
     elif config.decon_meth == "dampedf":
         RF[0].data = damped(v, u)
+    elif config.decon_meth == "waterlevel":
+        RF[0].data = waterlevel(v, u)
     return RF
 
 

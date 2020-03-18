@@ -16,6 +16,7 @@ wavdownload = False  # Bool - true for completing download, false: only
 
 decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999),
 # dampedf: damped frequency deconvolution - not recommended
+# waterlevel Langston (1977)
 # False/None: don't create RF
 
 #### P or S ####
@@ -107,9 +108,7 @@ highco = [.5, .33, .25]  # only for SRF
 if phase == "P":
     SNR_criteria = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
 elif phase == "S":
-    SNR_criteria = [7.5, 0.2, 1.75, .66]  # worked for LQT
-    # SNR_criteria = [7.5, .25, 1.5, .75]
-    # SNR_criteria = [10, .2, 2, .5]  # [primary/noise, sidelobe/primary,
-    # r/z(primary), r/z conversions]
+    SNR_criteria = [10, 0.2, 1.75, .66]
+    # [primary/noise, sidelobe/primary, r/z(primary), r/z conversions]
 ###### DON'T change program will change automatically. #################
 folder = "undefined"  # the download is happening here right now

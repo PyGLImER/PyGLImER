@@ -22,7 +22,7 @@ import time
 from subfunctions.preprocess import QC_S
 from subfunctions.createRF import createRF
 from subfunctions.plot import plot_stack
-from subfunctions.SignalProcessingTB import rotate_PSV, rotate_LQT
+from subfunctions.SignalProcessingTB import rotate_PSV, rotate_LQT, rotate_LQT_min
 
 rating = {}  # mutable object
 
@@ -216,8 +216,12 @@ def auto_rate_stack(network, station, phase=config.phase):
             rayp = info["rayp_s_deg"][ii]/111319.9
             ot = info["ot_ret"][ii]
         # _, _, st = rotate_PSV(statlat, statlon, rayp, st)
-        st, rat = rotate_LQT(st)
-        if rat > 0.5 and rat < 2:  # The PCA did not work properly, L & Q too similar
+        st, ia = rotate_LQT_min(st)
+        # st, rat = rotate_LQT(st)
+        # if rat > 0.5 and rat < 2:  # The PCA did not work properly, L & Q too similar
+        #      ret = ret - 1
+        #      continue
+        if ia > 70 or ia < 5:
             ret = ret - 1
             continue
         RF = createRF(st, dt)

@@ -187,31 +187,41 @@ Essentially, H will be deconvolved by P.
     rf = rf[0:N]
     
     return rf,it,IR
-    
-    
 
-        
-def damped(P,H,mu=.1):
+   
+def damped(P,H,mu=10):
     """ A simple damped deconvolution. I just used it to benchmark
     INPUT:
         P: denominator (t-domain)
         H: enumerator (t-domain)
         mu: damping factor"""  
-    P = np.array(P,dtype=float)
-    H = np.array(H,dtype=float)
+    P = np.array(P, dtype=float)
+    H = np.array(H, dtype=float)
     N = len(H)
     N2 = nextPowerOf2(N)
     # cast source wavelet estimation into frequency domain
-    P_ft = np.fft.fft(P,n=N2)
-    H_ft = np.fft.fft(H,n=N2)
+    P_ft = np.fft.fft(P)#,n=N2)
+    H_ft = np.fft.fft(H)#,n=N2)
     
     IR_ft = H_ft*np.conj(P_ft)/(np.conj(P_ft)*P_ft+mu)
-    IR = np.real(np.fft.ifft(IR_ft,n=N2))[0:N]
+    IR = np.real(np.fft.ifft(IR_ft))[0:N]
     return IR
- 
-    
-  
-        
+
+
+def waterlevel(v, u, mu=.0025):
+    N = len(v)
+    N2 = nextPowerOf2(N)
+    # fft
+    v_ft = np.fft.fft(v)#, n=N2)
+    u_ft = np.fft.fft(u)#, n=N2)
+    denom = np.conj(v_ft)*v_ft
+    # for ii, x in denom:
+    #     if x < mu:
+    #         denom[ii] = mu
+    RF_ft = np.conj(v_ft)*u_ft/denom
+    RF = np.real(np.fft.ifft(RF_ft))[0:N]
+    return RF
+
 def multitaper(P,H,mu,k=3,p=2.5):
     """ Multitaper deconvolution (Park & Levis (2000)). That still needs some work. For some reason,
     flips the plot. I should also implement the newer version from 2006
