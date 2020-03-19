@@ -207,6 +207,7 @@ def auto_rate_stack(network, station, phase=config.phase):
     if Path(outloc).is_dir():
         subprocess.call(['rm', '-rf', outloc])
     subprocess.call(['mkdir', '-p', outloc])
+    RFs = []
     for jj, st in enumerate(sts):
         if not crits[jj]:
             continue
@@ -215,21 +216,61 @@ def auto_rate_stack(network, station, phase=config.phase):
             ii = info["starttime"].index(st[0].stats.starttime)
             rayp = info["rayp_s_deg"][ii]/111319.9
             ot = info["ot_ret"][ii]
-        # _, _, st = rotate_PSV(statlat, statlon, rayp, st)
-        st, ia = rotate_LQT_min(st)
+        _, _, st = rotate_PSV(statlat, statlon, rayp, st)
         # st, rat = rotate_LQT(st)
         # if rat > 0.5 and rat < 2:  # The PCA did not work properly, L & Q too similar
         #      ret = ret - 1
         #      continue
-        if ia > 70 or ia < 5:
-            ret = ret - 1
-            continue
+        # st, ia = rotate_LQT_min(st)
+        # if ia > 70 or ia < 5:
+        #     ret = ret - 1
+        #     continue
         RF = createRF(st, dt)
+        RFs.append(RF[0].data)
         RF.write(outloc + ot + '.mseed', format="MSEED")
     print("N files that were not 3/4: ", diff, "N retained: ", ret)
     subprocess.call(['cp', info_file+'.bak', outloc])
     subprocess.call(['cp', info_file+'.dir', outloc])
     subprocess.call(['cp', info_file+'.dat', outloc])
     sta = station + "/test"
-    plot_stack(network, sta, phase=phase)
-    return diff, ret
+    # plot_stack(network, sta, phase=phase)
+    # plot unmigrated stack
+    RF_av = np.average(RFs, axis=0)
+    RF_av = -np.flip(RF_av)
+    t = np.arange(-120,120,0.1)
+    plt.close('all')
+    fig = plt.figure()
+    fig, ax = plt.subplots(1, 1, sharex=True)
+    # Move left y-axis and bottim x-axis to centre, passing through (0,0)
+    ax.spines['bottom'].set_position("center")
+    # ax.spines['left'].set_visible(False)
+    
+    # Eliminate upper and right axes
+    ax.spines['right'].set_color('none')
+    ax.spines['top'].set_color('none')
+    
+    # Show ticks in the left and lower axes only
+    ax.xaxis.set_ticks_position('bottom')
+    # ax.axvline(color='r')  # should plot at x = 0
+    ax.plot(t, RF_av, color="k", linewidth=1.5)
+    ax.set_ylabel('Amplitude')
+    ax.set_xlabel('time in s')
+    # ax.set_position([.5, .5, .1, .1])
+    x = ax
+    x.set_xlim(-20, 20)
+    x.set_ylim(-.5, .5)
+    x.xaxis.set_major_formatter(ScalarFormatter())
+    x.yaxis.major.formatter._useMathText = True
+    # x.yaxis.set_major_formatter(plt.NullFormatter())
+    x.xaxis.major.formatter._useMathText = True
+    x.yaxis.set_minor_locator(AutoMinorLocator(5))
+    x.xaxis.set_minor_locator(AutoMinorLocator(5))
+    # x.tick_params(axis ='y', which ='both', length = 0)
+    # plt.grid(color='c', which="both", linewidth=.25)
+    # x.yaxis.set_label_coords(0.63, 1.01)
+    # x.yaxis.tick_right()
+    # ax.legend(frameon=False, loc='upper left', ncol=2, handlelength=4)
+    # plt.legend(['it_max=4000', 'it_max=400'])
+    # plt.savefig(os.path.join(outloc + station[:-2] + ".pdf"), dpi=dpi)
+    # ax.xaxis.set_ticks_position('left')
+    return t, RF_av

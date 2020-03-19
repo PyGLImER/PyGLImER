@@ -136,15 +136,12 @@ Essentially, H will be deconvolved by P.
     P = np.array(P,dtype=float)
     H = np.array(H,dtype=float)
     N = len(H)
-    N2 = nextPowerOf2(N)
-        
+    N2 = nextPowerOf2(N) 
 
     # Pad input with zeros to the next power of 2
     P = np.append(P,(N2-len(P))*[0])
     H = np.append(H,(N2-len(H))*[0])
-    
-      
-    
+
             ##### PREPARING PARAMETERS FOR LOOP #####
     it = 0 #number of iteration
     r = H # the first residual value

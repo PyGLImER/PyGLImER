@@ -20,6 +20,7 @@ from math import floor
 from pkg_resources import resource_filename
 import obspy.core
 from scipy import interpolate
+from scipy.signal.windows import hann
 
 _MODEL_CACHE = {}
 DEG2KM = 111.2
@@ -65,6 +66,7 @@ def createRF(st, dt):
         RF[0].data = damped(v, u)
     elif config.decon_meth == "waterlevel":
         RF[0].data = waterlevel(v, u)
+    RF.normalize()
     return RF
 
 
@@ -129,6 +131,12 @@ def moveout(data, st, onset, rayp, phase):
     # RF = np.interp(zq, z, RF)
     tck = interpolate.splrep(z, RF)
     RF = interpolate.splev(zq, tck)
+    # Taper the last 3.5 seconds of the RF to avoid discontinuities in stack
+    tap = hann(round(7/st.delta))
+    tap = tap[round(len(tap)/2):]
+    taper = np.ones(len(RF))
+    taper[-len(tap):] = tap
+    RF = np.multiply(taper, RF)
     z2 = np.arange(0, 800, .3)
     RF2 = np.zeros(z2.shape)
     RF2[:len(RF)] = RF

@@ -7,6 +7,7 @@ Created on Thu Apr 25 14:14:47 2019
 """
 from obspy.core import UTCDateTime
 from obspy.taup import TauPyModel  # arrival times in 1D v-model
+import numpy as np
 
 # general settings
 # Define if you want to download new files or use old
@@ -27,7 +28,7 @@ phase = phase.upper()
 
 #### Rotation ####
 # "RTZ","LQT","PSS"
-rot = "LQT"
+rot = "PSS"
 
 #### DIRECTORY CONFIGURATION
 lith1 = '/home/pm/LITHO1.0/bin/access_litho'  # location of lith1 file
@@ -102,13 +103,14 @@ taper_type = 'hann'
 
 # low-cut-off frequencies for SNR check
 lowco = [.03, .1, .5]  # only for PRF
+# highco = np.linspace(.75, .25, 10)
 highco = [.5, .33, .25]  # only for SRF
 
 # SNR criteria for QC
 if phase == "P":
     SNR_criteria = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
 elif phase == "S":
-    SNR_criteria = [10, 0.2, 1.75, .66]
+    SNR_criteria = [7.5, 0.2, 1.75, .66]
     # [primary/noise, sidelobe/primary, r/z(primary), r/z conversions]
 ###### DON'T change program will change automatically. #################
 folder = "undefined"  # the download is happening here right now

@@ -232,6 +232,7 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                             raise Exception("The stream contains less than three traces")
                                                                              
                         # trim to according length
+                        st.resample(10) # resample streams with 10Hz sampling rate
                         st.trim(starttime = starttime, endtime = endtime)
                         
                     ###### DEMEAN AND DETREND #########
@@ -241,7 +242,6 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                         st.taper(max_percentage=taper_perc,type=taper_type,max_length=None,side='both')
                         
                     ##### Write clipped and resampled files into raw-file folder to save space ####
-                        st.resample(10) # resample streams with 10Hz sampling rate
                         st.write(prepro_folder+'/'+file,format="mseed") #write file
 
                     ### REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE ####
@@ -562,33 +562,33 @@ def QC_S(st, dt, sampling_f):
 
     ptn1 = round(5/dt)  # Hopefully relatively silent time
     ptn2 = round((config.tz-50)/dt)
-    nptn = ptn2-ptn1+1
+    nptn = ptn2-ptn1
     # First part of the signal
     pts1 = round(config.tz/dt)  # theoretical arrival time
     pts2 = round((config.tz+7.5)/dt)
-    npts = pts2-pts1+1
+    npts = pts2-pts1
     # Second part of the signal
     ptp1 = round((config.tz+20)/dt)
     ptp2 = round((config.tz+30)/dt)
-    nptp = ptp2-ptp1+1
+    nptp = ptp2-ptp1
     # part where the Sp converted arrival should be strong
     ptc1 = round((config.tz-30)/dt)
     ptc2 = round((config.tz-10)/dt)
-    nptc = ptc1-ptc1+1
+    nptc = ptc2-ptc1
     # filter
     # matrix to save SNR
-    noisemat = np.zeros((len(config.lowco), 4), dtype=float)
+    noisemat = np.zeros((len(config.highco), 4), dtype=float)
 # At some point, I might also want to consider to change the lowcof
     for ii, hf in enumerate(config.highco):
-        ftcomp = filter.bandpass(stream["T"], .03,
+        ftcomp = filter.bandpass(stream["T"], .05,
                                  hf, sampling_f, corners=2, zerophase=True)
-        frcomp = filter.bandpass(stream["R"], .03,
+        frcomp = filter.bandpass(stream["R"], .05,
                                  hf, sampling_f, corners=2, zerophase=True)
         if "Z" in stream:
-            fzcomp = filter.bandpass(stream["Z"], .03, hf,
+            fzcomp = filter.bandpass(stream["Z"], .05, hf,
                                      sampling_f, corners=2, zerophase=True)
         elif "3" in stream:
-            fzcomp = filter.bandpass(stream["3"], .03, hf,
+            fzcomp = filter.bandpass(stream["3"], .05, hf,
                                      sampling_f, corners=2, zerophase=True)
 
         # Compute the SNR for given frequency bands

@@ -101,7 +101,7 @@ def sshift(s, N2, dt, shift):
     S = np.fft.fft(s, n=N2)
 
     k = round(shift/dt)  # discrete shift
-
+    # p = 2*np.pi*np.arange(0, N2, 1, dtype=float)*k/N2  # phase shift
     p = 2*np.pi*np.arange(1, N2+1, 1, dtype=float)*k/N2  # phase shift
     S = S*(np.cos(p) - 1j*np.sin(p))
 
@@ -312,7 +312,7 @@ def rotate_LQT_min(st, phase=config.phase):
         ZR = np.array([stream["3"], stream["R"]])
     # calculate energy of the two components around zero
     # E_ZR = np.sum(np.square(ZR[:, pp1:pp2]), axis=1)/npp
-    ia = np.linspace(0, np.pi/2, num=360)  # incidence angle
+    ia = np.linspace(0, np.pi/2, num=90)  # incidence angle
     E_L = []
     for ii in ia:
         A_rot = np.array([[np.cos(ii), np.sin(ii)],
@@ -329,6 +329,12 @@ def rotate_LQT_min(st, phase=config.phase):
     A_rot = np.array([[np.cos(ia), np.sin(ia)],
                       [-np.sin(ia), np.cos(ia)]])
     LQ = np.dot(A_rot, ZR)
+    # for ii, x in enumerate(LQ[0]):  # Test for noise
+    #     if abs(x) < .1:
+    #         LQ[0, ii] = 0
+    # for ii, x in enumerate(LQ[1]):  # Test for noise
+    #     if abs(x) < .1:
+    #         LQ[1, ii] = 0
     # 3. save L and Q trace and change the label of the stream
     for tr in LQT:
         if tr.stats.channel[2] == "R":
