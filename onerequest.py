@@ -6,8 +6,8 @@ Created on Tue Jan  8 16:33:41 2019
 @author: pm
 """
 # reset variables
-from IPython import get_ipython
-get_ipython().magic('reset -sf')
+# from IPython import get_ipython
+# get_ipython().magic('reset -sf')
 
 
 # IMPORT PREDEFINED SUBFUNCTIONS

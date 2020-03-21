@@ -189,7 +189,7 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                                                 evtlon=evtlon)
                         
                         # compute time of first arrival & ray parameter
-                        arrival = model.get_ray_paths(source_depth_in_km=depth/1000,
+                        arrival = model.get_travel_times(source_depth_in_km=depth/1000,
                                          distance_in_degree=result['distance'],
                                          phase_list=config.phase)[0]
                         # ray parameter in s/deg

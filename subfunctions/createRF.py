@@ -26,42 +26,42 @@ _MODEL_CACHE = {}
 DEG2KM = 111.2
 
 
-def createRF(st, dt):
+def createRF(st, dt, phase=config.phase, shift=config.tz):
     RF = st.copy()
     # delete the old traces
     while RF.count() > 1:
         del RF[1]
-    RF[0].stats.channel = config.phase + "RF"
+    RF[0].stats.channel = phase + "RF"
     stream = {}
     for tr in st:
         stream[tr.stats.channel[2]] = tr.data
     # define denominator v and enumerator u
-    if config.phase == "P" and config.rot == "RTZ":
+    if phase == "P" and "R" in stream:
         if "Z" in stream:
             v = stream["Z"]
         elif "3" in stream:
             v = stream["3"]
         u = stream["R"]
-    elif config.phase == "P" and config.rot == "LQT":
+    elif phase == "P" and "Q" in stream:
         v = stream["L"]
         u = stream["Q"]
-    elif config.phase == "P" and config.rot == "PSS":
+    elif phase == "P" and "V" in stream:
         v = stream["P"]
         u = stream["V"]
-    elif config.phase == "S" and config.rot == "RTZ":
+    elif phase == "S" and "R" in stream:
         if "Z" in stream:
             u = stream["Z"]
         elif "3" in stream:
             u = stream["3"]
         v = stream["R"]
-    elif config.phase == "S" and config.rot == "LQT":
+    elif phase == "S" and "Q" in stream:
         u = stream["L"]
         v = stream["Q"]
-    elif config.phase == "S" and config.rot == "PSS":
+    elif phase == "S" and "V" in stream:
         u = stream["P"]
         v = stream["V"]
     if config.decon_meth == "it":
-        RF[0].data = it(v, u, dt, shift=config.tz, width=1.25)[0]
+        RF[0].data = it(v, u, dt, shift=shift, width=1.25)[0]
     elif config.decon_meth == "dampedf":
         RF[0].data = damped(v, u)
     elif config.decon_meth == "waterlevel":

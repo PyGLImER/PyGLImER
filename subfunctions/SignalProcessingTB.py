@@ -119,8 +119,8 @@ def rotate_PSV(statlat, statlon, rayp, st):
         rayp: rayparameter in s/m (i.e. horizontal slowness)
         st: stream in RTZ"""
     # Filter
-    if config.phase == "S":
-        st.filter('bandpass', freqmin=.03, freqmax=.33, zerophase=True)
+    # if config.phase == "S":
+    #     st.filter('bandpass', freqmin=.03, freqmax=.33, zerophase=True)
     x = subprocess.Popen([config.lith1, "-p", str(statlat),
                           str(statlon)], stdout=subprocess.PIPE)
     ls = str(x.stdout.read()).split("\\n")  # save the output
@@ -206,10 +206,12 @@ def rotate_PSV(statlat, statlon, rayp, st):
     return avp, avs, PSvSh
 
 
-def rotate_LQT(st):
+def rotate_LQT(st, phase=config.phase, TAT=config.tz):
     """rotates a stream given in RTZ to LQT using Singular Value Decomposition
     INPUT:
         st: stream given in RTZ, normalized
+        phase: S or P
+        TAT: theoretical arrival time
     RETURNS:
         LQT: stream in LQT"""
     dt = st[0].stats.delta  # sampling interval
@@ -222,12 +224,12 @@ def rotate_LQT(st):
 
     # only check around phase-arrival
     # window
-    if config.phase == "S":
-        ws = round((config.tz-3)/dt)
-        we = round((config.tz+5)/dt)
-    elif config.phase == "P":
-        ws = round((config.tz-5)/dt)
-        we = round((config.tz+5)/dt)
+    if phase == "S":
+        ws = round((TAT-3)/dt)
+        we = round((TAT+5)/dt)
+    elif phase == "P":
+        ws = round((TAT-5)/dt)
+        we = round((TAT+5)/dt)
     # 1. Find which component is which one and put them in a dict
     stream = {
         LQT[0].stats.channel[2]: LQT[0].data,
@@ -245,26 +247,16 @@ def rotate_LQT(st):
     # 2. Now, find out which is L and which Q by finding out which one has
     # the maximum energy around theoretical S-wave arrival - that one would
     # be Q. Or for Ps: maximum energy around P-wave arrival on L
-    # Note: the energy window has to be different otherwise the normalized
-    # traces sometimes have the energy 1 over the whole time, should work like
-    # this:
-    # if config.phase == "S":
-    #     ews = 1
-    #     ewe = 5
-    # elif config.phase == "P":
-    #     ews = 1
-    #     ewe = 8
-    # a = np.sum(np.square(vh[0])  # , round(ews/dt):round(ewe/dt)]))
-    # b = np.sum(np.square(vh[1]  # , round(ews/dt):round(ewe/dt)]))
+
     A_rot = np.linalg.inv(np.dot(u, np.diag(s)))
     LQ = np.dot(A_rot, ZR)
     # point of primary arrival
-    pp1 = round((config.tz-2)/dt)
-    pp2 = round((config.tz+20)/dt)
+    pp1 = round((TAT-2)/dt)
+    pp2 = round((TAT+20)/dt)
     npp = pp2 - pp1
     # point where converted Sp arrive
-    pc1 = round((config.tz-40)/dt)
-    pc2 = round((config.tz-15)/dt)
+    pc1 = round((TAT-40)/dt)
+    pc2 = round((TAT-15)/dt)
     npc = pc2 - pc1
     a = np.sum(np.square(LQ[0][pp1:pp2])/npp) /\
         np.sum(np.square(LQ[0][pc1:pc2])/npc)
