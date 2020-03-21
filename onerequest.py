@@ -2,37 +2,26 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Jan  8 16:33:41 2019
-
+Script to start the data accumulation for automatic RF processing.
+IMPORTANT:
+!!All configuration is done in subfunctions/config.py!!
 @author: pm
 """
-# reset variables
-# from IPython import get_ipython
-# get_ipython().magic('reset -sf')
-
 
 # IMPORT PREDEFINED SUBFUNCTIONS
 from subfunctions.download import downloadwav
 from subfunctions.preprocess import preprocess
-from subfunctions.preprocess import file_in_db
 import subfunctions.config as config
 
 # modules
 from obspy.core import *
-from obspy.clients.iris import Client as iClient  # To calculate ad & backaz
 from obspy.core.event.base import *
-from obspy.geodetics.base import locations2degrees
-from obspy.taup import TauPyModel  # arrival times in 1D v-model
-from obspy.clients.fdsn.mass_downloader import CircularDomain, \
-    Restrictions, MassDownloader
-import os
 import logging
-import time
 import subprocess
 from pathlib import Path
 from obspy.clients.fdsn import Client as Webclient  # web sevice
 from threading import Thread  # multi-thread processing
 from datetime import datetime
-from pathlib import Path
 from http.client import IncompleteRead
 from obspy import read_events
 
@@ -69,7 +58,7 @@ if not config.evtcat:
             print("Warning: Server interrupted connection,\
                   catalogue download is restarted.")
             continue
-    
+
     if not Path(config.evtloc).is_dir():
         subprocess.call(["mkdir", "-p", config.evtloc])
     # check if there is a better format for event catalog
@@ -85,14 +74,13 @@ if config.wavdownload:
     if __name__ == '__main__':
         Thread(target=downloadwav,
                args=(config.min_epid, config.max_epid,
-                       model, event_cat)).start()
-    
+                     model, event_cat)).start()
+
         Thread(target=preprocess,
                args=(config.taper_perc, config.taper_type,
-                       event_cat, webclient, model)).start()
-        
+                     event_cat, webclient, model)).start()
+
 else:  # Only preprocess files in waveform location
     config.folder = "finished"
     preprocess(config.taper_perc, config.taper_type, event_cat, webclient,
                model)
-    

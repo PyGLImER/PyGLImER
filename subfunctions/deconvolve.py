@@ -3,6 +3,7 @@
 """
 Created on Wed Oct 16 14:23:30 2019
 
+Various Deconvolution approach used for the RF technique.
 @author: pm
 """
 
@@ -10,8 +11,6 @@ import numpy as np
 from subfunctions.nextPowerOf2 import nextPowerOf2
 import subfunctions.SignalProcessingTB as sptb
 # import spectrum
-
-
 
 
 def gen_it(P,H,dt,mu,shift=0,width=2.5,e_min=5,omega_min=0.5,it_max=400,):#,swv,swv_width,it_max,shift,dt,mu):

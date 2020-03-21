@@ -178,6 +178,7 @@ def plot_all_wav(phase, network, station, TAT=config.tz, dpi=300):
 
 
 def plot_stack(network, station, dpi=300, phase=config.phase):
+    """Plots a moveout corrected RF stack of given station."""
     z, stack, RF_mo, raw = stackRF(network, station, phase)
     outloc = "figures/RF/stack/" + phase + '/'  # location for figures
     if not Path(outloc).is_dir():

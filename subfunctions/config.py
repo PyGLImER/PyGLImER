@@ -7,7 +7,6 @@ Created on Thu Apr 25 14:14:47 2019
 """
 from obspy.core import UTCDateTime
 from obspy.taup import TauPyModel  # arrival times in 1D v-model
-import numpy as np
 
 # general settings
 # Define if you want to download new files or use old

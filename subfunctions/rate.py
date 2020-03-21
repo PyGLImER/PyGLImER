@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Feb 25 19:28:38 2020
-
+Contains various functions used to evaluate the quality of RF and waveforms
 @author: pm
 
 """
@@ -11,9 +11,7 @@ from obspy import read
 import numpy as np
 # import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import plot
 from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
-import matplotlib as mpl
 from pathlib import Path
 from subfunctions import config
 import subprocess
@@ -22,7 +20,7 @@ import time
 from subfunctions.preprocess import QC_S
 from subfunctions.createRF import createRF
 from subfunctions.plot import plot_stack
-from subfunctions.SignalProcessingTB import rotate_PSV, rotate_LQT,\
+from subfunctions.rotate import rotate_PSV, rotate_LQT,\
                                             rotate_LQT_min
 from obspy.taup import TauPyModel
 

@@ -7,30 +7,23 @@ Created on Wed Apr 24 20:42:51 2019
 """
 import subfunctions.config as config
 from obspy.core import *
-from obspy.clients.iris import Client as iClient # To calculate angular distance and backazimuth
-from obspy.clients.fdsn import Client,header #web sevice
 from obspy.core.event.base import *
-from obspy.geodetics.base import locations2degrees #calculate angular distances
-from obspy.taup import TauPyModel #arrival times in 1D v-model
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
 from obspy.clients.fdsn.mass_downloader import *
 import os
 import logging
-import time
-#import progressbar
 import subprocess
 from pathlib import Path
 from obspy import read
-from datetime import datetime
 from obspy import UTCDateTime
 
 
 def downloadwav(min_epid, max_epid, model, event_cat):
     """ Downloads the waveforms for all events in the catalogue
-     for a circular domain around the epicentre with dfefined epicentral 
+     for a circular domain around the epicentre with defined epicentral
      distances from Clients defined in config.waveform_client.
-    
+
     INPUT:
         min_epid: minimal epicentral distance of station
         max_epid: maximal epicentral distance of station
@@ -49,26 +42,20 @@ def downloadwav(min_epid, max_epid, model, event_cat):
     # Calculate the min and max theoretical arrival time after event time
     # according to minimum and maximum epicentral distance
     min_time = model.get_travel_times(source_depth_in_km=500,
-                                         distance_in_degree=min_epid,
-                                         phase_list=[config.phase])[0].time
+                                      distance_in_degree=min_epid,
+                                      phase_list=[config.phase])[0].time
 
     max_time = model.get_travel_times(source_depth_in_km=0.001,
-                                         distance_in_degree=max_epid,
-                                         phase_list=[config.phase])[0].time
-    
-    
-    
-    
-
-    
+                                      distance_in_degree=max_epid,
+                                      phase_list=[config.phase])[0].time
 
     mdl = MassDownloader(config.waveform_client)
-    
+
     # Loop over each event
     for event in event_cat:
-        # fetch event-data   
+        # fetch event-data
         origin_time = event.origins[0].time
-        ot_fiss = UTCDateTime(origin_time).format_fissures() 
+        ot_fiss = UTCDateTime(origin_time).format_fissures()
         evtlat = event.origins[0].latitude
         evtlon = event.origins[0].longitude
 
@@ -113,26 +100,20 @@ def downloadwav(min_epid, max_epid, model, event_cat):
             channel_priorities=["BH*","HH*"],#channel_priorities=["BH[ZNE]","HH[ZNE]"],
             # Location codes are arbitrary and there is no rule as to which
             # location is best. Same logic as for the previous setting.
-            location_priorities= ["", "00", "10"],
-            sanitize=True #discards all mseeds for which no station information is available
+            location_priorities=["", "00", "10"],
+            sanitize=True
+            # discards all mseeds for which no station information is available
             )
-            
-            
-    
+
         # The data will be downloaded to the ``./waveforms/`` and ``./stations/``
         # folders with automatically chosen file names.
-        mdl.download(domain, restrictions, mseed_storage = get_mseed_storage, stationxml_storage=get_stationxml_storage)
-    config.folder = "finished" #removes the restriction for preprocess.py
+        mdl.download(domain, restrictions, mseed_storage=get_mseed_storage,
+                     stationxml_storage=get_stationxml_storage)
+    config.folder = "finished"  # removes the restriction for preprocess.py
 
 
-
-
-# Inner functions:
-        
-# Define the function, which stores the files and priorly checks if the files
-# are already available
-def get_mseed_storage(network, station, location, channel, starttime,endtime):
-
+def get_mseed_storage(network, station, location, channel, starttime, endtime):
+    """Stores the files and checks if files are already downloaded"""
     # Returning True means that neither the data nor the StationXML file
     # will be downloaded.
 
@@ -141,22 +122,18 @@ def get_mseed_storage(network, station, location, channel, starttime,endtime):
 
     # If a string is returned the file will be saved in that location.
     return os.path.join(config.folder, "%s.%s.mseed" % (network, station))
-                                                     #location))
-#    return os.path.join(config.folder, "%s.%s.%s.%s.mseed" % (network, station,
-#                                                     location, channel))
 
 
-
-# Download the station.xml for the stations. Check chanels that are already available
-# if channels are missing in the current file, do only download the channels that are
-# missing
 def get_stationxml_storage(network, station, channels, starttime, endtime):
+    """Download the station.xml for the stations. Check chanels that are
+    already available if channels are missing in the current file,
+    do only download the channels that are missing"""
     available_channels = []
     missing_channels = []
 
     for location, channel in channels:
         if stat_in_db(network, station, location, channel, starttime,
-                    endtime):
+                      endtime):
             available_channels.append((location, channel))
         else:
             missing_channels.append((location, channel))
@@ -168,29 +145,31 @@ def get_stationxml_storage(network, station, channels, starttime, endtime):
         "missing_channels": missing_channels,
         "filename": filename}
 
+
 def stat_in_db(network, station, location, channel, starttime, endtime):
+    """checks if station xml is already downloaded"""
     path = Path(config.statloc+"/%s.%s.xml" % (network, station))
     if path.is_file():
         return True
     else:
         return False
 
+
 def wav_in_db(network, station, location, channel, starttime, endtime):
+    """Checks if waveform is already downloaded."""
     path = Path(config.folder, "%s.%s.%s.mseed" % (network, station,
-                                                     location))
+                                                   location))
     if path.is_file():
         st = read(config.folder+'/'+network+"."+station+'.'+location+'.mseed')
     else:
         return False
-#    path = Path(config.folder, "%s.%s.%s.%s.mseed" % (network, station,
-#                                                     location, channel))
-    if len(st)==3:
-        return True #All three channels are downloaded
-    elif len(st)==2:
-        if st[0].stats.channel==channel or st[1].stats.channel==channel: #the other two cases: channel has already been downlaoded
+    if len(st) == 3:
+        return True  # All three channels are downloaded
+    # In case, channels are missing
+    elif len(st) == 2:
+        if st[0].stats.channel == channel or st[1].stats.channel == channel:
             return True
-    elif st[0].stats.channel==channel:
+    elif st[0].stats.channel == channel:
         return True
     else:
         return False
-    

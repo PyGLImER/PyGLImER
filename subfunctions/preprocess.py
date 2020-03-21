@@ -5,35 +5,27 @@ Created on Wed Apr 24 20:31:05 2019
 
 @author: pm
 """
-# import config
 import subfunctions.config as config
-####### PREPROCESSING SUBFUNCTION ############
 from obspy.core import *
 from obspy.clients.iris import Client as iClient # To calculate angular distance and backazimuth
 # careful with using clientas multiprocessing has a client class
-from obspy.clients.fdsn import Client,header #web sevice
 from obspy.core.event.base import *
-from obspy.geodetics.base import locations2degrees #calculate angular distances
-from obspy.taup import TauPyModel #arrival times in 1D v-model
-from obspy.clients.fdsn.mass_downloader import CircularDomain, \
-    Restrictions, MassDownloader
 from obspy.core.utcdatetime import UTCDateTime
 import os
 import logging
 import time
-#import progressbar
+# import progressbar
 import subprocess
-#from multiprocessing import Process,Queue #multi-thread processing - preprocess while downloading
 from pathlib import Path
 from obspy import read
 from obspy import read_inventory
 from obspy.signal import filter
-#from importlib import import_module
 import shelve
 import numpy as np
-from subfunctions.SignalProcessingTB import rotate_LQT, rotate_PSV
-from subfunctions.deconvolve import it, damped
+from subfunctions.rotate import rotate_LQT_min, rotate_PSV
 from subfunctions.createRF import createRF
+from subfunctions.Errorhandler import redownload, redownload_statxml, \
+    NoMatchingResponseHandler, NotLinearlyIndependentHandler
 
 
 def preprocess(taper_perc, taper_type, event_cat, webclient, model):
@@ -88,19 +80,28 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
                                               station='HRV')
     # instrument response of the channel downloaded above
     paz_sim = station_simulate[0][0][0].response
-    
+
     # create dictionary with necassary data
     paz_sim = {"gain": paz_sim._get_overall_sensitivity_and_gain
                (output="VEL")[0],
                "sensitivity": paz_sim._get_overall_sensitivity_and_gain
-                   (output="VEL")[1],
+               (output="VEL")[1],
                "poles": paz_sim.get_paz().poles,
                "zeros": paz_sim.get_paz().zeros}
 
     # Define class for backazimuth calculation
     iclient = iClient()
-    for event in event_cat:  # For each event
 
+    event_loop(event_cat, taper_perc, taper_type, webclient,
+               model, paz_sim, iclient)
+    print("Download and preprocessing finished.")
+
+
+def event_loop(event_cat, taper_perc, taper_type, webclient, model,
+               paz_sim, iclient):
+    """Loops over each event in the event catalogue
+    INPUT:"""
+    for event in event_cat:
         # fetch event-data
         origin_time = event.origins[0].time
         ot_fiss = UTCDateTime(origin_time).format_fissures()
@@ -113,357 +114,272 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
             subprocess.call(["mkdir", "-p",
                              config.outputloc+'/'+'by_event/'+ot_fiss])
 
-
-# Folder, in which the preprocessing is actually happening
+        # Folder, in which the preprocessing is actually happening
         prepro_folder = config.waveform + "/" + ot_fiss + '_' + str(evtlat) +\
             "_" + str(evtlon)
-# only start preprocessing after waveforms for foregoing are downloaded
+        # only start preprocessing after waveforms for foregoing are downloaded
         while prepro_folder == config.folder or config.folder == "not_started":
             print('preprocessing suspended, awaiting download')
             time.sleep(5)
         else:
             try:  # If one event has no folder it interrupts else
                 os.listdir(prepro_folder)
-            except:
+            except FileNotFoundError:
                 continue
-            # preprocess each file per event
-            for file in os.listdir(prepro_folder):
+            waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
+                          paz_sim, iclient, origin_time, ot_fiss, evtlat,
+                          evtlon, depth, prepro_folder, event)
+
+
+def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
+                  paz_sim, iclient, origin_time, ot_fiss, evtlat, evtlon,
+                  depth, prepro_folder, event):
+    """Loops over each waveform for a specific event and a specific station
+    INPUT:"""
+    for file in os.listdir(prepro_folder):
+        try:
+            st = read(prepro_folder+'/'+file)
+        except FileNotFoundError:  # file has not been downloaded yet
+            break  # I will still want to have the RF
+        station = st[0].stats.station
+        network = st[0].stats.network
+
+        # Location definitions
+        # Info file
+        infof = config.outputloc+'/by_station/'+network+'/'+station + \
+            '/'+'info'
+        outf = config.outputloc+'/by_station/'+network+'/'+station+'/'\
+            + network+'.'+station+'.'+ot_fiss+'.mseed'
+
+        # Create directory for preprocessed file
+        if not Path(config.outputloc + '/' + 'by_station/' +
+                    network + '/' + station).is_dir():
+            subprocess.call(["mkdir", "-p",
+                             config.outputloc + '/' + 'by_station/' +
+                             network + '/' + station])
+
+    # If the file hasn't been downloaded and preprocessed
+    # in an earlier iteration of the program
+        if not file_in_db(config.outputloc + '/by_station/' + network
+                          + '/' + station, network + '.' + station +
+                          '.' + ot_fiss + '.mseed'):
+            crit = False  # criterion to retain
+
+            try:  # From here on, all exceptions are logged
                 try:
-                    st = read(prepro_folder+'/'+file)
-                except FileNotFoundError:  # file has not been downloaded yet
-                    break  # I will still want to have the RF
-                station = st[0].stats.station
-                network = st[0].stats.network
+                    station_inv = read_inventory(config.statloc + "/"
+                                                 + network + "." +
+                                                 station + ".xml",
+                                                 format="STATIONXML")
+                except FileNotFoundError:
+                    station_inv = redownload_statxml(st, network, station)
 
-                # Create directory for preprocessed file
-                if not Path\
-                    (config.outputloc+'/'+'by_station/'+network+'/'+station)\
-                        .is_dir():
-                    subprocess.call(["mkdir", "-p",
-                                     config.outputloc + '/' + 'by_station/' +
-                                         network + '/' + station])
+# Trim TO RIGHT LENGTH BEFORE AND AFTER FIRST ARRIVAL  #
 
-        # If the file hasn't been downloaded and preprocessed
-        # in an earlier iteration of the program
-                if not file_in_db(config.outputloc + '/by_station/' + network
-                                  + '/' + station, network + '.' + station +
-                                  '.' + ot_fiss + '.mseed'):
-                    crit = False  # criterion to retain
+                result = iclient.distaz(station_inv[0][0].latitude,
+                                        station_inv[0][0].longitude, evtlat,
+                                        evtlon)
 
-                    try:
-                        # I don't copy the failed files anymore as it's
-                        # a waste of harddisk space
-                        # if not Path(config.failloc).is_dir():
-                        #     subprocess.call(["mkdir","-p",config.failloc])
+                # compute time of first arrival & ray parameter
+                arrival = model.get_travel_times(source_depth_in_km=depth/1000,
+                                                 distance_in_degree=result['distance'],
+                                                 phase_list=config.phase)[0]
+                rayp_s_deg = arrival.ray_param_sec_degree
+                rayp = rayp_s_deg/111319.9  # apparent slowness
+                first_arrival = origin_time + arrival.time
+                # start and endtime of stream
+                starttime = first_arrival - config.tz
+                endtime = first_arrival + config.ta
 
-                        # read station inventory
-                        try:
-                            station_inv = read_inventory(config.statloc + "/"
-                                                         + network + "." +
-                                                         station + ".xml",
-                                                         format="STATIONXML")
-                        except FileNotFoundError:
-                            for c in config.re_clients:
-                                try:
-                                    client = Client(c)
-                                    station_inv = client.get_stations(
-                                        level="response",
-                                        channel=st[0].stats.channel[0:2] + '*',
-                                        network=network, station=station)
-                                    # write the new, working stationxml file
-                                    station_inv.write(config.statloc + "/"
-                                                      + network + "." +
-                                                      station + ".xml",
-                                                      format="STATIONXML")
-                                    break
-                                except (header.FDSNNoDataException,
-                                        header.FDSNException):  # wrong client
-                                    pass
+                if len(st) < 3:
+                    st = redownload(network, station, starttime, endtime, st)
 
-                            
-                        
-                    ###### CLIP TO RIGHT LENGTH BEFORE AND AFTER FIRST ARRIVAL #####
-                        # 06.02.2020: Change function so that it also returns the ray-parameters (later for rotation to LQT)
-                        # calculate backazimuth, distance
-                        result = iclient.distaz(station_inv[0][0].latitude, stalon=station_inv[0][0].longitude, evtlat=evtlat,
-                                                evtlon=evtlon)
-                        
-                        # compute time of first arrival & ray parameter
-                        arrival = model.get_travel_times(source_depth_in_km=depth/1000,
-                                         distance_in_degree=result['distance'],
-                                         phase_list=config.phase)[0]
-                        # ray parameter in s/deg
-                        rayp_s_deg = arrival.ray_param_sec_degree
-                        rayp = rayp_s_deg/111319.9  # apparent slowness
-                        first_arrival = origin_time + arrival.time
-                        # first_arrival = origin_time + model.get_travel_times(source_depth_in_km=depth/1000,
-                        #                  distance_in_degree=result['distance'],
-                        #                  phase_list=config.phase)[0].time
-                        starttime = first_arrival - config.tz
-                        endtime = first_arrival + config.ta
-                        
-                        
-                   ##### Check if stream has three channels   
-                        # This might be a bit cumbersome, but should work.
-                        # Right now its trying three times to redownload the data for each client
-                        # That might be quite slow. I have however not found out how to find out which client is the one I need
-                        
-                        if len(st) < 3:
-                            for c in config.re_clients:
-                                client = Client(c) # I have not found out how to find the original Client that has been used for the download
-                                # to solve that I could implement another try / except loop in the except part down there, very cumbersome though
-                                for iii in range(3):
-                                    try:
-                                        if len(st) < 3: #If the stream does not contain all three components 
-                                            raise Exception
-                                        else:
-                                            break
-                                    except:
-                                        try:
-                                            st = client.get_waveforms(network,station,'*',st[0].stats.channel[0:2]+'*',starttime,endtime)
-                                        except (header.FDSNNoDataException,ValueError): #wrong client chosen
-                                            break
-                                if len(st) == 3:
-                                    break
-                                
-                                        
-                                #finally: # Check one last time. If stream to short raise Exception
-                        if len(st) < 3:
-                            raise Exception("The stream contains less than three traces")
-                                                                             
-                        # trim to according length
-                        st.resample(10) # resample streams with 10Hz sampling rate
-                        st.trim(starttime = starttime, endtime = endtime)
-                        
-                    ###### DEMEAN AND DETREND #########
-                        st.detrend(type='demean')
-                        
-                    ############# TAPER ###############
-                        st.taper(max_percentage=taper_perc,type=taper_type,max_length=None,side='both')
-                        
-                    ##### Write clipped and resampled files into raw-file folder to save space ####
-                        st.write(prepro_folder+'/'+file,format="mseed") #write file
+                # Check one last time. If stream to short raise Exception
+                if len(st) < 3:
+                    raise Exception("The stream contains less than 3 traces")
 
-                    ### REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE ####
+                # trim to according length
+                st.resample(10)  # resample streams with 10Hz sampling rate
+                st.trim(starttime=starttime, endtime=endtime)
 
-                        # maybe I don't need to do these two steps, I will just want an output in velocity
-                        # Bugs occur here due to station inventories without response information
-                        # Looks like the bulk downloader sometimes donwloads station inventories without response files
-                        # I could fix that here by redowloading the response file (alike to the 3 traces problem)
-                        try:
-                            st.remove_response(inventory=station_inv,output='VEL',water_level=60)
-                            
-                        except ValueError: #Occurs for "No matching response file found"
-                            print("The stationxml has to be redownloaded")
-                            #01.02.20: This bug occurs because the channels are named 1 & 2 instead of N and E
-                            
-                            # for c in config.re_clients:
-                            #     try:
-                            #         client = Client(c)
-                            #         station_inv = client.get_stations(level = "response",channel = st[0].stats.channel,network = network,station = station) #simulate one of the harvard instruments
-                            #         station_inv.write(config.statloc+"/"+network+"."+station+".xml", format = "STATIONXML") #write the new, working stationxml file
-                            #         st.remove_response(inventory=station_inv,output='VEL',water_level=60)
-                            #     except (header.FDSNNoDataException, header.FDSNException): #wrong client
-                            #         pass
-                            #     except ValueError: #the response file doesn't seem to be available at all
-                            #         break
-                            
-                            # Turns out the problem is in the stream not in the response file, so just redownload the stream
-                            # Not sure how necassary the whole thing is after changing download.py
-                            # But better safe than sorry, leave it inside - doesn't take any computation power
-                            # as long as it isn't called.
-                            for c in config.re_clients:
-                                try:
-                                    client = Client(c)
-                                    #st = client.get_waveforms(network,station,'*',st[0].stats.channel[0:2]+'*',starttime,endtime)
-                                    station_inv = client.get_stations(level = "response",channel = st[0].stats.channel[0:2]+'*',network = network,station = station) #simulate one of the harvard instruments
-                                    st.remove_response(inventory=station_inv,output='VEL',water_level=60)
-                                    station_inv.write(config.statloc+"/"+network+"."+station+".xml", format = "STATIONXML") #write the new, working stationxml file
-                                    if len(st) <3:
-                                        raise Exception("The stream contains less than three traces")
-                                    break
-                                except (header.FDSNNoDataException, header.FDSNException): #wrong client
-                                    pass
-                                except ValueError: #the response file doesn't seem to be available at all
-                                    break
-                                
-                                
-                        st.remove_sensitivity(inventory=station_inv) #Should this step be done?
-                        # st.remove_response(inventory=station_simulate,output='VEL',water_level=60)
-                        # st.remove_sensitivity(inventory=station_simulate) #Should this step be done?
-                    # simulate for another instrument like harvard (a stable good one)
-                        st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True) #simulate has a fuction paz_remove='self', which does not seem to work properly
+                # DEMEAN AND DETREND #
+                st.detrend(type='demean')
 
+                # TAPER #
+                st.taper(max_percentage=taper_perc, type=taper_type,
+                         max_length=None, side='both')
 
-############################ ROTATION ########################################
-                    ##### rotate from NEZ to radial, transverse, z ######
-                        try:
-                            # If channeles weren't properly aligned
-                            st.rotate(method ='->ZNE', inventory = station_inv)
-                        except ValueError: #Error: The directions are not linearly independent, for some reason redownloading seems to help here
-                            for c in config.re_clients:
-                                client = Client(c) # I have not found out how to find the original Client that has been used for the download
-                                # to solve that I could implement another try / except loop in the except part down there, very cumbersome though
-                                while len(st) < 3:
-                                    try:
-                                        st = client.get_waveforms(network,station,'*',st[0].stats.channel[0:2]+'*',starttime,endtime)
-                                        st.remove_response(inventory=station_inv,output='VEL',water_level=60)
-                                        st.remove_sensitivity(inventory=station_inv)
-                                        st.simulate(paz_remove=None, paz_simulate=paz_sim, simulate_sensitivity=True)
-                                        st.rotate(method='->ZNE', inventory=station_inv)
-                                    except (header.FDSNNoDataException,
-                                            header.FDSNException,
-                                            ValueError): #wrong client chosen
-                                        break
+                # Write trimmed and resampled files into raw-file folder
+                # to save space
+                st.write(prepro_folder+'/'+file, format="mseed")
 
-                        st.rotate(method='NE->RT',inventory=station_inv,back_azimuth=result["backazimuth"])
-                        st.normalize
-                        
-                        # Sometimes streams contain more than 3 traces:
-                        if st.count() > 3:
-                            stream = {}
-                            for tr in st:
-                                stream[tr.stats.channel[2]] = tr
-                            if "Z" in stream:
-                                st = Stream(stream["Z"], stream["R"],
-                                            stream["T"])
-                            elif "3" in stream:
-                                st = Stream(stream["3"], stream["R"],
-                                            stream["T"])
-                            del stream
+# REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE #
+# Bugs occur here due to station inventories without response information
+# Looks like the bulk downloader sometimes donwloads
+# station inventories without response files. I could fix that here by
+# redowloading the response file (alike to the 3 traces problem)
+                try:
+                    st.remove_response(inventory=station_inv, output='VEL',
+                                       water_level=60)
+                except ValueError:
+                    # Occurs for "No matching response file found"
+                    station_inv, st = NoMatchingResponseHandler(st, network,
+                                                                station)
 
-                    # SNR CRITERIA
-                        dt = st[0].stats.delta  # sampling interval
-                        sampling_f = st[0].stats.sampling_rate
+                st.remove_sensitivity(inventory=station_inv)
 
-                        if config.phase == "P":
-                            st, crit, f, noisemat = QC_P(st, dt, sampling_f)
-                            if not crit:
-                                raise SNRError(noisemat)
-                        elif config.phase == "S":
-                            st, crit, f, noisemat = QC_S(st, dt, sampling_f)
-                            # crit, f, noisemat = None, None, None
-                            if not crit:
-                                raise SNRError(noisemat)
+            # simulate for another instrument like harvard (a stable good one)
+                st.simulate(paz_remove=None, paz_simulate=paz_sim,
+                            simulate_sensitivity=True)
 
-                        # Rotate to LQT or PSS
-                        if config.rot == "LQT":
-                            st = rotate_LQT(st)
-                            # channel labels
-                            P = "L"
-                            S = "Q"
-                            T = "T"
-                        elif config.rot == "PSS":
-                            avp, avs, st = rotate_PSV(
-                                station_inv[0][0][0].latitude,
-                                station_inv[0][0][0].longitude,
-                                rayp, st)
+    #       ROTATION      #
+                try:
+                    # If channeles weren't properly aligned
+                    st.rotate(method ='->ZNE', inventory = station_inv)
+# Error: The directions are not linearly independent,
+# for some reason redownloading seems to help here
+# often the error persists though
+                except ValueError:
+                    st = NotLinearlyIndependentHandler(st, network, station,
+                                                       starttime, endtime,
+                                                       station_inv, paz_sim)
 
-                        st.write(config.outputloc+'/by_station/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', format="MSEED") 
-                        subprocess.call(["ln","-s",'../../by_station/'+network+'/'+station+'/'+network+'.'+station+'.'+ot_fiss+'.mseed', config.outputloc+'/by_event/'+ot_fiss+'/'+network+station])
-                    
-                    ############# WRITE AN INFO FILE #################
-                        append_inf = [['magnitude',event.magnitudes[0].mag],['magnitude_type',event.magnitudes[0].magnitude_type],
-                                      ['evtlat',evtlat],['evtlon',evtlon],['ot_ret',ot_fiss],['ot_all',ot_fiss],
-                                      ['evt_depth',depth],['noisemat',noisemat],['lowco_f',f],['npts',st[1].stats.npts],
-                                      ['rbaz',result["backazimuth"]],
-                                      ['rdelta', result["distance"]],
-                                      ['rayp_s_deg', rayp_s_deg], ["onset", first_arrival],
-                                      ['starttime', st[0].stats.starttime]]
-                        #append_info: [key,value]
+                st.rotate(method='NE->RT', inventory=station_inv,
+                          back_azimuth=result["backazimuth"])
+                st.normalize
 
-                        with shelve.open(config.outputloc + '/by_station/'+network+'/'+station+'/'+'info',writeback=True) as info:
-                            # if not old_info:
-                            #     # station specific parameters
-                            
-                            #Check if values are already in dic
-                            for key,value in append_inf:
-                                info.setdefault(key, []).append(value)
-                            
-                            info['num'] = len(info['ot_all'])
-                            info['numret'] = len(info['ot_ret'])
-                            info['dt'] = dt
-                            info['sampling_rate'] = sampling_f
-                            info['network'] = network
-                            info['station'] = station
-                            info['statlat'] = station_inv[0][0][0].latitude
-                            info['statlon'] = station_inv[0][0][0].longitude
-                            info['statel'] = station_inv[0][0][0].elevation
-                        
-                            info.sync()
-                            
-                            # I should create an extra script for the RF
-                            # creation, where I can decide if I rather want to
-                            # use mseed files in preprocessed!
-
-
-
-#                        # When writing pay attention that variables aren't 1 overwritten 2: written twice 3: One can append variables to arrays
-#                        finfo.writelines([dt, network, station, ])
-                        print("Stream accepted. Preprocessing successful") #
-                    except SNRError: #These should not be in the log as they mask real errors
-                        #print("Stream rejected - SNR too low with",e) #test
-                        with shelve.open(config.outputloc+'/'+'by_station/'+network+'/'+station+'/'+'info',writeback=True) as info:
-                            if not 'ot_all' in info or not ot_fiss in info['ot_all']: #Don't count rejected events double
-                                info.setdefault('ot_all', []).append(ot_fiss)
-                                info['num'] = len(info['ot_all'])
-                                info.sync()
-                        # if not file_in_db(config.failloc,file):
-                        #     subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+file])
-                        
-                    except:
-                        print("Stream rejected") #test
-                        logging.exception([prepro_folder,file])
-                        # if not file_in_db(config.failloc,file):
-                        #     subprocess.call(["cp",prepro_folder+'/'+file,config.failloc+'/'+file]) #move the mseed file for which the process failed
-                            # The mseed file that I copy is the raw one (as downloaded from webservvice)
-                            # Does that make sense?
-                    #finally: #Is executed regardless if an exception occurs or not
-
-                else:  # The file was already processed and passed the crit
-                    crit = True
-                    st = read(config.outputloc + '/by_station/' + network
-                                  + '/' + station + '/' + network + '.' +
-                                  station + '.' + ot_fiss + '.mseed')
-                        
-    ################### create RF ##################
-                # Check if RF was already computed and if it should be
-                # computed at all, and if the waveform was retained (SNR)
-                if config.decon_meth and not\
-                    file_in_db(config.RF + '/' + network + '/' + station,
-                               network + '.' + station + '.' + ot_fiss
-                         + '.mseed') and crit == True:
-                    try:
-                        RF = createRF(st, .1)  # dt is always .1
+                # Sometimes streams contain more than 3 traces:
+                if st.count() > 3:
+                    stream = {}
+                    for tr in st:
+                        stream[tr.stats.channel[2]] = tr
+                    if "Z" in stream:
+                        st = Stream(stream["Z"], stream["R"], stream["T"])
+                    elif "3" in stream:
+                        st = Stream(stream["3"], stream["R"], stream["T"])
+                    del stream
     
-                    # Write RF
-                        if not Path(config.RF + '/' + network + '/' + station
-                                    ).is_dir():
-                            subprocess.call(["mkdir", "-p",
-                             config.RF + '/' + network + '/' + station])
-                        RF.write(config.RF + '/' + network + '/' + station +
-                                 '/' +network + '.' + station + '.' + ot_fiss
-                                 + '.mseed', format="MSEED")                        
-                        # copy info files
-                        subprocess.call(["cp", config.outputloc + '/by_station/' +
-                                         network + '/' + station +
-                                         "/info.dir",
-                                         config.RF + '/' + network + '/' +
-                                         station + '/'])
-                        subprocess.call(["cp", config.outputloc + '/by_station/' +
-                                         network + '/' + station +
-                                         "/info.bak",
-                                         config.RF + '/' + network + '/' +
-                                         station + '/'])
-                        subprocess.call(["cp", config.outputloc + '/by_station/' +
-                                         network + '/' + station +
-                                         "/info.dat",
-                                         config.RF + '/' + network + '/' +
-                                         station + '/'])
-                    except:
-                        print("RF creation failed")
-                        logging.exception([network, station, ot_fiss])
-    print("Download and preprocessing finished.")
+            # SNR CRITERIA
+                dt = st[0].stats.delta  # sampling interval
+                sampling_f = st[0].stats.sampling_rate
+
+                if config.phase == "P":
+                    st, crit, f, noisemat = QC_P(st, dt, sampling_f)
+                    if not crit:
+                        raise SNRError(noisemat)
+                elif config.phase == "S":
+                    st, crit, f, noisemat = QC_S(st, dt, sampling_f)
+                    # crit, f, noisemat = None, None, None
+                    if not crit:
+                        raise SNRError(noisemat)
+
+                # Rotate to LQT or PSS
+                if config.rot == "LQT":
+                    st, ia = rotate_LQT_min(st)
+                    # addional QC
+                    if ia < 5 or ia > 75:
+                        crit = False
+                        raise SNRError(ia)
+                    # # channel labels
+                    # P = "L"
+                    # S = "Q"
+                    # T = "T"
+                elif config.rot == "PSS":
+                    avp, avs, st = rotate_PSV(
+                        station_inv[0][0][0].latitude,
+                        station_inv[0][0][0].longitude,
+                        rayp, st)
+
+                #      WRITE FILES     #
+                st.write(outf, format="MSEED")
+                # create softlink
+                subprocess.call(["ln", "-s", '../../by_station/'+network+'/' +
+                                 station+'/'+network+'.'+station+'.'+ot_fiss
+                                 + '.mseed', outf])
+
+            # WRITE AN INFO FILE
+                # append_info: [key,value]
+                append_inf = [['magnitude', event.magnitudes[0].mag],
+                              ['magnitude_type',
+                               event.magnitudes[0].magnitude_type],
+                              ['evtlat', evtlat], ['evtlon', evtlon],
+                              ['ot_ret', ot_fiss], ['ot_all', ot_fiss],
+                              ['evt_depth', depth], ['noisemat', noisemat],
+                              ['co_f', f], ['npts', st[1].stats.npts],
+                              ['rbaz', result["backazimuth"]],
+                              ['rdelta', result["distance"]],
+                              ['rayp_s_deg', rayp_s_deg],
+                              ["onset", first_arrival],
+                              ['starttime', st[0].stats.starttime]]
+
+                with shelve.open(infof, writeback=True) as info:
+                    # Check if values are already in dict
+                    for key, value in append_inf:
+                        info.setdefault(key, []).append(value)
+
+                    info['num'] = len(info['ot_all'])
+                    info['numret'] = len(info['ot_ret'])
+                    info['dt'] = dt
+                    info['sampling_rate'] = sampling_f
+                    info['network'] = network
+                    info['station'] = station
+                    info['statlat'] = station_inv[0][0][0].latitude
+                    info['statlon'] = station_inv[0][0][0].longitude
+                    info['statel'] = station_inv[0][0][0].elevation
+                    info.sync()
+
+                print("Stream accepted. Preprocessing successful")
+            # Exceptions & logging
+            except SNRError:
+                # Don't log that
+                with shelve.open(infof, writeback=True) as info:
+                    if 'ot_all' not in info or ot_fiss not in info['ot_all']:
+                        # Don't count rejected events twice
+                        info.setdefault('ot_all', []).append(ot_fiss)
+                        info['num'] = len(info['ot_all'])
+                        info.sync()
+            except:  # all other Exceptions
+                print("Stream rejected")  # test
+                logging.exception([prepro_folder, file])
+
+        else:  # The file was already processed and passed the crit
+            crit = True
+            st = read(outf)
+
+    #       CREATE RF       #
+
+        # Check if RF was already computed and if it should be
+        # computed at all, and if the waveform was retained (SNR)
+        if config.decon_meth and not\
+            file_in_db(config.RF + '/' + network + '/' + station,
+                       network + '.' + station + '.' + ot_fiss
+                       + '.mseed') and crit:
+            try:
+                RF = createRF(st, .1)  # dt is always .1
+
+            # Write RF
+                if not Path(config.RF + '/' + network + '/' + station
+                            ).is_dir():
+                    subprocess.call(["mkdir", "-p",
+                                     config.RF + '/' + network + '/' +
+                                     station])
+
+                RF.write(config.RF + '/' + network + '/' + station +
+                         '/' + network + '.' + station + '.' + ot_fiss
+                         + '.mseed', format="MSEED")
+                # copy info files
+                subprocess.call(["cp", infof + ".dir",
+                                 config.RF + '/' + network + '/' +
+                                 station + '/'])
+                subprocess.call(["cp", infof + ".bak",
+                                 config.RF + '/' + network + '/' +
+                                 station + '/'])
+                subprocess.call(["cp", infof+".dat",
+                                 config.RF + '/' + network + '/' +
+                                 station + '/'])
+            except:
+                print("RF creation failed")
+                logging.exception([network, station, ot_fiss])
 
 
 def QC_P(st, dt, sampling_f):
@@ -656,6 +572,8 @@ class SNRError(Exception):
 
 
 def test_SNR(network, station, phase=config.phase):
+    """Test the automatic QC scripts for a certain station and writes ratings
+    in the rating file."""
     noisematls = []
     critls = []
     loc = config.outputloc[:-1] + phase + '/by_station/' + \
@@ -667,7 +585,10 @@ def test_SNR(network, station, phase=config.phase):
             continue
         dt = st[0].stats.delta
         sampling_rate = st[0].stats.sampling_rate
-        _, crit, _, noisemat = QC_S(st, dt, sampling_rate)
+        if phase == "S":
+            _, crit, _, noisemat = QC_S(st, dt, sampling_rate)
+        elif phase == "P":
+            _, crit, _, noisemat
         noisematls.append(noisemat)
         critls.append(crit)
     return noisematls, critls
