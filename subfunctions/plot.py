@@ -168,11 +168,11 @@ def plot_all_wav(phase, network, station, TAT=config.tz, dpi=300):
             x.xaxis.set_minor_locator(AutoMinorLocator(5))
             x.set_ylim(-100, 100)
             # x.yticks([])
-            x.tick_params(axis ='x', which ='both', length = 0)
+            x.tick_params(axis='x', which='both', length=0)
             x.label_outer()
         #     # x.yaxis.set_label_coords(0.63, 1.01)
         #     # x.grid(color='c', which='both', linewidth=.25)
-        #             # ax.legend(frameon=False, loc='upper left', ncol=2, handlelength=4)
+        # ax.legend(frameon=False, loc='upper left', ncol=2, handlelength=4)
         # # plt.legend(['it_max=4000', 'it_max=400'])
         plt.savefig(os.path.join(outloc + file[:-5] + "pdf"), dpi=dpi)
 
@@ -190,11 +190,11 @@ def plot_stack(network, station, dpi=300, phase=config.phase):
     # Move left y-axis and bottim x-axis to centre, passing through (0,0)
     ax.spines['bottom'].set_position("center")
     # ax.spines['left'].set_visible(False)
-    
+
     # Eliminate upper and right axes
     ax.spines['right'].set_color('none')
     ax.spines['top'].set_color('none')
-    
+
     # Show ticks in the left and lower axes only
     ax.xaxis.set_ticks_position('bottom')
     # ax.axvline(color='r')  # should plot at x = 0

@@ -78,7 +78,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
             # Note: All the traces will still have the same length
             starttime=origin_time + min_time - config.tz,
             endtime=origin_time + max_time + config.ta,
-            network="IU", station="HRV",   # data comparison with old script
+            network="BK", station="YBH",   # data comparison with old script
             # You might not want to deal with gaps in the data.
             # If this setting is
             # True, any trace with a gap/overlap will be discarded.

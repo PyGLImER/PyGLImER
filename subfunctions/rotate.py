@@ -8,7 +8,7 @@ Contains functions to rotate a stream into different domains
 """
 import numpy as np
 import subprocess
-from sufunctions import config
+from subfunctions import config
 
 
 def rotate_PSV(statlat, statlon, rayp, st):

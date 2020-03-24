@@ -258,12 +258,14 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                     elif "3" in stream:
                         st = Stream(stream["3"], stream["R"], stream["T"])
                     del stream
-    
+
             # SNR CRITERIA
                 dt = st[0].stats.delta  # sampling interval
                 sampling_f = st[0].stats.sampling_rate
 
-                if config.phase == "P":
+                if not config.QC:
+                    crit, f, noisemat = None, None, None
+                elif config.phase == "P":
                     st, crit, f, noisemat = QC_P(st, dt, sampling_f)
                     if not crit:
                         raise SNRError(noisemat)
@@ -329,8 +331,10 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                     info.sync()
 
                 print("Stream accepted. Preprocessing successful")
+
             # Exceptions & logging
-            except SNRError:
+
+            except SNRError:  # QR rejections
                 # Don't log that
                 with shelve.open(infof, writeback=True) as info:
                     if 'ot_all' not in info or ot_fiss not in info['ot_all']:
@@ -338,7 +342,9 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                         info.setdefault('ot_all', []).append(ot_fiss)
                         info['num'] = len(info['ot_all'])
                         info.sync()
-            except:  # all other Exceptions
+
+            # Everythng else that might have gone wrong
+            except:
                 print("Stream rejected")  # test
                 logging.exception([prepro_folder, file])
 
@@ -367,6 +373,7 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                 RF.write(config.RF + '/' + network + '/' + station +
                          '/' + network + '.' + station + '.' + ot_fiss
                          + '.mseed', format="MSEED")
+
                 # copy info files
                 subprocess.call(["cp", infof + ".dir",
                                  config.RF + '/' + network + '/' +
@@ -377,6 +384,9 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                 subprocess.call(["cp", infof+".dat",
                                  config.RF + '/' + network + '/' +
                                  station + '/'])
+
+            # Exception that occured in the RF creation
+            # Usually, don't happen
             except:
                 print("RF creation failed")
                 logging.exception([network, station, ot_fiss])
@@ -446,8 +456,8 @@ def QC_P(st, dt, sampling_f):
             snrr2/snrr < config.SNR_criteria[1] and\
                 snrz > config.SNR_criteria[2]:  # accept
             crit = True
-            # overwrite the old traces with the sucessfully filtered ones
 
+            # overwrite the old traces with the sucessfully filtered ones
             for tr in st:
                 if tr.stats.channel[2] == "R":
                     tr.data = frcomp
@@ -491,10 +501,13 @@ def QC_S(st, dt, sampling_f):
     ptc1 = round((config.tz-30)/dt)
     ptc2 = round((config.tz-10)/dt)
     nptc = ptc2-ptc1
+
     # filter
     # matrix to save SNR
     noisemat = np.zeros((len(config.highco), 4), dtype=float)
-# At some point, I might also want to consider to change the lowcof
+
+    # Filter
+    # At some point, I might also want to consider to change the lowcof
     for ii, hf in enumerate(config.highco):
         ftcomp = filter.bandpass(stream["T"], .05,
                                  hf, sampling_f, corners=2, zerophase=True)
@@ -524,7 +537,8 @@ def QC_S(st, dt, sampling_f):
         noisemat[ii, 1] = snrr2/snrr
         noisemat[ii, 2] = snrz
         noisemat[ii, 3] = snrc
-# accept if
+
+        # accept if
         if snrr > config.SNR_criteria[0] and\
             snrr2/snrr < config.SNR_criteria[1] and\
             snrz > config.SNR_criteria[2] and\
@@ -533,6 +547,7 @@ def QC_S(st, dt, sampling_f):
             # max(frcomp) == max(frcomp[round((config.tz-2)/dt):
             #                           round((config.tz+10)/dt)]):
             crit = True
+
             # overwrite the old traces with the sucessfully filtered ones
             for tr in st:
                 if tr.stats.channel[2] == "R":

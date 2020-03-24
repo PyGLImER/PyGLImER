@@ -10,15 +10,14 @@ toolset to create RFs and RF stacks
 
 import numpy as np
 from subfunctions import config
-from subfunctions.deconvolve import it, damped, waterlevel
-import subfunctions.config
+from subfunctions.deconvolve import it, spectraldivision
 from obspy import read
 import shelve
 import os
-from obspy.taup import velocity_model, velocity_layer
-from math import floor
-from pkg_resources import resource_filename
-import obspy.core
+# from obspy.taup import velocity_model, velocity_layer
+# from math import floor
+# from pkg_resources import resource_filename
+# import obspy.core
 from scipy import interpolate
 from scipy.signal.windows import hann
 
@@ -26,7 +25,17 @@ _MODEL_CACHE = {}
 DEG2KM = 111.2
 
 
-def createRF(st, dt, phase=config.phase, shift=config.tz):
+def createRF(st, dt, phase=config.phase, shift=config.tz,
+             method=config.decon_meth):
+    """Creates a receiver function with the defined method from an obspy
+    stream.
+    INPUT:
+        st: stream
+        dt: sampling interval (s)
+        phase: "S" for Sp or "P" for Ps
+        shift: time shift of the main arrival
+        method: deconvolution method, "waterlevel", 'dampedf', 'it', or
+        'fqd'"""
     RF = st.copy()
     # delete the old traces
     while RF.count() > 1:
@@ -60,17 +69,21 @@ def createRF(st, dt, phase=config.phase, shift=config.tz):
     elif phase == "S" and "V" in stream:
         u = stream["P"]
         v = stream["V"]
-    if config.decon_meth == "it":
+    if method == "it":
         RF[0].data = it(v, u, dt, shift=shift, width=1.25)[0]
-    elif config.decon_meth == "dampedf":
-        RF[0].data = damped(v, u)
-    elif config.decon_meth == "waterlevel":
-        RF[0].data = waterlevel(v, u)
+    elif method == "dampedf":
+        _, RF[0].data = spectraldivision(v, u, dt, shift, "con", phase=phase)
+    elif method == "waterlevel":
+        _, RF[0].data = spectraldivision(v, u, dt, shift, "wat", phase=phase)
+    elif method == 'fqd':
+        _, RF[0].data = spectraldivision(v, u, dt, shift, "fqd", phase=phase)
     RF.normalize()
     return RF
 
 
 def stackRF(network, station, phase=config.phase):
+    """Creates a moveout corrected receiver function stack of the
+    requested station"""
     # extract data
     ioloc = config.RF[:-1] + phase + '/' + network + '/' + station
     data = []

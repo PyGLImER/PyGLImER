@@ -79,7 +79,7 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
             continue
 
         # create RF
-        st_f = st.filter('bandpass', freqmin=.03, freqmax=.33, zerophase=True)
+        st_f = st.filter('bandpass', freqmin=.05, freqmax=hf, zerophase=True)
         _, _, PSV = rotate_PSV(statlat, statlon, rayp, st_f)
         RF = createRF(PSV, dt, phase)
 
@@ -279,7 +279,8 @@ def sort_auto_rated(network, station, phase=config.phase):
             subprocess.call(["cp", inloc + file, inloc_RF + 'ret/' + file])
 
 
-def auto_rate_stack(network, station, phase=config.phase):
+def auto_rate_stack(network, station, phase=config.phase,
+                    decon_meth=config.decon_meth, rot="LQT_min"):
     """Does a quality control on the downloaded files and shows a plot of the
     stacked receiver function. Rotation into PSS. Just meant to facilitate
     the decision for QC parameters (config.SNR_criteria).
@@ -307,17 +308,26 @@ def auto_rate_stack(network, station, phase=config.phase):
             ii = info["starttime"].index(st[0].stats.starttime)
             rayp = info["rayp_s_deg"][ii]/111319.9
             ot = info["ot_ret"][ii]
-        _, _, st = rotate_PSV(statlat, statlon, rayp, st)
-        # st, rat = rotate_LQT(st)
-        # if rat > 0.5 and rat < 2:  # The PCA did not work properly, L & Q too similar
-        #      ret = ret - 1
-        #      continue
-        # st, ia = rotate_LQT_min(st)
-        # if ia > 70 or ia < 5:
-        #     ret = ret - 1
-        #     continue
-        # st.trim(st[0].stats.starttime, st[0].stats.starttime+30)  # noise RF test
-        RF = createRF(st, dt)
+        if rot == "PSS":
+            _, _, st = rotate_PSV(statlat, statlon, rayp, st)
+        elif rot == "LQT":
+            st, rat = rotate_LQT(st)
+            if rat > 0.5 and rat < 2:
+                # The PCA did not work properly, L & Q too similar
+                ret = ret - 1
+                continue
+        elif rot == "LQT_min":
+            st, ia = rotate_LQT_min(st)
+            if ia > 70 or ia < 5:
+                # Unrealistic incidence angle
+                ret = ret - 1
+                continue
+        else:
+            raise Exception("Unknown rotation method rot=,", rot, """"Use
+                            either 'PSS', 'LQT', or 'LQT_min'.""")
+        # noise RF test
+        # st.trim(st[0].stats.starttime, st[0].stats.starttime+30)
+        RF = createRF(st, dt, phase=phase, method=decon_meth)
         RFs.append(RF[0].data)
         RF.write(outloc + ot + '.mseed', format="MSEED")
     print("N files that were not 3/4: ", diff, "N retained: ", ret)
