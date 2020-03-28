@@ -7,16 +7,17 @@ Created on Thu Apr 25 14:14:47 2019
 """
 from obspy.core import UTCDateTime
 from obspy.taup import TauPyModel  # arrival times in 1D v-model
+import numpy as np
 
 # %% general settings
 # Define if you want to download new files or use old
-evtcat = None  # either None (downloads new) or file
-wavdownload = True  # Bool - true for completing download, false: only
+evtcat = "2020-02-29 15:49:43.388928"  # either None (downloads new) or file
+wavdownload = False  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
-decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
+decon_meth = None  # it=iterative deconvolution (Ligorria & Ammon, 1999)
 # dampedf: damped frequency deconvolution
-# fqd: frequency dependent damping
+# fqd: frequency dependent damping - not a good choice for SRF
 # waterlevel Langston (1977)
 # False/None: don't create RF
 
@@ -84,7 +85,7 @@ re_clients = ["IRIS", "NCEDC"]  # "ORFEUS", "ODC", "GFZ", "SCEDC", "TEXNET",
 
 # Rotation #
 # "RTZ","LQT","PSS"
-rot = "PSS"
+rot = "RTZ"
 
 # time window before and after first arrival
 if phase == "P":
@@ -105,15 +106,19 @@ taper_type = 'hann'
 
 # low-cut-off frequencies for SNR check
 lowco = [.03, .1, .5]  # only for PRF
-# highco = np.linspace(.75, .25, 10)
-highco = [.5, .33, .25]  # only for SRF
+lowcoS = 0.01  # 0.05 lowco frequency for SRF
+# highco = np.linspace(.5, .25, 10)
+highco = [0.175]  # Rychert et al
+# highco = [.5, .33, .25]  # only for SRF
 
 # SNR criteria for QC
 QC = False  # Do quality control or not
 if phase == "P":
     SNR_criteria = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
 elif phase == "S":
-    SNR_criteria = [7.5, 0.2, 1.75, .66]
+    # SNR_criteria = [7.5, .2, 0.2, .66]
+    # SNR_criteria = [7.5, .2, 0.2, 1]
+    SNR_criteria = [32.5, 1, .2, 5]  # to reproduce Rychert
     # [primary/noise, sidelobe/primary, r/z(primary), r/z conversions]
 
 # %% DON'T change program will change automatically!

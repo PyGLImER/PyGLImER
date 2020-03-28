@@ -23,12 +23,13 @@ from subfunctions.plot import plot_stack
 from subfunctions.rotate import rotate_PSV, rotate_LQT,\
                                             rotate_LQT_min
 from obspy.taup import TauPyModel
+import time
 
 rating = {}  # mutable object
 
 
 def rate(network, station, onset=config.tz, phase="S", review=False,
-         retained=False):
+         retained=False, decon_meth=config.decon_meth):
     """"Module to rate and review the quality of waveform from the given
     station. Shows the automatic rating from QC_S
     INPUT:
@@ -49,6 +50,11 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
         except IsADirectoryError as e:
             print(e)
             continue
+
+        # List for taper coordinates
+        if "taper" in rating:
+            del rating["taper"]
+        rating["taper"] = []
         st.normalize()
         y = []
         ch = []
@@ -79,9 +85,9 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
             continue
 
         # create RF
-        st_f = st.filter('bandpass', freqmin=.05, freqmax=hf, zerophase=True)
+        st_f = st.filter('bandpass', freqmin=.03, freqmax=hf, zerophase=True)
         _, _, PSV = rotate_PSV(statlat, statlon, rayp, st_f)
-        RF = createRF(PSV, dt, phase)
+        RF = createRF(PSV, dt, phase, method=decon_meth)
 
         # TauPy lookup
         arrivals = model.get_travel_times(evt_depth,
@@ -99,6 +105,7 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
             ph_time.append(arr.time-primary_time)
 
         # waveform data
+        st.sort()
         for tr in st:
             y.append(tr.data)
             ch.append(tr.stats.channel[2])
@@ -106,72 +113,23 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
         # shorten vector
         # create time vector
         t = np.linspace(0-onset, tr.stats.npts*tr.stats.delta-onset, len(y[0]))
-        plt.close('all')
-        fig, ax = plt.subplots(4, 1, sharex=True)
-        ax[1].set_ylabel(starttime)
-        colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w', '.75', '.5', '.25',
-                  '#FF6666', '#FF6633', '#FFFF66', '#66FF66', '#66CCCC',
-                  '#00FFFF', '#3399FF', '#9966FF', '#FF66FF']
-        for ii, x in enumerate(ax[:3]):
-            x.plot(t, y[ii][:], color="k")
-            for jj, t2 in enumerate(ph_time):
-                x.axvline(x=t2, linewidth=0.35, label=ph_name[jj],
-                          color=colors[jj])
-            x.set_title(ch[ii])
-            x.legend(loc='upper right', prop={"size": 8})
-            x.yaxis.set_major_formatter(ScalarFormatter())
-            x.yaxis.major.formatter._useMathText = True
-            x.xaxis.set_major_formatter(ScalarFormatter())
-            x.xaxis.major.formatter._useMathText = True
-            x.yaxis.set_minor_locator(AutoMinorLocator(5))
-            x.xaxis.set_minor_locator(AutoMinorLocator(5))
-            # x.yaxis.set_label_coords(0.63, 1.01)
-            x.yaxis.tick_right()
-            # x.grid(color='c', which='both', linewidth=.25)
-            x.set_ylabel('Amplitude')
-        # if old:
-        #     ax[2].text(0, 1, old,
-        #                bbox=dict(facecolor='green', alpha=0.5))
-        #     ax[2].set_xlabel(['time in s, old rating', old])
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-        ax[2].text(0.05, 0.95, str(noisemat), transform=ax[2].transAxes,
-                   fontsize=10, verticalalignment='top', bbox=props)
-        # show RF
-        ax[3].plot(t, -np.flip(RF[0].data), color='k')
-        ax[3].set_xlabel('time in s')
-        # textbox
-        if old:
-            textstr = '\n'.join((
-                r'$\Delta=%.2f$' % (rdelta, ),
-                r'$\mathrm{mag}=%.2f$' % (mag, ),
-                r'$\mathrm{rat_{man}}=%.2f$' % (int(old), ),
-                r'$\mathrm{rat_{auto}}=%.2f$' % (crit, )))
-        else:
-            textstr = '\n'.join((
-                r'$\Delta=%.2f$' % (rdelta, ),
-                r'$\mathrm{mag}=%.2f$' % (mag, ),
-                r'$\mathrm{rat_{auto}}=%.2f$' % (crit, )))
-        # place a text box in upper left in axes coords
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-        ax[3].text(0.05, 0.95, textstr, transform=ax[3].transAxes, fontsize=10,
-                   verticalalignment='top', bbox=props)
-        ax[3].yaxis.set_major_formatter(ScalarFormatter())
-        ax[3].yaxis.major.formatter._useMathText = True
-        ax[3].xaxis.set_major_formatter(ScalarFormatter())
-        ax[3].xaxis.major.formatter._useMathText = True
-        ax[3].yaxis.set_minor_locator(AutoMinorLocator(5))
-        ax[3].xaxis.set_minor_locator(AutoMinorLocator(5))
-        # x.yaxis.set_label_coords(0.63, 1.01)
-        ax[3].yaxis.tick_right()
-        # x.grid(color='c', which='both', linewidth=.25)
-        ax[3].set_ylabel('Amplitude')
-        figManager = plt.get_current_fig_manager()
-        figManager.window.showMaximized()
-        print("1: discard, 2: ok, 3: good, 4: very good, 5: keep old rating",
-              "quit with q")
-        fig.canvas.mpl_connect('key_press_event', ontype)
+
+        # plot
+        fig, ax = draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat,
+                            RF, old, rdelta, mag, crit)
         while not plt.waitforbuttonpress(30):
-            time.sleep(0.25)
+            # Taper when input is there
+            if len(rating["taper"]) == 2:
+                if rating["taper"][0] < rating["taper"][1]:
+                    trim = [rating["taper"][0], rating["taper"][1]]
+                else:
+                    trim = [rating["taper"][1], rating["taper"][0]]
+                trim[0] = trim[0] - t[0]
+                trim[1] = t[-1] - trim[1]
+                RF = createRF(PSV, dt, phase, method=decon_meth, trim=trim)
+                draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF,
+                          old, rdelta, mag, crit)
+                rating["taper"].clear()
         # fig.canvas.mpl_connect('key_press_event', ontype)
         if rating["k"] == "q":
             break
@@ -179,9 +137,86 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
             w_file(network, station, starttime)
 
 
+def draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old, rdelta,
+              mag, crit):
+    """Draws the plot for the rate function"""
+    plt.close('all')
+    fig, ax = plt.subplots(4, 1, sharex=False)
+    ax[1].set_ylabel(starttime)
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w', '.75', '.5', '.25',
+              '#FF6666', '#FF6633', '#FFFF66', '#66FF66', '#66CCCC',
+              '#00FFFF', '#3399FF', '#9966FF', '#FF66FF']
+    for ii, x in enumerate(ax[:3]):
+        x.plot(t, y[ii][:], color="k")
+        for jj, t2 in enumerate(ph_time):
+            x.axvline(x=t2, linewidth=0.35, label=ph_name[jj],
+                      color=colors[jj])
+        x.set_title(ch[ii])
+        x.legend(loc='upper right', prop={"size": 8})
+        x.yaxis.set_major_formatter(ScalarFormatter())
+        x.yaxis.major.formatter._useMathText = True
+        x.xaxis.set_major_formatter(ScalarFormatter())
+        x.xaxis.major.formatter._useMathText = True
+        x.yaxis.set_minor_locator(AutoMinorLocator(5))
+        x.xaxis.set_minor_locator(AutoMinorLocator(5))
+        # x.yaxis.set_label_coords(0.63, 1.01)
+        x.yaxis.tick_right()
+        # x.grid(color='c', which='both', linewidth=.25)
+        x.set_ylabel('Amplitude')
+    # if old:
+    #     ax[2].text(0, 1, old,
+    #                bbox=dict(facecolor='green', alpha=0.5))
+    #     ax[2].set_xlabel(['time in s, old rating', old])
+    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+    ax[2].text(0.05, 0.95, str(noisemat), transform=ax[2].transAxes,
+               fontsize=10, verticalalignment='top', bbox=props)
+    # show RF
+    ax[3].plot(t, -np.flip(RF[0].data), color='k')
+    ax[3].set_xlabel('time in s')
+    ax[3].set_xlim(-5, 40)
+    # textbox
+    if old:
+        textstr = '\n'.join((
+            r'$\Delta=%.2f$' % (rdelta, ),
+            r'$\mathrm{mag}=%.2f$' % (mag, ),
+            r'$\mathrm{rat_{man}}=%.2f$' % (int(old), ),
+            r'$\mathrm{rat_{auto}}=%.2f$' % (crit, )))
+    else:
+        textstr = '\n'.join((
+            r'$\Delta=%.2f$' % (rdelta, ),
+            r'$\mathrm{mag}=%.2f$' % (mag, ),
+            r'$\mathrm{rat_{auto}}=%.2f$' % (crit, )))
+    # place a text box in upper left in axes coords
+    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+    ax[3].text(0.05, 0.95, textstr, transform=ax[3].transAxes, fontsize=10,
+               verticalalignment='top', bbox=props)
+    ax[3].yaxis.set_major_formatter(ScalarFormatter())
+    ax[3].yaxis.major.formatter._useMathText = True
+    ax[3].xaxis.set_major_formatter(ScalarFormatter())
+    ax[3].xaxis.major.formatter._useMathText = True
+    ax[3].yaxis.set_minor_locator(AutoMinorLocator(5))
+    ax[3].xaxis.set_minor_locator(AutoMinorLocator(5))
+    # x.yaxis.set_label_coords(0.63, 1.01)
+    ax[3].yaxis.tick_right()
+    # x.grid(color='c', which='both', linewidth=.25)
+    ax[3].set_ylabel('Amplitude')
+    figManager = plt.get_current_fig_manager()
+    figManager.window.showMaximized()
+    fig.canvas.mpl_connect('key_press_event', ontype)
+    fig.canvas.mpl_connect('button_press_event', onclick)
+    print("1: discard, 2: ok, 3: good, 4: very good, 5: keep old rating",
+          "quit with q. Click on figure to taper (first left then right)")
+    return fig, ax
+
+
 def ontype(event):
     """Deals with keyboard input"""
     rating["k"] = event.key
+
+
+def onclick(event):
+    """Deals with mouse input"""
+    rating["taper"].append(event.xdata)
 
 
 def w_file(network, station, starttime):
@@ -248,7 +283,7 @@ def automatic_rate(network, station, phase="S"):
         # crit, hf, noisemat = None, None, None
         with shelve.open(network + "." + station + "rating") as f:
             f[starttime + "_auto"] = crit
-            if int(f[starttime]) < 3 and crit:
+            if starttime in f and int(f[starttime]) < 3 and crit:
                 diff = diff + 1
             if crit:
                 ret = ret + 1
@@ -299,6 +334,9 @@ def auto_rate_stack(network, station, phase=config.phase,
     if Path(outloc).is_dir():
         subprocess.call(['rm', '-rf', outloc])
     subprocess.call(['mkdir', '-p', outloc])
+    subprocess.call(['cp', info_file+'.bak', outloc])
+    subprocess.call(['cp', info_file+'.dir', outloc])
+    subprocess.call(['cp', info_file+'.dat', outloc])
     RFs = []
     for jj, st in enumerate(sts):
         if not crits[jj]:
@@ -308,6 +346,11 @@ def auto_rate_stack(network, station, phase=config.phase,
             ii = info["starttime"].index(st[0].stats.starttime)
             rayp = info["rayp_s_deg"][ii]/111319.9
             ot = info["ot_ret"][ii]
+            evt_depth = info["evt_depth"][ii]
+        # to reproduce Rychert et al (2007)
+        if int(ot[:4]) > 2002 or evt_depth > 1.5e5:
+            ret = ret-1
+            continue
         if rot == "PSS":
             _, _, st = rotate_PSV(statlat, statlon, rayp, st)
         elif rot == "LQT":
@@ -326,14 +369,18 @@ def auto_rate_stack(network, station, phase=config.phase,
             raise Exception("Unknown rotation method rot=,", rot, """"Use
                             either 'PSS', 'LQT', or 'LQT_min'.""")
         # noise RF test
-        # st.trim(st[0].stats.starttime, st[0].stats.starttime+30)
-        RF = createRF(st, dt, phase=phase, method=decon_meth)
+        trim = [40, 90]
+        # st.trim(st[0].stats.starttime+trim[0], st[0].stats.endtime-trim[1])
+        st.taper(0.5, side='left', max_length=trim[0])
+        st.taper(0.5, side='right', max_length=trim[1])
+        RF = createRF(st, dt, phase=phase, method=decon_meth,
+                      shift=config.tz)
         RFs.append(RF[0].data)
         RF.write(outloc + ot + '.mseed', format="MSEED")
+        # with shelve.open(outloc+"info", writeback=True) as info:
+        #     info["starttime"][ii] = st[0].stats.starttime
+        #     info.sync()
     print("N files that were not 3/4: ", diff, "N retained: ", ret)
-    subprocess.call(['cp', info_file+'.bak', outloc])
-    subprocess.call(['cp', info_file+'.dir', outloc])
-    subprocess.call(['cp', info_file+'.dat', outloc])
     sta = station + "/test"
     plot_stack(network, sta, phase=phase)
     # plot unmigrated stack

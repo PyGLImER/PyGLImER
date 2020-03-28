@@ -26,7 +26,7 @@ DEG2KM = 111.2
 
 
 def createRF(st, dt, phase=config.phase, shift=config.tz,
-             method=config.decon_meth):
+             method=config.decon_meth, trim=False):
     """Creates a receiver function with the defined method from an obspy
     stream.
     INPUT:
@@ -35,15 +35,28 @@ def createRF(st, dt, phase=config.phase, shift=config.tz,
         phase: "S" for Sp or "P" for Ps
         shift: time shift of the main arrival
         method: deconvolution method, "waterlevel", 'dampedf', 'it', or
-        'fqd'"""
+        'fqd'
+        trim: taper/truncate. Given as list [a, b] in s - left,right"""
     RF = st.copy()
-    # delete the old traces
+    st.normalize()
     while RF.count() > 1:
         del RF[1]
     RF[0].stats.channel = phase + "RF"
+
+    # taper traces
+    if trim:
+        if not type(trim) == list and len(trim) != 2:
+            raise Exception("""Trim has to be given as list with two elements
+                            [a, b]. Where a and b are the taper length in s
+                            on the left and right side, respectively.""")
+        st.taper(0.5, max_length=trim[0], side='left')
+        st.taper(0.5, max_length=trim[1], side='right')
+
+    # Identify components
     stream = {}
     for tr in st:
         stream[tr.stats.channel[2]] = tr.data
+
     # define denominator v and enumerator u
     if phase == "P" and "R" in stream:
         if "Z" in stream:
@@ -69,15 +82,22 @@ def createRF(st, dt, phase=config.phase, shift=config.tz,
     elif phase == "S" and "V" in stream:
         u = stream["P"]
         v = stream["V"]
+
+    # Deconvolution
     if method == "it":
-        RF[0].data = it(v, u, dt, shift=shift, width=1.25)[0]
+        if phase == "S":
+            width = 0.75
+        elif phase == "P":
+            width = 2.5
+        RF[0].data = it(v, u, dt, shift=shift, width=width)[0]
     elif method == "dampedf":
-        _, RF[0].data = spectraldivision(v, u, dt, shift, "con", phase=phase)
+        RF[0].data, _ = spectraldivision(v, u, dt, shift, "con", phase=phase)
     elif method == "waterlevel":
-        _, RF[0].data = spectraldivision(v, u, dt, shift, "wat", phase=phase)
+        RF[0].data, _ = spectraldivision(v, u, dt, shift, "wat", phase=phase)
     elif method == 'fqd':
-        _, RF[0].data = spectraldivision(v, u, dt, shift, "fqd", phase=phase)
-    RF.normalize()
+        RF[0].data, _ = spectraldivision(v, u, dt, shift, "fqd", phase=phase)
+    else:
+        raise Exception(method, "is no valid deconvolution method.")
     return RF
 
 
@@ -138,12 +158,13 @@ def moveout(data, st, onset, rayp, phase):
     if phase.upper() == "S":
         data = np.flip(data)
         data = -data
+        tas = -tas
     RF = data[tas:tas+len(z)]
     zq = np.arange(0, max(z), 0.3)
     # interpolate RF
-    # RF = np.interp(zq, z, RF)
-    tck = interpolate.splrep(z, RF)
-    RF = interpolate.splev(zq, tck)
+    RF = np.interp(zq, z, RF)
+    # tck = interpolate.splrep(z, RF)
+    # RF = interpolate.splev(zq, tck)
     # Taper the last 3.5 seconds of the RF to avoid discontinuities in stack
     tap = hann(round(7/st.delta))
     tap = tap[round(len(tap)/2):]
@@ -258,7 +279,7 @@ def load_model(fname='iasp91.dat'):
     """
     Load model from file.
 
-    :param fname: path to model file or 'iasp91'
+    :param fname: filename of model in data or 'iasp91'
     :return: `SimpleModel` instance
 
     The model file should have 4 columns with depth, vp, vs, n.

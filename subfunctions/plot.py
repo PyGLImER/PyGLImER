@@ -204,7 +204,7 @@ def plot_stack(network, station, dpi=300, phase=config.phase):
     # ax.set_position([.5, .5, .1, .1])
     x = ax
     x.set_xlim(0, 250)
-    x.set_ylim(-.5, .5)
+    x.set_ylim(-.3, .3)
     x.xaxis.set_major_formatter(ScalarFormatter())
     x.yaxis.major.formatter._useMathText = True
     # x.yaxis.set_major_formatter(plt.NullFormatter())

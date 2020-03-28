@@ -254,9 +254,9 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                     for tr in st:
                         stream[tr.stats.channel[2]] = tr
                     if "Z" in stream:
-                        st = Stream(stream["Z"], stream["R"], stream["T"])
+                        st = Stream([stream["Z"], stream["R"], stream["T"]])
                     elif "3" in stream:
-                        st = Stream(stream["3"], stream["R"], stream["T"])
+                        st = Stream([stream["3"], stream["R"], stream["T"]])
                     del stream
 
             # SNR CRITERIA
@@ -487,15 +487,15 @@ def QC_S(st, dt, sampling_f):
         stream[tr.stats.channel[2]] = tr.data
 
     ptn1 = round(5/dt)  # Hopefully relatively silent time
-    ptn2 = round((config.tz-50)/dt)
+    ptn2 = round((config.tz-20)/dt)
     nptn = ptn2-ptn1
     # First part of the signal
     pts1 = round(config.tz/dt)  # theoretical arrival time
     pts2 = round((config.tz+7.5)/dt)
     npts = pts2-pts1
     # Second part of the signal
-    ptp1 = round((config.tz+20)/dt)
-    ptp2 = round((config.tz+30)/dt)
+    ptp1 = round((config.tz+15)/dt)
+    ptp2 = round((config.tz+60)/dt)
     nptp = ptp2-ptp1
     # part where the Sp converted arrival should be strong
     ptc1 = round((config.tz-30)/dt)
@@ -509,15 +509,15 @@ def QC_S(st, dt, sampling_f):
     # Filter
     # At some point, I might also want to consider to change the lowcof
     for ii, hf in enumerate(config.highco):
-        ftcomp = filter.bandpass(stream["T"], .05,
+        ftcomp = filter.bandpass(stream["T"], config.lowcoS,
                                  hf, sampling_f, corners=2, zerophase=True)
-        frcomp = filter.bandpass(stream["R"], .05,
+        frcomp = filter.bandpass(stream["R"], config.lowcoS,
                                  hf, sampling_f, corners=2, zerophase=True)
         if "Z" in stream:
-            fzcomp = filter.bandpass(stream["Z"], .05, hf,
+            fzcomp = filter.bandpass(stream["Z"], config.lowcoS, hf,
                                      sampling_f, corners=2, zerophase=True)
         elif "3" in stream:
-            fzcomp = filter.bandpass(stream["3"], .05, hf,
+            fzcomp = filter.bandpass(stream["3"], config.lowcoS, hf,
                                      sampling_f, corners=2, zerophase=True)
 
         # Compute the SNR for given frequency bands
