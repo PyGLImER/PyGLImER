@@ -19,6 +19,7 @@ decon_meth = None  # it=iterative deconvolution (Ligorria & Ammon, 1999)
 # dampedf: damped frequency deconvolution
 # fqd: frequency dependent damping - not a good choice for SRF
 # waterlevel Langston (1977)
+# multit - for multitaper (Helffrich, 2006)
 # False/None: don't create RF
 
 # %% P or S ####
@@ -118,7 +119,7 @@ if phase == "P":
 elif phase == "S":
     # SNR_criteria = [7.5, .2, .66]
     # SNR_criteria = [7.5, .2, 1]
-    SNR_criteria = [30, .5, 1]  # to reproduce Rychert
+    SNR_criteria = [45, .5, 1]  # to reproduce Rychert
     # [primary/noise, sidelobe/primary, r/z(primary), r/z conversions]
 
 # %% DON'T change program will change automatically!

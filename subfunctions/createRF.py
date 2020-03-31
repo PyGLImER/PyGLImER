@@ -10,7 +10,7 @@ toolset to create RFs and RF stacks
 
 import numpy as np
 from subfunctions import config
-from subfunctions.deconvolve import it, spectraldivision
+from subfunctions.deconvolve import it, spectraldivision, multitaper
 from obspy import read
 import shelve
 import os
@@ -34,8 +34,10 @@ def createRF(st_in, dt, phase=config.phase, shift=config.tz,
         dt: sampling interval (s)
         phase: "S" for Sp or "P" for Ps
         shift: time shift of the main arrival
-        method: deconvolution method, "waterlevel", 'dampedf', 'it', or
-        'fqd'
+        method: deconvolution method, "waterlevel", 'dampedf' for constant
+        damping level, 'it' for iterative time domain deconvoltuion, 'multit'
+        for multitaper or 'fqd' for frequency dependently damped spectral
+        division.
         trim: taper/truncate. Given as list [a, b] in s - left,right"""
     st = st_in.copy()
     RF = st.copy()
@@ -107,6 +109,8 @@ def createRF(st_in, dt, phase=config.phase, shift=config.tz,
         RF[0].data, _ = spectraldivision(v, u, dt, shift, "wat", phase=phase)
     elif method == 'fqd':
         RF[0].data, _ = spectraldivision(v, u, dt, shift, "fqd", phase=phase)
+    elif method == 'multit':
+        RF[0].data, _, _, _ = multitaper(v, u, dt, shift, "fqd")
     else:
         raise Exception(method, "is no valid deconvolution method.")
     return RF
