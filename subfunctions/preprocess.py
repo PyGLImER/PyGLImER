@@ -487,24 +487,24 @@ def QC_S(st, dt, sampling_f):
         stream[tr.stats.channel[2]] = tr.data
 
     ptn1 = round(5/dt)  # Hopefully relatively silent time
-    ptn2 = round((config.tz-20)/dt)
+    ptn2 = round((config.tz-5)/dt)
     nptn = ptn2-ptn1
     # First part of the signal
     pts1 = round(config.tz/dt)  # theoretical arrival time
-    pts2 = round((config.tz+7.5)/dt)
+    pts2 = round((config.tz+10)/dt)
     npts = pts2-pts1
     # Second part of the signal
-    ptp1 = round((config.tz+15)/dt)
-    ptp2 = round((config.tz+60)/dt)
+    ptp1 = round((config.tz+10)/dt)
+    ptp2 = round((config.tz+25)/dt)
     nptp = ptp2-ptp1
     # part where the Sp converted arrival should be strong
-    ptc1 = round((config.tz-30)/dt)
+    ptc1 = round((config.tz-50)/dt)
     ptc2 = round((config.tz-10)/dt)
     nptc = ptc2-ptc1
 
     # filter
     # matrix to save SNR
-    noisemat = np.zeros((len(config.highco), 4), dtype=float)
+    noisemat = np.zeros((len(config.highco), 3), dtype=float)
 
     # Filter
     # At some point, I might also want to consider to change the lowcof
@@ -528,21 +528,19 @@ def QC_S(st, dt, sampling_f):
         snrr2 = (sum(np.square(frcomp[ptp1:ptp2]))/nptp)\
             / (sum(np.square(frcomp[ptn1:ptn2]))/nptn)
         # horizontal vs vertical
-        snrz = (sum(np.square(frcomp[pts1:pts2]))/npts)\
-            / (sum(np.square(fzcomp[pts1:pts2]))/npts)
+        # snrz = (sum(np.square(frcomp[pts1:pts2]))/npts)\
+        #     / (sum(np.square(fzcomp[pts1:pts2]))/npts)
         snrc = (sum(np.square(frcomp[ptc1:ptc2]))/nptc)\
             / sum(np.square(fzcomp[ptc1:ptc2])/nptc)
 
         noisemat[ii, 0] = snrr
         noisemat[ii, 1] = snrr2/snrr
-        noisemat[ii, 2] = snrz
-        noisemat[ii, 3] = snrc
+        noisemat[ii, 2] = snrc
 
         # accept if
         if snrr > config.SNR_criteria[0] and\
             snrr2/snrr < config.SNR_criteria[1] and\
-            snrz > config.SNR_criteria[2] and\
-                snrc < config.SNR_criteria[3]:
+                snrc < config.SNR_criteria[2]:
             # This bit didn't give good results
             # max(frcomp) == max(frcomp[round((config.tz-2)/dt):
             #                           round((config.tz+10)/dt)]):

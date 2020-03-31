@@ -327,7 +327,7 @@ def spectraldivision(v, u, ndt, tshift, regul, phase=config.phase):
 
     # waterlevel regularization
     if water:
-        eps = max(noise.real)*10
+        eps = max(noise.real)
         # eps = 10
         # eps = 100  # constant wl to reproduce Rychert et al
         den[den.real < eps] = eps

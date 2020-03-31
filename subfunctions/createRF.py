@@ -25,7 +25,7 @@ _MODEL_CACHE = {}
 DEG2KM = 111.2
 
 
-def createRF(st, dt, phase=config.phase, shift=config.tz,
+def createRF(st_in, dt, phase=config.phase, shift=config.tz,
              method=config.decon_meth, trim=False):
     """Creates a receiver function with the defined method from an obspy
     stream.
@@ -37,6 +37,7 @@ def createRF(st, dt, phase=config.phase, shift=config.tz,
         method: deconvolution method, "waterlevel", 'dampedf', 'it', or
         'fqd'
         trim: taper/truncate. Given as list [a, b] in s - left,right"""
+    st = st_in.copy()
     RF = st.copy()
     st.normalize()
     while RF.count() > 1:
@@ -49,8 +50,18 @@ def createRF(st, dt, phase=config.phase, shift=config.tz,
             raise Exception("""Trim has to be given as list with two elements
                             [a, b]. Where a and b are the taper length in s
                             on the left and right side, respectively.""")
-        st.taper(0.5, max_length=trim[0], side='left')
-        st.taper(0.5, max_length=trim[1], side='right')
+        # Hann taper with 7.5s taper window
+        tap = hann(round(15/dt))
+        taper = np.ones(st[0].stats.npts)
+        taper[:int((trim[0]-7.5)/dt)] = float(0)
+        taper[-int((trim[1]-7.5)/dt):] = float(0)
+        taper[int((trim[0]-7.5)/dt):int(trim[0]/dt)] = tap[:round(7.5/dt)]
+        taper[-int(trim[1]/dt):-int((trim[1]-7.5)/dt)] =\
+            tap[-round(7.5/dt):]
+        for tr in st:
+            tr.data = np.multiply(tr.data, taper)
+        # st.taper(0.5, max_length=trim[0], side='left')
+        # st.taper(0.5, max_length=trim[1], side='right')
 
     # Identify components
     stream = {}
@@ -86,7 +97,7 @@ def createRF(st, dt, phase=config.phase, shift=config.tz,
     # Deconvolution
     if method == "it":
         if phase == "S":
-            width = 0.75
+            width = 1.25  # .75
         elif phase == "P":
             width = 2.5
         RF[0].data = it(v, u, dt, shift=shift, width=width)[0]
@@ -152,9 +163,9 @@ def moveout(data, st, onset, rayp, phase):
     htab, dt = dt_table(rayp)
     # queried times
     tq = np.arange(0, round(max(dt), 1), st.delta)
-    z = np.interp(tq, dt, htab)  # Depth array
-    # tck = interpolate.splrep(dt, htab)
-    # z = interpolate.splev(tq, tck)
+    # z = np.interp(tq, dt, htab)  # Depth array
+    tck = interpolate.splrep(dt, htab)
+    z = interpolate.splev(tq, tck)
     if phase.upper() == "S":
         data = np.flip(data)
         data = -data

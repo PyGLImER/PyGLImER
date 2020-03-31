@@ -1,11 +1,11 @@
 *.log
 README-POINTS
-waveforms/
-stations/
-preprocessed/
-rejected/
-event_catalogues/
-figures/
+waveforms*
+stations*
+preprocessed*
+rejected*
+event_catalogues*
+figures*
 *.xml
 *.mseed
 *cache*

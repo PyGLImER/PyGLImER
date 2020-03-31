@@ -106,9 +106,9 @@ taper_type = 'hann'
 
 # low-cut-off frequencies for SNR check
 lowco = [.03, .1, .5]  # only for PRF
-lowcoS = 0.01  # 0.05 lowco frequency for SRF
-# highco = np.linspace(.5, .25, 10)
-highco = [0.175]  # Rychert et al
+lowcoS = 0.03  # 0.05 lowco frequency for SRF
+highco = np.linspace(.33, .175, 4)
+# highco = [0.175]  # Rychert et al
 # highco = [.5, .33, .25]  # only for SRF
 
 # SNR criteria for QC
@@ -116,9 +116,9 @@ QC = False  # Do quality control or not
 if phase == "P":
     SNR_criteria = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
 elif phase == "S":
-    # SNR_criteria = [7.5, .2, 0.2, .66]
-    # SNR_criteria = [7.5, .2, 0.2, 1]
-    SNR_criteria = [32.5, 1, .2, 5]  # to reproduce Rychert
+    # SNR_criteria = [7.5, .2, .66]
+    # SNR_criteria = [7.5, .2, 1]
+    SNR_criteria = [30, .5, 1]  # to reproduce Rychert
     # [primary/noise, sidelobe/primary, r/z(primary), r/z conversions]
 
 # %% DON'T change program will change automatically!

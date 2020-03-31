@@ -67,7 +67,7 @@ def plot_all_RF(network, station, phase=config.phase, TAT=config.tz, dpi=300):
         else:
             TATp = TAT
         # shorten vector
-            
+
         # y = y[:round((TATp+50)/dt)]
         # create time vector
         t = np.linspace(0-TATp, config.ta, len(y))

@@ -16,14 +16,12 @@ from pathlib import Path
 from subfunctions import config
 import subprocess
 import shelve
-import time
 from subfunctions.preprocess import QC_S
 from subfunctions.createRF import createRF
 from subfunctions.plot import plot_stack
 from subfunctions.rotate import rotate_PSV, rotate_LQT,\
                                             rotate_LQT_min
 from obspy.taup import TauPyModel
-import time
 
 rating = {}  # mutable object
 
@@ -71,6 +69,7 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
             statlon = info["statlon"]
             rayp = info["rayp_s_deg"][ii]/111319.9
             evt_depth = info["evt_depth"][ii]/1000
+            ot = info["ot_ret"][ii]
         if old and not review:  # skip already rated files
             continue
         if type(review) == int:
@@ -116,7 +115,7 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
 
         # plot
         fig, ax = draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat,
-                            RF, old, rdelta, mag, crit)
+                            RF, old, rdelta, mag, crit, ot, evt_depth)
         while not plt.waitforbuttonpress(30):
             # Taper when input is there
             if len(rating["taper"]) == 2:
@@ -126,9 +125,10 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
                     trim = [rating["taper"][1], rating["taper"][0]]
                 trim[0] = trim[0] - t[0]
                 trim[1] = t[-1] - trim[1]
+                print(trim)
                 RF = createRF(PSV, dt, phase, method=decon_meth, trim=trim)
                 draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF,
-                          old, rdelta, mag, crit)
+                          old, rdelta, mag, crit, ot, evt_depth)
                 rating["taper"].clear()
         # fig.canvas.mpl_connect('key_press_event', ontype)
         if rating["k"] == "q":
@@ -138,7 +138,7 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
 
 
 def draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old, rdelta,
-              mag, crit):
+              mag, crit, ot, evt_depth):
     """Draws the plot for the rate function"""
     plt.close('all')
     fig, ax = plt.subplots(4, 1, sharex=False)
@@ -172,6 +172,7 @@ def draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old, rdelta,
                fontsize=10, verticalalignment='top', bbox=props)
     # show RF
     ax[3].plot(t, -np.flip(RF[0].data), color='k')
+    ax[3].set_title(str(ot))
     ax[3].set_xlabel('time in s')
     ax[3].set_xlim(-5, 40)
     # textbox
@@ -179,12 +180,14 @@ def draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old, rdelta,
         textstr = '\n'.join((
             r'$\Delta=%.2f$' % (rdelta, ),
             r'$\mathrm{mag}=%.2f$' % (mag, ),
+            r'$\mathrm{z}=%.2f$' % (evt_depth, ),
             r'$\mathrm{rat_{man}}=%.2f$' % (int(old), ),
             r'$\mathrm{rat_{auto}}=%.2f$' % (crit, )))
     else:
         textstr = '\n'.join((
             r'$\Delta=%.2f$' % (rdelta, ),
             r'$\mathrm{mag}=%.2f$' % (mag, ),
+            r'$\mathrm{z}=%.2f$' % (evt_depth, ),
             r'$\mathrm{rat_{auto}}=%.2f$' % (crit, )))
     # place a text box in upper left in axes coords
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
@@ -347,10 +350,11 @@ def auto_rate_stack(network, station, phase=config.phase,
             rayp = info["rayp_s_deg"][ii]/111319.9
             ot = info["ot_ret"][ii]
             evt_depth = info["evt_depth"][ii]
+            rdelta = info["rdelta"][ii]
         # to reproduce Rychert et al (2007)
-        if int(ot[:4]) > 2002 or evt_depth > 1.5e5:
-            ret = ret-1
-            continue
+        # if int(ot[:4]) > 2002 or evt_depth > 1.5e5:
+        #     ret = ret-1
+        #     continue
         if rot == "PSS":
             _, _, st = rotate_PSV(statlat, statlon, rayp, st)
         elif rot == "LQT":
@@ -369,12 +373,13 @@ def auto_rate_stack(network, station, phase=config.phase,
             raise Exception("Unknown rotation method rot=,", rot, """"Use
                             either 'PSS', 'LQT', or 'LQT_min'.""")
         # noise RF test
-        trim = [40, 90]
-        # st.trim(st[0].stats.starttime+trim[0], st[0].stats.endtime-trim[1])
-        st.taper(0.5, side='left', max_length=trim[0])
-        st.taper(0.5, side='right', max_length=trim[1])
+        trim = [40, 0]
+        if rdelta >= 70:
+            trim[1] = config.ta - (-2*rdelta + 180)
+        else:
+            trim[1] = config.ta - 40
         RF = createRF(st, dt, phase=phase, method=decon_meth,
-                      shift=config.tz)
+                      shift=config.tz, trim=trim)
         RFs.append(RF[0].data)
         RF.write(outloc + ot + '.mseed', format="MSEED")
         # with shelve.open(outloc+"info", writeback=True) as info:
