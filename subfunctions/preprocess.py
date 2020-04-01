@@ -140,7 +140,10 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
         try:
             st = read(prepro_folder+'/'+file)
         except FileNotFoundError:  # file has not been downloaded yet
-            break  # I will still want to have the RF
+            continue  # I will still want to have the RF
+        except:  # Uknown erros
+            logging.exception([prepro_folder, file])
+            continue
         station = st[0].stats.station
         network = st[0].stats.network
 
