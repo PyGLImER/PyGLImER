@@ -191,16 +191,20 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                 starttime = first_arrival - config.tz
                 endtime = first_arrival + config.ta
 
-                if len(st) < 3:
+                if st.count() < 3:
                     st = redownload(network, station, starttime, endtime, st)
 
                 # Check one last time. If stream to short raise Exception
-                if len(st) < 3:
+                if st.count() < 3:
                     raise Exception("The stream contains less than 3 traces")
 
                 # trim to according length
                 st.resample(10)  # resample streams with 10Hz sampling rate
                 st.trim(starttime=starttime, endtime=endtime)
+                # After trimming length has to be checked again (recording may
+                # be empty now)
+                if st.count() < 3:
+                    raise Exception("The stream contains less than 3 traces")
 
                 # DEMEAN AND DETREND #
                 st.detrend(type='demean')
@@ -233,14 +237,13 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                             simulate_sensitivity=True)
 
     #       ROTATION      #
-                try:
+                # try:
                     # If channeles weren't properly aligned
-                    st.rotate(method ='->ZNE', inventory = station_inv)
+                st.rotate(method ='->ZNE', inventory = station_inv)
 # Error: The directions are not linearly independent,
-# for some reason redownloading seems to help here
-# often the error persists though
-                except ValueError:
-                    st = NotLinearlyIndependentHandler(st, network, station,
+# there doesn't seem to be a fix for this
+                # except ValueError:
+                st = NotLinearlyIndependentHandler(st, network, station,
                                                        starttime, endtime,
                                                        station_inv, paz_sim)
 

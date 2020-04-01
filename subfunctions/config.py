@@ -11,8 +11,8 @@ import numpy as np
 
 # %% general settings
 # Define if you want to download new files or use old
-evtcat = "2020-02-29 15:49:43.388928"  # either None (downloads new) or file
-wavdownload = False  # Bool - true for completing download, false: only
+evtcat = None #2020-02-29 15:49:43.388928"  # either None (downloads new) or file
+wavdownload = True  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
 decon_meth = None  # it=iterative deconvolution (Ligorria & Ammon, 1999)
@@ -41,8 +41,8 @@ evtloc = "event_catalogues"
 # %% EVENT AND DOWNLOAD VALUES
 # Set values to "None" if they aren't requried / desired
 # Time frame is identical to the station inventory
-starttime = UTCDateTime("1988-01-28")
-endtime = UTCDateTime("2019-01-10")
+starttime = UTCDateTime("1980-01-01")
+endtime = UTCDateTime("2019-03-10")
 eMINLAT = None
 eMAXLAT = None
 eMINLON = None
@@ -73,15 +73,18 @@ model = TauPyModel(model="iasp91")
 
 # Clients to download waveform
 # !No specified providers (None) will result in all known ones being queued.!
+# None is not recommended as some clients are unstable or do not provide any
+# data, waiting for these clients causes the script to be very slow.
 # Else "IRIS","ORFEUS",etc.
-waveform_client = ["IRIS", "NCEDC"]  # None
+waveform_client = ["IRIS", "NCEDC", "ORFEUS", "ODC", "GFZ", "SCEDC", "TEXNET", "BGR", "ETH",
+ "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
+# None  # ["IRIS", "NCEDC"]
 #
 # clients on which the download should be retried, list:
-re_clients = ["IRIS", "NCEDC"]  # "ORFEUS", "ODC", "GFZ", "SCEDC", "TEXNET",
-# "BGR", "ETH",
-# "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "LMU",
-# "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
-
+re_clients = ["IRIS", "NCEDC", "ORFEUS", "ODC", "GFZ", "SCEDC", "TEXNET", "BGR", "ETH",
+ "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
+# Clients that cause problems and are excluded:
+# ['EMSC', 'GFZ', 'LMU']
 # %% PRE-PROCESSING VALUES #####
 
 # Rotation #
@@ -120,7 +123,7 @@ elif phase == "S":
     # SNR_criteria = [7.5, .2, .66]
     # SNR_criteria = [7.5, .2, 1]
     SNR_criteria = [45, .5, 1]  # to reproduce Rychert
-    # [primary/noise, sidelobe/primary, r/z(primary), r/z conversions]
+    # [primary/noise, sidelobe/primary, r/z conversions]
 
 # %% DON'T change program will change automatically!
 folder = "undefined"  # the download is happening here right now
