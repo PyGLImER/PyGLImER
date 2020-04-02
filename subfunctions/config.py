@@ -76,12 +76,12 @@ model = TauPyModel(model="iasp91")
 # None is not recommended as some clients are unstable or do not provide any
 # data, waiting for these clients causes the script to be very slow.
 # Else "IRIS","ORFEUS",etc.
-waveform_client = ["IRIS", "NCEDC", "ORFEUS", "ODC", "GFZ", "SCEDC", "TEXNET", "BGR", "ETH",
+waveform_client = ["IRIS", "NCEDC", "ORFEUS", "ODC", "SCEDC", "TEXNET", "BGR", "ETH",
  "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
 # None  # ["IRIS", "NCEDC"]
 #
 # clients on which the download should be retried, list:
-re_clients = ["IRIS", "NCEDC", "ORFEUS", "ODC", "GFZ", "SCEDC", "TEXNET", "BGR", "ETH",
+re_clients = ["IRIS", "NCEDC", "ORFEUS", "ODC", "SCEDC", "TEXNET", "BGR", "ETH",
  "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
 # Clients that cause problems and are excluded:
 # ['EMSC', 'GFZ', 'LMU']

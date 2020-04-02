@@ -112,7 +112,7 @@ def createRF(st_in, dt, phase=config.phase, shift=config.tz,
     elif method == 'multit':
         RF[0].data, _, _, _ = multitaper(v, u, dt, shift, "fqd")
         # remove noise caused by multitaper
-        RF.filter('lowpass', freq=5)
+        RF.filter('lowpass', freq=4.99, zerophase=True, corners=2)
     else:
         raise Exception(method, "is no valid deconvolution method.")
     return RF

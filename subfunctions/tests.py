@@ -145,8 +145,9 @@ def decon_test(PSS_file, phase, method):
             data, _ = spectraldivision(v, u, dt, shift, regul=method)
         elif method == "multit_fqd":
             data, _, _, _ = multitaper(u, v, dt, shift, 'fqd')
-            data = lowpass(data, 5, 1/dt, zerophase=True)
+            data = lowpass(data, 4.99, 1/dt, zerophase=True)
         elif method == "multit_con":
             data, _, _, _ = multitaper(u, v, dt, shift, 'con')
+            data = lowpass(data, 4.99, 1/dt, zerophase=True)
         RF.append(data)
     return RF, dt

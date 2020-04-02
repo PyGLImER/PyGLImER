@@ -202,7 +202,8 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                     raise Exception("The stream contains less than 3 traces")
 
                 # trim to according length
-                st.filter(type="lowpass", freq=9.5, zerophase=True)  # Anti-Alias
+                # Anti-Alias
+                st.filter(type="lowpass", freq=4.95, zerophase=True, corners=2)
                 st.resample(10)  # resample streams with 10Hz sampling rate
                 st.trim(starttime=starttime, endtime=endtime)
                 # After trimming length has to be checked again (recording may
