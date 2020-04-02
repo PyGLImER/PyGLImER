@@ -369,7 +369,7 @@ def spectraldivision(v, u, ndt, tshift, regul, phase=config.phase):
 
 def multitaper(P, D, dt, tshift, regul):
     """
-    Output has to be bp-filtered (Noise appears in high-frequency)!
+    Output has to be filtered (Noise appears in high-frequency)!
     multitaper: takes Ved-Kathrins code and changes inputs to
     make it run like Helffrich algorithm, minus normalization and with
     questionable calculation of pre-event noise (have to double check this

@@ -11,6 +11,7 @@ from subfunctions.createRF import stackRF, moveout, load_model
 from subfunctions.deconvolve import it, multitaper, spectraldivision
 from obspy.core import Stream, Trace, Stats
 from obspy import UTCDateTime
+from obspy.signal.filter import lowpass
 
 
 def read_raysum(NEZ_file=None, RTZ_file=None, PSS_file=None):
@@ -144,6 +145,7 @@ def decon_test(PSS_file, phase, method):
             data, _ = spectraldivision(v, u, dt, shift, regul=method)
         elif method == "multit_fqd":
             data, _, _, _ = multitaper(u, v, dt, shift, 'fqd')
+            data = lowpass(data, 5, 1/dt, zerophase=True)
         elif method == "multit_con":
             data, _, _, _ = multitaper(u, v, dt, shift, 'con')
         RF.append(data)

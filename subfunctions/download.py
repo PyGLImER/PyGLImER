@@ -107,8 +107,8 @@ def downloadwav(min_epid, max_epid, model, event_cat):
             minimum_interstation_distance_in_m=100.0,
             # Only HH or BH channels. If a station has BH channels, those will be
             # downloaded, otherwise the HH. Nothing will be downloaded if it has
-            # neither. You can add more/less patterns if you like.
-            channel_priorities=["BH*","HH*"],#channel_priorities=["BH[ZNE]","HH[ZNE]"],
+            # neither.
+            channel_priorities=["BH[ZNE]", "BH*", "HH[ZNE]", "HH*"],
             # Location codes are arbitrary and there is no rule as to which
             # location is best. Same logic as for the previous setting.
             location_priorities=["", "00", "10"],
