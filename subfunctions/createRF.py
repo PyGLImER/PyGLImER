@@ -153,7 +153,7 @@ def stackRF(network, station, phase=config.phase):
     return z, stack, RF_mo, data
 
 
-def moveout(data, st, onset, rayp, phase):
+def moveout(data, st, onset, rayp, phase, fname='iasp91.dat'):
     """Corrects the for the moveout of a converted phase. Flips time axis
     and polarity of SRF.
     INPUT:
@@ -164,7 +164,7 @@ def moveout(data, st, onset, rayp, phase):
         phase: P or S for PRF or SRF, respectively"""
     tas = round((onset - st.starttime)/st.delta)  # theoretical arrival sample
     # Nq = st.npts - tas
-    htab, dt = dt_table(rayp)
+    htab, dt = dt_table(rayp, fname)
     # queried times
     tq = np.arange(0, round(max(dt), 1), st.delta)
     # z = np.interp(tq, dt, htab)  # Depth array
@@ -192,12 +192,12 @@ def moveout(data, st, onset, rayp, phase):
     return z2, RF2
 
 
-def dt_table(rayp):
+def dt_table(rayp, fname):
     """Creates a phase delay table for a specific ray parameter given in
     s/deg. Using the equation as in Rondenay 2009."""
     p = rayp/DEG2KM  # convert to s/km
     maxz = 800  # maximum depth
-    z, zf, vp, vs = iasp_flatearth(maxz)
+    z, zf, vp, vs = iasp_flatearth(maxz, fname)
     z = np.append(z, maxz)
     # dz = np.diff(z)  # thicknesses
     htab = np.arange(0, maxz, 1)  # hypothetical conversion depth, spherical
@@ -218,12 +218,12 @@ def dt_table(rayp):
     return htab[:index], dt[:index]
 
 
-def iasp91():
+def iasp91(fname='iasp91.dat'):
     """Loads velocity model in data subfolder"""
     # values = np.loadtxt('data/iasp91.dat', unpack=True)
     # z, vp, vs, n = values
     # n = n.astype(int)
-    model = load_model()
+    model = load_model(fname)
     z = model.z
     vp = model.vp
     vs = model.vs
@@ -231,59 +231,21 @@ def iasp91():
     return z, vp, vs  # , n
 
 
-def iasp_flatearth(maxz):
+def iasp_flatearth(maxz, fname):
     """Creates a flat-earth approximated velocity model down to 800 km as in
     Peter M. Shearer"""
-    z, vp, vs = iasp91()
+    z, vp, vs = iasp91(fname)
     r = 6371  # earth radius
     ii = np.where(z > maxz)[0][0]+1
     vpf = (r/(r-z[:ii]))*vp[:ii]
     vsf = (r/(r-z[:ii]))*vs[:ii]
     zf = -r*np.log((r-z[:ii])/r)
     z = z[:ii]
-    # n = n[:ii]
-    return z, zf, vpf, vsf  # , n
-
-
-# def Moveout(station, network, phasen=config.phase):
-#     """Moveout corretion for pS and sP phases. A modified version of the
-#     original Fortran program written by Xiaohui Yuan
-#     INPUT:
-#         station
-#         network (make sure data is in RF folder)
-#         phase: P for Ps moveout, S for Sp moveout"""
-#     # change for compatibility with the RF module
-#     if phasen == "S":
-#         phase = "Sp"
-#     if phasen == "P":
-#         phase = "Ps"
-#     ioloc = config.RF[:-1] + phasen + '/' + network + '/' + station
-
-#     RF = []
-#     starttime = []
-#     for file in os.listdir(ioloc):
-#         if file[:4] == "info":
-#             continue
-#         try:
-#             st = read(ioloc + '/' + file)
-#         except IsADirectoryError:
-#             continue
-#         st.normalize()  # make sure traces are normalised
-#         st[0].data = np.flip(st[0].data)  # double-check if that should be done
-#         RF.append(st.copy())
-#     # dt = st[0].stats.delta
-#     # read info file
-#     with shelve.open(ioloc + '/info') as info:
-#         rayp = info['rayp_s_deg']
-#         onset = info["onset"]
-#         starttime = info["starttime"]
-#     rayp = np.array(rayp)  # create numpy array
-#     # rayp_km = rayp*1000  # in s/km
-#     model = load_model()
-#     for st in RF:
-#         jj = starttime.index(st[0].stats.starttime)
-#         st = model.moveout(st, onset[jj], rayp[jj], phase=phase)
-#     return RF
+    if fname == 'raysum.dat':
+        zf = z
+        vpf = vp
+        vsf = vs
+    return z, zf, vpf, vsf
 
 
 # """ Everything from here on is from the RF model by Tom Eulenfeld, modified

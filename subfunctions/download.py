@@ -34,11 +34,6 @@ def downloadwav(min_epid, max_epid, model, event_cat):
         saves station xml in folder defined in config.py
         saves waveforms in folder defined in config.py"""
 
-    # logging for the download
-    # logging.basicConfig(filename='download.log',level=logging.DEBUG) #
-    fdsn_mass_logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
-    fdsn_mass_logger.setLevel(logging.WARNING)
-
     # Calculate the min and max theoretical arrival time after event time
     # according to minimum and maximum epicentral distance
     min_time = model.get_travel_times(source_depth_in_km=500,
@@ -51,6 +46,22 @@ def downloadwav(min_epid, max_epid, model, event_cat):
 
     mdl = MassDownloader(config.waveform_client)
 
+    ###########
+    # logging for the download
+    # logging.basicConfig(filename='download.log',level=logging.DEBUG) #
+    fdsn_mass_logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
+    fdsn_mass_logger.setLevel(logging.WARNING)
+
+    # Create handler to the log
+    fh = logging.FileHandler('download.log')
+    fh.setLevel(logging.WARNING)
+    fdsn_mass_logger.addHandler(fh)
+
+    # Create Formatter
+    fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
+    fh.setFormatter(fmt)
+
+    ####
     # Loop over each event
     for event in event_cat:
         # fetch event-data

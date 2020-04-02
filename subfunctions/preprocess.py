@@ -202,6 +202,7 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                     raise Exception("The stream contains less than 3 traces")
 
                 # trim to according length
+                st.filter(type="lowpass", freq=9.5)  # Anti-Alias
                 st.resample(10)  # resample streams with 10Hz sampling rate
                 st.trim(starttime=starttime, endtime=endtime)
                 # After trimming length has to be checked again (recording may
@@ -281,23 +282,6 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                     if not crit:
                         raise SNRError(noisemat)
 
-                # Rotate to LQT or PSS
-                if config.rot == "LQT":
-                    st, ia = rotate_LQT_min(st)
-                    # addional QC
-                    if ia < 5 or ia > 75:
-                        crit = False
-                        raise SNRError(ia)
-                    # # channel labels
-                    # P = "L"
-                    # S = "Q"
-                    # T = "T"
-                elif config.rot == "PSS":
-                    avp, avs, st = rotate_PSV(
-                        station_inv[0][0][0].latitude,
-                        station_inv[0][0][0].longitude,
-                        rayp, st)
-
                 #      WRITE FILES     #
                 st.write(outf, format="MSEED")
                 # create softlink
@@ -358,15 +342,28 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
             crit = True
             st = read(outf)
 
-    #       CREATE RF       #
+    #       CREATE RF   +    ROTATION TO PSS /   LQT    #
 
         # Check if RF was already computed and if it should be
         # computed at all, and if the waveform was retained (SNR)
         if config.decon_meth and not\
-            file_in_db(config.RF + '/' + network + '/' + station,
-                       network + '.' + station + '.' + ot_fiss
-                       + '.mseed') and crit:
+            file_in_db(config.RF + '/' + network + '/' + station, network +
+                       '.' + station + '.' + ot_fiss + '.mseed') and crit:
+
             try:
+                # Rotate to LQT or PSS
+                if config.rot == "LQT":
+                    st, ia = rotate_LQT_min(st)
+                    # addional QC
+                    if ia < 5 or ia > 75:
+                        crit = False
+                        raise SNRError(ia)
+
+                elif config.rot == "PSS":
+                    avp, avs, st = rotate_PSV(
+                        station_inv[0][0][0].latitude,
+                        station_inv[0][0][0].longitude,
+                        rayp, st)
                 RF = createRF(st, .1)  # dt is always .1
 
             # Write RF
@@ -393,6 +390,9 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
 
             # Exception that occured in the RF creation
             # Usually, don't happen
+            except SNRError:
+                logging.info("""Calculated incidence angle is unrealistic
+                             with""", ia, "deg.")
             except:
                 print("RF creation failed")
                 logging.exception([network, station, ot_fiss])

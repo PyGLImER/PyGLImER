@@ -34,8 +34,9 @@ webclient = Webclient("IRIS")  # client to download event catalogue
 ##############################################################################
 
 # logging
-logging.basicConfig(filename='preprocess.log',
-                    level=logging.WARNING, format='%(asctime)s %(message)s')
+logging.basicConfig(filename='preprocess.log', filemode ='a',
+                    level=logging.WARNING,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 if not config.evtcat:
     # download event catalogue
     # The server is often not reachable and returns an "IncompleteRead" Error,
