@@ -1,5 +1,4 @@
 *.log
-README-POINTS
 waveforms*
 stations*
 preprocessed*
@@ -10,6 +9,4 @@ figures*
 *.mseed
 *cache*
 *.png
-*rating*
 *info*
-*.tr

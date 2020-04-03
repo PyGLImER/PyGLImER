@@ -18,6 +18,9 @@ from subfunctions.preprocess import QC_S, QC_P
 import os
 
 
+tr_folder = "data/raysum_traces/"
+
+
 def read_raysum(NEZ_file=None, RTZ_file=None, PSS_file=None):
     """Reads the output of the raysum program (by Andrew Frederiksen).
     INPUT:
@@ -25,15 +28,15 @@ def read_raysum(NEZ_file=None, RTZ_file=None, PSS_file=None):
             traces, can be None if the respective rotation does not exists.
         N: number of data points"""
     if NEZ_file:
-        NEZ_f = open(NEZ_file)
+        NEZ_f = open(tr_folder + NEZ_file)
     else:
         NEZ_f = None
     if RTZ_file:
-        RTZ_f = open(RTZ_file)
+        RTZ_f = open(tr_folder + RTZ_file)
     else:
         RTZ_f = None
     if PSS_file:
-        PSS_f = open(PSS_file)
+        PSS_f = open(tr_folder + PSS_file)
     else:
         PSS_f = None
     files = []
