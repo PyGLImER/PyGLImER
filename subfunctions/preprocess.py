@@ -125,6 +125,10 @@ def event_loop(event_cat, taper_perc, taper_type, webclient, model,
             try:  # If one event has no folder it interrupts else
                 os.listdir(prepro_folder)
             except FileNotFoundError:
+                logging.warning(""""All files have been processed. No
+                                waveforms are for event""", ot_fiss, """Restart
+                                download to obtain missing files
+                                in database.""")
                 continue
             waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                           paz_sim, iclient, origin_time, ot_fiss, evtlat,
@@ -136,12 +140,14 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                   depth, prepro_folder, event):
     """Loops over each waveform for a specific event and a specific station
     INPUT:"""
+
+    # loop over all files for event x
     for file in os.listdir(prepro_folder):
         try:
             st = read(prepro_folder+'/'+file)
         except FileNotFoundError:  # file has not been downloaded yet
             continue  # I will still want to have the RF
-        except:  # Uknown erros
+        except:  # Unknown erros
             logging.exception([prepro_folder, file])
             continue
         station = st[0].stats.station
@@ -177,7 +183,7 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                 except FileNotFoundError:
                     station_inv = redownload_statxml(st, network, station)
 
-# Trim TO RIGHT LENGTH BEFORE AND AFTER FIRST ARRIVAL  #
+            # Trim TO RIGHT LENGTH BEFORE AND AFTER FIRST ARRIVAL  #
 
                 result = iclient.distaz(station_inv[0][0].latitude,
                                         station_inv[0][0].longitude, evtlat,
@@ -589,26 +595,3 @@ class SNRError(Exception):
 
     def __str__(self):
         return(repr(self.value))
-
-
-def test_SNR(network, station, phase=config.phase):
-    """Test the automatic QC scripts for a certain station and writes ratings
-    in the rating file."""
-    noisematls = []
-    critls = []
-    loc = config.outputloc[:-1] + phase + '/by_station/' + \
-        network + '/' + station
-    for file in os.listdir(loc):
-        try:
-            st = read(loc + '/' + file)
-        except IsADirectoryError:
-            continue
-        dt = st[0].stats.delta
-        sampling_rate = st[0].stats.sampling_rate
-        if phase == "S":
-            _, crit, _, noisemat = QC_S(st, dt, sampling_rate)
-        elif phase == "P":
-            _, crit, _, noisemat
-        noisematls.append(noisemat)
-        critls.append(crit)
-    return noisematls, critls

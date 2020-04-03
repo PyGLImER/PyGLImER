@@ -22,7 +22,7 @@ from scipy import interpolate
 from scipy.signal.windows import hann
 
 _MODEL_CACHE = {}
-DEG2KM = 111.2
+DEG2KM = 111.1949
 
 
 def createRF(st_in, dt, phase=config.phase, shift=config.tz,
@@ -188,7 +188,7 @@ def moveout(data, st, onset, rayp, phase, fname='iasp91.dat'):
     taper = np.ones(len(RF))
     taper[-len(tap):] = tap
     RF = np.multiply(taper, RF)
-    z2 = np.arange(0, 800, .3)
+    z2 = np.arange(0, 800.3, .3)
     RF2 = np.zeros(z2.shape)
     RF2[:len(RF)] = RF
     return z2, RF2
@@ -202,9 +202,16 @@ def dt_table(rayp, fname):
     z, zf, vp, vs = iasp_flatearth(maxz, fname)
     z = np.append(z, maxz)
     # dz = np.diff(z)  # thicknesses
-    htab = np.arange(0, maxz, 1)  # hypothetical conversion depth, spherical
+    res = .1  # resolution in km
+
+    # hypothetical conversion depth tables
+    htab = np.arange(0, maxz+res, res)  # spherical
     htab_f = -6371*np.log((6371-htab)/6371)  # flat earth depth
-    dt = np.zeros(np.shape(htab))  # delay times
+    if fname == "raysum.dat":
+        htab_f = htab
+
+    # delay times
+    dt = np.zeros(np.shape(htab))
     # vertical slownesses
     q_a = np.sqrt(vp**-2 - p**2)
     q_b = np.sqrt(vs**-2 - p**2)
@@ -274,7 +281,7 @@ def load_model(fname='iasp91.dat'):
         return _MODEL_CACHE[fname]
     except KeyError:
         pass
-    values = np.loadtxt('data/' + fname, unpack=True)
+    values = np.loadtxt('data/velocity_models' + fname, unpack=True)
     try:
         z, vp, vs, n = values
         n = n.astype(int)

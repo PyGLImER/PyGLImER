@@ -3,7 +3,7 @@
 """
 Created on Wed Oct 16 14:23:30 2019
 
-Various Deconvolution approach used for the RF technique.
+Various Deconvolution approaches used for the RF technique.
 @author: pm
 """
 

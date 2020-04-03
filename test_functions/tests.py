@@ -10,8 +10,12 @@ import numpy as np
 from subfunctions.createRF import stackRF, moveout, load_model
 from subfunctions.deconvolve import it, multitaper, spectraldivision
 from obspy.core import Stream, Trace, Stats
-from obspy import UTCDateTime
+from obspy import UTCDateTime, read
 from obspy.signal.filter import lowpass
+import matplotlib.pyplot as plt
+from subfunctions import config
+from subfunctions.preprocess import QC_S, QC_P
+import os
 
 
 def read_raysum(NEZ_file=None, RTZ_file=None, PSS_file=None):
@@ -104,7 +108,7 @@ def moveout_test(PSS_file, q, phase):
     INPUT: PSS_file: location + filename of PSS file
     q: slowness in s/m
     model: has to be in the glimer folder data/raysum.dat"""
-    rayp = q*1.112e5
+    rayp = q*1.111949e5
     PSS, dt, M, N, shift = read_raysum(PSS_file=PSS_file)
 
     # Create receiver functions
@@ -116,14 +120,20 @@ def moveout_test(PSS_file, q, phase):
     stats.starttime = UTCDateTime(0)
     for i in range(M):
         if phase == "P":
-            data, _, _ = it(PSS[i, 0, :], PSS[i, 1, :], dt, shift=shift, width=4)
+            data, _, _ = it(PSS[i, 0, :], PSS[i, 1, :], dt, shift=shift,
+                            width=4)
         elif phase == "S":
-            data, _, _ = it(PSS[i, 1, :], PSS[i, 0, :], dt, shift=shift, width=4)
+            data, _, _ = it(PSS[i, 1, :], PSS[i, 0, :], dt, shift=shift,
+                            width=4)
         RF.append(data)
         z, rfc = moveout(data, stats, UTCDateTime(shift), rayp[i], phase,
                          fname="raysum.dat")
         RF_mo.append(rfc)
     stack = np.average(RF_mo, axis=0)
+    plt.close('all')
+    plt.figure()
+    for mo in RF_mo:
+        plt.plot(z, mo)
     return z, stack, RF_mo, RF, dt, PSS
 
 
@@ -151,3 +161,26 @@ def decon_test(PSS_file, phase, method):
             data = lowpass(data, 4.99, 1/dt, zerophase=True)
         RF.append(data)
     return RF, dt
+
+
+def test_SNR(network, station, phase=config.phase):
+    """Test the automatic QC scripts for a certain station and writes ratings
+    in the rating file."""
+    noisematls = []
+    critls = []
+    loc = config.outputloc[:-1] + phase + '/by_station/' + \
+        network + '/' + station
+    for file in os.listdir(loc):
+        try:
+            st = read(loc + '/' + file)
+        except IsADirectoryError:
+            continue
+        dt = st[0].stats.delta
+        sampling_rate = st[0].stats.sampling_rate
+        if phase == "S":
+            _, crit, _, noisemat = QC_S(st, dt, sampling_rate)
+        elif phase == "P":
+            _, crit, _, noisemat = QC_P(st, dt, sampling_rate)
+        noisematls.append(noisemat)
+        critls.append(crit)
+    return noisematls, critls

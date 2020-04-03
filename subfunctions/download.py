@@ -53,7 +53,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
     fdsn_mass_logger.setLevel(logging.WARNING)
 
     # Create handler to the log
-    fh = logging.FileHandler('download.log')
+    fh = logging.FileHandler('logs/download.log')
     fh.setLevel(logging.WARNING)
     fdsn_mass_logger.addHandler(fh)
 

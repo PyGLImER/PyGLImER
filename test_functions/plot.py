@@ -23,7 +23,7 @@ from subfunctions.createRF import stackRF
 # plotting properties
 # dirFile = os.path.dirname('main.py')
 
-plt.style.use('data/PaperDoubleFig.mplstyle')
+plt.style.use('data/plot_data/PaperDoubleFig.mplstyle')
 # Make some style choices for plotting
 colourWheel = ['#329932', '#ff6961', 'b', '#6a3d9a', '#fb9a99', '#e31a1c',
                '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99',

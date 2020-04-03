@@ -37,6 +37,7 @@ outputloc = "waveforms/preprocessed/" + phase
 failloc = "waveforms/rejected"  # Not in use anymore
 statloc = "stations"
 evtloc = "event_catalogues"
+ratings = "data/ratings/"
 
 # %% EVENT AND DOWNLOAD VALUES
 # Set values to "None" if they aren't requried / desired
@@ -76,15 +77,15 @@ model = TauPyModel(model="iasp91")
 # None is not recommended as some clients are unstable or do not provide any
 # data, waiting for these clients causes the script to be very slow.
 # Else "IRIS","ORFEUS",etc.
-waveform_client = ["IRIS", "NCEDC", "ORFEUS", "ODC", "SCEDC", "TEXNET", "BGR", "ETH",
+waveform_client = ["IRIS", "NCEDC", "ORFEUS", "ODC", "TEXNET", "BGR", "ETH",
  "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
 # None  # ["IRIS", "NCEDC"]
 #
 # clients on which the download should be retried, list:
-re_clients = ["IRIS", "NCEDC", "ORFEUS", "ODC", "SCEDC", "TEXNET", "BGR", "ETH",
+re_clients = ["IRIS", "NCEDC", "ORFEUS", "ODC", "TEXNET", "BGR", "ETH",
  "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
 # Clients that cause problems and are excluded:
-# ['EMSC', 'GFZ', 'LMU']
+# ['EMSC', 'GFZ', 'LMU', 'SCEDC']
 # %% PRE-PROCESSING VALUES #####
 
 # Rotation #

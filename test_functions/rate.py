@@ -19,8 +19,7 @@ import shelve
 from subfunctions.preprocess import QC_S
 from subfunctions.createRF import createRF
 from subfunctions.plot import plot_stack
-from subfunctions.rotate import rotate_PSV, rotate_LQT,\
-                                            rotate_LQT_min
+from subfunctions.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
 from obspy.taup import TauPyModel
 
 rating = {}  # mutable object
@@ -227,14 +226,14 @@ def w_file(network, station, starttime):
         int(rating["k"])
     except ValueError:
         return False
-    with shelve.open(network + "." + station + "rating") as f:
+    with shelve.open(config.ratings + network + "." + station + "rating") as f:
         if int(rating["k"]) != 5:
             f[starttime] = rating["k"]
             print("You've rated the stream", rating["k"])
 
 
 def r_file(network, station, starttime):
-    with shelve.open(network + "." + station + "rating") as f:
+    with shelve.open(config.ratings + network + "." + station + "rating") as f:
         if starttime in f:
             old = f[starttime]
         else:
@@ -249,7 +248,7 @@ def sort_rated(network, station, phase=config.phase):
         '/' + station + '/'
     for n in range(1, 5):
         subprocess.call(["mkdir", "-p", inloc + str(n)])
-    dic = shelve.open(network + "." + station + "rating")
+    dic = shelve.open(config.ratings + network + "." + station + "rating")
     for file in os.listdir(inloc):
         if file[:4] == "info":   # Skip the info files
             continue
@@ -284,7 +283,8 @@ def automatic_rate(network, station, phase="S"):
         st, crit, hf, noisemat = QC_S(st, st[0].stats.delta,
                                       st[0].stats.sampling_rate)
         # crit, hf, noisemat = None, None, None
-        with shelve.open(network + "." + station + "rating") as f:
+        with shelve.open(config.ratings + network + "." + station
+                         + "rating") as f:
             f[starttime + "_auto"] = crit
             if starttime in f and int(f[starttime]) < 3 and crit:
                 diff = diff + 1
@@ -302,7 +302,7 @@ def sort_auto_rated(network, station, phase=config.phase):
     inloc_RF = config.RF[:-1] + phase + '/' + network + '/' + station + '/'
     subprocess.call(["mkdir", "-p", inloc + "ret"])
     subprocess.call(["mkdir", "-p", inloc_RF + "ret"])
-    dic = shelve.open(network + "." + station + "rating")
+    dic = shelve.open(config.ratings + network + "." + station + "rating")
     for file in os.listdir(inloc):
         if file[:4] == "info":   # Skip the info files
             continue

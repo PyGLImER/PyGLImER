@@ -11,7 +11,7 @@ IMPORTANT:
 # IMPORT PREDEFINED SUBFUNCTIONS
 from subfunctions.download import downloadwav
 from subfunctions.preprocess import preprocess
-import subfunctions.config as config
+import config
 
 # modules
 from obspy.core import *
@@ -34,7 +34,7 @@ webclient = Webclient("IRIS")  # client to download event catalogue
 ##############################################################################
 
 # logging
-logging.basicConfig(filename='preprocess.log', filemode ='a',
+logging.basicConfig(filename='logs/preprocess.log', filemode ='a',
                     level=logging.WARNING,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 if not config.evtcat:
