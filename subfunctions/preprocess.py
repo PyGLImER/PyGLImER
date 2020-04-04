@@ -5,7 +5,7 @@ Created on Wed Apr 24 20:31:05 2019
 
 @author: pm
 """
-import subfunctions.config as config
+import config
 from obspy.core import *
 from obspy.clients.iris import Client as iClient # To calculate angular distance and backazimuth
 # careful with using clientas multiprocessing has a client class

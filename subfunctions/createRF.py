@@ -9,7 +9,7 @@ toolset to create RFs and RF stacks
 """
 
 import numpy as np
-from subfunctions import config
+import config
 from subfunctions.deconvolve import it, spectraldivision, multitaper
 from obspy import read
 import shelve
@@ -23,6 +23,7 @@ from scipy.signal.windows import hann
 
 _MODEL_CACHE = {}
 DEG2KM = 111.1949
+maxz = 800  # maximum interpolation depth in km
 
 
 def createRF(st_in, dt, phase=config.phase, shift=config.tz,
@@ -166,95 +167,173 @@ def moveout(data, st, onset, rayp, phase, fname='iasp91.dat'):
         phase: P or S for PRF or SRF, respectively"""
     tas = round((onset - st.starttime)/st.delta)  # theoretical arrival sample
     # Nq = st.npts - tas
-    htab, dt = dt_table(rayp, fname)
+    htab, dt, delta = dt_table(rayp, fname, phase)
     # queried times
     tq = np.arange(0, round(max(dt), 1), st.delta)
-    # z = np.interp(tq, dt, htab)  # Depth array
-    tck = interpolate.splrep(dt, htab)
-    z = interpolate.splev(tq, tck)
+    z = np.interp(tq, dt, htab)  # Depth array
+    # tck = interpolate.splrep(dt, htab)
+    # z = interpolate.splev(tq, tck)
     if phase.upper() == "S":
         data = np.flip(data)
         data = -data
         tas = -tas
     RF = data[tas:tas+len(z)]
-    zq = np.arange(0, max(z), 0.3)
+    zq = np.arange(0, max(z), 0.25)
     # interpolate RF
-    RF = np.interp(zq, z, RF)
-    # tck = interpolate.splrep(z, RF)
-    # RF = interpolate.splev(zq, tck)
+    # RF = np.interp(zq, z, RF)
+    tck = interpolate.splrep(z, RF)
+    RF = interpolate.splev(zq, tck)
     # Taper the last 3.5 seconds of the RF to avoid discontinuities in stack
     tap = hann(round(7/st.delta))
     tap = tap[round(len(tap)/2):]
     taper = np.ones(len(RF))
     taper[-len(tap):] = tap
     RF = np.multiply(taper, RF)
-    z2 = np.arange(0, 800.3, .3)
+    z2 = np.arange(0, maxz+.25, .25)
     RF2 = np.zeros(z2.shape)
     RF2[:len(RF)] = RF
     return z2, RF2
 
 
-def dt_table(rayp, fname):
+def dt_table(rayp, fname, phase):
     """Creates a phase delay table for a specific ray parameter given in
     s/deg. Using the equation as in Rondenay 2009."""
     p = rayp/DEG2KM  # convert to s/km
-    maxz = 800  # maximum depth
-    z, zf, vp, vs = iasp_flatearth(maxz, fname)
+    # z, dz, zf, dzf, vp, vs = iasp_flatearth(maxz, fname)
+    model = load_model(fname)
+    z = model.z
+    if fname == 'raysum.dat':  # already Cartesian
+        vp = model.vp
+        vs = model.vs
+        zf = model.z
+    else:  # Spherical
+        vp = model.vpf
+        vs = model.vsf
+        zf = model.zf
+    dz = model.dz
+    dzf = model.dzf
     z = np.append(z, maxz)
-    # dz = np.diff(z)  # thicknesses
-    res = .1  # resolution in km
+    res = 1  # resolution in km
 
     # hypothetical conversion depth tables
     htab = np.arange(0, maxz+res, res)  # spherical
     htab_f = -6371*np.log((6371-htab)/6371)  # flat earth depth
+    res_f = np.diff(htab_f)  # earth flattened resolution
+    # htab_f = htab_f[:-1]
+    # htab = htab[:-1]
+
     if fname == "raysum.dat":
         htab_f = htab
+        res_f = res * np.ones(np.shape(res_f))
 
     # delay times
     dt = np.zeros(np.shape(htab))
+
+    # angular distances of piercing points
+    delta = np.zeros(np.shape(htab))
+
     # vertical slownesses
     q_a = np.sqrt(vp**-2 - p**2)
     q_b = np.sqrt(vs**-2 - p**2)
-    # if phase.upper() == "P":
-    for kk, h in enumerate(htab_f):
-        ii = np.where(zf >= h)[0][0]
-        dz = np.diff(np.append(zf[:ii], h))
-        dt[kk] = np.sum((q_b[:len(dz)]-q_a[:len(dz)])*dz)
+
+    # for kk, h in enumerate(htab_f):
+    #     ii = np.where(zf >= h)[0][0]
+    #     dz = np.diff(np.append(zf[:ii], h))
+    #     print(dz)
+    #     dt[kk] = np.sum((q_b[:len(dz)]-q_a[:len(dz)])*dz)
+        # delta[kk] = ppoint(q_a[:len(dz)], q_b[:len(dz)], dz, p, phase)
+    # dt[0] and delta[0] are always = 0
+    for kk, h in enumerate(htab_f[1:]):
+        ii = np.where(zf >= h)[0][0] - 1
+        dt[kk+1] = (q_b[ii]-q_a[ii])*res_f[kk]
+        delta[kk+1] = ppoint(q_a[ii], q_b[ii], res_f[kk], p, phase)
+    dt = np.cumsum(dt)
+    delta = np.cumsum(delta)
+
     try:
         index = np.nonzero(np.isnan(dt))[0][0] - 1
     except IndexError:
         index = len(dt)
-    return htab[:index], dt[:index]
+    return htab[:index], dt[:index], delta[:index]
 
 
-def iasp91(fname='iasp91.dat'):
-    """Loads velocity model in data subfolder"""
-    # values = np.loadtxt('data/iasp91.dat', unpack=True)
-    # z, vp, vs, n = values
-    # n = n.astype(int)
-    model = load_model(fname)
-    z = model.z
-    vp = model.vp
-    vs = model.vs
-    # n = model.n
-    return z, vp, vs  # , n
+def ppoint(q_a, q_b, dz, p, phase):
+    """
+    Calculate angular distance between piercing point and station.
+    INPUT (have to be in Cartesian/ flat Earth):
+    :param depth: depth of interface in km
+    :param p: slowness in s/km
+    :param phase: 'P' or 'S'
+    :return: angular distance in degree
+    """
+    # The case for the direct - conversion at surface, dz =[]
+    # if not len(dz):
+    #     x = 0
+
+    # Check phase, Sp travels as p, Ps as S from piercing point
+    if phase == "S":
+        x = np.sum(dz / q_a) * p
+    elif phase == "P":
+        x = dz / q_b * p
+    x_delta = x / DEG2KM  # angular distance in degree
+    return x_delta
 
 
-def iasp_flatearth(maxz, fname):
+# def ppoint(self, stats, depth, phase='S'):
+#     """
+#     Calculate latitude and longitude of piercing point.
+
+#     Piercing point coordinates and depth are saved in the pp_latitude,
+#     pp_longitude and pp_depth entries of the stats object or dictionary.
+
+#     :param stats: Stats object or dictionary with entries
+#         slowness, back_azimuth, station_latitude and station_longitude
+#     :param depth: depth of interface in km
+#     :param phase: 'P' for piercing point of P wave, 'S' for piercing
+#         point of S wave. Multiples are possible, too.
+#     :return: latitude and longitude of piercing point
+#     """
+#     dr = self.ppoint_distance(depth, stats['slowness'], phase=phase)
+#     lat = stats['station_latitude']
+#     lon = stats['station_longitude']
+#     az = stats['back_azimuth']
+#     plat, plon = direct_geodetic((lat, lon), az, dr)
+#     stats['pp_depth'] = depth
+#     stats['pp_latitude'] = plat
+#     stats['pp_longitude'] = plon
+#     return plat, plon
+
+
+# def iasp91(fname='iasp91.dat'):
+#     """Loads velocity model in data subfolder"""
+#     # values = np.loadtxt('data/iasp91.dat', unpack=True)
+#     # z, vp, vs, n = values
+#     # n = n.astype(int)
+#     model = load_model(fname)
+#     z = model.z
+#     vp = model.vp
+#     vs = model.vs
+#     dz = model.dz
+#     # n = model.n
+#     return z, dz, vp, vs  # , n
+
+
+def earth_flattening(maxz, z, dz, vp, vs):
     """Creates a flat-earth approximated velocity model down to 800 km as in
     Peter M. Shearer"""
-    z, vp, vs = iasp91(fname)
     r = 6371  # earth radius
     ii = np.where(z > maxz)[0][0]+1
     vpf = (r/(r-z[:ii]))*vp[:ii]
     vsf = (r/(r-z[:ii]))*vs[:ii]
-    zf = -r*np.log((r-z[:ii])/r)
+    zf = -r*np.log((r-z[:ii+1])/r)
     z = z[:ii]
-    if fname == 'raysum.dat':
-        zf = z
-        vpf = vp
-        vsf = vs
-    return z, zf, vpf, vsf
+    dz = dz[:ii]
+    dzf = np.diff(zf)
+    # if fname == 'raysum.dat':
+    #     zf = z
+    #     vpf = vp
+    #     vsf = vs
+    return z, dz, zf[:ii], dzf, vpf, vsf
 
 
 # """ Everything from here on is from the RF model by Tom Eulenfeld, modified
@@ -281,7 +360,7 @@ def load_model(fname='iasp91.dat'):
         return _MODEL_CACHE[fname]
     except KeyError:
         pass
-    values = np.loadtxt('data/velocity_models' + fname, unpack=True)
+    values = np.loadtxt('data/velocity_models/' + fname, unpack=True)
     try:
         z, vp, vs, n = values
         n = n.astype(int)
@@ -302,6 +381,7 @@ class SimpleModel(object):
 
     """
     Simple 1D velocity model for move out and piercing point calculation.
+    Calculated with Earth flattening algorithm as described by P. M. Shearer.
 
     :param z: depths in km
     :param vp: P wave velocities at provided depths in km/s
@@ -318,8 +398,11 @@ class SimpleModel(object):
             z = _interpolate_n(z, n)
             vp = _interpolate_n(vp, n)
             vs = _interpolate_n(vs, n)
-        self.z = z[:-1]
-        self.dz = np.diff(z)
+        dz = np.diff(z)
+        self.z, self.dz, self.zf, self.dzf, self.vpf, self.vsf = \
+            earth_flattening(maxz, z[:-1], dz, vp[:-1], vs[:-1])
+        # self.dz =
+        # self.z = z[:-1]
         self.vp = vp[:-1]
         self.vs = vs[:-1]
         self.t_ref = {}
@@ -442,54 +525,3 @@ class SimpleModel(object):
 #             except ValueError:
 #                 continue
 #         return stream
-
-
-#     def ppoint_distance(self, depth, slowness, phase='S'):
-#         """
-#         Calculate horizontal distance between piercing point and station.
-
-#         :param depth: depth of interface in km
-#         :param slowness: ray parameter in s/deg
-#         :param phase: 'P' or 'S' for P wave or S wave. Multiples are possible.
-#         :return: horizontal distance in km
-#         """
-#         if len(phase) % 2 == 0:
-#             msg = 'Length of phase (%s) should be even'
-#             raise ValueError(msg % phase)
-#         phase = phase.upper()
-#         xp, xs = 0., 0.
-#         qp, qs = self.calculate_vertical_slowness(slowness, phase=phase)
-#         if 'P' in phase:
-#             xp = np.cumsum(self.dz * slowness / DEG2KM / qp)
-#         if 'S' in phase:
-#             xs = np.cumsum(self.dz * slowness / DEG2KM / qs)
-#         x = xp * phase.count('P') + xs * phase.count('S')
-#         z = self.z
-#         index = np.nonzero(depth < z)[0][0] - 1
-#         return x[index] + ((x[index + 1] - x[index]) *
-#                            (depth - z[index]) / (z[index + 1] - z[index]))
-
-
-#     # def ppoint(self, stats, depth, phase='S'):
-#     #     """
-#     #     Calculate latitude and longitude of piercing point.
-
-#     #     Piercing point coordinates and depth are saved in the pp_latitude,
-#     #     pp_longitude and pp_depth entries of the stats object or dictionary.
-
-#     #     :param stats: Stats object or dictionary with entries
-#     #         slowness, back_azimuth, station_latitude and station_longitude
-#     #     :param depth: depth of interface in km
-#     #     :param phase: 'P' for piercing point of P wave, 'S' for piercing
-#     #         point of S wave. Multiples are possible, too.
-#     #     :return: latitude and longitude of piercing point
-#     #     """
-#     #     dr = self.ppoint_distance(depth, stats['slowness'], phase=phase)
-#     #     lat = stats['station_latitude']
-#     #     lon = stats['station_longitude']
-#     #     az = stats['back_azimuth']
-#     #     plat, plon = direct_geodetic((lat, lon), az, dr)
-#     #     stats['pp_depth'] = depth
-#     #     stats['pp_latitude'] = plat
-#     #     stats['pp_longitude'] = plon
-#     #     return plat, plon

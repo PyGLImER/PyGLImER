@@ -85,7 +85,7 @@ waveform_client = ["IRIS", "NCEDC", "ORFEUS", "ODC", "TEXNET", "BGR", "ETH",
 re_clients = ["IRIS", "NCEDC", "ORFEUS", "ODC", "TEXNET", "BGR", "ETH",
  "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
 # Clients that cause problems and are excluded:
-# ['EMSC', 'GFZ', 'LMU', 'SCEDC']
+# ['GFZ', 'LMU', 'SCEDC']
 # %% PRE-PROCESSING VALUES #####
 
 # Rotation #

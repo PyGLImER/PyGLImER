@@ -13,7 +13,7 @@ from obspy.core import Stream, Trace, Stats
 from obspy import UTCDateTime, read
 from obspy.signal.filter import lowpass
 import matplotlib.pyplot as plt
-from subfunctions import config
+import config
 from subfunctions.preprocess import QC_S, QC_P
 import os
 
@@ -121,9 +121,10 @@ def moveout_test(PSS_file, q, phase):
     stats.npts = N
     stats.delta = dt
     stats.starttime = UTCDateTime(0)
+    IRs = []
     for i in range(M):
         if phase == "P":
-            data, _, _ = it(PSS[i, 0, :], PSS[i, 1, :], dt, shift=shift,
+            data, _, IR = it(PSS[i, 0, :], PSS[i, 1, :], dt, shift=shift,
                             width=4)
         elif phase == "S":
             data, _, _ = it(PSS[i, 1, :], PSS[i, 0, :], dt, shift=shift,
@@ -131,13 +132,16 @@ def moveout_test(PSS_file, q, phase):
         RF.append(data)
         z, rfc = moveout(data, stats, UTCDateTime(shift), rayp[i], phase,
                          fname="raysum.dat")
+        # z, IRc = moveout(IR, stats, UTCDateTime(0), rayp[i], phase,
+        #                  fname="raysum.dat")
+        # IRs.append(IRc)
         RF_mo.append(rfc)
     stack = np.average(RF_mo, axis=0)
     plt.close('all')
     plt.figure()
     for mo in RF_mo:
         plt.plot(z, mo)
-    return z, stack, RF_mo, RF, dt, PSS
+    return z, stack, RF_mo, RF, dt, PSS  # ,   IRs
 
 
 def decon_test(PSS_file, phase, method):

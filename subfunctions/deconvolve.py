@@ -10,7 +10,7 @@ Various Deconvolution approaches used for the RF technique.
 import numpy as np
 from subfunctions.nextPowerOf2 import nextPowerOf2
 import subfunctions.SignalProcessingTB as sptb
-from subfunctions import config
+import config
 from scipy.signal.windows import dpss
 
 

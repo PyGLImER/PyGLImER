@@ -5,7 +5,7 @@ Created on Wed Apr 24 20:42:51 2019
 
 @author: pm
 """
-import subfunctions.config as config
+import config
 from obspy.core import *
 from obspy.core.event.base import *
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
