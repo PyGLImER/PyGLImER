@@ -103,11 +103,12 @@ def event_loop(event_cat, taper_perc, taper_type, webclient, model,
     INPUT:"""
     for event in event_cat:
         # fetch event-data
-        origin_time = event.origins[0].time
+        origin = (event.preferred_origin or event.origins[0])
+        origin_time = origin.time
         ot_fiss = UTCDateTime(origin_time).format_fissures()
-        evtlat = event.origins[0].latitude
-        evtlon = event.origins[0].longitude
-        depth = event.origins[0].depth
+        evtlat = origin.latitude
+        evtlon = origin.longitude
+        depth = origin.depth
 
         # make folder that will contain softlinks
         if not Path(config.outputloc+'/'+'by_event/'+ot_fiss).is_dir():
@@ -298,12 +299,15 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
 
             # WRITE AN INFO FILE
                 # append_info: [key,value]
-                append_inf = [['magnitude', event.magnitudes[0].mag],
-                              ['magnitude_type',
-                               event.magnitudes[0].magnitude_type],
+                append_inf = [['magnitude', (event.preferred_magnitude() or
+                               event.magnitudes[0])['mag']],
+                              ['magnitude_type', (event.preferred_magnitude()
+                                                  or event.magnitudes[0])['magnitude_type']],
                               ['evtlat', evtlat], ['evtlon', evtlon],
                               ['ot_ret', ot_fiss], ['ot_all', ot_fiss],
-                              ['evt_depth', depth], ['noisemat', noisemat],
+                              ['evt_depth', depth],
+                              ['evt_id', event.get('resource_id')],
+                              ['noisemat', noisemat],
                               ['co_f', f], ['npts', st[1].stats.npts],
                               ['rbaz', result["backazimuth"]],
                               ['rdelta', result["distance"]],
@@ -382,7 +386,7 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
 
                 RF.write(config.RF + '/' + network + '/' + station +
                          '/' + network + '.' + station + '.' + ot_fiss
-                         + '.mseed', format="MSEED")
+                         + '.sac', format="SAC")
 
                 # copy info files
                 subprocess.call(["cp", infof + ".dir",
