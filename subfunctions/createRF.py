@@ -17,7 +17,8 @@ import config
 from subfunctions.deconvolve import it, spectraldivision, multitaper
 from obspy import read, Stream, Trace, UTCDateTime
 from obspy.core import AttribDict
-from obspy.geodetics import gps2dist_azimuth
+from obspy.geodetics import gps2dist_azimuth, degrees2kilometers,\
+    direct_geodetic
 from obspy.taup import TauPyModel
 import shelve
 import os
@@ -26,7 +27,7 @@ from scipy import interpolate
 from scipy.signal.windows import hann
 
 _MODEL_CACHE = {}
-DEG2KM = 111.1949
+DEG2KM = degrees2kilometers(1)
 maxz = 800  # maximum interpolation depth in km
 
 
@@ -68,8 +69,6 @@ def createRF(st_in, dt, phase=config.phase, shift=config.tz,
             tap[-round(7.5/dt):]
         for tr in st:
             tr.data = np.multiply(tr.data, taper)
-        # st.taper(0.5, max_length=trim[0], side='left')
-        # st.taper(0.5, max_length=trim[1], side='right')
 
     # Identify components
     stream = {}
@@ -156,19 +155,14 @@ def stackRF(network, station, phase=config.phase):
         starttime = info["starttime"]
     for ii, tr in enumerate(data):
         jj = starttime.index(st[ii].starttime)
-        z, RF = moveout(tr, st[ii], onset[jj], rayp[jj], phase)
+        z, RF, _ = moveout(tr, st[ii], onset[jj], rayp[jj], phase)
         RF_mo.append(RF)
-        # z_all.append(z)
-    # Empty array for stack
-    # zl = []
-    # for z in z_all:
-    #     zl.append(len(z))
-    # ii = min(zl)
+
     stack = np.average(RF_mo, axis=0)
     return z, stack, RF_mo, data
 
 
-def moveout(data, st, onset, rayp, phase, fname='iasp91.dat'):
+def moveout(data, st, fname='iasp91.dat'):
     """Corrects the for the moveout of a converted phase. Flips time axis
     and polarity of SRF.
     INPUT:
@@ -177,7 +171,10 @@ def moveout(data, st, onset, rayp, phase, fname='iasp91.dat'):
         onset: the onset time (UTCDATETIME)
         rayp: ray parameter in sec/deg
         phase: P or S for PRF or SRF, respectively"""
+    onset = st.onset
     tas = round((onset - st.starttime)/st.delta)  # theoretical arrival sample
+    rayp = st.slowness
+    phase = st.phase
     # Nq = st.npts - tas
     htab, dt, delta = dt_table(rayp, fname, phase)
     # queried times
@@ -191,10 +188,11 @@ def moveout(data, st, onset, rayp, phase, fname='iasp91.dat'):
         tas = -tas
     RF = data[tas:tas+len(z)]
     zq = np.arange(0, max(z), 0.25)
+
     # interpolate RF
-    # RF = np.interp(zq, z, RF)
     tck = interpolate.splrep(z, RF)
     RF = interpolate.splev(zq, tck)
+
     # Taper the last 3.5 seconds of the RF to avoid discontinuities in stack
     tap = hann(round(7/st.delta))
     tap = tap[round(len(tap)/2):]
@@ -204,7 +202,7 @@ def moveout(data, st, onset, rayp, phase, fname='iasp91.dat'):
     z2 = np.arange(0, maxz+.25, .25)
     RF2 = np.zeros(z2.shape)
     RF2[:len(RF)] = RF
-    return z2, RF2
+    return z2, RF2, delta
 
 
 def dt_table(rayp, fname, phase):
@@ -222,8 +220,8 @@ def dt_table(rayp, fname, phase):
         vp = model.vpf
         vs = model.vsf
         zf = model.zf
-    dz = model.dz
-    dzf = model.dzf
+    # dz = model.dz
+    # dzf = model.dzf
     z = np.append(z, maxz)
     res = 1  # resolution in km
 
@@ -248,13 +246,7 @@ def dt_table(rayp, fname, phase):
     q_a = np.sqrt(vp**-2 - p**2)
     q_b = np.sqrt(vs**-2 - p**2)
 
-    # for kk, h in enumerate(htab_f):
-    #     ii = np.where(zf >= h)[0][0]
-    #     dz = np.diff(np.append(zf[:ii], h))
-    #     print(dz)
-    #     dt[kk] = np.sum((q_b[:len(dz)]-q_a[:len(dz)])*dz)
-        # delta[kk] = ppoint(q_a[:len(dz)], q_b[:len(dz)], dz, p, phase)
-    # dt[0] and delta[0] are always = 0
+    # Numerical integration
     for kk, h in enumerate(htab_f[1:]):
         ii = np.where(zf >= h)[0][0] - 1
         dt[kk+1] = (q_b[ii]-q_a[ii])*res_f[kk]
@@ -291,45 +283,6 @@ def ppoint(q_a, q_b, dz, p, phase):
     return x_delta
 
 
-# def ppoint(self, stats, depth, phase='S'):
-#     """
-#     Calculate latitude and longitude of piercing point.
-
-#     Piercing point coordinates and depth are saved in the pp_latitude,
-#     pp_longitude and pp_depth entries of the stats object or dictionary.
-
-#     :param stats: Stats object or dictionary with entries
-#         slowness, back_azimuth, station_latitude and station_longitude
-#     :param depth: depth of interface in km
-#     :param phase: 'P' for piercing point of P wave, 'S' for piercing
-#         point of S wave. Multiples are possible, too.
-#     :return: latitude and longitude of piercing point
-#     """
-#     dr = self.ppoint_distance(depth, stats['slowness'], phase=phase)
-#     lat = stats['station_latitude']
-#     lon = stats['station_longitude']
-#     az = stats['back_azimuth']
-#     plat, plon = direct_geodetic((lat, lon), az, dr)
-#     stats['pp_depth'] = depth
-#     stats['pp_latitude'] = plat
-#     stats['pp_longitude'] = plon
-#     return plat, plon
-
-
-# def iasp91(fname='iasp91.dat'):
-#     """Loads velocity model in data subfolder"""
-#     # values = np.loadtxt('data/iasp91.dat', unpack=True)
-#     # z, vp, vs, n = values
-#     # n = n.astype(int)
-#     model = load_model(fname)
-#     z = model.z
-#     vp = model.vp
-#     vs = model.vs
-#     dz = model.dz
-#     # n = model.n
-#     return z, dz, vp, vs  # , n
-
-
 def earth_flattening(maxz, z, dz, vp, vs):
     """Creates a flat-earth approximated velocity model down to 800 km as in
     Peter M. Shearer"""
@@ -348,8 +301,8 @@ def earth_flattening(maxz, z, dz, vp, vs):
     return z, dz, zf[:ii], dzf, vpf, vsf
 
 
-# """ Everything from here on is from the RF model by Tom Eulenfeld, modified
-# by me"""
+""" Everything from here on is from the RF model by Tom Eulenfeld, modified
+ by me"""
 
 
 def load_model(fname='iasp91.dat'):
@@ -419,9 +372,6 @@ class SimpleModel(object):
         self.vs = vs[:-1]
         self.t_ref = {}
 
-
-# RECEIVER FUNCTION CLASS AND EVERYTHING THAT IS NEEDED FROM IT, MODIFIED 
-# FROM TOM EULENFELD'S rf MODULE
 
 def __get_event_origin_prop(h):
     def wrapper(event):
@@ -571,7 +521,7 @@ class RFStream(Stream):
         """Property for used rf method, 'P' or 'S'"""
         phase = self.__get_unique_header('phase')
         if phase is not None:
-            return phase[-1].upper()
+            return phase.upper()
 
     @method.setter
     def method(self, value):
@@ -637,189 +587,63 @@ class RFStream(Stream):
             traces.append(sliced_trace)
         return self.__class__(traces)
 
-    # @_add_processing_info
-    # def rf(self, method=None, filter=None, trim=None, downsample=None,
-    #        rotate='ZNE->LQT', deconvolve='time', source_components=None,
-    #        **kwargs):
-    #     r"""
-    #     Calculate receiver functions in-place.
-    #     :param method: 'P' for P receiver functions, 'S' for S receiver
-    #         functions, if None method will be determined from the phase
-    #     :param dict filter: filter stream with its
-    #         `~obspy.core.stream.Stream.filter` method and given kwargs
-    #     :type trim: tuple (start, end)
-    #     :param trim: trim stream relative to P- or S-onset
-    #          with `trim2()` (seconds)
-    #     :param float downsample: downsample stream with its
-    #         :meth:`~obspy.core.stream.Stream.decimate` method to the given
-    #         frequency
-    #     :type rotate: 'ZNE->LQT' or 'NE->RT'
-    #     :param rotate: rotate stream with its
-    #         :meth:`~obspy.core.stream.Stream.rotate`
-    #         method with the angles given by the back_azimuth and inclination
-    #         attributes of the traces stats objects. You can set these to your
-    #         needs or let them be computed by :func:`~rf.rfstream.rfstats`.
-    #     :param deconvolve: 'time' or 'freq' for time or frequency domain
-    #         deconvolution by the streams
-    #         `deconvolve()`
-    #         method. See `~.deconvolve.deconvolve()`,
-    #         `.deconvt()` and `.deconvf()`
-    #         for further documentation.
-    #     :param source_components: parameter is passed to deconvolve.
-    #         If None, source components will be chosen depending on method.
-    #     :param \*\*kwargs: all other kwargs not mentioned here are
-    #         passed to deconvolve
-    #     After performing the deconvolution the Q/R and T components are
-    #     multiplied by -1 to get a positive phase for a Moho-like positive
-    #     velocity contrast. Furthermore for method='S' all components are
-    #     mirrored at t=0 for a better comparison with P receiver functions.
-    #     See source code of this function for the default
-    #     deconvolution windows.
-    #     """
-    #     def iter3c(stream):
-    #         return IterMultipleComponents(stream, key='onset',
-    #                                       number_components=(2, 3))
+    def moveout(self, vmodel_file="iasp91.dat"):
+        """
+        Depth migration of the receiver functions contained in the stream.
+        Also calculates piercing points.
+        Overwrites traces in stream!
+        """
+        for tr in self:
+            _, tr.data, delta = moveout(tr.data, tr.stats)
+            st = tr.stats
+            st.pp_latitude = []
+            st.pp_longitude = []
+            st.pp_depth = np.linspace(0, 800, len(delta))
 
-    #     if method is None:
-    #         method = self.method
-    #     if method is None or method not in 'PS':
-    #         msg = "method must be one of 'P', 'S', but is '%s'"
-    #         raise ValueError(msg % method)
-    #     if source_components is None:
-    #         source_components = 'LZ' if method == 'P' else 'QR'
-    #     if filter:
-    #         self.filter(**filter)
-    #     if trim:
-    #         self.trim2(*trim, reftime='onset')
-    #     if downsample:
-    #         for tr in self:
-    #             if downsample <= tr.stats.sampling_rate:
-    #                 tr.decimate(int(tr.stats.sampling_rate) // downsample)
-    #     if rotate:
-    #         for stream3c in iter3c(self):
-    #             stream3c.rotate(rotate)
-    #     # Multiply -1 on Q component, because Q component is pointing
-    #     # towards the event after the rotation with ObsPy.
-    #     # For a positive phase at a Moho-like velocity contrast,
-    #     # the Q component has to point away from the event.
-    #     # This is not necessary for the R component which points already
-    #     # away from the event.
-    #     # (compare issue #4)
-    #     for tr in self:
-    #         if tr.stats.channel.endswith('Q'):
-    #             tr.data = -tr.data
-    #     if deconvolve:
-    #         for stream3c in iter3c(self):
-    #             kwargs.setdefault('winsrc', method)
-    #             stream3c.deconvolve(method=deconvolve,
-    #                                 source_components=source_components,
-    #                                 **kwargs)
-    #     # Mirrow Q/R and T component at 0s for S-receiver method for a better
-    #     # comparison with P-receiver method (converted Sp wave arrives before
-    #     # S wave, but converted Ps wave arrives after P wave)
-    #     if method == 'S':
-    #         for tr in self:
-    #             tr.data = tr.data[::-1]
-    #             tr.stats.onset = tr.stats.starttime + (tr.stats.endtime -
-    #                                                    tr.stats.onset)
-    #     self.type = 'rf'
-    #     if self.method != method:
-    #         self.method = method
-    #     return self
+            # Calculate ppoint position
+            for dis in delta:
+                lat = st.station_latitude
+                lon = st.station_longitude
+                az = st.back_azimuth
+                dr = st.distance*DEG2KM
+                lat2, lon2 = direct_geodetic((lat, lon), az, dr)
+                st.pp_latitude.append(lat2)
+                st.pp_longitude.append(lon2)
 
-    # @_add_processing_info
-    # def moveout(self, phase=None, ref=6.4, model='iasp91'):
-    #     """
-    #     In-place moveout correction to a reference slowness.
-    #     Needs stats attributes slowness and onset.
-    #     :param phase: 'Ps', 'Sp', 'Ppss' or other multiples, if None is set to
-    #         'Ps' for P receiver functions or 'Sp' for S receiver functions
-    #     :param ref: reference ray parameter in s/deg
-    #     :param model: Path to model file
-    #         (see `.SimpleModel`, default: iasp91)
-    #     """
-    #     if phase is None:
-    #         phase = self.method + {'P': 's', 'S': 'p'}[self.method]
-    #     model = load_model(model)
-    #     model.moveout(self, phase=phase, ref=ref)
-    #     for tr in self:
-    #         tr.stats.moveout = phase
-    #         tr.stats.slowness_before_moveout = tr.stats.slowness
-    #         tr.stats.slowness = ref
-    #     return self
+    def ppoint(self, vmodel_file='iasp91.dat'):
+        """
+        Calculates piercing points for receiver functions in Stream
+        """
+        for tr in self:
+            st = tr.stats
+            htab, _, delta = dt_table(st.slowness, vmodel_file, st.phase)
+            st.pp_depth = htab
+            st.pp_latitude = []
+            st.pp_longitude = []
 
-    # def ppoints(self, pp_depth, pp_phase=None, model='iasp91'):
-    #     """
-    #     Return coordinates of piercing point calculated by 1D ray tracing.
-    #     Piercing point coordinates are stored in the
-    #     stats attributes plat and plon. Needs stats attributes
-    #     station_latitude, station_longitude, slowness and back_azimuth.
-    #     :param pp_depth: depth of interface in km
-    #     :param pp_phase: 'P' for piercing points of P wave, 'S' for piercing
-    #         points of S wave or multiples, if None will be
-    #         set to 'S' for P receiver functions or 'S' for S receiver functions
-    #     :param model: path to model file (see `.SimpleModel`, default: iasp91)
-    #     :return: NumPy array with coordinates of piercing points
-    #     """
-    #     if pp_phase is None:
-    #         pp_phase = {'P': 'S', 'S': 'P'}[self.method]
-    #     model = load_model(model)
-    #     for tr in self:
-    #         model.ppoint(tr.stats, pp_depth, phase=pp_phase)
-    #     return np.array([(tr.stats.pp_latitude, tr.stats.pp_longitude)
-    #                      for tr in self])
+            for dis in delta:
+                lat = st.station_latitude
+                lon = st.station_longitude
+                az = st.back_azimuth
+                dr = st.distance*DEG2KM
+                lat2, lon2 = direct_geodetic((lat, lon), az, dr)
+                st.pp_latitude.append(lat2)
+                st.pp_longitude.append(lon2)
 
-    # @_add_processing_info
-    # def stack(self):
-    #     """
-    #     Return stack of traces with same seed ids.
-    #     Traces with same id need to have the same number of datapoints.
-    #     Each trace in the returned stream will correspond to one unique seed
-    #     id.
-    #     """
-    #     ids = set(tr.id for tr in self)
-    #     tr = self[0]
-    #     traces = []
-    #     for id in ids:
-    #         net, sta, loc, cha = id.split('.')
-    #         data = np.mean([tr.data for tr in self if tr.id == id], axis=0)
-    #         header = {'network': net, 'station': sta, 'location': loc,
-    #                   'channel': cha, 'sampling_rate': tr.stats.sampling_rate}
-    #         for entry in ('phase', 'moveout', 'station_latitude',
-    #                       'station_longitude', 'station_elevation',
-    #                       'processing'):
-    #             if entry in tr.stats:
-    #                 header[entry] = tr.stats[entry]
-    #         tr2 = RFTrace(data=data, header=header)
-    #         if 'onset' in tr.stats:
-    #             onset = tr.stats.onset - tr.stats.starttime
-    #             tr2.stats.onset = tr2.stats.starttime + onset
-    #         traces.append(tr2)
-    #     return self.__class__(traces)
-
-    # def profile(self, *args, **kwargs):
-    #     """
-    #     Return profile of receiver functions in the stream.
-    #     See `.profile.profile()` for help on arguments.
-    #     """
-    #     from rf.profile import profile
-    #     return profile(self, *args, **kwargs)
-
-    # def plot_rf(self, *args, **kwargs):
-    #     """
-    #     Create receiver function plot.
-    #     See `.imaging.plot_rf()` for help on arguments.
-    #     """
-    #     from rf.imaging import plot_rf
-    #     return plot_rf(self, *args, **kwargs)
-
-    # def plot_profile(self, *args, **kwargs):
-    #     """
-    #     Create receiver function profile plot.
-    #     See `.imaging.plot_profile()` for help on arguments.
-    #     """
-    #     from rf.imaging import plot_profile
-    #     return plot_profile(self, *args, **kwargs)
+    def station_stack(self, vmodel_file='iasp91.dat'):
+        """
+        Performs a moveout correction and stacks all receiver functions
+        in Stream. Make sure that Stream only contains RF from one station!
+        """
+        self.moveout(vmodel_file=vmodel_file)
+        self.normalize()  # make sure traces are normalised
+        RF_mo = []
+        for tr in self:
+            RF_mo.append(tr.data)
+        stack = np.average(RF_mo, axis=0)
+        self.append(RFTrace(data=stack))
+        z = np.linspace(0, 800, len(stack))
+        return z, stack
 
 
 class RFTrace(Trace):
@@ -828,7 +652,7 @@ class RFTrace(Trace):
     Class providing the Trace object for receiver function calculation.
     """
 
-    def __init__(self, data=np.array([]), header=None, trace=None):
+    def __init__(self, data=None, header=None, trace=None):
         if header is None:
             header = {}
         if trace is not None:
@@ -972,6 +796,46 @@ class RFTrace(Trace):
         if not isinstance(reftime, UTC):
             reftime = self.stats[reftime]
         return reftime + seconds
+
+    def moveout(self, vmodel_file="iasp91.dat"):
+        """
+        Depth migration of the receiver function.
+        Also calculates piercing points.
+        """
+        st = self.stats
+        _, self.data, delta = moveout(self.data, st)
+        st.pp_latitude = []
+        st.pp_longitude = []
+        st.pp_depth = np.linspace(0, 800, len(delta))
+
+        # Calculate ppoint position
+        for dis in delta:
+            lat = st.station_latitude
+            lon = st.station_longitude
+            az = st.back_azimuth
+            dr = st.distance*DEG2KM
+            lat2, lon2 = direct_geodetic((lat, lon), az, dr)
+            st.pp_latitude.append(lat2)
+            st.pp_longitude.append(lon2)
+
+    def ppoint(self, vmodel_file='iasp91.dat'):
+        """
+        Calculates piercing points for receiver function.
+        """
+        st = self.stats
+        htab, _, delta = dt_table(st.slowness, vmodel_file, st.phase)
+        st.pp_depth = htab
+        st.pp_latitude = []
+        st.pp_longitude = []
+
+        for dis in delta:
+            lat = st.station_latitude
+            lon = st.station_longitude
+            az = st.back_azimuth
+            dr = st.distance*DEG2KM
+            lat2, lon2 = direct_geodetic((lat, lon), az, dr)
+            st.pp_latitude.append(lat2)
+            st.pp_longitude.append(lon2)
 
     def write(self, filename, format, **kwargs):
         """
