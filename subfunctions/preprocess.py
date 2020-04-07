@@ -29,8 +29,9 @@ from subfunctions.Errorhandler import redownload, redownload_statxml, \
     NoMatchingResponseHandler, NotLinearlyIndependentHandler
 
 
-def preprocess(taper_perc, taper_type, event_cat, webclient, model):
-    """ Preprocesses waveforms to create receiver functions
+def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
+    """
+     Preprocesses waveforms to create receiver functions
 
         1. Clips waveform to the right length
         (config.tz before and config.ta after theorethical arrival.)
@@ -52,28 +53,26 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
         downloaded by download.py.
         (checked over the dynamic variables prepro_folder and config.folder)
 
-        INPUT:
-        taper_perc: taper percentage (config)
-        taper_type: taper_type (config)
-        event_cat: event catalogue
-        webclient: webclient that is used to fetch response of Havard station
-        model: velocity model to calculate arrival time (config)
+        Saves preprocessed waveform files.
+        Creates info file to save parameters.
 
-        only in config file:
-        outputloc: output location for preprocessed files
-        failloc: location for files that were not preprocessed
-        waveform: folder, in which the raw data is dumped
-        folder: folder, in which  the download is happening
-        statloc: location of station inventory
-        tz: clip time before theoretical arrival
-        ta: clip time after theoretical arrival
-        lowco: list with low cut-off frequencies for SNR check
-        SNR_criteria: SNR criteria for accepting/rejecting stream
+    Parameters
+    ----------
+    taper_perc : FLOAT
+        Percemtage to be tapered in beginning and at the end of waveforms.
+    taper_type : STRING, optional
+        DESCRIPTION. The default is "hann".
+    event_cat : event catalogue
+        catalogue containing all events of waveforms.
+    webclient : obspy.clients.iris
+        Used to fetch IU.HRV response file (for station simulation).
+    model : obspy.taup.TauPyModel
+        1D velocity model to calculate arrival.
 
-        OUTPUT:
-        saves preprocessed waveform files
-        copies failed files
-        creates info file to save parameters.
+    Returns
+    -------
+    None.
+
         """
     ###########
     # logging
@@ -109,15 +108,16 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
     # Define class for backazimuth calculation
     iclient = iClient()
 
-    event_loop(event_cat, taper_perc, taper_type, webclient,
-               model, paz_sim, iclient, logger)
+    __event_loop(event_cat, taper_perc, taper_type, webclient,
+                 model, paz_sim, iclient, logger)
     print("Download and preprocessing finished.")
 
 
-def event_loop(event_cat, taper_perc, taper_type, webclient, model,
-               paz_sim, iclient, logger):
-    """Loops over each event in the event catalogue
-    INPUT:"""
+def __event_loop(event_cat, taper_perc, taper_type, webclient, model,
+                 paz_sim, iclient, logger):
+    """
+    Loops over each event in the event catalogue
+    """
     for event in event_cat:
         # fetch event-data
         origin = (event.preferred_origin() or event.origins[0])
@@ -148,16 +148,18 @@ def event_loop(event_cat, taper_perc, taper_type, webclient, model,
                                 download to obtain missing files
                                 in database.""")
                 continue
-            waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
-                          paz_sim, iclient, origin_time, ot_fiss, evtlat,
-                          evtlon, depth, prepro_folder, event, logger)
+            __waveform_loop(taper_perc, taper_type, event_cat, webclient,
+                            model, paz_sim, iclient, origin_time, ot_fiss,
+                            evtlat, evtlon, depth, prepro_folder, event,
+                            logger)
 
 
-def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
-                  paz_sim, iclient, origin_time, ot_fiss, evtlat, evtlon,
-                  depth, prepro_folder, event, logger):
-    """Loops over each waveform for a specific event and a specific station
-    INPUT:"""
+def __waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
+                    paz_sim, iclient, origin_time, ot_fiss, evtlat, evtlon,
+                    depth, prepro_folder, event, logger):
+    """
+    Loops over each waveform for a specific event and a specific station
+    """
 
     # loop over all files for event x
     for file in os.listdir(prepro_folder):
@@ -187,9 +189,9 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
 
     # If the file hasn't been downloaded and preprocessed
     # in an earlier iteration of the program
-        if not file_in_db(config.outputloc + '/by_station/' + network
-                          + '/' + station, network + '.' + station +
-                          '.' + ot_fiss + '.mseed'):
+        if not __file_in_db(config.outputloc + '/by_station/' + network
+                            + '/' + station, network + '.' + station +
+                            '.' + ot_fiss + '.mseed'):
             crit = False  # criterion to retain
 
             try:  # From here on, all exceptions are logged
@@ -375,8 +377,8 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
         # Check if RF was already computed and if it should be
         # computed at all, and if the waveform was retained (SNR)
         if config.decon_meth and not\
-            file_in_db(config.RF + '/' + network + '/' + station, network +
-                       '.' + station + '.' + ot_fiss + '.sac') and crit:
+            __file_in_db(config.RF + '/' + network + '/' + station, network +
+                         '.' + station + '.' + ot_fiss + '.sac') and crit:
 
             # Logging for RF creation
             RF_logger = logging.getLogger("subfunctions.preprocess.RF")
@@ -417,7 +419,7 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                         trim[1] = config.ta - (-2*info["rdelta"][i] + 180)
                     else:
                         trim[1] = config.ta - 40
-                    RF = createRF(st, st[0].stats.delta, info=info, trim=trim)
+                    RF = createRF(st, info=info, trim=trim)
 
             # Write RF
                 if not Path(config.RF + '/' + network + '/' + station
@@ -453,12 +455,34 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
 
 
 def QC_P(st, dt, sampling_f):
-    """Quality control for the downloaded waveforms that are used to create
+    """
+    Quality control for the downloaded waveforms that are used to create
     PRFS. Works with various filters and SNR criteria
-    INPUT:
-        st: input st to be checked
-        dt: sampling interval
-        sampling_f: sampling frequency"""
+
+    Parameters
+    ----------
+    st : '~obspy.Stream'
+        Input stream.
+    dt : FLOAT
+        Sampling interval [s].
+    sampling_f : FLOAT
+        Sampling frequency (Hz).
+
+    Returns
+    -------
+    st : '~obspy.Stream'
+        Output stream. If stream was accepted, then this will contain the
+        filtered stream, filtered with the broadest accepted filter.
+    crit : BOOL
+        True if stream was accepted, false if it wasn't.
+    f : FLOAT
+        Last used low-cut frequency. If crit=True, this will be the frequency
+        for which the stream was accepted.
+    noisemat : np.array
+        SNR values in form of a matrix. Rows represent the different filters
+        and columns the different criteria.
+
+    """
     # Create stream dict to identify channels
     stream = {}
     for tr in st:
@@ -534,13 +558,35 @@ def QC_P(st, dt, sampling_f):
 
 
 def QC_S(st, dt, sampling_f):
-    """Quality control for waveforms that are used to produce SRF. In contrast
+    """
+    Quality control for waveforms that are used to produce SRF. In contrast
     to the ones used for PRF this is a very rigid criterion and will reject
     >95% of the waveforms.
-    INPUT:
-        st: input stream, in RTZ
-        dt: sampling interval
-        sampling_f: sampling frequency"""
+
+    Parameters
+    ----------
+    st : '~obspy.Stream'
+        Input stream.
+    dt : FLOAT
+        Sampling interval [s].
+    sampling_f : FLOAT
+        Sampling frequency (Hz).
+
+    Returns
+    -------
+    st : '~obspy.Stream'
+        Output stream. If stream was accepted, then this will contain the
+        filtered stream, filtered with the broadest accepted filter.
+    crit : BOOL
+        True if stream was accepted, false if it wasn't.
+    f : FLOAT
+        Last used high-cut frequency. If crit=True, this will be the frequency
+        for which the stream was accepted.
+    noisemat : np.array
+        SNR values in form of a matrix. Rows represent the different filters
+        and columns the different criteria.
+
+    """
     # Create stream dict to identify channels
     stream = {}
     for tr in st:
@@ -622,7 +668,7 @@ def QC_S(st, dt, sampling_f):
     return st, crit, hf, noisemat
 
 
-def file_in_db(loc, filename):
+def __file_in_db(loc, filename):
     """Checks if file "filename" is already in location "loc"."""
     path = Path(loc+"/"+filename)
     if path.is_file():

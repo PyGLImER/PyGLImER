@@ -12,16 +12,39 @@ import config
 
 
 def rotate_PSV(statlat, statlon, rayp, st):
-    """Finds the incidence angle of an incoming ray with the weighted average
-    of the lithosphere's P velocity
-    INPUT:
-        statlat: station latitude
-        statlon: station longitude
-        rayp: rayparameter in s/m (i.e. horizontal slowness)
-        st: stream in RTZ"""
+    """
+    Finds the incidence angle of an incoming ray with the weighted average
+    of the lithosphere's P velocity. Requires Litho1.0 to be installed.
+
+    Parameters
+    ----------
+    statlat : FLOAT
+        station latitude.
+    statlon : FLOAT
+        station longitude.
+    rayp : FLOAT
+        ray parameter / slownesss in s/m.
+    st : obspy.Stream
+        Input stream given in RTZ.
+
+    Returns
+    -------
+    avp : FLOAT
+        Average P-wave velocity.
+    avs : FLOAT
+        Average S-wave velocity.
+    PSvSh : obspy.Stream
+        Stream in P-Sv-Sh.
+
+    """
+
     x = subprocess.Popen([config.lith1, "-p", str(statlat),
                           str(statlon)], stdout=subprocess.PIPE)
     ls = str(x.stdout.read()).split("\\n")  # save the output
+
+    # Close file or it will remain open forever!
+    x.stdout.close()
+
     for ii, item in enumerate(ls):
         ls[ii] = item.split()
     # clean list
@@ -65,6 +88,8 @@ def rotate_PSV(statlat, statlon, rayp, st):
         st[0].stats.channel[2]: st[0].data,
         st[1].stats.channel[2]: st[1].data,
         st[2].stats.channel[2]: st[2].data}
+
+    # deep copy
     PSvSh = st.copy()
     del st
     # create input matrix, Z component is sometimes called 3
@@ -93,15 +118,30 @@ def rotate_PSV(statlat, statlon, rayp, st):
     return avp, avs, PSvSh
 
 
-def rotate_LQT(st, phase=config.phase, TAT=config.tz):
-    """Not recommended. Use rotate_LQT_min instead!
+def rotate_LQT(st, phase=config.phase, onset=config.tz):
+    """
+    Not recommended. Use rotate_LQT_min instead!
     Rotates a stream given in RTZ to LQT using Singular Value Decomposition
-    INPUT:
-        st: stream given in RTZ, normalized
-        phase: S or P
-        TAT: theoretical arrival time
-    RETURNS:
-        LQT: stream in LQT"""
+
+    Parameters
+    ----------
+    st : obspy.Stream
+        Input Stream in RTZ.
+    phase : STRING, optional
+        "S" for Sp or "P" for Ps. The default is config.phase.
+    onset : float, optional
+        First arrival - starttime [s]. The default is config.tz.
+
+    Returns
+    -------
+    LQT : obspy.Stream
+        Output Stream in LQT.
+    QC : FLOAT
+        Quality control criterion. Energy balance at first arrival for L and Q.
+        Should deviate from 1 as far as possible.
+
+    """
+
     dt = st[0].stats.delta  # sampling interval
     LQT = st.copy()
     LQT.normalize()
@@ -110,11 +150,11 @@ def rotate_LQT(st, phase=config.phase, TAT=config.tz):
     # only check around phase-arrival
     # window
     if phase == "S":
-        ws = round((TAT-3)/dt)
-        we = round((TAT+5)/dt)
+        ws = round((onset-3)/dt)
+        we = round((onset+5)/dt)
     elif phase == "P":
-        ws = round((TAT-5)/dt)
-        we = round((TAT+5)/dt)
+        ws = round((onset-5)/dt)
+        we = round((onset+5)/dt)
     # 1. Find which component is which one and put them in a dict
     stream = {
         LQT[0].stats.channel[2]: LQT[0].data,
@@ -136,12 +176,12 @@ def rotate_LQT(st, phase=config.phase, TAT=config.tz):
     A_rot = np.linalg.inv(np.dot(u, np.diag(s)))
     LQ = np.dot(A_rot, ZR)
     # point of primary arrival
-    pp1 = round((TAT-2)/dt)
-    pp2 = round((TAT+20)/dt)
+    pp1 = round((onset-2)/dt)
+    pp2 = round((onset+20)/dt)
     npp = pp2 - pp1
     # point where converted Sp arrive
-    pc1 = round((TAT-40)/dt)
-    pc2 = round((TAT-15)/dt)
+    pc1 = round((onset-40)/dt)
+    pc2 = round((onset-15)/dt)
     npc = pc2 - pc1
     a = np.sum(np.square(LQ[0][pp1:pp2])/npp) /\
         np.sum(np.square(LQ[0][pc1:pc2])/npc)
@@ -162,14 +202,33 @@ def rotate_LQT(st, phase=config.phase, TAT=config.tz):
         elif tr.stats.channel[2] == "Z" or tr.stats.channel[2] == "3":
             tr.stats.channel = tr.stats.channel[0:2] + "L"
             tr.data = L
-    # LQT.normalize()
-    return LQT, a/b
+
+    QC = a/b
+    return LQT, QC
 
 
 def rotate_LQT_min(st, phase=config.phase):
-    """Rotates stream to LQT by minimising the energy of the S-wave primary
+    """
+    Rotates stream to LQT by minimising the energy of the S-wave primary
     arrival on the L component (SRF) or maximising the primary arrival
-    energy on L (PRF)."""
+    energy on L (PRF).
+
+    Parameters
+    ----------
+    st : obspy.Stream
+        Input stream in RTZ.
+    phase : STRING, optional
+        "P" for Ps or "S" for Sp. The default is config.phase.
+
+    Returns
+    -------
+    LQT : obspy.Stream
+        Output stream in LQT.
+    ia : float
+        Computed incidence angle in degree. Can serve as QC criterion.
+
+    """
+
     dt = st[0].stats.delta
     # point of primary arrival
     pp1 = round((config.tz-2)/dt)
@@ -219,4 +278,5 @@ def rotate_LQT_min(st, phase=config.phase):
         elif tr.stats.channel[2] == "Z" or tr.stats.channel[2] == "3":
             tr.stats.channel = tr.stats.channel[0:2] + "L"
             tr.data = LQ[0]
-    return LQT, ia*180/np.pi
+    ia = ia*180/np.pi
+    return LQT, ia

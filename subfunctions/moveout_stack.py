@@ -24,7 +24,10 @@ maxz = 800  # maximum interpolation depth in km
 
 
 def stackRF(network, station, phase=config.phase):
-    """Creates a moveout corrected receiver function stack of the
+    """
+    Outdated. Use fun:'subfunctions.createRF.RFStream.statstack()' instead.
+
+    Creates a moveout corrected receiver function stack of the
     requested station"""
     # extract data
     ioloc = config.RF[:-1] + phase + '/' + network + '/' + station
@@ -56,14 +59,32 @@ def stackRF(network, station, phase=config.phase):
 
 
 def moveout(data, st, fname='iasp91.dat'):
-    """Corrects the for the moveout of a converted phase. Flips time axis
+    """
+    Depth migration for RF.
+    Corrects the for the moveout of a converted phase. Flips time axis
     and polarity of SRF.
-    INPUT:
-        data: data from the trace object
-        st: stats from the trace object
-        onset: the onset time (UTCDATETIME)
-        rayp: ray parameter in sec/deg
-        phase: P or S for PRF or SRF, respectively"""
+
+    Parameters
+    ----------
+    data : np.array
+        Receiver Function.
+    st : obspy.core.AttributeDict
+        Stats from stream object.
+    fname : string, optional
+        1D velocity model for moveout correction. The default is 'iasp91.dat'.
+
+    Returns
+    -------
+    z2 : np.array
+        Depth vector in km.
+    RF2 : np.array
+        Vector containing the depth migrated RF.
+    delta : np.array
+        Vector containing Euclidian distance of piercing point from the
+        station at depth z.
+
+    """
+
     onset = st.onset
     tas = round((onset - st.starttime)/st.delta)  # theoretical arrival sample
     rayp = st.slowness
@@ -99,10 +120,37 @@ def moveout(data, st, fname='iasp91.dat'):
 
 
 def dt_table(rayp, fname, phase):
-    """Creates a phase delay table for a specific ray parameter given in
-    s/deg. Using the equation as in Rondenay 2009."""
+    """
+    Creates a phase delay table and calculates piercing points
+    for a specific ray parameter,
+    using the equation as in Rondenay 2009.
+    For SRF: The length of the output vectors is determined by the depth, at
+    which Sp conversion is supercritical (vertical slowness = complex).
+
+    Parameters
+    ----------
+    rayp : float
+        ray-parameter given in s/deg.
+    fname : string
+        1D velocity model, located in data/vmodels.
+    phase : string
+        Either "S" for Sp or "P" for Ps.
+
+    Returns
+    -------
+    htab: np.array
+        Vector containing conversion depths.
+    dt: np.array
+        Vector containing delay times between primary arrival and converted
+        wave.
+    delta: np.array
+        Vector containing Euclidian distance of piercing point from the
+        station at depth z.
+
+    """
+
     p = rayp/DEG2KM  # convert to s/km
-    # z, dz, zf, dzf, vp, vs = iasp_flatearth(maxz, fname)
+
     model = load_model(fname)
     z = model.z
     if fname == 'raysum.dat':  # already Cartesian
@@ -122,8 +170,6 @@ def dt_table(rayp, fname, phase):
     htab = np.arange(0, maxz+res, res)  # spherical
     htab_f = -6371*np.log((6371-htab)/6371)  # flat earth depth
     res_f = np.diff(htab_f)  # earth flattened resolution
-    # htab_f = htab_f[:-1]
-    # htab = htab[:-1]
 
     if fname == "raysum.dat":
         htab_f = htab
@@ -147,6 +193,7 @@ def dt_table(rayp, fname, phase):
     dt = np.cumsum(dt)
     delta = np.cumsum(delta)
 
+    # Determine if Sp is supercritical
     try:
         index = np.nonzero(np.isnan(dt))[0][0] - 1
     except IndexError:
@@ -156,42 +203,83 @@ def dt_table(rayp, fname, phase):
 
 def ppoint(q_a, q_b, dz, p, phase):
     """
-    Calculate angular distance between piercing point and station.
-    INPUT (have to be in Cartesian/ flat Earth):
-    :param depth: depth of interface in km
-    :param p: slowness in s/km
-    :param phase: 'P' or 'S'
-    :return: angular distance in degree
+    Calculate Euclidean distance between piercing point and station.
+    INPUT has to be in Cartesian/ flat Earth:
+
+    Parameters
+    ----------
+    q_a : float
+        Vertical P-wave slowness in s/km.
+    q_b : float
+        Vertical S-wave slowness in s/km.
+    dz : float
+        Vertical distance between two consecutive piercing points [km].
+    p : float
+        slowness in s/km.
+    phase : string
+        Either "S" or "P".
+
+    Returns
+    -------
+    x_delta : float
+        Euclidean distance between station and piercing point.
+
     """
-    # The case for the direct - conversion at surface, dz =[]
-    # if not len(dz):
-    #     x = 0
 
     # Check phase, Sp travels as p, Ps as S from piercing point
     if phase == "S":
         x = np.sum(dz / q_a) * p
     elif phase == "P":
         x = dz / q_b * p
-    x_delta = x / DEG2KM  # angular distance in degree
+    x_delta = x / DEG2KM  # Euclidean distance in degree
     return x_delta
 
 
 def earth_flattening(maxz, z, dz, vp, vs):
-    """Creates a flat-earth approximated velocity model down to 800 km as in
-    Peter M. Shearer"""
-    r = 6371  # earth radius
+    """
+    Creates a flat-earth approximated velocity model down to 800 km as in
+    Peter M. Shearer
+
+    Parameters
+    ----------
+    maxz : int
+        Maximal intepolation depth [km]. Given at beginning of file.
+    z : np.array
+        Depth vector [km].
+    dz : np.array
+        Layer thicknesses in km.
+    vp : np.array
+        P wave velocities [km/s].
+    vs : np.array
+        S wave velocities [km/s].
+
+    Returns
+    -------
+    z : np.array
+        Same as input, but shortened to maxz.
+    dz : np.array
+        Same as input, but shortened to maxz.
+    zf : np.array
+        Depths in a Cartesian coordinate system.
+    dzf : np.array
+        Layer thicknesse in a Cartesian coordinate system.
+    vpf : np.array
+        P wave velocities in a Cartesian coordinate system.
+    vsf : np.array
+        S wave velocities in a Cartesian coordinate system.
+
+    """
+
+    r = 6371  # Earth's radius
     ii = np.where(z > maxz)[0][0]+1
     vpf = (r/(r-z[:ii]))*vp[:ii]
     vsf = (r/(r-z[:ii]))*vs[:ii]
-    zf = -r*np.log((r-z[:ii+1])/r)
+    zf = -r*np.log((r-z[:ii+1])/r)[:ii]
     z = z[:ii]
     dz = dz[:ii]
     dzf = np.diff(zf)
-    # if fname == 'raysum.dat':
-    #     zf = z
-    #     vpf = vp
-    #     vsf = vs
-    return z, dz, zf[:ii], dzf, vpf, vsf
+
+    return z, dz, zf, dzf, vpf, vsf
 
 
 """ Everything from here on is from the RF model by Tom Eulenfeld, modified
@@ -200,11 +288,7 @@ def earth_flattening(maxz, z, dz, vp, vs):
 
 def load_model(fname='iasp91.dat'):
     """
-    Load model from file.
-
-    :param fname: filename of model in data or 'iasp91'
-    :return: `SimpleModel` instance
-
+    Load 1D velocity model from file.
     The model file should have 4 columns with depth, vp, vs, n.
     The model file for iasp91 starts like this::
 
@@ -213,7 +297,20 @@ def load_model(fname='iasp91.dat'):
           0.00  5.800 3.360 0
           0.00  5.800 3.360 0
         10.00  5.800 3.360 4
+
+    Parameters
+    ----------
+    fname : string, optional
+        filename of model in data or 'iasp91'.
+        The default is 'iasp91.dat'.
+
+    Returns
+    -------
+    SimpleModel
+        Returns SimpleModel instance.
+
     """
+
     try:
         return _MODEL_CACHE[fname]
     except KeyError:

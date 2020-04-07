@@ -20,19 +20,32 @@ from obspy import UTCDateTime
 
 
 def downloadwav(min_epid, max_epid, model, event_cat):
-    """ Downloads the waveforms for all events in the catalogue
+    """
+    Downloads the waveforms for all events in the catalogue
      for a circular domain around the epicentre with defined epicentral
-     distances from Clients defined in config.waveform_client.
+     distances from Clients defined in config.waveform_client. Also Station
+     xmls for corresponding stations are downloaded.
 
-    INPUT:
-        min_epid: minimal epicentral distance of station
-        max_epid: maximal epicentral distance of station
-        model: velocity model
-        event_cat: event catalogue that the program will loop over
+    Saves station xml in folder defined in config.py
+    Saves waveforms in folder defined in config.py
 
-    OUTPUT:
-        saves station xml in folder defined in config.py
-        saves waveforms in folder defined in config.py"""
+    Parameters
+    ----------
+    min_epid : float
+        Minimal epicentral distance to be downloaded.
+    max_epid : float
+        Maxmimal epicentral distance to be downloaded.
+    model : obspy.taup.TauPyModel
+        1D velocity model to calculate arrival.
+    event_cat : Obspy event catalog
+        Catalog containing all events, for which waveforms should be
+        downloaded.
+
+    Returns
+    -------
+    None
+
+    """
 
     # Calculate the min and max theoretical arrival time after event time
     # according to minimum and maximum epicentral distance

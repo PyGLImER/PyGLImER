@@ -15,7 +15,7 @@ from pathlib import Path
 import subprocess
 import shelve
 
-from subfunctions.preprocess import QC_S
+from subfunctions.preprocess import QC_S, QC_P
 from subfunctions.createRF import createRF, RFStream
 from subfunctions.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
 import config
@@ -28,14 +28,45 @@ rating = {}  # mutable object
 
 def rate(network, station, onset=config.tz, phase="S", review=False,
          retained=False, decon_meth=config.decon_meth):
-    """"Module to rate and review the quality of waveform from the given
-    station. Shows the automatic rating from QC_S
-    INPUT:
-        network: network code
-        station: station code
-        phase: phase (only coded for S)
-        review: review already manually rated, False, True, or rating (1,2,3,4)
-        retained: show only automatically retained, Bool"""
+    """
+    Module to rate and review the quality of Sp or Ps waveforms from the given
+    station. Shows the automatic rating from. Tapers can be controlled with
+    the mouse. Rating is done with the keyboard.
+
+    Parameters
+    ----------
+    network : STRING
+        Network code (two letters).
+    station : STRING
+        Station code (three letters).
+    onset : float, optional
+        Difference between starttime and theoretical first arrival.
+        The default is config.tz.
+    phase : STRING, optional
+        Either "P" for Ps or "S" Sp. The default is "S".
+    review : INTEGER, optional
+        If true, already rated waveforms are shown.
+        Can also be an integer between 1 and 4. Then, only waveforms rated
+        with the respected rating are shown. The default is False.
+    retained : Bool, optional
+        Show only waveforms retained by QC_P or QC_S. The default is False.
+    decon_meth : STRING, optional
+        Deconvolution method, "waterlevel", 'dampedf' for constant
+        damping level, 'it' for iterative time domain deconvoltuion, 'multit'
+        for multitaper or 'fqd' for frequency dependently damped spectral
+        division. The default is config.decon_meth.
+        The default is config.decon_meth.
+
+    Raises
+    ------
+    Exception
+        For Typing mistakes.
+
+    Returns
+    -------
+    None.
+
+    """
     inloc = config.outputloc[:-1] + phase + "/by_station/" + network +\
         '/' + station + '/'
     # For TauPy lookup
@@ -59,7 +90,8 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
         starttime = str(st[0].stats.starttime)
         dt = st[0].stats.delta
         sampling_f = st[0].stats.sampling_rate
-        old = r_file(network, station, starttime)  # old
+        old = __r_file(network, station, starttime)  # old
+
         # read info file
         with shelve.open(inloc+"info") as info:
             ii = info["starttime"].index(st[0].stats.starttime)
@@ -79,14 +111,19 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
                 continue
 
         # check automatic rating
-        _, crit, hf, noisemat = QC_S(st, dt, sampling_f)
-        if retained and not crit:  # skip files that have not been retained
+        if phase == "S":
+            _, crit, hf, noisemat = QC_S(st, dt, sampling_f)
+        elif phase == "P":
+            _, crit, hf, noisemat = QC_P(st, dt, sampling_f)
+
+        # skip files that have not been retained
+        if retained and not crit:
             continue
 
         # create RF
         st_f = st.filter('bandpass', freqmin=.03, freqmax=hf, zerophase=True)
         _, _, PSV = rotate_PSV(statlat, statlon, rayp, st_f)
-        RF = createRF(PSV, dt, phase, method=decon_meth)
+        RF = createRF(PSV, phase, method=decon_meth)
 
         # TauPy lookup
         arrivals = model.get_travel_times(evt_depth,
@@ -114,8 +151,8 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
         t = np.linspace(0-onset, tr.stats.npts*tr.stats.delta-onset, len(y[0]))
 
         # plot
-        fig, ax = draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat,
-                            RF, old, rdelta, mag, crit, ot, evt_depth)
+        fig, ax = __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat,
+                              RF, old, rdelta, mag, crit, ot, evt_depth)
         while not plt.waitforbuttonpress(30):
             # Taper when input is there
             if len(rating["taper"]) == 2:
@@ -126,19 +163,19 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
                 trim[0] = trim[0] - t[0]
                 trim[1] = t[-1] - trim[1]
                 print(trim)
-                RF = createRF(PSV, dt, phase, method=decon_meth, trim=trim)
-                draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF,
-                          old, rdelta, mag, crit, ot, evt_depth)
+                RF = createRF(PSV, phase, method=decon_meth, trim=trim)
+                __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat,
+                            RF, old, rdelta, mag, crit, ot, evt_depth)
                 rating["taper"].clear()
         # fig.canvas.mpl_connect('key_press_event', ontype)
         if rating["k"] == "q":
             break
         elif "k" in rating:
-            w_file(network, station, starttime)
+            __w_file(network, station, starttime)
 
 
-def draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old, rdelta,
-              mag, crit, ot, evt_depth):
+def __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old,
+                rdelta, mag, crit, ot, evt_depth):
     """Draws the plot for the rate function"""
     plt.close('all')
     fig, ax = plt.subplots(4, 1, sharex=False)
@@ -205,24 +242,24 @@ def draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old, rdelta,
     ax[3].set_ylabel('Amplitude')
     figManager = plt.get_current_fig_manager()
     figManager.window.showMaximized()
-    fig.canvas.mpl_connect('key_press_event', ontype)
-    fig.canvas.mpl_connect('button_press_event', onclick)
+    fig.canvas.mpl_connect('key_press_event', __ontype)
+    fig.canvas.mpl_connect('button_press_event', __onclick)
     print("1: discard, 2: ok, 3: good, 4: very good, 5: keep old rating",
           "quit with q. Click on figure to taper (first left then right)")
     return fig, ax
 
 
-def ontype(event):
+def __ontype(event):
     """Deals with keyboard input"""
     rating["k"] = event.key
 
 
-def onclick(event):
+def __onclick(event):
     """Deals with mouse input"""
     rating["taper"].append(event.xdata)
 
 
-def w_file(network, station, starttime):
+def __w_file(network, station, starttime):
     try:
         int(rating["k"])
     except ValueError:
@@ -233,7 +270,7 @@ def w_file(network, station, starttime):
             print("You've rated the stream", rating["k"])
 
 
-def r_file(network, station, starttime):
+def __r_file(network, station, starttime):
     with shelve.open(config.ratings + network + "." + station + "rating") as f:
         if starttime in f:
             old = f[starttime]
@@ -243,8 +280,25 @@ def r_file(network, station, starttime):
 
 
 def sort_rated(network, station, phase=config.phase):
-    """Functions that sorts waveforms in 4 folders,
-    depending on their rating"""
+    """
+    Functions that sorts waveforms in 4 folders,
+    depending on their manual rating.
+
+    Parameters
+    ----------
+    network : STRING
+        Network code (2 letters).
+    station : STRING
+        Station code (3 letters).
+    phase : STRING, optional
+        "P" or "S". The default is config.phase.
+
+    Returns
+    -------
+    None.
+
+    """
+
     inloc = config.outputloc[:-1] + phase + "/by_station/" + network +\
         '/' + station + '/'
     for n in range(1, 5):
@@ -264,8 +318,33 @@ def sort_rated(network, station, phase=config.phase):
                              + file])
 
 
-def automatic_rate(network, station, phase="S"):
-    """Check the automatic QC criteria for SRF waveforms."""
+def automatic_rate(network, station, phase=config.phase):
+    """
+    Checks the automatic QC criteria for SRF waveforms.
+
+    Parameters
+    ----------
+    network : STRING
+        Network code (2 letters).
+    station : STRING
+        Station code (3 letters).
+    phase : STRING, optional
+        "P" or "S". The default is config.phase.
+
+    Returns
+    -------
+    diff : INTEGER
+        Number of waveforms that were not rated 3 or 4.
+    ret : INTEGER
+        Number of automatically retained waveforms.
+    sts : LIST
+        List containing all retained + filtered streams.
+    crits : LIST
+        List containing bools (retained or not) corresponding to streams in
+        sts.
+
+    """
+
     inloc = config.outputloc[:-1] + phase + "/by_station/" + network +\
         '/' + station + '/'
     diff = 0
@@ -281,9 +360,13 @@ def automatic_rate(network, station, phase="S"):
             print(e)
             continue
         starttime = str(st[0].stats.starttime)
-        st, crit, hf, noisemat = QC_S(st, st[0].stats.delta,
-                                      st[0].stats.sampling_rate)
-        # crit, hf, noisemat = None, None, None
+        if phase == "S":
+            st, crit, hf, noisemat = QC_S(st, st[0].stats.delta,
+                                          st[0].stats.sampling_rate)
+        elif phase == "P":
+            st, crit, hf, noisemat = QC_P(st, st[0].stats.delta,
+                                          st[0].stats.sampling_rate)
+
         with shelve.open(config.ratings + network + "." + station
                          + "rating") as f:
             f[starttime + "_auto"] = crit
@@ -297,7 +380,19 @@ def automatic_rate(network, station, phase="S"):
 
 
 def sort_auto_rated(network, station, phase=config.phase):
-    """Puts all retained RF and waveforms in a folder"""
+    """
+    Puts all retained RF and waveforms in one folder.
+
+    Parameters
+    ----------
+    network : STRING
+        Network code (2 letters).
+    station : STRING
+        Station code (3 letters).
+    phase : STRING, optional
+        "P" or "S". The default is config.phase.
+    """
+
     inloc = config.outputloc[:-1] + phase + "/by_station/" + network +\
         '/' + station + '/'
     inloc_RF = config.RF[:-1] + phase + '/' + network + '/' + station + '/'
@@ -320,13 +415,48 @@ def sort_auto_rated(network, station, phase=config.phase):
 
 def auto_rate_stack(network, station, phase=config.phase,
                     decon_meth=config.decon_meth, rot="LQT_min"):
-    """Does a quality control on the downloaded files and shows a plot of the
-    stacked receiver function. Rotation into PSS. Just meant to facilitate
+    """
+    Does a quality control on the downloaded files and shows a plot of the
+    stacked receiver function. Just meant to facilitate
     the decision for QC parameters (config.SNR_criteria).
-    Returns:
-        diff: number of files that were retained but not rated 3 or 4 in
-        manual QC.
-        ret: number of retained files"""
+
+
+    Parameters
+    ----------
+    network : STRING
+        Network code (2 letters).
+    station : STRING
+        Station code (3 letters).
+    phase : STRING, optional
+        "P" or "S". The default is config.phase.
+    decon_meth : STRING, optional
+        Deconvolution method, "waterlevel", 'dampedf' for constant
+        damping level, 'it' for iterative time domain deconvoltuion, 'multit'
+        for multitaper or 'fqd' for frequency dependently damped spectral
+        division. The default is config.decon_meth.
+        The default is config.decon_meth.
+    rot : STRING, optional
+        Kind of rotation that should be performed.
+        Either "PSS" for P-Sv-Sh, "LQT" for LQT via singular value
+        decomposition or "LQT_min" for LQT by minimising first arrival energy
+        on Q. The default is "LQT_min".
+
+    Raises
+    ------
+    Exception
+        For unknown inputs.
+
+    Returns
+    -------
+    z : np.array
+        Vector containing depths.
+    stack : RFTrace
+        RFTrace object containing the stacked RF.
+    RF_mo : RFStream
+        RFStream object containg depth migrated receiver functions.
+
+    """
+
     diff, ret, sts, crits = automatic_rate(network, station, phase)
     sort_auto_rated(network, station, phase)
     info_file = config.outputloc[:-1] + phase + '/by_station/' + network + \
@@ -380,7 +510,7 @@ def auto_rate_stack(network, station, phase=config.phase,
         else:
             trim[1] = config.ta - 40
         info = shelve.open(info_file)
-        RF = createRF(st, dt, phase=phase, method=decon_meth,
+        RF = createRF(st, phase=phase, method=decon_meth,
                       shift=config.tz, trim=trim, info=info)
         RFs.append(RF)
         # with shelve.open(outloc+"info", writeback=True) as info:

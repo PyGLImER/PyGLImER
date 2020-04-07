@@ -3,6 +3,8 @@
 """
 Created on Thu Apr 25 14:14:47 2019
 
+General configuration for GLImER.
+
 @author: pm
 """
 from obspy.core import UTCDateTime

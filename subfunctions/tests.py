@@ -125,7 +125,7 @@ def moveout_test(PSS_file, q, phase):
     for i in range(M):
         if phase == "P":
             data, _, IR = it(PSS[i, 0, :], PSS[i, 1, :], dt, shift=shift,
-                            width=4)
+                             width=4)
         elif phase == "S":
             data, _, _ = it(PSS[i, 1, :], PSS[i, 0, :], dt, shift=shift,
                             width=4)

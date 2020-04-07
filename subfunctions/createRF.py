@@ -29,24 +29,62 @@ from subfunctions.moveout_stack import DEG2KM, maxz, moveout, dt_table
 import config
 
 
-def createRF(st_in, dt, phase=config.phase, shift=config.tz,
-             method=config.decon_meth, trim=False, event=None, station=None,
+def createRF(st_in, phase=config.phase, shift=config.tz,
+             method=config.decon_meth, trim=None, event=None, station=None,
              info=None):
-    """Creates a receiver function with the defined method from an obspy
+    """
+    Creates a receiver function with the defined method from an obspy
     stream.
-    INPUT:
-        st: stream
-        dt: sampling interval (s)
-        phase: "S" for Sp or "P" for Ps
-        shift: time shift of the main arrival
-        method: deconvolution method, "waterlevel", 'dampedf' for constant
+
+    Parameters
+    ----------
+    st_in : '~obspy.Stream'
+        Stream of which components are to be deconvolved.
+    phase : string, optional
+        Either "P" or "S". The default is config.phase.
+    shift : float, optional
+        Time shift of theoretical arrival from starttime in seconds.
+        The default is config.tz.
+    method : string, optional
+        Deconvolution method, "waterlevel", 'dampedf' for constant
         damping level, 'it' for iterative time domain deconvoltuion, 'multit'
         for multitaper or 'fqd' for frequency dependently damped spectral
-        division.
-        trim: taper/truncate. Given as list [a, b] in s - left,right"""
+        division. The default is config.decon_meth.
+    trim : tuple, optional
+        taper/truncate. Given as list [a, b] in s - left,right.
+        The default is None.
+    event : '~obspy.core.event', optional
+        Event File used to extract additional information about arrival.
+        Provide either event and station or info dict. The default is None.
+    station : '~obspy.core.station', optional
+        Dictionary containing station information. The default is None.
+    info : dict, optional
+        Dictionary containing information about the waveform, used to
+        extract additional information for header. The default is None.
+
+    Raises
+    ------
+    Exception
+        If deconvolution method is unknown.
+
+    Returns
+    -------
+    RF : subfunctons.createRF.RFTrace
+        RFTrace object containing receiver function.
+
+    """
+
+    # sampling interval
+    dt = st_in[0].stats.delta
+
+    # deep copy stream
     st = st_in.copy()
     RF = st.copy()
+
+    # Normalise stream
     st.normalize()
+
+    # Shorten RF stream
     while RF.count() > 1:
         del RF[1]
     RF[0].stats.channel = phase + "RF"
@@ -221,6 +259,22 @@ def read_rf(pathname_or_url=None, format=None, **kwargs):
     """
     Read waveform files into RFStream object.
     See :func:`~obspy.core.stream.read` in ObsPy.
+
+    Parameters
+    ----------
+    pathname_or_url : path, optional
+        Path to file. The default is None.
+    format : string, optional
+        e.g. "MSEED" or "SAC". Will attempt to determine from ending if = None.
+        The default is None.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    subfunctions.createRF.RFStream
+        RFStream object from file.
+
     """
     if pathname_or_url is None:   # use example file
         fname = resource_filename('rf', 'example/minimal_example.tar.gz')
@@ -231,7 +285,6 @@ def read_rf(pathname_or_url=None, format=None, **kwargs):
 
 
 class RFStream(Stream):
-
     """
     Class providing the necessary functions for receiver function calculation.
     :param traces: list of traces, single trace or stream object
@@ -345,11 +398,22 @@ class RFStream(Stream):
 
     def moveout(self, vmodel_file="iasp91.dat"):
         """
-        Depth migration of the receiver functions contained in the stream.
-        Also calculates piercing points.
-        INPUT:
-            vmodel_file: velocity model located in data/vmodels
-        Returns: RFStream object containing depth migrated traces.
+        Depth migration of all receiver functions given Stream.
+        Also calculates piercing points and adds them to RFTrace.stats.
+
+        Parameters
+        ----------
+        vmodel_file : file, optional
+            Velocity model located in /data/vmodel.
+            The default is "iasp91.dat".
+
+        Returns
+        -------
+        z : np.array
+            DESCRIPTION.
+        RF_mo : RFTrace
+            Depth migrated receiver function.
+
         """
         RF_mo = []
         for tr in self:
@@ -360,9 +424,18 @@ class RFStream(Stream):
 
     def ppoint(self, vmodel_file='iasp91.dat'):
         """
-        Calculates piercing points for every receiver function in stream.
-        INPUT:
-            vmodel_file: velocity model located in /data/vmodel
+        Calculates piercing points for all receiver functions in given
+        RFStream and adds them to self.stats in form of lat, lon and depth.
+
+        Parameters
+        ----------
+        vmodel_file : file, optional
+            velocity model located in /data/vmodel.
+            The default is 'iasp91.dat'.
+
+        Returns
+        -------
+        None.
         """
         for tr in self:
             tr.ppoint(vmodel_file=vmodel_file)
@@ -371,13 +444,23 @@ class RFStream(Stream):
         """
         Performs a moveout correction and stacks all receiver functions
         in Stream. Make sure that Stream only contains RF from one station!
-        INPUT:
-            vmodel_file: 1D velocity model in data/vmodels
-        Returns:
-            RFTrace object containing station stack
-            RFStream object containing depth migrated traces
-            depth vector
+
+        Parameters
+        ----------
+        vmodel_file : file, optional
+            1D velocity model in data/vmodels. The default is 'iasp91.dat'.
+
+        Returns
+        -------
+        z : np.array
+            Depth Vector.
+        stack : subfunctions.createRF.RFTrace
+            Object containing station stack.
+        RF_mo : subfunctions.createRF.RFStream
+            Object containing depth migrated traces.
+
         """
+
         z, RF_mo = self.moveout(vmodel_file=vmodel_file)
         RF_mo.normalize()  # make sure traces are normalised
         traces = []
@@ -387,6 +470,20 @@ class RFStream(Stream):
         stack = RFTrace(data=stack, header=self[0].stats)
         stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0)})
         return z, stack, RF_mo
+
+    def plot():
+        """
+        USE RFTrace.plot() instead
+
+        Raises
+        ------
+        NotImplementedError
+            DESCRIPTION.
+
+        """
+        raise NotImplementedError("""Plot of an RFStream object is not
+                                  implemented yet. Use RFTrace.plot() instead
+                                  """)
 
 
 class RFTrace(Trace):
@@ -544,10 +641,22 @@ class RFTrace(Trace):
         """
         Depth migration of the receiver function.
         Also calculates piercing points.
-        INPUT:
-            vmodel_file: velocity model located in /data/vmodel
-        Returns the depth migrated RF and the corresponding depth vector.
+
+        Parameters
+        ----------
+        vmodel_file : file, optional
+            Velocity model located in /data/vmodel.
+            The default is "iasp91.dat".
+
+        Returns
+        -------
+        z : np.array
+            DESCRIPTION.
+        RF_mo : RFTrace
+            Depth migrated receiver function.
+
         """
+
         st = self.stats
         z, RF_mo, delta = moveout(self.data, st)
         st.pp_latitude = []
@@ -571,10 +680,21 @@ class RFTrace(Trace):
 
     def ppoint(self, vmodel_file='iasp91.dat'):
         """
-        Calculates piercing points for receiver function.
-        INPUT:
-            vmodel_file: velocity model located in /data/vmodel
+        Calculates piercing points for receiver function and adds them to
+        self.stats in form of lat, lon and depth.
+
+        Parameters
+        ----------
+        vmodel_file : file, optional
+            velocity model located in /data/vmodel.
+            The default is 'iasp91.dat'.
+
+        Returns
+        -------
+        None.
+
         """
+
         st = self.stats
         htab, _, delta = dt_table(st.slowness, vmodel_file, st.phase)
         st.pp_depth = htab
@@ -696,11 +816,22 @@ class RFTrace(Trace):
 def obj2stats(event=None, station=None):
     """
     Map event and station object to stats with attributes.
-    :param event: ObsPy `~obspy.core.event.event.Event` object
-    :param station: station object with attributes latitude, longitude and
-        elevation
-    :return: ``stats`` object with station and event attributes
+
+    Parameters
+    ----------
+    event : `~obspy.core.event.event.Event`, optional
+        Event File. The default is None.
+    station : station object, optional
+        Station file with attributes lat, lon, and elevation.
+        The default is None.
+
+    Returns
+    -------
+    stats : obspy.core.AttribDict
+        Stats object with station and event attributes.
+
     """
+
     stats = AttribDict({})
     if event is not None:
         for key, getter in _EVENT_GETTER:
@@ -718,21 +849,37 @@ def rfstats(info=None, starttime=None, event=None, station=None,
     starttime or event and station object. Latter will take longer since
     computations are redone.
 
-    INPUT:
-        info: dictionary containing information about waveform.
-        starttime: Starttime of first trace in stream, used as identifier in
-            info dict.
-        event: ObsPy `~obspy.core.event.event.Event` object
-        station: dictionary like object with items latitude, longitude and
-            elevation
-        phase: 'S' for SRF or 'P' for PRF.
+    Parameters
+    ----------
+    info : dict, optional
+        Dictionary containing information about waveform. Can be None if
+        event and station are provided. Has to be given in combination with
+        starttime
+    starttime : obspy.core.UTCDateTime, optional
+        Starttime of first trace in stream, used as identifier in
+            info dict. The default is None.
+    event : `~obspy.core.event.event.Event`, optional
+        Event file, provide together with station file if info=None.
+        The default is None.
+    station : station object, optional
+        Station file with attributes lat, lon, and elevation.
+        The default is None.
+    tt_model : obspy.taup.TauPyModel, optional
+        TauPy model to calculate arrival, only used if no info file is given.
+        The default is "IASP91".
+    phase : string, optional
+        Either "P" or "S" for main phase. The default is config.phase.
 
-    :param tt_model: model for travel time calculation.
-        (see the `obspy.taup` module, default: iasp91)
-    return: `~obspy.core.trace.Stats` object with event and station
+
+    Returns
+    -------
+    stats : obspy.core.AttributeDict
+        Stats file for a RFTrace object with event and station
         attributes, distance, back_azimuth, onset and
         ray parameter.
+
     """
+
     stats = AttribDict({})
 
     # read info file if provided
