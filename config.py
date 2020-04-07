@@ -11,11 +11,11 @@ import numpy as np
 
 # %% general settings
 # Define if you want to download new files or use old
-evtcat = None #2020-02-29 15:49:43.388928"  # either None (downloads new) or file
-wavdownload = True  # Bool - true for completing download, false: only
+evtcat = "2020-02-29 15:49:43.388928"  # either None (downloads new) or file
+wavdownload = False  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
-decon_meth = None  # it=iterative deconvolution (Ligorria & Ammon, 1999)
+decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
 # dampedf: damped frequency deconvolution
 # fqd: frequency dependent damping - not a good choice for SRF
 # waterlevel Langston (1977)

@@ -16,9 +16,9 @@ from matplotlib.pyplot import plot
 from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
 import matplotlib as mpl
 from pathlib import Path
-from subfunctions import config
+import config
 import subprocess
-from subfunctions.createRF import stackRF
+from subfunctions.moveout_stack import stackRF
 
 # plotting properties
 # dirFile = os.path.dirname('main.py')
@@ -72,11 +72,9 @@ def plot_all_RF(network, station, phase=config.phase, TAT=config.tz, dpi=300):
         # create time vector
         t = np.linspace(0-TATp, config.ta, len(y))
         plt.close('all')
-        fig = plt.figure()
         fig, ax = plt.subplots(1, 1, sharex=True)
         # Move left y-axis and bottim x-axis to centre, passing through (0,0)
-        ax.spines['bottom'].set_position("center")
-        ax.spines['left'].set_visible(False)
+        ax.spines['bottom'].set_position("zero")
         
         # Eliminate upper and right axes
         ax.spines['right'].set_color('none')

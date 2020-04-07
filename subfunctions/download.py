@@ -50,7 +50,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
     # logging for the download
     # logging.basicConfig(filename='download.log',level=logging.DEBUG) #
     fdsn_mass_logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
-    fdsn_mass_logger.setLevel(logging.WARNING)
+    fdsn_mass_logger.setLevel(logging.INFO)
 
     # Create handler to the log
     fh = logging.FileHandler('logs/download.log')

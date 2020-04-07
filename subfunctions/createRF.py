@@ -5,7 +5,7 @@ Created on Wed Feb 19 13:41:10 2020
 
 @author: pm
 
-toolset to create RFs and RF stacks
+toolset to create RFs and RF classes
 """
 import json
 from operator import itemgetter
@@ -13,22 +13,20 @@ from pkg_resources import resource_filename
 import warnings
 
 import numpy as np
-import config
-from subfunctions.deconvolve import it, spectraldivision, multitaper
+from matplotlib import pyplot as plt
+from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
+
 from obspy import read, Stream, Trace, UTCDateTime
 from obspy.core import AttribDict
-from obspy.geodetics import gps2dist_azimuth, degrees2kilometers,\
-    direct_geodetic
+from obspy.geodetics import gps2dist_azimuth
+from geographiclib.geodesic import Geodesic
 from obspy.taup import TauPyModel
-import shelve
-import os
 
-from scipy import interpolate
 from scipy.signal.windows import hann
 
-_MODEL_CACHE = {}
-DEG2KM = degrees2kilometers(1)
-maxz = 800  # maximum interpolation depth in km
+from subfunctions.deconvolve import it, spectraldivision, multitaper
+from subfunctions.moveout_stack import DEG2KM, maxz, moveout, dt_table
+import config
 
 
 def createRF(st_in, dt, phase=config.phase, shift=config.tz,
@@ -125,252 +123,10 @@ def createRF(st_in, dt, phase=config.phase, shift=config.tz,
     # create stats
     stats = rfstats(info=info, starttime=st[0].stats.starttime, event=event,
                     station=station, phase=phase)
+    stats.update({"type": "time"})
     RF = RFTrace(trace=RF[0])
     RF.stats.update(stats)
     return RF
-
-
-def stackRF(network, station, phase=config.phase):
-    """Creates a moveout corrected receiver function stack of the
-    requested station"""
-    # extract data
-    ioloc = config.RF[:-1] + phase + '/' + network + '/' + station
-    data = []
-    st = []  # stats
-    RF_mo = []  # moveout corrected RF
-    # z_all = []
-    for file in os.listdir(ioloc):
-        if file[:4] == "info":
-            continue
-        try:
-            stream = read(ioloc + '/' + file)
-        except IsADirectoryError:
-            continue
-        stream.normalize()  # make sure traces are normalised
-        data.append(stream[0].data)
-        st.append(stream[0].stats)
-    with shelve.open(ioloc + '/info') as info:
-        rayp = info['rayp_s_deg']
-        onset = info["onset"]
-        starttime = info["starttime"]
-    for ii, tr in enumerate(data):
-        jj = starttime.index(st[ii].starttime)
-        z, RF, _ = moveout(tr, st[ii], onset[jj], rayp[jj], phase)
-        RF_mo.append(RF)
-
-    stack = np.average(RF_mo, axis=0)
-    return z, stack, RF_mo, data
-
-
-def moveout(data, st, fname='iasp91.dat'):
-    """Corrects the for the moveout of a converted phase. Flips time axis
-    and polarity of SRF.
-    INPUT:
-        data: data from the trace object
-        st: stats from the trace object
-        onset: the onset time (UTCDATETIME)
-        rayp: ray parameter in sec/deg
-        phase: P or S for PRF or SRF, respectively"""
-    onset = st.onset
-    tas = round((onset - st.starttime)/st.delta)  # theoretical arrival sample
-    rayp = st.slowness
-    phase = st.phase
-    # Nq = st.npts - tas
-    htab, dt, delta = dt_table(rayp, fname, phase)
-    # queried times
-    tq = np.arange(0, round(max(dt), 1), st.delta)
-    z = np.interp(tq, dt, htab)  # Depth array
-
-    # Flip SRF
-    if phase.upper() == "S":
-        data = np.flip(data)
-        data = -data
-        tas = -tas
-    RF = data[tas:tas+len(z)]
-    zq = np.arange(0, max(z), 0.25)
-
-    # interpolate RF
-    tck = interpolate.splrep(z, RF)
-    RF = interpolate.splev(zq, tck)
-
-    # Taper the last 3.5 seconds of the RF to avoid discontinuities in stack
-    tap = hann(round(7/st.delta))
-    tap = tap[round(len(tap)/2):]
-    taper = np.ones(len(RF))
-    taper[-len(tap):] = tap
-    RF = np.multiply(taper, RF)
-    z2 = np.arange(0, maxz+.25, .25)
-    RF2 = np.zeros(z2.shape)
-    RF2[:len(RF)] = RF
-    return z2, RF2, delta
-
-
-def dt_table(rayp, fname, phase):
-    """Creates a phase delay table for a specific ray parameter given in
-    s/deg. Using the equation as in Rondenay 2009."""
-    p = rayp/DEG2KM  # convert to s/km
-    # z, dz, zf, dzf, vp, vs = iasp_flatearth(maxz, fname)
-    model = load_model(fname)
-    z = model.z
-    if fname == 'raysum.dat':  # already Cartesian
-        vp = model.vp
-        vs = model.vs
-        zf = model.z
-    else:  # Spherical
-        vp = model.vpf
-        vs = model.vsf
-        zf = model.zf
-    # dz = model.dz
-    # dzf = model.dzf
-    z = np.append(z, maxz)
-    res = 1  # resolution in km
-
-    # hypothetical conversion depth tables
-    htab = np.arange(0, maxz+res, res)  # spherical
-    htab_f = -6371*np.log((6371-htab)/6371)  # flat earth depth
-    res_f = np.diff(htab_f)  # earth flattened resolution
-    # htab_f = htab_f[:-1]
-    # htab = htab[:-1]
-
-    if fname == "raysum.dat":
-        htab_f = htab
-        res_f = res * np.ones(np.shape(res_f))
-
-    # delay times
-    dt = np.zeros(np.shape(htab))
-
-    # angular distances of piercing points
-    delta = np.zeros(np.shape(htab))
-
-    # vertical slownesses
-    q_a = np.sqrt(vp**-2 - p**2)
-    q_b = np.sqrt(vs**-2 - p**2)
-
-    # Numerical integration
-    for kk, h in enumerate(htab_f[1:]):
-        ii = np.where(zf >= h)[0][0] - 1
-        dt[kk+1] = (q_b[ii]-q_a[ii])*res_f[kk]
-        delta[kk+1] = ppoint(q_a[ii], q_b[ii], res_f[kk], p, phase)
-    dt = np.cumsum(dt)
-    delta = np.cumsum(delta)
-
-    try:
-        index = np.nonzero(np.isnan(dt))[0][0] - 1
-    except IndexError:
-        index = len(dt)
-    return htab[:index], dt[:index], delta[:index]
-
-
-def ppoint(q_a, q_b, dz, p, phase):
-    """
-    Calculate angular distance between piercing point and station.
-    INPUT (have to be in Cartesian/ flat Earth):
-    :param depth: depth of interface in km
-    :param p: slowness in s/km
-    :param phase: 'P' or 'S'
-    :return: angular distance in degree
-    """
-    # The case for the direct - conversion at surface, dz =[]
-    # if not len(dz):
-    #     x = 0
-
-    # Check phase, Sp travels as p, Ps as S from piercing point
-    if phase == "S":
-        x = np.sum(dz / q_a) * p
-    elif phase == "P":
-        x = dz / q_b * p
-    x_delta = x / DEG2KM  # angular distance in degree
-    return x_delta
-
-
-def earth_flattening(maxz, z, dz, vp, vs):
-    """Creates a flat-earth approximated velocity model down to 800 km as in
-    Peter M. Shearer"""
-    r = 6371  # earth radius
-    ii = np.where(z > maxz)[0][0]+1
-    vpf = (r/(r-z[:ii]))*vp[:ii]
-    vsf = (r/(r-z[:ii]))*vs[:ii]
-    zf = -r*np.log((r-z[:ii+1])/r)
-    z = z[:ii]
-    dz = dz[:ii]
-    dzf = np.diff(zf)
-    # if fname == 'raysum.dat':
-    #     zf = z
-    #     vpf = vp
-    #     vsf = vs
-    return z, dz, zf[:ii], dzf, vpf, vsf
-
-
-""" Everything from here on is from the RF model by Tom Eulenfeld, modified
- by me"""
-
-
-def load_model(fname='iasp91.dat'):
-    """
-    Load model from file.
-
-    :param fname: filename of model in data or 'iasp91'
-    :return: `SimpleModel` instance
-
-    The model file should have 4 columns with depth, vp, vs, n.
-    The model file for iasp91 starts like this::
-
-        #IASP91 velocity model
-        #depth  vp    vs   n
-          0.00  5.800 3.360 0
-          0.00  5.800 3.360 0
-        10.00  5.800 3.360 4
-    """
-    try:
-        return _MODEL_CACHE[fname]
-    except KeyError:
-        pass
-    values = np.loadtxt('data/velocity_models/' + fname, unpack=True)
-    try:
-        z, vp, vs, n = values
-        n = n.astype(int)
-    except ValueError:
-        n = None
-        z, vp, vs = values
-    _MODEL_CACHE[fname] = model = SimpleModel(z, vp, vs, n)
-    return model
-
-
-def _interpolate_n(val, n):
-    vals = [np.linspace(val[i], val[i + 1], n[i + 1] + 1, endpoint=False)
-            for i in range(len(val) - 1)]
-    return np.hstack(vals + [np.array([val[-1]])])
-
-
-class SimpleModel(object):
-
-    """
-    Simple 1D velocity model for move out and piercing point calculation.
-    Calculated with Earth flattening algorithm as described by P. M. Shearer.
-
-    :param z: depths in km
-    :param vp: P wave velocities at provided depths in km/s
-    :param vs: S wave velocities at provided depths in km/s
-    :param n: number of support points between provided depths
-
-    All arguments can be of type numpy.ndarray or list.
-    taken from the RF module based on obspy by Tom Eulenfeld
-    """
-
-    def __init__(self, z, vp, vs, n=None):
-        assert len(z) == len(vp) == len(vs)
-        if n is not None:
-            z = _interpolate_n(z, n)
-            vp = _interpolate_n(vp, n)
-            vs = _interpolate_n(vs, n)
-        dz = np.diff(z)
-        self.z, self.dz, self.zf, self.dzf, self.vpf, self.vsf = \
-            earth_flattening(maxz, z[:-1], dz, vp[:-1], vs[:-1])
-        # self.dz =
-        # self.z = z[:-1]
-        self.vp = vp[:-1]
-        self.vs = vs[:-1]
-        self.t_ref = {}
 
 
 def __get_event_origin_prop(h):
@@ -591,59 +347,46 @@ class RFStream(Stream):
         """
         Depth migration of the receiver functions contained in the stream.
         Also calculates piercing points.
-        Overwrites traces in stream!
+        INPUT:
+            vmodel_file: velocity model located in data/vmodels
+        Returns: RFStream object containing depth migrated traces.
         """
+        RF_mo = []
         for tr in self:
-            _, tr.data, delta = moveout(tr.data, tr.stats)
-            st = tr.stats
-            st.pp_latitude = []
-            st.pp_longitude = []
-            st.pp_depth = np.linspace(0, 800, len(delta))
-
-            # Calculate ppoint position
-            for dis in delta:
-                lat = st.station_latitude
-                lon = st.station_longitude
-                az = st.back_azimuth
-                dr = st.distance*DEG2KM
-                lat2, lon2 = direct_geodetic((lat, lon), az, dr)
-                st.pp_latitude.append(lat2)
-                st.pp_longitude.append(lon2)
+            z, mo = tr.moveout(vmodel_file=vmodel_file)
+            RF_mo.append(mo)
+        st = RFStream(traces=RF_mo)
+        return z, st
 
     def ppoint(self, vmodel_file='iasp91.dat'):
         """
-        Calculates piercing points for receiver functions in Stream
+        Calculates piercing points for every receiver function in stream.
+        INPUT:
+            vmodel_file: velocity model located in /data/vmodel
         """
         for tr in self:
-            st = tr.stats
-            htab, _, delta = dt_table(st.slowness, vmodel_file, st.phase)
-            st.pp_depth = htab
-            st.pp_latitude = []
-            st.pp_longitude = []
-
-            for dis in delta:
-                lat = st.station_latitude
-                lon = st.station_longitude
-                az = st.back_azimuth
-                dr = st.distance*DEG2KM
-                lat2, lon2 = direct_geodetic((lat, lon), az, dr)
-                st.pp_latitude.append(lat2)
-                st.pp_longitude.append(lon2)
+            tr.ppoint(vmodel_file=vmodel_file)
 
     def station_stack(self, vmodel_file='iasp91.dat'):
         """
         Performs a moveout correction and stacks all receiver functions
         in Stream. Make sure that Stream only contains RF from one station!
+        INPUT:
+            vmodel_file: 1D velocity model in data/vmodels
+        Returns:
+            RFTrace object containing station stack
+            RFStream object containing depth migrated traces
+            depth vector
         """
-        self.moveout(vmodel_file=vmodel_file)
-        self.normalize()  # make sure traces are normalised
-        RF_mo = []
-        for tr in self:
-            RF_mo.append(tr.data)
-        stack = np.average(RF_mo, axis=0)
-        self.append(RFTrace(data=stack))
-        z = np.linspace(0, 800, len(stack))
-        return z, stack
+        z, RF_mo = self.moveout(vmodel_file=vmodel_file)
+        RF_mo.normalize()  # make sure traces are normalised
+        traces = []
+        for tr in RF_mo:
+            traces.append(tr.data)
+        stack = np.average(traces, axis=0)
+        stack = RFTrace(data=stack, header=self[0].stats)
+        stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0)})
+        return z, stack, RF_mo
 
 
 class RFTrace(Trace):
@@ -801,26 +544,36 @@ class RFTrace(Trace):
         """
         Depth migration of the receiver function.
         Also calculates piercing points.
+        INPUT:
+            vmodel_file: velocity model located in /data/vmodel
+        Returns the depth migrated RF and the corresponding depth vector.
         """
         st = self.stats
-        _, self.data, delta = moveout(self.data, st)
+        z, RF_mo, delta = moveout(self.data, st)
         st.pp_latitude = []
         st.pp_longitude = []
-        st.pp_depth = np.linspace(0, 800, len(delta))
+        st.pp_depth = np.linspace(0, maxz, len(delta))
 
         # Calculate ppoint position
         for dis in delta:
             lat = st.station_latitude
             lon = st.station_longitude
             az = st.back_azimuth
-            dr = st.distance*DEG2KM
-            lat2, lon2 = direct_geodetic((lat, lon), az, dr)
+            coords = Geodesic.WGS84.ArcDirect(lat, lon, az, dis)
+            lat2, lon2 = coords['lat2'], coords['lon2']
             st.pp_latitude.append(lat2)
             st.pp_longitude.append(lon2)
+
+        # Create trace object
+        RF_mo = RFTrace(data=RF_mo, header=st)
+        RF_mo.stats.update({"type": "depth", "npts": len(RF_mo.data)})
+        return z, RF_mo
 
     def ppoint(self, vmodel_file='iasp91.dat'):
         """
         Calculates piercing points for receiver function.
+        INPUT:
+            vmodel_file: velocity model located in /data/vmodel
         """
         st = self.stats
         htab, _, delta = dt_table(st.slowness, vmodel_file, st.phase)
@@ -832,10 +585,105 @@ class RFTrace(Trace):
             lat = st.station_latitude
             lon = st.station_longitude
             az = st.back_azimuth
-            dr = st.distance*DEG2KM
-            lat2, lon2 = direct_geodetic((lat, lon), az, dr)
+            coords = Geodesic.WGS84.ArcDirect(lat, lon, az, dis)
+            lat2, lon2 = coords['lat2'], coords['lon2']
             st.pp_latitude.append(lat2)
             st.pp_longitude.append(lon2)
+
+    def plot(self, grid=False):
+        """
+        Plots the Receiver function against either depth or time, depending on
+        information given in stats.type.
+
+        Parameters
+        ----------
+        grid : Bool, optional
+            Show a grid. The default is False.
+
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+            Figure parameter if one wishes to edit figure.
+        ax : matplotlib.axes._subplots.AxesSubplot
+            If one wishes to edit axes.
+
+        """
+        # plt.style.use('data/plot_data/PaperDoubleFig.mplstyle')
+        # Make some style choices for plotting
+        colourWheel = ['#329932', '#ff6961', 'b', '#6a3d9a', '#fb9a99',
+                       '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a',
+                       '#ffff99', '#b15928', '#67001f', '#b2182b', '#d6604d',
+                       '#f4a582', '#fddbc7', '#f7f7f7', '#d1e5f0', '#92c5de',
+                       '#4393c3', '#2166ac', '#053061']
+        dashesStyles = [[3, 1], [1000, 1], [2, 1, 10, 1], [4, 1, 1, 1, 1, 1]]
+        fig, ax = plt.subplots(1, 1)
+
+        # Move y-axis and x-axis to centre, passing through (0,0)
+        ax.spines['bottom'].set_position("zero")
+
+        # Eliminate upper and right axes
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+
+        # Show ticks in the left and lower axes only
+        ax.xaxis.set_ticks_position('bottom')
+
+        ax.xaxis.set_major_formatter(ScalarFormatter())
+        ax.yaxis.major.formatter._useMathText = True
+        ax.yaxis.set_major_formatter(ScalarFormatter())
+        ax.xaxis.major.formatter._useMathText = True
+        # ax.yaxis.set_minor_locator(AutoMinorLocator(5))
+        ax.xaxis.set_minor_locator(AutoMinorLocator(5))
+
+        ax.set_ylabel('normalised Amplitude')
+        if grid:
+            plt.grid(color='c', which="both", linewidth=.25)
+
+        y = self.data
+
+        # Determine type
+        if self.stats.type == "time":
+
+            # theoretical arrival sample in seconds (plotted as 0)
+            # TAS = round((self.stats.onset-self.stats.starttime)
+            #             / self.stats.delta)
+            if self.stats.phase == "S":  # flip trace
+                y = np.flip(y)
+                y = -y  # polarity
+                # TAS = -TAS
+                t = np.linspace(self.stats.onset - self.stats.endtime,
+                                self.stats.onset - self.stats.starttime,
+                                len(self.data))
+            elif self.stats.phase == "P":
+                t = np.linspace(self.stats.starttime - self.stats.onset,
+                                self.stats.endtime - self.stats.onset,
+                                len(self.data))
+
+            # plot
+            ax.plot(t, y, color="k", linewidth=1.5)
+            ax.set_xlabel('conversion time in s')
+            ax.set_xlim(0, 30)
+            ax.set_title("Receiver Function " + str(self.stats.network) + " " +
+                         str(self.stats.station) + " " +
+                         str(self.stats.event_time))
+
+        elif self.stats.type == "stastack" or self.stats.type == "depth":
+            # plot against depth
+            z = np.linspace(0, maxz, len(self.data))
+            # plot
+            ax.plot(z, y, color="k", linewidth=1.5)
+
+            ax.set_xlabel('Depth in km')
+            ax.set_xlim(0, 250)
+            if self.stats.type == "depth":
+                ax.set_title("Receiver Function " + self.stats.network
+                             + " " + self.stats.station + " " +
+                             str(self.stats.event_time))
+            elif self.stats.type == "stastack":
+                ax.set_title("Receiver Function stack " +
+                             str(self.stats.network) + " " +
+                             str(self.stats.station))
+        return fig, ax
 
     def write(self, filename, format, **kwargs):
         """

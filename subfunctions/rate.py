@@ -7,20 +7,21 @@ Contains various functions used to evaluate the quality of RF and waveforms
 
 """
 import os
-from obspy import read
 import numpy as np
 # import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
 from pathlib import Path
-from subfunctions import config
 import subprocess
 import shelve
+
 from subfunctions.preprocess import QC_S
-from subfunctions.createRF import createRF
-from subfunctions.plot import plot_stack
+from subfunctions.createRF import createRF, RFStream
 from subfunctions.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
+import config
+
 from obspy.taup import TauPyModel
+from obspy import read
 
 rating = {}  # mutable object
 
@@ -170,7 +171,7 @@ def draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old, rdelta,
     ax[2].text(0.05, 0.95, str(noisemat), transform=ax[2].transAxes,
                fontsize=10, verticalalignment='top', bbox=props)
     # show RF
-    ax[3].plot(t, -np.flip(RF[0].data), color='k')
+    ax[3].plot(t, -np.flip(RF.data), color='k')
     ax[3].set_title(str(ot))
     ax[3].set_xlabel('time in s')
     ax[3].set_xlim(-5, 40)
@@ -378,16 +379,20 @@ def auto_rate_stack(network, station, phase=config.phase,
             trim[1] = config.ta - (-2*rdelta + 180)
         else:
             trim[1] = config.ta - 40
+        info = shelve.open(info_file)
         RF = createRF(st, dt, phase=phase, method=decon_meth,
-                      shift=config.tz, trim=trim)
-        RFs.append(RF[0].data)
-        RF.write(outloc + ot + '.mseed', format="MSEED")
+                      shift=config.tz, trim=trim, info=info)
+        RFs.append(RF)
         # with shelve.open(outloc+"info", writeback=True) as info:
         #     info["starttime"][ii] = st[0].stats.starttime
         #     info.sync()
+    RF = RFStream(traces=RFs)
+    # RF.write(outloc + station + '.sac', format="SAC")
     print("N files that were not 3/4: ", diff, "N retained: ", ret)
-    sta = station + "/test"
-    plot_stack(network, sta, phase=phase)
+    # sta = station + "/test"
+    # plot_stack(network, sta, phase=phase)
+    z, stack, RF_mo = RF.station_stack()
+    stack.plot()
     # plot unmigrated stack
     # RF_av = np.average(RFs, axis=0)
     # RF_av = -np.flip(RF_av)
@@ -398,25 +403,4 @@ def auto_rate_stack(network, station, phase=config.phase,
     # # Move left y-axis and bottim x-axis to centre, passing through (0,0)
     # ax.spines['bottom'].set_position("center")
     # # ax.spines['left'].set_visible(False)
-
-    # # Eliminate upper and right axes
-    # ax.spines['right'].set_color('none')
-    # ax.spines['top'].set_color('none')
-
-    # # Show ticks in the left and lower axes only
-    # ax.xaxis.set_ticks_position('bottom')
-    # # ax.axvline(color='r')  # should plot at x = 0
-    # ax.plot(t, RF_av, color="k", linewidth=1.5)
-    # ax.set_ylabel('Amplitude')
-    # ax.set_xlabel('time in s')
-    # # ax.set_position([.5, .5, .1, .1])
-    # x = ax
-    # x.set_xlim(-15, 15)
-    # x.set_ylim(-.5, .5)
-    # x.xaxis.set_major_formatter(ScalarFormatter())
-    # x.yaxis.major.formatter._useMathText = True
-    # # x.yaxis.set_major_formatter(plt.NullFormatter())
-    # x.xaxis.major.formatter._useMathText = True
-    # x.yaxis.set_minor_locator(AutoMinorLocator(5))
-    # x.xaxis.set_minor_locator(AutoMinorLocator(5))
-    # return t, RF_av
+    return z, stack, RF_mo

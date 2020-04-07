@@ -5,23 +5,24 @@ Created on Wed Apr 24 20:31:05 2019
 
 @author: pm
 """
-import config
-from obspy.core import *
-from obspy.clients.iris import Client as iClient # To calculate angular distance and backazimuth
-# careful with using clientas multiprocessing has a client class
-from obspy.core.event.base import *
-from obspy.core.utcdatetime import UTCDateTime
 import os
 import logging
 import time
+import shelve
+import numpy as np
 # import progressbar
 import subprocess
 from pathlib import Path
 from obspy import read
 from obspy import read_inventory
 from obspy.signal import filter
-import shelve
-import numpy as np
+from obspy.core import *
+from obspy.clients.iris import Client as iClient # To calculate angular distance and backazimuth
+# careful with using clientas multiprocessing has a client class
+from obspy.core.event.base import *
+from obspy.core.utcdatetime import UTCDateTime
+
+import config
 from subfunctions.rotate import rotate_LQT_min, rotate_PSV
 from subfunctions.createRF import createRF
 from subfunctions.Errorhandler import redownload, redownload_statxml, \
@@ -74,6 +75,22 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
         copies failed files
         creates info file to save parameters.
         """
+    ###########
+    # logging
+    logger = logging.Logger("subfunctions.preprocess")
+    logger.setLevel(logging.INFO)
+
+    # Create handler to the log
+    fh = logging.FileHandler('logs/preprocess.log')
+    fh.setLevel(logging.WARNING)
+    logger.addHandler(fh)
+
+    # Create Formatter
+    fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
+    fh.setFormatter(fmt)
+
+    #########
+
     # needed for a station simulation - Harvard
     station_simulate = webclient.get_stations(level="response",
                                               channel='BH*', network='IU',
@@ -93,17 +110,17 @@ def preprocess(taper_perc, taper_type, event_cat, webclient, model):
     iclient = iClient()
 
     event_loop(event_cat, taper_perc, taper_type, webclient,
-               model, paz_sim, iclient)
+               model, paz_sim, iclient, logger)
     print("Download and preprocessing finished.")
 
 
 def event_loop(event_cat, taper_perc, taper_type, webclient, model,
-               paz_sim, iclient):
+               paz_sim, iclient, logger):
     """Loops over each event in the event catalogue
     INPUT:"""
     for event in event_cat:
         # fetch event-data
-        origin = (event.preferred_origin or event.origins[0])
+        origin = (event.preferred_origin() or event.origins[0])
         origin_time = origin.time
         ot_fiss = UTCDateTime(origin_time).format_fissures()
         evtlat = origin.latitude
@@ -126,19 +143,19 @@ def event_loop(event_cat, taper_perc, taper_type, webclient, model,
             try:  # If one event has no folder it interrupts else
                 os.listdir(prepro_folder)
             except FileNotFoundError:
-                logging.warning(""""All files have been processed. No
+                logger.warning(""""All files have been processed. No
                                 waveforms are for event""", ot_fiss, """Restart
                                 download to obtain missing files
                                 in database.""")
                 continue
             waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                           paz_sim, iclient, origin_time, ot_fiss, evtlat,
-                          evtlon, depth, prepro_folder, event)
+                          evtlon, depth, prepro_folder, event, logger)
 
 
 def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                   paz_sim, iclient, origin_time, ot_fiss, evtlat, evtlon,
-                  depth, prepro_folder, event):
+                  depth, prepro_folder, event, logger):
     """Loops over each waveform for a specific event and a specific station
     INPUT:"""
 
@@ -149,7 +166,7 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
         except FileNotFoundError:  # file has not been downloaded yet
             continue  # I will still want to have the RF
         except:  # Unknown erros
-            logging.exception([prepro_folder, file])
+            logger.exception([prepro_folder, file])
             continue
         station = st[0].stats.station
         network = st[0].stats.network
@@ -279,7 +296,7 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                 sampling_f = st[0].stats.sampling_rate
 
                 if not config.QC:
-                    crit, f, noisemat = None, None, None
+                    crit, f, noisemat = True, None, None
                 elif config.phase == "P":
                     st, crit, f, noisemat = QC_P(st, dt, sampling_f)
                     if not crit:
@@ -336,7 +353,7 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
             # Exceptions & logging
 
             except SNRError:  # QR rejections
-                # Don't log that
+                logger.info("QC was not met, SNR ratios are", noisemat, file)
                 with shelve.open(infof, writeback=True) as info:
                     if 'ot_all' not in info or ot_fiss not in info['ot_all']:
                         # Don't count rejected events twice
@@ -347,7 +364,7 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
             # Everythng else that might have gone wrong
             except:
                 print("Stream rejected")  # test
-                logging.exception([prepro_folder, file])
+                logger.exception([prepro_folder, file])
 
         else:  # The file was already processed and passed the crit
             crit = True
@@ -359,8 +376,23 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
         # computed at all, and if the waveform was retained (SNR)
         if config.decon_meth and not\
             file_in_db(config.RF + '/' + network + '/' + station, network +
-                       '.' + station + '.' + ot_fiss + '.mseed') and crit:
+                       '.' + station + '.' + ot_fiss + '.sac') and crit:
 
+            # Logging for RF creation
+            RF_logger = logging.getLogger("subfunctions.preprocess.RF")
+            RF_logger.setLevel(logging.INFO)
+
+            # Create handler to the log
+            fhrf = logging.FileHandler('logs/RF.log')
+            fhrf.setLevel(logging.WARNING)
+            RF_logger.addHandler(fhrf)
+
+            # Create Formatter
+            fmtrf = logging.Formatter(fmt="""%(asctime)s -
+                                      %(levelname)s - %(message)s""")
+            fhrf.setFormatter(fmtrf)
+
+            ####
             try:
                 # Rotate to LQT or PSS
                 if config.rot == "LQT":
@@ -375,7 +407,17 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                         station_inv[0][0][0].latitude,
                         station_inv[0][0][0].longitude,
                         rayp, st)
-                RF = createRF(st, .1)  # dt is always .1
+
+                # Create RF object
+                with shelve.open(infof) as info:
+                    i = info["starttime"].index(st[0].stats.starttime)
+                    # Make a trim dependt on epicentral distance
+                    trim = [40, 0]
+                    if info["rdelta"][i] >= 70:
+                        trim[1] = config.ta - (-2*info["rdelta"][i] + 180)
+                    else:
+                        trim[1] = config.ta - 40
+                    RF = createRF(st, st[0].stats.delta, info=info, trim=trim)
 
             # Write RF
                 if not Path(config.RF + '/' + network + '/' + station
@@ -400,13 +442,14 @@ def waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                                  station + '/'])
 
             # Exception that occured in the RF creation
-            # Usually, don't happen
+            # Usually don't happen
             except SNRError:
-                logging.info("""Calculated incidence angle is unrealistic
-                             with""", ia, "deg.")
+                continue
+                RF_logger.info("""Calculated incidence angle is unrealistic
+                              with""", ia, "deg.")
             except:
                 print("RF creation failed")
-                logging.exception([network, station, ot_fiss])
+                RF_logger.exception([network, station, ot_fiss])
 
 
 def QC_P(st, dt, sampling_f):

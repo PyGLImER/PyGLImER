@@ -7,7 +7,7 @@ GLImER functions.
 @author: pm
 """
 import numpy as np
-from subfunctions.createRF import stackRF, moveout, load_model
+from subfunctions.moveout_stack import stackRF, moveout, load_model
 from subfunctions.deconvolve import it, multitaper, spectraldivision
 from obspy.core import Stream, Trace, Stats
 from obspy import UTCDateTime, read
