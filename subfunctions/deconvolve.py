@@ -16,25 +16,48 @@ from scipy.signal.windows import dpss
 
 def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
            it_max=400):
-    """Has a bug in the normalisation!
-This function provides a generalised iterative deconvolution as given
-by Wang & Pavlis (2016)
-Essentially, H will be deconvolved by P.
+    """
+    Has a bug in the normalisation!
+    This function provides a generalised iterative deconvolution as given
+    by Wang & Pavlis (2016)
+    Essentially, P will be deconvolved from H.
 
- INPUT parameters:
-     P - the source wavelet estimation (denominator)
-     H - impulse response convolved with source wavelet (enumerator)
-     e_min - is the ratio of residual and original data
-             after the nth iteration; given in per cent [5]
-     omega_min - secondary control parameter (percentage improvement per
-                  iteration), given in per cent -
-                 used as criterion to test significance
-     width - width parameter for the Gaussian
-     it_max - maximal number of iterations before the algorithm interrupts
-     shift - Position of t=0 in the waveform.
-     dt - sampling interval
-     mu - the damping factor for a least-squares damped solution
-"""
+    Parameters
+    ----------
+    P : np.array
+        The source wavelet estimation (denominator).
+    H : np.array
+        Impulse response convolved with source wavelet (enumerator).
+    dt : float
+        Sampling interval [s].
+    mu : float
+        Damping factor for least-square damping.
+    shift : float, optional
+        Time shift of theoretical arrival [s]. The default is 0.
+    width : float, optional
+        Width parameter for Gaussian. The default is 2.5.
+    e_min : float, optional
+        Is the energy ratio of residual and original data
+        after the nth iteration; given in per cent. The default is 5.
+    omega_min : float, optional
+        secondary control parameter (percentage improvement per iteration),
+        given in per cent - used as criterion to test significance.
+        The default is 0.5.
+    it_max : int, optional
+        Maximum number of iterations. The default is 400.
+
+    Returns
+    -------
+    rf : np.array
+        The receiver function.
+    IR : np.array
+        The estimation of the medium's impulse response.
+    it : int
+        Number of iterations
+    rej : int
+        Number of peaks that did not meet the criterion of significance.
+    """
+
     # From per cent to decimal
     e_min = e_min/100
     omega_min = omega_min/100
@@ -122,18 +145,39 @@ Essentially, H will be deconvolved by P.
 
 
 def it(P, H, dt, shift=0, width=2.5, omega_min=0.5, it_max=400):
-    """ Iterative deconvolution after Ligorria & Ammon (1999)
-Essentially, H will be deconvolved by P.
- INPUT parameters
- P - the source wavelet estimation / denominator
- H - The enumerator (impulse response * source wavelet estimation)
- omega_min - convergence control parameter (percentage improvement per
-                                            iteration)
- width - width parameter of the Gaussian
- it_max - maximal number of iterations before the algorithm interrupts [400]
- shift - time shift of tt = 0 (primary arrival)
- dt - sampling interval
-"""
+    """
+    Iterative deconvolution after Ligorria & Ammon (1999)
+    Essentially, P will be deconvolved from H.
+
+    Parameters
+    ----------
+    P : np.array
+        The source wavelet estimation / denominator.
+    H : np.array
+        The enumerator (impulse response * source wavelet estimation).
+    dt : float
+        Sampling interval [s].
+    shift : float, optional
+        Time shift of main arrival [s]. The default is 0.
+    width : float, optional
+        Gaussian width parameter. The default is 2.5.
+    omega_min : float, optional
+        Convergence control parameter (percentage improvement periteration).
+        The default is 0.5.
+    it_max : int, optional
+        Maximal number of iterations before the algorithm interrupts.
+        The default is 400.
+
+    Returns
+    -------
+    rf : np.array
+        The receiver function.
+    it : int
+        Number of iterations until algorithm converged.
+    IR : np.array
+        Estimation of the medium's impulse response.
+
+    """
 
     omega_min = omega_min/100  # change from per cent to decimal
     # create proper numpy arrays (allow functions on arrays as in Matlab)
@@ -186,6 +230,7 @@ Essentially, H will be deconvolved by P.
     if shift:  # only if shift !=0
         rf = sptb.sshift(rf, N2, dt, shift)
     rf = rf[0:N]
+
     return rf, it, IR
 
 
@@ -269,17 +314,42 @@ def multitaper_bak(P, H, mu, k=3, p=2.5):
 
 
 def spectraldivision(v, u, ndt, tshift, regul, phase=config.phase):
-    """Function spectraldivision(v,u,ndt,tshift,regul) is a standard spectral
-    division frequency domain deconvolution. The regularization can be chosen
-    by the variable "regul", this can be 'con', 'wat', or 'fqd' for constant
-    damping factor, waterlevel, or frequency-dependent damping, respectively.
-    "ndt" is the sampling interval in seconds and "tshift" is the time before
-    onset of the direct wave.
-    v = Source wavelet estimation (denominator);
-    u = impulse response * source wavelet (enumerator);
+    """
+    Function spectraldivision(v,u,ndt,tshift,regul) is a standard spectral
+    division frequency domain deconvolution.
 
-    output is the receiver function "qrf" and the direct wave deconvolved by
-    itself"""
+    Parameters
+    ----------
+    v : np.array
+        Source wavelet estimation (denominator).
+    u : np.array
+        Impulse response convolved by v (enumerator).
+    ndt : float
+        Sampling interval [s].
+    tshift : float
+        Time shift of primary arrival [s].
+    regul : str
+        Regularization, can be chosen by the variable "regul", this can be
+        'con', 'wat', or 'fqd' for constant damping factor, waterlevel,
+        or frequency-dependent damping, respectively.
+    phase : str, optional
+        Phase either "P" for Ps or "S" for Sp. The default is config.phase.
+
+    Raises
+    ------
+    Exception
+        For unknown inputs.
+
+    Returns
+    -------
+    qrf : np.array
+        Receiver function.
+    lrf : np.array
+        Output of deoncolution of source wavelet estimation from longitudinal
+        component.
+
+    """
+
     N = len(v)
 
     # pre-event noise needed for regularisation parameter
@@ -373,15 +443,7 @@ def multitaper(P, D, dt, tshift, regul):
     multitaper: takes Ved-Kathrins code and changes inputs to
     make it run like Helffrich algorithm, minus normalization and with
     questionable calculation of pre-event noise (have to double check this
-    and compare it to the regular FFT based estimate without any tapers)
-
-    INPUT:
-        P - component containing source time function
-        D - component containing converted wave
-        dt - sampling interval
-        tshift - time shift of primary arrival
-        regul - regularization, either 'fqd' for frequency dependent
-                or 'con' for constant
+    and compare it to the regular FFT based estimate without any tapers).
 
     Findings: when P arrival is not in the center of the window, the
     amplitudes are not unity at the beginning and decreasing from there on.
@@ -400,7 +462,39 @@ def multitaper(P, D, dt, tshift, regul):
     the input "regul" defines which type of regularization is used,
     regul='fqd' defines frequency dependent regularisation from pre-event
     noise, regul='con' defines adding a constant value (here maximum of
-    pre-event noise) as regularisation"""
+    pre-event noise) as regularisation
+
+    Parameters
+    ----------
+    P : np.array
+        Source time function estimation.
+    D : np.array
+        Component containing the converted wave.
+    dt : float
+        Sampling interval [s].
+    tshift : float
+        Time shift of primary arrival [s].
+    regul : str
+        Regularization, either 'fqd' for frequency dependentor 'con' for
+        constant.
+
+    Raises
+    ------
+    Exception
+        For unknown input.
+
+    Returns
+    -------
+    rf : np.array
+        The receiver function.
+    lrf : np.array
+        The source-time wavelet convolved by itself.
+    var_rf : np.array
+        The receiver function's variance.
+    tmpp : np.array
+        Receiver function without variance weighting.
+
+    """
 
     # wavelet always in the center of the window
     # Original from Ved's
@@ -421,9 +515,6 @@ def multitaper(P, D, dt, tshift, regul):
     # Length of waveforms;
     nh = len(P)
 
-    # Create moving time windowed slepians
-    starts = np.arange(0, nh-Nwin+1, round((1-Poverlap)*Nwin))
-
     # tapernumber, bandwith
     # is in general put to NT=3, and bandwidth to 2.5
     # TB=2.5;
@@ -432,6 +523,9 @@ def multitaper(P, D, dt, tshift, regul):
     TB = 4
     # NT=2*TB-1; #4 tapers
     NT = 3
+
+    # Create moving time windowed slepians
+    starts = np.arange(0, nh-Nwin+1, round((1-Poverlap)*Nwin))
 
     # Construct Slepians
     Etmp, lambdas = dpss(Nwin, TB, Kmax=NT, return_ratios=True)
@@ -463,9 +557,10 @@ def multitaper(P, D, dt, tshift, regul):
     # together. One should first comput the entire estimate of the wavelet
     # and the data for each valie of k, and then do the sum of products for
     # each k!!!
+
     for k in range(NT):
-        for j in range(len(starts)):
-            E[n, starts[j]:(starts[j]+Nwin)] = np.transpose(Etmp[k, :])
+        for j in starts:
+            E[n, j:(j+Nwin)] = Etmp[k, :].transpose()
 
             tmp1 = np.fft.fft(np.multiply(E[n, :], P))
             tmp2 = np.fft.fft(np.multiply(E[n, :], D))
@@ -541,8 +636,8 @@ def multitaper(P, D, dt, tshift, regul):
     ####
     # Coherence and Variance of RF
     # added: KS 26.06.2016
-    # C_rf = np.divide(NUM, np.sqrt(np.multiply(DUM, DEN)))
-    # var_rf = np.zeros(len(C_rf))
+    C_rf = np.divide(NUM, np.sqrt(np.multiply(DUM, DEN)))
+    var_rf = np.zeros(len(C_rf))
     # for ii in range(len(C_rf)):
     #     var_rf[ii] = ((1-abs(C_rf[ii])**2)/((NT-1)*abs(C_rf[ii])**2))*(abs(tmpp[ii])**2)
     var_rf = None

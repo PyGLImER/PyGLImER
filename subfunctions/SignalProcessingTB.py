@@ -10,11 +10,27 @@ import numpy as np
 
 
 def convf(u, v, nf, dt):
-    """ convolution in frequency domain
-    INPUT:
-    u,v: arrays - to be convolved
-    dt: sampling interval
-    nf: array length in frequency-domain (usually next Power of 2)"""
+    """
+    Convolution conducted in the frequency domain.
+
+    Parameters
+    ----------
+    u : np.array
+        Array 1.
+    v : np.array
+        Array 2.
+    nf : INTEGER
+        Array length in frequency domain (use next power of 2).
+    dt : FLOAT
+        Sampling Interval [s].
+
+    Returns
+    -------
+    c : np.array
+        Convolution of u with v.
+
+    """
+
     U = np.fft.fft(u, n=nf)
     V = np.fft.fft(v, n=nf)
     C = U*V*dt
@@ -23,12 +39,26 @@ def convf(u, v, nf, dt):
 
 
 def corrf(u, v, nf):
-    """cross-correlation in frequency domain,
+    """
+    Cross-correlation in frequency domain,
     calculates the x=crosscorr(u,v). Hence, v is the flipped vector.
-    INPUT:
-    v: flipped vector
-    u: vector, to be correlated to
-    nf: array length in frequency-domain (usually next Power of 2)"""
+
+    Parameters
+    ----------
+    u : np.array
+        flipped vector.
+    v : np.array
+        Vector that the correlation is measured to.
+    nf : INTEGER
+        Array length in frequency domain (use next power of 2).
+
+    Returns
+    -------
+    x : np.array
+        Correlation vector.
+
+    """
+
     V = np.conj(np.fft.fft(v, n=nf))
     U = np.fft.fft(u, n=nf)
     X = U*V
@@ -37,13 +67,27 @@ def corrf(u, v, nf):
 
 
 def gaussian(N, dt, width):
-    """ Create a zero-phase Gaussian function. In particular meant to be
-        convolved with the impulse
-        response that is the output of an iterative deconvolution.
-        INPUT:
-        N = length of the desired array
-        width = width parameter of the Gaussian function
-        dt = sampling interval"""
+    """
+    Create a zero-phase Gaussian function. In particular meant to be
+    convolved with the impulse
+    response that is the output of an iterative deconvolution
+
+    Parameters
+    ----------
+    N : INTEGER
+        Length of the desired array.
+    dt : FLOAT
+        Sampling interval [s].
+    width : FLOAT
+        Width parameter of the Gaussian function.
+
+    Returns
+    -------
+    G : np.array
+        Gaussian window.
+
+    """
+
     df = 1/(N*dt)  # frequency step
     f = np.arange(0, round(0.5*N), 1, dtype=float)*df  # frequency array
     w = 2*np.pi*f  # angular frequency
@@ -56,7 +100,27 @@ def gaussian(N, dt, width):
 
 
 def filter(s, F, dt, nf):
-    """ Convolve a filter with a signal (given in time domain)
+    """
+    Convolves a filter with a signal (given in time domain).
+
+    Parameters
+    ----------
+    s : np.array
+        Signal given in time domain.
+    F : np.array
+        Filter's amplitude response.
+    dt : FLOAT
+        Sampling interval [s].
+    nf : INTEGER
+        Array length in frequency domain (use next power of 2).
+
+    Returns
+    -------
+    s_f : np.array
+        Filtered signal.
+
+    """
+    """ 
     INPUT
     s: signal in time domain
     F: Filter's amplitude response

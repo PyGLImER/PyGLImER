@@ -143,6 +143,8 @@ def rotate_LQT(st, phase=config.phase, onset=config.tz):
     """
 
     dt = st[0].stats.delta  # sampling interval
+
+    # Deep copy stream & Normalise
     LQT = st.copy()
     LQT.normalize()
     del st
@@ -155,11 +157,13 @@ def rotate_LQT(st, phase=config.phase, onset=config.tz):
     elif phase == "P":
         ws = round((onset-5)/dt)
         we = round((onset+5)/dt)
+
     # 1. Find which component is which one and put them in a dict
     stream = {
         LQT[0].stats.channel[2]: LQT[0].data,
         LQT[1].stats.channel[2]: LQT[1].data,
         LQT[2].stats.channel[2]: LQT[2].data}
+
     # create input matrix, Z component is sometimes called 3
     if "Z" in stream:
         A_in = np.array([stream["Z"][ws:we], stream["R"][ws:we]])
@@ -167,6 +171,11 @@ def rotate_LQT(st, phase=config.phase, onset=config.tz):
     elif "3" in stream:
         A_in = np.array([stream["3"][ws:we], stream["R"][ws:we]])
         ZR = np.array([stream["3"], stream["R"]])
+
+    # Work with energies instead of amplitudes
+    A_in = np.square(A_in)
+
+    # Conduct svd
     u, s, vh = np.linalg.svd(A_in, full_matrices=False)
 
     # 2. Now, find out which is L and which Q by finding out which one has

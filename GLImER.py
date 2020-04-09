@@ -14,9 +14,6 @@ from subfunctions.preprocess import preprocess
 import config
 
 # modules
-from obspy.core import *
-from obspy.core.event.base import *
-import logging
 import subprocess
 from pathlib import Path
 from obspy.clients.fdsn import Client as Webclient  # web sevice
@@ -79,5 +76,5 @@ if config.wavdownload:
 
 else:  # Only preprocess files in waveform location
     config.folder = "finished"
-    preprocess(config.taper_perc, config.taper_type, event_cat, webclient,
+    preprocess(config.taper_perc, event_cat, webclient,
                model)

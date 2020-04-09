@@ -6,17 +6,15 @@ Created on Wed Apr 24 20:42:51 2019
 @author: pm
 """
 import config
-from obspy.core import *
-from obspy.core.event.base import *
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
-from obspy.clients.fdsn.mass_downloader import *
 import os
 import logging
 import subprocess
 from pathlib import Path
 from obspy import read
 from obspy import UTCDateTime
+from http.client import IncompleteRead
 
 
 def downloadwav(min_epid, max_epid, model, event_cat):
@@ -131,8 +129,18 @@ def downloadwav(min_epid, max_epid, model, event_cat):
 
         # The data will be downloaded to the ``./waveforms/`` and ``./stations/``
         # folders with automatically chosen file names.
-        mdl.download(domain, restrictions, mseed_storage=get_mseed_storage,
-                     stationxml_storage=get_stationxml_storage)
+        incomplete = True
+        while incomplete:
+            try:
+                mdl.download(domain, restrictions,
+                             mseed_storage=get_mseed_storage,
+                             stationxml_storage=get_stationxml_storage)
+                incomplete = False
+            except IncompleteRead:
+                continue  # Just retry for poor connection
+            except:
+                incomplete = False  # Any other error: continue
+
     config.folder = "finished"  # removes the restriction for preprocess.py
 
 

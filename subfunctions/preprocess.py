@@ -16,10 +16,9 @@ from pathlib import Path
 from obspy import read
 from obspy import read_inventory
 from obspy.signal import filter
-from obspy.core import *
-from obspy.clients.iris import Client as iClient # To calculate angular distance and backazimuth
+from obspy.core import Stream
+from obspy.clients.iris import Client as iClient
 # careful with using clientas multiprocessing has a client class
-from obspy.core.event.base import *
 from obspy.core.utcdatetime import UTCDateTime
 
 import config
@@ -269,14 +268,14 @@ def __waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
 
     #       ROTATION      #
                 # try:
-                    # If channeles weren't properly aligned
-                st.rotate(method ='->ZNE', inventory = station_inv)
+                # If channeles weren't properly aligned
+                st.rotate(method='->ZNE', inventory=station_inv)
 # Error: The directions are not linearly independent,
 # there doesn't seem to be a fix for this
                 # except ValueError:
                 st = NotLinearlyIndependentHandler(st, network, station,
-                                                       starttime, endtime,
-                                                       station_inv, paz_sim)
+                                                   starttime, endtime,
+                                                   station_inv, paz_sim)
 
                 st.rotate(method='NE->RT', inventory=station_inv,
                           back_azimuth=result["backazimuth"])

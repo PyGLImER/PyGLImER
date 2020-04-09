@@ -7,7 +7,7 @@ GLImER functions.
 @author: pm
 """
 import numpy as np
-from subfunctions.moveout_stack import stackRF, moveout, load_model
+from subfunctions.moveout_stack import moveout, load_model
 from subfunctions.deconvolve import it, multitaper, spectraldivision
 from obspy.core import Stream, Trace, Stats
 from obspy import UTCDateTime, read
@@ -22,11 +22,35 @@ tr_folder = "data/raysum_traces/"
 
 
 def read_raysum(NEZ_file=None, RTZ_file=None, PSS_file=None):
-    """Reads the output of the raysum program (by Andrew Frederiksen).
-    INPUT:
-        NEZ_f, RTZ_f, PSS_f: location, filename of the respectively rotated
-            traces, can be None if the respective rotation does not exists.
-        N: number of data points"""
+    """
+    Reads the output of the raysum program (by Andrew Frederiksen).
+
+    Parameters
+    ----------
+    NEZ_file : str, optional
+        Filename of file in NEZ coordinate system. The default is None.
+    RTZ_file : str, optional
+        Filename of file in RTZ coordinate system. The default is None.
+    PSS_file : str, optional
+        Filename of file in P-Sv-Sh coordinate system. The default is None.
+
+    Raises
+    ------
+    Exception
+        For wron inputs.
+
+    Returns
+    -------
+    stream : np.array
+        One numpy array for each provided input file.
+    dt : float
+        The sampling interval [s].
+    M : int
+        Number of traces per file.
+    N : int
+        Number of samples per trace
+    """
+
     if NEZ_file:
         NEZ_f = open(tr_folder + NEZ_file)
     else:
@@ -107,10 +131,34 @@ def read_raysum(NEZ_file=None, RTZ_file=None, PSS_file=None):
 
 
 def moveout_test(PSS_file, q, phase):
-    """Creates synthetic PRFs and stacks them after moveout correction.
-    INPUT: PSS_file: location + filename of PSS file
-    q: slowness in s/m
-    model: has to be in the glimer folder data/raysum.dat"""
+    """
+    Creates synthetic PRFs and stacks them after depth migration.
+
+    Parameters
+    ----------
+    PSS_file : str
+        Filename of raysum file containing P-Sv-Sh traces.
+    q : float
+        Slowness [s/m].
+    phase : str
+        Either "P" for Ps or "S" for Sp.
+
+    Returns
+    -------
+    z : np.array
+        Depth vector.
+    stack : np.array
+        Receiver function stack.
+    RF_mo : np.array
+        Matrix containing all depth migrated RFs.
+    RF : np.array
+        Matrix containing all RFs.
+    dt : float
+        Sampling interval.
+    PSS : np.array
+        Matrix containing all traces in P-Sv-Sh.
+
+    """
     rayp = q*1.111949e5
     PSS, dt, M, N, shift = read_raysum(PSS_file=PSS_file)
 
@@ -121,7 +169,7 @@ def moveout_test(PSS_file, q, phase):
     stats.npts = N
     stats.delta = dt
     stats.starttime = UTCDateTime(0)
-    IRs = []
+
     for i in range(M):
         if phase == "P":
             data, _, IR = it(PSS[i, 0, :], PSS[i, 1, :], dt, shift=shift,
@@ -132,19 +180,41 @@ def moveout_test(PSS_file, q, phase):
         RF.append(data)
         z, rfc = moveout(data, stats, UTCDateTime(shift), rayp[i], phase,
                          fname="raysum.dat")
-        # z, IRc = moveout(IR, stats, UTCDateTime(0), rayp[i], phase,
-        #                  fname="raysum.dat")
-        # IRs.append(IRc)
         RF_mo.append(rfc)
     stack = np.average(RF_mo, axis=0)
     plt.close('all')
     plt.figure()
     for mo in RF_mo:
         plt.plot(z, mo)
-    return z, stack, RF_mo, RF, dt, PSS  # ,   IRs
+    return z, stack, RF_mo, RF, dt, PSS
 
 
 def decon_test(PSS_file, phase, method):
+    """
+    Function to test a given deconvolution method with synthetic data created
+    with raysum.
+
+    Parameters
+    ----------
+    PSS_file : str
+        Filename of raysum file containing P-Sv-Sh traces.
+    phase : str
+        "S" or "P".
+    method : str
+        Deconvolution method: use 1. "fqd", "wat", or "con for
+        frequency-dependent damped, waterlevel damped, constantly damped
+        spectraldivision. 2. "it" for iterative deconvolution, and 3.
+        "multit_con" or "multitap_fqd" for constantly or frequency-dependent
+        damped multitaper deconvolution.
+
+    Returns
+    -------
+    RF : np.array
+        Matrix containing all receiver functions.
+    dt : float
+        Sampling interval.
+
+    """
     PSS, dt, M, N, shift = read_raysum(PSS_file=PSS_file)
 
     # Create receiver functions
@@ -164,7 +234,7 @@ def decon_test(PSS_file, phase, method):
             data, _, _, _ = multitaper(u, v, dt, shift, 'fqd')
             data = lowpass(data, 4.99, 1/dt, zerophase=True)
         elif method == "multit_con":
-            data, _, _, _ = multitaper(u, v, dt, shift, 'con')
+            data, _, _, data2 = multitaper(u, v, dt, shift, 'con')
             data = lowpass(data, 4.99, 1/dt, zerophase=True)
         RF.append(data)
     return RF, dt
