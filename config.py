@@ -79,19 +79,19 @@ model = TauPyModel(model="iasp91")
 # None is not recommended as some clients are unstable or do not provide any
 # data, waiting for these clients causes the script to be very slow.
 # Else "IRIS","ORFEUS",etc.
-waveform_client = ["IRIS", "NCEDC", "ORFEUS", "ODC", "TEXNET", "BGR", "ETH",
- "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
+waveform_client = ["IRIS", "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
+ #"GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
 # None  # ["IRIS", "NCEDC"]
 #
 # clients on which the download should be retried, list:
-re_clients = ["IRIS", "NCEDC", "ORFEUS", "ODC", "TEXNET", "BGR", "ETH",
- "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
+re_clients = ["IRIS", "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
+ #"GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
 # Clients that cause problems and are excluded:
 # ['GFZ', 'LMU', 'SCEDC']
 # %% PRE-PROCESSING VALUES #####
 
 # Rotation #
-# "RTZ","LQT","PSS"
+# "RTZ", "LQT", "LQT_min", or "PSS"
 rot = "RTZ"
 
 # time window before and after first arrival
@@ -119,7 +119,7 @@ highco = np.linspace(.33, .175, 4)
 # highco = [.5, .33, .25]  # only for SRF
 
 # SNR criteria for QC
-QC = False  # Do quality control or not
+QC = True  # Do quality control or not
 if phase == "P":
     SNR_criteria = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
 elif phase == "S":

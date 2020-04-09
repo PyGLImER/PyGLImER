@@ -120,7 +120,6 @@ def rotate_PSV(statlat, statlon, rayp, st):
 
 def rotate_LQT(st, phase=config.phase, onset=config.tz):
     """
-    Not recommended. Use rotate_LQT_min instead!
     Rotates a stream given in RTZ to LQT using Singular Value Decomposition
 
     Parameters
@@ -183,6 +182,14 @@ def rotate_LQT(st, phase=config.phase, onset=config.tz):
     # be Q. Or for Ps: maximum energy around P-wave arrival on L
 
     A_rot = np.linalg.inv(np.dot(u, np.diag(s)))
+
+    # When working with energies A_rot is ambiguous for 180 deg, so I will
+    # have to test here: element (2,1) is always negative, all others positive.
+    if A_rot[0, 0] < 0:
+        A_rot[0, :] = -A_rot[0, :]
+    if A_rot[1, 0] > 0:
+        A_rot[1, :] = -A_rot[1, :]
+
     LQ = np.dot(A_rot, ZR)
     # point of primary arrival
     pp1 = round((onset-2)/dt)
@@ -216,7 +223,7 @@ def rotate_LQT(st, phase=config.phase, onset=config.tz):
     return LQT, QC
 
 
-def rotate_LQT_min(st, phase=config.phase):
+def rotate_LQT_min(st, phase=config.phase, onset=config.tz):
     """
     Rotates stream to LQT by minimising the energy of the S-wave primary
     arrival on the L component (SRF) or maximising the primary arrival
@@ -240,8 +247,8 @@ def rotate_LQT_min(st, phase=config.phase):
 
     dt = st[0].stats.delta
     # point of primary arrival
-    pp1 = round((config.tz-2)/dt)
-    pp2 = round((config.tz+10)/dt)
+    pp1 = round((onset-2)/dt)
+    pp2 = round((onset+10)/dt)
     LQT = st.copy()
     LQT.normalize()
     del st

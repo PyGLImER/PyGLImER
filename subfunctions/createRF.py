@@ -281,7 +281,12 @@ def read_rf(pathname_or_url=None, format=None, **kwargs):
         pathname_or_url = fname
         format = 'SAC'
     stream = read(pathname_or_url, format=format, **kwargs)
-    return RFStream(stream)
+    stream = RFStream(stream)
+    # Calculate piercing points for depth migrated RF
+    for tr in stream:
+        if tr.stats.type == "depth" or tr.stats.type == "stastack":
+            tr.ppoint()
+    return stream
 
 
 class RFStream(Stream):
@@ -345,6 +350,13 @@ class RFStream(Stream):
         if len(self) == 0:
             return
         for tr in self:
+            if tr.stats.type == 'depth' or tr.stats.type == 'stastack':
+                # Lists cannot be written in header
+                # Save maximum depth of pp-calculation
+                tr.stats.pp_depth = tr.stats.pp_depth.max()
+                tr.stats.pp_longitude = None
+                tr.stats.pp_latitude = None
+
             tr._write_format_specific_header(format)
             if format.upper() == 'Q':
                 tr.stats.station = tr.id
@@ -417,9 +429,16 @@ class RFStream(Stream):
         """
         RF_mo = []
         for tr in self:
-            z, mo = tr.moveout(vmodel_file=vmodel_file)
+            try:
+                z, mo = tr.moveout(vmodel_file=vmodel_file)
+            except TypeError:
+                # This trace is already depth migrated
+                RF_mo.append(tr)
+                continue
             RF_mo.append(mo)
         st = RFStream(traces=RF_mo)
+        if z not in locals():
+            z = np.linspace(0, maxz, len(st[0].data))
         return z, st
 
     def ppoint(self, vmodel_file='iasp91.dat'):
@@ -471,7 +490,7 @@ class RFStream(Stream):
         stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0)})
         return z, stack, RF_mo
 
-    def plot():
+    def plot(self, scale=2):
         """
         USE RFTrace.plot() instead
 
@@ -481,9 +500,51 @@ class RFStream(Stream):
             DESCRIPTION.
 
         """
-        raise NotImplementedError("""Plot of an RFStream object is not
-                                  implemented yet. Use RFTrace.plot() instead
-                                  """)
+        # deep copy stream
+        traces = []
+        for tr in self:
+            stats = AttribDict({})
+            stats["coordinates"] = {}
+            stats["coordinates"]["latitude"] = tr.stats["event_latitude"]
+            stats["coordinates"]["longitude"] = tr.stats["event_longitude"]
+            stats["network"] = tr.stats["network"]
+            stats["station"] = tr.stats["station"]
+
+            # Check type
+            if tr.stats.type == "time":
+                stats.delta = tr.stats.delta
+                data = tr.data
+                TAS = round((tr.stats.onset-tr.stats.starttime)/stats.delta)
+                if tr.stats.phase == "S":
+                    data = -np.flip(data[round(TAS-30/stats.delta):TAS+1])
+                elif tr.stats.phase == "P":
+                    data = data[TAS:round(TAS + 30/stats.delta)]
+                stats["npts"] = len(data)
+                trace = Trace(data=data, header=stats)
+                trace.normalize()
+
+            elif tr.stats.type == "depth":
+                stats.delta = 0.25
+                data = tr.data
+                stats["npts"] = len(data)
+                trace = Trace(data=data, header=stats)
+                trace.normalize()
+
+            elif tr.stats.type == "stastack":
+                # That should be a single plot
+                tr.plot()
+            traces.append(trace)
+        statlat = tr.stats.station_latitude
+        statlon = tr.stats.station_longitude
+        st = Stream(traces=traces)
+        fig = st.plot(type='section', dist_degree=True,
+                      ev_coord=(statlat, statlon), scale=scale, time_down=True,
+                      linewidth=1.5, handle=True, fillcolors=('r', 'c'))
+        fig.suptitle([tr.stats.network, tr.stats.station])
+        ax = fig.get_axes()[0]
+        if tr.stats.type == "depth":
+            ax.set_ylabel('Depth [km]')
+        return fig, ax
 
 
 class RFTrace(Trace):
@@ -656,7 +717,8 @@ class RFTrace(Trace):
             Depth migrated receiver function.
 
         """
-
+        if self.stats.type == "depth" or self.stats.type == "stastack":
+            raise TypeError("RF is already depth migrated.")
         st = self.stats
         z, RF_mo, delta = moveout(self.data, st)
         st.pp_latitude = []

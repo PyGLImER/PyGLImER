@@ -490,7 +490,7 @@ def auto_rate_stack(network, station, phase=config.phase,
             _, _, st = rotate_PSV(statlat, statlon, rayp, st)
         elif rot == "LQT":
             st, rat = rotate_LQT(st)
-            if rat > 0.5 and rat < 2:
+            if rat > 0.75 and rat < 1.5:
                 # The PCA did not work properly, L & Q too similar
                 ret = ret - 1
                 continue

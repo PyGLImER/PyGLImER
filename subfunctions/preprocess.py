@@ -22,7 +22,7 @@ from obspy.clients.iris import Client as iClient
 from obspy.core.utcdatetime import UTCDateTime
 
 import config
-from subfunctions.rotate import rotate_LQT_min, rotate_PSV
+from subfunctions.rotate import rotate_LQT_min, rotate_PSV, rotate_LQT
 from subfunctions.createRF import createRF
 from subfunctions.Errorhandler import redownload, redownload_statxml, \
     NoMatchingResponseHandler, NotLinearlyIndependentHandler
@@ -396,12 +396,22 @@ def __waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
             ####
             try:
                 # Rotate to LQT or PSS
-                if config.rot == "LQT":
+                if config.rot == "LQT_min":
                     st, ia = rotate_LQT_min(st)
                     # addional QC
                     if ia < 5 or ia > 75:
                         crit = False
-                        raise SNRError(ia)
+                        raise SNRError("""The estimated incidence angle is
+                                       unrealistic with """, ia, 'degree.')
+
+                if config.rot == "LQT":
+                    st, b = rotate_LQT(st)
+                    # addional QC
+                    if b > 0.75 or b < 1.5:
+                        crit = False
+                        raise SNRError("""The energy ratio between Q and L
+                                       at theoretical arrival is too close
+                                       to 1 with """, b, '.')
 
                 elif config.rot == "PSS":
                     avp, avs, st = rotate_PSV(
@@ -444,10 +454,10 @@ def __waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
 
             # Exception that occured in the RF creation
             # Usually don't happen
-            except SNRError:
+            except SNRError as e:
+                RF_logger.info(e)
                 continue
-                RF_logger.info("""Calculated incidence angle is unrealistic
-                              with""", ia, "deg.")
+
             except:
                 print("RF creation failed")
                 RF_logger.exception([network, station, ot_fiss])
