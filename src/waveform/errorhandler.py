@@ -6,8 +6,10 @@ Created on Sat Mar 21 19:16:41 2020
 Files contains all Errorhandler for the Glimer to obspy project
 @author: pm
 """
-import config
+
 from obspy.clients.fdsn import Client, header  # web sevice
+
+import config
 
 
 def redownload(network, station, starttime, endtime, st):

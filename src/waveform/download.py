@@ -5,16 +5,19 @@ Created on Wed Apr 24 20:42:51 2019
 
 @author: pm
 """
-import config
-from obspy.clients.fdsn.mass_downloader import CircularDomain, \
-    Restrictions, MassDownloader
+
 import os
 import logging
 import subprocess
 from pathlib import Path
+from http.client import IncompleteRead
+
+from obspy.clients.fdsn.mass_downloader import CircularDomain, \
+    Restrictions, MassDownloader
 from obspy import read
 from obspy import UTCDateTime
-from http.client import IncompleteRead
+
+import config
 
 
 def downloadwav(min_epid, max_epid, model, event_cat):

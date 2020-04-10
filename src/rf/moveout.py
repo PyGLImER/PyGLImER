@@ -9,14 +9,16 @@ Contains functions for moveout correction and station stacking
 """
 
 import numpy as np
-import config
-from obspy import read
-from obspy.geodetics import degrees2kilometers
 import shelve
 import os
-
 from scipy import interpolate
 from scipy.signal.windows import hann
+
+from obspy import read
+from obspy.geodetics import degrees2kilometers
+
+import config
+
 
 _MODEL_CACHE = {}
 DEG2KM = degrees2kilometers(1)

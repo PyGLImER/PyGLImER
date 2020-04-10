@@ -9,8 +9,8 @@ IMPORTANT:
 """
 
 # IMPORT PREDEFINED SUBFUNCTIONS
-from subfunctions.download import downloadwav
-from subfunctions.preprocess import preprocess
+from src.waveform.download import downloadwav
+from src.waveform.preprocess import preprocess
 import config
 
 # modules

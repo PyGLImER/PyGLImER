@@ -11,21 +11,18 @@ import json
 from operator import itemgetter
 from pkg_resources import resource_filename
 import warnings
-
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
-
+from scipy.signal.windows import hann
 from obspy import read, Stream, Trace, UTCDateTime
 from obspy.core import AttribDict
 from obspy.geodetics import gps2dist_azimuth
 from geographiclib.geodesic import Geodesic
 from obspy.taup import TauPyModel
 
-from scipy.signal.windows import hann
-
-from subfunctions.deconvolve import it, spectraldivision, multitaper
-from subfunctions.moveout_stack import DEG2KM, maxz, moveout, dt_table
+from src.rf.deconvolve import it, spectraldivision, multitaper
+from src.rf.moveout import DEG2KM, maxz, moveout, dt_table
 import config
 
 
@@ -284,7 +281,7 @@ def read_rf(pathname_or_url=None, format=None, **kwargs):
     stream = RFStream(stream)
     # Calculate piercing points for depth migrated RF
     for tr in stream:
-        if tr.stats.type == "depth" or tr.stats.type == "stastack":
+        if tr.stats.type == "depth":
             tr.ppoint()
     return stream
 
@@ -350,10 +347,9 @@ class RFStream(Stream):
         if len(self) == 0:
             return
         for tr in self:
-            if tr.stats.type == 'depth' or tr.stats.type == 'stastack':
+            if tr.stats.type == 'depth':
                 # Lists cannot be written in header
-                # Save maximum depth of pp-calculation
-                tr.stats.pp_depth = tr.stats.pp_depth.max()
+                tr.stats.pp_depth = None
                 tr.stats.pp_longitude = None
                 tr.stats.pp_latitude = None
 
@@ -487,7 +483,9 @@ class RFStream(Stream):
             traces.append(tr.data)
         stack = np.average(traces, axis=0)
         stack = RFTrace(data=stack, header=self[0].stats)
-        stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0)})
+        stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0),
+                            "pp_depth": None, "pp_latitude": None,
+                            "pp_longitude": None})
         return z, stack, RF_mo
 
     def plot(self, scale=2):
