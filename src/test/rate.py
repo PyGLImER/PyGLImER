@@ -67,6 +67,7 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
     None.
 
     """
+
     inloc = config.outputloc[:-1] + phase + "/by_station/" + network +\
         '/' + station + '/'
     # For TauPy lookup

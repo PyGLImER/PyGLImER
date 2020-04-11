@@ -15,15 +15,20 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
 from scipy.signal.windows import hann
+import logging
+
 from obspy import read, Stream, Trace, UTCDateTime
 from obspy.core import AttribDict
 from obspy.geodetics import gps2dist_azimuth
 from geographiclib.geodesic import Geodesic
 from obspy.taup import TauPyModel
 
-from src.rf.deconvolve import it, spectraldivision, multitaper
-from src.rf.moveout import DEG2KM, maxz, moveout, dt_table
+from .deconvolve import it, spectraldivision, multitaper
+from .moveout import DEG2KM, maxz, res, moveout, dt_table
+from ..ccp.ccp import CCPStack
 import config
+
+logger = logging.Logger("rf")
 
 
 def createRF(st_in, phase=config.phase, shift=config.tz,
@@ -433,7 +438,7 @@ class RFStream(Stream):
                 continue
             RF_mo.append(mo)
         st = RFStream(traces=RF_mo)
-        if z not in locals():
+        if 'z' not in locals():
             z = np.linspace(0, maxz, len(st[0].data))
         return z, st
 
@@ -487,6 +492,63 @@ class RFStream(Stream):
                             "pp_depth": None, "pp_latitude": None,
                             "pp_longitude": None})
         return z, stack, RF_mo
+
+    def ccp(self, edist, verbose=True):
+        """
+        Creates a CCP stack for all traces in the stream
+
+        Parameters
+        ----------
+        edist : float
+            Spacing between the grid points.
+        verbose : Bool, optional
+            If true: info in console. The default is True.
+
+        Returns
+        -------
+        ccp : CCPStack
+            Returns CCPStack object, containing ccp stack, illumination matrix,
+            coordintes, and other data.
+
+        """
+        lats = []
+        lons = []
+
+        # Fetch station coordinates
+        for tr in self:
+            if tr.stats.type == "time":
+                tr.moveout()
+            elif tr.stats.type == "stastack":
+                logger.warning("""Stream contains station stacks, they will be
+                               ignored.""")
+                continue
+            if tr.stats.station_latitude in lats and \
+                tr.stats.station_longitude in lons \
+                and lats.index(tr.stats.station_latitude) == \
+                    lons.index(tr.stats.station_longitude):
+                continue  # Same station
+            lats.append(tr.stats.station_latitude)
+            lons.append(tr.stats.station_longitude)
+
+        # Create CCPStack object
+        lats = np.array(lats)
+        lons = np.array(lons)
+        ccp = CCPStack(lats, lons, edist, verbose=verbose)
+
+        # Find nearest neighbours of conversion points
+        for tr in self:
+            if tr.stats.type == "stastack":
+                continue
+
+            ppoint_lat = np.array(tr.stats.pp_latitude)
+            ppoint_lon = np.array(tr.stats.pp_longitude)
+            ppoint_z = np.array(tr.stats.pp_depth)
+            ccp.query_bin_tree(ppoint_lat, ppoint_lon, ppoint_z, tr.data)
+
+        # Conculde CCP stacking
+        ccp.conclude_ccp()
+
+        return ccp
 
     def plot(self, scale=2):
         """
@@ -721,7 +783,7 @@ class RFTrace(Trace):
         z, RF_mo, delta = moveout(self.data, st)
         st.pp_latitude = []
         st.pp_longitude = []
-        st.pp_depth = np.linspace(0, maxz, len(delta))
+        st.pp_depth = np.arange(0, maxz+res, res)[0:len(delta)]
 
         # Calculate ppoint position
         for dis in delta:

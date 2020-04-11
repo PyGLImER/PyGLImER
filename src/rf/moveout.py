@@ -23,6 +23,7 @@ import config
 _MODEL_CACHE = {}
 DEG2KM = degrees2kilometers(1)
 maxz = 800  # maximum interpolation depth in km
+res = 1 # vertical resolution in km for interpolation and ccp bins
 
 
 def stackRF(network, station, phase=config.phase):
@@ -103,7 +104,7 @@ def moveout(data, st, fname='iasp91.dat'):
         data = -data
         tas = -tas
     RF = data[tas:tas+len(z)]
-    zq = np.arange(0, max(z), 0.25)
+    zq = np.arange(0, max(z)+res, res)
 
     # interpolate RF
     tck = interpolate.splrep(z, RF)
@@ -115,7 +116,7 @@ def moveout(data, st, fname='iasp91.dat'):
     taper = np.ones(len(RF))
     taper[-len(tap):] = tap
     RF = np.multiply(taper, RF)
-    z2 = np.arange(0, maxz+.25, .25)
+    z2 = np.arange(0, maxz+res, res)
     RF2 = np.zeros(z2.shape)
     RF2[:len(RF)] = RF
     return z2, RF2, delta
@@ -166,7 +167,6 @@ def dt_table(rayp, fname, phase):
     # dz = model.dz
     # dzf = model.dzf
     z = np.append(z, maxz)
-    res = 1  # resolution in km
 
     # hypothetical conversion depth tables
     htab = np.arange(0, maxz+res, res)  # spherical
