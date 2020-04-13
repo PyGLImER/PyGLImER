@@ -13,8 +13,8 @@ import numpy as np
 
 # %% general settings
 # Define if you want to download new files or use old
-evtcat = "2020-04-11 11:42:09.935408"  # either None (downloads new) or file
-wavdownload = False  # Bool - true for completing download, false: only
+evtcat = None  # either None (downloads new) or file
+wavdownload = True  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
 decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)

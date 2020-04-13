@@ -9,16 +9,17 @@ Author:
 Last updated:
 """
 
-import pickle
 import fnmatch
 import os
-import numpy as np
+import pickle
 
+import numpy as np
 from obspy import read_inventory
+import scipy.io as sio
 
 import config
-from ..rf.create import read_rf
 from .compute.bin import BinGrid
+from ..rf.create import read_rf
 from ..rf.moveout import res, maxz
 
 
@@ -313,6 +314,20 @@ class CCPStack(object):
         self.ccp = np.divide(self.bins, self.illum+1)
 
     def write(self, filename='ccp', folder=config.ccp, fmt="pickle"):
+        """
+        Saves the CCPStream file as pickle or matlab file. Only save
+        as Matlab file for exporting, as not all information can be
+        preserved!
+
+        Parameters
+        ----------
+        filename : str, optional
+            Name as which to save, file extensions aren't necessary.
+        folder : str, optional
+            Output folder, standard is defined in config.
+        fmt : str, optional
+            Either "pickle" or "matlab" for .mat.
+        """
         # Remove filetype identifier if provided
         x = filename.split('.')
         if len(x) > 1:
@@ -324,5 +339,15 @@ class CCPStack(object):
         if fmt == "pickle":
             with open(oloc + ".pkl", 'wb') as output:
                 pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
+
+        # Save as Matlab file (exporting to plot)
+        elif fmt == "matlab":
+            d = {}
+            d.update({'RF_ccp': self.ccp, 'illum': self.illum, 'depth_new': self.z,
+                      'lat_ccp': self.coords[0], 'lon_ccp': self.coords[1],
+                      'CSLAT': self.bingrid.latitude, 'CSLON': self.bingrid.longitude})
+            sio.savemat(oloc + '.mat', d)
+
+        # Unknown formats
         else:
             raise ValueError("The format type ", fmt, "is unkown.")

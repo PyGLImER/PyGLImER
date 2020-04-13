@@ -4,7 +4,7 @@
 Created on Tue Jan  8 16:33:41 2019
 Script to start the data accumulation for automatic RF processing.
 IMPORTANT:
-!!All configuration is done in subfunctions/config.py!!
+!!All configuration is done in config.py!!
 @author: pm
 """
 
@@ -71,8 +71,8 @@ if config.wavdownload:
                      model, event_cat)).start()
 
         Thread(target=preprocess,
-               args=(config.taper_perc, config.taper_type,
-                     event_cat, webclient, model)).start()
+               args=(config.taper_perc, event_cat, webclient, model,
+                     config.taper_type)).start()
 
 else:  # Only preprocess files in waveform location
     config.folder = "finished"

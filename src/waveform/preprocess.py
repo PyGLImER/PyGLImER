@@ -11,7 +11,7 @@ import time
 import shelve
 import numpy as np
 import subprocess
-import fnmatch.filter
+import fnmatch
 
 from pathlib import Path
 from obspy import read
