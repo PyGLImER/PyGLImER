@@ -25,7 +25,7 @@ from obspy.taup import TauPyModel
 
 from .deconvolve import it, spectraldivision, multitaper
 from .moveout import DEG2KM, maxz, res, moveout, dt_table
-from ..ccp.ccp import CCPStack
+# import ..ccp.ccp #import CCPStack
 import config
 
 logger = logging.Logger("rf")
@@ -493,62 +493,85 @@ class RFStream(Stream):
                             "pp_longitude": None})
         return z, stack, RF_mo
 
-    def ccp(self, edist, verbose=True):
-        """
-        Creates a CCP stack for all traces in the stream
+    # That doesn't work due to circular dependence! (CCPStack is dependent
+    # on RFStream)
+    # def ccp(self, edist, phase=None, verbose=True):
+    #     """
+    #     Creates a CCP stack for all traces in the stream. This method is only
+    #     recommended for smaller datasets (up to 10,000 RFs) as all RFs will be
+    #     saved in the RAM.
 
-        Parameters
-        ----------
-        edist : float
-            Spacing between the grid points.
-        verbose : Bool, optional
-            If true: info in console. The default is True.
+    #     Parameters
+    #     ----------
+    #     edist : float
+    #         Spacing between the grid points.
+    #     phase : str
+    #         Seismic phase either "S" or "P". Phase "S" will lead to more
+    #         grid points being created due to flatter incidence angle. Hence,
+    #         Phase can be "S" for PRFs but not the other way around. However,
+    #         "P" is computationally more efficient. The default is None, if
+    #         =None the phase will be determined from the first trace in file.
+    #         In this case, make sure that Stream only contains either S or PRFs.
+    #     verbose : Bool, optional
+    #         If true: info in console. The default is True.
 
-        Returns
-        -------
-        ccp : CCPStack
-            Returns CCPStack object, containing ccp stack, illumination matrix,
-            coordintes, and other data.
+    #     Returns
+    #     -------
+    #     ccp : CCPStack
+    #         Returns CCPStack object, containing ccp stack, illumination matrix,
+    #         coordintes, and other data.
 
-        """
-        lats = []
-        lons = []
+    #     """
+    #     lats = []
+    #     lons = []
+    #     if not phase:
+    #         phase = []
 
-        # Fetch station coordinates
-        for tr in self:
-            if tr.stats.type == "time":
-                tr.moveout()
-            elif tr.stats.type == "stastack":
-                logger.warning("""Stream contains station stacks, they will be
-                               ignored.""")
-                continue
-            if tr.stats.station_latitude in lats and \
-                tr.stats.station_longitude in lons \
-                and lats.index(tr.stats.station_latitude) == \
-                    lons.index(tr.stats.station_longitude):
-                continue  # Same station
-            lats.append(tr.stats.station_latitude)
-            lons.append(tr.stats.station_longitude)
+    #     # Fetch station coordinates
+    #     for tr in self:
+    #         if tr.stats.type == "time":
+    #             tr.moveout()
+    #         elif tr.stats.type == "stastack":
+    #             logger.warning("""Stream contains station stacks, they will be
+    #                            ignored.""")
+    #             continue
+    #         if tr.stats.station_latitude in lats and \
+    #             tr.stats.station_longitude in lons \
+    #             and lats.index(tr.stats.station_latitude) == \
+    #                 lons.index(tr.stats.station_longitude):
+    #             continue  # Same station
+    #         if type(phase) == list:
+    #             phase.append(tr.stats.phase)
+    #         lats.append(tr.stats.station_latitude)
+    #         lons.append(tr.stats.station_longitude)
 
-        # Create CCPStack object
-        lats = np.array(lats)
-        lons = np.array(lons)
-        ccp = CCPStack(lats, lons, edist, verbose=verbose)
+    #     # Decide for phase
+    #     if type(phase) == list:
+    #         if "S" in phase:
+    #             # One SRF is enough to make S necassery
+    #             phase = "S"
+    #         else:
+    #             phase = "P"
 
-        # Find nearest neighbours of conversion points
-        for tr in self:
-            if tr.stats.type == "stastack":
-                continue
+    #     # Create CCPStack object
+    #     lats = np.array(lats)
+    #     lons = np.array(lons)
+    #     ccp = CCPStack(lats, lons, edist, phase=phase, verbose=verbose)
 
-            ppoint_lat = np.array(tr.stats.pp_latitude)
-            ppoint_lon = np.array(tr.stats.pp_longitude)
-            ppoint_z = np.array(tr.stats.pp_depth)
-            ccp.query_bin_tree(ppoint_lat, ppoint_lon, ppoint_z, tr.data)
+    #     # Find nearest neighbours of conversion points
+    #     for tr in self:
+    #         if tr.stats.type == "stastack":
+    #             continue
 
-        # Conculde CCP stacking
-        ccp.conclude_ccp()
+    #         ppoint_lat = np.array(tr.stats.pp_latitude)
+    #         ppoint_lon = np.array(tr.stats.pp_longitude)
+    #         ppoint_z = np.array(tr.stats.pp_depth)
+    #         ccp.query_bin_tree(ppoint_lat, ppoint_lon, ppoint_z, tr.data)
 
-        return ccp
+    #     # Conculde CCP stacking
+    #     ccp.conclude_ccp()
+
+    #     return ccp
 
     def plot(self, scale=2):
         """

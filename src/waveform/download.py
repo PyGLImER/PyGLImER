@@ -103,7 +103,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
             # Note: All the traces will still have the same length
             starttime=origin_time + min_time - config.tz,
             endtime=origin_time + max_time + config.ta,
-            # network="IU", station="HRV",   # data comparison with old script
+            network=config.network, station=config.station,
             # You might not want to deal with gaps in the data.
             # If this setting is
             # True, any trace with a gap/overlap will be discarded.
@@ -141,7 +141,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
                 incomplete = False
             except IncompleteRead:
                 continue  # Just retry for poor connection
-            except:
+            except Exception:
                 incomplete = False  # Any other error: continue
 
     config.folder = "finished"  # removes the restriction for preprocess.py

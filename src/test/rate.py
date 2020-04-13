@@ -18,9 +18,9 @@ import shelve
 from obspy.taup import TauPyModel
 from obspy import read
 
-from src.waveform.qc import qcs, qcp
-from src.rf.create import createRF, RFStream
-from src.waveform.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
+from ..waveform.qc import qcs, qcp
+from ..rf.create import createRF, RFStream
+from ..waveform.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
 import config
 
 rating = {}  # mutable object

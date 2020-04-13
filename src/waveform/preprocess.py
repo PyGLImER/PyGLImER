@@ -11,6 +11,7 @@ import time
 import shelve
 import numpy as np
 import subprocess
+import fnmatch.filter
 
 from pathlib import Path
 from obspy import read
@@ -22,11 +23,11 @@ from obspy.clients.iris import Client as iClient
 from obspy.core.utcdatetime import UTCDateTime
 
 import config
-from src.waveform.rotate import rotate_LQT_min, rotate_PSV, rotate_LQT
-from src.rf.create import createRF
-from src.waveform.errorhandler import redownload, redownload_statxml, \
+from .rotate import rotate_LQT_min, rotate_PSV, rotate_LQT
+from ..rf.create import createRF
+from .errorhandler import redownload, redownload_statxml, \
     NoMatchingResponseHandler, NotLinearlyIndependentHandler
-from src.waveform.qc import qcp, qcs
+from .qc import qcp, qcs
 
 
 def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
@@ -160,18 +161,37 @@ def __waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
     """
     Loops over each waveform for a specific event and a specific station
     """
+    # Preprocessing just for some stations?
+    # Then skip files that should not be preprocessed
+    if config.network:
+        pattern = config.network + '.' + (config.station or '') + '*'
+        files = fnmatch.filter(os.listdir(prepro_folder), pattern)
+    else:
+        files = os.listdir(prepro_folder)
 
     # loop over all files for event x
-    for file in os.listdir(prepro_folder):
+    for file in files:
+
+        # Open files that should be processed
         try:
             st = read(prepro_folder+'/'+file)
         except FileNotFoundError:  # file has not been downloaded yet
             continue  # I will still want to have the RF
-        except:  # Unknown erros
-            logger.exception([prepro_folder, file])
+        except Exception as e:  # Unknown erros
+            logger.exception([prepro_folder, file, e])
             continue
         station = st[0].stats.station
         network = st[0].stats.network
+
+        # # Processing just for some stations?
+        # That might be the most robust solution, but takes longer than
+        # working with filenames
+        # if config.network:
+        #     if not fnmatch(network.upper(), config.network.upper()):
+        #         continue
+        # if config.station:
+        #     if not fnmatch(station.upper(), config.station.upper()):
+        #         continue
 
         # Location definitions
         # Info file
@@ -364,9 +384,9 @@ def __waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                         info.sync()
 
             # Everythng else that might have gone wrong
-            except:
+            except Exception as e:
                 print("Stream rejected")  # test
-                logger.exception([prepro_folder, file])
+                logger.exception([prepro_folder, file, e])
 
         else:  # The file was already processed and passed the crit
             crit = True
@@ -459,9 +479,9 @@ def __waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                 RF_logger.info(e)
                 continue
 
-            except:
+            except Exception as e:
                 print("RF creation failed")
-                RF_logger.exception([network, station, ot_fiss])
+                RF_logger.exception([network, station, ot_fiss, e])
 
 
 def __file_in_db(loc, filename):

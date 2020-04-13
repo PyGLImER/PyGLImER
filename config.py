@@ -13,7 +13,7 @@ import numpy as np
 
 # %% general settings
 # Define if you want to download new files or use old
-evtcat = "2020-02-29 15:49:43.388928"  # either None (downloads new) or file
+evtcat = "2020-04-11 11:42:09.935408"  # either None (downloads new) or file
 wavdownload = False  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
@@ -33,19 +33,20 @@ phase = phase.upper()
 # %% DIRECTORY CONFIGURATION
 lith1 = '/home/pm/LITHO1.0/bin/access_litho'  # location of lith1 file
 
-RF = "waveforms/RF/" + phase  # save RF here
-waveform = "waveforms/raw/" + phase
-outputloc = "waveforms/preprocessed/" + phase
-failloc = "waveforms/rejected"  # Not in use anymore
-statloc = "stations"
-evtloc = "event_catalogues"
+RF = "output/waveforms/RF/" + phase  # save RF here
+waveform = "output/waveforms/raw/" + phase
+outputloc = "output/waveforms/preprocessed/" + phase
+failloc = "output/waveforms/rejected"  # Not in use anymore
+statloc = "output/stations"
+evtloc = "output/event_catalogues"
 ratings = "data/ratings/"
+ccp = "output/ccps"
 
 # %% EVENT AND DOWNLOAD VALUES
 # Set values to "None" if they aren't requried / desired
 # Time frame is identical to the station inventory
-starttime = UTCDateTime("1980-01-01")
-endtime = UTCDateTime("2019-03-10")
+starttime = UTCDateTime("2009-01-01")
+endtime = UTCDateTime("2011-12-31")
 eMINLAT = None
 eMAXLAT = None
 eMINLON = None
@@ -53,8 +54,14 @@ eMAXLON = None
 if phase == "P":
     minMag = 5.5
 elif phase == "S":
-    minMag = 5.8
+    minMag = 5.5
 maxMag = 10.0
+
+# Station and Network codes
+# type : str
+# wildcards allowed. If None, all that are available are requested
+network = "YP"
+station = None
 
 # epicentral distances:
 if phase == "P":
@@ -79,12 +86,12 @@ model = TauPyModel(model="iasp91")
 # None is not recommended as some clients are unstable or do not provide any
 # data, waiting for these clients causes the script to be very slow.
 # Else "IRIS","ORFEUS",etc.
-waveform_client = ["IRIS", "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
+waveform_client = ["IRIS"] #, "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
  #"GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
 # None  # ["IRIS", "NCEDC"]
 #
 # clients on which the download should be retried, list:
-re_clients = ["IRIS", "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
+re_clients = ["IRIS"] #, "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
  #"GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
 # Clients that cause problems and are excluded:
 # ['GFZ', 'LMU', 'SCEDC']
@@ -92,7 +99,7 @@ re_clients = ["IRIS", "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
 
 # Rotation #
 # "RTZ", "LQT", "LQT_min", or "PSS"
-rot = "RTZ"
+rot = "PSS"
 
 # time window before and after first arrival
 if phase == "P":
@@ -125,7 +132,7 @@ if phase == "P":
 elif phase == "S":
     # SNR_criteria = [7.5, .2, .66]
     # SNR_criteria = [7.5, .2, 1]
-    SNR_criteria = [45, .5, 1]  # to reproduce Rychert
+    SNR_criteria = [35, .5, 1]  # to reproduce Rychert
     # [primary/noise, sidelobe/primary, r/z conversions]
 
 # %% DON'T change program will change automatically!

@@ -8,7 +8,7 @@ Used to test the deconvolve module.
 """
 import numpy as np
 
-from src.utils import signalproc as sptb
+from ..utils import signalproc as sptb
 
 
 def synthetic(N2,dt,R,SNR,stdv):

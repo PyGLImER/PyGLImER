@@ -91,7 +91,3 @@ def load_tracefile(filename):
     dtimes = npzfile['dtimes']
 
     return rf, lat, lon, baz, rayp, elev, clat, clon, depth, dtimes
-
-
-
-

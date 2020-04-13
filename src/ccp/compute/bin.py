@@ -21,7 +21,7 @@ import logging
 from src.utils.geo_utils import geo2cart, cart2geo, epi2euc, euc2epi
 from src.utils.utils import dt_string
 from src.constants import R_EARTH
-from src.rf.moveout import maxz
+import config
 
 logger = logging.Logger("binlogger")
 
@@ -48,7 +48,8 @@ def fibonacci_sphere(epi=1):
 class BinGrid(object):
     """Creates Bingrid object from parameters"""
 
-    def __init__(self, latitude, longitude, edist, verbose=True):
+    def __init__(self, latitude, longitude, edist, phase=config.phase,
+                 verbose=True):
         """
 
         Parameters
@@ -58,6 +59,12 @@ class BinGrid(object):
         longitude (1-D `numpy.array`): Longitudes
 
         edist (float): epicentral distance between stations
+
+        phase : str
+            Seismic phase either "S" or "P". Phase "S" will lead to more
+            grid points being created due to flatter incidence angle. Hence,
+            Phase can be "S" for PRFs but not the other way around. However,
+            "P" is computationally more efficient.
 
         verbose: if True --> console output
 
@@ -73,6 +80,7 @@ class BinGrid(object):
         self.latitude = self.stations[:, 0]
         self.longitude = self.stations[:, 1]
         self.edist = edist
+        self.phase = phase
 
         # Verbosity
         self.verbose = verbose
@@ -167,8 +175,14 @@ class BinGrid(object):
             logger.info("--- Checking whether points are close to stations ---")
             logger.info(" ")
             start = time.time()
+
+        # maximal distance of bins to station depends upon phase
+        if self.phase == "S":
+                maxepid = 10
+        elif self.phase == "P":
+                maxepid = 4
         d, i = self.KDS.query(R_EARTH * points,
-                              distance_upper_bound=epi2euc(4))
+                              distance_upper_bound=epi2euc(maxepid))
 
         # pick out close enough stations only
         pos = np.where(i < self.ns)
@@ -204,7 +218,7 @@ class BinGrid(object):
         -------
         eucd : 1Dnp.array
             Euclidian distances to next point
-        
+
         i: 1D np.array
             Indices of next neighbour.
         """
@@ -236,7 +250,7 @@ class BinGrid(object):
         -------
         eucd : 1Dnp.array
             Euclidian distances to next point
-        
+
         i: 1D np.array
             Indices of next neighbour.
         """

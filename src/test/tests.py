@@ -14,9 +14,9 @@ from obspy.core import Stream, Trace, Stats
 from obspy import UTCDateTime, read
 from obspy.signal.filter import lowpass
 
-from src.rf.moveout import moveout, load_model
-from src.rf.deconvolve import it, multitaper, spectraldivision
-from src.waveform.qc import qcs, qcp
+from ..rf.moveout import moveout, load_model
+from ..rf.deconvolve import it, multitaper, spectraldivision
+from ..waveform.qc import qcs, qcp
 import config
 
 
