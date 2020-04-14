@@ -271,9 +271,11 @@ def __waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
                                         taper_perc, taper_type)
 
                 # Finalise preprocessing
-                st = __rotate_qc(st, station_inv, network, station, paz_sim,
-                                 baz, distance, outf, ot_fiss, event, evtlat, evtlon,
-                                 depth, rayp_s_deg, first_arrival, infof, logger)
+                st, crit = __rotate_qc(st, station_inv, network, station,
+                                       paz_sim, baz, distance, outf, ot_fiss,
+                                       event, evtlat, evtlon, depth,
+                                       rayp_s_deg, first_arrival, infof,
+                                       logger)
 
             # Exceptions & logging
 
@@ -367,7 +369,7 @@ def __waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
 
                 RF.write(config.RF + '/' + network + '/' + station +
                          '/' + network + '.' + station + '.' + ot_fiss
-                         + '.sac', fmt='SAC')
+                         + '.sac', format='SAC')
 
                 end = time.time()
                 rflogger.info("RF created")
@@ -555,7 +557,7 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
 
     logger.info("Stream accepted. Preprocessing successful")
 
-    return st
+    return st, crit
 
 
 def __file_in_db(loc, filename):

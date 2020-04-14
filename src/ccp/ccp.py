@@ -312,6 +312,8 @@ class CCPStack(object):
         """Averages the CCP-bin and populates empty cells with average of
         neighbouring cells."""
         self.ccp = np.divide(self.bins, self.illum+1)
+        index = np.where(self.ccp == 0)
+        self.ccp[index] = np.nan
 
     def write(self, filename='ccp', folder=config.ccp, fmt="pickle"):
         """

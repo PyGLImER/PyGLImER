@@ -237,6 +237,8 @@ def decon_test(PSS_file, phase, method):
         elif method == "multit_con":
             data, _, _, data2 = multitaper(u, v, dt, shift, 'con')
             data = lowpass(data, 4.99, 1/dt, zerophase=True)
+        else:
+            raise NameError
         RF.append(data)
     return RF, dt
 
