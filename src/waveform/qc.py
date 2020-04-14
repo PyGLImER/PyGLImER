@@ -12,7 +12,6 @@ Last updated:
 """
 
 import numpy as np
-
 from obspy.signal import filter
 
 import config

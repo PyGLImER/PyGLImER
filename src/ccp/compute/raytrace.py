@@ -10,24 +10,23 @@ Last Update: November 2019
 
 """
 
-import numpy as np
+import multiprocessing
 import time
+# Filter raytrace warning due tue turning point reach of shallow rays.
+import warnings
 
+from joblib import delayed
 # enabling multiprocessing.
 from joblib import Parallel
-from joblib import delayed
-import multiprocessing
-
-# Local imports
-from ...geo_utils import reckon
-from ...constants import R_EARTH
-from ...utils import dt_string
+import numpy as np
 
 # Import the logger
 from ... import logger
+from ...constants import R_EARTH
+# Local imports
+from ...geo_utils import reckon
+from ...utils import dt_string
 
-# Filter raytrace warning due tue turning point reach of shallow rays.
-import warnings
 warnings.filterwarnings("ignore",
                         message="invalid value encountered in sqrt")
 
@@ -83,14 +82,14 @@ class Raytracing(object):
             self.baz = [baz]
             self.lat = [lat]
             self.lon = [lon]
-            self.elev = [elev/1000]
+            self.elev = [elev / 1000]
             self.M = 1
         else:
             self.rayp = rayp
             self.baz = baz
             self.lat = lat
             self.lon = lon
-            self.elev = elev/1000
+            self.elev = elev / 1000
             self.M = np.shape(rayp)[0]
 
         # Velocity model parameters
@@ -99,7 +98,7 @@ class Raytracing(object):
         self.vdep = vdep
         self.vp = vp
         self.vs = vs
-        self.N = vdep.shape[0]-1
+        self.N = vdep.shape[0] - 1
 
         # Multiprocessing
         self.mp = mp
@@ -114,7 +113,7 @@ class Raytracing(object):
             logger.info(" ")
             start = time.time()
 
-        if self.mp == False:
+        if not self.mp:
 
             # Preallocate stuff
             self.clat = np.zeros((self.M, self.N))
@@ -152,11 +151,7 @@ class Raytracing(object):
             self.d = np.vstack(tuple((row[2] for row in results)))
             self.dtimes = np.stack(tuple((row[3] for row in results)))
 
-
-
-
         if self.verbose:
-
             end = time.time()
             dt = end - start
 
@@ -192,17 +187,16 @@ class Raytracing(object):
         if self.verbose:
             end = time.time()
             logger.info("   Finished saving.")
-            logger.info(dt_string(end-start))
+            logger.info(dt_string(end - start))
             logger.info(" ")
             logger.info(" ")
-
 
     def trace(self, _i, rayp, baz, lat, lon, elev):
 
         # Print after 10% of rays have been computed
         if self.verbose:
-            if np.mod(_i+1, np.round(self.M/20)) == 0:
-                logger.info("   Finished  ~ %3f%%." % (100*_i/self.M))
+            if np.mod(_i + 1, np.round(self.M / 20)) == 0:
+                logger.info("   Finished  ~ %3f%%." % (100 * _i / self.M))
 
         # Earth's radius in km
         re = R_EARTH - np.min(self.vdep)
@@ -296,8 +290,8 @@ class Raytracing(object):
                         self.vs[:, :, k] >= minvs)
 
                     closestnz_ind = np.argmin(np.abs(np.sqrt(
-                        (nonzero_lon - velon1[k])**2
-                        + (nonzero_lat - velat1[k])**2)))
+                        (nonzero_lon - velon1[k]) ** 2
+                        + (nonzero_lat - velat1[k]) ** 2)))
 
                     vp1[k] = self.vp[nonzero_lon[closestnz_ind],
                                      nonzero_lat[closestnz_ind], k]
@@ -320,29 +314,28 @@ class Raytracing(object):
                                           :] >= minvp)[0][0]
                     vp1[k] = self.vs[velon1[k], velat1[k], nonzero_vp]
 
-
                 # epicentral distance, equation from Peter M.Shearer's Introduction to
                 # Seismology(1999), p. 48:
                 if k == depth_pos:
-                    ep1[k] = rayp * (self.vdep[k+1]-elev)\
-                             / (((re-(elev+dfix)
-                                  - (self.vdep[k+1]-elev)/2)/vs1[k])**2
-                                - rayp**2)**(1/2)\
-                             / (re-(elev + dfix)-(self.vdep[k + 1]-elev) / 2)
+                    ep1[k] = rayp * (self.vdep[k + 1] - elev) \
+                             / (((re - (elev + dfix)
+                                  - (self.vdep[k + 1] - elev) / 2) / vs1[k]) ** 2
+                                - rayp ** 2) ** (1 / 2) \
+                             / (re - (elev + dfix) - (self.vdep[k + 1] - elev) / 2)
                 else:
-                    ep1[k] = rayp*d[k]\
-                             / (((re-(self.vdep[k]+dfix) -
-                                 d[k]/2)/vs1[k])**2-rayp**2)**(1/2)\
-                             / (re-(self.vdep[k]+dfix)-d[k]/2)
+                    ep1[k] = rayp * d[k] \
+                             / (((re - (self.vdep[k] + dfix) -
+                                  d[k] / 2) / vs1[k]) ** 2 - rayp ** 2) ** (1 / 2) \
+                             / (re - (self.vdep[k] + dfix) - d[k] / 2)
 
                 # calculate location of conversion point with epicentral distance and
                 # backazimuth:
                 if k == depth_pos:
-                    clat1[k], clon1[k] = reckon(lat, lon, ep1[k]/np.pi*180,
+                    clat1[k], clon1[k] = reckon(lat, lon, ep1[k] / np.pi * 180,
                                                 baz)
                 else:
-                    clat1[k], clon1[k] = reckon(clat2[k-1], clon2[k-1],
-                                                ep1[k]/np.pi*180, baz)
+                    clat1[k], clon1[k] = reckon(clat2[k - 1], clon2[k - 1],
+                                                ep1[k] / np.pi * 180, baz)
 
                 # Updating velocities, since the conversion point could be in different
                 # velocity gridpoint than the starting point:
@@ -359,7 +352,7 @@ class Raytracing(object):
 
                     closestnz_ind = np.argmin(np.abs(np.sqrt(
                         (nonzero_lon - velon1[k]) ** 2
-                        + (nonzero_lat - velat1[k])**2)))
+                        + (nonzero_lat - velat1[k]) ** 2)))
 
                     velat2[k] = nonzero_lat[closestnz_ind]
                     velon2[k] = nonzero_lon[closestnz_ind]
@@ -369,17 +362,17 @@ class Raytracing(object):
 
                 # Fix for peaks being higher than the first entry in the
                 # velocity model.
-                elif np.isnan(self.vs[velon2[k], velat2[k], k])\
-                    or np.isnan(self.vp[velon2[k], velat2[k], k]):
+                elif np.isnan(self.vs[velon2[k], velat2[k], k]) \
+                        or np.isnan(self.vp[velon2[k], velat2[k], k]):
                     # vs must be larger than minvs as well to ensure correct
                     # ray path and escape water issue
                     kindvs = np.where(
-                        self.vs[velon2[k], velat2[k],:] >= minvs)[0][0]
+                        self.vs[velon2[k], velat2[k], :] >= minvs)[0][0]
 
                     # vp must be larger than minvp as well to ensure correct
                     # ray path
                     kindvp = np.where(
-                        self.vp[velon1[k], velat1[k],:] >= minvp)[0][0]
+                        self.vp[velon1[k], velat1[k], :] >= minvp)[0][0]
 
                 else:
                     kindvs = k
@@ -387,8 +380,8 @@ class Raytracing(object):
 
                 # p and s wave layer velocity, average over traveltime in both
                 # gridcells
-                vp2[k] = (vp1[k] + self.vp[velon2[k], velat2[k], kindvp])/2;
-                vs2[k] = (vs1[k] + self.vs[velon2[k], velat2[k], kindvs])/2;
+                vp2[k] = (vp1[k] + self.vp[velon2[k], velat2[k], kindvp]) / 2
+                vs2[k] = (vs1[k] + self.vs[velon2[k], velat2[k], kindvs]) / 2
 
                 # epicentral distance, equation from Peter M.Shearer's Introduction
                 # to Seismology(1999), p. 48:
@@ -400,9 +393,9 @@ class Raytracing(object):
                              / (re - (elev + dfix) - (self.vdep[k + 1] - elev) / 2)
                 else:
                     ep2[k] = rayp * d[k] / (
-                                ((re - (self.vdep[k] + dfix)
-                                  - d[k] / 2) / vs2[k]) ** 2
-                                - rayp ** 2) ** (1 / 2) \
+                            ((re - (self.vdep[k] + dfix)
+                              - d[k] / 2) / vs2[k]) ** 2
+                            - rayp ** 2) ** (1 / 2) \
                              / (re - (self.vdep[k] + dfix) - d[k] / 2)
 
                 # calculate location of conversion point with help of epicentral

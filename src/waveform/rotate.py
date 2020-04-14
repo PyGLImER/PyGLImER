@@ -6,8 +6,9 @@ Created on Sat Mar 21 19:26:57 2020
 @author: pm
 Contains functions to rotate a stream into different domains
 """
-import numpy as np
 import subprocess
+
+import numpy as np
 
 import config
 
@@ -236,6 +237,8 @@ def rotate_LQT_min(st, phase=config.phase, onset=config.tz):
         Input stream in RTZ.
     phase : STRING, optional
         "P" for Ps or "S" for Sp. The default is config.phase.
+    onset : float, optional
+        Onset after starttime in s.
 
     Returns
     -------

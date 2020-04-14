@@ -8,17 +8,17 @@ Has to be started with working directory as upper directory of GLImER
 @author: pm
 """
 import os
-from obspy import read
-import numpy as np
+from pathlib import Path
+import subprocess
+
 # import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import plot
 from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
-import matplotlib as mpl
-from pathlib import Path
-import config
-import subprocess
+import numpy as np
+from obspy import read
 from subfunctions.moveout_stack import stackRF
+
+import config
 
 # plotting properties
 # dirFile = os.path.dirname('main.py')
@@ -49,7 +49,7 @@ def plot_all_RF(network, station, phase=config.phase, TAT=config.tz, dpi=300):
     if not Path(outloc).is_dir():
         subprocess.call(["mkdir", "-p", outloc])
     for file in os.listdir(inloc):
-        if file[:4] == "info":   # Skip the info files, they are none for RF
+        if file[:4] == "info":  # Skip the info files, they are none for RF
             # but doesn't hurt
             continue
         try:
@@ -63,23 +63,23 @@ def plot_all_RF(network, station, phase=config.phase, TAT=config.tz, dpi=300):
         if phase == "S":  # flip trace
             y = np.flip(y)
             y = -y  # polarity
-            TATp = (N-1)*dt - TAT
+            TATp = (N - 1) * dt - TAT
         else:
             TATp = TAT
         # shorten vector
 
         # y = y[:round((TATp+50)/dt)]
         # create time vector
-        t = np.linspace(0-TATp, config.ta, len(y))
+        t = np.linspace(0 - TATp, config.ta, len(y))
         plt.close('all')
         fig, ax = plt.subplots(1, 1, sharex=True)
         # Move left y-axis and bottim x-axis to centre, passing through (0,0)
         ax.spines['bottom'].set_position("zero")
-        
+
         # Eliminate upper and right axes
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
-        
+
         # Show ticks in the left and lower axes only
         ax.xaxis.set_ticks_position('bottom')
         # ax.axvline(color='r')  # should plot at x = 0
@@ -96,7 +96,7 @@ def plot_all_RF(network, station, phase=config.phase, TAT=config.tz, dpi=300):
         x.xaxis.major.formatter._useMathText = True
         x.yaxis.set_minor_locator(AutoMinorLocator(5))
         x.xaxis.set_minor_locator(AutoMinorLocator(5))
-        x.tick_params(axis ='y', which ='both', length = 0)
+        x.tick_params(axis='y', which='both', length=0)
         # plt.grid(color='c', which="both", linewidth=.25)
         # x.yaxis.set_label_coords(0.63, 1.01)
         # x.yaxis.tick_right()
@@ -104,7 +104,6 @@ def plot_all_RF(network, station, phase=config.phase, TAT=config.tz, dpi=300):
         # plt.legend(['it_max=4000', 'it_max=400'])
         plt.savefig(os.path.join(outloc + file[:-5] + "pdf"), dpi=dpi)
         # ax.xaxis.set_ticks_position('left')
-
 
 
 def plot_all_wav(phase, network, station, TAT=config.tz, dpi=300):
@@ -119,8 +118,8 @@ def plot_all_wav(phase, network, station, TAT=config.tz, dpi=300):
     """
     # make output folder
     outloc = "figures/waveforms/" + phase + '/'  # location for figures
-    inloc = config.outputloc[:-1] + phase + "/by_station/" + network +\
-        '/' + station + '/'
+    inloc = config.outputloc[:-1] + phase + "/by_station/" + network + \
+            '/' + station + '/'
     if not Path(outloc).is_dir():
         subprocess.call(["mkdir", "-p", outloc])
     for file in os.listdir(inloc):

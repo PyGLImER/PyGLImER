@@ -10,18 +10,18 @@ Last Update: November 2019
 
 """
 
-import numpy as np
-import time
-from scipy.spatial import KDTree
 import logging
+import time
 
+import numpy as np
+from scipy.spatial import KDTree
 
+import config
+from src.constants import R_EARTH
 # Local imports
 # from ... import logger
-from src.utils.geo_utils import geo2cart, cart2geo, epi2euc, euc2epi
+from src.utils.geo_utils import geo2cart, cart2geo, epi2euc
 from src.utils.utils import dt_string
-from src.constants import R_EARTH
-import config
 
 logger = logging.Logger("binlogger")
 
@@ -29,14 +29,14 @@ logger = logging.Logger("binlogger")
 def fibonacci_sphere(epi=1):
     # Get number of samples from epicentral distance first get euclidean
     # distance d
-    d = 2*np.sin(epi/180*np.pi/2)
-    samples = int(np.round(1/(d/np.sqrt(10))**2))
+    d = 2 * np.sin(epi / 180 * np.pi / 2)
+    samples = int(np.round(1 / (d / np.sqrt(10)) ** 2))
     points = []
-    offset = 2./samples
+    offset = 2. / samples
     increment = np.pi * (3. - np.sqrt(5.))
     for i in range(samples):
         y = ((i * offset) - 1) + (offset / 2)
-        r = np.sqrt(1 - y**2)
+        r = np.sqrt(1 - y ** 2)
         phi = ((i + 1) % samples) * increment
         # print(phi)
         x = np.cos(phi) * r
@@ -113,7 +113,7 @@ class BinGrid(object):
         if self.verbose:
             end = time.time()
             logger.info("   Finished station KDTree.")
-            logger.info(dt_string(end-start))
+            logger.info(dt_string(end - start))
             logger.info(" ")
 
         return K
@@ -138,7 +138,7 @@ class BinGrid(object):
         if self.verbose:
             end = time.time()
             logger.info("   Finished station KDTree.")
-            logger.info(dt_string(end-start))
+            logger.info(dt_string(end - start))
             logger.info(" ")
 
         self.KDB = K
@@ -162,7 +162,7 @@ class BinGrid(object):
             end = time.time()
             logger.info("   Finished computing points on Fibonacci sphere.")
             logger.info("   Total Number of possible bins: %d" % Nf)
-            logger.info(dt_string(end-start))
+            logger.info(dt_string(end - start))
             logger.info(" ")
 
         # Query points that are close enough
@@ -178,9 +178,9 @@ class BinGrid(object):
 
         # maximal distance of bins to station depends upon phase
         if self.phase == "S":
-                maxepid = 10
+            maxepid = 10
         elif self.phase == "P":
-                maxepid = 4
+            maxepid = 4
         d, i = self.KDS.query(R_EARTH * points,
                               distance_upper_bound=epi2euc(maxepid))
 
@@ -199,7 +199,7 @@ class BinGrid(object):
             end = time.time()
             logger.info("   Finished sorting out bad bins.")
             logger.info("   Total number of accepted bins: %d" % self.Nb)
-            logger.info(dt_string(end-start))
+            logger.info(dt_string(end - start))
             logger.info(" ")
 
         return self.bins

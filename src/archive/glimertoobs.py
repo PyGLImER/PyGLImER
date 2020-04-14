@@ -11,14 +11,11 @@ from IPython import get_ipython
 get_ipython().magic('reset -sf')
 
 #from obspy.signal.invsim import corn_freq_2_paz
-from obspy.core import *
 from obspy.clients.iris import Client as iClient # To calculate angular distance and backazimuth
 from obspy.clients.fdsn import Client,header #web sevice
 from obspy.core.event.base import *
-from obspy.geodetics.base import locations2degrees #calculate angular distances
 from obspy.taup import TauPyModel #arrival times in 1D v-model
 import logging
-import time
 import progressbar
 
 

@@ -6,16 +6,16 @@ Created on Wed Apr 24 20:42:51 2019
 @author: pm
 """
 
-import os
-import logging
-import subprocess
-from pathlib import Path
 from http.client import IncompleteRead
+import logging
+import os
+from pathlib import Path
+import subprocess
 
-from obspy.clients.fdsn.mass_downloader import CircularDomain, \
-    Restrictions, MassDownloader
 from obspy import read
 from obspy import UTCDateTime
+from obspy.clients.fdsn.mass_downloader import CircularDomain, \
+    Restrictions, MassDownloader
 
 import config
 
@@ -84,8 +84,8 @@ def downloadwav(min_epid, max_epid, model, event_cat):
         evtlat = event.origins[0].latitude
         evtlon = event.origins[0].longitude
 
-        config.folder = config.waveform + "/" + ot_fiss + '_' + str(evtlat)\
-            + "_" + str(evtlon)  # Download location
+        config.folder = config.waveform + "/" + ot_fiss + '_' + str(evtlat) \
+                        + "_" + str(evtlon)  # Download location
         # create folder for each event
         if not Path(config.folder).is_dir():
             subprocess.call(["mkdir", "-p", config.folder])
@@ -112,7 +112,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
             # And you might only want waveforms that have data for at least 95 % of
             # the requested time span. Any trace that is shorter than 95 % of the
             # desired total duration will be discarded.
-            minimum_length=0.99, #For 1.00 it will always delete the waveform
+            minimum_length=0.99,  # For 1.00 it will always delete the waveform
             # No two stations should be closer than 1 km to each other. This is
             # useful to for example filter out stations that are part of different
             # networks but at the same physical station. Settings this option to
@@ -128,7 +128,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
             location_priorities=["", "00", "10"],
             sanitize=True
             # discards all mseeds for which no station information is available
-            )
+        )
 
         # The data will be downloaded to the ``./waveforms/`` and ``./stations/``
         # folders with automatically chosen file names.
@@ -147,19 +147,19 @@ def downloadwav(min_epid, max_epid, model, event_cat):
     config.folder = "finished"  # removes the restriction for preprocess.py
 
 
-def get_mseed_storage(network, station, location, channel, starttime, endtime):
+def get_mseed_storage(network, station, channel):
     """Stores the files and checks if files are already downloaded"""
     # Returning True means that neither the data nor the StationXML file
     # will be downloaded.
 
-    if wav_in_db(network, station, location, channel, starttime, endtime):
+    if wav_in_db(network, station, channel):
         return True
 
     # If a string is returned the file will be saved in that location.
     return os.path.join(config.folder, "%s.%s.mseed" % (network, station))
 
 
-def get_stationxml_storage(network, station, channels, starttime, endtime):
+def get_stationxml_storage(network, station, channels):
     """Download the station.xml for the stations. Check chanels that are
     already available if channels are missing in the current file,
     do only download the channels that are missing"""
@@ -167,8 +167,7 @@ def get_stationxml_storage(network, station, channels, starttime, endtime):
     missing_channels = []
 
     for location, channel in channels:
-        if stat_in_db(network, station, location, channel, starttime,
-                      endtime):
+        if stat_in_db(network, station):
             available_channels.append((location, channel))
         else:
             missing_channels.append((location, channel))
@@ -181,21 +180,22 @@ def get_stationxml_storage(network, station, channels, starttime, endtime):
         "filename": filename}
 
 
-def stat_in_db(network, station, location, channel, starttime, endtime):
+def stat_in_db(network, station):
     """checks if station xml is already downloaded"""
-    path = Path(config.statloc+"/%s.%s.xml" % (network, station))
+    path = Path(config.statloc + "/%s.%s.xml" % (network, station))
     if path.is_file():
         return True
     else:
         return False
 
 
-def wav_in_db(network, station, location, channel, starttime, endtime):
+def wav_in_db(network, station, channel):
     """Checks if waveform is already downloaded."""
-    path = Path(config.folder, "%s.%s.%s.mseed" % (network, station,
-                                                   location))
+    path = Path(config.folder, "%s.%s.mseed" % (network, station))
+                                                   #location))
     if path.is_file():
-        st = read(config.folder+'/'+network+"."+station+'.'+location+'.mseed')
+        st = read(config.folder + '/' + network + "." + station + '.mseed')
+        # '.' + location +
     else:
         return False
     if len(st) == 3:

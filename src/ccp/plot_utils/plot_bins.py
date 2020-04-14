@@ -10,9 +10,11 @@ Last Update: November 2019
 
 """
 
-from .plot_map import plot_map
-import matplotlib.pyplot as plt
 from cartopy.crs import PlateCarree
+import matplotlib.pyplot as plt
+
+from .plot_map import plot_map
+
 
 def plot_bins(stations, bins, ax=None, kwargsS=None, kwargsB=None):
     """ Takes in original stations and bins and plots them on a map.

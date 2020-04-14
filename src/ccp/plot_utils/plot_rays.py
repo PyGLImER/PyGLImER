@@ -21,8 +21,6 @@ def plot_rays(clat, clon, depth, dtimes):
     -------
 
     """
-
-
     fig = plt.figure(figsize=(10, 5))
 
     # as a function of depth

@@ -12,6 +12,7 @@ Last Update: November 2019
 """
 
 import numpy as np
+
 from ..constants import R_EARTH
 
 
@@ -119,7 +120,7 @@ def cart2geo(x, y, z):
 def epi2euc(epi):
     """Converts epicentral distance in to a euclidean distance along the
     corresponding chord."""
-    return 2 * R_EARTH * np.sin(np.pi * epi / (360))
+    return 2 * R_EARTH * np.sin(np.pi * epi / 360)
 
 
 def euc2epi(euc):

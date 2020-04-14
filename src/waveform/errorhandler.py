@@ -20,13 +20,13 @@ def redownload(network, station, starttime, endtime, st):
         for iii in range(3):
             try:
                 if len(st) < 3:
-                    raise Exception
+                    raise ValueError
                 else:
                     break
-            except:
+            except ValueError:
                 try:
                     st = client.get_waveforms(network, station, '*',
-                                              st[0].stats.channel[0:2]+'*',
+                                              st[0].stats.channel[0:2] + '*',
                                               starttime, endtime)
                 except (header.FDSNNoDataException, ValueError):
                     break  # wrong client
@@ -42,7 +42,7 @@ def redownload_statxml(st, network, station):
             client = Client(c)
             station_inv = client.get_stations(level="response",
                                               channel=st[0].stats.channel[0:2]
-                                              + '*',
+                                                      + '*',
                                               network=network, station=station)
             # write the new, working stationxml file
             station_inv.write(config.statloc + "/" + network + "." +
@@ -59,18 +59,18 @@ def NoMatchingResponseHandler(st, network, station):
         try:
             client = Client(c)
             station_inv = client.get_stations(level="response",
-                                              channel=st[0].stats.channel[0:2]+'*',
+                                              channel=st[0].stats.channel[0:2] + '*',
                                               network=network,
                                               station=station)
             st.remove_response(inventory=station_inv, output='VEL',
                                water_level=60)
             # write the new, working stationxml file
-            station_inv.write(config.statloc+"/"+network+"."+station+".xml",
+            station_inv.write(config.statloc + "/" + network + "." + station + ".xml",
                               format="STATIONXML")
             break
         except (header.FDSNNoDataException, header.FDSNException):
             pass  # wrong client
-        except ValueError:
+        except Exception as e:
             break  # the response file doesn't seem to be available at all
     return station_inv, st
 
@@ -82,7 +82,7 @@ def NotLinearlyIndependentHandler(st, network, station, starttime, endtime,
         while len(st) < 3:
             try:
                 st = client.get_waveforms(network, station, '*',
-                                          st[0].stats.channel[0:2]+'*',
+                                          st[0].stats.channel[0:2] + '*',
                                           starttime, endtime)
                 st.remove_response(inventory=station_inv, output='VEL',
                                    water_level=60)

@@ -3,11 +3,11 @@
 Simple map plot to be use by other
 
 """
-from cartopy.crs import PlateCarree
 import cartopy
+from cartopy.crs import PlateCarree
+
 
 def plot_map(ax):
-
     ax.set_global()
     ax.frameon = True
     # ax.outline_patch.set_visible(False)

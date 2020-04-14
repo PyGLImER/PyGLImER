@@ -7,26 +7,27 @@ Created on Wed Feb 19 13:41:10 2020
 
 toolset to create RFs and RF classes
 """
+from abc import ABCMeta
 import json
+import logging
 from operator import itemgetter
-from pkg_resources import resource_filename
 import warnings
-import numpy as np
+
+from geographiclib.geodesic import Geodesic
 from matplotlib import pyplot as plt
 from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
-from scipy.signal.windows import hann
-import logging
-
+import numpy as np
 from obspy import read, Stream, Trace, UTCDateTime
 from obspy.core import AttribDict
 from obspy.geodetics import gps2dist_azimuth
-from geographiclib.geodesic import Geodesic
 from obspy.taup import TauPyModel
+from pkg_resources import resource_filename
+from scipy.signal.windows import hann
 
-from .deconvolve import it, spectraldivision, multitaper
-from .moveout import DEG2KM, maxz, res, moveout, dt_table
 # import ..ccp.ccp #import CCPStack
 import config
+from .deconvolve import it, spectraldivision, multitaper
+from .moveout import DEG2KM, maxz, res, moveout, dt_table
 
 logger = logging.Logger("rf")
 
@@ -98,13 +99,13 @@ def createRF(st_in, phase=config.phase, shift=config.tz,
                             [a, b]. Where a and b are the taper length in s
                             on the left and right side, respectively.""")
         # Hann taper with 7.5s taper window
-        tap = hann(round(15/dt))
+        tap = hann(round(15 / dt))
         taper = np.ones(st[0].stats.npts)
-        taper[:int((trim[0]-7.5)/dt)] = float(0)
-        taper[-int((trim[1]-7.5)/dt):] = float(0)
-        taper[int((trim[0]-7.5)/dt):int(trim[0]/dt)] = tap[:round(7.5/dt)]
-        taper[-int(trim[1]/dt):-int((trim[1]-7.5)/dt)] =\
-            tap[-round(7.5/dt):]
+        taper[:int((trim[0] - 7.5) / dt)] = float(0)
+        taper[-int((trim[1] - 7.5) / dt):] = float(0)
+        taper[int((trim[0] - 7.5) / dt):int(trim[0] / dt)] = tap[:round(7.5 / dt)]
+        taper[-int(trim[1] / dt):-int((trim[1] - 7.5) / dt)] = \
+            tap[-round(7.5 / dt):]
         for tr in st:
             tr.data = np.multiply(tr.data, taper)
 
@@ -180,6 +181,7 @@ def __get_event_origin_prop(h):
         if h == 'depth':
             r = r / 1000
         return r
+
     return wrapper
 
 
@@ -222,10 +224,10 @@ _EVENT_GETTER = (
 # H5 simply writes all stats entries
 _HEADERS = (tuple(zip(*_STATION_GETTER))[0] +
             tuple(zip(*_EVENT_GETTER))[0][:-1] + (  # do not write event_id
-            'onset', 'type', 'phase', 'moveout',
-            'distance', 'back_azimuth', 'inclination', 'slowness',
-            'pp_latitude', 'pp_longitude', 'pp_depth',
-            'box_pos', 'box_length'))
+                'onset', 'type', 'phase', 'moveout',
+                'distance', 'back_azimuth', 'inclination', 'slowness',
+                'pp_latitude', 'pp_longitude', 'pp_depth',
+                'box_pos', 'box_length'))
 
 # The corresponding header fields in the format
 # The following headers can at the moment only be stored for H5:
@@ -246,7 +248,6 @@ _FORMATHEADERS = {'sac': ('stla', 'stlo', 'stel', 'evla', 'evlo',
                          'COMMENT', 'COMMENT')}
 _HEADER_CONVERSIONS = {'sac': {'onset': (__SAC2UTC, __UTC2SAC),
                                'event_time': (__SAC2UTC, __UTC2SAC)}}
-
 
 _TF = '.datetime:%Y-%m-%dT%H:%M:%S'
 
@@ -278,7 +279,7 @@ def read_rf(pathname_or_url=None, format=None, **kwargs):
         RFStream object from file.
 
     """
-    if pathname_or_url is None:   # use example file
+    if pathname_or_url is None:  # use example file
         fname = resource_filename('rf', 'example/minimal_example.tar.gz')
         pathname_or_url = fname
         format = 'SAC'
@@ -303,6 +304,7 @@ class RFStream(Stream):
     """
 
     def __init__(self, traces=None):
+        super().__init__(traces)
         self.traces = []
         if isinstance(traces, Trace):
             traces = [traces]
@@ -597,11 +599,11 @@ class RFStream(Stream):
             if tr.stats.type == "time":
                 stats.delta = tr.stats.delta
                 data = tr.data
-                TAS = round((tr.stats.onset-tr.stats.starttime)/stats.delta)
+                TAS = round((tr.stats.onset - tr.stats.starttime) / stats.delta)
                 if tr.stats.phase == "S":
-                    data = -np.flip(data[round(TAS-30/stats.delta):TAS+1])
+                    data = -np.flip(data[round(TAS - 30 / stats.delta):TAS + 1])
                 elif tr.stats.phase == "P":
-                    data = data[TAS:round(TAS + 30/stats.delta)]
+                    data = data[TAS:round(TAS + 30 / stats.delta)]
                 stats["npts"] = len(data)
                 trace = Trace(data=data, header=stats)
                 trace.normalize()
@@ -631,7 +633,6 @@ class RFStream(Stream):
 
 
 class RFTrace(Trace):
-
     """
     Class providing the Trace object for receiver function calculation.
     """
@@ -644,7 +645,7 @@ class RFTrace(Trace):
             header = trace.stats
         super(RFTrace, self).__init__(data=data, header=header)
         st = self.stats
-        if ('_format'in st and st._format.upper() == 'Q' and
+        if ('_format' in st and st._format.upper() == 'Q' and
                 st.station.count('.') > 0):
             st.network, st.station, st.location = st.station.split('.')[:3]
         self._read_format_specific_header()
@@ -679,7 +680,7 @@ class RFTrace(Trace):
             o3.append('mag:{event_magnitude:.1f}')
         if 'distance' in self.stats:
             o3.append('dist:{distance:.1f}')
-        if'back_azimuth' in self.stats:
+        if 'back_azimuth' in self.stats:
             o3.append('baz:{back_azimuth:.1f}')
         if 'box_pos' in self.stats:
             o3.append('pos:{box_pos:.2f}km')
@@ -692,15 +693,15 @@ class RFTrace(Trace):
         out.append(' '.join(o3))
         return ' | '.join(out).format(**self.stats)
 
-    def _read_format_specific_header(self, format=None):
+    def _read_format_specific_header(self, fmt=None):
         st = self.stats
-        if format is None:
+        if fmt is None:
             if '_format' not in st:
                 return
-            format = st._format
-        format = format.lower()
-        if format == 'q':
-            format = 'sh'
+            fmt = st._format
+        fmt = fmt.lower()
+        if fmt == 'q':
+            fmt = 'sh'
         try:
             header_map = zip(_HEADERS, _FORMATHEADERS[format])
         except KeyError:
@@ -708,46 +709,46 @@ class RFTrace(Trace):
             return
         read_comment = False
         for head, head_format in header_map:
-            if format == 'sh' and read_comment:
+            if fmt == 'sh' and read_comment:
                 continue
             try:
-                value = st[format][head_format]
+                value = st[fmt][head_format]
             except KeyError:
                 continue
             else:
-                if format == 'sac' and '-12345' in str(value):
+                if fmt == 'sac' and '-12345' in str(value):
                     pass
-                elif format == 'sh' and head_format == 'COMMENT':
+                elif fmt == 'sh' and head_format == 'COMMENT':
                     st.update(json.loads(value))
                     continue
                 else:
                     st[head] = value
             try:
-                convert = _HEADER_CONVERSIONS[format][head][0]
+                convert = _HEADER_CONVERSIONS[fmt][head][0]
                 st[head] = convert(st, head)
             except KeyError:
                 pass
 
-    def _write_format_specific_header(self, format):
+    def _write_format_specific_header(self, fmt):
         st = self.stats
-        format = format.lower()
-        if format == 'q':
-            format = 'sh'
-        elif format == 'sac':
+        fmt = fmt.lower()
+        if fmt == 'q':
+            fmt = 'sh'
+        elif fmt == 'sac':
             # make sure SAC reference time is set
             from obspy.io.sac.util import obspy_to_sac_header
             self.stats.sac = obspy_to_sac_header(self.stats)
         try:
-            header_map = zip(_HEADERS, _FORMATHEADERS[format])
+            header_map = zip(_HEADERS, _FORMATHEADERS[fmt])
         except KeyError:
             # file format is H5 or not supported
             return
-        if format not in st:
-            st[format] = AttribDict({})
-        if format == 'sh':
+        if fmt not in st:
+            st[fmt] = AttribDict({})
+        if fmt == 'sh':
             comment = {}
         for head, head_format in header_map:
-            if format == 'sh' and head_format == 'COMMENT':
+            if fmt == 'sh' and head_format == 'COMMENT':
                 try:
                     comment[head] = st[head]
                 except KeyError:
@@ -758,15 +759,16 @@ class RFTrace(Trace):
             except KeyError:
                 continue
             try:
-                convert = _HEADER_CONVERSIONS[format][head][1]
+                convert = _HEADER_CONVERSIONS[fmt][head][1]
                 val = convert(st, head)
             except KeyError:
                 pass
-            st[format][head_format] = val
-        if format == 'sh' and len(comment) > 0:
+            st[fmt][head_format] = val
+        if fmt == 'sh' and len(comment) > 0:
             def default(obj):  # convert numpy types
                 return np.asscalar(obj)
-            st[format]['COMMENT'] = json.dumps(comment, separators=(',', ':'),
+
+            st[fmt]['COMMENT'] = json.dumps(comment, separators=(',', ':'),
                                                default=default)
 
     def _seconds2utc(self, seconds, reftime=None):
@@ -806,7 +808,7 @@ class RFTrace(Trace):
         z, RF_mo, delta = moveout(self.data, st)
         st.pp_latitude = []
         st.pp_longitude = []
-        st.pp_depth = np.arange(0, maxz+res, res)[0:len(delta)]
+        st.pp_depth = np.arange(0, maxz + res, res)[0:len(delta)]
 
         # Calculate ppoint position
         for dis in delta:
@@ -950,12 +952,12 @@ class RFTrace(Trace):
                              str(self.stats.station))
         return fig, ax
 
-    def write(self, filename, format, **kwargs):
+    def write(self, filename, fmt='SAC', **kwargs):
         """
         Save current trace into a file  including format specific headers.
         See `Trace.write() <obspy.core.trace.Trace.write>` in ObsPy.
         """
-        RFStream([self]).write(filename, format, **kwargs)
+        RFStream([self]).write(filename, fmt, **kwargs)
 
 
 def obj2stats(event=None, station=None):

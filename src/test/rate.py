@@ -7,21 +7,21 @@ Contains various functions used to evaluate the quality of RF and waveforms
 
 """
 import os
-import numpy as np
+from pathlib import Path
+import shelve
+import subprocess
+
 # import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
-from pathlib import Path
-import subprocess
-import shelve
-
-from obspy.taup import TauPyModel
+import numpy as np
 from obspy import read
+from obspy.taup import TauPyModel
 
-from ..waveform.qc import qcs, qcp
-from ..rf.create import createRF, RFStream
-from ..waveform.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
 import config
+from ..rf.create import createRF, RFStream
+from ..waveform.qc import qcs, qcp
+from ..waveform.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
 
 rating = {}  # mutable object
 
@@ -68,12 +68,12 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
 
     """
 
-    inloc = config.outputloc[:-1] + phase + "/by_station/" + network +\
-        '/' + station + '/'
+    inloc = config.outputloc[:-1] + phase + "/by_station/" + network + \
+            '/' + station + '/'
     # For TauPy lookup
     model = TauPyModel()
     for file in os.listdir(inloc):
-        if file[:4] == "info":   # Skip the info files
+        if file[:4] == "info":  # Skip the info files
             continue
         try:
             st = read(inloc + file)
@@ -94,14 +94,14 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
         old = __r_file(network, station, starttime)  # old
 
         # read info file
-        with shelve.open(inloc+"info") as info:
+        with shelve.open(inloc + "info") as info:
             ii = info["starttime"].index(st[0].stats.starttime)
             rdelta = info["rdelta"][ii]  # epicentral distance
             mag = info["magnitude"][ii]
             statlat = info["statlat"]
             statlon = info["statlon"]
-            rayp = info["rayp_s_deg"][ii]/111319.9
-            evt_depth = info["evt_depth"][ii]/1000
+            rayp = info["rayp_s_deg"][ii] / 111319.9
+            evt_depth = info["evt_depth"][ii] / 1000
             ot = info["ot_ret"][ii]
         if old and not review:  # skip already rated files
             continue
@@ -135,11 +135,11 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
         ph_name = []
         ph_time = []
         for arr in arrivals:
-            if arr.time < primary_time-onset or arr.time >\
-                    primary_time+config.ta or arr.name == phase:
+            if arr.time < primary_time - onset or arr.time > \
+                    primary_time + config.ta or arr.name == phase:
                 continue
             ph_name.append(arr.name)
-            ph_time.append(arr.time-primary_time)
+            ph_time.append(arr.time - primary_time)
 
         # waveform data
         st.sort()
@@ -149,7 +149,7 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
 
         # shorten vector
         # create time vector
-        t = np.linspace(0-onset, tr.stats.npts*tr.stats.delta-onset, len(y[0]))
+        t = np.linspace(0 - onset, tr.stats.npts * tr.stats.delta - onset, len(y[0]))
 
         # plot
         fig, ax = __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat,
@@ -216,17 +216,17 @@ def __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old,
     # textbox
     if old:
         textstr = '\n'.join((
-            r'$\Delta=%.2f$' % (rdelta, ),
-            r'$\mathrm{mag}=%.2f$' % (mag, ),
-            r'$\mathrm{z}=%.2f$' % (evt_depth, ),
-            r'$\mathrm{rat_{man}}=%.2f$' % (int(old), ),
-            r'$\mathrm{rat_{auto}}=%.2f$' % (crit, )))
+            r'$\Delta=%.2f$' % (rdelta,),
+            r'$\mathrm{mag}=%.2f$' % (mag,),
+            r'$\mathrm{z}=%.2f$' % (evt_depth,),
+            r'$\mathrm{rat_{man}}=%.2f$' % (int(old),),
+            r'$\mathrm{rat_{auto}}=%.2f$' % (crit,)))
     else:
         textstr = '\n'.join((
-            r'$\Delta=%.2f$' % (rdelta, ),
-            r'$\mathrm{mag}=%.2f$' % (mag, ),
-            r'$\mathrm{z}=%.2f$' % (evt_depth, ),
-            r'$\mathrm{rat_{auto}}=%.2f$' % (crit, )))
+            r'$\Delta=%.2f$' % (rdelta,),
+            r'$\mathrm{mag}=%.2f$' % (mag,),
+            r'$\mathrm{z}=%.2f$' % (evt_depth,),
+            r'$\mathrm{rat_{auto}}=%.2f$' % (crit,)))
     # place a text box in upper left in axes coords
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     ax[3].text(0.05, 0.95, textstr, transform=ax[3].transAxes, fontsize=10,
@@ -300,13 +300,13 @@ def sort_rated(network, station, phase=config.phase):
 
     """
 
-    inloc = config.outputloc[:-1] + phase + "/by_station/" + network +\
-        '/' + station + '/'
+    inloc = config.outputloc[:-1] + phase + "/by_station/" + network + \
+            '/' + station + '/'
     for n in range(1, 5):
         subprocess.call(["mkdir", "-p", inloc + str(n)])
     dic = shelve.open(config.ratings + network + "." + station + "rating")
     for file in os.listdir(inloc):
-        if file[:4] == "info":   # Skip the info files
+        if file[:4] == "info":  # Skip the info files
             continue
         try:
             st = read(inloc + file)
@@ -346,14 +346,14 @@ def automatic_rate(network, station, phase=config.phase):
 
     """
 
-    inloc = config.outputloc[:-1] + phase + "/by_station/" + network +\
-        '/' + station + '/'
+    inloc = config.outputloc[:-1] + phase + "/by_station/" + network + \
+            '/' + station + '/'
     diff = 0
     ret = 0
     sts = []
     crits = []
     for file in os.listdir(inloc):
-        if file[:4] == "info":   # Skip the info files
+        if file[:4] == "info":  # Skip the info files
             continue
         try:
             st = read(inloc + file)
@@ -363,10 +363,10 @@ def automatic_rate(network, station, phase=config.phase):
         starttime = str(st[0].stats.starttime)
         if phase == "S":
             st, crit, hf, noisemat = qcs(st, st[0].stats.delta,
-                                          st[0].stats.sampling_rate)
+                                         st[0].stats.sampling_rate)
         elif phase == "P":
             st, crit, hf, noisemat = qcp(st, st[0].stats.delta,
-                                          st[0].stats.sampling_rate)
+                                         st[0].stats.sampling_rate)
 
         with shelve.open(config.ratings + network + "." + station
                          + "rating") as f:
@@ -394,14 +394,14 @@ def sort_auto_rated(network, station, phase=config.phase):
         "P" or "S". The default is config.phase.
     """
 
-    inloc = config.outputloc[:-1] + phase + "/by_station/" + network +\
-        '/' + station + '/'
+    inloc = config.outputloc[:-1] + phase + "/by_station/" + network + \
+            '/' + station + '/'
     inloc_RF = config.RF[:-1] + phase + '/' + network + '/' + station + '/'
     subprocess.call(["mkdir", "-p", inloc + "ret"])
     subprocess.call(["mkdir", "-p", inloc_RF + "ret"])
     dic = shelve.open(config.ratings + network + "." + station + "rating")
     for file in os.listdir(inloc):
-        if file[:4] == "info":   # Skip the info files
+        if file[:4] == "info":  # Skip the info files
             continue
         try:
             st = read(inloc + file)
@@ -461,7 +461,7 @@ def auto_rate_stack(network, station, phase=config.phase,
     diff, ret, sts, crits = automatic_rate(network, station, phase)
     sort_auto_rated(network, station, phase)
     info_file = config.outputloc[:-1] + phase + '/by_station/' + network + \
-        '/' + station + '/info'
+                '/' + station + '/info'
     with shelve.open(info_file) as info:
         statlat = info["statlat"]
         statlon = info["statlon"]
@@ -469,9 +469,9 @@ def auto_rate_stack(network, station, phase=config.phase,
     if Path(outloc).is_dir():
         subprocess.call(['rm', '-rf', outloc])
     subprocess.call(['mkdir', '-p', outloc])
-    subprocess.call(['cp', info_file+'.bak', outloc])
-    subprocess.call(['cp', info_file+'.dir', outloc])
-    subprocess.call(['cp', info_file+'.dat', outloc])
+    subprocess.call(['cp', info_file + '.bak', outloc])
+    subprocess.call(['cp', info_file + '.dir', outloc])
+    subprocess.call(['cp', info_file + '.dat', outloc])
     RFs = []
     for jj, st in enumerate(sts):
         if not crits[jj]:
@@ -479,7 +479,7 @@ def auto_rate_stack(network, station, phase=config.phase,
         dt = st[0].stats.delta
         with shelve.open(info_file) as info:
             ii = info["starttime"].index(st[0].stats.starttime)
-            rayp = info["rayp_s_deg"][ii]/111319.9
+            rayp = info["rayp_s_deg"][ii] / 111319.9
             ot = info["ot_ret"][ii]
             evt_depth = info["evt_depth"][ii]
             rdelta = info["rdelta"][ii]
@@ -491,7 +491,7 @@ def auto_rate_stack(network, station, phase=config.phase,
             _, _, st = rotate_PSV(statlat, statlon, rayp, st)
         elif rot == "LQT":
             st, rat = rotate_LQT(st)
-            if rat > 0.75 and rat < 1.5:
+            if 0.75 < rat < 1.5:
                 # The PCA did not work properly, L & Q too similar
                 ret = ret - 1
                 continue
@@ -507,7 +507,7 @@ def auto_rate_stack(network, station, phase=config.phase,
         # noise RF test
         trim = [40, 0]
         if rdelta >= 70:
-            trim[1] = config.ta - (-2*rdelta + 180)
+            trim[1] = config.ta - (-2 * rdelta + 180)
         else:
             trim[1] = config.ta - 40
         info = shelve.open(info_file)

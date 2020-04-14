@@ -7,14 +7,14 @@ General configuration for GLImER.
 
 @author: pm
 """
+import numpy as np
 from obspy.core import UTCDateTime
 from obspy.taup import TauPyModel  # arrival times in 1D v-model
-import numpy as np
 
 # %% general settings
 # Define if you want to download new files or use old
-evtcat = None  # either None (downloads new) or file
-wavdownload = True  # Bool - true for completing download, false: only
+evtcat = '2020-04-14 13:35:26.136417' #None  # either None (downloads new) or file
+wavdownload = False  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
 decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
@@ -77,7 +77,6 @@ if phase == "P":
 elif phase == "S":
     maxdepth = 300
 
-
 # define 1D velocity model
 model = TauPyModel(model="iasp91")
 
@@ -86,13 +85,13 @@ model = TauPyModel(model="iasp91")
 # None is not recommended as some clients are unstable or do not provide any
 # data, waiting for these clients causes the script to be very slow.
 # Else "IRIS","ORFEUS",etc.
-waveform_client = ["IRIS"] #, "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
- #"GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
+waveform_client = ["IRIS"]  # , "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
+# "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
 # None  # ["IRIS", "NCEDC"]
 #
 # clients on which the download should be retried, list:
-re_clients = ["IRIS"] #, "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
- #"GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
+re_clients = ["IRIS"]  # , "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
+# "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
 # Clients that cause problems and are excluded:
 # ['GFZ', 'LMU', 'SCEDC']
 # %% PRE-PROCESSING VALUES #####
@@ -105,7 +104,7 @@ rot = "PSS"
 if phase == "P":
     # time window before
     tz = 30
-# time window after
+    # time window after
     ta = 120
 elif phase == "S":
     tz = 120

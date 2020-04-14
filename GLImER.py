@@ -8,20 +8,20 @@ IMPORTANT:
 @author: pm
 """
 
+from datetime import datetime
+from http.client import IncompleteRead
+from pathlib import Path
+# modules
+import subprocess
+from threading import Thread  # multi-thread processing
+
+from obspy import read_events
+from obspy.clients.fdsn import Client as Webclient  # web sevice
+
+import config
 # IMPORT PREDEFINED SUBFUNCTIONS
 from src.waveform.download import downloadwav
 from src.waveform.preprocess import preprocess
-import config
-
-# modules
-import subprocess
-from pathlib import Path
-from obspy.clients.fdsn import Client as Webclient  # web sevice
-from threading import Thread  # multi-thread processing
-from datetime import datetime
-from http.client import IncompleteRead
-from obspy import read_events
-
 
 # !values are located in subfunctions/config.py!
 

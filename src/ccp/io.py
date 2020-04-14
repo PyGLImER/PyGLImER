@@ -7,6 +7,7 @@ incoming `.mat` files that are produced by the GLImER database.
 import h5py
 import numpy as np
 
+
 def load_rawrf(filename):
     """
 
@@ -43,6 +44,7 @@ def load_rawrf(filename):
         dt = f['dt'][()]
 
     return rfs, baz, rayp, lat, lon, elev, dt
+
 
 def load_velocity_model(filename):
     """ Loads velocity model and outputs velocities and corresponding

@@ -8,14 +8,14 @@ Contains functions for moveout correction and station stacking
 @author: pm
 """
 
-import numpy as np
-import shelve
 import os
-from scipy import interpolate
-from scipy.signal.windows import hann
+import shelve
 
+import numpy as np
 from obspy import read
 from obspy.geodetics import degrees2kilometers
+from scipy import interpolate
+from scipy.signal.windows import hann
 
 import config
 
@@ -23,42 +23,41 @@ import config
 _MODEL_CACHE = {}
 DEG2KM = degrees2kilometers(1)
 maxz = 800  # maximum interpolation depth in km
-res = 1 # vertical resolution in km for interpolation and ccp bins
+res = 1  # vertical resolution in km for interpolation and ccp bins
 
-
-def stackRF(network, station, phase=config.phase):
-    """
-    Outdated. Use fun:'subfunctions.createRF.RFStream.statstack()' instead.
-
-    Creates a moveout corrected receiver function stack of the
-    requested station"""
-    # extract data
-    ioloc = config.RF[:-1] + phase + '/' + network + '/' + station
-    data = []
-    st = []  # stats
-    RF_mo = []  # moveout corrected RF
-    # z_all = []
-    for file in os.listdir(ioloc):
-        if file[:4] == "info":
-            continue
-        try:
-            stream = read(ioloc + '/' + file)
-        except IsADirectoryError:
-            continue
-        stream.normalize()  # make sure traces are normalised
-        data.append(stream[0].data)
-        st.append(stream[0].stats)
-    with shelve.open(ioloc + '/info') as info:
-        rayp = info['rayp_s_deg']
-        onset = info["onset"]
-        starttime = info["starttime"]
-    for ii, tr in enumerate(data):
-        jj = starttime.index(st[ii].starttime)
-        z, RF, _ = moveout(tr, st[ii], onset[jj], rayp[jj], phase)
-        RF_mo.append(RF)
-
-    stack = np.average(RF_mo, axis=0)
-    return z, stack, RF_mo, data
+# def stackRF(network, station, phase=config.phase):
+#     """
+#     Outdated. Use fun:'subfunctions.createRF.RFStream.statstack()' instead.
+#
+#     Creates a moveout corrected receiver function stack of the
+#     requested station"""
+#     # extract data
+#     ioloc = config.RF[:-1] + phase + '/' + network + '/' + station
+#     data = []
+#     st = []  # stats
+#     RF_mo = []  # moveout corrected RF
+#     # z_all = []
+#     for file in os.listdir(ioloc):
+#         if file[:4] == "info":
+#             continue
+#         try:
+#             stream = read(ioloc + '/' + file)
+#         except IsADirectoryError:
+#             continue
+#         stream.normalize()  # make sure traces are normalised
+#         data.append(stream[0].data)
+#         st.append(stream[0].stats)
+#     with shelve.open(ioloc + '/info') as info:
+#         rayp = info['rayp_s_deg']
+#         onset = info["onset"]
+#         starttime = info["starttime"]
+#     for ii, tr in enumerate(data):
+#         jj = starttime.index(st[ii].starttime)
+#         z, RF, _ = moveout(tr, st[ii], onset[jj], rayp[jj], phase)
+#         RF_mo.append(RF)
+#
+#     stack = np.average(RF_mo, axis=0)
+#     return z, stack, RF_mo, data
 
 
 def moveout(data, st, fname='iasp91.dat'):

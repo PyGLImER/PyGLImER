@@ -6,19 +6,18 @@ Assorted functions that serve as a tests (mostly with synthetic data) of other
 GLImER functions.
 @author: pm
 """
-import numpy as np
-import matplotlib.pyplot as plt
 import os
 
-from obspy.core import Stream, Trace, Stats
+import matplotlib.pyplot as plt
+import numpy as np
 from obspy import UTCDateTime, read
+from obspy.core import Stats
 from obspy.signal.filter import lowpass
 
-from ..rf.moveout import moveout, load_model
-from ..rf.deconvolve import it, multitaper, spectraldivision
-from ..waveform.qc import qcs, qcp
 import config
-
+from ..rf.deconvolve import it, multitaper, spectraldivision
+from ..rf.moveout import moveout
+from ..waveform.qc import qcs, qcp
 
 tr_folder = "data/raysum_traces/"
 
@@ -99,7 +98,7 @@ def read_raysum(NEZ_file=None, RTZ_file=None, PSS_file=None):
             for i in range(3):  # header
                 f.readline()
             out = [[], [], []]
-            for l in range(N):
+            for j in range(N):
                 x = f.readline()
                 xl = x.split()
                 for kk, value in enumerate(xl):
