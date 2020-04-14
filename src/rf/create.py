@@ -224,10 +224,10 @@ _EVENT_GETTER = (
 # H5 simply writes all stats entries
 _HEADERS = (tuple(zip(*_STATION_GETTER))[0] +
             tuple(zip(*_EVENT_GETTER))[0][:-1] + (  # do not write event_id
-                'onset', 'type', 'phase', 'moveout',
-                'distance', 'back_azimuth', 'inclination', 'slowness',
-                'pp_latitude', 'pp_longitude', 'pp_depth',
-                'box_pos', 'box_length'))
+            'onset', 'type', 'phase', 'moveout',
+            'distance', 'back_azimuth', 'inclination', 'slowness',
+            'pp_latitude', 'pp_longitude', 'pp_depth',
+            'box_pos', 'box_length'))
 
 # The corresponding header fields in the format
 # The following headers can at the moment only be stored for H5:
@@ -304,7 +304,7 @@ class RFStream(Stream):
     """
 
     def __init__(self, traces=None):
-        super().__init__(traces)
+        #super().__init__(traces)
         self.traces = []
         if isinstance(traces, Trace):
             traces = [traces]
@@ -693,15 +693,15 @@ class RFTrace(Trace):
         out.append(' '.join(o3))
         return ' | '.join(out).format(**self.stats)
 
-    def _read_format_specific_header(self, fmt=None):
+    def _read_format_specific_header(self, format=None):
         st = self.stats
-        if fmt is None:
+        if format is None:
             if '_format' not in st:
                 return
-            fmt = st._format
-        fmt = fmt.lower()
-        if fmt == 'q':
-            fmt = 'sh'
+            format = st._format
+        format = format.lower()
+        if format == 'q':
+            format = 'sh'
         try:
             header_map = zip(_HEADERS, _FORMATHEADERS[format])
         except KeyError:
@@ -709,46 +709,46 @@ class RFTrace(Trace):
             return
         read_comment = False
         for head, head_format in header_map:
-            if fmt == 'sh' and read_comment:
+            if format == 'sh' and read_comment:
                 continue
             try:
-                value = st[fmt][head_format]
+                value = st[format][head_format]
             except KeyError:
                 continue
             else:
-                if fmt == 'sac' and '-12345' in str(value):
+                if format == 'sac' and '-12345' in str(value):
                     pass
-                elif fmt == 'sh' and head_format == 'COMMENT':
+                elif format == 'sh' and head_format == 'COMMENT':
                     st.update(json.loads(value))
                     continue
                 else:
                     st[head] = value
             try:
-                convert = _HEADER_CONVERSIONS[fmt][head][0]
+                convert = _HEADER_CONVERSIONS[format][head][0]
                 st[head] = convert(st, head)
             except KeyError:
                 pass
 
-    def _write_format_specific_header(self, fmt):
+    def _write_format_specific_header(self, format):
         st = self.stats
-        fmt = fmt.lower()
-        if fmt == 'q':
-            fmt = 'sh'
-        elif fmt == 'sac':
+        format = format.lower()
+        if format == 'q':
+            format = 'sh'
+        elif format == 'sac':
             # make sure SAC reference time is set
             from obspy.io.sac.util import obspy_to_sac_header
             self.stats.sac = obspy_to_sac_header(self.stats)
         try:
-            header_map = zip(_HEADERS, _FORMATHEADERS[fmt])
+            header_map = zip(_HEADERS, _FORMATHEADERS[format])
         except KeyError:
             # file format is H5 or not supported
             return
-        if fmt not in st:
-            st[fmt] = AttribDict({})
-        if fmt == 'sh':
+        if format not in st:
+            st[format] = AttribDict({})
+        if format == 'sh':
             comment = {}
         for head, head_format in header_map:
-            if fmt == 'sh' and head_format == 'COMMENT':
+            if format == 'sh' and head_format == 'COMMENT':
                 try:
                     comment[head] = st[head]
                 except KeyError:
@@ -759,16 +759,16 @@ class RFTrace(Trace):
             except KeyError:
                 continue
             try:
-                convert = _HEADER_CONVERSIONS[fmt][head][1]
+                convert = _HEADER_CONVERSIONS[format][head][1]
                 val = convert(st, head)
             except KeyError:
                 pass
-            st[fmt][head_format] = val
-        if fmt == 'sh' and len(comment) > 0:
+            st[format][head_format] = val
+        if format == 'sh' and len(comment) > 0:
             def default(obj):  # convert numpy types
                 return np.asscalar(obj)
 
-            st[fmt]['COMMENT'] = json.dumps(comment, separators=(',', ':'),
+            st[format]['COMMENT'] = json.dumps(comment, separators=(',', ':'),
                                                default=default)
 
     def _seconds2utc(self, seconds, reftime=None):
@@ -952,12 +952,12 @@ class RFTrace(Trace):
                              str(self.stats.station))
         return fig, ax
 
-    def write(self, filename, fmt='SAC', **kwargs):
+    def write(self, filename, format, **kwargs):
         """
         Save current trace into a file  including format specific headers.
         See `Trace.write() <obspy.core.trace.Trace.write>` in ObsPy.
         """
-        RFStream([self]).write(filename, fmt, **kwargs)
+        RFStream([self]).write(filename, format, **kwargs)
 
 
 def obj2stats(event=None, station=None):

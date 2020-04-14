@@ -343,7 +343,7 @@ class CCPStack(object):
         # Save as Matlab file (exporting to plot)
         elif fmt == "matlab":
             d = {}
-            d.update({'RF_ccp': self.ccp, 'illum': self.illum, 'depth_new': self.z,
+            d.update({'RF_ccp': self.ccp, 'illum': self.illum, 'depth_ccp': self.z.astype(float),
                       'lat_ccp': self.coords[0], 'lon_ccp': self.coords[1],
                       'CSLAT': self.bingrid.latitude, 'CSLON': self.bingrid.longitude})
             sio.savemat(oloc + '.mat', d)
