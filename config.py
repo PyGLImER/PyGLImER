@@ -13,8 +13,8 @@ from obspy.taup import TauPyModel  # arrival times in 1D v-model
 
 # %% general settings
 # Define if you want to download new files or use old
-evtcat = '2020-04-14 13:35:26.136417' #None  # either None (downloads new) or file
-wavdownload = False  # Bool - true for completing download, false: only
+evtcat = None  # either None (downloads new) or file
+wavdownload = True  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
 decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
@@ -45,8 +45,8 @@ ccp = "output/ccps"
 # %% EVENT AND DOWNLOAD VALUES
 # Set values to "None" if they aren't requried / desired
 # Time frame is identical to the station inventory
-starttime = UTCDateTime("2009-01-01")
-endtime = UTCDateTime("2011-12-31")
+starttime = UTCDateTime("1975-01-01")
+endtime = UTCDateTime("2019-04-15")
 eMINLAT = None
 eMAXLAT = None
 eMINLON = None
@@ -60,8 +60,8 @@ maxMag = 10.0
 # Station and Network codes
 # type : str
 # wildcards allowed. If None, all that are available are requested
-network = "YP"
-station = None
+network = "IU"
+station = "HRV"
 
 # epicentral distances:
 if phase == "P":
@@ -130,8 +130,8 @@ if phase == "P":
     SNR_criteria = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
 elif phase == "S":
     # SNR_criteria = [7.5, .2, .66]
-    SNR_criteria = [20, .5, 1] #QC2
-    #SNR_criteria = [35, .5, 1]  #QC1 to reproduce Rychert
+    #SNR_criteria = [20, .5, 1] #QC2
+    SNR_criteria = [35, .5, 1]  #QC1 to reproduce Rychert
     # [primary/noise, sidelobe/primary, r/z conversions]
 
 # %% DON'T change program will change automatically!
