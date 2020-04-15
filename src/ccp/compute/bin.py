@@ -58,7 +58,7 @@ class BinGrid(object):
 
         longitude (1-D `numpy.array`): Longitudes
 
-        edist (float): epicentral distance between stations
+        edist (float): epicentral distance between bin centres
 
         phase : str
             Seismic phase either "S" or "P". Phase "S" will lead to more
@@ -236,7 +236,7 @@ class BinGrid(object):
                                  distance_upper_bound=maxdist_euc)
         return eucd, i
 
-    def query_bin_tree(self, latitude, longitude, maxdist):
+    def query_bin_tree(self, latitude, longitude, binrad):
         """Uses the query function of the KDTree but takes geolocations as
         input.
 
@@ -244,7 +244,10 @@ class BinGrid(object):
         ----------
         latitude: latitudes to be queried
         longitude: longitudes to be queried
-        maxdist: maximum  distance to be queried in epicentral distance
+        binrad: maximum  distance to be queried in epicentral distance
+                Equals the radius of the bin, higher = more averaging ->
+                --> less noise, lower resolution
+
 
         Returns
         -------
@@ -256,14 +259,16 @@ class BinGrid(object):
         """
 
         # Compute maxdist in euclidean space
-        maxdist_euc = epi2euc(maxdist)
+        maxdist_euc = epi2euc(binrad)
 
         # Get cartesian coordinate points
         points = geo2cart(R_EARTH, latitude, longitude)
 
         # Query the points and return the distances and closest neighbours
+        # Eps: approximate closest neighbour (big boost in computation time)
+        # Returned distance is not more than (1+eps)*real distance
         eucd, i = self.KDB.query(np.vstack((points[0],
                                             points[1],
-                                            points[2])).T,
+                                            points[2])).T, eps=0.05, k=4,
                                  distance_upper_bound=maxdist_euc)
         return eucd, i

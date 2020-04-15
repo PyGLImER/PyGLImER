@@ -24,7 +24,8 @@ from ..rf.moveout import res, maxz
 
 
 def init_ccp(spacing, phase=config.phase, network=None, station=None,
-             compute_stack=False, save=False, verbose=True):
+             compute_stack=False, binrad=np.cos(np.radians(30)),
+             save=False, verbose=True):
     """
     Computes a ccp stack in self.ccp using the standard folder
     structure set in config. The stack can be limited to some networks and
@@ -49,6 +50,11 @@ def init_ccp(spacing, phase=config.phase, network=None, station=None,
     compute_stack : Bool, optional
         If true it will compute the stack by calling ccp.compute_stack().
         That can take a long time! The default is False.
+    binrad : float, optional
+            Only used if compute_stack=True
+            Defines the bin radius with bin radius = binrad*distance_bins.
+            Full Overlap = cosd(30), Full coverage: 1.
+            The default is full overlap
     save : Bool or str, optional
         Either False if the ccp should not be saved or string with filename
         will be saved in config.ccp. Will be saved as pickle file.
@@ -95,7 +101,8 @@ def init_ccp(spacing, phase=config.phase, network=None, station=None,
     ccp = CCPStack(lats, lons, spacing, phase=phase, verbose=verbose)
 
     if compute_stack:
-        ccp.compute_stack(network=network, station=station, save=save)
+        ccp.compute_stack(network=network, station=station, save=save,
+                          binrad=binrad)
 
     return ccp
 
@@ -199,7 +206,8 @@ class CCPStack(object):
         # self.latv, self.longv, self.zv = np.meshgrid(self.latitude,
         #                                              self.longitude, self.z)
 
-    def query_bin_tree(self, latitude, longitude, z, data):
+    def query_bin_tree(self, latitude, longitude, z, data,
+                       binrad):
         """
         Find closest bins for given latitude and longitude.
 
@@ -213,20 +221,21 @@ class CCPStack(object):
             depths of piercing points
         data : 1D np.array
             Depth migrated receiver function data
+        binrad : float
+            Radius of the bin
 
         Returns
         -------
         None.
 
         """
-        eucd, i = self.bingrid.query_bin_tree(latitude, longitude,
-                                              self.bingrid.edist/2)
+        eucd, i = self.bingrid.query_bin_tree(latitude, longitude, binrad)
 
         # Kd tree returns locations that are too far with maxindex+1
         pos = np.where(i < self.bingrid.Nb)
 
         # Depth index
-        j = z[pos]/res
+        j = z[pos[0]]/res
         j = j.astype(int)
 
         # Lateral position index
@@ -241,7 +250,8 @@ class CCPStack(object):
         # Data counter
         self.N = self.N + 1
 
-    def compute_stack(self, network=None, station=None, save=False):
+    def compute_stack(self, network=None, station=None, save=False,
+                      binrad=np.cos(np.radians(30))):
         """
         Computes a ccp stack in self.ccp, using the standard folder
         structure set in config. The stack can be limited to some networks and
@@ -264,12 +274,18 @@ class CCPStack(object):
         save : str or Bool
             Either False if the ccp should not be saved or string with filename
             will be saved in config.ccp. Will be saved as pickle file.
+        binrad : float, optional
+            Defines the bin radius with bin radius = binrad*distance_bins.
+            Full Overlap = cosd(30), Full coverage: 1.
+            The default is full overlap
+
 
         Returns
         -------
         None (Data are appended to ccp object).
 
         """
+        binrad = binrad*self.bingrid.edist
         folder = config.RF[:-1] + self.bingrid.phase
 
         if network and type(network) == list:
@@ -301,7 +317,7 @@ class CCPStack(object):
                     lat = np.array(rf.stats.pp_latitude)
                     lon = np.array(rf.stats.pp_longitude)
                     z = np.array(rf.stats.pp_depth)
-                    self.query_bin_tree(lat, lon, z, rf.data)
+                    self.query_bin_tree(lat, lon, z, rf.data, binrad)
         self.conclude_ccp()
 
         # save file
@@ -314,6 +330,7 @@ class CCPStack(object):
         self.ccp = np.divide(self.bins, self.illum+1)
         index = np.where(self.ccp == 0)
         self.ccp[index] = np.nan
+
 
     def write(self, filename='ccp', folder=config.ccp, fmt="pickle"):
         """

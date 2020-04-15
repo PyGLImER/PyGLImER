@@ -131,7 +131,7 @@ if phase == "P":
 elif phase == "S":
     # SNR_criteria = [7.5, .2, .66]
     #SNR_criteria = [20, .5, 1] #QC2
-    SNR_criteria = [35, .5, 1]  #QC1 to reproduce Rychert
+    SNR_criteria = [25, .5, 1]  #QC1 to reproduce Rychert
     # [primary/noise, sidelobe/primary, r/z conversions]
 
 # %% DON'T change program will change automatically!
