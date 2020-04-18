@@ -25,7 +25,7 @@ from ..rf.moveout import res, maxz
 
 def init_ccp(spacing, phase=config.phase, network=None, station=None,
              compute_stack=False, binrad=np.cos(np.radians(30)),
-             save=False, verbose=True):
+             append_pp=False, save=False, verbose=True):
     """
     Computes a ccp stack in self.ccp using the standard folder
     structure set in config. The stack can be limited to some networks and
@@ -55,6 +55,12 @@ def init_ccp(spacing, phase=config.phase, network=None, station=None,
             Defines the bin radius with bin radius = binrad*distance_bins.
             Full Overlap = cosd(30), Full coverage: 1.
             The default is full overlap
+    append_pp : Bool, optional
+        Only used if compute_stack=True.
+        Appends piercing point locations to object. Can be used to plot
+        pps on map. Not recommended for large datasets as it takes A LOT
+        longer and makes the file a lot larger.
+        The default is False
     save : Bool or str, optional
         Either False if the ccp should not be saved or string with filename
         will be saved in config.ccp. Will be saved as pickle file.
@@ -100,9 +106,12 @@ def init_ccp(spacing, phase=config.phase, network=None, station=None,
 
     ccp = CCPStack(lats, lons, spacing, phase=phase, verbose=verbose)
 
+    # Clear Memory
+    del stat, lats, lons, files
+
     if compute_stack:
         ccp.compute_stack(network=network, station=station, save=save,
-                          binrad=binrad)
+                          append_pp=append_pp, binrad=binrad)
 
     return ccp
 
@@ -203,6 +212,8 @@ class CCPStack(object):
         self.z = np.arange(0, maxz+res, res)
         self.bins = np.zeros([self.coords[0].size, len(self.z)])
         self.illum = np.zeros(np.shape(self.bins))
+        self.pplat = []
+        self.pplon = []
         # self.latv, self.longv, self.zv = np.meshgrid(self.latitude,
         #                                              self.longitude, self.z)
 
@@ -242,7 +253,7 @@ class CCPStack(object):
         k = i[pos]
 
         # populate ccp stack and illumination matrix
-        self.bins[k, j] = data[j]
+        self.bins[k, j] = self.bins[k, j] + data[j]
 
         # hit counter + 1
         self.illum[k, j] = self.illum[k, j] + 1
@@ -251,7 +262,7 @@ class CCPStack(object):
         self.N = self.N + 1
 
     def compute_stack(self, network=None, station=None, save=False,
-                      binrad=np.cos(np.radians(30))):
+                      binrad=np.cos(np.radians(30)), append_pp=False):
         """
         Computes a ccp stack in self.ccp, using the standard folder
         structure set in config. The stack can be limited to some networks and
@@ -278,6 +289,10 @@ class CCPStack(object):
             Defines the bin radius with bin radius = binrad*distance_bins.
             Full Overlap = cosd(30), Full coverage: 1.
             The default is full overlap
+        append_pp : Bool, optional
+            appends piercing point coordinates if True, so tey can later be
+            plotted. Not recommended for big data sets.
+            The default is false.
 
 
         Returns
@@ -316,6 +331,13 @@ class CCPStack(object):
                     _, rf = rft[0].moveout()
                     lat = np.array(rf.stats.pp_latitude)
                     lon = np.array(rf.stats.pp_longitude)
+                    if append_pp:
+                        plat = np.pad(lat, (0, len(self.z)-len(lat)),
+                                      constant_values=np.nan)
+                        plon = np.pad(lon, (0, len(self.z)-len(lon)),
+                                      constant_values=np.nan)
+                        self.pplat.append(plat)
+                        self.pplon.append(plon)
                     z = np.array(rf.stats.pp_depth)
                     self.query_bin_tree(lat, lon, z, rf.data, binrad)
         self.conclude_ccp()
@@ -330,7 +352,6 @@ class CCPStack(object):
         self.ccp = np.divide(self.bins, self.illum+1)
         index = np.where(self.ccp == 0)
         self.ccp[index] = np.nan
-
 
     def write(self, filename='ccp', folder=config.ccp, fmt="pickle"):
         """
@@ -362,9 +383,17 @@ class CCPStack(object):
         # Save as Matlab file (exporting to plot)
         elif fmt == "matlab":
             d = {}
-            d.update({'RF_ccp': self.ccp, 'illum': self.illum, 'depth_ccp': self.z.astype(float),
-                      'lat_ccp': self.coords[0], 'lon_ccp': self.coords[1],
-                      'CSLAT': self.bingrid.latitude, 'CSLON': self.bingrid.longitude})
+            d.update({'RF_ccp': self.ccp,
+                      'illum': self.illum,
+                      'depth_ccp': self.z.astype(float),
+                      'lat_ccp': self.coords[0],
+                      'lon_ccp': self.coords[1],
+                      'CSLAT': self.bingrid.latitude,
+                      'CSLON': self.bingrid.longitude,
+                      'clat': np.array(self.pplat),
+                      'clon': np.array(self.pplon),
+                      'cdepth': self.z.astype(float)})
+
             sio.savemat(oloc + '.mat', d)
 
         # Unknown formats

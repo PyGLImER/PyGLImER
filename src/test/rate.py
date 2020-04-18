@@ -113,22 +113,22 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
 
         # check automatic rating
         if phase == "S":
-            _, crit, hf, noisemat = qcs(st, dt, sampling_f)
+            st_f, crit, hf, noisemat = qcs(st, dt, sampling_f)
         elif phase == "P":
-            _, crit, hf, noisemat = qcp(st, dt, sampling_f)
+            st_f, crit, hf, noisemat = qcp(st, dt, sampling_f)
 
         # skip files that have not been retained
         if retained and not crit:
             continue
 
         # create RF
-        st_f = st.filter('bandpass', freqmin=.03, freqmax=hf, zerophase=True)
         _, _, PSV = rotate_PSV(statlat, statlon, rayp, st_f)
-        RF = createRF(PSV, phase, method=decon_meth)
+        RF = createRF(PSV, phase, method=decon_meth, shift=config.tz)
 
         # TauPy lookup
         arrivals = model.get_travel_times(evt_depth,
                                           distance_in_degree=rdelta)
+
         primary_time = model.get_travel_times(evt_depth,
                                               distance_in_degree=rdelta,
                                               phase_list=phase)[0].time
@@ -147,13 +147,13 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
             y.append(tr.data)
             ch.append(tr.stats.channel[2])
 
-        # shorten vector
         # create time vector
-        t = np.linspace(0 - onset, tr.stats.npts * tr.stats.delta - onset, len(y[0]))
+        t = np.linspace(0 - onset, tr.stats.npts * tr.stats.delta - onset,
+                        len(y[0]))
 
         # plot
         fig, ax = __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat,
-                              RF, old, rdelta, mag, crit, ot, evt_depth)
+                              RF, old, rdelta, mag, crit, ot, evt_depth, phase)
         while not plt.waitforbuttonpress(30):
             # Taper when input is there
             if len(rating["taper"]) == 2:
@@ -176,7 +176,7 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
 
 
 def __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old,
-                rdelta, mag, crit, ot, evt_depth):
+                rdelta, mag, crit, ot, evt_depth, phase):
     """Draws the plot for the rate function"""
     plt.close('all')
     fig, ax = plt.subplots(4, 1, sharex=False)
@@ -209,10 +209,15 @@ def __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old,
     ax[2].text(0.05, 0.95, str(noisemat), transform=ax[2].transAxes,
                fontsize=10, verticalalignment='top', bbox=props)
     # show RF
-    ax[3].plot(t, -np.flip(RF.data), color='k')
+    if phase == 'S':
+        ax[3].plot(t, -np.flip(RF.data), color='k')
+    elif phase == 'P':
+        ax[3].plot(t, RF.data, color='k')
     ax[3].set_title(str(ot))
     ax[3].set_xlabel('time in s')
-    ax[3].set_xlim(-5, 40)
+    #ax[3].set_xlim(-5, 40)
+    print(t)
+
     # textbox
     if old:
         textstr = '\n'.join((

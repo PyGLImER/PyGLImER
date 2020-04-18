@@ -11,10 +11,10 @@ IMPORTANT:
 from datetime import datetime
 from http.client import IncompleteRead
 from pathlib import Path
-# modules
+import multiprocessing
 import subprocess
-from threading import Thread  # multi-thread processing
 
+# modules
 from obspy import read_events
 from obspy.clients.fdsn import Client as Webclient  # web sevice
 
@@ -23,12 +23,14 @@ import config
 from src.waveform.download import downloadwav
 from src.waveform.preprocess import preprocess
 
+
 # !values are located in subfunctions/config.py!
 
 webclient = Webclient("IRIS")  # client to download event catalogue
 
 ##############################################################################
 ##############################################################################
+
 
 if not config.evtcat:
     # download event catalogue
@@ -66,13 +68,13 @@ if config.wavdownload:
     config.folder = "not_started"  # resetting momentary event download folder
     # multi-threading
     if __name__ == '__main__':
-        Thread(target=downloadwav,
-               args=(config.min_epid, config.max_epid,
-                     model, event_cat)).start()
+        multiprocessing.Process(target=downloadwav,
+                                args=(config.min_epid, config.max_epid,
+                                      model, event_cat)).start()
 
-        Thread(target=preprocess,
-               args=(config.taper_perc, event_cat, webclient, model,
-                     config.taper_type)).start()
+        multiprocessing.Process(target=preprocess,
+                                args=(config.taper_perc, event_cat, webclient,
+                                      model, config.taper_type)).start()
 
 else:  # Only preprocess files in waveform location
     config.folder = "finished"

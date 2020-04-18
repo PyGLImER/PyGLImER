@@ -143,7 +143,7 @@ def createRF(st_in, phase=config.phase, shift=config.tz,
     # Deconvolution
     if method == "it":
         if phase == "S":
-            width = 1.25  # .75
+            width = 2.5  # 1.25
         elif phase == "P":
             width = 2.5
         RF[0].data = it(v, u, dt, shift=shift, width=width)[0]

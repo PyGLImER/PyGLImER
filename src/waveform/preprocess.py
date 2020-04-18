@@ -14,12 +14,7 @@ import subprocess
 import time
 import numpy as np
 
-from obspy import read
-from obspy import read_inventory
-#from obspy.clients.iris import Client as iClient
-from obspy.core import Stream
-# careful with using clientas multiprocessing has a client class
-from obspy.core.utcdatetime import UTCDateTime
+from obspy import read, read_inventory, Stream, UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 
 import config
@@ -122,283 +117,292 @@ def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
                "poles": paz_sim.get_paz().poles,
                "zeros": paz_sim.get_paz().zeros}
 
-    # Define class for backazimuth calculation
-    #iclient = iClient()
-
-    __event_loop(event_cat, taper_perc, taper_type, webclient,
-                 model, paz_sim, logger, rflogger)
+    for event in event_cat:
+        __event_loop(event, taper_perc, taper_type, webclient,
+                     model, paz_sim, logger, rflogger)
     print("Download and preprocessing finished.")
 
 
-def __event_loop(event_cat, taper_perc, taper_type, webclient, model,
+def __event_loop(event, taper_perc, taper_type, webclient, model,
                  paz_sim, logger, rflogger):
     """
     Loops over each event in the event catalogue
     """
-    for event in event_cat:
-        # fetch event-data
-        origin = (event.preferred_origin() or event.origins[0])
-        origin_time = origin.time
-        ot_fiss = UTCDateTime(origin_time).format_fissures()
-        evtlat = origin.latitude
-        evtlon = origin.longitude
-        depth = origin.depth
+    # fetch event-data
+    origin = (event.preferred_origin() or event.origins[0])
+    origin_time = origin.time
+    ot_fiss = UTCDateTime(origin_time).format_fissures()
+    evtlat = origin.latitude
+    evtlon = origin.longitude
+    depth = origin.depth
 
-        # make folder that will contain softlinks
-        if not Path(config.outputloc+'/'+'by_event/'+ot_fiss).is_dir():
-            subprocess.call(["mkdir", "-p",
-                             config.outputloc+'/'+'by_event/'+ot_fiss])
+    # make folder that will contain softlinks
+    if not Path(config.outputloc+'/'+'by_event/'+ot_fiss).is_dir():
+        subprocess.call(["mkdir", "-p",
+                         config.outputloc+'/'+'by_event/'+ot_fiss])
 
-        # Folder, in which the preprocessing is actually happening
-        prepro_folder = config.waveform + "/" + ot_fiss + '_' + str(evtlat) +\
-            "_" + str(evtlon)
-        # only start preprocessing after waveforms for foregoing are downloaded
-        while prepro_folder == config.folder or config.folder == "not_started":
-            print('preprocessing suspended, awaiting download')
-            time.sleep(2.5)
+    # Folder, in which the preprocessing is actually happening
+    prepro_folder = config.waveform + "/" + ot_fiss + '_' + str(evtlat) +\
+        "_" + str(evtlon)
+    # only start preprocessing after waveforms for foregoing are downloaded
+    while prepro_folder == config.folder or config.folder == "not_started":
+        print('preprocessing suspended, awaiting download')
+        time.sleep(2.5)
+    else:
+        try:  # If one event has no folder it interrupts else
+            # Remove empty folders in the raw directory
+            if not os.listdir(prepro_folder):
+                subprocess.call(['rmdir', prepro_folder])
+                return
+        except FileNotFoundError:
+            # If we are not downloading that's entirely normal as
+            # an earlier iteration just deletes empty directories
+            if config.wavdownload:
+                logger.exception([ot_fiss,
+                                 """Waveforms missing in database."""])
+            return
+
+        # Preprocessing just for some stations?
+        # Then skip files that should not be preprocessed
+
+        if config.network:
+            pattern = config.network + '.' + (config.station or '') + '*'
+            files = fnmatch.filter(os.listdir(prepro_folder), pattern)
         else:
-            try:  # If one event has no folder it interrupts else
-                # Remove empty folders in the raw directory
-                if not os.listdir(prepro_folder):
-                    subprocess.call(['rmdir', prepro_folder])
-                    continue
-            except FileNotFoundError:
-                # If we are not downloading that's entirely normal as
-                # an earlier iteration just deletes empty directories
-                if config.wavdownload:
-                    logger.exception([ot_fiss,
-                                     """Waveforms missing in database."""])
-                continue
+            files = os.listdir(prepro_folder)
 
-            __waveform_loop(taper_perc, taper_type, event_cat, webclient,
-                            model, paz_sim, origin_time, ot_fiss,
-                            evtlat, evtlon, depth, prepro_folder, event,
-                            logger, rflogger)
+        for file in files:
+            __waveform_loop(file, taper_perc, taper_type, webclient, model,
+                            paz_sim, origin_time, ot_fiss, evtlat, evtlon,
+                            depth, prepro_folder, event, logger, rflogger)
+        # Use several cores
+        # if __name__ == '__main__':
+        #     processes = []
+        #     for file in files:
+        #         p = multiprocessing.Process(target=__waveform_loop,
+        #                                     args=(file, taper_perc,
+        #                                           taper_type, event_cat,
+        #                                           webclient, model,
+        #                                           paz_sim, origin_time,
+        #                                           ot_fiss, evtlat, evtlon,
+        #                                           depth, prepro_folder,
+        #                                           event, logger, rflogger))
+        #         processes.append(p)
+        #         p.start
+
+        #     for process in processes:
+        #         # Waits for a free core until it joins
+        #         process.join()
+        # # __waveform_loop(file, taper_perc, taper_type, event_cat, webclient,
+        # #                 model, paz_sim, origin_time, ot_fiss,
+        # #                 evtlat, evtlon, depth, prepro_folder, event,
+        # #                 logger, rflogger)
 
 
-def __waveform_loop(taper_perc, taper_type, event_cat, webclient, model,
+def __waveform_loop(file, taper_perc, taper_type, webclient, model,
                     paz_sim, origin_time, ot_fiss, evtlat, evtlon,
                     depth, prepro_folder, event, logger, rflogger):
     """
     Loops over each waveform for a specific event and a specific station
     """
-    # Preprocessing just for some stations?
-    # Then skip files that should not be preprocessed
-
-    if config.network:
-        pattern = config.network + '.' + (config.station or '') + '*'
-        files = fnmatch.filter(os.listdir(prepro_folder), pattern)
-    else:
-        files = os.listdir(prepro_folder)
-
     # loop over all files for event x
-    for file in files:
-        start = time.time()
-        # Open files that should be processed
-        try:
-            st = read(prepro_folder+'/'+file)
-        except FileNotFoundError:  # file has not been downloaded yet
-            continue  # I will still want to have the RFs
-        except Exception as e:  # Unknown erros
+    # for file in files:
+    start = time.time()
+    # Open files that should be processed
+    try:
+        st = read(prepro_folder+'/'+file)
+    except FileNotFoundError:  # file has not been downloaded yet
+        return  # I will still want to have the RFs
+    except Exception as e:  # Unknown erros
+        logger.exception([prepro_folder, file, e])
+        return
+    station = st[0].stats.station
+    network = st[0].stats.network
+
+    # Location definitions
+    # Info file
+    outdir = config.outputloc+'/by_station/'+network+'/'+station
+
+    infof = outdir + '/info'
+
+    outf = outdir+'/'+network+'.'+station+'.'+ot_fiss+'.mseed'
+
+    # Create directory for preprocessed file
+    if not Path(outdir).is_dir():
+        subprocess.call(["mkdir", "-p", outdir])
+
+# If the file hasn't been downloaded and preprocessed
+# in an earlier iteration of the program
+
+    if not __file_in_db(outdir, 'info.dat') or ot_fiss not in \
+            shelve.open(infof)['ot_all']:
+        crit = False  # criterion to retain
+
+        try:  # From here on, all exceptions are logged
+
+            try:
+                station_inv = read_inventory(config.statloc + "/"
+                                             + network + "." +
+                                             station + ".xml",
+                                             format="STATIONXML")
+            except FileNotFoundError:
+                station_inv = redownload_statxml(st, network, station)
+
+            # result = iclient.distaz(station_inv[0][0].latitude,
+            #                         station_inv[0][0].longitude, evtlat,
+            #                         evtlon)
+            distance, baz, _ = gps2dist_azimuth(station_inv[0][0].latitude,
+                                                station_inv[0][0].longitude,
+                                                evtlat, evtlon)
+            distance = kilometer2degrees(distance)/1000
+
+            # compute time of first arrival & ray parameter
+            arrival = model.get_travel_times(source_depth_in_km=depth / 1000,
+                                             distance_in_degree=distance,
+                                             phase_list=config.phase)[0]
+            rayp_s_deg = arrival.ray_param_sec_degree
+            rayp = rayp_s_deg / 111319.9  # apparent slowness
+            first_arrival = origin_time + arrival.time
+
+            end = time.time()
+            logger.info("Before cut and resample")
+            logger.info(dt_string(end-start))
+
+            # Check if step is already done
+            if st[0].stats.sampling_rate != 10:
+                st = __cut_resample(st, logger, first_arrival, network,
+                                    station, prepro_folder, file,
+                                    taper_perc, taper_type)
+
+            # Finalise preprocessing
+            st, crit = __rotate_qc(st, station_inv, network, station,
+                                   paz_sim, baz, distance, outf, ot_fiss,
+                                   event, evtlat, evtlon, depth,
+                                   rayp_s_deg, first_arrival, infof,
+                                   logger)
+
+        # Exceptions & logging
+
+        except SNRError as e:  # QR rejections
+            logger.debug([file, "QC was not met, SNR ratios are",
+                         e])
+            with shelve.open(infof, writeback=True) as info:
+                if 'ot_all' not in info or ot_fiss not in info['ot_all']:
+                    # Don't count rejected events twice
+                    info.setdefault('ot_all', []).append(ot_fiss)
+                    info['num'] = len(info['ot_all'])
+                    info.sync()
+
+        # Everything else that might have gone wrong
+        except Exception as e:
             logger.exception([prepro_folder, file, e])
-            continue
-        station = st[0].stats.station
-        network = st[0].stats.network
 
-        # # Processing just for some stations?
-        # That might be the most robust solution, but takes longer than
-        # working with filenames
-        # if config.network:
-        #     if not fnmatch(network.upper(), config.network.upper()):
-        #         continue
-        # if config.station:
-        #     if not fnmatch(station.upper(), config.station.upper()):
-        #         continue
+        finally:
+            end = time.time()
+            logger.info("File preprocessed.")
+            logger.info(dt_string(end-start))
 
-        # Location definitions
-        # Info file
-        outdir = config.outputloc+'/by_station/'+network+'/'+station
+    else:  # The file was already processed
 
-        infof = outdir + '/info'
+        # Did it pass QC?
+        with shelve.open(infof) as info:
+            if "ot_ret" not in info or ot_fiss not in info["ot_ret"]:
+                return
+            else:
+                crit = True
+                st = read(outf)
+                station_inv = read_inventory(config.statloc + "/"
+                                             + network + "." +
+                                             station + ".xml")
+                j = info["ot_ret"].index(ot_fiss)
+                rayp = info["rayp_s_deg"][j] / 111319.9
 
-        outf = outdir+'/'+network+'.'+station+'.'+ot_fiss+'.mseed'
+#       CREATE RF   +    ROTATION TO PSS /   LQT    #
 
-        # Create directory for preprocessed file
-        if not Path(outdir).is_dir():
-            subprocess.call(["mkdir", "-p", outdir])
+    # Check if RF was already computed and if it should be
+    # computed at all, and if the waveform was retained (SNR)
+    if config.decon_meth and not\
+        __file_in_db(config.RF + '/' + network + '/' + station, network +
+                     '.' + station + '.' + ot_fiss + '.sac') and crit:
 
-    # If the file hasn't been downloaded and preprocessed
-    # in an earlier iteration of the program
-    #     with shelve.open(infof):
-    #         proccessed =
-        if not __file_in_db(outdir, 'info.dat') or ot_fiss not in \
-                shelve.open(infof)['ot_all']:
-            crit = False  # criterion to retain
+        start = time.time()
 
-            try:  # From here on, all exceptions are logged
+        ####
+        try:
+            # Rotate to LQT or PSS
+            if config.rot == "LQT_min":
+                st, ia = rotate_LQT_min(st)
+                # additional QC
+                if ia < 5 or ia > 75:
+                    crit = False
+                    raise SNRError("""The estimated incidence angle is
+                                   unrealistic with """ + str(ia) + 'degree.')
 
-                try:
-                    station_inv = read_inventory(config.statloc + "/"
-                                                 + network + "." +
-                                                 station + ".xml",
-                                                 format="STATIONXML")
-                except FileNotFoundError:
-                    station_inv = redownload_statxml(st, network, station)
+            if config.rot == "LQT":
+                st, b = rotate_LQT(st)
+                # addional QC
+                if b > 0.75 or b < 1.5:
+                    crit = False
+                    raise SNRError("""The energy ratio between Q and L
+                                   at theoretical arrival is too close
+                                   to 1 with """ + str(b) + '.')
 
-                # result = iclient.distaz(station_inv[0][0].latitude,
-                #                         station_inv[0][0].longitude, evtlat,
-                #                         evtlon)
-                distance, baz, _ = gps2dist_azimuth(station_inv[0][0].latitude,
-                                                    station_inv[0][0].longitude,
-                                                    evtlat, evtlon)
-                distance = kilometer2degrees(distance)/1000
+            elif config.rot == "PSS":
+                avp, avs, st = rotate_PSV(
+                    station_inv[0][0][0].latitude,
+                    station_inv[0][0][0].longitude,
+                    rayp, st)
 
-                # compute time of first arrival & ray parameter
-                arrival = model.get_travel_times(source_depth_in_km=depth / 1000,
-                                                 distance_in_degree=distance,
-                                                 phase_list=config.phase)[0]
-                rayp_s_deg = arrival.ray_param_sec_degree
-                rayp = rayp_s_deg / 111319.9  # apparent slowness
-                first_arrival = origin_time + arrival.time
-
-                end = time.time()
-                logger.info("Before cut and resample")
-                logger.info(dt_string(end-start))
-                # Check if step is already done
-                if st[0].stats.sampling_rate != 10:
-                    st = __cut_resample(st, logger, first_arrival, network,
-                                        station, prepro_folder, file,
-                                        taper_perc, taper_type)
-
-                # Finalise preprocessing
-                st, crit = __rotate_qc(st, station_inv, network, station,
-                                       paz_sim, baz, distance, outf, ot_fiss,
-                                       event, evtlat, evtlon, depth,
-                                       rayp_s_deg, first_arrival, infof,
-                                       logger)
-
-            # Exceptions & logging
-
-            except SNRError as e:  # QR rejections
-                logger.debug([file, "QC was not met, SNR ratios are",
-                             e])
-                with shelve.open(infof, writeback=True) as info:
-                    if 'ot_all' not in info or ot_fiss not in info['ot_all']:
-                        # Don't count rejected events twice
-                        info.setdefault('ot_all', []).append(ot_fiss)
-                        info['num'] = len(info['ot_all'])
-                        info.sync()
-
-            # Everything else that might have gone wrong
-            except Exception as e:
-                logger.exception([prepro_folder, file, e])
-
-            finally:
-                end = time.time()
-                logger.info("File preprocessed.")
-                logger.info(dt_string(end-start))
-
-        else:  # The file was already processed
-
-            # Did it pass QC?
+            # Create RF object
             with shelve.open(infof) as info:
-                if "ot_ret" not in info or ot_fiss not in info["ot_ret"]:
-                    continue
+                i = info["starttime"].index(st[0].stats.starttime)
+                # Make a trim dependt on epicentral distance
+                trim = [40, 0]
+                if info["rdelta"][i] >= 70:
+                    trim[1] = config.ta - (-2*info["rdelta"][i] + 180)
                 else:
-                    crit = True
-                    st = read(outf)
-                    station_inv = read_inventory(config.statloc + "/"
-                                                 + network + "." +
-                                                 station + ".xml")
-                    j = info["ot_ret"].index(ot_fiss)
-                    rayp = info["rayp_s_deg"][j] / 111319.9
+                    trim[1] = config.ta - 40
+                RF = createRF(st, info=info, trim=trim)
 
-    #       CREATE RF   +    ROTATION TO PSS /   LQT    #
+        # Write RF
+            if not Path(config.RF + '/' + network + '/' + station
+                        ).is_dir():
+                subprocess.call(["mkdir", "-p",
+                                 config.RF + '/' + network + '/' +
+                                 station])
 
-        # Check if RF was already computed and if it should be
-        # computed at all, and if the waveform was retained (SNR)
-        if config.decon_meth and not\
-            __file_in_db(config.RF + '/' + network + '/' + station, network +
-                         '.' + station + '.' + ot_fiss + '.sac') and crit:
+            RF.write(config.RF + '/' + network + '/' + station +
+                     '/' + network + '.' + station + '.' + ot_fiss
+                     + '.sac', format='SAC')
 
+            end = time.time()
+            rflogger.info("RF created")
+            rflogger.info(dt_string(end-start))
             start = time.time()
 
-            ####
-            try:
-                # Rotate to LQT or PSS
-                if config.rot == "LQT_min":
-                    st, ia = rotate_LQT_min(st)
-                    # additional QC
-                    if ia < 5 or ia > 75:
-                        crit = False
-                        raise SNRError("""The estimated incidence angle is
-                                       unrealistic with """ + str(ia) + 'degree.')
+            # copy info files
+            subprocess.call(["cp", infof + ".dir",
+                             config.RF + '/' + network + '/' +
+                             station + '/'])
+            subprocess.call(["cp", infof + ".bak",
+                             config.RF + '/' + network + '/' +
+                             station + '/'])
+            subprocess.call(["cp", infof+".dat",
+                             config.RF + '/' + network + '/' +
+                             station + '/'])
+            end = time.time()
+            rflogger.info("Info file copied.")
+            rflogger.info(dt_string(end-start))
 
-                if config.rot == "LQT":
-                    st, b = rotate_LQT(st)
-                    # addional QC
-                    if b > 0.75 or b < 1.5:
-                        crit = False
-                        raise SNRError("""The energy ratio between Q and L
-                                       at theoretical arrival is too close
-                                       to 1 with """ + str(b) + '.')
+        # Exception that occured in the RF creation
+        # Usually don't happen
+        except SNRError as e:
+            rflogger.info(e)
+            return
 
-                elif config.rot == "PSS":
-                    avp, avs, st = rotate_PSV(
-                        station_inv[0][0][0].latitude,
-                        station_inv[0][0][0].longitude,
-                        rayp, st)
-
-                # Create RF object
-                with shelve.open(infof) as info:
-                    i = info["starttime"].index(st[0].stats.starttime)
-                    # Make a trim dependt on epicentral distance
-                    trim = [40, 0]
-                    if info["rdelta"][i] >= 70:
-                        trim[1] = config.ta - (-2*info["rdelta"][i] + 180)
-                    else:
-                        trim[1] = config.ta - 40
-                    RF = createRF(st, info=info, trim=trim)
-
-            # Write RF
-                if not Path(config.RF + '/' + network + '/' + station
-                            ).is_dir():
-                    subprocess.call(["mkdir", "-p",
-                                     config.RF + '/' + network + '/' +
-                                     station])
-
-                RF.write(config.RF + '/' + network + '/' + station +
-                         '/' + network + '.' + station + '.' + ot_fiss
-                         + '.sac', format='SAC')
-
-                end = time.time()
-                rflogger.info("RF created")
-                rflogger.info(dt_string(end-start))
-                start = time.time()
-
-                # copy info files
-                subprocess.call(["cp", infof + ".dir",
-                                 config.RF + '/' + network + '/' +
-                                 station + '/'])
-                subprocess.call(["cp", infof + ".bak",
-                                 config.RF + '/' + network + '/' +
-                                 station + '/'])
-                subprocess.call(["cp", infof+".dat",
-                                 config.RF + '/' + network + '/' +
-                                 station + '/'])
-                end = time.time()
-                rflogger.info("Info file copied.")
-                rflogger.info(dt_string(end-start))
-
-            # Exception that occured in the RF creation
-            # Usually don't happen
-            except SNRError as e:
-                rflogger.info(e)
-                continue
-
-            except Exception as e:
-                print("RF creation failed")
-                rflogger.exception([network, station, ot_fiss, e])
+        except Exception as e:
+            print("RF creation failed")
+            rflogger.exception([network, station, ot_fiss, e])
 
 
 def __cut_resample(st, logger, first_arrival, network, station,
