@@ -195,20 +195,26 @@ def rotate_LQT(st, phase=config.phase, onset=config.tz):
     LQ = np.dot(A_rot, ZR)
     # point of primary arrival
     pp1 = round((onset-2)/dt)
-    pp2 = round((onset+20)/dt)
+    pp2 = round((onset+10)/dt)
     npp = pp2 - pp1
     # point where converted Sp arrive
-    pc1 = round((onset-40)/dt)
-    pc2 = round((onset-15)/dt)
+    if phase == "S":
+        pc1 = round((onset-40)/dt)
+        pc2 = round((onset-15)/dt)
+    elif phase == "P":
+        # Point where PS arrives
+        pc1 = round((onset+20)/dt)
+        pc2 = round((onset+40)/dt)
+
     npc = pc2 - pc1
     a = np.sum(np.square(LQ[0][pp1:pp2])/npp) /\
         np.sum(np.square(LQ[0][pc1:pc2])/npc)
     b = np.sum(np.square(LQ[1][pp1:pp2])/npp) /\
         np.sum(np.square(LQ[1][pc1:pc2])/npc)
-    if a > b:  # and config.phase == "S" or a < b and config.phase == "P":
+    if a > b and phase == "S" or a < b and phase == "P":
         Q = LQ[0]
         L = LQ[1]
-    elif a < b:  # and config.phase == "S" or a > b and config.phase == "P":
+    elif a < b and phase == "S" or a > b and phase == "P":
         Q = LQ[1]
         L = LQ[0]
 

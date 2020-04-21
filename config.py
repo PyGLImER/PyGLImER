@@ -13,7 +13,7 @@ from obspy.taup import TauPyModel  # arrival times in 1D v-model
 
 # %% general settings
 # Define if you want to download new files or use old
-evtcat = "2020-04-17 20:16:11.128149"  # either None (downloads new) or file
+evtcat = None  # either None (downloads new) or file
 wavdownload = False  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
@@ -26,7 +26,7 @@ decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
 
 # %% P or S ####
 # put string either "P" or "S"
-phase = "S"
+phase = "P"
 # don't change
 phase = phase.upper()
 
@@ -45,8 +45,8 @@ ccp = "output/ccps"
 # %% EVENT AND DOWNLOAD VALUES
 # Set values to "None" if they aren't requried / desired
 # Time frame is identical to the station inventory
-starttime = UTCDateTime("1970-01-01")
-endtime = UTCDateTime("2019-04-15")
+starttime = UTCDateTime("2009-01-01")
+endtime = UTCDateTime("2011-12-31")
 eMINLAT = None
 eMAXLAT = None
 eMINLON = None
@@ -60,8 +60,8 @@ maxMag = 10.0
 # Station and Network codes
 # type : str
 # wildcards allowed. If None, all that are available are requested
-network = "IU"
-station = "HRV"
+network = "YP"
+station = None
 
 # epicentral distances:
 if phase == "P":

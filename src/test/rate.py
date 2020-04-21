@@ -370,7 +370,7 @@ def automatic_rate(network, station, phase=config.phase):
             st, crit, hf, noisemat = qcs(st, st[0].stats.delta,
                                          st[0].stats.sampling_rate)
         elif phase == "P":
-            st, crit, hf, noisemat = qcp(st, st[0].stats.delta,
+            st, crit, lf, noisemat = qcp(st, st[0].stats.delta,
                                          st[0].stats.sampling_rate)
 
         with shelve.open(config.ratings + network + "." + station
@@ -463,7 +463,7 @@ def auto_rate_stack(network, station, phase=config.phase,
 
     """
 
-    diff, ret, sts, crits = automatic_rate(network, station, phase)
+    diff, ret, sts, crits = automatic_rate(network, station, phase=phase)
     sort_auto_rated(network, station, phase)
     info_file = config.outputloc[:-1] + phase + '/by_station/' + network + \
                 '/' + station + '/info'
@@ -496,7 +496,7 @@ def auto_rate_stack(network, station, phase=config.phase,
             _, _, st = rotate_PSV(statlat, statlon, rayp, st)
         elif rot == "LQT":
             st, rat = rotate_LQT(st)
-            if 0.75 < rat < 1.5:
+            if 0.75 < rat < 1.5 and phase == "S":
                 # The PCA did not work properly, L & Q too similar
                 ret = ret - 1
                 continue
@@ -510,14 +510,21 @@ def auto_rate_stack(network, station, phase=config.phase,
             raise Exception("Unknown rotation method rot=,", rot, """"Use
                             either 'PSS', 'LQT', or 'LQT_min'.""")
         # noise RF test
-        trim = [40, 0]
-        if rdelta >= 70:
-            trim[1] = config.ta - (-2 * rdelta + 180)
-        else:
-            trim[1] = config.ta - 40
+        if phase == "S":
+            trim = [40, 0]
+            if rdelta >= 70:
+                trim[1] = config.ta - (-2 * rdelta + 180)
+            else:
+                trim[1] = config.ta - 40
+        elif phase == "P":
+            trim = False
         info = shelve.open(info_file)
-        RF = createRF(st, phase=phase, method=decon_meth,
-                      shift=config.tz, trim=trim, info=info)
+        try:
+            RF = createRF(st, phase=phase, method=decon_meth,
+                          shift=config.tz, trim=trim, info=info)
+        except ValueError:
+            print("corrupted event")
+            continue
         RFs.append(RF)
         # with shelve.open(outloc+"info", writeback=True) as info:
         #     info["starttime"][ii] = st[0].stats.starttime

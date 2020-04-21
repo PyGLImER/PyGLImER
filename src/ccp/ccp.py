@@ -362,6 +362,9 @@ class CCPStack(object):
         # clear memory
         del pattern, infiles
 
+        # Data counter
+        self.N = self.N + len(streams)
+
         # Split job into n chunks
         num_cores = cpu_count()
 
@@ -381,9 +384,6 @@ class CCPStack(object):
 
                 # hit counter + 1
                 self.illum[k, j] = self.illum[k, j] + 1
-
-                # Data counter
-                self.N = self.N + 1
 
         end = time.time()
         logger.info("Stacking finished.")
@@ -467,10 +467,17 @@ class CCPStack(object):
 
         # Save as Matlab file (exporting to plot)
         elif fmt == "matlab":
+            # Change vectors so it can be corrected for elevation
+
+            illum = np.pad(self.illum, ((0, 0), (round(10/res), 0)))
+            depth = np.arange(-10, maxz+res, res, dtype=float)
+            ccp = np.pad(self.ccp, ((0, 0), (round(10/res), 0)))#,
+                         #constant_values=np.nan)
+
             d = {}
-            d.update({'RF_ccp': self.ccp,
-                      'illum': self.illum,
-                      'depth_ccp': self.z.astype(float),
+            d.update({'RF_ccp': ccp,
+                      'illum': illum,
+                      'depth_ccp': depth,
                       'lat_ccp': self.coords[0],
                       'lon_ccp': self.coords[1],
                       'CSLAT': self.bingrid.latitude,

@@ -325,6 +325,9 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
         __file_in_db(config.RF + '/' + network + '/' + station, network +
                      '.' + station + '.' + ot_fiss + '.sac') and crit:
 
+        # 21.04.2020 Second highcut filter
+        st.filter('lowpass', freq=2.0, zerophase=True, corners=2)
+
         start = time.time()
 
         ####
