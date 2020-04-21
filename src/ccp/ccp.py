@@ -12,6 +12,11 @@ Last updated:
 import fnmatch
 import os
 import pickle
+import logging
+import time
+from joblib import Parallel, delayed
+from itertools import repeat
+from multiprocessing import cpu_count
 
 import numpy as np
 from obspy import read_inventory
@@ -21,6 +26,20 @@ import config
 from .compute.bin import BinGrid
 from ..rf.create import read_rf
 from ..rf.moveout import res, maxz
+from ..utils.utils import dt_string, chunks
+
+# Loggers for the CCP script
+logger = logging.Logger('PyGlimer.src.ccp.ccplogger')
+logger.setLevel(logging.INFO)
+
+# Create handler to the log
+fh = logging.FileHandler('logs/ccp.log')
+fh.setLevel(logging.INFO)
+logger.addHandler(fh)
+
+# Create Formatter
+fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
+fh.setFormatter(fmt)
 
 
 def init_ccp(spacing, phase=config.phase, network=None, station=None,
@@ -214,11 +233,9 @@ class CCPStack(object):
         self.illum = np.zeros(np.shape(self.bins))
         self.pplat = []
         self.pplon = []
-        # self.latv, self.longv, self.zv = np.meshgrid(self.latitude,
-        #                                              self.longitude, self.z)
+        self.binrad = None
 
-    def query_bin_tree(self, latitude, longitude, z, data,
-                       binrad):
+    def query_bin_tree(self, latitude, longitude, data):
         """
         Find closest bins for given latitude and longitude.
 
@@ -228,38 +245,27 @@ class CCPStack(object):
             Latitudes of piercing points.
         longitude : 1D np.array
             Longitudes of piercing points.
-        z : 1D np.array
-            depths of piercing points
         data : 1D np.array
             Depth migrated receiver function data
-        binrad : float
-            Radius of the bin
 
         Returns
         -------
         None.
 
         """
-        eucd, i = self.bingrid.query_bin_tree(latitude, longitude, binrad)
+        i = self.bingrid.query_bin_tree(latitude, longitude, self.binrad)
 
         # Kd tree returns locations that are too far with maxindex+1
         pos = np.where(i < self.bingrid.Nb)
 
         # Depth index
-        j = z[pos[0]]/res
-        j = j.astype(int)
+        j = pos[0]
+        # j = j.astype(int)
 
-        # Lateral position index
+        # Bin index
         k = i[pos]
 
-        # populate ccp stack and illumination matrix
-        self.bins[k, j] = self.bins[k, j] + data[j]
-
-        # hit counter + 1
-        self.illum[k, j] = self.illum[k, j] + 1
-
-        # Data counter
-        self.N = self.N + 1
+        return k, j
 
     def compute_stack(self, network=None, station=None, save=False,
                       binrad=np.cos(np.radians(30)), append_pp=False):
@@ -300,51 +306,130 @@ class CCPStack(object):
         None (Data are appended to ccp object).
 
         """
-        binrad = binrad*self.bingrid.edist
+
+        self.binrad = binrad*self.bingrid.edist
         folder = config.RF[:-1] + self.bingrid.phase
 
-        if network and type(network) == list:
-            networks = []
-            for net in network:
-                networks.extend(fnmatch.filter(os.listdir(folder), net))
-        elif network:
-            networks = fnmatch.filter(os.listdir(folder), network)
+        start = time.time()
+        logger.info('Stacking started')
+
+        if network and type(network) == str:
+            # Loop over fewer files
+            folder = os.path.join(folder, network)
+
+        infiles = []  # List of all files in folder
+        pattern = []  # List of input constraints
+        streams = []  # List of files filtered for input criteria
+
+        for root, dirs, files in os.walk(folder):
+            for name in files:
+                infiles.append(os.path.join(root, name))
+
+        # Set filter patterns
+        if network:
+            if type(network) == list:
+                if station:
+                    if type(station) == list:
+                        for net in network:
+                            for stat in station:
+                                pattern.append('*%s*%s*.sac' % (net, stat))
+                    else:
+                        raise ValueError("""The combination of network
+                                         and station are invalid""")
+                else:
+                    for net in network:
+                        pattern.append('*%s*.sac' % (net))
+            elif type(network) == str:
+                if station:
+                    if type(station) == str:
+                        pattern.append('*%s*%s*.sac' % (net, station))
+                    elif type(station) == list:
+                        for stat in station:
+                            pattern.append('*%s*%s*.sac' % (net, stat))
+                else:
+                    pattern.append('*%s*.sac' % (network))
+        elif station:
+            raise ValueError("""You have to provide both network and station
+                             code if you want to filter by station""")
         else:
-            networks = os.listdir(folder)
-        for net in networks:
-            if station and type(station) == list:
-                stations = []
-                for stat in station:
-                    stations.extend(fnmatch.filter(os.listdir(folder+'/'+net),
-                                                   stat))
-            elif station:
-                stations = fnmatch.filter(os.listdir(folder+'/'+net), station)
-            else:
-                stations = os.listdir(folder+'/'+net)
-            for stat in stations:
-                # skip info files
-                files = fnmatch.filter(os.listdir(folder+'/'+net+'/'+stat),
-                                       '*.sac')
-                for file in files:
-                    rft = read_rf(folder+'/'+net+'/'+stat+'/'+file,
-                                  format='SAC')
-                    _, rf = rft[0].moveout()
-                    lat = np.array(rf.stats.pp_latitude)
-                    lon = np.array(rf.stats.pp_longitude)
-                    if append_pp:
-                        plat = np.pad(lat, (0, len(self.z)-len(lat)),
-                                      constant_values=np.nan)
-                        plon = np.pad(lon, (0, len(self.z)-len(lon)),
-                                      constant_values=np.nan)
-                        self.pplat.append(plat)
-                        self.pplon.append(plon)
-                    z = np.array(rf.stats.pp_depth)
-                    self.query_bin_tree(lat, lon, z, rf.data, binrad)
+            # Global CCP
+            pattern.append('*.sac')
+
+        # Do filtering
+        for pat in pattern:
+            streams.extend(fnmatch.filter(infiles, pat))
+
+        # clear memory
+        del pattern, infiles
+
+        # Split job into n chunks
+        num_cores = cpu_count()
+
+        # Actual CCP stack
+        # Note loki does mess up the output and threads is slower than
+        # using a single core
+        out = Parallel(n_jobs=num_cores, prefer='processes')(
+                        delayed(self.multicore_stack)(st, append_pp)
+                        for st in chunks(streams, num_cores))
+
+        # The stacking is done here (one should not reassign variables in
+        # multi-core processes).
+        # Awful way to solve it, but the best I could find
+        for kk, jj, datal in out:
+            for k, j, data in zip(kk, jj, datal):
+                self.bins[k, j] = self.bins[k, j] + data[j]
+
+                # hit counter + 1
+                self.illum[k, j] = self.illum[k, j] + 1
+
+                # Data counter
+                self.N = self.N + 1
+
+        end = time.time()
+        logger.info("Stacking finished.")
+        logger.info(dt_string(end-start))
         self.conclude_ccp()
 
         # save file
         if save:
             self.write(filename=save)
+
+    def multicore_stack(self, stream, append_pp):
+        """
+        Takes in chunks of data to be processed on one core.
+
+        Parameters
+        ----------
+        stream : list
+            List of file locations.
+        append_pp : Bool
+            Should piercing points be appended?.
+
+        Returns
+        -------
+        None.
+
+        """
+        kk = []
+        jj = []
+        datal = []
+        for st in stream:
+            rft = read_rf(st, format='SAC')
+            _, rf = rft[0].moveout()
+            lat = np.array(rf.stats.pp_latitude)
+            lon = np.array(rf.stats.pp_longitude)
+            if append_pp:
+                plat = np.pad(lat, (0, len(self.z)-len(lat)),
+                              constant_values=np.nan)
+                plon = np.pad(lon, (0, len(self.z)-len(lon)),
+                              constant_values=np.nan)
+                self.pplat.append(plat)
+                self.pplon.append(plon)
+            k, j = self.query_bin_tree(lat, lon, rf.data)
+            kk.append(k)
+            jj.append(j)
+            datal.append(rf.data)
+        return kk, jj, datal
 
     def conclude_ccp(self):
         """Averages the CCP-bin and populates empty cells with average of

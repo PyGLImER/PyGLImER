@@ -230,9 +230,9 @@ class BinGrid(object):
         points = geo2cart(R_EARTH, latitude, longitude)
 
         # Query the points and return the distances and closest neighbours
-        eucd, i = self.KDS.query(np.vstack((points[0],
-                                            points[1],
-                                            points[2])).T,
+        eucd, i = self.KDS.query(np.column_stack((points[0],
+                                                  points[1],
+                                                  points[2])),
                                  distance_upper_bound=maxdist_euc)
         return eucd, i
 
@@ -264,11 +264,13 @@ class BinGrid(object):
         # Get cartesian coordinate points
         points = geo2cart(R_EARTH, latitude, longitude)
 
+        # Create tree to be KDTree queried against
+
         # Query the points and return the distances and closest neighbours
         # Eps: approximate closest neighbour (big boost in computation time)
         # Returned distance is not more than (1+eps)*real distance
-        eucd, i = self.KDB.query(np.vstack((points[0],
-                                            points[1],
-                                            points[2])).T, eps=0.05, k=4,
-                                 distance_upper_bound=maxdist_euc)
-        return eucd, i
+        _, i = self.KDB.query(np.column_stack((points[0],
+                                               points[1],
+                                               points[2])), eps=0.05, k=4,
+                              distance_upper_bound=maxdist_euc)
+        return i
