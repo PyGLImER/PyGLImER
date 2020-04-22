@@ -17,7 +17,7 @@ from obspy.signal import filter
 import config
 
 
-def qcp(st, dt, sampling_f):
+def qcp(st, dt, sampling_f, onset=config.tz):
     """
     Quality control for the downloaded waveforms that are used to create
     PRFS. Works with various filters and SNR criteria
@@ -51,15 +51,15 @@ def qcp(st, dt, sampling_f):
     for tr in st:
         stream[tr.stats.channel[2]] = tr.data
     ptn1 = round(5/dt)
-    ptn2 = round((config.tz-5)/dt)
+    ptn2 = round((onset-5)/dt)
     nptn = ptn2-ptn1+1
     # First part of the signal
-    pts1 = round(config.tz/dt)
-    pts2 = round((config.tz+7.5)/dt)
+    pts1 = round(onset/dt)
+    pts2 = round((onset+7.5)/dt)
     npts = pts2-pts1+1
     # Second part of the signal
-    ptp1 = round((config.tz+15)/dt)
-    ptp2 = round((config.tz+22.5)/dt)
+    ptp1 = round((onset+15)/dt)
+    ptp2 = round((onset+22.5)/dt)
     nptp = ptp2-ptp1+1
 
     # Then, I'll have to filter in the for-loop
@@ -99,9 +99,9 @@ def qcp(st, dt, sampling_f):
         noisemat[ii, 1] = snrr2/snrr
         noisemat[ii, 2] = snrz
 
-        if snrr > config.SNR_criteria[0] and\
-            snrr2/snrr < config.SNR_criteria[1] and\
-                snrz > config.SNR_criteria[2]:  # accept
+        if snrr > config.SNR_criteriaP[0] and\
+            snrr2/snrr < config.SNR_criteriaP[1] and\
+                snrz > config.SNR_criteriaP[2]:  # accept
             crit = True
 
             # overwrite the old traces with the sucessfully filtered ones
@@ -120,7 +120,7 @@ def qcp(st, dt, sampling_f):
     return st, crit, f, noisemat
 
 
-def qcs(st, dt, sampling_f):
+def qcs(st, dt, sampling_f, onset=config.tz):
     """
     Quality control for waveforms that are used to produce SRF. In contrast
     to the ones used for PRF this is a very rigid criterion and will reject
@@ -156,19 +156,19 @@ def qcs(st, dt, sampling_f):
         stream[tr.stats.channel[2]] = tr.data
 
     ptn1 = round(5/dt)  # Hopefully relatively silent time
-    ptn2 = round((config.tz-5)/dt)
+    ptn2 = round((onset-5)/dt)
     nptn = ptn2-ptn1
     # First part of the signal
-    pts1 = round(config.tz/dt)  # theoretical arrival time
-    pts2 = round((config.tz+10)/dt)
+    pts1 = round(onset/dt)  # theoretical arrival time
+    pts2 = round((onset+10)/dt)
     npts = pts2-pts1
     # Second part of the signal
-    ptp1 = round((config.tz+10)/dt)
-    ptp2 = round((config.tz+25)/dt)
+    ptp1 = round((onset+10)/dt)
+    ptp2 = round((onset+35)/dt)
     nptp = ptp2-ptp1
     # part where the Sp converted arrival should be strong
-    ptc1 = round((config.tz-50)/dt)
-    ptc2 = round((config.tz-10)/dt)
+    ptc1 = round((onset-50)/dt)
+    ptc2 = round((onset-10)/dt)
     nptc = ptc2-ptc1
 
     # filter
@@ -207,12 +207,12 @@ def qcs(st, dt, sampling_f):
         noisemat[ii, 2] = snrc
 
         # accept if
-        if snrr > config.SNR_criteria[0] and\
-            snrr2/snrr < config.SNR_criteria[1] and\
-                snrc < config.SNR_criteria[2]:
+        if snrr > config.SNR_criteriaS[0] and\
+            snrr2/snrr < config.SNR_criteriaS[1] and\
+                snrc < config.SNR_criteriaS[2]:
             # This bit didn't give good results
-            # max(frcomp) == max(frcomp[round((config.tz-2)/dt):
-            #                           round((config.tz+10)/dt)]):
+            # max(frcomp) == max(frcomp[round((onset-2)/dt):
+            #                           round((onset+10)/dt)]):
             crit = True
 
             # overwrite the old traces with the sucessfully filtered ones

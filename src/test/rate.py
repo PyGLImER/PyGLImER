@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import shelve
 import subprocess
+import fnmatch
 
 # import pandas as pd
 import matplotlib.pyplot as plt
@@ -26,8 +27,8 @@ from ..waveform.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
 rating = {}  # mutable object
 
 
-def rate(network, station, onset=config.tz, phase="S", review=False,
-         retained=False, decon_meth=config.decon_meth):
+def rate(network, station=None, onset=config.tz, phase=config.phase,
+         review=False, retained=False, decon_meth=config.decon_meth):
     """
     Module to rate and review the quality of Sp or Ps waveforms from the given
     station. Shows the automatic rating from. Tapers can be controlled with
@@ -37,7 +38,7 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
     ----------
     network : STRING
         Network code (two letters).
-    station : STRING
+    station : str or list, optional
         Station code (three letters).
     onset : float, optional
         Difference between starttime and theoretical first arrival.
@@ -68,33 +69,69 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
 
     """
 
-    inloc = config.outputloc[:-1] + phase + "/by_station/" + network + \
-            '/' + station + '/'
+    inloc = os.path.join(config.outputloc[:-1], phase, 'by_station', network)
+
+    infiles = []  # List of all files in folder
+    pattern = []  # List of input constraints
+    streams = []  # List of files filtered for input criteria
+
+    for root, dirs, files in os.walk(inloc):
+        for name in files:
+            infiles.append(os.path.join(root, name))
+
+    # Set filter patterns
+
+    if station:
+        if type(station) == str:
+            pattern.append('*%s*%s*.mseed' % (network, station))
+        elif type(station) == list:
+            for stat in station:
+                pattern.append('*%s*%s*.mseed' % (network, stat))
+    else:
+        pattern.append('*%s*.mseed' % (network))
+
+    # Do filtering
+    for pat in pattern:
+        streams.extend(fnmatch.filter(infiles, pat))
+
+    # clear memory
+    del pattern, infiles
+
     # For TauPy lookup
     model = TauPyModel()
-    for file in os.listdir(inloc):
-        if file[:4] == "info":  # Skip the info files
-            continue
-        try:
-            st = read(inloc + file)
-        except IsADirectoryError as e:
-            print(e)
-            continue
+    for f in streams:
+        # if file[:4] == "info":  # Skip the info files
+        #     continue
+        # try:
+        #     st = read(inloc + file)
+        # except IsADirectoryError as e:
+        #     print(e)
+        #     continue
 
+        st = read(f)
         # List for taper coordinates
         if "taper" in rating:
             del rating["taper"]
         rating["taper"] = []
         st.normalize()
+
+        # Additional filter "test"
+        if phase == "S":
+            st.filter("lowpass", freq=1.0, zerophase=True, corners=2)
+        elif phase == "P":
+            st.filter("lowpass", freq=1.0, zerophase=True, corners=2)
+
         y = []
         ch = []
         starttime = str(st[0].stats.starttime)
         dt = st[0].stats.delta
         sampling_f = st[0].stats.sampling_rate
-        old = __r_file(network, station, starttime)  # old
+        old = __r_file(network, st[0].stats.station, starttime)  # old
 
         # read info file
-        with shelve.open(inloc + "info") as info:
+        # location info file
+        infof = os.path.join(inloc, st[0].stats.station, 'info')
+        with shelve.open(infof) as info:
             ii = info["starttime"].index(st[0].stats.starttime)
             rdelta = info["rdelta"][ii]  # epicentral distance
             mag = info["magnitude"][ii]
@@ -113,9 +150,9 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
 
         # check automatic rating
         if phase == "S":
-            st_f, crit, hf, noisemat = qcs(st, dt, sampling_f)
+            st_f, crit, hf, noisemat = qcs(st, dt, sampling_f, onset=onset)
         elif phase == "P":
-            st_f, crit, hf, noisemat = qcp(st, dt, sampling_f)
+            st_f, crit, hf, noisemat = qcp(st, dt, sampling_f, onset=onset)
 
         # skip files that have not been retained
         if retained and not crit:
@@ -123,7 +160,11 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
 
         # create RF
         _, _, PSV = rotate_PSV(statlat, statlon, rayp, st_f)
-        RF = createRF(PSV, phase, method=decon_meth, shift=config.tz)
+        try:
+            RF = createRF(PSV, phase, method=decon_meth, shift=onset)
+        except ValueError as e:  # There were some problematic events
+            print(e)
+            continue
 
         # TauPy lookup
         arrivals = model.get_travel_times(evt_depth,
@@ -163,16 +204,18 @@ def rate(network, station, onset=config.tz, phase="S", review=False,
                     trim = [rating["taper"][1], rating["taper"][0]]
                 trim[0] = trim[0] - t[0]
                 trim[1] = t[-1] - trim[1]
-                print(trim)
-                RF = createRF(PSV, phase, method=decon_meth, trim=trim)
+
+                RF = createRF(PSV, phase, method=decon_meth, shift=onset,
+                              trim=trim)
+
                 __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat,
-                            RF, old, rdelta, mag, crit, ot, evt_depth)
+                            RF, old, rdelta, mag, crit, ot, evt_depth, phase)
                 rating["taper"].clear()
         # fig.canvas.mpl_connect('key_press_event', ontype)
         if rating["k"] == "q":
             break
         elif "k" in rating:
-            __w_file(network, station, starttime)
+            __w_file(network, st[0].stats.station, starttime)
 
 
 def __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old,
@@ -215,8 +258,7 @@ def __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old,
         ax[3].plot(t, RF.data, color='k')
     ax[3].set_title(str(ot))
     ax[3].set_xlabel('time in s')
-    #ax[3].set_xlim(-5, 40)
-    print(t)
+    ax[3].set_xlim(-10, 40)
 
     # textbox
     if old:
@@ -420,7 +462,7 @@ def sort_auto_rated(network, station, phase=config.phase):
 
 
 def auto_rate_stack(network, station, phase=config.phase,
-                    decon_meth=config.decon_meth, rot="LQT_min"):
+                    decon_meth=config.decon_meth, rot="PSS"):
     """
     Does a quality control on the downloaded files and shows a plot of the
     stacked receiver function. Just meant to facilitate
@@ -546,4 +588,4 @@ def auto_rate_stack(network, station, phase=config.phase,
     # # Move left y-axis and bottim x-axis to centre, passing through (0,0)
     # ax.spines['bottom'].set_position("center")
     # # ax.spines['left'].set_visible(False)
-    return z, stack, RF_mo
+    return z, stack, RF_mo, RF

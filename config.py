@@ -13,7 +13,7 @@ from obspy.taup import TauPyModel  # arrival times in 1D v-model
 
 # %% general settings
 # Define if you want to download new files or use old
-evtcat = None  # either None (downloads new) or file
+evtcat = '2020-04-22 19:28:52.611277'  # either None (downloads new) or file
 wavdownload = False  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
@@ -26,7 +26,7 @@ decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
 
 # %% P or S ####
 # put string either "P" or "S"
-phase = "P"
+phase = "S"
 # don't change
 phase = phase.upper()
 
@@ -126,13 +126,13 @@ highco = np.linspace(.33, .175, 4)
 
 # SNR criteria for QC
 QC = True  # Do quality control or not
-if phase == "P":
-    SNR_criteria = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
-elif phase == "S":
-    # SNR_criteria = [7.5, .2, .66]
-    #SNR_criteria = [20, .5, 1] #QC2
-    SNR_criteria = [35, .5, 1]  #QC1 to reproduce Rychert
-    # [primary/noise, sidelobe/primary, r/z conversions]
+
+SNR_criteriaP = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
+
+# SNR_criteria = [7.5, .2, .66]
+#SNR_criteria = [20, .5, 1] #QC2
+SNR_criteriaS = [35, .4, 1]  #QC1 to reproduce Rychert
+# [primary/noise, sidelobe/primary, r/z conversions]
 
 # %% DON'T change program will change automatically!
 folder = "undefined"  # the download is happening here right now

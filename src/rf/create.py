@@ -103,7 +103,8 @@ def createRF(st_in, phase=config.phase, shift=config.tz,
         taper = np.ones(st[0].stats.npts)
         taper[:int((trim[0] - 7.5) / dt)] = float(0)
         taper[-int((trim[1] - 7.5) / dt):] = float(0)
-        taper[int((trim[0] - 7.5) / dt):int(trim[0] / dt)] = tap[:round(7.5 / dt)]
+        taper[int((trim[0] - 7.5) / dt):int(trim[0] / dt)] = \
+            tap[:round(7.5 / dt)]
         taper[-int(trim[1] / dt):-int((trim[1] - 7.5) / dt)] = \
             tap[-round(7.5 / dt):]
         for tr in st:
@@ -586,6 +587,10 @@ class RFStream(Stream):
 
         """
         # deep copy stream
+        if len(self.traces) == 1:
+            fig, ax = self[0].plot()
+            return fig, ax
+
         traces = []
         for tr in self:
             stats = AttribDict({})
@@ -600,16 +605,19 @@ class RFStream(Stream):
                 stats.delta = tr.stats.delta
                 data = tr.data
                 TAS = round((tr.stats.onset - tr.stats.starttime) / stats.delta)
+                TAS = 1201
+                print(TAS)
                 if tr.stats.phase == "S":
-                    data = -np.flip(data[round(TAS - 30 / stats.delta):TAS + 1])
-                elif tr.stats.phase == "P":
-                    data = data[TAS:round(TAS + 30 / stats.delta)]
+                    # data = -np.flip(data[round(TAS - 30 / stats.delta):TAS + 1])
+                    data = -np.flip(data)
+                # elif tr.stats.phase == "P":
+                data = data[TAS:round(TAS + 30 / stats.delta)]
                 stats["npts"] = len(data)
                 trace = Trace(data=data, header=stats)
                 trace.normalize()
 
             elif tr.stats.type == "depth":
-                stats.delta = 0.25
+                stats.delta = res
                 data = tr.data
                 stats["npts"] = len(data)
                 trace = Trace(data=data, header=stats)
@@ -627,6 +635,7 @@ class RFStream(Stream):
                       linewidth=1.5, handle=True, fillcolors=('r', 'c'))
         fig.suptitle([tr.stats.network, tr.stats.station])
         ax = fig.get_axes()[0]
+        # ax.set_ylim(0, 30)
         if tr.stats.type == "depth":
             ax.set_ylabel('Depth [km]')
         return fig, ax

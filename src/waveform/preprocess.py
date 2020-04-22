@@ -13,6 +13,10 @@ import shelve
 import subprocess
 import time
 import numpy as np
+from joblib import Parallel, delayed
+from multiprocessing import cpu_count
+from pickle import UnpicklingError
+import itertools
 
 from obspy import read, read_inventory, Stream, UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
@@ -23,7 +27,7 @@ from .errorhandler import redownload, redownload_statxml, \
 from .qc import qcp, qcs
 from .rotate import rotate_LQT_min, rotate_PSV, rotate_LQT
 from ..rf.create import createRF
-from ..utils.utils import dt_string
+from ..utils.utils import dt_string, chunks
 
 
 def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
@@ -78,7 +82,7 @@ def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
 
     # Create handler to the log
     fh = logging.FileHandler('logs/preprocess.log')
-    fh.setLevel(logging.INFO)
+    fh.setLevel(logging.WARNING)
     logger.addHandler(fh)
 
     # Create Formatter
@@ -92,7 +96,7 @@ def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
 
     # Create handler to the log
     fhrf = logging.FileHandler('logs/RF.log')
-    fhrf.setLevel(logging.INFO)
+    fhrf.setLevel(logging.WARNING)
     rflogger.addHandler(fhrf)
 
     # Create Formatter
@@ -117,9 +121,74 @@ def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
                "poles": paz_sim.get_paz().poles,
                "zeros": paz_sim.get_paz().zeros}
 
-    for event in event_cat:
-        __event_loop(event, taper_perc, taper_type, webclient,
-                     model, paz_sim, logger, rflogger)
+    # for event in event_cat:
+    #     __event_loop(event, taper_perc, taper_type, webclient,
+    #                  model, paz_sim, logger, rflogger)
+    # num_cores = cpu_count()
+
+    # event_list = []
+    # for event in event_cat:
+    #     event_list.append(event)
+
+    # Actual CCP stack
+    # Note loki does mess up the output and threads is slower than
+    # using a single core
+    # try:
+    out = Parallel(n_jobs=-1)(
+            delayed(__event_loop)(event, taper_perc, taper_type,
+                                  webclient, model, paz_sim, logger, rflogger)
+            for event in event_cat)
+
+    dictlist = list(itertools.chain.from_iterable(out))
+
+    masterdict = {}
+
+    for d in dictlist:
+        if not d:  # Some of the dictionaries might be empty
+            continue
+        net = d['network']
+        stat = d['station']
+        key = net + '.' + stat
+        if key in masterdict:
+            for k in d:
+                if type(d[k]) == list:
+                    masterdict.setdefault(k, []).extend(d[k])
+                    # masterdict[key][k].extend(d[k])
+        else:
+            masterdict[key] = d
+
+    # Write dictionaries in the folder
+    for d in masterdict:
+        try:
+            net, stat = d.split('.')
+        except ValueError as e:
+            logger.exception(e, d)
+            continue
+        infof = os.path.join(config.outputloc, 'by_station', net, stat, 'info')
+        with shelve.open(infof) as info:
+            info.update(masterdict[d])
+            info['num'] = len(info['ot_all'])
+            if 'ot_ret' in info:
+                info['numret'] = len(info['ot_ret'])
+
+        # create softlink info files
+
+        subprocess.call(['ln', '-s', infof + "*",
+                         os.path.join(config.RF, net, stat)])
+        # subprocess.call(["ln -s", infof + ".bak",
+        #                  config.RF + '/' + network + '/' +
+        #                  station + '/'])
+        # subprocess.call(["ln -s", infof+".dat",
+        #                  config.RF + '/' + network + '/' +
+        #                  station + '/'])
+
+        
+    # except UnpicklingError as e:
+    #     logger.warning([e, 'Falling back to single core computation.'])
+    #     Parallel(n_jobs=1, prefer='processes')(
+    #         delayed(__event_loop)(event, taper_perc, taper_type,
+    #                               webclient, model, paz_sim, logger, rflogger)
+    #         for event in event_cat)
     print("Download and preprocessing finished.")
 
 
@@ -128,6 +197,9 @@ def __event_loop(event, taper_perc, taper_type, webclient, model,
     """
     Loops over each event in the event catalogue
     """
+    # create list for what will later be the info files
+    infolist = []
+
     # fetch event-data
     origin = (event.preferred_origin() or event.origins[0])
     origin_time = origin.time
@@ -148,33 +220,36 @@ def __event_loop(event, taper_perc, taper_type, webclient, model,
     while prepro_folder == config.folder or config.folder == "not_started":
         print('preprocessing suspended, awaiting download')
         time.sleep(2.5)
+
+    try:  # If one event has no folder it interrupts else
+        # Remove empty folders in the raw directory
+        if not os.listdir(prepro_folder):
+            subprocess.call(['rmdir', prepro_folder])
+            return infolist  # It's important to return empty lists!
+    except FileNotFoundError:
+        # If we are not downloading that's entirely normal as
+        # an earlier iteration just deletes empty directories
+        if config.wavdownload:
+            logger.exception([ot_fiss,
+                             """Waveforms missing in database."""])
+        return infolist
+
+    # Preprocessing just for some stations?
+    # Then skip files that should not be preprocessed
+
+    if config.network:
+        pattern = config.network + '.' + (config.station or '') + '*'
+        files = fnmatch.filter(os.listdir(prepro_folder), pattern)
     else:
-        try:  # If one event has no folder it interrupts else
-            # Remove empty folders in the raw directory
-            if not os.listdir(prepro_folder):
-                subprocess.call(['rmdir', prepro_folder])
-                return
-        except FileNotFoundError:
-            # If we are not downloading that's entirely normal as
-            # an earlier iteration just deletes empty directories
-            if config.wavdownload:
-                logger.exception([ot_fiss,
-                                 """Waveforms missing in database."""])
-            return
+        files = os.listdir(prepro_folder)
 
-        # Preprocessing just for some stations?
-        # Then skip files that should not be preprocessed
+    for file in files:
+        info = __waveform_loop(file, taper_perc, taper_type, webclient, model,
+                               paz_sim, origin_time, ot_fiss, evtlat, evtlon,
+                               depth, prepro_folder, event, logger, rflogger)
+        infolist.append(info)
 
-        if config.network:
-            pattern = config.network + '.' + (config.station or '') + '*'
-            files = fnmatch.filter(os.listdir(prepro_folder), pattern)
-        else:
-            files = os.listdir(prepro_folder)
-
-        for file in files:
-            __waveform_loop(file, taper_perc, taper_type, webclient, model,
-                            paz_sim, origin_time, ot_fiss, evtlat, evtlon,
-                            depth, prepro_folder, event, logger, rflogger)
+    return infolist
         # Use several cores
         # if __name__ == '__main__':
         #     processes = []
@@ -205,6 +280,9 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
     """
     Loops over each waveform for a specific event and a specific station
     """
+    infodict = {}  # empty dictionary that will be dumped in a shelve file
+    # at the end of the program
+
     # loop over all files for event x
     # for file in files:
     start = time.time()
@@ -221,11 +299,14 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
 
     # Location definitions
     # Info file
-    outdir = config.outputloc+'/by_station/'+network+'/'+station
+    outdir = os.path.join(config.outputloc, 'by_station', network, station)
+    # config.outputloc+'/by_station/'+network+'/'+station
 
-    infof = outdir + '/info'
+    infof = os.path.join(outdir, 'info')
+    # outdir + '/info'
 
-    outf = outdir+'/'+network+'.'+station+'.'+ot_fiss+'.mseed'
+    outf = os.path.join(outdir, network+'.'+station+'.'+ot_fiss+'.mseed')
+    # outdir+'/'+network+'.'+station+'.'+ot_fiss+'.mseed'
 
     # Create directory for preprocessed file
     if not Path(outdir).is_dir():
@@ -235,7 +316,7 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
 # in an earlier iteration of the program
 
     if not __file_in_db(outdir, 'info.dat') or ot_fiss not in \
-            shelve.open(infof)['ot_all']:
+            shelve.open(infof, flag='r')['ot_all']:
         crit = False  # criterion to retain
 
         try:  # From here on, all exceptions are logged
@@ -275,23 +356,29 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
                                     taper_perc, taper_type)
 
             # Finalise preprocessing
-            st, crit = __rotate_qc(st, station_inv, network, station,
-                                   paz_sim, baz, distance, outf, ot_fiss,
-                                   event, evtlat, evtlon, depth,
-                                   rayp_s_deg, first_arrival, infof,
-                                   logger)
+            st, crit, infodict = __rotate_qc(st, station_inv, network, station,
+                                             paz_sim, baz, distance, outf, ot_fiss,
+                                             event, evtlat, evtlon, depth,
+                                             rayp_s_deg, first_arrival, infof,
+                                             logger, infodict)
 
         # Exceptions & logging
 
         except SNRError as e:  # QR rejections
             logger.debug([file, "QC was not met, SNR ratios are",
                          e])
-            with shelve.open(infof, writeback=True) as info:
-                if 'ot_all' not in info or ot_fiss not in info['ot_all']:
-                    # Don't count rejected events twice
-                    info.setdefault('ot_all', []).append(ot_fiss)
-                    info['num'] = len(info['ot_all'])
-                    info.sync()
+
+            if __file_in_db(outdir, 'info.dat'):
+                with shelve.open(infof, flag='r') as info:
+                    if 'ot_all' not in info or ot_fiss not in info['ot_all']:
+                        # Don't count rejected events twice
+                        infodict.setdefault('ot_all', []).append(ot_fiss)
+                        # info['num'] = len(info['ot_all'])
+
+            else:
+                infodict.setdefault('ot_all', []).append(ot_fiss)
+
+            return infodict
 
         # Everything else that might have gone wrong
         except Exception as e:
@@ -305,7 +392,7 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
     else:  # The file was already processed
 
         # Did it pass QC?
-        with shelve.open(infof) as info:
+        with shelve.open(infof, flag='r') as info:
             if "ot_ret" not in info or ot_fiss not in info["ot_ret"]:
                 return
             else:
@@ -316,6 +403,7 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
                                              station + ".xml")
                 j = info["ot_ret"].index(ot_fiss)
                 rayp = info["rayp_s_deg"][j] / 111319.9
+                distance = info["rdelta"][j]
 
 #       CREATE RF   +    ROTATION TO PSS /   LQT    #
 
@@ -326,7 +414,8 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
                      '.' + station + '.' + ot_fiss + '.sac') and crit:
 
         # 21.04.2020 Second highcut filter
-        st.filter('lowpass', freq=2.0, zerophase=True, corners=2)
+        if config.phase == "P":
+            st.filter('lowpass', freq=1.0, zerophase=True, corners=2)
 
         start = time.time()
 
@@ -357,15 +446,22 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
                     rayp, st)
 
             # Create RF object
-            with shelve.open(infof) as info:
-                i = info["starttime"].index(st[0].stats.starttime)
-                # Make a trim dependt on epicentral distance
+            if config.phase == "S":
                 trim = [40, 0]
-                if info["rdelta"][i] >= 70:
-                    trim[1] = config.ta - (-2*info["rdelta"][i] + 180)
+                if distance >= 70:
+                    trim[1] = config.ta - (-2*distance + 180)
                 else:
                     trim[1] = config.ta - 40
+            elif config.phase == "P":
+                trim = False
+
+            if not infodict:
+                info = shelve.open(infof, flag='r')
+
                 RF = createRF(st, info=info, trim=trim)
+
+            else:
+                RF = createRF(st, info=infodict, trim=trim)
 
         # Write RF
             if not Path(config.RF + '/' + network + '/' + station
@@ -381,31 +477,18 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
             end = time.time()
             rflogger.info("RF created")
             rflogger.info(dt_string(end-start))
-            start = time.time()
-
-            # copy info files
-            subprocess.call(["cp", infof + ".dir",
-                             config.RF + '/' + network + '/' +
-                             station + '/'])
-            subprocess.call(["cp", infof + ".bak",
-                             config.RF + '/' + network + '/' +
-                             station + '/'])
-            subprocess.call(["cp", infof+".dat",
-                             config.RF + '/' + network + '/' +
-                             station + '/'])
-            end = time.time()
-            rflogger.info("Info file copied.")
-            rflogger.info(dt_string(end-start))
 
         # Exception that occured in the RF creation
         # Usually don't happen
         except SNRError as e:
             rflogger.info(e)
-            return
+            return infodict
 
         except Exception as e:
             print("RF creation failed")
             rflogger.exception([network, station, ot_fiss, e])
+
+    return infodict
 
 
 def __cut_resample(st, logger, first_arrival, network, station,
@@ -456,7 +539,7 @@ def __cut_resample(st, logger, first_arrival, network, station,
 
 def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
                 distance, outf, ot_fiss, event, evtlat, evtlon, depth,
-                rayp_s_deg, first_arrival, infof, logger):
+                rayp_s_deg, first_arrival, infof, logger, infodict):
     """REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
     Bugs occur here due to station inventories without response information
     Looks like the bulk downloader sometimes donwnloads
@@ -520,6 +603,13 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
         st, crit, f, noisemat = qcs(st, dt, sampling_f)
         # crit, f, noisemat = None, None, None
         if not crit:
+            infodict['dt'] = dt
+            infodict['sampling_rate'] = sampling_f
+            infodict['network'] = network
+            infodict['station'] = station
+            infodict['statlat'] = station_inv[0][0][0].latitude
+            infodict['statlon'] = station_inv[0][0][0].longitude
+            infodict['statel'] = station_inv[0][0][0].elevation
             raise SNRError(np.array2string(noisemat))
 
     #      WRITE FILES     #
@@ -546,25 +636,25 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
                   ["onset", first_arrival],
                   ['starttime', st[0].stats.starttime]]
 
-    with shelve.open(infof, writeback=True) as info:
+    # with shelve.open(infof, writeback=True) as info:
         # Check if values are already in dict
-        for key, value in append_inf:
-            info.setdefault(key, []).append(value)
+    for key, value in append_inf:
+        infodict.setdefault(key, []).append(value)
 
-        info['num'] = len(info['ot_all'])
-        info['numret'] = len(info['ot_ret'])
-        info['dt'] = dt
-        info['sampling_rate'] = sampling_f
-        info['network'] = network
-        info['station'] = station
-        info['statlat'] = station_inv[0][0][0].latitude
-        info['statlon'] = station_inv[0][0][0].longitude
-        info['statel'] = station_inv[0][0][0].elevation
-        info.sync()
+    # infodict['num'] = len(info['ot_all'])
+    # infodict['numret'] = len(info['ot_ret'])
+    infodict['dt'] = dt
+    infodict['sampling_rate'] = sampling_f
+    infodict['network'] = network
+    infodict['station'] = station
+    infodict['statlat'] = station_inv[0][0][0].latitude
+    infodict['statlon'] = station_inv[0][0][0].longitude
+    infodict['statel'] = station_inv[0][0][0].elevation
+        # info.sync()
 
     logger.info("Stream accepted. Preprocessing successful")
 
-    return st, crit
+    return st, crit, infodict
 
 
 def __file_in_db(loc, filename):
