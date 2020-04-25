@@ -14,11 +14,10 @@ import subprocess
 import time
 import numpy as np
 from joblib import Parallel, delayed
-from multiprocessing import cpu_count
-from pickle import UnpicklingError
 import itertools
 
 from obspy import read, read_inventory, Stream, UTCDateTime
+from obspy.clients.iris import Client
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 
 import config
@@ -27,7 +26,7 @@ from .errorhandler import redownload, redownload_statxml, \
 from .qc import qcp, qcs
 from .rotate import rotate_LQT_min, rotate_PSV, rotate_LQT
 from ..rf.create import createRF
-from ..utils.utils import dt_string, chunks
+from ..utils.utils import dt_string
 
 
 def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
@@ -121,78 +120,58 @@ def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
                "poles": paz_sim.get_paz().poles,
                "zeros": paz_sim.get_paz().zeros}
 
-    # for event in event_cat:
-    #     __event_loop(event, taper_perc, taper_type, webclient,
-    #                  model, paz_sim, logger, rflogger)
-    # num_cores = cpu_count()
+    # Iris client for backazimuth and epicentral distance calculation
+    iclient = Client()
 
-    # event_list = []
-    # for event in event_cat:
-    #     event_list.append(event)
+    # If there is a download happening in parallel, only use one core
+    if config.wavdownload:
+        n_jobs = 1
+    else:  # Use all available cores
+        n_jobs = -1
 
-    # Actual CCP stack
-    # Note loki does mess up the output and threads is slower than
-    # using a single core
-    # try:
-    out = Parallel(n_jobs=-1)(
-            delayed(__event_loop)(event, taper_perc, taper_type,
+    out = Parallel(n_jobs=n_jobs)(
+            delayed(__event_loop)(event, taper_perc, taper_type, iclient,
                                   webclient, model, paz_sim, logger, rflogger)
             for event in event_cat)
 
-    dictlist = list(itertools.chain.from_iterable(out))
+    if not config.wavdownload:
+        # Else the dictionaries are written, while the processing is happening
+        # (Not robust for multicore)
 
-    masterdict = {}
+        # The multicore process returns a list of lists of dictionaries
+        dictlist = list(itertools.chain.from_iterable(out))
 
-    for d in dictlist:
-        if not d:  # Some of the dictionaries might be empty
-            continue
-        net = d['network']
-        stat = d['station']
-        key = net + '.' + stat
-        if key in masterdict:
-            for k in d:
-                if type(d[k]) == list:
-                    masterdict.setdefault(k, []).extend(d[k])
-                    # masterdict[key][k].extend(d[k])
-        else:
-            masterdict[key] = d
+        # 1. Write all dictionaries in a "masterdictionary", where the keys
+        # are Network and station code. Then, extent these subdictionaries
+        # with the new information from new dictionaries for the same station.
+        masterdict = {}
 
-    # Write dictionaries in the folder
-    for d in masterdict:
-        try:
-            net, stat = d.split('.')
-        except ValueError as e:
-            logger.exception(e, d)
-            continue
-        infof = os.path.join(config.outputloc, 'by_station', net, stat, 'info')
-        with shelve.open(infof) as info:
-            info.update(masterdict[d])
-            info['num'] = len(info['ot_all'])
-            if 'ot_ret' in info:
-                info['numret'] = len(info['ot_ret'])
+        for d in dictlist:
+            if not d:  # Some of the dictionaries might be empty
+                continue
+            net = d['network']
+            stat = d['station']
+            key = net + '.' + stat
+            if key in masterdict:
+                for k in d:
+                    if type(d[k]) == list:
+                        masterdict[key].setdefault(k, []).extend(d[k])
+            else:
+                masterdict[key] = d
 
-        # create softlink info files
+        # Write dictionaries in the folder
+        for d in masterdict:
+            try:
+                net, stat = d.split('.')
+                write_info(net, stat, masterdict[d])
+            except (ValueError, KeyError) as e:
+                logger.exception([e, d])
+                continue
 
-        subprocess.call(['ln', '-s', infof + "*",
-                         os.path.join(config.RF, net, stat)])
-        # subprocess.call(["ln -s", infof + ".bak",
-        #                  config.RF + '/' + network + '/' +
-        #                  station + '/'])
-        # subprocess.call(["ln -s", infof+".dat",
-        #                  config.RF + '/' + network + '/' +
-        #                  station + '/'])
-
-        
-    # except UnpicklingError as e:
-    #     logger.warning([e, 'Falling back to single core computation.'])
-    #     Parallel(n_jobs=1, prefer='processes')(
-    #         delayed(__event_loop)(event, taper_perc, taper_type,
-    #                               webclient, model, paz_sim, logger, rflogger)
-    #         for event in event_cat)
     print("Download and preprocessing finished.")
 
 
-def __event_loop(event, taper_perc, taper_type, webclient, model,
+def __event_loop(event, taper_perc, taper_type, iclient, webclient, model,
                  paz_sim, logger, rflogger):
     """
     Loops over each event in the event catalogue
@@ -246,37 +225,16 @@ def __event_loop(event, taper_perc, taper_type, webclient, model,
     for file in files:
         info = __waveform_loop(file, taper_perc, taper_type, webclient, model,
                                paz_sim, origin_time, ot_fiss, evtlat, evtlon,
-                               depth, prepro_folder, event, logger, rflogger)
+                               depth, prepro_folder, event, logger, rflogger,
+                               iclient)
         infolist.append(info)
 
     return infolist
-        # Use several cores
-        # if __name__ == '__main__':
-        #     processes = []
-        #     for file in files:
-        #         p = multiprocessing.Process(target=__waveform_loop,
-        #                                     args=(file, taper_perc,
-        #                                           taper_type, event_cat,
-        #                                           webclient, model,
-        #                                           paz_sim, origin_time,
-        #                                           ot_fiss, evtlat, evtlon,
-        #                                           depth, prepro_folder,
-        #                                           event, logger, rflogger))
-        #         processes.append(p)
-        #         p.start
-
-        #     for process in processes:
-        #         # Waits for a free core until it joins
-        #         process.join()
-        # # __waveform_loop(file, taper_perc, taper_type, event_cat, webclient,
-        # #                 model, paz_sim, origin_time, ot_fiss,
-        # #                 evtlat, evtlon, depth, prepro_folder, event,
-        # #                 logger, rflogger)
 
 
 def __waveform_loop(file, taper_perc, taper_type, webclient, model,
                     paz_sim, origin_time, ot_fiss, evtlat, evtlon,
-                    depth, prepro_folder, event, logger, rflogger):
+                    depth, prepro_folder, event, logger, rflogger, iclient):
     """
     Loops over each waveform for a specific event and a specific station
     """
@@ -329,13 +287,12 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
             except FileNotFoundError:
                 station_inv = redownload_statxml(st, network, station)
 
-            # result = iclient.distaz(station_inv[0][0].latitude,
-            #                         station_inv[0][0].longitude, evtlat,
-            #                         evtlon)
+            # compute theoretical arrival
+
             distance, baz, _ = gps2dist_azimuth(station_inv[0][0].latitude,
                                                 station_inv[0][0].longitude,
                                                 evtlat, evtlon)
-            distance = kilometer2degrees(distance)/1000
+            distance = kilometer2degrees(distance/1000)
 
             # compute time of first arrival & ray parameter
             arrival = model.get_travel_times(source_depth_in_km=depth / 1000,
@@ -357,10 +314,10 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
 
             # Finalise preprocessing
             st, crit, infodict = __rotate_qc(st, station_inv, network, station,
-                                             paz_sim, baz, distance, outf, ot_fiss,
-                                             event, evtlat, evtlon, depth,
-                                             rayp_s_deg, first_arrival, infof,
-                                             logger, infodict)
+                                             paz_sim, baz, distance, outf,
+                                             ot_fiss, event, evtlat, evtlon,
+                                             depth, rayp_s_deg, first_arrival,
+                                             infof, logger, infodict)
 
         # Exceptions & logging
 
@@ -488,6 +445,14 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
             print("RF creation failed")
             rflogger.exception([network, station, ot_fiss, e])
 
+        finally:
+            if config.wavdownload and infodict:
+                # Single-core case
+                write_info(network, station, infodict)
+
+                # just to save RAM - not needed for single-core
+                infodict = None
+
     return infodict
 
 
@@ -545,8 +510,6 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
     Looks like the bulk downloader sometimes donwnloads
     station inventories without response files. I could fix that here by
     redownloading the response file (alike to the 3 traces problem)"""
-
-    start = time.time()
 
     try:
         st.remove_response(inventory=station_inv, output='VEL',
@@ -633,16 +596,13 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
                   ['rbaz', baz],
                   ['rdelta', distance],
                   ['rayp_s_deg', rayp_s_deg],
-                  ["onset", first_arrival],
+                  ['onset', first_arrival],
                   ['starttime', st[0].stats.starttime]]
 
-    # with shelve.open(infof, writeback=True) as info:
-        # Check if values are already in dict
+    # Check if values are already in dict
     for key, value in append_inf:
         infodict.setdefault(key, []).append(value)
 
-    # infodict['num'] = len(info['ot_all'])
-    # infodict['numret'] = len(info['ot_ret'])
     infodict['dt'] = dt
     infodict['sampling_rate'] = sampling_f
     infodict['network'] = network
@@ -650,7 +610,6 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
     infodict['statlat'] = station_inv[0][0][0].latitude
     infodict['statlon'] = station_inv[0][0][0].longitude
     infodict['statel'] = station_inv[0][0][0].elevation
-        # info.sync()
 
     logger.info("Stream accepted. Preprocessing successful")
 
@@ -664,6 +623,60 @@ def __file_in_db(loc, filename):
         return True
     else:
         return False
+
+
+def write_info(network, station, dictionary):
+    """
+    Writes information dictionary in shelve format in each of the station
+    folders.
+
+    Parameters
+    ----------
+    network : str
+        Network Code.
+    station : str
+        Station code.
+    dictionary : dict
+        Dictionary containing the information.
+
+    Returns
+    -------
+    None.
+
+    """
+    loc = os.path.join(config.outputloc, 'by_station', network, station)
+    if not __file_in_db(loc, 'info.dat'):
+        with shelve.open(loc+'/info', writeback=True) as info:
+            info.update(dictionary)
+            info['num'] = len(info['ot_all'])
+            if 'ot_ret' in info:
+                info['numret'] = len(info['ot_ret'])
+            info.sync()
+
+        # create softlink info files
+        subprocess.call(['ln', '-s', loc + "/info*",
+                         os.path.join(config.RF, network, station)])
+
+    else:
+
+        if 'ot_ret' in dictionary:
+            append_inf = ['magnitude', 'magnitude_type', 'evtlat',
+                          'evtlon', 'ot_ret', 'ot_all', 'evt_depth',
+                          'evt_id', 'noisemat', 'co_f', 'npts', 'rbaz',
+                          'rdelta', 'rayp_s_deg', 'onset', 'starttime']
+
+            with shelve.open(loc+'/info', writeback=True) as info:
+                for key in append_inf:
+                    info.setdefault(key, []).extend(dictionary[key])
+                info['num'] = len(info['ot_all'])
+                info['numret'] = len(info['ot_ret'])
+                info.sync()
+
+        else:
+            with shelve.open(loc+'/info', writeback=True) as info:
+                info.setdefault('ot_all', []).extend(dictionary['ot_all'])
+                info['num'] = len(info['ot_all'])
+                info.sync()
 
 
 # program-specific Exceptions

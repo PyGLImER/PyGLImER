@@ -85,15 +85,19 @@ model = TauPyModel(model="iasp91")
 # None is not recommended as some clients are unstable or do not provide any
 # data, waiting for these clients causes the script to be very slow.
 # Else "IRIS","ORFEUS",etc.
-waveform_client = ["IRIS"]  # , "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
-# "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
-# None  # ["IRIS", "NCEDC"]
+# !!NOTE: For machines with little RAM, the script might interrupt if too
+# many clients are chosen.
+#
+waveform_client = ["IRIS"]
+# "NCEDC", "ORFEUS", "ODC", "LMU", "INGV", "KOERI", "NIEP", "RESIF"]
 #
 # clients on which the download should be retried, list:
-re_clients = ["IRIS"]  # , "NCEDC", "ORFEUS"] #, "ODC", "TEXNET", "BGR", "ETH",
-# "GEONET", "ICGC", "INGV", "IPGP", "KNMI", "KOERI", "NCEDC", "NIEP", "NOA", "RESIF", 'USP']
-# Clients that cause problems and are excluded:
-# ['GFZ', 'LMU', 'SCEDC']
+re_clients = ["IRIS"]  # It's usually enoguh to have only IRIS here
+# as IRIS tends to be very intreliable
+#
+# Clients that do not provide additional data:
+# ['TEXNET', 'BGR', 'ETH','GFZ', 'SCEDC', 'GEONET', 'ICGC', 'IPGP', 'KNMI',
+# 'NOA', 'USP']
 # %% PRE-PROCESSING VALUES #####
 
 # Rotation #

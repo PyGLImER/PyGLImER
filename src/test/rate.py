@@ -16,8 +16,10 @@ import fnmatch
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
 import numpy as np
-from obspy import read
+from obspy import read, UTCDateTime
 from obspy.taup import TauPyModel
+from obspy.clients.iris import Client
+from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 
 import config
 from ..rf.create import createRF, RFStream
@@ -28,7 +30,8 @@ rating = {}  # mutable object
 
 
 def rate(network, station=None, onset=config.tz, phase=config.phase,
-         review=False, retained=False, decon_meth=config.decon_meth):
+         review=False, retained=False, decon_meth=config.decon_meth,
+         test_tt_calculation=False):
     """
     Module to rate and review the quality of Sp or Ps waveforms from the given
     station. Shows the automatic rating from. Tapers can be controlled with
@@ -99,6 +102,10 @@ def rate(network, station=None, onset=config.tz, phase=config.phase,
 
     # For TauPy lookup
     model = TauPyModel()
+
+    if test_tt_calculation:
+        client = Client()
+
     for f in streams:
         # if file[:4] == "info":  # Skip the info files
         #     continue
@@ -140,6 +147,9 @@ def rate(network, station=None, onset=config.tz, phase=config.phase,
             rayp = info["rayp_s_deg"][ii] / 111319.9
             evt_depth = info["evt_depth"][ii] / 1000
             ot = info["ot_ret"][ii]
+            evtlat = info['evtlat'][ii]
+            evtlon = info['evtlon'][ii]
+
         if old and not review:  # skip already rated files
             continue
         if type(review) == int:
@@ -159,7 +169,11 @@ def rate(network, station=None, onset=config.tz, phase=config.phase,
             continue
 
         # create RF
-        _, _, PSV = rotate_PSV(statlat, statlon, rayp, st_f)
+        if not test_tt_calculation:
+            _, _, PSV = rotate_PSV(statlat, statlon, rayp, st_f)
+        else:
+            PSV = st_f  # to see correlation at theoretical arrival
+
         try:
             RF = createRF(PSV, phase, method=decon_meth, shift=onset)
         except ValueError as e:  # There were some problematic events
@@ -167,20 +181,43 @@ def rate(network, station=None, onset=config.tz, phase=config.phase,
             continue
 
         # TauPy lookup
-        arrivals = model.get_travel_times(evt_depth,
-                                          distance_in_degree=rdelta)
-
-        primary_time = model.get_travel_times(evt_depth,
-                                              distance_in_degree=rdelta,
-                                              phase_list=phase)[0].time
         ph_name = []
         ph_time = []
-        for arr in arrivals:
-            if arr.time < primary_time - onset or arr.time > \
-                    primary_time + config.ta or arr.name == phase:
-                continue
-            ph_name.append(arr.name)
-            ph_time.append(arr.time - primary_time)
+
+        if not test_tt_calculation:
+            arrivals = model.get_travel_times(evt_depth,
+                                              distance_in_degree=rdelta)
+
+            primary_time = model.get_travel_times(evt_depth,
+                                                  distance_in_degree=rdelta,
+                                                  phase_list=phase)[0].time
+
+            for arr in arrivals:
+                if arr.time < primary_time - onset or arr.time > \
+                        primary_time + config.ta or arr.name == phase:
+                    continue
+                ph_name.append(arr.name)
+                ph_time.append(arr.time - primary_time)
+
+        else:
+            # Caluclate travel times with different methods
+            ph_time.append(model.get_travel_times_geo(
+                evt_depth, evtlat, evtlon, statlat, statlon,
+                phase_list=phase)[0].time)
+
+            d = []
+            d.append(client.distaz(
+                statlat, statlon, evtlat, evtlon)['distance'])
+
+            d.append(kilometer2degrees(
+                gps2dist_azimuth(statlat, statlon, evtlat, evtlon)[0]/1000))
+
+            for dis in d:
+                ph_time.append(model.get_travel_times(
+                    evt_depth, dis, phase_list=phase)[0].time)
+            ph_name = ['taup', 'iris', 'geodetics']
+            ph_time = np.array(ph_time) - (st[0].stats.starttime + onset - \
+                                           UTCDateTime(ot))
 
         # waveform data
         st.sort()
@@ -194,7 +231,8 @@ def rate(network, station=None, onset=config.tz, phase=config.phase,
 
         # plot
         fig, ax = __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat,
-                              RF, old, rdelta, mag, crit, ot, evt_depth, phase)
+                              RF, old, rdelta, mag, crit, ot, evt_depth, phase,
+                              test_tt_calculation)
         while not plt.waitforbuttonpress(30):
             # Taper when input is there
             if len(rating["taper"]) == 2:
@@ -209,7 +247,8 @@ def rate(network, station=None, onset=config.tz, phase=config.phase,
                               trim=trim)
 
                 __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat,
-                            RF, old, rdelta, mag, crit, ot, evt_depth, phase)
+                            RF, old, rdelta, mag, crit, ot, evt_depth, phase,
+                            test_tt_calculation)
                 rating["taper"].clear()
         # fig.canvas.mpl_connect('key_press_event', ontype)
         if rating["k"] == "q":
@@ -219,7 +258,7 @@ def rate(network, station=None, onset=config.tz, phase=config.phase,
 
 
 def __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old,
-                rdelta, mag, crit, ot, evt_depth, phase):
+                rdelta, mag, crit, ot, evt_depth, phase, test_tt_calculation):
     """Draws the plot for the rate function"""
     plt.close('all')
     fig, ax = plt.subplots(4, 1, sharex=False)
@@ -244,6 +283,8 @@ def __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old,
         x.yaxis.tick_right()
         # x.grid(color='c', which='both', linewidth=.25)
         x.set_ylabel('Amplitude')
+        if test_tt_calculation:
+            x.set_xlim(-10,10)
     # if old:
     #     ax[2].text(0, 1, old,
     #                bbox=dict(facecolor='green', alpha=0.5))

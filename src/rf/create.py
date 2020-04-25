@@ -7,7 +7,6 @@ Created on Wed Feb 19 13:41:10 2020
 
 toolset to create RFs and RF classes
 """
-from abc import ABCMeta
 import json
 import logging
 from operator import itemgetter
@@ -32,7 +31,7 @@ from .moveout import DEG2KM, maxz, res, moveout, dt_table
 logger = logging.Logger("rf")
 
 
-def createRF(st_in, phase=config.phase, shift=config.tz,
+def createRF(st_in, phase=config.phase, onset=None, shift=config.tz,
              method=config.decon_meth, trim=None, event=None, station=None,
              info=None):
     """
@@ -45,6 +44,9 @@ def createRF(st_in, phase=config.phase, shift=config.tz,
         Stream of which components are to be deconvolved.
     phase : string, optional
         Either "P" or "S". The default is config.phase.
+    onset: UTCDateTime, optional
+        Is used to shift function rather than shift if provided.
+        If info is provided, it will be extracted from info file.
     shift : float, optional
         Time shift of theoretical arrival from starttime in seconds.
         The default is config.tz.
@@ -76,6 +78,12 @@ def createRF(st_in, phase=config.phase, shift=config.tz,
         RFTrace object containing receiver function.
 
     """
+    if info:
+        ii = info['starttime'].index(st_in[0].stats.starttime)
+        shift = info['onset'][ii] - st_in[0].stats.starttime
+
+    elif onset:
+        shift = onset - st_in[0].stats.starttime
 
     # sampling interval
     dt = st_in[0].stats.delta

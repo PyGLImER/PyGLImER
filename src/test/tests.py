@@ -7,16 +7,21 @@ GLImER functions.
 @author: pm
 """
 import os
-
+import subprocess
 import matplotlib.pyplot as plt
 import numpy as np
-from obspy import UTCDateTime, read
+import h5py
+from pathlib import Path
+from joblib import Parallel, delayed
+
+from obspy import UTCDateTime, read, Trace
 from obspy.core import Stats
 from obspy.signal.filter import lowpass
 
 import config
+from ..rf import RFTrace, RFStream
 from ..rf.deconvolve import it, multitaper, spectraldivision
-from ..rf.moveout import moveout
+from ..rf.moveout import moveout, DEG2KM
 from ..waveform.qc import qcs, qcp
 
 tr_folder = "data/raysum_traces/"
@@ -264,3 +269,57 @@ def test_SNR(network, station, phase=config.phase):
         noisematls.append(noisemat)
         critls.append(crit)
     return noisematls, critls
+
+
+def read_rfs_mat(filename, path='output/ccps',
+                 outdir='output/waveform/RF/matlab', outfile='matlab'):
+    """
+    Reads in Matlab files constructed by the old GLImER workflow.
+    It takes a long time to decode h5 files with that and they cannot
+    be pickled either, so no multicore :-/
+
+    Parameters
+    ----------
+    filename : str
+        filename.
+    path : str, optional
+        Input directory. The default is 'output/ccps'.
+    outdir : str, optional
+        Output directory. The default is 'output/waveform/RF/matlab'.
+    outfile : str, optional
+        Output file. The default is 'matlab'.
+
+    Yields
+    ------
+    rf : RFTrace
+        RFTracec object, one per receiver function.
+    i : int
+        position in .mat.
+
+    """
+    inp = os.path.join(path, filename)
+    out = os.path.join(outdir, outfile)
+
+    mat = h5py.File(inp, 'r')
+
+    # Create ouput dir
+    if not Path(outdir).is_dir():
+        subprocess.call(['mkdir', '-p', outdir])
+
+    # Create RFTrace objects and save them for each of the RF
+
+
+    for i, _ in enumerate(mat['cbaz'][0]):
+        rf = RFTrace(data=mat['crfs'][:, i])
+        rf.stats.delta = mat['dt'][0]
+        rf.stats.station_latitude = mat['cslat'][0, i]
+        rf.stats.station_longitude = mat['cslon'][0, i]
+        rf.stats.station_elevation = mat['celev'][0, i]
+        rf.stats.back_azimuth = mat['cbaz'][0, i]
+        rf.stats.slowness = float(mat['crayp'][0, i])*DEG2KM
+        rf.stats.type = 'time'
+        rf.stats.phase = 'P'
+        rf.stats.npts = len(mat['crfs'][:, i])
+        rf.stats.starttime = UTCDateTime(0)
+        rf.stats.onset = UTCDateTime(30)
+        rf.write(out+str(i)+'.sac', 'SAC')
