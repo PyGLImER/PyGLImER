@@ -236,7 +236,7 @@ class BinGrid(object):
                                  distance_upper_bound=maxdist_euc)
         return eucd, i
 
-    def query_bin_tree(self, latitude, longitude, binrad):
+    def query_bin_tree(self, latitude, longitude, binrad, k):
         """Uses the query function of the KDTree but takes geolocations as
         input.
 
@@ -244,9 +244,12 @@ class BinGrid(object):
         ----------
         latitude: latitudes to be queried
         longitude: longitudes to be queried
-        binrad: maximum  distance to be queried in epicentral distance
+        binrad: maximum  distance to be queried in euclidean distance
                 Equals the radius of the bin, higher = more averaging ->
                 --> less noise, lower resolution
+        k: int
+            Number of neighbours to return. Note that this directly depends
+            on the ratio of deltabin/binrad.
 
 
         Returns
@@ -258,9 +261,6 @@ class BinGrid(object):
             Indices of next neighbour.
         """
 
-        # Compute maxdist in euclidean space
-        maxdist_euc = epi2euc(binrad)
-
         # Get cartesian coordinate points
         points = geo2cart(R_EARTH, latitude, longitude)
 
@@ -271,6 +271,6 @@ class BinGrid(object):
         # Returned distance is not more than (1+eps)*real distance
         _, i = self.KDB.query(np.column_stack((points[0],
                                                points[1],
-                                               points[2])), eps=0.05, k=4,
-                              distance_upper_bound=maxdist_euc)
+                                               points[2])), eps=0.05, k=k,
+                              distance_upper_bound=binrad)
         return i

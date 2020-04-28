@@ -22,7 +22,7 @@ import config
 
 _MODEL_CACHE = {}
 DEG2KM = degrees2kilometers(1)
-maxz = 800  # maximum interpolation depth in km
+maxz = 750  # maximum interpolation depth in km
 res = 1  # vertical resolution in km for interpolation and ccp bins
 
 # def stackRF(network, station, phase=config.phase):
@@ -238,7 +238,7 @@ def ppoint(q_a, q_b, dz, p, phase):
 
 def earth_flattening(maxz, z, dz, vp, vs):
     """
-    Creates a flat-earth approximated velocity model down to 800 km as in
+    Creates a flat-earth approximated velocity model down to maxz as in
     Peter M. Shearer
 
     Parameters

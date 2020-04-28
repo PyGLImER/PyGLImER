@@ -272,7 +272,7 @@ def test_SNR(network, station, phase=config.phase):
 
 
 def read_rfs_mat(filename, path='output/ccps',
-                 outdir='output/waveform/RF/matlab', outfile='matlab'):
+                 outdir='output/waveforms/RF/P/matlab', outfile='matlab'):
     """
     Reads in Matlab files constructed by the old GLImER workflow.
     It takes a long time to decode h5 files with that and they cannot
@@ -307,7 +307,6 @@ def read_rfs_mat(filename, path='output/ccps',
         subprocess.call(['mkdir', '-p', outdir])
 
     # Create RFTrace objects and save them for each of the RF
-
 
     for i, _ in enumerate(mat['cbaz'][0]):
         rf = RFTrace(data=mat['crfs'][:, i])

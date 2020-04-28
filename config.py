@@ -13,7 +13,7 @@ from obspy.taup import TauPyModel  # arrival times in 1D v-model
 
 # %% general settings
 # Define if you want to download new files or use old
-evtcat = '2020-04-22 19:28:52.611277'  # either None (downloads new) or file
+evtcat = None  # either None (downloads new) or file
 wavdownload = False  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
@@ -26,7 +26,7 @@ decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
 
 # %% P or S ####
 # put string either "P" or "S"
-phase = "S"
+phase = "P"
 # don't change
 phase = phase.upper()
 
@@ -89,14 +89,15 @@ model = TauPyModel(model="iasp91")
 # many clients are chosen.
 #
 waveform_client = ["IRIS"]
-# "NCEDC", "ORFEUS", "ODC", "LMU", "INGV", "KOERI", "NIEP", "RESIF"]
+# "NCEDC", "ORFEUS", "ODC", "LMU", "INGV", "KOERI", "NIEP", "RESIF", "GFZ",
+# "BGR"]
 #
 # clients on which the download should be retried, list:
 re_clients = ["IRIS"]  # It's usually enoguh to have only IRIS here
 # as IRIS tends to be very intreliable
 #
 # Clients that do not provide additional data:
-# ['TEXNET', 'BGR', 'ETH','GFZ', 'SCEDC', 'GEONET', 'ICGC', 'IPGP', 'KNMI',
+# ['TEXNET', 'ETH', 'SCEDC', 'GEONET', 'ICGC', 'IPGP', 'KNMI',
 # 'NOA', 'USP']
 # %% PRE-PROCESSING VALUES #####
 
@@ -133,9 +134,8 @@ QC = True  # Do quality control or not
 
 SNR_criteriaP = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
 
-# SNR_criteria = [7.5, .2, .66]
-#SNR_criteria = [20, .5, 1] #QC2
-SNR_criteriaS = [35, .4, 1]  #QC1 to reproduce Rychert
+# SNR_criteriaS = [20, .5, 1] # QC2
+SNR_criteriaS = [35, .4, 1]  # QC1
 # [primary/noise, sidelobe/primary, r/z conversions]
 
 # %% DON'T change program will change automatically!

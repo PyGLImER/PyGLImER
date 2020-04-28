@@ -15,7 +15,7 @@ import pickle
 import logging
 import time
 from joblib import Parallel, delayed
-from itertools import repeat
+# from itertools import repeat
 from multiprocessing import cpu_count
 
 import numpy as np
@@ -27,6 +27,7 @@ from .compute.bin import BinGrid
 from ..rf.create import read_rf
 from ..rf.moveout import res, maxz
 from ..utils.utils import dt_string, chunks
+from ..utils.geo_utils import epi2euc
 
 # Loggers for the CCP script
 logger = logging.Logger('PyGlimer.src.ccp.ccplogger')
@@ -235,7 +236,7 @@ class CCPStack(object):
         self.pplon = []
         self.binrad = None
 
-    def query_bin_tree(self, latitude, longitude, data):
+    def query_bin_tree(self, latitude, longitude, data, n_closest_points):
         """
         Find closest bins for given latitude and longitude.
 
@@ -253,7 +254,8 @@ class CCPStack(object):
         None.
 
         """
-        i = self.bingrid.query_bin_tree(latitude, longitude, self.binrad)
+        i = self.bingrid.query_bin_tree(latitude, longitude, self.binrad_eucl,
+                                        n_closest_points)
 
         # Kd tree returns locations that are too far with maxindex+1
         pos = np.where(i < self.bingrid.Nb)
@@ -308,6 +310,21 @@ class CCPStack(object):
         """
 
         self.binrad = binrad*self.bingrid.edist
+
+        # How many closest points are queried by the bintree?
+        # See Gauss circle problem
+        # sum of squares for 2 squares for max binrad=4
+        # Using the ceiling funciton to account for inaccuracies
+        sosq = [1, 4, 4, 0, 4, 8, 0, 0, 4, 4, 8, 0, 0, 8, 0, 0, 4]
+        try:
+            n_closest_points = sum(sosq[0:int(np.ceil(binrad**2+1))])
+        except IndexError:
+            raise ValueError(
+                """Maximum allowed binradius is 4 times the bin distance""")
+
+        # Compute maxdist in euclidean space
+        self.binrad_eucl = epi2euc(binrad)
+
         folder = config.RF[:-1] + self.bingrid.phase
 
         start = time.time()
@@ -325,8 +342,12 @@ class CCPStack(object):
             for name in files:
                 infiles.append(os.path.join(root, name))
 
+        # Special rule for files imported from Matlab
+        if network == 'matlab':
+            pattern.append('*.sac')
+
         # Set filter patterns
-        if network:
+        elif network:
             if type(network) == list:
                 if station:
                     if type(station) == list:
@@ -371,8 +392,16 @@ class CCPStack(object):
         # Actual CCP stack
         # Note loki does mess up the output and threads is slower than
         # using a single core
+
+        # The test data needs to be filtered
+        if network == 'matlab':
+            filt = [.03, 1.5]  # bandpass frequencies
+        else:
+            filt = False
+
         out = Parallel(n_jobs=num_cores, prefer='processes')(
-                        delayed(self.multicore_stack)(st, append_pp)
+                        delayed(self.multicore_stack)(st, append_pp,
+                                                      n_closest_points, filt)
                         for st in chunks(streams, num_cores))
 
         # The stacking is done here (one should not reassign variables in
@@ -394,7 +423,7 @@ class CCPStack(object):
         if save:
             self.write(filename=save)
 
-    def multicore_stack(self, stream, append_pp):
+    def multicore_stack(self, stream, append_pp, n_closest_points, filt=False):
         """
         Takes in chunks of data to be processed on one core.
 
@@ -415,6 +444,11 @@ class CCPStack(object):
         datal = []
         for st in stream:
             rft = read_rf(st, format='SAC')
+
+            if filt:
+                rft.filter('bandpass', freqmin=filt[0], freqmax=filt[1],
+                           zerophase=True, corners=2)
+
             _, rf = rft[0].moveout()
             lat = np.array(rf.stats.pp_latitude)
             lon = np.array(rf.stats.pp_longitude)
@@ -425,7 +459,7 @@ class CCPStack(object):
                               constant_values=np.nan)
                 self.pplat.append(plat)
                 self.pplon.append(plon)
-            k, j = self.query_bin_tree(lat, lon, rf.data)
+            k, j = self.query_bin_tree(lat, lon, rf.data, n_closest_points)
             kk.append(k)
             jj.append(j)
             datal.append(rf.data)
@@ -469,10 +503,9 @@ class CCPStack(object):
         elif fmt == "matlab":
             # Change vectors so it can be corrected for elevation
 
-            illum = np.pad(self.illum, ((0, 0), (round(10/res), 0)))
-            depth = np.arange(-10, maxz+res, res, dtype=float)
-            ccp = np.pad(self.ccp, ((0, 0), (round(10/res), 0)))#,
-                         #constant_values=np.nan)
+            illum = np.pad(self.illum, ((0, 0), (round(10/.1), 0)))
+            depth = np.hstack((np.arange(-10, 0, .1), self.z))
+            ccp = np.pad(self.ccp, ((0, 0), (round(10/.1), 0)))
 
             d = {}
             d.update({'RF_ccp': ccp,

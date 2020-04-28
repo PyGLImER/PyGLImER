@@ -149,9 +149,13 @@ def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
         for d in dictlist:
             if not d:  # Some of the dictionaries might be empty
                 continue
-            net = d['network']
-            stat = d['station']
-            key = net + '.' + stat
+            try:
+                net = d['network']
+                stat = d['station']
+                key = net + '.' + stat
+            except (ValueError, KeyError) as e:
+                logger.exception([e, d])
+                continue
             if key in masterdict:
                 for k in d:
                     if type(d[k]) == list:
@@ -372,7 +376,7 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
 
         # 21.04.2020 Second highcut filter
         if config.phase == "P":
-            st.filter('lowpass', freq=1.0, zerophase=True, corners=2)
+            st.filter('lowpass', freq=1.5, zerophase=True, corners=2)
 
         start = time.time()
 
