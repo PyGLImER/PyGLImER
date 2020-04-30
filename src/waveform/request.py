@@ -61,7 +61,7 @@ class Request(object):
             self.maxdepth = None
             self.min_epid = 28.1
             self.max_epid = 95.8
-        elif self.phase == 'P':
+        elif self.phase == 'S':
             self.maxdepth = 300
             self.min_epid = 55
             self.max_epid = 80

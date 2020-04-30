@@ -26,7 +26,7 @@ decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
 
 # %% P or S ####
 # put string either "P" or "S"
-phase = "P"
+phase = "S"
 # don't change
 phase = phase.upper()
 
@@ -134,8 +134,10 @@ QC = True  # Do quality control or not
 
 SNR_criteriaP = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
 
-# SNR_criteriaS = [20, .5, 1] # QC2
-SNR_criteriaS = [35, .4, 1]  # QC1
+SNR_criteriaS = [24, .4, 1]  # QC4
+# SNR_criteriaS = [27.5, .4, 1]  # QC3
+# SNR_criteriaS = [20, .5, 1]  # QC2
+# SNR_criteriaS = [35, .4, 1]  # QC1
 # [primary/noise, sidelobe/primary, r/z conversions]
 
 # %% DON'T change program will change automatically!

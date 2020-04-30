@@ -21,6 +21,7 @@ from multiprocessing import cpu_count
 import numpy as np
 from obspy import read_inventory
 import scipy.io as sio
+from mpl_toolkits.basemap import Basemap
 
 import config
 from .compute.bin import BinGrid
@@ -28,6 +29,7 @@ from ..rf.create import read_rf
 from ..rf.moveout import res, maxz
 from ..utils.utils import dt_string, chunks
 from ..utils.geo_utils import epi2euc
+from .plot_utils.plot_bins import plot_bins
 
 # Loggers for the CCP script
 logger = logging.Logger('PyGlimer.src.ccp.ccplogger')
@@ -465,14 +467,70 @@ class CCPStack(object):
             datal.append(rf.data)
         return kk, jj, datal
 
-    def conclude_ccp(self):
-        """Averages the CCP-bin and populates empty cells with average of
-        neighbouring cells."""
-        self.ccp = np.divide(self.bins, self.illum+1)
-        # index = np.where(self.ccp == 0)
-        # self.ccp[index] = np.nan
+    def conclude_ccp(self, keep_empty=True, keep_water=True, r=1):
+        """
+        Averages the CCP-bin and populates empty cells with average of
+        neighbouring cells. No matter which option is
+        chosen for the parameters, data is never lost entirely. One can always
+        execute a new conclude_ccp() command. However, decisions that are
+        taken here will affect the *.mat output and plotting outputs.
 
-    def write(self, filename='ccp', folder=config.ccp, fmt="pickle"):
+
+        Parameters
+        ----------
+        keep_empty : Bool or str, optional
+            Keep entirely empty bins. The default is True.
+        keep_water : Bool , optional
+            For False all bins that are on water-covered areas
+            will be discarded. The default is True.
+        r : int, optional
+            Fields with less than r hits will be set equal 0.
+            r has to be >= 1. The default is 1.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.ccp = np.divide(self.bins, self.illum+1)
+
+        self.hits = self.illum.copy()
+
+        if r > 1:
+            index = np.where(np.logical_and(self.illum > 1, self.illum < r))
+            self.ccp[index] = 0
+            self.hits[index] = 0
+
+        if not keep_empty:
+            i = np.where(self.hits.sum(axis=1) == 0)[0]
+            self.ccp = np.delete(self.ccp, i, 0)
+            self.hits = np.delete(self.hits, i, 0)
+            self.coords_new = (np.delete(self.coords[0], i, 1),
+                               np.delete(self.coords[1], i, 1))
+
+        # Check if bins are on land
+        if not keep_water:
+            bm = Basemap(
+                resolution='c', projection='cyl',
+                llcrnrlat=self.coords[0][0].min(),
+                llcrnrlon=self.coords[1][0].min(),
+                urcrnrlat=self.coords[0][0].max(),
+                urcrnrlon=self.coords[1][0].max())
+            if not hasattr(self, 'coords_new'):
+                self.coords_new = self.coords.copy()
+
+            lats, lons = self.coords_new
+            index = []  # list of indices that contain water
+
+            for i, (lat, lon) in enumerate(zip(lats[0], lons[0])):
+                if not bm.is_land(lon, lat):
+                    index.append(i)
+            self.ccp = np.delete(self.ccp, index, 0)
+            self.hits = np.delete(self.hits, index, 0)
+            self.coords_new = (np.delete(self.coords_new[0], index, 1),
+                               np.delete(self.coords_new[1], index, 1))
+
+    def write(self, filename=None, folder=config.ccp, fmt="pickle"):
         """
         Saves the CCPStream file as pickle or matlab file. Only save
         as Matlab file for exporting, as not all information can be
@@ -487,6 +545,12 @@ class CCPStack(object):
         fmt : str, optional
             Either "pickle" or "matlab" for .mat.
         """
+
+        # Standard filename
+        if not filename:
+            filename = self.bingrid.phase + '_' + str(self.bingrid.edist) + \
+                '_' + str(self.binrad)
+
         # Remove filetype identifier if provided
         x = filename.split('.')
         if len(x) > 1:
@@ -501,18 +565,23 @@ class CCPStack(object):
 
         # Save as Matlab file (exporting to plot)
         elif fmt == "matlab":
-            # Change vectors so it can be corrected for elevation
 
-            illum = np.pad(self.illum, ((0, 0), (round(10/.1), 0)))
+            # Change vectors so it can be corrected for elevation
+            illum = np.pad(self.hits, ((0, 0), (round(10/.1), 0)))
             depth = np.hstack((np.arange(-10, 0, .1), self.z))
             ccp = np.pad(self.ccp, ((0, 0), (round(10/.1), 0)))
+
+            if hasattr(self, 'coords_new'):
+                lat_ccp, lon_ccp = self.coords_new
+            else:
+                lat_ccp, lon_ccp = self.coords
 
             d = {}
             d.update({'RF_ccp': ccp,
                       'illum': illum,
                       'depth_ccp': depth,
-                      'lat_ccp': self.coords[0],
-                      'lon_ccp': self.coords[1],
+                      'lat_ccp': lat_ccp,
+                      'lon_ccp': lon_ccp,
                       'CSLAT': self.bingrid.latitude,
                       'CSLON': self.bingrid.longitude,
                       'clat': np.array(self.pplat),
@@ -524,3 +593,10 @@ class CCPStack(object):
         # Unknown formats
         else:
             raise ValueError("The format type ", fmt, "is unkown.")
+
+    def plot_bins(self):
+        if hasattr(self, 'coords_new'):
+            coords = self.coords_new
+        else:
+            coords = self.coords
+        plot_bins(self.bingrid.stations, coords)
