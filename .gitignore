@@ -5,6 +5,7 @@ preprocessed*
 rejected*
 event_catalogues*
 figures*
+gypsum.pkl
 *.xml
 *.mseed
 *cache*

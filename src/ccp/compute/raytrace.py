@@ -126,7 +126,7 @@ class Raytracing(object):
                                                         self.elev)):
                 # print("Tracing RF: %7d/%d" % (_i, self.M))
                 self.clat[_i, :], self.clon[_i, :], \
-                self.d[_i, :], self.dtimes[_i, :, :] = \
+                    self.d[_i, :], self.dtimes[_i, :, :] = \
                     self.trace(_i, r, b, la, lo, el)
 
         else:

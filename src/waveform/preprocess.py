@@ -404,7 +404,7 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
                 avp, avs, st = rotate_PSV(
                     station_inv[0][0][0].latitude,
                     station_inv[0][0][0].longitude,
-                    rayp, st)
+                    rayp, st, config.phase)
 
             # Create RF object
             if config.phase == "S":

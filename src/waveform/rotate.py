@@ -6,14 +6,13 @@ Created on Sat Mar 21 19:26:57 2020
 @author: pm
 Contains functions to rotate a stream into different domains
 """
-import subprocess
-
 import numpy as np
 
+from ..utils.createvmodel import load_avvmodel
 import config
 
 
-def rotate_PSV(statlat, statlon, rayp, st):
+def rotate_PSV(statlat, statlon, rayp, st, phase):
     """
     Finds the incidence angle of an incoming ray with the weighted average
     of the lithosphere's P velocity. Requires Litho1.0 to be installed.
@@ -28,6 +27,8 @@ def rotate_PSV(statlat, statlon, rayp, st):
         ray parameter / slownesss in s/m.
     st : obspy.Stream
         Input stream given in RTZ.
+    phase : str
+        Primary phase, either P or S.
 
     Returns
     -------
@@ -40,40 +41,42 @@ def rotate_PSV(statlat, statlon, rayp, st):
 
     """
 
-    x = subprocess.Popen([config.lith1, "-p", str(statlat),
-                          str(statlon)], stdout=subprocess.PIPE)
-    ls = str(x.stdout.read()).split("\\n")  # save the output
+    # x = subprocess.Popen([config.lith1, "-p", str(statlat),
+    #                       str(statlon)], stdout=subprocess.PIPE)
+    # ls = str(x.stdout.read()).split("\\n")  # save the output
 
-    # Close file or it will remain open forever!
-    x.stdout.close()
+    # # Close file or it will remain open forever!
+    # x.stdout.close()
 
-    for ii, item in enumerate(ls):
-        ls[ii] = item.split()
-    # clean list
-    del ls[-1]
-    del ls[0][0]
-    # reorder items
-    depth = []
-    vp = []
-    vs = []
-    name = []
-    for item in ls:
-        depth.append(float(item[0]))  # in m
-        vp.append(float(item[2]))  # m/s
-        vs.append(float(item[3]))  # m/
-        name.append(item[-1])  # name of the boundary
+    # for ii, item in enumerate(ls):
+    #     ls[ii] = item.split()
+    # # clean list
+    # del ls[-1]
+    # del ls[0][0]
+    # # reorder items
+    # depth = []
+    # vp = []
+    # vs = []
+    # name = []
+    # for item in ls:
+    #     depth.append(float(item[0]))  # in m
+    #     vp.append(float(item[2]))  # m/s
+    #     vs.append(float(item[3]))  # m/
+    #     name.append(item[-1])  # name of the boundary
 
-    # build weighted average for upper 15km -10
-    maxd = 15e3
-    for ii, item in enumerate(depth):
-        if item <= maxd:
-            break
-    avp = np.multiply(vp[ii+1:], -np.diff(depth)[ii:])
-    avp = sum(avp) + vp[ii]*(-np.diff(depth)[ii-1] + maxd - depth[ii-1])
-    avp = avp/maxd
-    avs = np.multiply(vs[ii+1:], -np.diff(depth)[ii:])
-    avs = sum(avs) + vs[ii]*(-np.diff(depth)[ii-1] + maxd - depth[ii-1])
-    avs = avs/maxd
+    # # build weighted average for upper 15km -10
+    # maxd = 15e3
+    # for ii, item in enumerate(depth):
+    #     if item <= maxd:
+    #         break
+    # avp = np.multiply(vp[ii+1:], -np.diff(depth)[ii:])
+    # avp = sum(avp) + vp[ii]*(-np.diff(depth)[ii-1] + maxd - depth[ii-1])
+    # avp = avp/maxd
+    # avs = np.multiply(vs[ii+1:], -np.diff(depth)[ii:])
+    # avs = sum(avs) + vs[ii]*(-np.diff(depth)[ii-1] + maxd - depth[ii-1])
+    # avs = avs/maxd
+    model = load_avvmodel()
+    avp, avs = model.query(statlat, statlon, phase)
 
     # Do the rotation as in Rondenay (2009)
     # Note that in contrast to the paper the z-components have to be
