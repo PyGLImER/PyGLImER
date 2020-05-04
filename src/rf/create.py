@@ -420,16 +420,16 @@ class RFStream(Stream):
             traces.append(sliced_trace)
         return self.__class__(traces)
 
-    def moveout(self, vmodel_file="iasp91.dat"):
+    def moveout(self, vmodel):
         """
         Depth migration of all receiver functions given Stream.
         Also calculates piercing points and adds them to RFTrace.stats.
 
         Parameters
         ----------
-        vmodel_file : file, optional
+        vmodel_file : file
             Velocity model located in /data/vmodel.
-            The default is "iasp91.dat".
+            Standard options are iasp91 and 3D (GYPSuM).
 
         Returns
         -------
@@ -442,7 +442,7 @@ class RFStream(Stream):
         RF_mo = []
         for tr in self:
             try:
-                z, mo = tr.moveout(vmodel_file=vmodel_file)
+                z, mo = tr.moveout(vmodel)
             except TypeError:
                 # This trace is already depth migrated
                 RF_mo.append(tr)
@@ -800,16 +800,16 @@ class RFTrace(Trace):
             reftime = self.stats[reftime]
         return reftime + seconds
 
-    def moveout(self, vmodel_file="iasp91.dat"):
+    def moveout(self, vmodel):
         """
         Depth migration of the receiver function.
         Also calculates piercing points.
 
         Parameters
         ----------
-        vmodel_file : file, optional
+        vmodel : str
             Velocity model located in /data/vmodel.
-            The default is "iasp91.dat".
+            Standard choices are '3D' for GYPSuM 3D model or iasp91.dat.
 
         Returns
         -------
@@ -822,7 +822,8 @@ class RFTrace(Trace):
         if self.stats.type == "depth" or self.stats.type == "stastack":
             raise TypeError("RF is already depth migrated.")
         st = self.stats
-        z, RF_mo, delta = moveout(self.data, st)
+
+        z, RF_mo, delta = moveout(self.data, st, vmodel)
         st.pp_latitude = []
         st.pp_longitude = []
         st.pp_depth = np.arange(0, maxz + res, res)[0:len(delta)]

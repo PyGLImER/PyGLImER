@@ -18,7 +18,7 @@ import fnmatch
 import numpy as np
 from scipy.interpolate import interp1d
 
-from ..rf.moveout import maxz, res
+from ..constants import R_EARTH, maxz, res
 
 # location of lith1 file
 lith1 = os.path.join('/home', 'pm', 'LITHO1.0', 'bin', 'access_litho')
@@ -29,9 +29,17 @@ gyps = os.path.join('data', 'velocity_models', 'GyPSuM')
 _MODEL_CACHE = {}
 
 
-def load_gyps():
+def load_gyps(save=True):
     """
-    Compiles the GyPSuM 3D-velocity object from included GyPSuM text files.
+    Compiles the GyPSuM 3D-velocity object from included GyPSuM text files
+
+    Parameters
+    ----------
+    save : Bool, optional
+        Pickle the 3D velocity model after compiling it for the first time.
+        This will allow for faster access to the model. Saving the model takes
+        about 800 MB disk space.
+        The default is True.
 
     Returns
     -------
@@ -61,8 +69,8 @@ def load_gyps():
     rp, vpb = zip(*np.loadtxt(os.path.join(gyps, 'StartingVpModel.txt')))
     rs, vsb = zip(*np.loadtxt(os.path.join(gyps, 'StartingVsModel.txt')))
 
-    zbp = 6371 - np.array(rp, dtype=float)  # background model depth vector
-    zbs = 6371 - np.array(rs, dtype=float)  # background model depth vecto
+    zbp = R_EARTH - np.array(rp, dtype=float)  # background model depth vector
+    zbs = R_EARTH - np.array(rs, dtype=float)  # background model depth vecto
     vpb = np.array(vpb)
     vsb = np.array(vsb)
 
@@ -121,7 +129,8 @@ def load_gyps():
     # vs deviations
     _MODEL_CACHE['gyps'] = model = ComplexModel(zq, vp, vs, lat, lon)
 
-    model.write()
+    if save:
+        model.write()
 
     return model
 
@@ -132,16 +141,17 @@ class ComplexModel(object):
         Velocity model based on GyPSuM model. Compiled and loaded with function
         load_gyps(). The model will be compiled once into a relatively large
         pickle file. Afterwards, the file will be unpickled rather than
-        recompiled.
+        recompiled. Self.vpf, self.vsf, and self.zf are contain values for
+        an Earth-flattening approximation.
 
         Parameters
         ----------
         z : 1D ndarray
             Contains depths in km.
         vp : 3D ndarray
-            P-wave velocity grid with velocities in km/s.
+            P-wave velocity grid with velocities in km/s. Spherical
         vs : 3D ndarray
-            S-wave velocity grid with velocities in km/s.
+            S-wave velocity grid with velocities in km/s. Spherical
         lat : 1D ndarray
             Latitude vector.
         lon : 1D ndarray
@@ -155,8 +165,7 @@ class ComplexModel(object):
         self.lat = lat
         self.lon = lon
         self.z = z
-        self.vp = vp
-        self.vs = vs
+        self.zf, self.vpf, self.vsf = self.flatten(vp, vs)
 
     def query(self, lat, lon, z):
         """
@@ -183,8 +192,8 @@ class ComplexModel(object):
         n = np.where(round(lon) == self.lon)[0][0]
         p = np.where(round(z) == self.z)[0][0]
 
-        vp = self.vp[m, n, p]
-        vs = self.vs[m, n, p]
+        vp = self.vpf[m, n, p]
+        vs = self.vsf[m, n, p]
         return vp, vs
 
     def write(self, filename='gypsum', folder='data/velocity_models'):
@@ -210,6 +219,35 @@ class ComplexModel(object):
         oloc = os.path.join(folder, filename)
         with open(oloc + ".pkl", 'wb') as output:
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
+
+    def flatten(self, vp, vs):
+        """
+        Creates a flat-earth approximated velocity model down to maxz as in
+        Peter M. Shearer
+
+        Parameters
+        ----------
+        vp : np.array (3D)
+            P wave velocities [km/s].
+        vs : np.array (3D)
+            S wave velocities [km/s].
+
+        Returns
+        -------
+        zf : np.array
+            Depths in a Cartesian coordinate system.
+        vpf : np.array
+            P wave velocities in a Cartesian coordinate system.
+        vsf : np.array
+            S wave velocities in a Cartesian coordinate system.
+        """
+
+        r = R_EARTH  # Earth's radius
+        vpf = np.multiply((r/(r-self.z)), vp)
+        vsf = np.multiply((r/(r-self.z)), vs)
+        zf = -r*np.log((r-self.z)/r)
+
+        return zf, vpf, vsf
 
 
 def load_avvmodel():

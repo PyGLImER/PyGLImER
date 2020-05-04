@@ -14,53 +14,19 @@ import shelve
 import numpy as np
 from obspy import read
 from obspy.geodetics import degrees2kilometers
+from geographiclib.geodesic import Geodesic
 from scipy import interpolate
 from scipy.signal.windows import hann
 
 import config
+from ..constants import R_EARTH, DEG2KM, maxz, res
+from ..utils.createvmodel import load_gyps
 
 
 _MODEL_CACHE = {}
-DEG2KM = degrees2kilometers(1)
-maxz = 750  # maximum interpolation depth in km
-res = 1  # vertical resolution in km for interpolation and ccp bins
-
-# def stackRF(network, station, phase=config.phase):
-#     """
-#     Outdated. Use fun:'subfunctions.createRF.RFStream.statstack()' instead.
-#
-#     Creates a moveout corrected receiver function stack of the
-#     requested station"""
-#     # extract data
-#     ioloc = config.RF[:-1] + phase + '/' + network + '/' + station
-#     data = []
-#     st = []  # stats
-#     RF_mo = []  # moveout corrected RF
-#     # z_all = []
-#     for file in os.listdir(ioloc):
-#         if file[:4] == "info":
-#             continue
-#         try:
-#             stream = read(ioloc + '/' + file)
-#         except IsADirectoryError:
-#             continue
-#         stream.normalize()  # make sure traces are normalised
-#         data.append(stream[0].data)
-#         st.append(stream[0].stats)
-#     with shelve.open(ioloc + '/info') as info:
-#         rayp = info['rayp_s_deg']
-#         onset = info["onset"]
-#         starttime = info["starttime"]
-#     for ii, tr in enumerate(data):
-#         jj = starttime.index(st[ii].starttime)
-#         z, RF, _ = moveout(tr, st[ii], onset[jj], rayp[jj], phase)
-#         RF_mo.append(RF)
-#
-#     stack = np.average(RF_mo, axis=0)
-#     return z, stack, RF_mo, data
 
 
-def moveout(data, st, fname='iasp91.dat'):
+def moveout(data, st, fname):
     """
     Depth migration for RF.
     Corrects the for the moveout of a converted phase. Flips time axis
@@ -72,8 +38,8 @@ def moveout(data, st, fname='iasp91.dat'):
         Receiver Function.
     st : obspy.core.AttributeDict
         Stats from stream object.
-    fname : string, optional
-        1D velocity model for moveout correction. The default is 'iasp91.dat'.
+    fname : string
+        1D velocity model for moveout correction. Use '3D' for a 3D raytracing.
 
     Returns
     -------
@@ -89,10 +55,15 @@ def moveout(data, st, fname='iasp91.dat'):
 
     onset = st.onset
     tas = round((onset - st.starttime)/st.delta)  # theoretical arrival sample
-    rayp = st.slowness
-    phase = st.phase
-    # Nq = st.npts - tas
-    htab, dt, delta = dt_table(rayp, fname, phase)
+    rayp = st.slowness  # Ray parameter
+    phase = st.phase  # Primary phase
+
+    if fname == '3D':
+        htab, dt, delta = dt_table_3D(rayp, phase, st.station_latitude,
+                                      st.station_longitude, st.back_azimuth)
+    else:
+        htab, dt, delta = dt_table(rayp, fname, phase)
+
     # queried times
     tq = np.arange(0, round(max(dt), 1), st.delta)
     z = np.interp(tq, dt, htab)  # Depth array
@@ -102,6 +73,8 @@ def moveout(data, st, fname='iasp91.dat'):
         data = np.flip(data)
         data = -data
         tas = -tas
+
+    # Shorten RF
     RF = data[tas:tas+len(z)]
     zq = np.arange(0, max(z)+res, res)
 
@@ -109,16 +82,109 @@ def moveout(data, st, fname='iasp91.dat'):
     tck = interpolate.splrep(z, RF)
     RF = interpolate.splev(zq, tck)
 
+    # This taper is wrong, considering that the RF is already depth migrated
     # Taper the last 3.5 seconds of the RF to avoid discontinuities in stack
-    tap = hann(round(7/st.delta))
+    # tap = hann(round(7/st.delta))
+    # tap = tap[round(len(tap)/2):]
+    # # if len(RF) < len(tap):  # That usually doesn't happen, only for extreme
+    # # discontinuities in 3D model and SRFs
+    # taper = np.ones(len(RF))
+    # taper[-len(tap):] = tap
+    # RF = np.multiply(taper, RF)
+    # else:
+    #     print('short RF')
+    # Taper the last 10 km
+    tap = hann(20)
     tap = tap[round(len(tap)/2):]
-    taper = np.ones(len(RF))
-    taper[-len(tap):] = tap
-    RF = np.multiply(taper, RF)
+    if len(RF) > len(tap):  # That usually doesn't happen, only for extreme
+        # discontinuities in 3D model and errors in SRF data
+        taper = np.ones(len(RF))
+        taper[-len(tap):] = tap
+        RF = np.multiply(taper, RF)
+
     z2 = np.arange(0, maxz+res, res)
     RF2 = np.zeros(z2.shape)
     RF2[:len(RF)] = RF
     return z2, RF2, delta
+
+
+def dt_table_3D(rayp, phase, lat, lon, baz):
+    """
+    Creates a phase delay table and calculates piercing points
+    for a specific ray parameter,
+    using the equation as in Rondenay 2009.
+    For SRF: The length of the output vectors is determined by the depth, at
+    which Sp conversion is supercritical (vertical slowness = complex).
+
+    Parameters
+    ----------
+    rayp : float
+        ray-parameter given in s/deg.
+    fname : string
+        1D velocity model, located in data/vmodels.
+    phase : string
+        Either "S" for Sp or "P" for Ps.
+
+    Returns
+    -------
+    htab: np.array
+        Vector containing conversion depths.
+    dt: np.array
+        Vector containing delay times between primary arrival and converted
+        wave.
+    delta: np.array
+        Vector containing Euclidian distance of piercing point from the
+        station at depth z.
+
+    """
+
+    p = rayp/DEG2KM  # convert to s/km
+
+    model = load_gyps(save=True)
+
+    # hypothetical conversion depth tables
+    htab = np.arange(0, maxz+res, res)  # spherical
+    htab_f = -R_EARTH*np.log((R_EARTH-htab)/R_EARTH)  # flat earth depth
+    res_f = np.diff(htab_f)  # earth flattened resolution
+
+    # delay times
+    dt = np.zeros(np.shape(htab))
+
+    # angular distances of piercing points
+    delta = np.zeros(np.shape(htab))
+
+    # vertical slownesses
+    q_a = np.zeros(np.shape(htab))
+    q_b = np.zeros(np.shape(htab))
+
+    vpf, vsf = model.query(lat, lon, 0)
+
+    q_a[0] = np.sqrt(vpf**-2 - p**2)
+    q_b[0] = np.sqrt(vsf**-2 - p**2)
+
+    # Numerical integration
+    for kk, h in enumerate(htab_f[1:]):
+        ii = np.where(model.zf >= h)[0][0] - 1
+
+        delta[kk+1] = ppoint(q_a[ii], q_b[ii], res_f[kk], p, phase) + delta[kk]
+        az = baz
+
+        if np.isnan(delta[kk+1]):  # Supercritical
+            delta = delta[:kk+1]
+            break
+
+        coords = Geodesic.WGS84.ArcDirect(lat, lon, az, delta[kk+1])
+        lat2, lon2 = coords['lat2'], coords['lon2']
+
+        vpf, vsf = model.query(lat2, lon2, kk+1)
+        q_a[kk+1] = np.sqrt(vpf**-2 - p**2)
+        q_b[kk+1] = np.sqrt(vsf**-2 - p**2)
+
+        dt[kk+1] = (q_b[ii]-q_a[ii])*res_f[kk]
+
+    dt = np.cumsum(dt)[:len(delta)]
+
+    return htab[:len(delta)], dt, delta
 
 
 def dt_table(rayp, fname, phase):
@@ -163,13 +229,12 @@ def dt_table(rayp, fname, phase):
         vp = model.vpf
         vs = model.vsf
         zf = model.zf
-    # dz = model.dz
-    # dzf = model.dzf
+
     z = np.append(z, maxz)
 
     # hypothetical conversion depth tables
     htab = np.arange(0, maxz+res, res)  # spherical
-    htab_f = -6371*np.log((6371-htab)/6371)  # flat earth depth
+    htab_f = -R_EARTH*np.log((R_EARTH-htab)/R_EARTH)  # flat earth depth
     res_f = np.diff(htab_f)  # earth flattened resolution
 
     if fname == "raysum.dat":
@@ -271,7 +336,7 @@ def earth_flattening(maxz, z, dz, vp, vs):
 
     """
 
-    r = 6371  # Earth's radius
+    r = R_EARTH  # Earth's radius
     ii = np.where(z > maxz)[0][0]+1
     vpf = (r/(r-z[:ii]))*vp[:ii]
     vsf = (r/(r-z[:ii]))*vs[:ii]

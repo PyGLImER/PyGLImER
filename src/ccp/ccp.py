@@ -45,7 +45,8 @@ fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
 fh.setFormatter(fmt)
 
 
-def init_ccp(spacing, phase=config.phase, network=None, station=None,
+def init_ccp(spacing, vel_model, phase=config.phase, network=None,
+             station=None,
              compute_stack=False, binrad=np.cos(np.radians(30)),
              append_pp=False, save=False, verbose=True):
     """
@@ -57,6 +58,9 @@ def init_ccp(spacing, phase=config.phase, network=None, station=None,
     ----------
     spacing : float
         Angular distance between each bin point.
+    vel_model : str
+        Velocity model located in data. Either iasp91 (1D raytracing) or
+        3D for 3D raytracing using a model compiled from GyPSuM.
     phase : str, optional
         Either 'S' or 'P'. Use 'S' if dataset contains both SRFs and PRFs.
         The default is config.phase.
@@ -132,8 +136,9 @@ def init_ccp(spacing, phase=config.phase, network=None, station=None,
     del stat, lats, lons, files
 
     if compute_stack:
-        ccp.compute_stack(network=network, station=station, save=save,
-                          append_pp=append_pp, binrad=binrad)
+        ccp.compute_stack(
+            vel_model=vel_model, network=network, station=station, save=save,
+            append_pp=append_pp, binrad=binrad)
 
     return ccp
 
@@ -271,7 +276,7 @@ class CCPStack(object):
 
         return k, j
 
-    def compute_stack(self, network=None, station=None, save=False,
+    def compute_stack(self, vel_model, network=None, station=None, save=False,
                       binrad=np.cos(np.radians(30)), append_pp=False):
         """
         Computes a ccp stack in self.ccp, using the standard folder
@@ -282,6 +287,10 @@ class CCPStack(object):
 
         Parameters
         ----------
+        vel_model : str
+            Velocity model located in data. Either 'iasp91' for 1D raytracing
+            or 3D for 3D raytracing with GYPSuM model. Using 3D Raytracing
+            will cause the code to take about 30% longer.
         network : str or list, optional
             Network or networks that are to be included in the ccp stack.
             Standard unix wildcards are allowed. If None, the whole database
@@ -402,8 +411,8 @@ class CCPStack(object):
             filt = False
 
         out = Parallel(n_jobs=num_cores, prefer='processes')(
-                        delayed(self.multicore_stack)(st, append_pp,
-                                                      n_closest_points, filt)
+                        delayed(self.multicore_stack)(
+                            st, append_pp, n_closest_points, vel_model, filt)
                         for st in chunks(streams, num_cores))
 
         # The stacking is done here (one should not reassign variables in
@@ -425,7 +434,8 @@ class CCPStack(object):
         if save:
             self.write(filename=save)
 
-    def multicore_stack(self, stream, append_pp, n_closest_points, filt=False):
+    def multicore_stack(self, stream, append_pp, n_closest_points, vmodel,
+                        filt=False):
         """
         Takes in chunks of data to be processed on one core.
 
@@ -451,7 +461,7 @@ class CCPStack(object):
                 rft.filter('bandpass', freqmin=filt[0], freqmax=filt[1],
                            zerophase=True, corners=2)
 
-            _, rf = rft[0].moveout()
+            _, rf = rft[0].moveout(vmodel)
             lat = np.array(rf.stats.pp_latitude)
             lon = np.array(rf.stats.pp_longitude)
             if append_pp:
