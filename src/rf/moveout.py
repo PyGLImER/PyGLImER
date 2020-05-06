@@ -57,12 +57,14 @@ def moveout(data, st, fname):
     tas = round((onset - st.starttime)/st.delta)  # theoretical arrival sample
     rayp = st.slowness  # Ray parameter
     phase = st.phase  # Primary phase
+    el = st.station_elevation
 
     if fname == '3D':
-        htab, dt, delta = dt_table_3D(rayp, phase, st.station_latitude,
-                                      st.station_longitude, st.back_azimuth)
+        htab, dt, delta = dt_table_3D(
+            rayp, phase, st.station_latitude, st.station_longitude,
+            st.back_azimuth, el)
     else:
-        htab, dt, delta = dt_table(rayp, fname, phase)
+        htab, dt, delta = dt_table(rayp, fname, phase, el)
 
     # queried times
     tq = np.arange(0, round(max(dt), 1), st.delta)
@@ -76,39 +78,40 @@ def moveout(data, st, fname):
 
     # Shorten RF
     RF = data[tas:tas+len(z)]
-    zq = np.arange(0, max(z)+res, res)
+    zq = np.hstack((np.arange(min(z), 0, .1), np.arange(0, max(z)+res, res)))
+    # zq = np.arange(0, max(z)+res, res)
 
     # interpolate RF
     tck = interpolate.splrep(z, RF)
     RF = interpolate.splev(zq, tck)
 
-    # This taper is wrong, considering that the RF is already depth migrated
-    # Taper the last 3.5 seconds of the RF to avoid discontinuities in stack
-    # tap = hann(round(7/st.delta))
-    # tap = tap[round(len(tap)/2):]
-    # # if len(RF) < len(tap):  # That usually doesn't happen, only for extreme
-    # # discontinuities in 3D model and SRFs
-    # taper = np.ones(len(RF))
-    # taper[-len(tap):] = tap
-    # RF = np.multiply(taper, RF)
-    # else:
-    #     print('short RF')
     # Taper the last 10 km
     tap = hann(20)
-    tap = tap[round(len(tap)/2):]
+    _, down = np.split(tap, 2)
+
+    # And taper the first 5 samples
+    # tap = hann(10)
+    # up, _ = np.split(tap, 2)
+
     if len(RF) > len(tap):  # That usually doesn't happen, only for extreme
         # discontinuities in 3D model and errors in SRF data
         taper = np.ones(len(RF))
-        taper[-len(tap):] = tap
+        taper[-len(down):] = down
+        # taper[:len(up)] = up
         RF = np.multiply(taper, RF)
 
-    z2 = np.arange(0, maxz+res, res)
+    # z2 = np.arange(0, maxz+res, res)
+    z2 = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
     RF2 = np.zeros(z2.shape)
-    RF2[:len(RF)] = RF
+    # RF2[:len(RF)] = RF
+
+    # np.where does not seem to work here
+    starti = np.nonzero(np.isclose(z2, htab[0]))[0][0]
+    RF2[starti:starti+len(RF)] = RF
     return z2, RF2, delta
 
 
-def dt_table_3D(rayp, phase, lat, lon, baz):
+def dt_table_3D(rayp, phase, lat, lon, baz, el):
     """
     Creates a phase delay table and calculates piercing points
     for a specific ray parameter,
@@ -124,6 +127,8 @@ def dt_table_3D(rayp, phase, lat, lon, baz):
         1D velocity model, located in data/vmodels.
     phase : string
         Either "S" for Sp or "P" for Ps.
+    el : float
+        station elevation in m.
 
     Returns
     -------
@@ -143,9 +148,18 @@ def dt_table_3D(rayp, phase, lat, lon, baz):
     model = load_gyps(save=True)
 
     # hypothetical conversion depth tables
-    htab = np.arange(0, maxz+res, res)  # spherical
+    if el > 0:
+        htab = np.hstack(  # spherical
+                         (np.arange(-round(el/1000, 1), 0, .1),
+                          np.arange(0, maxz+res, res)))
+    else:
+        htab = np.arange(-round(el/1000), maxz+res, res)
+
     htab_f = -R_EARTH*np.log((R_EARTH-htab)/R_EARTH)  # flat earth depth
     res_f = np.diff(htab_f)  # earth flattened resolution
+
+    # # Find station elevation
+    # istart = np.where(htab == -round(el/100)/10)
 
     # delay times
     dt = np.zeros(np.shape(htab))
@@ -166,6 +180,10 @@ def dt_table_3D(rayp, phase, lat, lon, baz):
     for kk, h in enumerate(htab_f[1:]):
         ii = np.where(model.zf >= h)[0][0] - 1
 
+        # When there is elevation (velocity model starts at depth 0!)
+        if ii == -1:
+            ii = 0
+
         delta[kk+1] = ppoint(q_a[ii], q_b[ii], res_f[kk], p, phase) + delta[kk]
         az = baz
 
@@ -176,7 +194,7 @@ def dt_table_3D(rayp, phase, lat, lon, baz):
         coords = Geodesic.WGS84.ArcDirect(lat, lon, az, delta[kk+1])
         lat2, lon2 = coords['lat2'], coords['lon2']
 
-        vpf, vsf = model.query(lat2, lon2, kk+1)
+        vpf, vsf = model.query(lat2, lon2, ii)  # Note that ii equals depth
         q_a[kk+1] = np.sqrt(vpf**-2 - p**2)
         q_b[kk+1] = np.sqrt(vsf**-2 - p**2)
 
@@ -187,7 +205,7 @@ def dt_table_3D(rayp, phase, lat, lon, baz):
     return htab[:len(delta)], dt, delta
 
 
-def dt_table(rayp, fname, phase):
+def dt_table(rayp, fname, phase, el):
     """
     Creates a phase delay table and calculates piercing points
     for a specific ray parameter,
@@ -233,7 +251,14 @@ def dt_table(rayp, fname, phase):
     z = np.append(z, maxz)
 
     # hypothetical conversion depth tables
-    htab = np.arange(0, maxz+res, res)  # spherical
+    # htab = np.arange(0, maxz+res, res)  # spherical
+    if el > 0:
+        htab = np.hstack(  # spherical
+                         (np.arange(-round(el/1000, 1), 0, .1),
+                          np.arange(0, maxz+res, res)))
+    else:
+        htab = np.arange(-round(el/1000), maxz+res, res)
+
     htab_f = -R_EARTH*np.log((R_EARTH-htab)/R_EARTH)  # flat earth depth
     res_f = np.diff(htab_f)  # earth flattened resolution
 
@@ -254,6 +279,8 @@ def dt_table(rayp, fname, phase):
     # Numerical integration
     for kk, h in enumerate(htab_f[1:]):
         ii = np.where(zf >= h)[0][0] - 1
+        if ii == -1:
+            ii = 0
         dt[kk+1] = (q_b[ii]-q_a[ii])*res_f[kk]
         delta[kk+1] = ppoint(q_a[ii], q_b[ii], res_f[kk], p, phase)
     dt = np.cumsum(dt)

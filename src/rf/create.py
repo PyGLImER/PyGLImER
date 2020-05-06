@@ -26,7 +26,7 @@ from scipy.signal.windows import hann
 # import ..ccp.ccp #import CCPStack
 import config
 from .deconvolve import it, spectraldivision, multitaper
-from .moveout import DEG2KM, maxz, res, moveout, dt_table
+from .moveout import DEG2KM, maxz, res, moveout, dt_table, dt_table_3D
 
 logger = logging.Logger("rf")
 
@@ -313,7 +313,6 @@ class RFStream(Stream):
     """
 
     def __init__(self, traces=None):
-        #super().__init__(traces)
         self.traces = []
         if isinstance(traces, Trace):
             traces = [traces]
@@ -504,86 +503,6 @@ class RFStream(Stream):
                             "pp_longitude": None})
         return z, stack, RF_mo
 
-    # That doesn't work due to circular dependence! (CCPStack is dependent
-    # on RFStream)
-    # def ccp(self, edist, phase=None, verbose=True):
-    #     """
-    #     Creates a CCP stack for all traces in the stream. This method is only
-    #     recommended for smaller datasets (up to 10,000 RFs) as all RFs will be
-    #     saved in the RAM.
-
-    #     Parameters
-    #     ----------
-    #     edist : float
-    #         Spacing between the grid points.
-    #     phase : str
-    #         Seismic phase either "S" or "P". Phase "S" will lead to more
-    #         grid points being created due to flatter incidence angle. Hence,
-    #         Phase can be "S" for PRFs but not the other way around. However,
-    #         "P" is computationally more efficient. The default is None, if
-    #         =None the phase will be determined from the first trace in file.
-    #         In this case, make sure that Stream only contains either S or PRFs.
-    #     verbose : Bool, optional
-    #         If true: info in console. The default is True.
-
-    #     Returns
-    #     -------
-    #     ccp : CCPStack
-    #         Returns CCPStack object, containing ccp stack, illumination matrix,
-    #         coordintes, and other data.
-
-    #     """
-    #     lats = []
-    #     lons = []
-    #     if not phase:
-    #         phase = []
-
-    #     # Fetch station coordinates
-    #     for tr in self:
-    #         if tr.stats.type == "time":
-    #             tr.moveout()
-    #         elif tr.stats.type == "stastack":
-    #             logger.warning("""Stream contains station stacks, they will be
-    #                            ignored.""")
-    #             continue
-    #         if tr.stats.station_latitude in lats and \
-    #             tr.stats.station_longitude in lons \
-    #             and lats.index(tr.stats.station_latitude) == \
-    #                 lons.index(tr.stats.station_longitude):
-    #             continue  # Same station
-    #         if type(phase) == list:
-    #             phase.append(tr.stats.phase)
-    #         lats.append(tr.stats.station_latitude)
-    #         lons.append(tr.stats.station_longitude)
-
-    #     # Decide for phase
-    #     if type(phase) == list:
-    #         if "S" in phase:
-    #             # One SRF is enough to make S necassery
-    #             phase = "S"
-    #         else:
-    #             phase = "P"
-
-    #     # Create CCPStack object
-    #     lats = np.array(lats)
-    #     lons = np.array(lons)
-    #     ccp = CCPStack(lats, lons, edist, phase=phase, verbose=verbose)
-
-    #     # Find nearest neighbours of conversion points
-    #     for tr in self:
-    #         if tr.stats.type == "stastack":
-    #             continue
-
-    #         ppoint_lat = np.array(tr.stats.pp_latitude)
-    #         ppoint_lon = np.array(tr.stats.pp_longitude)
-    #         ppoint_z = np.array(tr.stats.pp_depth)
-    #         ccp.query_bin_tree(ppoint_lat, ppoint_lon, ppoint_z, tr.data)
-
-    #     # Conculde CCP stacking
-    #     ccp.conclude_ccp()
-
-    #     return ccp
-
     def plot(self, scale=2):
         """
         USE RFTrace.plot() instead
@@ -612,13 +531,13 @@ class RFStream(Stream):
             if tr.stats.type == "time":
                 stats.delta = tr.stats.delta
                 data = tr.data
-                TAS = round((tr.stats.onset - tr.stats.starttime) / stats.delta)
+                TAS = round((
+                    tr.stats.onset - tr.stats.starttime) / stats.delta)
                 TAS = 1201
                 print(TAS)
                 if tr.stats.phase == "S":
-                    # data = -np.flip(data[round(TAS - 30 / stats.delta):TAS + 1])
                     data = -np.flip(data)
-                # elif tr.stats.phase == "P":
+
                 data = data[TAS:round(TAS + 30 / stats.delta)]
                 stats["npts"] = len(data)
                 trace = Trace(data=data, header=stats)
@@ -826,7 +745,15 @@ class RFTrace(Trace):
         z, RF_mo, delta = moveout(self.data, st, vmodel)
         st.pp_latitude = []
         st.pp_longitude = []
-        st.pp_depth = np.arange(0, maxz + res, res)[0:len(delta)]
+
+        if st.station_elevation > 0:
+            st.pp_depth = np.hstack(
+                (np.arange(-round(st.station_elevation/1000, 1), 0, .1),
+                 np.arange(0, maxz + res)))[:len(delta)]
+        else:
+            st.pp_depth = np.arange(-round(st.station_elevation/1000),
+                                    maxz + res, res)[0:len(delta)]
+        # np.arange(0, maxz + res, res)[0:len(delta)]
 
         # Calculate ppoint position
         for dis in delta:
@@ -843,16 +770,16 @@ class RFTrace(Trace):
         RF_mo.stats.update({"type": "depth", "npts": len(RF_mo.data)})
         return z, RF_mo
 
-    def ppoint(self, vmodel_file='iasp91.dat'):
+    def ppoint(self, vmodel):
         """
         Calculates piercing points for receiver function and adds them to
         self.stats in form of lat, lon and depth.
 
         Parameters
         ----------
-        vmodel_file : file, optional
+        vmodel : str, optional
             velocity model located in /data/vmodel.
-            The default is 'iasp91.dat'.
+            Standard choices are 'iasp91.dat' or 3D
 
         Returns
         -------
@@ -861,7 +788,16 @@ class RFTrace(Trace):
         """
 
         st = self.stats
-        htab, _, delta = dt_table(st.slowness, vmodel_file, st.phase)
+
+        if vmodel == '3D':
+            htab, _, delta = dt_table_3D(
+                st.slowness, st.phase, st.station_latitude,
+                st.station_longitude, st.back_azimuth, st.station_elevation)
+
+        else:
+            htab, _, delta = dt_table(
+                st.slowness, vmodel, st.phase, st.station_elevation)
+
         st.pp_depth = htab
         st.pp_latitude = []
         st.pp_longitude = []
@@ -947,14 +883,17 @@ class RFTrace(Trace):
             # plot
             ax.plot(t, y, color="k", linewidth=1.5)
             ax.set_xlabel('conversion time in s')
-            ax.set_xlim(0, 30)
+            ax.set_xlim(-10, 30)
             ax.set_title("Receiver Function " + str(self.stats.network) + " " +
                          str(self.stats.station) + " " +
                          str(self.stats.event_time))
 
         elif self.stats.type == "stastack" or self.stats.type == "depth":
             # plot against depth
-            z = np.linspace(0, maxz, len(self.data))
+            # z = np.linspace(0, maxz, len(self.data))
+            z = np.hstack(
+                ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+
             # plot
             ax.plot(z, y, color="k", linewidth=1.5)
 

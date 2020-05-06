@@ -236,11 +236,14 @@ class CCPStack(object):
 
         # Softlink useful variables and functions
         self.coords = self.bingrid.bins
-        self.z = np.arange(0, maxz+res, res)
+        # self.z = np.arange(0, maxz+res, res)
+        self.z = np.hstack(
+            (np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
         self.bins = np.zeros([self.coords[0].size, len(self.z)])
         self.illum = np.zeros(np.shape(self.bins))
         self.pplat = []
         self.pplon = []
+        self.ppz = []
         self.binrad = None
 
     def query_bin_tree(self, latitude, longitude, data, n_closest_points):
@@ -477,7 +480,7 @@ class CCPStack(object):
             datal.append(rf.data)
         return kk, jj, datal
 
-    def conclude_ccp(self, keep_empty=True, keep_water=True, r=1):
+    def conclude_ccp(self, keep_empty=True, keep_water=True, r=3):
         """
         Averages the CCP-bin and populates empty cells with average of
         neighbouring cells. No matter which option is
@@ -577,9 +580,15 @@ class CCPStack(object):
         elif fmt == "matlab":
 
             # Change vectors so it can be corrected for elevation
-            illum = np.pad(self.hits, ((0, 0), (round(10/.1), 0)))
-            depth = np.hstack((np.arange(-10, 0, .1), self.z))
-            ccp = np.pad(self.ccp, ((0, 0), (round(10/.1), 0)))
+            # Only for old data standard
+            if min(self.z) == 0:
+                illum = np.pad(self.hits, ((0, 0), (round(10/.1), 0)))
+                depth = np.hstack((np.arange(-10, 0, .1), self.z))
+                ccp = np.pad(self.ccp, ((0, 0), (round(10/.1), 0)))
+            else:
+                illum = self.hits
+                depth = self.z
+                ccp = self.ccp
 
             if hasattr(self, 'coords_new'):
                 lat_ccp, lon_ccp = self.coords_new
@@ -596,7 +605,7 @@ class CCPStack(object):
                       'CSLON': self.bingrid.longitude,
                       'clat': np.array(self.pplat),
                       'clon': np.array(self.pplon),
-                      'cdepth': self.z.astype(float)})
+                      'cdepth': self.ppz.astype(float)})
 
             sio.savemat(oloc + '.mat', d)
 
