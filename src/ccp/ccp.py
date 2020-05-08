@@ -479,7 +479,7 @@ class CCPStack(object):
             datal.append(rf.data)
         return kk, jj, datal
 
-    def conclude_ccp(self, keep_empty=True, keep_water=True, r=3):
+    def conclude_ccp(self, keep_empty=False, keep_water=False, r=3):
         """
         Averages the CCP-bin and populates empty cells with average of
         neighbouring cells. No matter which option is
