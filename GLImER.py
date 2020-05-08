@@ -2,15 +2,20 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Jan  8 16:33:41 2019
+
 Script to start the data accumulation for automatic RF processing.
+
 IMPORTANT:
 !!All configuration is done in config.py!!
-@author: pm
+
+Author:
+    Peter Makus (peter.makus@student.uib.no)
+
+Last updated:
 """
 import multiprocessing
 
 import config
-# IMPORT PREDEFINED SUBFUNCTIONS
 from src.waveform.request import Request
 
 

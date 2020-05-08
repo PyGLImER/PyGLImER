@@ -51,11 +51,11 @@ eMINLAT = None
 eMAXLAT = None
 eMINLON = None
 eMAXLON = None
-if phase == "P":
-    minMag = 5.5
-elif phase == "S":
-    minMag = 5.5
-maxMag = 10.0
+# if phase == "P":
+#     minMag = 5.5
+# elif phase == "S":
+#     minMag = 5.5
+# maxMag = 10.0
 
 # Station and Network codes
 # type : str
@@ -64,18 +64,18 @@ network = "YP"
 station = None
 
 # epicentral distances:
-if phase == "P":
-    min_epid = 28.1
-    max_epid = 95.8
-# (see Wilson et. al., 2006)
-elif phase == "S":
-    min_epid = 55
-    max_epid = 80
-# event depth in km (see Wilson et. al., 2006):
-if phase == "P":
-    maxdepth = None
-elif phase == "S":
-    maxdepth = 300
+# if phase == "P":
+#     min_epid = 28.1
+#     max_epid = 95.8
+# # (see Wilson et. al., 2006)
+# elif phase == "S":
+#     min_epid = 55
+#     max_epid = 80
+# # event depth in km (see Wilson et. al., 2006):
+# if phase == "P":
+#     maxdepth = None
+# elif phase == "S":
+#     maxdepth = 300
 
 # define 1D velocity model
 model = TauPyModel(model="iasp91")

@@ -754,7 +754,7 @@ class RFTrace(Trace):
             raise TypeError("RF is already depth migrated.")
         st = self.stats
 
-        z, RF_mo, delta = moveout(self.data, st, vmodel)
+        z, RF_mo, delta = moveout(self.data, st, vmodel, taper=taper)
         st.pp_latitude = []
         st.pp_longitude = []
 

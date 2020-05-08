@@ -23,6 +23,7 @@ from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 import config
 from .errorhandler import redownload, redownload_statxml, \
     NoMatchingResponseHandler, NotLinearlyIndependentHandler
+from ..constants import DEG2KM
 from .qc import qcp, qcs
 from .rotate import rotate_LQT_min, rotate_PSV, rotate_LQT
 from ..rf.create import createRF
@@ -245,8 +246,6 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
     infodict = {}  # empty dictionary that will be dumped in a shelve file
     # at the end of the program
 
-    # loop over all files for event x
-    # for file in files:
     start = time.time()
     # Open files that should be processed
     try:
@@ -260,23 +259,19 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
     network = st[0].stats.network
 
     # Location definitions
-    # Info file
     outdir = os.path.join(config.outputloc, 'by_station', network, station)
-    # config.outputloc+'/by_station/'+network+'/'+station
 
+    # Info file
     infof = os.path.join(outdir, 'info')
-    # outdir + '/info'
 
     outf = os.path.join(outdir, network+'.'+station+'.'+ot_fiss+'.mseed')
-    # outdir+'/'+network+'.'+station+'.'+ot_fiss+'.mseed'
 
     # Create directory for preprocessed file
     if not Path(outdir).is_dir():
         subprocess.call(["mkdir", "-p", outdir])
 
-# If the file hasn't been downloaded and preprocessed
-# in an earlier iteration of the program
-
+    # If the file hasn't been downloaded and preprocessed
+    # in an earlier iteration of the program
     if not __file_in_db(outdir, 'info.dat') or ot_fiss not in \
             shelve.open(infof, flag='r')['ot_all']:
         crit = False  # criterion to retain
@@ -377,6 +372,8 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
         # 21.04.2020 Second highcut filter
         if config.phase == "P":
             st.filter('lowpass', freq=1.5, zerophase=True, corners=2)
+        elif config.phase == 'S':
+            st.filter('lowpass', freq=0.175, zerophase=True, corners=2)
 
         start = time.time()
 
