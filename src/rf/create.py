@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+A toolset to create RFs and RF classes
+
 Created on Wed Feb 19 13:41:10 2020
 
-@author: pm
+Author:
+    Peter Makus (peter.makus@student.uib.no)
 
-toolset to create RFs and RF classes
+Some parts of this code are modified versions of the rf module by
+Tom Eulenfeld.
+
+Last updated:
 """
 import json
 import logging
@@ -419,7 +425,7 @@ class RFStream(Stream):
             traces.append(sliced_trace)
         return self.__class__(traces)
 
-    def moveout(self, vmodel):
+    def moveout(self, vmodel, taper=True):
         """
         Depth migration of all receiver functions given Stream.
         Also calculates piercing points and adds them to RFTrace.stats.
@@ -429,6 +435,9 @@ class RFStream(Stream):
         vmodel_file : file
             Velocity model located in /data/vmodel.
             Standard options are iasp91 and 3D (GYPSuM).
+        taper : Bool, optional
+            If True, the last 10km of the RF will be tapered, which avoids
+            jumps in station stacks. Should be False for CCP stacks.
 
         Returns
         -------
@@ -441,7 +450,7 @@ class RFStream(Stream):
         RF_mo = []
         for tr in self:
             try:
-                z, mo = tr.moveout(vmodel)
+                z, mo = tr.moveout(vmodel, taper=taper)
             except TypeError:
                 # This trace is already depth migrated
                 RF_mo.append(tr)
@@ -719,7 +728,7 @@ class RFTrace(Trace):
             reftime = self.stats[reftime]
         return reftime + seconds
 
-    def moveout(self, vmodel):
+    def moveout(self, vmodel, taper=True):
         """
         Depth migration of the receiver function.
         Also calculates piercing points.
@@ -729,6 +738,9 @@ class RFTrace(Trace):
         vmodel : str
             Velocity model located in /data/vmodel.
             Standard choices are '3D' for GYPSuM 3D model or iasp91.dat.
+        taper : Bool, optional
+            If True, the last 10km of the RF will be tapered, which avoids
+            jumps in station stacks. Should be False for CCP stacks.
 
         Returns
         -------
@@ -798,11 +810,22 @@ class RFTrace(Trace):
             htab, _, delta = dt_table(
                 st.slowness, vmodel, st.phase, st.station_elevation)
 
-        st.pp_depth = htab
+        # st.pp_depth = htab
+        st.pp_depth = np.hstack(
+            (np.arange(-10, 0, .1), np.arange(0, htab.max(), res)))
+        delta2 = np.empty(st.pp_depth.shape)
+        delta2.fill(np.nan)
+
+        # Find first pp depth
+        starti = np.nonzero(np.isclose(st.pp_depth, htab[0]))[0][0]
+
+        # Create full-length distance vector
+        delta2[starti:starti+len(delta)] = delta
+
         st.pp_latitude = []
         st.pp_longitude = []
 
-        for dis in delta:
+        for dis in delta2:
             lat = st.station_latitude
             lon = st.station_longitude
             az = st.back_azimuth

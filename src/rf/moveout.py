@@ -26,7 +26,7 @@ from ..utils.createvmodel import load_gyps
 _MODEL_CACHE = {}
 
 
-def moveout(data, st, fname):
+def moveout(data, st, fname, taper):
     """
     Depth migration for RF.
     Corrects the for the moveout of a converted phase. Flips time axis
@@ -40,6 +40,9 @@ def moveout(data, st, fname):
         Stats from stream object.
     fname : string
         1D velocity model for moveout correction. Use '3D' for a 3D raytracing.
+    taper : Bool
+        If True, the last 10km of the RF will be tapered, which avoids
+        jumps in station stacks. Should be False for CCP stacks.
 
     Returns
     -------
@@ -79,36 +82,35 @@ def moveout(data, st, fname):
     # Shorten RF
     RF = data[tas:tas+len(z)]
     zq = np.hstack((np.arange(min(z), 0, .1), np.arange(0, max(z)+res, res)))
-    # zq = np.arange(0, max(z)+res, res)
 
     # interpolate RF
     tck = interpolate.splrep(z, RF)
     RF = interpolate.splev(zq, tck)
+    if taper:
+        # Taper the last 10 km
+        tap = hann(20)
+        _, down = np.split(tap, 2)
 
-    # Taper the last 10 km
-    tap = hann(20)
-    _, down = np.split(tap, 2)
-
-    # And taper the first 5 samples
-    # tap = hann(10)
-    # up, _ = np.split(tap, 2)
-
-    if len(RF) > len(tap):  # That usually doesn't happen, only for extreme
-        # discontinuities in 3D model and errors in SRF data
-        taper = np.ones(len(RF))
-        taper[-len(down):] = down
-        # taper[:len(up)] = up
-        RF = np.multiply(taper, RF)
+        if len(RF) > len(tap):  # That usually doesn't happen, only for extreme
+            # discontinuities in 3D model and errors in SRF data
+            taper = np.ones(len(RF))
+            taper[-len(down):] = down
+            RF = np.multiply(taper, RF)
 
     # z2 = np.arange(0, maxz+res, res)
     z2 = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
     RF2 = np.zeros(z2.shape)
-    # RF2[:len(RF)] = RF
 
     # np.where does not seem to work here
     starti = np.nonzero(np.isclose(z2, htab[0]))[0][0]
     RF2[starti:starti+len(RF)] = RF
-    return z2, RF2, delta
+
+    # reshape delta - else that will mess with the CCP stacking
+    delta2 = np.empty(z2.shape)
+    delta2.fill(np.nan)
+    delta2[starti:starti+len(delta)] = delta
+
+    return z2, RF2, delta2
 
 
 def dt_table_3D(rayp, phase, lat, lon, baz, el):
@@ -157,9 +159,6 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el):
 
     htab_f = -R_EARTH*np.log((R_EARTH-htab)/R_EARTH)  # flat earth depth
     res_f = np.diff(htab_f)  # earth flattened resolution
-
-    # # Find station elevation
-    # istart = np.where(htab == -round(el/100)/10)
 
     # delay times
     dt = np.zeros(np.shape(htab))
@@ -251,7 +250,6 @@ def dt_table(rayp, fname, phase, el):
     z = np.append(z, maxz)
 
     # hypothetical conversion depth tables
-    # htab = np.arange(0, maxz+res, res)  # spherical
     if el > 0:
         htab = np.hstack(  # spherical
                          (np.arange(-round(el/1000, 1), 0, .1),

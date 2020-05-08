@@ -243,7 +243,7 @@ class CCPStack(object):
         self.illum = np.zeros(np.shape(self.bins))
         self.pplat = []
         self.pplon = []
-        self.ppz = []
+        self.ppz = self.z
         self.binrad = None
 
     def query_bin_tree(self, latitude, longitude, data, n_closest_points):
@@ -272,7 +272,6 @@ class CCPStack(object):
 
         # Depth index
         j = pos[0]
-        # j = j.astype(int)
 
         # Bin index
         k = i[pos]
@@ -337,7 +336,7 @@ class CCPStack(object):
                 """Maximum allowed binradius is 4 times the bin distance""")
 
         # Compute maxdist in euclidean space
-        self.binrad_eucl = epi2euc(binrad)
+        self.binrad_eucl = epi2euc(self.binrad)
 
         folder = config.RF[:-1] + self.bingrid.phase
 
@@ -464,7 +463,7 @@ class CCPStack(object):
                 rft.filter('bandpass', freqmin=filt[0], freqmax=filt[1],
                            zerophase=True, corners=2)
 
-            _, rf = rft[0].moveout(vmodel)
+            _, rf = rft[0].moveout(vmodel, taper=False)
             lat = np.array(rf.stats.pp_latitude)
             lon = np.array(rf.stats.pp_longitude)
             if append_pp:
