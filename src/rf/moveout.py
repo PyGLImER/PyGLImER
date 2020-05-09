@@ -26,7 +26,7 @@ from ..utils.createvmodel import load_gyps
 _MODEL_CACHE = {}
 
 
-def moveout(data, st, fname, taper):
+def moveout(data, st, fname, latb, lonb, taper):
     """
     Depth migration for RF.
     Corrects the for the moveout of a converted phase. Flips time axis
@@ -40,6 +40,11 @@ def moveout(data, st, fname, taper):
         Stats from stream object.
     fname : string
         1D velocity model for moveout correction. Use '3D' for a 3D raytracing.
+    latb : Tuple
+        Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
+        Will remain unused for 1D RT.
+    lonb : Tuple
+        Tuple in Form (minlon, maxlon)
     taper : Bool
         If True, the last 10km of the RF will be tapered, which avoids
         jumps in station stacks. Should be False for CCP stacks.
@@ -65,7 +70,7 @@ def moveout(data, st, fname, taper):
     if fname == '3D':
         htab, dt, delta = dt_table_3D(
             rayp, phase, st.station_latitude, st.station_longitude,
-            st.back_azimuth, el)
+            st.back_azimuth, el, latb, lonb)
     else:
         htab, dt, delta = dt_table(rayp, fname, phase, el)
 
@@ -113,7 +118,7 @@ def moveout(data, st, fname, taper):
     return z2, RF2, delta2
 
 
-def dt_table_3D(rayp, phase, lat, lon, baz, el):
+def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb):
     """
     Creates a phase delay table and calculates piercing points
     for a specific ray parameter,
@@ -131,6 +136,11 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el):
         Either "S" for Sp or "P" for Ps.
     el : float
         station elevation in m.
+    latb : Tuple
+        Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
+        Will remain unused for 1D RT.
+    lonb : Tuple
+        Tuple in Form (minlon, maxlon)
 
     Returns
     -------
@@ -147,7 +157,7 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el):
 
     p = rayp/DEG2KM  # convert to s/km
 
-    model = load_gyps(save=True)
+    model = load_gyps(save=True, latb=latb, lonb=lonb)
 
     # hypothetical conversion depth tables
     if el > 0:

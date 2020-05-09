@@ -28,6 +28,7 @@ from .compute.bin import BinGrid
 from ..rf.create import read_rf
 from ..rf.moveout import res, maxz
 from ..utils.utils import dt_string, chunks
+from ..utils.createvmodel import _MODEL_CACHE
 from ..utils.geo_utils import epi2euc
 from .plot_utils.plot_bins import plot_bins
 
@@ -139,6 +140,8 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
         ccp.compute_stack(
             vel_model=vel_model, network=network, station=station, save=save,
             append_pp=append_pp, binrad=binrad)
+
+    _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
 
     return ccp
 
@@ -412,9 +415,14 @@ class CCPStack(object):
         else:
             filt = False
 
+        # Define grid boundaries for 3D RT
+        latb = (self.coords[0].min(), self.coords[0].max())
+        lonb = (self.coords[0].min(), self.coords[0].max())
+
         out = Parallel(n_jobs=num_cores, prefer='processes')(
                         delayed(self.multicore_stack)(
-                            st, append_pp, n_closest_points, vel_model, filt)
+                            st, append_pp, n_closest_points, vel_model, latb,
+                            lonb, filt)
                         for st in chunks(streams, num_cores))
 
         # The stacking is done here (one should not reassign variables in
@@ -437,7 +445,7 @@ class CCPStack(object):
             self.write(filename=save)
 
     def multicore_stack(self, stream, append_pp, n_closest_points, vmodel,
-                        filt=False):
+                        latb, lonb, filt=False):
         """
         Takes in chunks of data to be processed on one core.
 
@@ -447,6 +455,18 @@ class CCPStack(object):
             List of file locations.
         append_pp : Bool
             Should piercing points be appended?.
+        n_closest_points : int
+            Number of Closest points that the KDTree should query.
+        vmodel : str
+            Name of the velocity model that should be used for the raytraycing.
+        latb : Tuple
+            Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
+            Will remain unused for 1D RT.
+        lonb : Tuple
+            Tuple in Form (minlon, maxlon).
+        filter : Bool, Tuple - optional
+            Should the RFs be filtered before the ccp stack? If so, provide
+            (lowcof, highcof).
 
         Returns
         -------

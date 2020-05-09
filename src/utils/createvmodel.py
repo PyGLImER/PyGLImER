@@ -29,7 +29,7 @@ gyps = os.path.join('data', 'velocity_models', 'GyPSuM')
 _MODEL_CACHE = {}
 
 
-def load_gyps(save=True):
+def load_gyps(save=True, latb=None, lonb=None):
     """
     Compiles the GyPSuM 3D-velocity object from included GyPSuM text files
 
@@ -40,6 +40,10 @@ def load_gyps(save=True):
         This will allow for faster access to the model. Saving the model takes
         about 800 MB disk space.
         The default is True.
+    latb : Tuple, optional
+        Creates a submodel from the full model. In form (minlat, maxlat).
+    lonb : Tuple, optional
+        (minlon, maxlon)
 
     Returns
     -------
@@ -47,19 +51,47 @@ def load_gyps(save=True):
         Object that can be queried for velocities.
 
     """
+    if latb and not lonb or lonb and not latb:
+        raise ValueError(
+            """"Provide either no geographic boundaries or both latitude
+            and longitude boundaries.""")
 
-    try:
-        return _MODEL_CACHE['gyps']
-    except KeyError:
-        pass
+    if latb:
+        try:
+            return _MODEL_CACHE['gyps' + str(latb) + str(lonb)]
+        except KeyError:
+            pass
+        try:
+            with open('tmp/'+str(latb)+str(lonb)+'.pkl', 'rb') as infile:
+                model = pickle.load(infile)
+
+                _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model
+                return model
+        except FileNotFoundError:
+            pass
+
+    else:
+        try:
+            return _MODEL_CACHE['gyps']
+        except KeyError:
+            pass
 
     try:
         with open('data/velocity_models/gypsum.pkl', 'rb') as infile:
-            _MODEL_CACHE['gyps'] = model = pickle.load(infile)
+            model = pickle.load(infile)
+
+            if not latb:
+                _MODEL_CACHE['gyps'] = model
+
+            else:
+                _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
+                    model.submodel(latb, lonb)
             return model
+
     except FileNotFoundError:
         pass
 
+    # Create initial, full model
     # Create the velocity deviation grids
     vpd, vsd, _ = np.mgrid[-90:91, -180:181, 0:18]
     vpd = vpd.astype(float)
@@ -125,18 +157,24 @@ def load_gyps(save=True):
     lat = np.arange(-90, 91, 1)
     lon = np.arange(-180, 181, 1)
     # Create a velocity model with 1km spacing
+    model = ComplexModel(zq, vp, vs, lat, lon)
 
-    # vs deviations
-    _MODEL_CACHE['gyps'] = model = ComplexModel(zq, vp, vs, lat, lon)
-
+    # Pickle model
     if save:
         model.write()
+
+    if not lat:
+        _MODEL_CACHE['gyps'] = model
+    else:
+        _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
+            model.submodel(latb, lonb)
+        model.write(filename=str(latb)+str(lonb), folder='tmp')
 
     return model
 
 
 class ComplexModel(object):
-    def __init__(self, z, vp, vs, lat, lon):
+    def __init__(self, z, vp, vs, lat, lon, flatten=True):
         """
         Velocity model based on GyPSuM model. Compiled and loaded with function
         load_gyps(). The model will be compiled once into a relatively large
@@ -156,6 +194,11 @@ class ComplexModel(object):
             Latitude vector.
         lon : 1D ndarray
             Longitude vector.
+        flatten : Bool - optional
+            Apply Earth flattening. Should be False for submodels. In that
+            case the values for vp and vs are already flattened.
+        zf : 1d ndarray
+            flattened depth vector. Only needed if flatten=False.
 
         Returns
         -------
@@ -165,7 +208,15 @@ class ComplexModel(object):
         self.lat = lat
         self.lon = lon
         self.z = z
-        self.zf, self.vpf, self.vsf = self.flatten(vp, vs)
+
+        if flatten:
+            self.vpf, self.vsf = self.flatten(vp, vs)
+        else:
+            # if not zf:
+            #     raise ValueError("""If flatten=False, a zf vector has to be
+            #                      provided""")
+            self.vpf = vp
+            self.vps = vs
 
     def query(self, lat, lon, z):
         """
@@ -245,9 +296,44 @@ class ComplexModel(object):
         r = R_EARTH  # Earth's radius
         vpf = np.multiply((r/(r-self.z)), vp)
         vsf = np.multiply((r/(r-self.z)), vs)
-        zf = -r*np.log((r-self.z)/r)
+        # zf = -r*np.log((r-self.z)/r)
 
-        return zf, vpf, vsf
+        return vpf, vsf
+
+    def submodel(self, lat, lon):
+        """
+        Creates a submodel from the current velocity model within the
+        defined geographic boundaries. Can save a lot of RAM.
+
+        Parameters
+        ----------
+        lat : tuple
+            Tuple in the form (minimum latitude, maximum latitude).
+        lon : tuple
+            Tuple in the form (minimum longitude, maximum longitude).
+            Note that this can cause troubles if the defined area is
+            between >-180 and <0 (which should usually not be the case).
+
+        Returns
+        -------
+        subm : ComplexModel
+            ComplexModel daughter object.
+
+        """
+        latv = np.arange(np.floor(lat[0]), np.ceil(lat[1])+1, 1)
+        lonv = np.arange(np.floor(lon[0]), np.ceil(lon[1])+1, 1)
+
+        m0 = np.where(self.latv == np.floor(lat[0]))[0][0]
+        m1 = np.where(self.latv == np.ceil(lat[1]))[0][0] + 1
+        n0 = np.where(self.lonv == np.floor(lon[0]))[0][0]
+        n1 = np.where(self.lonv == np.ceil(lon[1]))[0][0] + 1
+
+        # Define new model
+        subm = ComplexModel(
+            self.z, self.vpf[m0:m1, n0:n1, :], self.vsf[m0:m1, n0:n1, :],
+            latv, lonv, flatten=False)
+
+        return subm
 
 
 def load_avvmodel():

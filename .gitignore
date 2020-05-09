@@ -12,3 +12,4 @@ gypsum.pkl
 *.png
 *info*
 output*
+tmp/*

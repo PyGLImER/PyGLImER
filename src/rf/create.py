@@ -425,7 +425,7 @@ class RFStream(Stream):
             traces.append(sliced_trace)
         return self.__class__(traces)
 
-    def moveout(self, vmodel, taper=True):
+    def moveout(self, vmodel, latb=None, lonb=None, taper=True):
         """
         Depth migration of all receiver functions given Stream.
         Also calculates piercing points and adds them to RFTrace.stats.
@@ -435,6 +435,11 @@ class RFStream(Stream):
         vmodel_file : file
             Velocity model located in /data/vmodel.
             Standard options are iasp91 and 3D (GYPSuM).
+        latb : Tuple, optional
+            Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
+            Will remain unused for 1D RT.
+        lonb : Tuple, optional
+            Tuple in Form (minlon, maxlon)
         taper : Bool, optional
             If True, the last 10km of the RF will be tapered, which avoids
             jumps in station stacks. Should be False for CCP stacks.
@@ -450,7 +455,7 @@ class RFStream(Stream):
         RF_mo = []
         for tr in self:
             try:
-                z, mo = tr.moveout(vmodel, taper=taper)
+                z, mo = tr.moveout(vmodel, latb=latb, lonb=lonb, taper=taper)
             except TypeError:
                 # This trace is already depth migrated
                 RF_mo.append(tr)
@@ -461,7 +466,7 @@ class RFStream(Stream):
             z = np.linspace(0, maxz, len(st[0].data))
         return z, st
 
-    def ppoint(self, vmodel_file='iasp91.dat'):
+    def ppoint(self, vmodel_file='iasp91.dat', latb=None, lonb=None):
         """
         Calculates piercing points for all receiver functions in given
         RFStream and adds them to self.stats in form of lat, lon and depth.
@@ -471,13 +476,18 @@ class RFStream(Stream):
         vmodel_file : file, optional
             velocity model located in /data/vmodel.
             The default is 'iasp91.dat'.
+        latb : Tuple
+            Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
+            Will remain unused for 1D RT.
+        lonb : Tuple
+            Tuple in Form (minlon, maxlon)
 
         Returns
         -------
         None.
         """
         for tr in self:
-            tr.ppoint(vmodel_file=vmodel_file)
+            tr.ppoint(vmodel_file=vmodel_file, latb=latb, lonb=lonb)
 
     def station_stack(self, vmodel_file='iasp91.dat'):
         """
@@ -499,8 +509,10 @@ class RFStream(Stream):
             Object containing depth migrated traces.
 
         """
+        latb = (self.station_latitude-10, self.station_latitude+10)
+        lonb = (self.statio_longitude-20, self.station_longitude+20)
 
-        z, RF_mo = self.moveout(vmodel_file=vmodel_file)
+        z, RF_mo = self.moveout(vmodel_file=vmodel_file, latb=latb, lonb=lonb)
         RF_mo.normalize()  # make sure traces are normalised
         traces = []
         for tr in RF_mo:
@@ -728,7 +740,7 @@ class RFTrace(Trace):
             reftime = self.stats[reftime]
         return reftime + seconds
 
-    def moveout(self, vmodel, taper=True):
+    def moveout(self, vmodel, latb=None, lonb=None, taper=True):
         """
         Depth migration of the receiver function.
         Also calculates piercing points.
@@ -738,6 +750,11 @@ class RFTrace(Trace):
         vmodel : str
             Velocity model located in /data/vmodel.
             Standard choices are '3D' for GYPSuM 3D model or iasp91.dat.
+        latb : Tuple
+            Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
+            Will remain unused for 1D RT.
+        lonb : Tuple
+            Tuple in Form (minlon, maxlon)
         taper : Bool, optional
             If True, the last 10km of the RF will be tapered, which avoids
             jumps in station stacks. Should be False for CCP stacks.
@@ -754,7 +771,8 @@ class RFTrace(Trace):
             raise TypeError("RF is already depth migrated.")
         st = self.stats
 
-        z, RF_mo, delta = moveout(self.data, st, vmodel, taper=taper)
+        z, RF_mo, delta = moveout(self.data, st, vmodel, latb=latb, lonb=lonb,
+                                  taper=taper)
         st.pp_latitude = []
         st.pp_longitude = []
 
@@ -782,7 +800,7 @@ class RFTrace(Trace):
         RF_mo.stats.update({"type": "depth", "npts": len(RF_mo.data)})
         return z, RF_mo
 
-    def ppoint(self, vmodel):
+    def ppoint(self, vmodel, latb=None, lonb=None):
         """
         Calculates piercing points for receiver function and adds them to
         self.stats in form of lat, lon and depth.
@@ -792,6 +810,11 @@ class RFTrace(Trace):
         vmodel : str, optional
             velocity model located in /data/vmodel.
             Standard choices are 'iasp91.dat' or 3D
+        latb : Tuple, optional
+            Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
+            Will remain unused for 1D RT.
+        lonb : Tuple, optional
+            Tuple in Form (minlon, maxlon)
 
         Returns
         -------
@@ -804,7 +827,8 @@ class RFTrace(Trace):
         if vmodel == '3D':
             htab, _, delta = dt_table_3D(
                 st.slowness, st.phase, st.station_latitude,
-                st.station_longitude, st.back_azimuth, st.station_elevation)
+                st.station_longitude, st.back_azimuth, st.station_elevation,
+                latb, lonb)
 
         else:
             htab, _, delta = dt_table(
