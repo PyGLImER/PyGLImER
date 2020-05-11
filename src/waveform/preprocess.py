@@ -3,7 +3,10 @@
 """
 Created on Wed Apr 24 20:31:05 2019
 
-@author: pm
+Author:
+    Peter Makus (peter.makus@student.uib.no)
+
+Last updated:
 """
 import fnmatch
 import logging
@@ -78,7 +81,7 @@ def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
     ###########
     # logging
     logger = logging.Logger("src.waveform.preprocess")
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.WARNING)
 
     # Create handler to the log
     fh = logging.FileHandler('logs/preprocess.log')

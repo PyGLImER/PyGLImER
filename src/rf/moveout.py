@@ -5,7 +5,10 @@ Created on Tue Apr  7 10:08:42 2020
 
 Contains functions for moveout correction and station stacking
 
-@author: pm
+Author:
+    Peter Makus (peter.makus@student.uib.no)
+
+Last updated:
 """
 
 import os

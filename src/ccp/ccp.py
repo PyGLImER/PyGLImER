@@ -25,6 +25,7 @@ from mpl_toolkits.basemap import Basemap
 
 import config
 from .compute.bin import BinGrid
+from ..database.stations import StationDB
 from ..rf.create import read_rf
 from ..rf.moveout import res, maxz
 from ..utils.utils import dt_string, chunks
@@ -47,7 +48,7 @@ fh.setFormatter(fmt)
 
 
 def init_ccp(spacing, vel_model, phase=config.phase, network=None,
-             station=None,
+             station=None, geocoords=None,
              compute_stack=False, binrad=np.cos(np.radians(30)),
              append_pp=False, save=False, verbose=True):
     """
@@ -74,6 +75,8 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
         Standard unix wildcards are allowed. Can only be list if
         type(network)=str. If None, the whole database will be used.
         The default is None.
+    geocoords : Tuple, optional
+        An alternative way of selecting networks and stations
     compute_stack : Bool, optional
         If true it will compute the stack by calling ccp.compute_stack().
         That can take a long time! The default is False.
@@ -107,11 +110,35 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
     lons = []
 
     # Were network and stations provided?
-    if network and type(network) == list:
+    # Possibility 1 as geo boundaries
+    if geocoords:
+        lat = (geocoords[0], geocoords[1])
+        lon = (geocoords[2], geocoords[3])
+        db = StationDB()
+        net, stat = db.find_stations(lat, lon)
+        pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
         files = []
-        for net in network:
-            pattern = net + '.' + (station or '') + '*'
-            files.extend(fnmatch.filter(os.listdir(config.statloc), pattern))
+        for pat in pattern:
+            files.extend(fnmatch.filter(os.listdir(config.statloc), pat+'.xml'))
+
+    # As strings
+    elif network and type(network) == list:
+        files = []
+        if station:
+            if type(station) != list:
+                raise TypeError(
+                    """Provide a list of stations, when using a list of
+                    networks as parameter.""")
+            for net in network:
+                for stat in station:
+                    pattern = net + '.' + stat
+                    files.extend(
+                        fnmatch.filter(os.listdir(config.statloc), pattern))
+        else:
+            for net in network:
+                pattern = net + '.' + (station or '') + '*'
+                files.extend(
+                    fnmatch.filter(os.listdir(config.statloc), pattern))
     elif network and type(station) == list:
         files = []
         for stat in station:
