@@ -37,7 +37,7 @@ from .moveout import DEG2KM, maxz, res, moveout, dt_table, dt_table_3D
 logger = logging.Logger("rf")
 
 
-def createRF(st_in, phase=config.phase, onset=None, shift=config.tz,
+def createRF(st_in, phase=config.phase, onset=None,
              method=config.decon_meth, trim=None, event=None, station=None,
              info=None):
     """
@@ -53,9 +53,6 @@ def createRF(st_in, phase=config.phase, onset=None, shift=config.tz,
     onset: UTCDateTime, optional
         Is used to shift function rather than shift if provided.
         If info is provided, it will be extracted from info file.
-    shift : float, optional
-        Time shift of theoretical arrival from starttime in seconds.
-        The default is config.tz.
     method : string, optional
         Deconvolution method, "waterlevel", 'dampedf' for constant
         damping level, 'it' for iterative time domain deconvoltuion, 'multit'

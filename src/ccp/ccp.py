@@ -386,7 +386,7 @@ class CCPStack(object):
                 infiles.append(os.path.join(root, name))
 
         # Special rule for files imported from Matlab
-        if network == 'matlab':
+        if network == 'matlab' or network == 'raysum':
             pattern.append('*.sac')
 
         # Set filter patterns
@@ -431,6 +431,9 @@ class CCPStack(object):
 
         # Split job into n chunks
         num_cores = cpu_count()
+
+        # if network == 'raysum':
+        #     num_cores = 1  # Else its too memory hungry
 
         # Actual CCP stack
         # Note loki does mess up the output and threads is slower than
@@ -636,7 +639,7 @@ class CCPStack(object):
                 depth = self.z
                 ccp = self.ccp
 
-            if hasattr(self, 'coords_new'):
+            if hasattr(self, 'coords_new') and self.coords_new[0].size:
                 lat_ccp, lon_ccp = self.coords_new
             else:
                 lat_ccp, lon_ccp = self.coords

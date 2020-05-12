@@ -14,12 +14,14 @@ import h5py
 from pathlib import Path
 from joblib import Parallel, delayed
 
-from obspy import UTCDateTime, read, Trace
+from obspy import UTCDateTime, read, Trace, Stream
 from obspy.core import Stats
 from obspy.signal.filter import lowpass
 
 import config
+from ..ccp import CCPStack
 from ..rf import RFTrace, RFStream
+from ..rf.create import createRF
 from ..rf.deconvolve import it, multitaper, spectraldivision
 from ..rf.moveout import moveout, DEG2KM
 from ..waveform.qc import qcs, qcp
@@ -134,6 +136,157 @@ def read_raysum(NEZ_file=None, RTZ_file=None, PSS_file=None):
             return RTZ, dt, M, N, shift
         elif PSS_f:
             return PSS, dt, M, N, shift
+
+
+def read_geom(geom_file):
+    """
+    Reads in the geometry file of the raysum program to determine parameters.
+
+    Parameters
+    ----------
+    geom_file : str
+        Filename of the geometry file.
+
+    Returns
+    -------
+    baz : np.ndarray(1D)
+        Array containing the backazimuths of each trace [deg].
+    q : np.ndarray(1D)
+        Array containing the slownesses of each trace [s/m].
+    dN : np.ndarray(1D)
+        Array containing the north shift of each trace [m].
+    dE : np.ndarray(1D)
+        Array containing the east shift of each trace [m].
+
+    """
+    geom = open(os.path.join(tr_folder, geom_file))
+    x = geom.readlines()
+
+    baz = []  # back-azimuths [deg]
+    q = []  # slownesses [s/m]
+    dN = []  # North shift [m]
+    dE = []  # East shift [m]
+    for line in x:
+        # Ignore comments
+        if line[0] == '#':
+            continue
+        # Create list
+        ls = line.split()
+
+        # append each element
+        baz.append(ls[0])
+        q.append(ls[1])
+        dN.append(ls[2])
+        dE.append(ls[3])
+
+    # Convert to float
+    baz = np.array(baz, dtype=float)
+    q = np.array(q, dtype=float)
+    dN = np.array(dN, dtype=float)
+    dE = np.array(dE, dtype=float)
+
+    return baz, q, dN, dE
+
+
+def rf_test(
+        PSS_file=['3D_0.tr', '3D_1.tr', '3D_2.tr', '3D_3.tr', '3D_4.tr'],
+        geom_file='3D.geom'):
+    """
+    Creates synthetic PRFs from Raysum data.
+
+    Parameters
+    ----------
+    PSS_file : str or list, optional
+        Filename of raysum file containing P-Sv-Sh traces. If several files,
+        enter list
+    geom_file : str, optional
+        Filename of the geometry file
+
+    Returns
+    -------
+    rfs: list
+        List of RFTrace objects. Will in addition be saved in SAC format.
+
+    """
+    # Read geometry
+    baz, q, dN, dE = read_geom(geom_file)
+
+    statlat = dN/(DEG2KM*1000)
+    statlon = dE/(DEG2KM*1000)
+    rayp = q*DEG2KM*1000
+
+    # Read traces
+    stream = []
+
+    for f in PSS_file:
+        PSS, dt, _, N, shift = read_raysum(PSS_file=f)
+        stream.append(PSS)
+
+    streams = np.vstack(stream)
+    del stream
+
+    M = len(baz)
+
+    if M != streams.shape[0]:
+        raise ValueError("""Number of traces does not equal the number
+                         of backazimuths in the geom file.""")
+
+    rfs = []
+    odir = os.path.join(config.RF[:-1], 'P', 'raysum', 'raysum')
+    ch = ['BHP', 'BHH', 'BHV']  # Channel names
+
+    if not Path(odir).is_dir():
+        subprocess.call(['mkdir', '-p', odir])
+
+    # Create RF objects
+    for i, st in enumerate(streams):
+        s = Stream()
+        for j, tr in enumerate(st):
+            stats = Stats()
+            stats.npts = N
+            stats.delta = dt
+            stats.starttime = UTCDateTime(0)
+            stats.channel = ch[j]
+            s.append(Trace(data=tr, header=stats))
+
+        # Create info dictionary for rf creation
+        info = {
+            'onset': [UTCDateTime(0)+shift], 'starttime': [UTCDateTime(0)],
+            'statlat': statlat[i], 'statlon': statlon[i],
+            'statel': 0, 'rayp_s_deg': [rayp[i]], 'rbaz': [baz[i]],
+            'rdelta': [np.nan], 'ot_ret': [0], 'magnitude': [np.nan],
+            'evt_depth': [np.nan], 'evtlon': [np.nan], 'evtlat': [np.nan]}
+
+        rf = createRF(s, phase='P', method='it', info=info)
+
+        # The rotation in Raysum does not work properly
+        if abs(rf.data.max()) > abs(rf.data.min()):
+            rf.data = -rf.data
+
+        # Write RF
+        rf.write(os.path.join(odir, str(i)+'.sac'), format='SAC')
+        rfs.append(rf)
+
+    return rfs, statlat, statlon
+
+
+def ccp_test(
+        PSS_file=['3D_0.tr', '3D_1.tr', '3D_2.tr', '3D_3.tr', '3D_4.tr'],
+        geom_file='3D.geom'):
+    rfs, statlat, statlon = rf_test(PSS_file, geom_file)
+    print("RFs created")
+
+    # Create empty CCP object
+    ccp = CCPStack(statlat, statlon, 0.05, phase='P')
+    print("CCP object created")
+
+    # Create stack
+    ccp.compute_stack(
+        'raysum3D', network='raysum', station='raysum', save=False)
+    print('ccp stack concluded')
+    ccp.conclude_ccp(r=1, keep_water=True)
+    ccp.write('raysum', fmt='matlab')
+    return ccp
 
 
 def moveout_test(PSS_file, q, phase):

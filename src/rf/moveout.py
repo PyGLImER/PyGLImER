@@ -23,7 +23,7 @@ from scipy.signal.windows import hann
 
 import config
 from ..constants import R_EARTH, DEG2KM, maxz, res
-from ..utils.createvmodel import load_gyps
+from ..utils.createvmodel import load_gyps, raysum3D
 
 
 _MODEL_CACHE = {}
@@ -70,10 +70,11 @@ def moveout(data, st, fname, latb, lonb, taper):
     phase = st.phase  # Primary phase
     el = st.station_elevation
 
-    if fname == '3D':
+    if fname[-2:] == '3D':
+        test = fname == 'raysum3D'
         htab, dt, delta = dt_table_3D(
             rayp, phase, st.station_latitude, st.station_longitude,
-            st.back_azimuth, el, latb, lonb)
+            st.back_azimuth, el, latb, lonb, test=test)
     else:
         htab, dt, delta = dt_table(rayp, fname, phase, el)
 
@@ -121,7 +122,7 @@ def moveout(data, st, fname, latb, lonb, taper):
     return z2, RF2, delta2
 
 
-def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb):
+def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
     """
     Creates a phase delay table and calculates piercing points
     for a specific ray parameter,
@@ -144,6 +145,8 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb):
         Will remain unused for 1D RT.
     lonb : Tuple
         Tuple in Form (minlon, maxlon)
+    test : Bool
+        If True, the raysum 3D model is loaded.
 
     Returns
     -------
@@ -160,7 +163,10 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb):
 
     p = rayp/DEG2KM  # convert to s/km
 
-    model = load_gyps(save=True, latb=latb, lonb=lonb)
+    if test:
+        model = raysum3D()
+    else:
+        model = load_gyps(save=True, latb=latb, lonb=lonb)
 
     # hypothetical conversion depth tables
     if el > 0:
@@ -171,6 +177,10 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb):
         htab = np.arange(-round(el/1000), maxz+res, res)
 
     htab_f = -R_EARTH*np.log((R_EARTH-htab)/R_EARTH)  # flat earth depth
+
+    if test:  # then cartesian
+        htab_f = htab
+
     res_f = np.diff(htab_f)  # earth flattened resolution
 
     # delay times

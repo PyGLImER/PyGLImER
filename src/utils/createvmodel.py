@@ -17,8 +17,11 @@ import fnmatch
 
 import numpy as np
 from scipy.interpolate import interp1d
+from scipy.spatial import KDTree
+from obspy.geodetics import gps2dist_azimuth
 
-from ..constants import R_EARTH, maxz, res
+from ..constants import R_EARTH, maxz, res, DEG2KM
+from ..utils.geo_utils import geo2cart, cart2geo
 
 # location of lith1 file
 lith1 = os.path.join('/home', 'pm', 'LITHO1.0', 'bin', 'access_litho')
@@ -173,8 +176,64 @@ def load_gyps(save=True, latb=None, lonb=None):
     return model
 
 
+def raysum3D():
+    """
+    Compiles the provided Raysum test model (3D).
+
+    Returns
+    -------
+    model : ComplexModel
+        Complexmodel object that can be queried.
+
+    """
+    try:
+        return _MODEL_CACHE['raysum']
+    except KeyError:
+        pass
+
+    z = np.arange(0, maxz+res, res)  # depth in km
+    lat = np.arange(-5, 5.01, 0.05)
+    lon = np.arange(-5, 5.01, 0.05)
+
+    # Populate velocity models
+    vp = np.empty((len(lat), len(lon), len(z)))
+    vs = np.empty((len(lat), len(lon), len(z)))
+
+    # vp.fill(6.3)  # km/s
+    # vs.fill(3)  # km/s
+
+    # above Moho
+    im = np.where(z == 20)[0][0]
+    vp[:, :, :im].fill(3.54)
+    vs[:, :, :im].fill(1.41)
+    vp[:, :, im:].fill(7.7)
+    vs[:, :, im:].fill(4.2)
+
+    # calculate position of dipping layer
+    # d = np.empty((len(lat), len(lon)))  # array containing depth of LAB
+    dip = 10  # deg
+    d0 = 150  # depth at origin (0,0)
+    a = np.tan(np.deg2rad(dip))
+
+    for m, latitude in enumerate(lat):
+        x = DEG2KM*latitude
+        for n, longitude in enumerate(lon):
+            y, _, _ = gps2dist_azimuth(latitude, 0, latitude, longitude)
+            y = y/1000
+            if longitude < 0:
+                y = -y
+                # Depth depending on x, y
+                d = int(round(a*np.dot([1, -1], (x, y))/np.sqrt(2) + d0))
+                vp[m, n, d:] = 6.3
+                vs[m, n, d:] = 3
+    _MODEL_CACHE['raysum'] = \
+        model = ComplexModel(z, vp, vs, lat, lon, flatten=False, zf=z)
+
+    return model
+
+
 class ComplexModel(object):
-    def __init__(self, z, vp, vs, lat, lon, flatten=True):
+    def __init__(self, z, vp, vs, lat, lon, flatten=True, zf=None):
         """
         Velocity model based on GyPSuM model. Compiled and loaded with function
         load_gyps(). The model will be compiled once into a relatively large
@@ -207,16 +266,28 @@ class ComplexModel(object):
         """
         self.lat = lat
         self.lon = lon
+        grid = np.meshgrid(self.lat, self.lon)
+        self.coords = (grid[0].ravel(), grid[1].ravel())
+        del grid
+
+        xs, ys, zs = geo2cart(R_EARTH, self.coords[0],
+                                             self.coords[1])
+
+        self.tree = KDTree(list(zip(xs, ys, zs)))
+        del xs, ys, zs
+
         self.z = z
+        self.ndec = len(str(lat[1]-lat[0]))-1
 
         if flatten:
-            self.vpf, self.vsf = self.flatten(vp, vs)
+            self.vpf, self.vsf, self.zf = self.flatten(vp, vs)
         else:
             # if not zf:
             #     raise ValueError("""If flatten=False, a zf vector has to be
             #                      provided""")
             self.vpf = vp
-            self.vps = vs
+            self.vsf = vs
+            self.zf = zf
 
     def query(self, lat, lon, z):
         """
@@ -239,8 +310,15 @@ class ComplexModel(object):
             S-wave velocity.
 
         """
-        m = np.where(round(lat) == self.lat)[0][0]
-        n = np.where(round(lon) == self.lon)[0][0]
+        # m = np.where(round(lat, self.ndec) == self.lat)[0][0]
+        # n = np.where(round(lon, self.ndec) == self.lon)[0][0]
+        # m = np.nonzero(np.isclose(round(lat, self.ndec), self.lat))[0][0]
+        # n = np.nonzero(np.isclose(round(lon, self.ndec), self.lon))[0][0]
+        xs, ys, zs = geo2cart(R_EARTH, lat, lon)
+        d, i = self.tree.query([xs, ys, zs])
+
+        m = np.where(self.lat == self.coords[0][i])[0][0]
+        n = np.where(self.lon == self.coords[1][i])[0][0]
         p = np.where(round(z) == self.z)[0][0]
 
         vp = self.vpf[m, n, p]
@@ -296,9 +374,9 @@ class ComplexModel(object):
         r = R_EARTH  # Earth's radius
         vpf = np.multiply((r/(r-self.z)), vp)
         vsf = np.multiply((r/(r-self.z)), vs)
-        # zf = -r*np.log((r-self.z)/r)
+        zf = -r*np.log((r-self.z)/r)
 
-        return vpf, vsf
+        return vpf, vsf, zf
 
     def submodel(self, lat, lon):
         """
@@ -331,7 +409,7 @@ class ComplexModel(object):
         # Define new model
         subm = ComplexModel(
             self.z, self.vpf[m0:m1, n0:n1, :], self.vsf[m0:m1, n0:n1, :],
-            latv, lonv, flatten=False)
+            latv, lonv, flatten=False, zf=self.zf)
 
         return subm
 
