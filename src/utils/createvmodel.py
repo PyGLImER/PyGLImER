@@ -187,12 +187,18 @@ def load_gyps(save=True, latb=None, lonb=None):
     return model
 
 
-def raysum3D():
+def raysum3D(dip):
     """
     Compiles the provided Raysum test model (3D). Fairly clumpsy solved,
     which makes it quite slow and RAM intense. An interpolated model instead
     of a gridded model would probably be faster and more accurate. However,
     this one is closer to the "real 3D model".
+
+    Parameters
+    ----------
+    dip : int
+        Dip of the LAB in degree. Options are 10, 20, 30, 40 deg.
+        Rest of the model is set.
 
     Returns
     -------
@@ -200,8 +206,9 @@ def raysum3D():
         Complexmodel object that can be queried.
 
     """
+
     try:
-        return _MODEL_CACHE['raysum']
+        return _MODEL_CACHE['raysum'+str(dip)]
     except KeyError:
         pass
 
@@ -221,8 +228,6 @@ def raysum3D():
     vs[:, :, im:].fill(4.2)
 
     # calculate position of dipping layer
-    # d = np.empty((len(lat), len(lon)))  # array containing depth of LAB
-    dip = 10  # deg
     d0 = 150  # depth at origin (0,0)
     a = np.tan(np.deg2rad(dip))
 
@@ -237,7 +242,7 @@ def raysum3D():
                 d = int(round(a*np.dot([1, -1], (x, y))/np.sqrt(2) + d0))
                 vp[m, n, d:] = 6.3
                 vs[m, n, d:] = 3
-    _MODEL_CACHE['raysum'] = \
+    _MODEL_CACHE['raysum'+str(dip)] = \
         model = ComplexModel(z, vp, vs, lat, lon, flatten=False, zf=z)
 
     return model

@@ -55,8 +55,8 @@ class StationDB(object):
         folderS = os.path.join(config.outputloc[:-1], 'S', 'by_station')
 
         # Check data availability of PRFs
-        for root, dirs, _ in os.walk(folderP):
-            if len(dirs):
+        for root, _, files in os.walk(folderP):
+            if 'info.dat' not in files:
                 continue  # Skip parent folders
             infof = (os.path.join(root, 'info'))
 
@@ -77,9 +77,9 @@ class StationDB(object):
                                        info['network'] + '.' + info['station']])
 
         # Check data availability of SRFs
-        for root, dirs, _ in os.walk(folderS):
-            if len(dirs):
-                continue  # Skip parent folders
+        for root, _, files in os.walk(folderS):
+            if 'info.dat' not in files:
+                continue  # Skip parent folders or empty folders
             infof = (os.path.join(root, 'info'))
 
             with shelve.open(infof, flag='r') as info:

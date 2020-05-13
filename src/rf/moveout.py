@@ -72,6 +72,8 @@ def moveout(data, st, fname, latb, lonb, taper):
 
     if fname[-2:] == '3D':
         test = fname == 'raysum3D'
+        if test:
+            test = int(st.station)  # The dip of the LAB
         htab, dt, delta = dt_table_3D(
             rayp, phase, st.station_latitude, st.station_longitude,
             st.back_azimuth, el, latb, lonb, test=test)
@@ -164,7 +166,7 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
     p = rayp/DEG2KM  # convert to s/km
 
     if test:
-        model = raysum3D()
+        model = raysum3D(test)
     else:
         model = load_gyps(save=True, latb=latb, lonb=lonb)
 

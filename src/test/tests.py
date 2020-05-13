@@ -189,16 +189,14 @@ def read_geom(geom_file):
 
 
 def rf_test(
-        PSS_file=['3D_0.tr', '3D_1.tr', '3D_2.tr', '3D_3.tr', '3D_4.tr'],
-        geom_file='3D.geom'):
+        dip, geom_file='3D.geom'):
     """
     Creates synthetic PRFs from Raysum data.
 
     Parameters
     ----------
-    PSS_file : str or list, optional
-        Filename of raysum file containing P-Sv-Sh traces. If several files,
-        enter list
+    dip : int
+        Dip of the LAB in deg, determines, which files to use
     geom_file : str, optional
         Filename of the geometry file
 
@@ -208,6 +206,11 @@ def rf_test(
         List of RFTrace objects. Will in addition be saved in SAC format.
 
     """
+    # Determine filenames
+    PSS_file = []
+    for i in range(5):
+        PSS_file.append('3D_' + str(dip) + '_' + str(i) + '.tr')
+
     # Read geometry
     baz, q, dN, dE = read_geom(geom_file)
 
@@ -232,7 +235,7 @@ def rf_test(
                          of backazimuths in the geom file.""")
 
     rfs = []
-    odir = os.path.join(config.RF[:-1], 'P', 'raysum', 'raysum')
+    odir = os.path.join(config.RF[:-1], 'P', 'raysum', str(dip))
     ch = ['BHP', 'BHH', 'BHV']  # Channel names
 
     if not Path(odir).is_dir():
@@ -247,6 +250,8 @@ def rf_test(
             stats.delta = dt
             stats.starttime = UTCDateTime(0)
             stats.channel = ch[j]
+            stats.network = 'RS'
+            stats.station = str(dip)
             s.append(Trace(data=tr, header=stats))
 
         # Create info dictionary for rf creation
@@ -270,10 +275,8 @@ def rf_test(
     return rfs, statlat, statlon
 
 
-def ccp_test(
-        PSS_file=['3D_0.tr', '3D_1.tr', '3D_2.tr', '3D_3.tr', '3D_4.tr'],
-        geom_file='3D.geom'):
-    rfs, statlat, statlon = rf_test(PSS_file, geom_file)
+def ccp_test(dip, geom_file='3D.geom'):
+    rfs, statlat, statlon = rf_test(dip, geom_file)
     print("RFs created")
 
     # Create empty CCP object
@@ -282,10 +285,10 @@ def ccp_test(
 
     # Create stack
     ccp.compute_stack(
-        'raysum3D', network='raysum', station='raysum', save=False)
+        'raysum3D', network='raysum', station=str(dip), save=False)
     print('ccp stack concluded')
     ccp.conclude_ccp(r=1, keep_water=True)
-    ccp.write('raysum', fmt='matlab')
+    ccp.write('raysum'+str(dip), fmt='matlab')
     return ccp
 
 

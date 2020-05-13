@@ -121,7 +121,8 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
         pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
         files = []
         for pat in pattern:
-            files.extend(fnmatch.filter(os.listdir(config.statloc), pat+'.xml'))
+            files.extend(
+                fnmatch.filter(os.listdir(config.statloc), pat+'.xml'))
 
     # As strings
     elif network and type(network) == list:
@@ -378,6 +379,8 @@ class CCPStack(object):
         if network and type(network) == str:
             # Loop over fewer files
             folder = os.path.join(folder, network)
+            if station and type(station) == str:
+                folder = os.path.join(folder, station)
 
         infiles = []  # List of all files in folder
         pattern = []  # List of input constraints
