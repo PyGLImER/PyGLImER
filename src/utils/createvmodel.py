@@ -19,6 +19,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 from scipy.spatial import KDTree
 from obspy.geodetics import gps2dist_azimuth
+from pathlib import Path
 
 from ..constants import R_EARTH, maxz, res, DEG2KM
 from ..utils.geo_utils import geo2cart, cart2geo
@@ -60,6 +61,10 @@ def load_gyps(save=True, latb=None, lonb=None):
             and longitude boundaries.""")
 
     if latb:
+        # Changes the boundaries to ints (mainly for filenames)
+        latb = (int(np.floor(latb[0])), int(np.ceil(latb[1])))
+        lonb = (int(np.floor(lonb[0])), int(np.ceil(lonb[1])))
+
         try:
             return _MODEL_CACHE['gyps' + str(latb) + str(lonb)]
         except KeyError:
@@ -73,11 +78,15 @@ def load_gyps(save=True, latb=None, lonb=None):
         except FileNotFoundError:
             pass
 
-    else:
-        try:
-            return _MODEL_CACHE['gyps']
-        except KeyError:
-            pass
+    try:
+        model = _MODEL_CACHE['gyps']
+        if latb:
+            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
+                    model.submodel(latb, lonb)
+            model.write(filename=str(latb)+str(lonb), folder='tmp')
+        return model
+    except KeyError:
+        pass
 
     try:
         with open('data/velocity_models/gypsum.pkl', 'rb') as infile:
@@ -89,7 +98,8 @@ def load_gyps(save=True, latb=None, lonb=None):
             else:
                 _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
                     model.submodel(latb, lonb)
-            return model
+                model.write(filename=str(latb)+str(lonb), folder='tmp')
+                return model
 
     except FileNotFoundError:
         pass
@@ -159,6 +169,7 @@ def load_gyps(save=True, latb=None, lonb=None):
 
     lat = np.arange(-90, 91, 1)
     lon = np.arange(-180, 181, 1)
+
     # Create a velocity model with 1km spacing
     model = ComplexModel(zq, vp, vs, lat, lon)
 
@@ -166,7 +177,7 @@ def load_gyps(save=True, latb=None, lonb=None):
     if save:
         model.write()
 
-    if not lat:
+    if not latb:
         _MODEL_CACHE['gyps'] = model
     else:
         _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
@@ -178,7 +189,10 @@ def load_gyps(save=True, latb=None, lonb=None):
 
 def raysum3D():
     """
-    Compiles the provided Raysum test model (3D).
+    Compiles the provided Raysum test model (3D). Fairly clumpsy solved,
+    which makes it quite slow and RAM intense. An interpolated model instead
+    of a gridded model would probably be faster and more accurate. However,
+    this one is closer to the "real 3D model".
 
     Returns
     -------
@@ -198,9 +212,6 @@ def raysum3D():
     # Populate velocity models
     vp = np.empty((len(lat), len(lon), len(z)))
     vs = np.empty((len(lat), len(lon), len(z)))
-
-    # vp.fill(6.3)  # km/s
-    # vs.fill(3)  # km/s
 
     # above Moho
     im = np.where(z == 20)[0][0]
@@ -271,13 +282,13 @@ class ComplexModel(object):
         del grid
 
         xs, ys, zs = geo2cart(R_EARTH, self.coords[0],
-                                             self.coords[1])
+                              self.coords[1])
 
         self.tree = KDTree(list(zip(xs, ys, zs)))
         del xs, ys, zs
 
         self.z = z
-        self.ndec = len(str(lat[1]-lat[0]))-1
+        # self.ndec = len(str(lat[1]-lat[0]))-1
 
         if flatten:
             self.vpf, self.vsf, self.zf = self.flatten(vp, vs)
@@ -317,6 +328,10 @@ class ComplexModel(object):
         xs, ys, zs = geo2cart(R_EARTH, lat, lon)
         d, i = self.tree.query([xs, ys, zs])
 
+        if d > (self.lat[1]-self.lat[0]) * DEG2KM * 1.25:
+            raise ValueError(""" The chosen velocity model does not cover
+                             the queried area.""")
+
         m = np.where(self.lat == self.coords[0][i])[0][0]
         n = np.where(self.lon == self.coords[1][i])[0][0]
         p = np.where(round(z) == self.z)[0][0]
@@ -344,7 +359,8 @@ class ComplexModel(object):
         # Remove filetype identifier if provided
         x = filename.split('.')
         if len(x) > 1:
-            filename = filename + '.' - x[-1]
+            if x[-1] == 'pkl':
+                filename = ''.join(x[:-1])
         oloc = os.path.join(folder, filename)
         with open(oloc + ".pkl", 'wb') as output:
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
@@ -398,18 +414,18 @@ class ComplexModel(object):
             ComplexModel daughter object.
 
         """
-        latv = np.arange(np.floor(lat[0]), np.ceil(lat[1])+1, 1)
-        lonv = np.arange(np.floor(lon[0]), np.ceil(lon[1])+1, 1)
+        # latv = np.arange(np.floor(lat[0]), np.ceil(lat[1])+1, 1)
+        # lonv = np.arange(np.floor(lon[0]), np.ceil(lon[1])+1, 1)
 
-        m0 = np.where(self.latv == np.floor(lat[0]))[0][0]
-        m1 = np.where(self.latv == np.ceil(lat[1]))[0][0] + 1
-        n0 = np.where(self.lonv == np.floor(lon[0]))[0][0]
-        n1 = np.where(self.lonv == np.ceil(lon[1]))[0][0] + 1
+        m0 = np.where(self.lat == np.floor(lat[0]))[0][0]
+        m1 = np.where(self.lat == np.ceil(lat[1]))[0][0] + 1
+        n0 = np.where(self.lon == np.floor(lon[0]))[0][0]
+        n1 = np.where(self.lon == np.ceil(lon[1]))[0][0] + 1
 
         # Define new model
         subm = ComplexModel(
             self.z, self.vpf[m0:m1, n0:n1, :], self.vsf[m0:m1, n0:n1, :],
-            latv, lonv, flatten=False, zf=self.zf)
+            self.lat[m0:m1], self.lon[n0:n1], flatten=False, zf=self.zf)
 
         return subm
 
@@ -623,5 +639,9 @@ class AverageVelModel(object):
         if len(x) > 1:
             filename = filename + '.' - x[-1]
         oloc = os.path.join(folder, filename)
+
+        if not Path(oloc).is_dir:
+            subprocess.call(['mkdir', '-p', oloc])
+
         with open(oloc + ".pkl", 'wb') as output:
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)

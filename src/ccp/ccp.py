@@ -22,6 +22,8 @@ import numpy as np
 from obspy import read_inventory
 import scipy.io as sio
 from mpl_toolkits.basemap import Basemap
+from pathlib import Path
+import subprocess
 
 import config
 from .compute.bin import BinGrid
@@ -432,9 +434,6 @@ class CCPStack(object):
         # Split job into n chunks
         num_cores = cpu_count()
 
-        # if network == 'raysum':
-        #     num_cores = 1  # Else its too memory hungry
-
         # Actual CCP stack
         # Note loki does mess up the output and threads is slower than
         # using a single core
@@ -447,7 +446,7 @@ class CCPStack(object):
 
         # Define grid boundaries for 3D RT
         latb = (self.coords[0].min(), self.coords[0].max())
-        lonb = (self.coords[0].min(), self.coords[0].max())
+        lonb = (self.coords[1].min(), self.coords[1].max())
 
         out = Parallel(n_jobs=num_cores, prefer='processes')(
                         delayed(self.multicore_stack)(
@@ -513,7 +512,7 @@ class CCPStack(object):
                 rft.filter('bandpass', freqmin=filt[0], freqmax=filt[1],
                            zerophase=True, corners=2)
 
-            _, rf = rft[0].moveout(vmodel, taper=False)
+            _, rf = rft[0].moveout(vmodel, latb=latb, lonb=lonb, taper=False)
             lat = np.array(rf.stats.pp_latitude)
             lon = np.array(rf.stats.pp_longitude)
             if append_pp:
@@ -616,10 +615,14 @@ class CCPStack(object):
         # Remove filetype identifier if provided
         x = filename.split('.')
         if len(x) > 1:
-            filename = filename + '.' - x[-1]
+            if x[-1] == 'pkl' or x[-1] == 'mat':
+                filename = ''.join(x[:-1])
 
         # output location
         oloc = folder + '/' + filename
+
+        if not Path(oloc).is_dir:
+            subprocess.call(['mkdir', '-p', oloc])
 
         if fmt == "pickle":
             with open(oloc + ".pkl", 'wb') as output:
