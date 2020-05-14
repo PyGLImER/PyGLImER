@@ -208,7 +208,7 @@ def rf_test(
     """
     # Determine filenames
     PSS_file = []
-    for i in range(5):
+    for i in range(23):
         PSS_file.append('3D_' + str(dip) + '_' + str(i) + '.tr')
 
     # Read geometry
@@ -231,8 +231,9 @@ def rf_test(
     M = len(baz)
 
     if M != streams.shape[0]:
-        raise ValueError("""Number of traces does not equal the number
-                         of backazimuths in the geom file.""")
+        raise ValueError(
+            ["Number of traces", streams.shape[0], """does not
+             equal the number of backazimuths in the geom file""", M])
 
     rfs = []
     odir = os.path.join(config.RF[:-1], 'P', 'raysum', str(dip))

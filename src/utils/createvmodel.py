@@ -73,8 +73,8 @@ def load_gyps(save=True, latb=None, lonb=None):
             with open('tmp/'+str(latb)+str(lonb)+'.pkl', 'rb') as infile:
                 model = pickle.load(infile)
 
-                _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model
-                return model
+            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model
+            return model
         except FileNotFoundError:
             pass
 
@@ -91,15 +91,14 @@ def load_gyps(save=True, latb=None, lonb=None):
     try:
         with open('data/velocity_models/gypsum.pkl', 'rb') as infile:
             model = pickle.load(infile)
+        if not latb:
+            _MODEL_CACHE['gyps'] = model
 
-            if not latb:
-                _MODEL_CACHE['gyps'] = model
-
-            else:
-                _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
-                    model.submodel(latb, lonb)
-                model.write(filename=str(latb)+str(lonb), folder='tmp')
-                return model
+        else:
+            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
+                model.submodel(latb, lonb)
+            model.write(filename=str(latb)+str(lonb), folder='tmp')
+            return model
 
     except FileNotFoundError:
         pass
