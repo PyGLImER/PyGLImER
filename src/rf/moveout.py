@@ -350,7 +350,7 @@ def ppoint(q_a, q_b, dz, p, phase):
 
     # Check phase, Sp travels as p, Ps as S from piercing point
     if phase == "S":
-        x = np.sum(dz / q_a) * p
+        x = dz / q_a * p
     elif phase == "P":
         x = dz / q_b * p
     x_delta = x / DEG2KM  # Euclidean distance in degree
