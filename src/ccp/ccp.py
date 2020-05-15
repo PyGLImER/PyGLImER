@@ -158,11 +158,12 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
 
     # read out station latitudes and longitudes
     for file in files:
-        stat = read_inventory(config.statloc + '/' + file)
+        stat = read_inventory(os.path.join(config.statloc, file))
         lats.append(stat[0][0].latitude)
         lons.append(stat[0][0].longitude)
 
-    ccp = CCPStack(lats, lons, spacing, phase=phase, verbose=verbose)
+    ccp = CCPStack(
+        lats, lons, spacing, phase=phase, pattern=pattern, verbose=verbose)
 
     # Clear Memory
     del stat, lats, lons, files
@@ -312,7 +313,8 @@ class CCPStack(object):
 
         return k, j
 
-    def compute_stack(self, vel_model, network=None, station=None, save=False,
+    def compute_stack(self, vel_model, network=None, station=None, pattern=None,
+                      save=False,
                       binrad=np.cos(np.radians(30)), append_pp=False):
         """
         Computes a ccp stack in self.ccp, using the standard folder
@@ -377,14 +379,15 @@ class CCPStack(object):
         start = time.time()
         logger.info('Stacking started')
 
-        if network and type(network) == str:
+        if network and type(network) == str and not pattern:
             # Loop over fewer files
             folder = os.path.join(folder, network)
             if station and type(station) == str:
                 folder = os.path.join(folder, station)
 
         infiles = []  # List of all files in folder
-        pattern = []  # List of input constraints
+        if not pattern:
+            pattern = []  # List of input constraints
         streams = []  # List of files filtered for input criteria
 
         for root, dirs, files in os.walk(folder):
@@ -394,6 +397,9 @@ class CCPStack(object):
         # Special rule for files imported from Matlab
         if network == 'matlab' or network == 'raysum':
             pattern.append('*.sac')
+
+        elif pattern:
+            pattern = ["{}*.sac".format(_a) for _a in pattern]
 
         # Set filter patterns
         elif network:
