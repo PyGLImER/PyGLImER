@@ -478,7 +478,8 @@ class ComplexModel(object):
 
     # program-specific Exceptions
     class CoverageError(Exception):
-        """raised when the SNR is too high"""
+        """Raised, when coordinates are requested that are not covered
+        by the model."""
         # Constructor method
 
         def __init__(self, value):

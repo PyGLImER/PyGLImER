@@ -658,8 +658,9 @@ def write_info(network, station, dictionary):
             info.sync()
 
         # create softlink info files
-        subprocess.call(['ln', '-s', loc + "/info*",
-                         os.path.join(config.RF, network, station)])
+        # not really neeeded, the sac files contains everything important.
+        # subprocess.call(['ln', '-s', loc + "/info.dat",
+        #                  os.path.join(config.RF, network, station)])
 
     else:
 
