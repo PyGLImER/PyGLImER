@@ -286,7 +286,7 @@ def ccp_test(dip, geom_file='3D.geom'):
 
     # Create stack
     ccp.compute_stack(
-        'raysum3D', network='raysum', station=str(dip), save=False)
+        'raysum.dat', network='raysum', station=str(dip), save=False)
     print('ccp stack concluded')
     ccp.conclude_ccp(r=1, keep_water=True)
     ccp.write('raysum'+str(dip), fmt='matlab')

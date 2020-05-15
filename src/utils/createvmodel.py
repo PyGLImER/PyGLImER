@@ -20,6 +20,8 @@ from scipy.interpolate import interp1d
 from scipy.spatial import KDTree
 from obspy.geodetics import gps2dist_azimuth
 from pathlib import Path
+import plotly.graph_objs as go
+from plotly.offline import plot
 
 from ..constants import R_EARTH, maxz, res, DEG2KM
 from ..utils.geo_utils import geo2cart, cart2geo
@@ -211,9 +213,9 @@ def raysum3D(dip):
     except KeyError:
         pass
 
-    z = np.arange(0, maxz+res, res)  # depth in km
-    lat = np.arange(-5, 5.01, 0.05)
-    lon = np.arange(-5, 5.01, 0.05)
+    z = np.arange(0, maxz+10, 10)  # depth in km
+    lat = np.arange(-5, 5.01, 0.25)
+    lon = np.arange(-5, 5.01, 0.25)
 
     # Populate velocity models
     vp = np.empty((len(lat), len(lon), len(z)))
@@ -333,8 +335,9 @@ class ComplexModel(object):
         d, i = self.tree.query([xs, ys, zs])
 
         if d > (self.lat[1]-self.lat[0]) * DEG2KM * 1.25:
-            raise ValueError(""" The chosen velocity model does not cover
-                             the queried area.""")
+            raise ValueError([""" The chosen velocity model does not cover
+                             the queried area. You queried the following
+                             lat, lon:""", lat, lon])
 
         m = np.where(self.lat == self.coords[0][i])[0][0]
         n = np.where(self.lon == self.coords[1][i])[0][0]
@@ -432,6 +435,46 @@ class ComplexModel(object):
             self.lat[m0:m1], self.lon[n0:n1], flatten=False, zf=self.zf)
 
         return subm
+
+    def plot(self):
+        """
+        Plots the vp and vs model as html files. Looks nice, but is pretty
+        costly, so expect some waiting time for bigger models.
+        Note that vp and vs are flattened values.
+
+        Returns
+        -------
+        figvp : plotly.graphs_objs._figure.Figure
+            Figure containg vp model.
+        figvs : plotly.graphs_objs._figure.Figure
+            Figure containing vs model.
+
+        """
+        x, y, z = np.meshgrid(self.lat, self.lon, self.z)
+        figvp = go.Figure(data=go.Volume(
+            x=x.flatten(),
+            y=y.flatten(),
+            z=z.flatten(),
+            value=self.vpf.flatten(),
+            isomin=0,
+            isomax=10,
+            opacity=0.3, # needs to be small to see through all surfaces
+            surface_count=21, # needs to be a large number for good volume rendering
+            ))
+
+        figvs = go.Figure(data=go.Volume(
+            x=x.flatten(),
+            y=y.flatten(),
+            z=z.flatten(),
+            value=self.vsf.flatten(),
+            isomin=0,
+            isomax=10,
+            opacity=0.3, # needs to be small to see through all surfaces
+            surface_count=21, # needs to be a large number for good volume rendering
+            ))
+        # plot(figvp)
+        # plot(figvs)
+        return figvp, figvs
 
 
 def load_avvmodel():

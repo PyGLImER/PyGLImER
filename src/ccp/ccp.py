@@ -78,7 +78,8 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
         type(network)=str. If None, the whole database will be used.
         The default is None.
     geocoords : Tuple, optional
-        An alternative way of selecting networks and stations
+        An alternative way of selecting networks and stations. Given
+        in the form (minlat, maxlat, minlon, maxlon)
     compute_stack : Bool, optional
         If true it will compute the stack by calling ccp.compute_stack().
         That can take a long time! The default is False.
