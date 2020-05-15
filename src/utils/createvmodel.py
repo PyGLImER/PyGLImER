@@ -335,9 +335,9 @@ class ComplexModel(object):
         d, i = self.tree.query([xs, ys, zs])
 
         if d > (self.lat[1]-self.lat[0]) * DEG2KM * 1.25:
-            raise ValueError([""" The chosen velocity model does not cover
-                             the queried area. You queried the following
-                             lat, lon:""", lat, lon])
+            raise self.CoverageError(
+                [""" The chosen velocity model does not cover the queried area.
+                 You queried the following lat, lon:""", lat, lon])
 
         m = np.where(self.lat == self.coords[0][i])[0][0]
         n = np.where(self.lon == self.coords[1][i])[0][0]
@@ -475,6 +475,18 @@ class ComplexModel(object):
         # plot(figvp)
         # plot(figvs)
         return figvp, figvs
+
+    # program-specific Exceptions
+    class CoverageError(Exception):
+        """raised when the SNR is too high"""
+        # Constructor method
+
+        def __init__(self, value):
+            self.value = value
+        # __str__ display function
+
+        def __str__(self):
+            return repr(self.value)
 
 
 def load_avvmodel():

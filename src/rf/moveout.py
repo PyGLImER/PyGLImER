@@ -16,7 +16,6 @@ import shelve
 
 import numpy as np
 from obspy import read
-from obspy.geodetics import degrees2kilometers
 from geographiclib.geodesic import Geodesic
 from scipy import interpolate
 from scipy.signal.windows import hann

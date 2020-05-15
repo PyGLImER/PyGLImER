@@ -31,7 +31,7 @@ from ..database.stations import StationDB
 from ..rf.create import read_rf
 from ..rf.moveout import res, maxz
 from ..utils.utils import dt_string, chunks
-from ..utils.createvmodel import _MODEL_CACHE
+from ..utils.createvmodel import _MODEL_CACHE, ComplexModel
 from ..utils.geo_utils import epi2euc
 from .plot_utils.plot_bins import plot_bins
 
@@ -515,8 +515,14 @@ class CCPStack(object):
             if filt:
                 rft.filter('bandpass', freqmin=filt[0], freqmax=filt[1],
                            zerophase=True, corners=2)
+            try:
+                _, rf = rft[0].moveout(
+                    vmodel, latb=latb, lonb=lonb, taper=False)
+            except ComplexModel.CoverageError as e:
+                # Wrong stations codes can raise this
+                logger.warning(e)
+                continue
 
-            _, rf = rft[0].moveout(vmodel, latb=latb, lonb=lonb, taper=False)
             lat = np.array(rf.stats.pp_latitude)
             lon = np.array(rf.stats.pp_longitude)
             if append_pp:
