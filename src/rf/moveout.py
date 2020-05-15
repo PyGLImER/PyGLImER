@@ -210,7 +210,8 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
         delta[kk+1] = ppoint(q_a[ii], q_b[ii], res_f[kk], p, phase) + delta[kk]
         az = baz
 
-        if np.isnan(delta[kk+1]):  # Supercritical
+        if np.isnan(delta[kk+1]) or q_a[ii] == 0 or q_b[ii] == 0:
+            # Supercritical
             delta = delta[:kk+1]
             break
 
