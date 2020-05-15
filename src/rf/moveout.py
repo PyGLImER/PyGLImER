@@ -210,10 +210,10 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
         delta[kk+1] = ppoint(q_a[ii], q_b[ii], res_f[kk], p, phase) + delta[kk]
         az = baz
 
-        if np.isnan(delta[kk+1]) or q_a[ii] == 0 or q_b[ii] == 0:
-            # Supercritical
-            delta = delta[:kk+1]
-            break
+        # if np.isnan(delta[kk+1]) or q_a[ii] == 0 or q_b[ii] == 0:
+        #     # Supercritical
+        #     delta = delta[:kk+1]
+        #     break
 
         coords = Geodesic.WGS84.ArcDirect(lat, lon, az, delta[kk+1])
         lat2, lon2 = coords['lat2'], coords['lon2']
@@ -221,6 +221,12 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
         vpf, vsf = model.query(lat2, lon2, ii)  # Note that ii equals depth
         q_a[kk+1] = np.sqrt(vpf**-2 - p**2)
         q_b[kk+1] = np.sqrt(vsf**-2 - p**2)
+
+        if np.isnan(q_a[kk+1]) or np.isnan(q_b[kk+1]) or\
+                q_a[kk+1] == 0 or q_b[kk+1] == 0:
+            # Supercritical, can really only happen for q_a
+            delta = delta[:kk+1]
+            break
 
         dt[kk+1] = (q_b[ii]-q_a[ii])*res_f[kk]
 
