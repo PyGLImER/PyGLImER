@@ -163,7 +163,7 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
         lons.append(stat[0][0].longitude)
 
     ccp = CCPStack(
-        lats, lons, spacing, phase=phase, pattern=pattern, verbose=verbose)
+        lats, lons, spacing, phase=phase, verbose=verbose)
 
     # Clear Memory
     del stat, lats, lons, files
@@ -171,7 +171,7 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
     if compute_stack:
         ccp.compute_stack(
             vel_model=vel_model, network=network, station=station, save=save,
-            append_pp=append_pp, binrad=binrad)
+            pattern=pattern, append_pp=append_pp, binrad=binrad)
 
     _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
 
