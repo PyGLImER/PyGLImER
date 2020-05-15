@@ -13,6 +13,7 @@ Last updated:
 
 import os
 import shelve
+import warnings
 
 import numpy as np
 from obspy import read
@@ -207,7 +208,16 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
         if ii == -1:
             ii = 0
 
-        delta[kk+1] = ppoint(q_a[ii], q_b[ii], res_f[kk], p, phase) + delta[kk]
+        with warnings.catch_warnings():
+            # Catch Zerodivision warnings
+            warnings.filterwarnings('error')
+            try:
+                delta[kk+1] = ppoint(
+                    q_a[ii], q_b[ii], res_f[kk], p, phase) + delta[kk]
+            except Warning:
+                delta = delta[:kk+1]
+                break
+
         az = baz
 
         # if np.isnan(delta[kk+1]) or q_a[ii] == 0 or q_b[ii] == 0:
