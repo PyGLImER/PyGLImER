@@ -168,7 +168,7 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
     if test:
         model = raysum3D(test)
     else:
-        model = load_gyps(save=True, latb=latb, lonb=lonb)
+        model = load_gyps(latb=latb, lonb=lonb)
 
     # hypothetical conversion depth tables
     if el > 0:

@@ -25,6 +25,7 @@ from plotly.offline import plot
 
 from ..constants import R_EARTH, maxz, res, DEG2KM
 from ..utils.geo_utils import geo2cart, cart2geo
+import config
 
 # location of lith1 file
 lith1 = os.path.join('/home', 'pm', 'LITHO1.0', 'bin', 'access_litho')
@@ -35,7 +36,7 @@ gyps = os.path.join('data', 'velocity_models', 'GyPSuM')
 _MODEL_CACHE = {}
 
 
-def load_gyps(save=True, latb=None, lonb=None):
+def load_gyps(save=config.savevmodel, latb=None, lonb=None):
     """
     Compiles the GyPSuM 3D-velocity object from included GyPSuM text files
 
@@ -46,7 +47,7 @@ def load_gyps(save=True, latb=None, lonb=None):
         This will allow for faster access to the model. Saving the model takes
         about 800 MB disk space.
         The default is True.
-    latb : Tuple, optional
+        latb : Tuple, optional
         Creates a submodel from the full model. In form (minlat, maxlat).
     lonb : Tuple, optional
         (minlon, maxlon)
@@ -85,7 +86,8 @@ def load_gyps(save=True, latb=None, lonb=None):
         if latb:
             _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
                     model.submodel(latb, lonb)
-            model.write(filename=str(latb)+str(lonb), folder='tmp')
+            if save:
+                model.write(filename=str(latb)+str(lonb), folder='tmp')
         return model
     except KeyError:
         pass
@@ -99,7 +101,8 @@ def load_gyps(save=True, latb=None, lonb=None):
         else:
             _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
                 model.submodel(latb, lonb)
-            model.write(filename=str(latb)+str(lonb), folder='tmp')
+            if save:
+                model.write(filename=str(latb)+str(lonb), folder='tmp')
             return model
 
     except FileNotFoundError:
@@ -183,7 +186,8 @@ def load_gyps(save=True, latb=None, lonb=None):
     else:
         _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
             model.submodel(latb, lonb)
-        model.write(filename=str(latb)+str(lonb), folder='tmp')
+        if save:
+            model.write(filename=str(latb)+str(lonb), folder='tmp')
 
     return model
 

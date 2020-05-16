@@ -173,7 +173,7 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
             vel_model=vel_model, network=network, station=station, save=save,
             pattern=pattern, append_pp=append_pp, binrad=binrad)
 
-    _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
+    # _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
 
     return ccp
 

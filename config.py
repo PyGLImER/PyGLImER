@@ -140,5 +140,11 @@ SNR_criteriaS = [24, .4, 1]  # QC4
 # SNR_criteriaS = [35, .4, 1]  # QC1
 # [primary/noise, sidelobe/primary, r/z conversions]
 
+# %% CCP settings
+# Should the 3D velocity models be saved? That saves some computation time
+# (something about 5 seconds), but costs disk space. However, when working
+# with many cores this can lead to unforseen errors (usually UnpicklingErrors)
+# The model will however still be cached
+savevmodel = False
 # %% DON'T change program will change automatically!
 folder = "undefined"  # the download is happening here right now
