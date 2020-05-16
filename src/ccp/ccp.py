@@ -399,7 +399,7 @@ class CCPStack(object):
             pattern.append('*.sac')
 
         elif pattern:
-            pattern = ["{}*.sac".format(_a) for _a in pattern]
+            pattern = ["*{}.*.sac".format(_a) for _a in pattern]
 
         # Set filter patterns
         elif network:

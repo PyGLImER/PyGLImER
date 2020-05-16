@@ -178,7 +178,7 @@ class BinGrid(object):
 
         # maximal distance of bins to station depends upon phase
         if self.phase == "S":
-            maxepid = 10
+            maxepid = 12
         elif self.phase == "P":
             maxepid = 4
         d, i = self.KDS.query(R_EARTH * points,
