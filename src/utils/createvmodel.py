@@ -192,65 +192,66 @@ def load_gyps(save=config.savevmodel, latb=None, lonb=None):
     return model
 
 
-def raysum3D(dip):
-    """
-    Compiles the provided Raysum test model (3D). Fairly clumpsy solved,
-    which makes it quite slow and RAM intense. An interpolated model instead
-    of a gridded model would probably be faster and more accurate. However,
-    this one is closer to the "real 3D model".
+# Depricated, just work with a 1D model.
+# def raysum3D(dip):
+#     """
+#     Compiles the provided Raysum test model (3D). Fairly clumpsy solved,
+#     which makes it quite slow and RAM intense. An interpolated model instead
+#     of a gridded model would probably be faster and more accurate. However,
+#     this one is closer to the "real 3D model".
 
-    Parameters
-    ----------
-    dip : int
-        Dip of the LAB in degree. Options are 10, 20, 30, 40 deg.
-        Rest of the model is set.
+#     Parameters
+#     ----------
+#     dip : int
+#         Dip of the LAB in degree. Options are 10, 20, 30, 40 deg.
+#         Rest of the model is set.
 
-    Returns
-    -------
-    model : ComplexModel
-        Complexmodel object that can be queried.
+#     Returns
+#     -------
+#     model : ComplexModel
+#         Complexmodel object that can be queried.
 
-    """
+#     """
 
-    try:
-        return _MODEL_CACHE['raysum'+str(dip)]
-    except KeyError:
-        pass
+#     try:
+#         return _MODEL_CACHE['raysum'+str(dip)]
+#     except KeyError:
+#         pass
 
-    z = np.arange(0, maxz+10, 10)  # depth in km
-    lat = np.arange(-5, 5.01, 0.25)
-    lon = np.arange(-5, 5.01, 0.25)
+#     z = np.arange(0, maxz+10, 10)  # depth in km
+#     lat = np.arange(-5, 5.01, 0.25)
+#     lon = np.arange(-5, 5.01, 0.25)
 
-    # Populate velocity models
-    vp = np.empty((len(lat), len(lon), len(z)))
-    vs = np.empty((len(lat), len(lon), len(z)))
+#     # Populate velocity models
+#     vp = np.empty((len(lat), len(lon), len(z)))
+#     vs = np.empty((len(lat), len(lon), len(z)))
 
-    # above Moho
-    im = np.where(z == 20)[0][0]
-    vp[:, :, :im].fill(3.54)
-    vs[:, :, :im].fill(1.41)
-    vp[:, :, im:].fill(7.7)
-    vs[:, :, im:].fill(4.2)
+#     # above Moho
+#     im = np.where(z == 20)[0][0]
+#     vp[:, :, :im].fill(3.54)
+#     vs[:, :, :im].fill(1.41)
+#     vp[:, :, im:].fill(7.7)
+#     vs[:, :, im:].fill(4.2)
 
-    # calculate position of dipping layer
-    d0 = 150  # depth at origin (0,0)
-    a = np.tan(np.deg2rad(dip))
+#     # calculate position of dipping layer
+#     d0 = 150  # depth at origin (0,0)
+#     a = np.tan(np.deg2rad(dip))
 
-    for m, latitude in enumerate(lat):
-        x = DEG2KM*latitude
-        for n, longitude in enumerate(lon):
-            y, _, _ = gps2dist_azimuth(latitude, 0, latitude, longitude)
-            y = y/1000
-            if longitude < 0:
-                y = -y
-                # Depth depending on x, y
-                d = int(round(a*np.dot([1, -1], (x, y))/np.sqrt(2) + d0))
-                vp[m, n, d:] = 6.3
-                vs[m, n, d:] = 3
-    _MODEL_CACHE['raysum'+str(dip)] = \
-        model = ComplexModel(z, vp, vs, lat, lon, flatten=False, zf=z)
+#     for m, latitude in enumerate(lat):
+#         x = DEG2KM*latitude
+#         for n, longitude in enumerate(lon):
+#             y, _, _ = gps2dist_azimuth(latitude, 0, latitude, longitude)
+#             y = y/1000
+#             if longitude < 0:
+#                 y = -y
+#                 # Depth depending on x, y
+#                 d = int(round(a*np.dot([1, -1], (x, y))/np.sqrt(2) + d0))
+#                 vp[m, n, d:] = 6.3
+#                 vs[m, n, d:] = 3
+#     _MODEL_CACHE['raysum'+str(dip)] = \
+#         model = ComplexModel(z, vp, vs, lat, lon, flatten=False, zf=z)
 
-    return model
+#     return model
 
 
 class ComplexModel(object):

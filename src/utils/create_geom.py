@@ -24,15 +24,25 @@ def geom3D():
     create_geom(N, bazv, raypv, shift_max, filename)
 
 
-def create_geom(N, bazv, raypv, shift_max, filename):
+def geom3D_even():
+    N = 100
+    bazv = np.arange(0, 360, 20)
+    # raypv = np.arange(.1e-5, .11e-4, .25e-5)
+    raypv = np.arange(.7e-4, 1e-4, 1e-5)
+    shift_max = 55660
+    filename = '3D'
+    create_geom(N, bazv, raypv, shift_max, filename, shape='even')
+
+
+def create_geom(N, bazv, raypv, shift_max, filename, shape='cross'):
     """
     Creates geometry files for Raysum.
 
     Parameters
     ----------
     N : int
-        Number of stations. Has to be uneven. Stations will be places
-        cross-shaped on the equator (around 0,0)
+        Number of stations. Has to be uneven if shape=cross.
+        Else has to be N=M**2. Were M is a natural number
     bazv : np.ndarray(1D)
         1D array containing the backzimuths per station (deg).
     raypv : np.ndarray(1D)
@@ -41,6 +51,8 @@ def create_geom(N, bazv, raypv, shift_max, filename):
         Maximum horizontal shift in m.
     filename : str
         Name of the output file.
+    shape : str
+        shape of the array
 
     Raises
     ------
@@ -52,16 +64,23 @@ def create_geom(N, bazv, raypv, shift_max, filename):
     None.
 
     """
-    if N/2 == round(N/2):
-        raise ValueError('Number of station has to be uneven.')
-
-    # create shift vectors
-    xshift = np.hstack((np.linspace(-shift_max, shift_max, round((N+1)/2)),
-                        np.zeros(round((N+1)/2))))
-    yshift = np.hstack((np.zeros(round((N+1)/2)),
-                       np.linspace(-shift_max, shift_max, round((N+1)/2))))
-
-    coords = np.unique(np.column_stack((yshift, xshift)), axis=0)
+    if shape == 'cross':
+        if N/2 == round(N/2):
+            raise ValueError('Number of station has to be uneven.')
+    
+        # create shift vectors
+        xshift = np.hstack((np.linspace(-shift_max, shift_max, round((N+1)/2)),
+                            np.zeros(round((N+1)/2))))
+        yshift = np.hstack((np.zeros(round((N+1)/2)),
+                           np.linspace(-shift_max, shift_max, round((N+1)/2))))
+    
+        coords = np.unique(np.column_stack((yshift, xshift)), axis=0)
+    else:
+        M = np.sqrt(N)  # Number of stations per line
+        d = shift_max/M
+        xshift, yshift = np.mgrid[
+            -shift_max:shift_max:M, -shift_max:shift_max:M]
+        coords = np.column_stack((xshift.ravel(), yshift.ravel()))
 
     lines = []  # list with text
 

@@ -332,7 +332,6 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
                     if 'ot_all' not in info or ot_fiss not in info['ot_all']:
                         # Don't count rejected events twice
                         infodict.setdefault('ot_all', []).append(ot_fiss)
-                        # info['num'] = len(info['ot_all'])
 
             else:
                 infodict.setdefault('ot_all', []).append(ot_fiss)
@@ -376,7 +375,7 @@ def __waveform_loop(file, taper_perc, taper_type, webclient, model,
         if config.phase == "P":
             st.filter('lowpass', freq=1.5, zerophase=True, corners=2)
         elif config.phase == 'S':
-            st.filter('lowpass', freq=0.175, zerophase=True, corners=2)
+            st.filter('lowpass', freq=0.25, zerophase=True, corners=2)  # freq=0.175Hz
 
         start = time.time()
 
@@ -565,10 +564,18 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
     elif config.phase == "P":
         st, crit, f, noisemat = qcp(st, dt, sampling_f)
         if not crit:
+            infodict['dt'] = dt
+            infodict['sampling_rate'] = sampling_f
+            infodict['network'] = network
+            infodict['station'] = station
+            infodict['statlat'] = station_inv[0][0][0].latitude
+            infodict['statlon'] = station_inv[0][0][0].longitude
+            infodict['statel'] = station_inv[0][0][0].elevation
             raise SNRError(np.array2string(noisemat))
+
     elif config.phase == "S":
         st, crit, f, noisemat = qcs(st, dt, sampling_f)
-        # crit, f, noisemat = None, None, None
+
         if not crit:
             infodict['dt'] = dt
             infodict['sampling_rate'] = sampling_f
@@ -581,6 +588,7 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
 
     #      WRITE FILES     #
     st.write(outf, format="MSEED")
+
     # create softlink
     subprocess.call(["ln", "-s", outf, config.outputloc + '/by_event/'
                      + ot_fiss + '/' + network + '.' + station])
@@ -589,8 +597,9 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
     # append_info: [key,value]
     append_inf = [['magnitude', (event.preferred_magnitude() or
                                  event.magnitudes[0])['mag']],
-                  ['magnitude_type', (event.preferred_magnitude()
-                                      or event.magnitudes[0])['magnitude_type']],
+                  ['magnitude_type', (
+                      event.preferred_magnitude() or event.magnitudes[0])[
+                          'magnitude_type']],
                   ['evtlat', evtlat], ['evtlon', evtlon],
                   ['ot_ret', ot_fiss], ['ot_all', ot_fiss],
                   ['evt_depth', depth],

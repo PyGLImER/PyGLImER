@@ -124,8 +124,10 @@ taper_type = 'hann'
 
 # low-cut-off frequencies for SNR check
 lowco = [.03, .1, .5]  # only for PRF
-lowcoS = 0.03  # 0.05 lowco frequency for SRF
+# lowcoS = 0.03  # 0.05 lowco frequency for SRF
+lowcoS = .01  # Changed 18.05 to compare with Hopper et. al. 2018
 highco = np.linspace(.33, .175, 4)
+
 # highco = [0.175]  # Rychert et al
 # highco = [.5, .33, .25]  # only for SRF
 

@@ -23,7 +23,7 @@ from scipy.signal.windows import hann
 
 import config
 from ..constants import R_EARTH, DEG2KM, maxz, res
-from ..utils.createvmodel import load_gyps, raysum3D
+from ..utils.createvmodel import load_gyps
 
 
 _MODEL_CACHE = {}
@@ -165,10 +165,10 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
 
     p = rayp/DEG2KM  # convert to s/km
 
-    if test:
-        model = raysum3D(test)
-    else:
-        model = load_gyps(latb=latb, lonb=lonb)
+    # if test:
+    #     model = raysum3D(test)
+    # else:
+    model = load_gyps(latb=latb, lonb=lonb)
 
     # hypothetical conversion depth tables
     if el > 0:

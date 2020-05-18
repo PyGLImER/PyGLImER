@@ -17,6 +17,7 @@ from joblib import Parallel, delayed
 from obspy import UTCDateTime, read, Trace, Stream
 from obspy.core import Stats
 from obspy.signal.filter import lowpass
+from geographiclib.geodesic import Geodesic
 
 import config
 from ..ccp import CCPStack
@@ -208,14 +209,30 @@ def rf_test(
     """
     # Determine filenames
     PSS_file = []
-    for i in range(23):
+    for i in range(37):
         PSS_file.append('3D_' + str(dip) + '_' + str(i) + '.tr')
 
     # Read geometry
     baz, q, dN, dE = read_geom(geom_file)
 
-    statlat = dN/(DEG2KM*1000)
-    statlon = dE/(DEG2KM*1000)
+    # statlat = dN/(DEG2KM*1000)
+    d = np.sqrt(np.square(dN) + np.square(dE))
+    az = np.rad2deg(np.arccos(dN/d))
+    i = np.where(dE<0)
+    az[i] = az[i]+180
+    statlat = []
+    statlon = []
+    for azimuth, delta in zip(az, d):
+        if delta == 0:
+            statlat.append(0)
+            statlon.append(0)
+            continue
+        coords = Geodesic.WGS84.Direct(0, 0, azimuth, delta)
+        statlat.append(coords["lat2"])
+        statlon.append(coords["lon2"])
+    #         for n, longitude in enumerate(lon):
+#             y, _, _ = gps2dist_azimuth(latitude, 0, latitude, longitude)
+    # statlon = dE/(DEG2KM*1000)
     rayp = q*DEG2KM*1000
 
     # Read traces
@@ -237,7 +254,7 @@ def rf_test(
 
     rfs = []
     odir = os.path.join(config.RF[:-1], 'P', 'raysum', str(dip))
-    ch = ['BHP', 'BHH', 'BHV']  # Channel names
+    ch = ['BHP', 'BHV', 'BHH']  # Channel names
 
     if not Path(odir).is_dir():
         subprocess.call(['mkdir', '-p', odir])
@@ -266,14 +283,44 @@ def rf_test(
         rf = createRF(s, phase='P', method='it', info=info)
 
         # The rotation in Raysum does not work properly
-        if abs(rf.data.max()) > abs(rf.data.min()):
-            rf.data = -rf.data
+        # if abs(rf.data.max()) > abs(rf.data.min()):
+        #     rf.data = -rf.data
 
         # Write RF
         rf.write(os.path.join(odir, str(i)+'.sac'), format='SAC')
         rfs.append(rf)
 
     return rfs, statlat, statlon
+
+# def multicore_RF(st, i, N, dt, ch, dip, shift, statlat, statlon, rayp, baz):
+#     s = Stream()
+#     for j, tr in enumerate(st):
+#         stats = Stats()
+#         stats.npts = N
+#         stats.delta = dt
+#         stats.starttime = UTCDateTime(0)
+#         stats.channel = ch[j]
+#         stats.network = 'RS'
+#         stats.station = str(dip)
+#         s.append(Trace(data=tr, header=stats))
+
+#     # Create info dictionary for rf creation
+#     info = {
+#         'onset': [UTCDateTime(0)+shift], 'starttime': [UTCDateTime(0)],
+#         'statlat': statlat[i], 'statlon': statlon[i],
+#         'statel': 0, 'rayp_s_deg': [rayp[i]], 'rbaz': [baz[i]],
+#         'rdelta': [np.nan], 'ot_ret': [0], 'magnitude': [np.nan],
+#         'evt_depth': [np.nan], 'evtlon': [np.nan], 'evtlat': [np.nan]}
+
+#     rf = createRF(s, phase='P', method='it', info=info)
+
+#     # The rotation in Raysum does not work properly
+#     # if abs(rf.data.max()) > abs(rf.data.min()):
+#     #     rf.data = -rf.data
+
+#     # Write RF
+#     rf.write(os.path.join(odir, str(i)+'.sac'), format='SAC')
+#     rfs.append(rf)
 
 
 def ccp_test(dip, geom_file='3D.geom'):
