@@ -190,7 +190,7 @@ def read_geom(geom_file):
 
 
 def rf_test(
-        dip, geom_file='3D.geom'):
+        phase, dip, geom_file='3D.geom'):
     """
     Creates synthetic PRFs from Raysum data.
 
@@ -209,7 +209,7 @@ def rf_test(
     """
     # Determine filenames
     PSS_file = []
-    for i in range(37):
+    for i in range(23):
         PSS_file.append('3D_' + str(dip) + '_' + str(i) + '.tr')
 
     # Read geometry
@@ -218,7 +218,7 @@ def rf_test(
     # statlat = dN/(DEG2KM*1000)
     d = np.sqrt(np.square(dN) + np.square(dE))
     az = np.rad2deg(np.arccos(dN/d))
-    i = np.where(dE<0)
+    i = np.where(dE < 0)
     az[i] = az[i]+180
     statlat = []
     statlon = []
@@ -253,7 +253,7 @@ def rf_test(
              equal the number of backazimuths in the geom file""", M])
 
     rfs = []
-    odir = os.path.join(config.RF[:-1], 'P', 'raysum', str(dip))
+    odir = os.path.join(config.RF[:-1], phase, 'raysum', str(dip))
     ch = ['BHP', 'BHV', 'BHH']  # Channel names
 
     if not Path(odir).is_dir():
@@ -280,11 +280,7 @@ def rf_test(
             'rdelta': [np.nan], 'ot_ret': [0], 'magnitude': [np.nan],
             'evt_depth': [np.nan], 'evtlon': [np.nan], 'evtlat': [np.nan]}
 
-        rf = createRF(s, phase='P', method='it', info=info)
-
-        # The rotation in Raysum does not work properly
-        # if abs(rf.data.max()) > abs(rf.data.min()):
-        #     rf.data = -rf.data
+        rf = createRF(s, phase=phase, method='it', info=info)
 
         # Write RF
         rf.write(os.path.join(odir, str(i)+'.sac'), format='SAC')
@@ -323,12 +319,17 @@ def rf_test(
 #     rfs.append(rf)
 
 
-def ccp_test(dip, geom_file='3D.geom'):
-    rfs, statlat, statlon = rf_test(dip, geom_file)
+def ccp_test(phase, dip, geom_file='3D.geom'):
+    rfs, statlat, statlon = rf_test(phase, dip, geom_file)
     print("RFs created")
 
+    coords = np.unique(np.column_stack((statlat, statlon)), axis=0)
+
     # Create empty CCP object
-    ccp = CCPStack(statlat, statlon, 0.05, phase='P')
+    ccp = CCPStack(coords[:, 0], coords[:, 1], 0.05, phase='P')
+    ccp.bingrid.phase = phase  # I'm doing it this way because computing a
+    # bingrid for phase S takes way longer and I don't really need the extra
+    # area
     print("CCP object created")
 
     # Create stack

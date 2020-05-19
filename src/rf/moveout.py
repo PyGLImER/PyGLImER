@@ -245,7 +245,7 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
     return htab[:len(delta)], dt, delta
 
 
-def dt_table(rayp, fname, phase, el):
+def dt_table(rayp, fname, phase, el, debug=True):
     """
     Creates a phase delay table and calculates piercing points
     for a specific ray parameter,
@@ -279,7 +279,7 @@ def dt_table(rayp, fname, phase, el):
 
     model = load_model(fname)
     z = model.z
-    if fname == 'raysum.dat':  # already Cartesian
+    if fname == 'raysum.dat' or debug:  # already Cartesian
         vp = model.vp
         vs = model.vs
         zf = model.z
@@ -301,7 +301,7 @@ def dt_table(rayp, fname, phase, el):
     htab_f = -R_EARTH*np.log((R_EARTH-htab)/R_EARTH)  # flat earth depth
     res_f = np.diff(htab_f)  # earth flattened resolution
 
-    if fname == "raysum.dat":
+    if fname == "raysum.dat" or debug:
         htab_f = htab
         res_f = res * np.ones(np.shape(res_f))
 
