@@ -14,7 +14,7 @@ from obspy.taup import TauPyModel  # arrival times in 1D v-model
 # %% general settings
 # Define if you want to download new files or use old
 evtcat = None  # either None (downloads new) or file
-wavdownload = False  # Bool - true for completing download, false: only
+wavdownload = True  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
 decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
@@ -45,39 +45,20 @@ ccp = "output/ccps"
 # %% EVENT AND DOWNLOAD VALUES
 # Set values to "None" if they aren't requried / desired
 # Time frame is identical to the station inventory
-starttime = UTCDateTime("2009-01-01")
-endtime = UTCDateTime("2011-12-31")
+starttime = UTCDateTime("1970-01-01")
+endtime = UTCDateTime("2019-05-19")
 eMINLAT = None
 eMAXLAT = None
 eMINLON = None
 eMAXLON = None
-# if phase == "P":
-#     minMag = 5.5
-# elif phase == "S":
-#     minMag = 5.5
-# maxMag = 10.0
 
 # Station and Network codes
 # type : str
 # wildcards allowed. If None, all that are available are requested
-network = "YP"
+network = None
 station = None
 
-# epicentral distances:
-# if phase == "P":
-#     min_epid = 28.1
-#     max_epid = 95.8
-# # (see Wilson et. al., 2006)
-# elif phase == "S":
-#     min_epid = 55
-#     max_epid = 80
-# # event depth in km (see Wilson et. al., 2006):
-# if phase == "P":
-#     maxdepth = None
-# elif phase == "S":
-#     maxdepth = 300
-
-# define 1D velocity model
+# define 1D velocity model for arrival time calculation
 model = TauPyModel(model="iasp91")
 
 # Clients to download waveform
@@ -88,17 +69,18 @@ model = TauPyModel(model="iasp91")
 # !!NOTE: For machines with little RAM, the script might interrupt if too
 # many clients are chosen.
 #
-waveform_client = ["IRIS"]
-# "NCEDC", "ORFEUS", "ODC", "LMU", "INGV", "KOERI", "NIEP", "RESIF", "GFZ",
-# "BGR"]
+waveform_client = ["IRIS", 'NCEDC', 'TEXNET', 'SCEDC', 'USGS']
+# See https://www.fdsn.org/webservices/datacenters/
+# Possible options:
+# 'https://raspberryshake.org/', 'http://auspass.edu.au/'
+# ‘BGR’, ‘EMSC’, ‘ETH’, ‘GEONET’, ‘GFZ’, ‘ICGC’, ‘INGV’, ‘IPGP’, ‘IRIS’, ‘ISC’,
+# ‘KNMI’, ‘KOERI’, ‘LMU’, ‘NCEDC’, ‘NIEP’, ‘NOA’, ‘ODC’, ‘ORFEUS’,
+# ‘RASPISHAKE’, ‘RESIF’, ‘SCEDC’, ‘TEXNET’, ‘USGS’, ‘USP’
 #
 # clients on which the download should be retried, list:
 re_clients = ["IRIS"]  # It's usually enoguh to have only IRIS here
-# as IRIS tends to be very intreliable
+# as IRIS tends to be very unreliable
 #
-# Clients that do not provide additional data:
-# ['TEXNET', 'ETH', 'SCEDC', 'GEONET', 'ICGC', 'IPGP', 'KNMI',
-# 'NOA', 'USP']
 # %% PRE-PROCESSING VALUES #####
 
 # Rotation #
@@ -148,5 +130,6 @@ SNR_criteriaS = [24, .4, 1]  # QC4
 # with many cores this can lead to unforseen errors (usually UnpicklingErrors)
 # The model will however still be cached
 savevmodel = False
+
 # %% DON'T change program will change automatically!
 folder = "undefined"  # the download is happening here right now

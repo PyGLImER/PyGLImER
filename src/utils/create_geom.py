@@ -18,8 +18,8 @@ import numpy as np
 def geom3D():
     N = 21
     bazv = np.arange(0, 360, 20)
-    raypv = np.arange(.1e-5, .31e-4, .25e-5)
-    shift_max = 55660
+    raypv = np.linspace(5e-5, 1.5e-4, 8)#np.arange(.1e-5, .31e-4, .25e-5)
+    shift_max = 55660/2  # 55660
     filename = '3D'
     create_geom(N, bazv, raypv, shift_max, filename)
 

@@ -58,7 +58,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
                                       distance_in_degree=max_epid,
                                       phase_list=[config.phase])[0].time
 
-    mdl = MassDownloader(config.waveform_client)
+    mdl = MassDownloader(providers=config.waveform_client)
 
     ###########
     # logging for the download
@@ -135,9 +135,11 @@ def downloadwav(min_epid, max_epid, model, event_cat):
         incomplete = True
         while incomplete:
             try:
-                mdl.download(domain, restrictions,
-                             mseed_storage=get_mseed_storage,
-                             stationxml_storage=get_stationxml_storage)
+                mdl.download(
+                    domain, restrictions,
+                    mseed_storage=get_mseed_storage,
+                    stationxml_storage=get_stationxml_storage,
+                    threads_per_client=3, download_chunk_size_in_mb=50)
                 incomplete = False
             except IncompleteRead:
                 continue  # Just retry for poor connection

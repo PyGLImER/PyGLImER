@@ -209,7 +209,7 @@ def rf_test(
     """
     # Determine filenames
     PSS_file = []
-    for i in range(23):
+    for i in range(16):
         PSS_file.append('3D_' + str(dip) + '_' + str(i) + '.tr')
 
     # Read geometry

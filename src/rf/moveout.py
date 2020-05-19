@@ -245,7 +245,7 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
     return htab[:len(delta)], dt, delta
 
 
-def dt_table(rayp, fname, phase, el, debug=True):
+def dt_table(rayp, fname, phase, el, debug=False):
     """
     Creates a phase delay table and calculates piercing points
     for a specific ray parameter,
