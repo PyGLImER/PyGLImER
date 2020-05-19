@@ -21,6 +21,7 @@ import itertools
 
 from obspy import read, read_inventory, Stream, UTCDateTime
 from obspy.clients.iris import Client
+from obspy.clients.fdsn import Client as Webclient
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 
 import config
@@ -33,7 +34,7 @@ from ..rf.create import createRF
 from ..utils.utils import dt_string
 
 
-def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
+def preprocess(taper_perc, event_cat,model, taper_type="hann"):
     """
      Preprocesses waveforms to create receiver functions
 
@@ -68,8 +69,6 @@ def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
         DESCRIPTION. The default is "hann".
     event_cat : event catalogue
         catalogue containing all events of waveforms.
-    webclient : obspy.clients.iris
-        Used to fetch IU.HRV response file (for station simulation).
     model : obspy.taup.TauPyModel
         1D velocity model to calculate arrival.
 
@@ -110,6 +109,7 @@ def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
     #########
 
     # needed for a station simulation - Harvard
+    webclient = Webclient('IRIS')
     station_simulate = webclient.get_stations(level="response",
                                               channel='BH*', network='IU',
                                               station='HRV')
@@ -135,7 +135,7 @@ def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
 
     out = Parallel(n_jobs=n_jobs)(
             delayed(__event_loop)(event, taper_perc, taper_type, iclient,
-                                  webclient, model, paz_sim, logger, rflogger)
+                                  model, paz_sim, logger, rflogger)
             for event in event_cat)
 
     if not config.wavdownload:
@@ -179,7 +179,7 @@ def preprocess(taper_perc, event_cat, webclient, model, taper_type="hann"):
     print("Download and preprocessing finished.")
 
 
-def __event_loop(event, taper_perc, taper_type, iclient, webclient, model,
+def __event_loop(event, taper_perc, taper_type, iclient, model,
                  paz_sim, logger, rflogger):
     """
     Loops over each event in the event catalogue
@@ -231,7 +231,7 @@ def __event_loop(event, taper_perc, taper_type, iclient, webclient, model,
         files = os.listdir(prepro_folder)
 
     for file in files:
-        info = __waveform_loop(file, taper_perc, taper_type, webclient, model,
+        info = __waveform_loop(file, taper_perc, taper_type, model,
                                paz_sim, origin_time, ot_fiss, evtlat, evtlon,
                                depth, prepro_folder, event, logger, rflogger,
                                iclient)
@@ -240,7 +240,7 @@ def __event_loop(event, taper_perc, taper_type, iclient, webclient, model,
     return infolist
 
 
-def __waveform_loop(file, taper_perc, taper_type, webclient, model,
+def __waveform_loop(file, taper_perc, taper_type, model,
                     paz_sim, origin_time, ot_fiss, evtlat, evtlon,
                     depth, prepro_folder, event, logger, rflogger, iclient):
     """

@@ -142,4 +142,4 @@ class Request(object):
         downloadwav(self.min_epid, self.max_epid, self.model, self.event_cat)
 
     def preprocess(self):
-        preprocess(0.05, self.evtcat, self.webclient, self.model, 'hann')
+        preprocess(0.05, self.evtcat, self.model, 'hann')
