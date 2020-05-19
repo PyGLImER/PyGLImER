@@ -27,8 +27,6 @@ import config
 from .download import downloadwav
 from .preprocess import preprocess
 
-webclient = Webclient('USGS')
-
 
 class Request(object):
     """"Initialises the FDSN request for
@@ -75,6 +73,12 @@ class Request(object):
         self.station = station
 
         # Server settings
+        try:
+            self.webclient = Webclient('USGS')
+        except FDSNException:
+            self.webclient = Webclient('ISC')
+            print('Falling back to ISC')
+
         self.waveform_client = waveform_client
         self.re_client = re_client
 
@@ -93,7 +97,7 @@ class Request(object):
 
         while not event_cat_done:
             try:
-                self.evtcat = webclient.get_events(
+                self.evtcat = self.webclient.get_events(
                     starttime=self.starttime, endtime=self.endtime,
                     minlatitude=self.eMINLAT, maxlatitude=self.eMAXLAT,
                     minlongitude=self.eMINLON, maxlongitude=self.eMAXLON,
@@ -103,7 +107,6 @@ class Request(object):
             except FDSNException:
                 # Request is too big, break it down ito several requests
                 a = 20*365.25*24*3600  # 20 years in seconds
-                d = 24*3600
                 starttimes = [self.starttime, self.starttime+a]
                 while self.endtime-starttimes[-1] > a:
                     starttimes.append(starttimes[-1]+a)
@@ -115,13 +118,13 @@ class Request(object):
                 self.evtcat = Catalog()
                 for st, et in zip(starttimes, endtimes):
                     self.evtcat.extend(
-                        webclient.get_events(
+                        self.webclient.get_events(
                             starttime=st, endtime=et,
                             minlatitude=self.eMINLAT, maxlatitude=self.eMAXLAT,
                             minlongitude=self.eMINLON,
                             maxlongitude=self.eMAXLON, minmagnitude=5.5,
                             maxmagnitude=10, maxdepth=self.maxdepth))
-                event_cat_done=True
+                event_cat_done = True
 
             except IncompleteRead:
                 # Server interrupted connection, just try again
@@ -133,10 +136,10 @@ class Request(object):
             subprocess.call(["mkdir", "-p", config.evtloc])
             # check if there is a better format for event catalog
             self.evtcat.write(config.evtloc + '/' + str(datetime.now()),
-                                 format="QUAKEML")
+                              format="QUAKEML")
 
     def download_waveforms(self):
         downloadwav(self.min_epid, self.max_epid, self.model, self.event_cat)
 
     def preprocess(self):
-        preprocess(0.05, self.evtcat, webclient, self.model, 'hann')
+        preprocess(0.05, self.evtcat, self.webclient, self.model, 'hann')
