@@ -139,7 +139,7 @@ class Request(object):
                               format="QUAKEML")
 
     def download_waveforms(self):
-        downloadwav(self.min_epid, self.max_epid, self.model, self.event_cat)
+        downloadwav(self.min_epid, self.max_epid, self.model, self.evtcat)
 
     def preprocess(self):
         preprocess(0.05, self.evtcat, self.model, 'hann')
