@@ -69,13 +69,13 @@ model = TauPyModel(model="iasp91")
 # !!NOTE: For machines with little RAM, the script might interrupt if too
 # many clients are chosen.
 #
-waveform_client = ["IRIS", 'NCEDC', 'TEXNET', 'SCEDC', 'USGS']
+waveform_client = ["IRIS", 'NCEDC', 'TEXNET', 'SCEDC']
 # See https://www.fdsn.org/webservices/datacenters/
 # Possible options:
-# 'https://raspberryshake.org/', 'http://auspass.edu.au/'
+# 'http://auspass.edu.au/'
 # ‘BGR’, ‘EMSC’, ‘ETH’, ‘GEONET’, ‘GFZ’, ‘ICGC’, ‘INGV’, ‘IPGP’, ‘IRIS’, ‘ISC’,
 # ‘KNMI’, ‘KOERI’, ‘LMU’, ‘NCEDC’, ‘NIEP’, ‘NOA’, ‘ODC’, ‘ORFEUS’,
-# ‘RASPISHAKE’, ‘RESIF’, ‘SCEDC’, ‘TEXNET’, ‘USGS’, ‘USP’
+# ‘RASPISHAKE’, ‘RESIF’, ‘SCEDC’, ‘TEXNET’, ‘USP’
 #
 # clients on which the download should be retried, list:
 re_clients = ["IRIS"]  # It's usually enoguh to have only IRIS here

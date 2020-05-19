@@ -18,15 +18,16 @@ from http.client import IncompleteRead
 from datetime import datetime
 from pathlib import Path
 
-from obspy import read_events
+from obspy import read_events, Catalog
 from obspy.clients.fdsn import Client as Webclient
 from obspy.taup import TauPyModel
+from obspy.clients.fdsn.client import FDSNException
 
 import config
 from .download import downloadwav
 from .preprocess import preprocess
 
-webclient = Webclient('IRIS')
+webclient = Webclient('USGS')
 
 
 class Request(object):
@@ -86,15 +87,42 @@ class Request(object):
     def download_eventcat(self):
         event_cat_done = False
 
+        # The USGS webservice does only allow requests of a maximum size of
+        # 20000, so I will have to do several requests and join the
+        # catalogue afterwards if it's too big for a single download
+
         while not event_cat_done:
             try:
-                self.event_cat = webclient.get_events(
+                self.evtcat = webclient.get_events(
                     starttime=self.starttime, endtime=self.endtime,
                     minlatitude=self.eMINLAT, maxlatitude=self.eMAXLAT,
                     minlongitude=self.eMINLON, maxlongitude=self.eMAXLON,
                     minmagnitude=5.5, maxmagnitude=10, maxdepth=self.maxdepth)
 
                 event_cat_done = True
+            except FDSNException:
+                # Request is too big, break it down ito several requests
+                a = 20*365.25*24*3600  # 20 years in seconds
+                d = 24*3600
+                starttimes = [self.starttime, self.starttime+a]
+                while self.endtime-starttimes[-1] > a:
+                    starttimes.append(starttimes[-1]+a)
+                endtimes = []
+                endtimes.extend(starttimes[1:])
+                endtimes.append(self.endtime)
+
+                # Query
+                self.evtcat = Catalog()
+                for st, et in zip(starttimes, endtimes):
+                    self.evtcat.extend(
+                        webclient.get_events(
+                            starttime=st, endtime=et,
+                            minlatitude=self.eMINLAT, maxlatitude=self.eMAXLAT,
+                            minlongitude=self.eMINLON,
+                            maxlongitude=self.eMAXLON, minmagnitude=5.5,
+                            maxmagnitude=10, maxdepth=self.maxdepth))
+                event_cat_done=True
+
             except IncompleteRead:
                 # Server interrupted connection, just try again
                 print("Warning: Server interrupted connection,\
@@ -104,11 +132,11 @@ class Request(object):
         if not Path(config.evtloc).is_dir():
             subprocess.call(["mkdir", "-p", config.evtloc])
             # check if there is a better format for event catalog
-            self.event_cat.write(config.evtloc + '/' + str(datetime.now()),
+            self.evtcat.write(config.evtloc + '/' + str(datetime.now()),
                                  format="QUAKEML")
 
     def download_waveforms(self):
         downloadwav(self.min_epid, self.max_epid, self.model, self.event_cat)
 
     def preprocess(self):
-        preprocess(0.05, self.event_cat, webclient, self.model, 'hann')
+        preprocess(0.05, self.evtcat, webclient, self.model, 'hann')
