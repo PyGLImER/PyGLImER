@@ -24,6 +24,19 @@ import config
 
 class StationDB(object):
     def __init__(self):
+        """
+        Creates a pandas database of all available receiver functions.
+        This database is entirely based on the info files in the "preprocessed"
+        folder. Make sure that the output folder is not corrupted before
+        running this. Creating this database does not take much time, so there
+        will be no option to save it, as it should be up to date.
+        However, there is an export function
+
+        Returns
+        -------
+        None.
+
+        """
         # 1. Initiate logger
         self.logger = logging.Logger(
             "src.database.stations.StationDBaseLogger")
@@ -40,9 +53,17 @@ class StationDB(object):
         fh.setFormatter(fmt)
 
         # Create database
-        self.create()
+        self.__create__()
 
-    def create(self):
+    def __create__(self):
+        """
+        Create panda database.
+
+        Returns
+        -------
+        None.
+
+        """
         # Create data dictionary
         dataP = {
             'network': [], 'station': [], 'lat': [], 'lon': [],
@@ -117,6 +138,22 @@ class StationDB(object):
         self.db = pd.DataFrame.from_dict(dataP)
 
     def geo_boundary(self, lat, lon):
+        """
+        Return a subset of the database filtered by location.
+
+        Parameters
+        ----------
+        lat : Tuple
+            Latitude boundaries in the form (minimum latitude, maximum lat).
+        lon : Tuple
+            Longitude boundaries in the form (minimum longitude, maximum lon).
+
+        Returns
+        -------
+        subset : pandas.DataFrame
+            Subset of the original DataFrame filtered by location.
+
+        """
         a = self.db['lat'] >= lat[0]
         b = self.db['lat'] <= lat[1]
         c = self.db['lon'] >= lon[0]
