@@ -76,8 +76,8 @@ class Request(object):
         try:
             self.webclient = Webclient('USGS')
         except FDSNException:
-            self.webclient = Webclient('ISC')
-            print('Falling back to ISC')
+            self.webclient = Webclient('IRIS')
+            print('Falling back to IRIS\' event service.')
 
         self.waveform_client = waveform_client
         self.re_client = re_client
