@@ -13,7 +13,8 @@ from obspy.taup import TauPyModel  # arrival times in 1D v-model
 
 # %% general settings
 # Define if you want to download new files or use old
-evtcat = None  # either None (downloads new) or file
+evtcat = 'all_greater55'  # either None (downloads new) or string of filename
+# in evtloc
 wavdownload = True  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
