@@ -111,7 +111,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
             # And you might only want waveforms that have data for at least 95 % of
             # the requested time span. Any trace that is shorter than 95 % of the
             # desired total duration will be discarded.
-            minimum_length=0.99,  # For 1.00 it will always delete the waveform
+            minimum_length=0.95,  # For 1.00 it will always delete the waveform
             # No two stations should be closer than 1 km to each other. This is
             # useful to for example filter out stations that are part of different
             # networks but at the same physical station. Settings this option to
@@ -121,12 +121,14 @@ def downloadwav(min_epid, max_epid, model, event_cat):
             # Only HH or BH channels. If a station has BH channels, those will be
             # downloaded, otherwise the HH. Nothing will be downloaded if it has
             # neither.
-            channel_priorities=["BH[ZNE]", "BH*", "HH[ZNE]", "HH*"],
+            channel_priorities=["BH[ZNE12]", "HH[ZNE12]"],
             # Location codes are arbitrary and there is no rule as to which
             # location is best. Same logic as for the previous setting.
-            location_priorities=["", "00", "10"],
-            sanitize=True
+            # location_priorities=["", "00", "10"],
+            sanitize=False
             # discards all mseeds for which no station information is available
+            # I changed it too False because else it will redownload over and
+            # over and slow down the script
         )
 
         # The data will be downloaded to the ``./waveforms/`` and ``./stations/``
