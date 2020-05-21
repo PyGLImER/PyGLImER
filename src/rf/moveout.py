@@ -228,10 +228,12 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
         coords = Geodesic.WGS84.ArcDirect(lat, lon, az, delta[kk+1])
         lat2, lon2 = coords['lat2'], coords['lon2']
 
-        if h < 0:  # For elevation, model is not defined for el
-            h = 0
+        # Query depth
+        qd = htab[kk]
+        if qd < 0:  # For elevation, model is not defined for el
+            qd = 0
 
-        vpf, vsf = model.query(lat2, lon2, h)  # Note that ii equals depth
+        vpf, vsf = model.query(lat2, lon2, qd)
         q_a[kk+1] = np.sqrt(vpf**-2 - p**2)
         q_b[kk+1] = np.sqrt(vsf**-2 - p**2)
 
@@ -321,7 +323,7 @@ def dt_table(rayp, fname, phase, el, debug=False):
 
     # Numerical integration
     for kk, h in enumerate(htab_f[1:]):
-        ii = np.where(zf > h)[0][0] - 1  # >=
+        ii = np.where(zf >= h)[0][0] - 1
         if ii == -1:
             ii = 0
         dt[kk+1] = (q_b[ii]-q_a[ii])*res_f[kk]
