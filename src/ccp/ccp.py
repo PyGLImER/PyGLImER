@@ -14,9 +14,7 @@ import os
 import pickle
 import logging
 import time
-from joblib import Parallel, delayed
-# from itertools import repeat
-from multiprocessing import cpu_count
+from joblib import Parallel, delayed, cpu_count
 
 import numpy as np
 from obspy import read_inventory

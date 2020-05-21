@@ -135,7 +135,7 @@ class Request(object):
         if not Path(config.evtloc).is_dir():
             subprocess.call(["mkdir", "-p", config.evtloc])
             # check if there is a better format for event catalog
-        self.evtcat.write(config.evtloc + '/' + str(datetime.now()),
+        self.evtcat.write(os.path.join(config.evtloc, str(datetime.now())),
                           format="QUAKEML")
 
     def download_waveforms(self):

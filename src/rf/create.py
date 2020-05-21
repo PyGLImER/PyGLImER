@@ -484,7 +484,7 @@ class RFStream(Stream):
         None.
         """
         for tr in self:
-            tr.ppoint(vmodel_file=vmodel_file, latb=latb, lonb=lonb)
+            tr.ppoint(vmodel=vmodel_file, latb=latb, lonb=lonb)
 
     def station_stack(self, vmodel_file='iasp91.dat'):
         """
@@ -831,15 +831,24 @@ class RFTrace(Trace):
             htab, _, delta = dt_table(
                 st.slowness, vmodel, st.phase, st.station_elevation)
 
-        # st.pp_depth = htab
-        st.pp_depth = np.hstack(
-            (np.arange(-10, 0, .1), np.arange(0, htab.max(), res)))
+        st.pp_depth = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
+        # if st.station_elevation > 0:
+        #     st.pp_depth = np.hstack(
+        #         (np.arange(-round(st.station_elevation/1000, 1), 0, .1),
+        #          np.arange(0, maxz + res)))[:len(delta)]
+        # else:
+        #     st.pp_depth = np.arange(-round(st.station_elevation/1000),
+        #                             maxz + res, res)[0:len(delta)]
+        # st.pp_depth = np.hstack(
+        #     (np.arange(-10, 0, .1), np.arange(0, htab.max(), res)))
         delta2 = np.empty(st.pp_depth.shape)
         delta2.fill(np.nan)
 
         # Find first pp depth
+        # starti = np.nonzero(np.isclose(st.ppdepth, -st.station_elevation))
         starti = np.nonzero(np.isclose(st.pp_depth, htab[0]))[0][0]
 
+        # print(len(delta))
         # Create full-length distance vector
         delta2[starti:starti+len(delta)] = delta
 
@@ -854,6 +863,7 @@ class RFTrace(Trace):
             lat2, lon2 = coords['lat2'], coords['lon2']
             st.pp_latitude.append(lat2)
             st.pp_longitude.append(lon2)
+        return delta2
 
     def plot(self, grid=False):
         """

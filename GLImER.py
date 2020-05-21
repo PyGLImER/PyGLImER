@@ -14,6 +14,7 @@ Author:
 Last updated:
 """
 import multiprocessing
+from joblib import Parallel, delayed
 
 import config
 from src.waveform.request import Request

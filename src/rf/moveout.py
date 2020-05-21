@@ -202,18 +202,18 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
 
     # Numerical integration
     for kk, h in enumerate(htab_f[1:]):
-        ii = np.where(model.zf >= h)[0][0] - 1
+        # ii = np.where(model.zf > h)[0][0] - 1  # >=
 
-        # When there is elevation (velocity model starts at depth 0!)
-        if ii == -1:
-            ii = 0
+        # # When there is elevation (velocity model starts at depth 0!)
+        # if ii == -1:
+        #     ii = 0
 
         with warnings.catch_warnings():
             # Catch Zerodivision warnings
             warnings.filterwarnings('error')
             try:
                 delta[kk+1] = ppoint(
-                    q_a[ii], q_b[ii], res_f[kk], p, phase) + delta[kk]
+                    q_a[kk], q_b[kk], res_f[kk], p, phase) + delta[kk]
             except Warning:
                 delta = delta[:kk+1]
                 break
@@ -228,7 +228,10 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
         coords = Geodesic.WGS84.ArcDirect(lat, lon, az, delta[kk+1])
         lat2, lon2 = coords['lat2'], coords['lon2']
 
-        vpf, vsf = model.query(lat2, lon2, ii)  # Note that ii equals depth
+        if h < 0:  # For elevation, model is not defined for el
+            h = 0
+
+        vpf, vsf = model.query(lat2, lon2, h)  # Note that ii equals depth
         q_a[kk+1] = np.sqrt(vpf**-2 - p**2)
         q_b[kk+1] = np.sqrt(vsf**-2 - p**2)
 
@@ -238,7 +241,7 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
             delta = delta[:kk+1]
             break
 
-        dt[kk+1] = (q_b[ii]-q_a[ii])*res_f[kk]
+        dt[kk+1] = (q_b[kk]-q_a[kk])*res_f[kk]
 
     dt = np.cumsum(dt)[:len(delta)]
 
@@ -270,12 +273,12 @@ def dt_table(rayp, fname, phase, el, debug=False):
         Vector containing delay times between primary arrival and converted
         wave.
     delta: np.array
-        Vector containing Euclidian distance of piercing point from the
+        Vector containing angular distance of piercing point from the
         station at depth z.
 
     """
 
-    p = rayp/DEG2KM  # convert to s/km
+    p = rayp/DEG2KM  # convert to s/km for flattened model
 
     model = load_model(fname)
     z = model.z
@@ -299,11 +302,12 @@ def dt_table(rayp, fname, phase, el, debug=False):
         htab = np.arange(-round(el/1000), maxz+res, res)
 
     htab_f = -R_EARTH*np.log((R_EARTH-htab)/R_EARTH)  # flat earth depth
+
     res_f = np.diff(htab_f)  # earth flattened resolution
 
     if fname == "raysum.dat" or debug:
         htab_f = htab
-        res_f = res * np.ones(np.shape(res_f))
+        res_f = np.diff(htab)
 
     # delay times
     dt = np.zeros(np.shape(htab))
@@ -317,7 +321,7 @@ def dt_table(rayp, fname, phase, el, debug=False):
 
     # Numerical integration
     for kk, h in enumerate(htab_f[1:]):
-        ii = np.where(zf >= h)[0][0] - 1
+        ii = np.where(zf > h)[0][0] - 1  # >=
         if ii == -1:
             ii = 0
         dt[kk+1] = (q_b[ii]-q_a[ii])*res_f[kk]
@@ -327,7 +331,7 @@ def dt_table(rayp, fname, phase, el, debug=False):
 
     # Determine if Sp is supercritical
     try:
-        index = np.nonzero(np.isnan(dt))[0][0] - 1
+        index = np.nonzero(np.isnan(dt))[0][0]
     except IndexError:
         index = len(dt)
     return htab[:index], dt[:index], delta[:index]
@@ -363,7 +367,7 @@ def ppoint(q_a, q_b, dz, p, phase):
         x = dz / q_a * p
     elif phase == "P":
         x = dz / q_b * p
-    x_delta = x / DEG2KM  # Euclidean distance in degree
+    x_delta = x / DEG2KM  # distance in degree
     return x_delta
 
 
@@ -402,11 +406,12 @@ def earth_flattening(maxz, z, dz, vp, vs):
 
     """
 
-    r = R_EARTH  # Earth's radius
+    a = R_EARTH  # Earth's radius
     ii = np.where(z > maxz)[0][0]+1
-    vpf = (r/(r-z[:ii]))*vp[:ii]
-    vsf = (r/(r-z[:ii]))*vs[:ii]
-    zf = -r*np.log((r-z[:ii+1])/r)[:ii]
+    r = a - z[:ii]
+    vpf = (a/r) * vp[:ii]
+    vsf = (a/r) * vs[:ii]
+    zf = -a * np.log(r/a)
     z = z[:ii]
     dz = dz[:ii]
     dzf = np.diff(zf)
@@ -490,6 +495,6 @@ class SimpleModel(object):
             earth_flattening(maxz, z[:-1], dz, vp[:-1], vs[:-1])
         # self.dz =
         # self.z = z[:-1]
-        self.vp = vp[:-1]
-        self.vs = vs[:-1]
+        self.vp = vp[:len(self.z)]
+        self.vs = vs[:len(self.z)]
         self.t_ref = {}
