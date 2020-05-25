@@ -18,6 +18,7 @@ from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
 
 import config
+from ..utils.roundhalf import roundhalf
 
 
 def downloadwav(min_epid, max_epid, model, event_cat):
@@ -83,8 +84,13 @@ def downloadwav(min_epid, max_epid, model, event_cat):
         evtlat = event.origins[0].latitude
         evtlon = event.origins[0].longitude
 
-        config.folder = config.waveform + "/" + ot_fiss + '_' + str(evtlat) \
-                        + "_" + str(evtlon)  # Download location
+        # Download location
+        ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()
+        evtlat_loc = str(roundhalf(evtlat))
+        evtlon_loc = str(roundhalf(evtlon))
+        config.folder = os.path.join(config.waveform, ot_loc + '_'
+                                     + evtlat_loc + "_" + evtlon_loc)
+
         # create folder for each event
         if not Path(config.folder).is_dir():
             subprocess.call(["mkdir", "-p", config.folder])

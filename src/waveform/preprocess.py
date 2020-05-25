@@ -31,6 +31,7 @@ from ..constants import DEG2KM
 from .qc import qcp, qcs
 from .rotate import rotate_LQT_min, rotate_PSV, rotate_LQT
 from ..rf.create import createRF
+from ..utils.roundhalf import roundhalf
 from ..utils.utils import dt_string
 
 
@@ -195,14 +196,23 @@ def __event_loop(event, taper_perc, taper_type, iclient, model,
     evtlon = origin.longitude
     depth = origin.depth
 
+    # Rounded for filenames
+    ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()
+    evtlat_loc = str(roundhalf(evtlat))
+    evtlon_loc = str(roundhalf(evtlon))
+    by_event = os.path.join(
+        config.outputloc, 'by_event', ot_loc + '_' + evtlat_loc
+        + '_' + evtlon_loc)
+
     # make folder that will contain softlinks
-    if not Path(config.outputloc+'/'+'by_event/'+ot_fiss).is_dir():
-        subprocess.call(["mkdir", "-p",
-                         config.outputloc+'/'+'by_event/'+ot_fiss])
+    if not Path(by_event).is_dir():
+        subprocess.call(["mkdir", "-p", by_event])
 
     # Folder, in which the preprocessing is actually happening
-    prepro_folder = config.waveform + "/" + ot_fiss + '_' + str(evtlat) +\
-        "_" + str(evtlon)
+    prepro_folder = os.path.join(
+        config.waveform, ot_loc + '_' + evtlat_loc + '_' + evtlon_loc)
+    # config.waveform + "/" + ot_fiss + '_' + str(evtlat) +\
+    #     "_" + str(evtlon)
     # only start preprocessing after waveforms for foregoing are downloaded
     while prepro_folder == config.folder or config.folder == "not_started":
         print('preprocessing suspended, awaiting download')
@@ -234,7 +244,7 @@ def __event_loop(event, taper_perc, taper_type, iclient, model,
         info = __waveform_loop(file, taper_perc, taper_type, model,
                                paz_sim, origin_time, ot_fiss, evtlat, evtlon,
                                depth, prepro_folder, event, logger, rflogger,
-                               iclient)
+                               iclient, by_event)
         infolist.append(info)
 
     return infolist
@@ -242,7 +252,8 @@ def __event_loop(event, taper_perc, taper_type, iclient, model,
 
 def __waveform_loop(file, taper_perc, taper_type, model,
                     paz_sim, origin_time, ot_fiss, evtlat, evtlon,
-                    depth, prepro_folder, event, logger, rflogger, iclient):
+                    depth, prepro_folder, event, logger, rflogger, iclient,
+                    by_event):
     """
     Loops over each waveform for a specific event and a specific station
     """
@@ -267,7 +278,9 @@ def __waveform_loop(file, taper_perc, taper_type, model,
     # Info file
     infof = os.path.join(outdir, 'info')
 
-    outf = os.path.join(outdir, network+'.'+station+'.'+ot_fiss+'.mseed')
+    ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()
+
+    outf = os.path.join(outdir, network+'.'+station+'.'+ot_loc+'.mseed')
 
     # Create directory for preprocessed file
     if not Path(outdir).is_dir():
@@ -319,7 +332,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
                                              paz_sim, baz, distance, outf,
                                              ot_fiss, event, evtlat, evtlon,
                                              depth, rayp_s_deg, first_arrival,
-                                             infof, logger, infodict)
+                                             infof, logger, infodict, by_event)
 
         # Exceptions & logging
 
@@ -369,7 +382,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
     # computed at all, and if the waveform was retained (SNR)
     if config.decon_meth and not\
         __file_in_db(config.RF + '/' + network + '/' + station, network +
-                     '.' + station + '.' + ot_fiss + '.sac') and crit:
+                     '.' + station + '.' + ot_loc + '.sac') and crit:
 
         # 21.04.2020 Second highcut filter
         if config.phase == "P":
@@ -431,7 +444,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
                                  station])
 
             RF.write(config.RF + '/' + network + '/' + station +
-                     '/' + network + '.' + station + '.' + ot_fiss
+                     '/' + network + '.' + station + '.' + ot_loc
                      + '.sac', format='SAC')
 
             end = time.time()
@@ -446,7 +459,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
 
         except Exception as e:
             print("RF creation failed")
-            rflogger.exception([network, station, ot_fiss, e])
+            rflogger.exception([network, station, ot_loc, e])
 
         finally:
             if config.wavdownload and infodict:
@@ -507,7 +520,7 @@ def __cut_resample(st, logger, first_arrival, network, station,
 
 def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
                 distance, outf, ot_fiss, event, evtlat, evtlon, depth,
-                rayp_s_deg, first_arrival, infof, logger, infodict):
+                rayp_s_deg, first_arrival, infof, logger, infodict, by_event):
     """REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
     Bugs occur here due to station inventories without response information
     Looks like the bulk downloader sometimes donwnloads
@@ -590,8 +603,7 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
     st.write(outf, format="MSEED")
 
     # create softlink
-    subprocess.call(["ln", "-s", outf, config.outputloc + '/by_event/'
-                     + ot_fiss + '/' + network + '.' + station])
+    subprocess.call(["ln", "-s", outf, by_event])
 
     # WRITE AN INFO FILE
     # append_info: [key,value]
