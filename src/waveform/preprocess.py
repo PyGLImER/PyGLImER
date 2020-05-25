@@ -197,7 +197,7 @@ def __event_loop(event, taper_perc, taper_type, iclient, model,
     depth = origin.depth
 
     # Rounded for filenames
-    ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()
+    ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
     evtlat_loc = str(roundhalf(evtlat))
     evtlon_loc = str(roundhalf(evtlon))
     by_event = os.path.join(
@@ -278,7 +278,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
     # Info file
     infof = os.path.join(outdir, 'info')
 
-    ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()
+    ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
 
     outf = os.path.join(outdir, network+'.'+station+'.'+ot_loc+'.mseed')
 

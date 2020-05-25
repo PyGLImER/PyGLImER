@@ -85,7 +85,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
         evtlon = event.origins[0].longitude
 
         # Download location
-        ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()
+        ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
         evtlat_loc = str(roundhalf(evtlat))
         evtlon_loc = str(roundhalf(evtlon))
         config.folder = os.path.join(config.waveform, ot_loc + '_'
