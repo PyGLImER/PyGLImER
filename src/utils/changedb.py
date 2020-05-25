@@ -1,7 +1,7 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
 Created: Mon May 25 2020 10:40:04
-Last Modified: Monday, 25th May 2020 11:52:46 am
+Last Modified: Monday, 25th May 2020 12:56:46 pm
 '''
 
 import os
@@ -48,7 +48,7 @@ def shortennames(phase):
 
         elif Path(di_new).is_dir():
             # move content
-            susudi = os.listdir(di_new)
+            susudi = os.listdir(di_old)
             for didi in susudi:
                 subprocess.call(['mv', os.path.join(di_old, didi), di_new])
             subprocess.call(['rmdir', di_old])
