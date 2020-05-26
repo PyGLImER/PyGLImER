@@ -32,7 +32,7 @@ from .qc import qcp, qcs
 from .rotate import rotate_LQT_min, rotate_PSV, rotate_LQT
 from ..rf.create import createRF
 from ..utils.roundhalf import roundhalf
-from ..utils.utils import dt_string
+from ..utils.utils import dt_string, chunks
 
 
 def preprocess(taper_perc, event_cat,model, taper_type="hann"):
@@ -125,62 +125,76 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
                "poles": paz_sim.get_paz().poles,
                "zeros": paz_sim.get_paz().zeros}
 
-    # Iris client for backazimuth and epicentral distance calculation
-    iclient = Client()
-
-    # If there is a download happening in parallel, only use one core
-    if config.wavdownload:
-        n_jobs = 1
-    else:  # Use all available cores
-        n_jobs = -1
-
-    out = Parallel(n_jobs=n_jobs)(
-            delayed(__event_loop)(event, taper_perc, taper_type, iclient,
-                                  model, paz_sim, logger, rflogger)
-            for event in event_cat)
-
+    
     if not config.wavdownload:
-        # Else the dictionaries are written, while the processing is happening
-        # (Not robust for multicore)
+        # Here, we work with all available cores to speed things up
+        # Split up event catalogue to mitigate danger of data loss
+        # Now the infodicts will be written in an even way
+        # i.e. every 100 events
+        
+        n_split = int(np.ceil(event_cat.count()/100))
+        
+        # Returns generator object with evtcats with each 100 events
+        evtcats = chunks(event_cat, n_split)
+        for evtcat in evtcats:
+            out = Parallel(n_jobs=-1)(
+                    delayed(__event_loop)(
+                        event, taper_perc, taper_type, model,
+                        paz_sim, logger, rflogger)
+                    for event in evtcat)
 
-        # The multicore process returns a list of lists of dictionaries
-        dictlist = list(itertools.chain.from_iterable(out))
+            # For simultaneous download, dicts are written
+            #  while the processing is happening
+            # (Not robust for multicore)
 
-        # 1. Write all dictionaries in a "masterdictionary", where the keys
-        # are Network and station code. Then, extent these subdictionaries
-        # with the new information from new dictionaries for the same station.
-        masterdict = {}
+            # The multicore process returns a list of lists of dictionaries
+            dictlist = list(itertools.chain.from_iterable(out))
 
-        for d in dictlist:
-            if not d:  # Some of the dictionaries might be empty
-                continue
-            try:
-                net = d['network']
-                stat = d['station']
-                key = net + '.' + stat
-            except (ValueError, KeyError) as e:
-                logger.exception([e, d])
-                continue
-            if key in masterdict:
-                for k in d:
-                    if type(d[k]) == list:
-                        masterdict[key].setdefault(k, []).extend(d[k])
-            else:
-                masterdict[key] = d
+            # 1. Write all dictionaries in a "masterdictionary", where the keys
+            # are Network and station code. Then, extent these subdictionaries
+            # with the new information from new dictionaries for the same
+            # station.
+            masterdict = {}
 
-        # Write dictionaries in the folder
-        for d in masterdict:
-            try:
-                net, stat = d.split('.')
-                write_info(net, stat, masterdict[d])
-            except (ValueError, KeyError) as e:
-                logger.exception([e, d])
-                continue
+            for d in dictlist:
+                if not d:  # Some of the dictionaries might be empty
+                    continue
+                try:
+                    net = d['network']
+                    stat = d['station']
+                    key = net + '.' + stat
+                except (ValueError, KeyError) as e:
+                    logger.exception([e, d])
+                    continue
+                if key in masterdict:
+                    for k in d:
+                        if type(d[k]) == list:
+                            masterdict[key].setdefault(k, []).extend(d[k])
+                else:
+                    masterdict[key] = d
+
+            # Write dictionaries in the folder
+            for d in masterdict:
+                try:
+                    net, stat = d.split('.')
+                    write_info(net, stat, masterdict[d])
+                except (ValueError, KeyError) as e:
+                    logger.exception([e, d])
+                    continue
+
+    else:
+        # It won't be faster to use several cores, when the download is running
+        # So for stability's sake just one core and dicts are written at the
+        # same time.
+        Parallel(n_jobs=1)(
+            delayed(__event_loop)(event, taper_perc, taper_type,
+                                model, paz_sim, logger, rflogger)
+            for event in event_cat)
 
     print("Download and preprocessing finished.")
 
 
-def __event_loop(event, taper_perc, taper_type, iclient, model,
+def __event_loop(event, taper_perc, taper_type, model,
                  paz_sim, logger, rflogger):
     """
     Loops over each event in the event catalogue
@@ -244,7 +258,7 @@ def __event_loop(event, taper_perc, taper_type, iclient, model,
         info = __waveform_loop(file, taper_perc, taper_type, model,
                                paz_sim, origin_time, ot_fiss, evtlat, evtlon,
                                depth, prepro_folder, event, logger, rflogger,
-                               iclient, by_event)
+                               by_event)
         infolist.append(info)
 
     return infolist
@@ -252,7 +266,7 @@ def __event_loop(event, taper_perc, taper_type, iclient, model,
 
 def __waveform_loop(file, taper_perc, taper_type, model,
                     paz_sim, origin_time, ot_fiss, evtlat, evtlon,
-                    depth, prepro_folder, event, logger, rflogger, iclient,
+                    depth, prepro_folder, event, logger, rflogger,
                     by_event):
     """
     Loops over each waveform for a specific event and a specific station
