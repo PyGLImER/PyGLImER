@@ -77,7 +77,7 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
     -------
     None.
 
-        """
+    """
     ###########
     # logging
     logger = logging.Logger("src.waveform.preprocess")
@@ -132,7 +132,8 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
         # Now the infodicts will be written in an even way
         # i.e. every 100 events
         
-        n_split = int(np.ceil(event_cat.count()/100))
+        # Number of cores is often a multiple of 8 (therefore 128)
+        n_split = int(np.ceil(event_cat.count()/128))
         
         # Returns generator object with evtcats with each 100 events
         evtcats = chunks(event_cat, n_split)

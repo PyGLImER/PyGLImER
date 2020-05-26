@@ -1,10 +1,12 @@
+'''
+Author: Peter Makus (peter.makus@student.uib.no
+Created: Tue May 26 2020 13:31:30
+Last Modified: Tuesday, 26th May 2020 1:31:40 pm
+'''
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Apr 24 20:42:51 2019
 
-@author: pm
-"""
 
 from http.client import IncompleteRead
 import logging
@@ -68,7 +70,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
 
     # Create handler to the log
     fh = logging.FileHandler('logs/download.log')
-    fh.setLevel(logging.INFO)
+    fh.setLevel(logging.WARNING)
     fdsn_mass_logger.addHandler(fh)
 
     # Create Formatter
