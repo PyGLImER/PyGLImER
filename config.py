@@ -12,9 +12,14 @@ from obspy.core import UTCDateTime
 from obspy.taup import TauPyModel  # arrival times in 1D v-model
 
 # %% general settings
+# If debug setting is true, all loggers will go to DEBUG mode and all warnings
+# will be shown. That will result in a lot of information being shown!
+debug = False
+
 # Define if you want to download new files or use old
 evtcat = 'all_greater55'  # either None (downloads new) or string of filename
 # in evtloc
+
 wavdownload = True  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 

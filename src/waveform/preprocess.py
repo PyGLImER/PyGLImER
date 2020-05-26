@@ -83,10 +83,14 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
     # logging
     logger = logging.Logger("src.waveform.preprocess")
     logger.setLevel(logging.WARNING)
+    if config.debug:
+        logger.setLevel(logging.DEBUG)
 
     # Create handler to the log
     fh = logging.FileHandler('logs/preprocess.log')
     fh.setLevel(logging.WARNING)
+    if config.debug:
+        fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
 
     # Create Formatter
@@ -96,11 +100,15 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
     #########
     # Logging for RF creation
     rflogger = logging.getLogger("src.waveform.preprocess.RF")
-    rflogger.setLevel(logging.INFO)
+    rflogger.setLevel(logging.WARNING)
+    if config.debug:
+        rflogger.setLevel(logging.DEBUG)
 
     # Create handler to the log
     fhrf = logging.FileHandler('logs/RF.log')
     fhrf.setLevel(logging.WARNING)
+    if config.debug:
+        fhrf.setLevel(logging.DEBUG)
     rflogger.addHandler(fhrf)
 
     # Create Formatter
@@ -109,8 +117,8 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
     fhrf.setFormatter(fmtrf)
 
     # To get rid of the annoying and useless mseed warning
-    # When debugging it probably makes sense to comment this
-    warnings.filterwarnings("ignore", category=UserWarning)
+    if not config.debug:
+        warnings.filterwarnings("ignore", category=UserWarning)
 
     #########
 

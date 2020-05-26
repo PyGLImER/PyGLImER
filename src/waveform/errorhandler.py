@@ -28,7 +28,8 @@ def redownload(network, station, starttime, endtime, st):
                     st = client.get_waveforms(network, station, '*',
                                               st[0].stats.channel[0:2] + '*',
                                               starttime, endtime)
-                except (header.FDSNNoDataException, ValueError):
+                except (header.FDSNNoDataException,header.FDSNException,
+                        ValueError):
                     break  # wrong client
         if len(st) == 3:
             break

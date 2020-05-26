@@ -1,7 +1,7 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
 Created: Tue May 26 2020 13:31:30
-Last Modified: Tuesday, 26th May 2020 1:31:40 pm
+Last Modified: Tuesday, 26th May 2020 1:47:36 pm
 '''
 
 #!/usr/bin/env python3
@@ -67,10 +67,14 @@ def downloadwav(min_epid, max_epid, model, event_cat):
     # logging for the download
     fdsn_mass_logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
     fdsn_mass_logger.setLevel(logging.INFO)
+    if config.debug:
+        fdsn_mass_logger.setLevel(logging.DEBUG)
 
     # Create handler to the log
     fh = logging.FileHandler('logs/download.log')
     fh.setLevel(logging.WARNING)
+    if config.debug:
+        fh.setLevel(logging.DEBUG)
     fdsn_mass_logger.addHandler(fh)
 
     # Create Formatter
