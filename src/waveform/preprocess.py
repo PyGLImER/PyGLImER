@@ -1,8 +1,10 @@
 '''
-Author: Peter Makus (peter.makus@student.uib.no
-Created: Tue May 26 2019 18:10:52
-Last Modified: Tuesday, 26th May 2020 6:43:44 pm
+Author: Peter Makus (peter.makus@student.uib.no)
+
+Created: Tuesday, 19th May 2019 8:59:40 pm
+Last Modified: Tuesday, 26th May 2020 07:16:23
 '''
+
 #!/usr/bin/env python3d
 # -*- coding: utf-8 -*-
 
@@ -115,8 +117,8 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
     fhrf.setFormatter(fmtrf)
 
     # To get rid of the annoying and useless mseed warning
-    if not config.debug:
-        warnings.filterwarnings("ignore", category=UserWarning)
+    # if not config.debug:
+    #     warnings.filterwarnings("ignore", category=UserWarning)
 
     #########
 
@@ -486,7 +488,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
                 subprocess.call(["mkdir", "-p", rfdir])
 
             RF.write(os.path.join(rfdir, network + '.' + station + '.' + ot_loc
-                     + '.sac', format='SAC'))
+                     + '.sac'), format='SAC')
 
             end = time.time()
             rflogger.info("RF created")
@@ -533,6 +535,11 @@ def __cut_resample(st, logger, first_arrival, network, station,
     if st.count() < 3:
         raise Exception("The stream contains less than 3 traces")
 
+    # Change dtype
+    for tr in st:
+        np.require(tr.data, dtype=np.float64)
+        tr.stats.mseed.encoding = 'FLOAT64'
+    
     # trim to according length
     # Anti-Alias
     st.filter(type="lowpass", freq=4.95, zerophase=True, corners=2)
@@ -555,11 +562,11 @@ def __cut_resample(st, logger, first_arrival, network, station,
     try:
         st.write(os.path.join(prepro_folder, file), format="MSEED")
     except ValueError:
-        # Occurs for weird mseed encodings
+        # Occurs for dtype=int32
         for tr in st:
             del tr.stats.mseed
         st.write(os.path.join(prepro_folder, file),
-                  format="MSEED", encoding="ASCII")
+                  format="MSEED")
 
 
     end = time.time()

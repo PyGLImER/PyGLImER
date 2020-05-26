@@ -1,13 +1,12 @@
+'''
+Author: Peter Makus (peter.makus@student.uib.no)
+
+Created: Friday, 10th April 2020 05:30:18 pm
+Last Modified: Tuesday, 26th May 2020 06:58:55
+'''
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Apr 10 17:10:18 2020
-
-Author:
-    Peter Makus (peter.makus@student.uib.no)
-
-Last updated:
-"""
 
 import fnmatch
 import os

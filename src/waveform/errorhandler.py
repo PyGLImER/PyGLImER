@@ -1,11 +1,16 @@
+'''
+Files contains all Errorhandler for the Glimer to obspy project
+
+
+Author: Peter Makus (peter.makus@student.uib.no)
+
+Created: Saturday, 21th March 2020 19:16:41
+Last Modified: Tuesday, 26th May 2020 6:55:27 pm
+'''
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 21 19:16:41 2020
 
-Files contains all Errorhandler for the Glimer to obspy project
-@author: pm
-"""
 
 from obspy.clients.fdsn import Client, header  # web sevice
 

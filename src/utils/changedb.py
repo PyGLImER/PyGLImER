@@ -1,7 +1,15 @@
 '''
-Author: Peter Makus (peter.makus@student.uib.no
-Created: Mon May 25 2020 10:40:04
-Last Modified: Monday, 25th May 2020 1:07:26 pm
+Author: Peter Makus (peter.makus@student.uib.no)
+
+Created: Monday, 25th May 2020 10:40:03
+Last Modified: Tuesday, 26th May 2020 06:57:56
+'''
+
+'''
+Author: Peter Makus (peter.makus@student.uib.no)
+
+Created: Monday, 25th May 2020 10:40:03 am
+Last Modified: Tuesday, 26th May 2020 6:54:16 pm
 '''
 
 import os
