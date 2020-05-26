@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 26th May 2020 07:30:55
+Last Modified: Tuesday, 26th May 2020 09:51:48
 '''
 
 #!/usr/bin/env python3d
@@ -116,9 +116,9 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
                                           %(levelname)s - %(message)s""")
     fhrf.setFormatter(fmtrf)
 
-    # To get rid of the annoying and useless mseed warning
-    # if not config.debug:
-    #     warnings.filterwarnings("ignore", category=UserWarning)
+    # We don't really want to see all the warnings.
+    if not config.debug:
+        warnings.filterwarnings("ignore")
 
     #########
 
@@ -277,9 +277,9 @@ def __event_loop(event, taper_perc, taper_type, model,
     else:
         files = os.listdir(prepro_folder)
 
-    for file in files:
+    for filestr in files:
         try:
-            info = __waveform_loop(file, taper_perc, taper_type, model,
+            info = __waveform_loop(filestr, taper_perc, taper_type, model,
                                 paz_sim, origin_time, ot_fiss, evtlat, evtlon,
                                 depth, prepro_folder, event, logger, rflogger,
                                 by_event, eh)
@@ -287,13 +287,13 @@ def __event_loop(event, taper_perc, taper_type, model,
         except Exception as e:
             # Unhandled exceptions should not cause the loop to quit
             # processing one event
-            logger.exception([file, e])
+            logger.exception([filestr, e])
             continue
 
     return infolist
 
 
-def __waveform_loop(file, taper_perc, taper_type, model,
+def __waveform_loop(filestr, taper_perc, taper_type, model,
                     paz_sim, origin_time, ot_fiss, evtlat, evtlon,
                     depth, prepro_folder, event, logger, rflogger,
                     by_event, eh):
@@ -306,11 +306,11 @@ def __waveform_loop(file, taper_perc, taper_type, model,
     start = time.time()
     # Open files that should be processed
     try:
-        st = read(os.path.join(prepro_folder, file))
+        st = read(os.path.join(prepro_folder, filestr))
     except FileNotFoundError:  # file has not been downloaded yet
         return  # I will still want to have the RFs
     except Exception as e:  # Unknown erros
-        logger.exception([prepro_folder, file, e])
+        logger.exception([prepro_folder, filestr, e])
         return
     station = st[0].stats.station
     network = st[0].stats.network
@@ -372,7 +372,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
             # Check if step is already done
             if st[0].stats.sampling_rate != 10:
                 st = __cut_resample(st, logger, first_arrival, network,
-                                    station, prepro_folder, file,
+                                    station, prepro_folder, filestr,
                                     taper_perc, taper_type, eh)
 
             # Finalise preprocessing
@@ -386,7 +386,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
         # Exceptions & logging
 
         except SNRError as e:  # QR rejections
-            logger.debug([file, "QC was not met, SNR ratios are",
+            logger.debug([filestr, "QC was not met, SNR ratios are",
                          e])
 
             if __file_in_db(outdir, 'info.dat'):
@@ -402,7 +402,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
 
         # Everything else that might have gone wrong
         except Exception as e:
-            logger.exception([prepro_folder, file, e])
+            logger.exception([prepro_folder, filestr, e])
 
         finally:
             end = time.time()
@@ -520,7 +520,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
 
 
 def __cut_resample(st, logger, first_arrival, network, station,
-                   prepro_folder, file, taper_perc, taper_type, eh):
+                   prepro_folder, filestr, taper_perc, taper_type, eh):
     """Cut and resample raw file. Will overwrite original raw"""
 
     start = time.time()
@@ -533,7 +533,7 @@ def __cut_resample(st, logger, first_arrival, network, station,
     if st.count() < 3:
         if not eh:
             raise ValueError(
-                ["The stream contains less than three traces.", file])
+                ["The stream contains less than three traces.", filestr])
         st = redownload(network, station, starttime, endtime, st)
 
     # Check one last time. If stream to short raise Exception
@@ -565,12 +565,12 @@ def __cut_resample(st, logger, first_arrival, network, station,
     # Write trimmed and resampled files into raw-file folder
     # to save space
     try:
-        st.write(os.path.join(prepro_folder, file), format="MSEED")
+        st.write(os.path.join(prepro_folder, filestr), format="MSEED")
     except ValueError:
         # Occurs for dtype=int32
         for tr in st:
             del tr.stats.mseed
-        st.write(os.path.join(prepro_folder, file),
+        st.write(os.path.join(prepro_folder, filestr),
                   format="MSEED")
 
 
