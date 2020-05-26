@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 26th May 2020 07:16:23
+Last Modified: Tuesday, 26th May 2020 07:30:55
 '''
 
 #!/usr/bin/env python3d
@@ -208,9 +208,11 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
         # It won't be faster to use several cores, when the download is running
         # So for stability's sake just one core and dicts are written at the
         # same time.
+        eh = False  # Don't send additional requests to the FDSN servers!
+        # Else it'll overload and no data will arrive
         Parallel(n_jobs=1)(
             delayed(__event_loop)(event, taper_perc, taper_type,
-                                model, paz_sim, logger, rflogger)
+                                model, paz_sim, logger, rflogger, eh)
             for event in event_cat)
 
     print("Download and preprocessing finished.")
@@ -323,7 +325,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
 
     outf = os.path.join(outdir, network+'.'+station+'.'+ot_loc+'.mseed')
     
-    statfile = os.path.join(config.statloc, network + '.' + station +'.xml')
+    statfile = os.path.join(config.statloc, network + '.' + station + '.xml')
 
     # Create directory for preprocessed file
     if not Path(outdir).is_dir():
@@ -529,6 +531,9 @@ def __cut_resample(st, logger, first_arrival, network, station,
     endtime = first_arrival + config.ta
 
     if st.count() < 3:
+        if not eh:
+            raise ValueError(
+                ["The stream contains less than three traces.", file])
         st = redownload(network, station, starttime, endtime, st)
 
     # Check one last time. If stream to short raise Exception
