@@ -269,11 +269,17 @@ def __event_loop(event, taper_perc, taper_type, model,
         files = os.listdir(prepro_folder)
 
     for file in files:
-        info = __waveform_loop(file, taper_perc, taper_type, model,
-                               paz_sim, origin_time, ot_fiss, evtlat, evtlon,
-                               depth, prepro_folder, event, logger, rflogger,
-                               by_event)
-        infolist.append(info)
+        try:
+            info = __waveform_loop(file, taper_perc, taper_type, model,
+                                paz_sim, origin_time, ot_fiss, evtlat, evtlon,
+                                depth, prepro_folder, event, logger, rflogger,
+                                by_event)
+            infolist.append(info)
+        except Exception as e:
+            # Unhandled exceptions should not cause the loop to quit
+            # processing one event
+            logger.exception([file,e])
+            continue
 
     return infolist
 
