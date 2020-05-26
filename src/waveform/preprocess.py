@@ -15,10 +15,11 @@ from pathlib import Path
 import shelve
 import subprocess
 import time
+import itertools
+import warnings
+
 import numpy as np
 from joblib import Parallel, delayed
-import itertools
-
 from obspy import read, read_inventory, Stream, UTCDateTime
 from obspy.clients.iris import Client
 from obspy.clients.fdsn import Client as Webclient
@@ -106,6 +107,10 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
     fmtrf = logging.Formatter(fmt="""%(asctime)s -
                                           %(levelname)s - %(message)s""")
     fhrf.setFormatter(fmtrf)
+
+    # To get rid of the annoying and useless mseed warning
+    # When debugging it probably makes sense to comment this
+    warnings.filterwarnings("ignore", category=UserWarning)
 
     #########
 
