@@ -455,7 +455,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
         # Usually don't happen
         except SNRError as e:
             rflogger.info(e)
-            return infodict
+            # return infodict
 
         except Exception as e:
             print("RF creation failed")
@@ -468,8 +468,10 @@ def __waveform_loop(file, taper_perc, taper_type, model,
 
                 # just to save RAM - not needed for single-core
                 infodict = None
+            else:  # The multicore case
+                return infodict
 
-    return infodict
+    # return infodict
 
 
 def __cut_resample(st, logger, first_arrival, network, station,

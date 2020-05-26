@@ -50,7 +50,9 @@ def moveout(data, st, fname, latb, lonb, taper):
         Tuple in Form (minlon, maxlon)
     taper : Bool
         If True, the last 10km of the RF will be tapered, which avoids
-        jumps in station stacks. Should be False for CCP stacks.
+        jumps in station stacks. If False,
+        the upper 5 km will be tapered.
+        Should be False for CCP stacks.
 
     Returns
     -------
@@ -102,10 +104,21 @@ def moveout(data, st, fname, latb, lonb, taper):
         tap = hann(20)
         _, down = np.split(tap, 2)
 
-        if len(RF) > len(tap):  # That usually doesn't happen, only for extreme
+        if len(RF) > len(down):  # That usually doesn't happen, only for extreme
             # discontinuities in 3D model and errors in SRF data
             taper = np.ones(len(RF))
             taper[-len(down):] = down
+            RF = np.multiply(taper, RF)
+    
+    else:
+        # Taper the upper 5 km
+        i = np.where(z>=5)[0][0]  # Find where rf is depth = 5
+        tap = hann((i+1)*2)
+        up, _ = np.split(tap, 2)
+        if len(RF) > len(up):  # That usually doesn't happen, only for extreme
+            # discontinuities in 3D model and errors in SRF data
+            taper = np.ones(len(RF))
+            taper[:len(up)] = up
             RF = np.multiply(taper, RF)
 
     # z2 = np.arange(0, maxz+res, res)
