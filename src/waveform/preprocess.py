@@ -1,7 +1,7 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
 Created: Tue May 26 2019 18:10:52
-Last Modified: Tuesday, 26th May 2020 6:33:25 pm
+Last Modified: Tuesday, 26th May 2020 6:43:44 pm
 '''
 #!/usr/bin/env python3d
 # -*- coding: utf-8 -*-
@@ -552,8 +552,15 @@ def __cut_resample(st, logger, first_arrival, network, station,
 
     # Write trimmed and resampled files into raw-file folder
     # to save space
-    st.write(
-        os.path.join(prepro_folder, file), format="mseed")
+    try:
+        st.write(os.path.join(prepro_folder, file), format="MSEED")
+    except ValueError:
+        # Occurs for weird mseed encodings
+        for tr in st:
+            del tr.stats.mseed
+        st.write(os.path.join(prepro_folder, file),
+                  format="MSEED", encoding="ASCII")
+
 
     end = time.time()
     logger.info("Unprocessed file rewritten")
