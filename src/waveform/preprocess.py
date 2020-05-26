@@ -239,10 +239,9 @@ def __event_loop(event, taper_perc, taper_type, model,
     # Folder, in which the preprocessing is actually happening
     prepro_folder = os.path.join(
         config.waveform, ot_loc + '_' + evtlat_loc + '_' + evtlon_loc)
-    # config.waveform + "/" + ot_fiss + '_' + str(evtlat) +\
-    #     "_" + str(evtlon)
-    # only start preprocessing after waveforms for foregoing are downloaded
-    while prepro_folder == config.folder or config.folder == "not_started":
+
+    while prepro_folder == config.folder or config.folder == "not_started" \
+        and config.wavdownload:
         print('preprocessing suspended, awaiting download')
         time.sleep(2.5)
 
@@ -315,6 +314,8 @@ def __waveform_loop(file, taper_perc, taper_type, model,
     ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
 
     outf = os.path.join(outdir, network+'.'+station+'.'+ot_loc+'.mseed')
+    
+    statfile = os.path.join(config.statloc, network + '.' + station +'.xml')
 
     # Create directory for preprocessed file
     if not Path(outdir).is_dir():
@@ -329,12 +330,9 @@ def __waveform_loop(file, taper_perc, taper_type, model,
         try:  # From here on, all exceptions are logged
 
             try:
-                station_inv = read_inventory(config.statloc + "/"
-                                             + network + "." +
-                                             station + ".xml",
-                                             format="STATIONXML")
+                station_inv = read_inventory(statfile, format="STATIONXML")
             except FileNotFoundError:
-                station_inv = redownload_statxml(st, network, station)
+                station_inv = redownload_statxml(st, network, station, statfile)
 
             # compute theoretical arrival
 
@@ -403,9 +401,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
             else:
                 crit = True
                 st = read(outf)
-                station_inv = read_inventory(config.statloc + "/"
-                                             + network + "." +
-                                             station + ".xml")
+                station_inv = read_inventory(statfile)
                 j = info["ot_ret"].index(ot_fiss)
                 rayp = info["rayp_s_deg"][j] / 111319.9
                 distance = info["rdelta"][j]
@@ -471,15 +467,13 @@ def __waveform_loop(file, taper_perc, taper_type, model,
                 RF = createRF(st, info=infodict, trim=trim)
 
         # Write RF
-            if not Path(config.RF + '/' + network + '/' + station
-                        ).is_dir():
-                subprocess.call(["mkdir", "-p",
-                                 config.RF + '/' + network + '/' +
-                                 station])
+            rfdir = os.path.join(config.RF, network, station)
 
-            RF.write(config.RF + '/' + network + '/' + station +
-                     '/' + network + '.' + station + '.' + ot_loc
-                     + '.sac', format='SAC')
+            if not Path(rfdir).is_dir():
+                subprocess.call(["mkdir", "-p", rfdir])
+
+            RF.write(os.path.join(rfdir, network + '.' + station + '.' + ot_loc
+                     + '.sac', format='SAC'))
 
             end = time.time()
             rflogger.info("RF created")
@@ -545,7 +539,8 @@ def __cut_resample(st, logger, first_arrival, network, station,
 
     # Write trimmed and resampled files into raw-file folder
     # to save space
-    st.write(prepro_folder + '/' + file, format="mseed")
+    st.write(
+        os.path.join(prepro_folder, file), format="mseed", encoding="ASCII")
 
     end = time.time()
     logger.info("Unprocessed file rewritten")
@@ -568,8 +563,13 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
                            water_level=60)
     except ValueError:
         # Occurs for "No matching response file found"
-        station_inv, st = NoMatchingResponseHandler(st, network,
-                                                    station)
+        try:
+            station_inv, st = NoMatchingResponseHandler(st, network,
+                                                        station)
+        except UnboundLocalError:
+            logger.exception(["Could not download response information.",
+                             network, station, ot_fiss])
+            return
 
     st.remove_sensitivity(inventory=station_inv)
 
@@ -636,7 +636,7 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
             raise SNRError(np.array2string(noisemat))
 
     #      WRITE FILES     #
-    st.write(outf, format="MSEED")
+    st.write(outf, format="MSEED", encoding="ASCII")
 
     # create softlink
     subprocess.call(["ln", "-s", outf, by_event])
@@ -706,18 +706,15 @@ def write_info(network, station, dictionary):
 
     """
     loc = os.path.join(config.outputloc, 'by_station', network, station)
+    infof = os.path.join(loc, 'info')
+    
     if not __file_in_db(loc, 'info.dat'):
-        with shelve.open(loc+'/info', writeback=True) as info:
+        with shelve.open(os.path.join(loc, 'info'), writeback=True) as info:
             info.update(dictionary)
             info['num'] = len(info['ot_all'])
             if 'ot_ret' in info:
                 info['numret'] = len(info['ot_ret'])
             info.sync()
-
-        # create softlink info files
-        # not really neeeded, the sac files contains everything important.
-        # subprocess.call(['ln', '-s', loc + "/info.dat",
-        #                  os.path.join(config.RF, network, station)])
 
     else:
 
@@ -727,7 +724,7 @@ def write_info(network, station, dictionary):
                           'evt_id', 'noisemat', 'co_f', 'npts', 'rbaz',
                           'rdelta', 'rayp_s_deg', 'onset', 'starttime']
 
-            with shelve.open(loc+'/info', writeback=True) as info:
+            with shelve.open(infof, writeback=True) as info:
                 for key in append_inf:
                     info.setdefault(key, []).extend(dictionary[key])
                 info['num'] = len(info['ot_all'])
@@ -735,7 +732,7 @@ def write_info(network, station, dictionary):
                 info.sync()
 
         else:
-            with shelve.open(loc+'/info', writeback=True) as info:
+            with shelve.open(infof, writeback=True) as info:
                 info.setdefault('ot_all', []).extend(dictionary['ot_all'])
                 info['num'] = len(info['ot_all'])
                 info.sync()

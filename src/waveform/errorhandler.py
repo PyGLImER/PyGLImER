@@ -35,7 +35,7 @@ def redownload(network, station, starttime, endtime, st):
     return st
 
 
-def redownload_statxml(st, network, station):
+def redownload_statxml(st, network, station, statfile):
     """Errorhandler: Redownload station xml in case that it is not found."""
     for c in config.re_clients:
         try:
@@ -45,8 +45,7 @@ def redownload_statxml(st, network, station):
                                                       + '*',
                                               network=network, station=station)
             # write the new, working stationxml file
-            station_inv.write(config.statloc + "/" + network + "." +
-                              station + ".xml", format="STATIONXML")
+            station_inv.write(statfile, format="STATIONXML")
             break
         except (header.FDSNNoDataException, header.FDSNException):
             pass  # wrong client
