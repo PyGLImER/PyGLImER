@@ -1,13 +1,11 @@
-#!/usr/bin/env python3
+'''
+Author: Peter Makus (peter.makus@student.uib.no
+Created: Tue May 26 2019 18:10:52
+Last Modified: Tuesday, 26th May 2020 6:33:25 pm
+'''
+#!/usr/bin/env python3d
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Apr 24 20:31:05 2019
 
-Author:
-    Peter Makus (peter.makus@student.uib.no)
-
-Last updated:
-"""
 import fnmatch
 import logging
 import os
@@ -19,7 +17,7 @@ import itertools
 import warnings
 
 import numpy as np
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed, cpu_count
 from obspy import read, read_inventory, Stream, UTCDateTime
 from obspy.clients.iris import Client
 from obspy.clients.fdsn import Client as Webclient
@@ -148,13 +146,21 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
         # Number of cores is often a multiple of 8 (therefore 128)
         n_split = int(np.ceil(event_cat.count()/128))
         
+        # All error handlers rely on download via IRIS webservice.
+        # However, there is a maximum number for connections (3).
+        # So I don't really want to flood everything with exceptions.
+        if cpu_count() > 12:
+            eh = False
+        else:
+            eh = True
+        
         # Returns generator object with evtcats with each 100 events
         evtcats = chunks(event_cat, n_split)
         for evtcat in evtcats:
             out = Parallel(n_jobs=-1)(
                     delayed(__event_loop)(
                         event, taper_perc, taper_type, model,
-                        paz_sim, logger, rflogger)
+                        paz_sim, logger, rflogger, eh)
                     for event in evtcat)
 
             # For simultaneous download, dicts are written
@@ -209,7 +215,7 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
 
 
 def __event_loop(event, taper_perc, taper_type, model,
-                 paz_sim, logger, rflogger):
+                 paz_sim, logger, rflogger, eh):
     """
     Loops over each event in the event catalogue
     """
@@ -272,7 +278,7 @@ def __event_loop(event, taper_perc, taper_type, model,
             info = __waveform_loop(file, taper_perc, taper_type, model,
                                 paz_sim, origin_time, ot_fiss, evtlat, evtlon,
                                 depth, prepro_folder, event, logger, rflogger,
-                                by_event)
+                                by_event, eh)
             infolist.append(info)
         except Exception as e:
             # Unhandled exceptions should not cause the loop to quit
@@ -286,7 +292,7 @@ def __event_loop(event, taper_perc, taper_type, model,
 def __waveform_loop(file, taper_perc, taper_type, model,
                     paz_sim, origin_time, ot_fiss, evtlat, evtlon,
                     depth, prepro_folder, event, logger, rflogger,
-                    by_event):
+                    by_event, eh):
     """
     Loops over each waveform for a specific event and a specific station
     """
@@ -296,7 +302,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
     start = time.time()
     # Open files that should be processed
     try:
-        st = read(prepro_folder+'/'+file)
+        st = read(os.path.join(prepro_folder, file))
     except FileNotFoundError:  # file has not been downloaded yet
         return  # I will still want to have the RFs
     except Exception as e:  # Unknown erros
@@ -332,7 +338,13 @@ def __waveform_loop(file, taper_perc, taper_type, model,
             try:
                 station_inv = read_inventory(statfile, format="STATIONXML")
             except FileNotFoundError:
-                station_inv = redownload_statxml(st, network, station, statfile)
+                if eh:
+                    station_inv = redownload_statxml(
+                        st, network, station, statfile)
+                else:
+                    raise FileNotFoundError(
+                        ["Station XML not available for station",
+                          network, station])
 
             # compute theoretical arrival
 
@@ -357,14 +369,15 @@ def __waveform_loop(file, taper_perc, taper_type, model,
             if st[0].stats.sampling_rate != 10:
                 st = __cut_resample(st, logger, first_arrival, network,
                                     station, prepro_folder, file,
-                                    taper_perc, taper_type)
+                                    taper_perc, taper_type, eh)
 
             # Finalise preprocessing
             st, crit, infodict = __rotate_qc(st, station_inv, network, station,
                                              paz_sim, baz, distance, outf,
                                              ot_fiss, event, evtlat, evtlon,
                                              depth, rayp_s_deg, first_arrival,
-                                             infof, logger, infodict, by_event)
+                                             infof, logger, infodict, by_event,
+                                             eh)
 
         # Exceptions & logging
 
@@ -503,7 +516,7 @@ def __waveform_loop(file, taper_perc, taper_type, model,
 
 
 def __cut_resample(st, logger, first_arrival, network, station,
-                   prepro_folder, file, taper_perc, taper_type):
+                   prepro_folder, file, taper_perc, taper_type, eh):
     """Cut and resample raw file. Will overwrite original raw"""
 
     start = time.time()
@@ -540,7 +553,7 @@ def __cut_resample(st, logger, first_arrival, network, station,
     # Write trimmed and resampled files into raw-file folder
     # to save space
     st.write(
-        os.path.join(prepro_folder, file), format="mseed", encoding="ASCII")
+        os.path.join(prepro_folder, file), format="mseed")
 
     end = time.time()
     logger.info("Unprocessed file rewritten")
@@ -551,7 +564,8 @@ def __cut_resample(st, logger, first_arrival, network, station,
 
 def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
                 distance, outf, ot_fiss, event, evtlat, evtlon, depth,
-                rayp_s_deg, first_arrival, infof, logger, infodict, by_event):
+                rayp_s_deg, first_arrival, infof, logger, infodict, by_event,
+                eh):
     """REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
     Bugs occur here due to station inventories without response information
     Looks like the bulk downloader sometimes donwnloads
@@ -564,11 +578,15 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
     except ValueError:
         # Occurs for "No matching response file found"
         try:
-            station_inv, st = NoMatchingResponseHandler(st, network,
-                                                        station)
+            if eh:
+                station_inv, st = NoMatchingResponseHandler(
+                    st, network, station)
+            else:
+                raise ValueError(["No matching response file found for",
+                                  network, station])
         except UnboundLocalError:
             logger.exception(["Could not download response information.",
-                             network, station, ot_fiss])
+                             network, station])
             return
 
     st.remove_sensitivity(inventory=station_inv)
@@ -584,10 +602,10 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
     # Error: The directions are not linearly independent,
     # there doesn't seem to be a fix for this
     # except ValueError:
-    st = NotLinearlyIndependentHandler(st, network, station,
-                                       st[0].stats.starttime,
-                                       st[0].stats.endtime,
-                                       station_inv, paz_sim)
+    # st = NotLinearlyIndependentHandler(st, network, station,
+    #                                    st[0].stats.starttime,
+    #                                    st[0].stats.endtime,
+    #                                    station_inv, paz_sim)
 
     st.rotate(method='NE->RT', inventory=station_inv,
               back_azimuth=baz)
@@ -636,7 +654,13 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
             raise SNRError(np.array2string(noisemat))
 
     #      WRITE FILES     #
-    st.write(outf, format="MSEED", encoding="ASCII")
+    try:
+        st.write(outf, format="MSEED")
+    except ValueError:
+        # Occurs for weird mseed encodings
+        for tr in st:
+            del tr.stats.mseed
+        st.write(outf, format="MSEED", encoding="ASCII")
 
     # create softlink
     subprocess.call(["ln", "-s", outf, by_event])
