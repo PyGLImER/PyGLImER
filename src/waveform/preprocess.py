@@ -278,7 +278,7 @@ def __event_loop(event, taper_perc, taper_type, model,
         except Exception as e:
             # Unhandled exceptions should not cause the loop to quit
             # processing one event
-            logger.exception([file,e])
+            logger.exception([file, e])
             continue
 
     return infolist

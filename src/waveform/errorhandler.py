@@ -16,21 +16,20 @@ def redownload(network, station, starttime, endtime, st):
     """Errorhandler that Redownloads the stream for the given input.
     Used when the stream has less than three channels."""
     for c in config.re_clients:
-        client = Client(c)
-        for iii in range(3):
+        try:
+            client = Client(c)
+            if len(st) < 3:
+                raise ValueError
+            else:
+                break
+        except ValueError:
             try:
-                if len(st) < 3:
-                    raise ValueError
-                else:
-                    break
-            except ValueError:
-                try:
-                    st = client.get_waveforms(network, station, '*',
-                                              st[0].stats.channel[0:2] + '*',
-                                              starttime, endtime)
-                except (header.FDSNNoDataException,header.FDSNException,
-                        ValueError):
-                    break  # wrong client
+                st = client.get_waveforms(network, station, '*',
+                                            st[0].stats.channel[0:2] + '*',
+                                            starttime, endtime)
+            except (header.FDSNNoDataException,header.FDSNException,
+                    ValueError):
+                continue  # wrong client
         if len(st) == 3:
             break
     return st
