@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 26th May 2020 06:58:55
+Last Modified: Wednesday, 27th May 2020 10:30:54 am
 '''
 
 #!/usr/bin/env python3
@@ -115,7 +115,7 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
         lat = (geocoords[0], geocoords[1])
         lon = (geocoords[2], geocoords[3])
         db = StationDB()
-        net, stat = db.find_stations(lat, lon)
+        net, stat = db.find_stations(lat, lon, phase=phase)
         pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
         files = []
         for pat in pattern:

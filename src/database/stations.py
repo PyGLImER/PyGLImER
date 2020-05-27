@@ -71,6 +71,26 @@ class StationDB(object):
             }
         dataS = deepcopy(dataP)
 
+        # # Find receiver function folders with files in it
+        # folderP = os.path.join(config.RF[:-1], 'P')
+        # folderS = os.path.join(config.RF[:-1], 'S')
+        
+        # for root, folders, files in os.walk(folderP):
+        #     if not files:
+        #         # Skip parents
+        #         continue
+        #     x = root.split('/')
+        #     dataP['station'].append(x[-1])
+        #     dataP['network'].append[x[-2]]
+        #     dataP['network'].append(info['network'])
+        #     dataP['station'].append(info['station'])
+        #     dataP['lat'].append(info['statlat'])
+        #     dataP['lon'].append(info['statlon'])
+        #     dataP['elevation'].append(info['statel'])
+        #     dataP['NP'].append(info['num'])
+        #     dataP['NS'].append(0)
+        #     dataP['NSret'].append(0)            
+
         # Read in info files
         folderP = os.path.join(config.outputloc[:-1], 'P', 'by_station')
         folderS = os.path.join(config.outputloc[:-1], 'S', 'by_station')
@@ -137,7 +157,7 @@ class StationDB(object):
 
         self.db = pd.DataFrame.from_dict(dataP)
 
-    def geo_boundary(self, lat, lon):
+    def geo_boundary(self, lat, lon, phase=None):
         """
         Return a subset of the database filtered by location.
 
@@ -147,21 +167,29 @@ class StationDB(object):
             Latitude boundaries in the form (minimum latitude, maximum lat).
         lon : Tuple
             Longitude boundaries in the form (minimum longitude, maximum lon).
+        phase: string - optional
+            'P' or 'S'. If option is given, it will only return stations with
+            accepted receiver functions for this phase. The default is None.
 
         Returns
         -------
         subset : pandas.DataFrame
             Subset of the original DataFrame filtered by location.
 
-        """
+        """        
         a = self.db['lat'] >= lat[0]
         b = self.db['lat'] <= lat[1]
         c = self.db['lon'] >= lon[0]
         d = self.db['lon'] <= lon[1]
-        subset = self.db[a & b & c & d]
+        if phase:
+            phase = phase.upper()
+            e = self.db['N'+phase+'ret'] > 0
+            subset = self.db[a & b & c & d & e]
+        else:
+            subset = self.db[a & b & c & d]        
 
         return subset
 
-    def find_stations(self, lat, lon):
-        subset = self.geo_boundary(lat, lon)
+    def find_stations(self, lat, lon, phase=None):
+        subset = self.geo_boundary(lat, lon, phase)
         return list(subset['network']), list(subset['station'])
