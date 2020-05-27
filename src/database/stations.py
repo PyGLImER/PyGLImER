@@ -77,7 +77,7 @@ class StationDB(object):
             self.db = self.__create__()     
 
         # Save Database, don't save if only one phase is requested newly
-        if not phase or update:
+        if not phase:
             self.db.to_csv(oloc)
 
     def __create__(self):
