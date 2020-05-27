@@ -25,7 +25,7 @@ import config
 
 
 class StationDB(object):
-    def __init__(self, phase=None, update=False):
+    def __init__(self, phase=None, use_old=False):
         """
         Creates a pandas database of all available receiver functions.
         This database is entirely based on the info files in the "preprocessed"
@@ -39,11 +39,9 @@ class StationDB(object):
         phase: str - optional
             If just one of the primary phases should be checked - useful for
             computational efficiency, when creating ccp. Default is None.
-        update: Bool - optional
-            When update is turned on, it will only look for new stations
-            available and update their data. However, values for ret>0 will
-            not be checked again (so mainly useful for CCP stack). Default
-            is False
+        use_old: Bool - optional
+            When turned on it will read in the saved csv file. That is a lot
+            faster, but it will obviously not update.
         
         Returns
         -------
@@ -53,9 +51,6 @@ class StationDB(object):
         if phase:
             self.phase = phase.upper()           
         else:
-            if update:
-                print("Warning, update only allowed with phase option, reset.")
-                update = False
             self.phase = phase
         
         # 1. Initiate logger
@@ -76,9 +71,8 @@ class StationDB(object):
         # Check if there is already a saved database
         oloc = 'data/database.csv'
         
-        if update and Path(oloc).is_file():
+        if use_old and Path(oloc).is_file():
             self.db = pd.read_csv(oloc)
-            self.update()
         else:
             self.db = self.__create__()     
 
@@ -214,72 +208,72 @@ class StationDB(object):
         del dataS
         return pd.DataFrame.from_dict(dataP)
     
-    def update(self):
-        """Updates the current pandas dataframe."""
-        dataP = {
-            'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
-            'elevation': [], 'NP': [], 'NPret': [], 'NS': [], 'NSret': []
-            }
-        dataS = deepcopy(dataP)
+    # def update(self):
+    #     """Updates the current pandas dataframe."""
+    #     dataP = {
+    #         'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
+    #         'elevation': [], 'NP': [], 'NPret': [], 'NS': [], 'NSret': []
+    #         }
+    #     dataS = deepcopy(dataP)
         
-        # if self.phase:
-        data = [dataP]
-        folder = [
-            os.path.join(config.outputloc[:-1], self.phase, 'by_station')]
-        # else:
-        #     data = [dataP, dataS]
-        #     folderP = os.path.join(config.outputloc[:-1], 'P', 'by_station')
-        #     folderS = os.path.join(config.outputloc[:-1], 'S', 'by_station')
-        #     folder = [folderP, folderS]
+    #     # if self.phase:
+    #     data = [dataP]
+    #     folder = [
+    #         os.path.join(config.outputloc[:-1], self.phase, 'by_station')]
+    #     # else:
+    #     #     data = [dataP, dataS]
+    #     #     folderP = os.path.join(config.outputloc[:-1], 'P', 'by_station')
+    #     #     folderS = os.path.join(config.outputloc[:-1], 'S', 'by_station')
+    #     #     folder = [folderP, folderS]
 
-        for f, d, p in zip(folder,data, self.phase or ['P', 'S']):
-            for root, _, files in os.walk(f):
-                # identify current phase
-                # p = self.phase or d[-1]
-                if 'info.dat' not in files:
-                    continue  # Skip parent folders or empty folders
-                x = root.split('/')
-                stat = x[-1]
-                net = x[-2]
-                if p == 'P' and not self.db.query(
-                    '(network == @net) & (station == @stat) & (NPret)').empty \
-                    or p == 'S' and not self.db.query(
-                    '(network == @net) & (station == @stat) & (NSret)').empty:
-                    continue
+    #     for f, d, p in zip(folder,data, self.phase or ['P', 'S']):
+    #         for root, _, files in os.walk(f):
+    #             # identify current phase
+    #             # p = self.phase or d[-1]
+    #             if 'info.dat' not in files:
+    #                 continue  # Skip parent folders or empty folders
+    #             x = root.split('/')
+    #             stat = x[-1]
+    #             net = x[-2]
+    #             if p == 'P' and not self.db.query(
+    #                 '(network == @net) & (station == @stat) & (NPret)').empty \
+    #                 or p == 'S' and not self.db.query(
+    #                 '(network == @net) & (station == @stat) & (NSret)').empty:
+    #                 continue
                 
-                infof = (os.path.join(root, 'info'))
+    #             infof = (os.path.join(root, 'info'))
 
-                with shelve.open(infof, flag='r') as info:
-                    d['code'].append(info['network']+'.'+info['station'])
-                    d['network'].append(info['network'])
-                    d['station'].append(info['station'])
-                    d['lat'].append(info['statlat'])
-                    d['lon'].append(info['statlon'])
-                    d['elevation'].append(info['statel'])
-                    d['N'+p].append(info['num'])
-                    if p == 'P':
-                        d['NS'].append(0)
-                        d['NSret'].append(0)
-                    if p == 'S':
-                        d['NP'].append(0)
-                        d['NPret'].append(0)
-                    try:
-                        d['N'+p+'ret'].append(info['numret'])
-                    except KeyError:
-                        d['N'+p+'ret'].append(0)
-                        self.logger.debug(
-                            'No ' +p+ '-waveforms retained for station' +
-                            info['network'] + '.' + info['station'])
+    #             with shelve.open(infof, flag='r') as info:
+    #                 d['code'].append(info['network']+'.'+info['station'])
+    #                 d['network'].append(info['network'])
+    #                 d['station'].append(info['station'])
+    #                 d['lat'].append(info['statlat'])
+    #                 d['lon'].append(info['statlon'])
+    #                 d['elevation'].append(info['statel'])
+    #                 d['N'+p].append(info['num'])
+    #                 if p == 'P':
+    #                     d['NS'].append(0)
+    #                     d['NSret'].append(0)
+    #                 if p == 'S':
+    #                     d['NP'].append(0)
+    #                     d['NPret'].append(0)
+    #                 try:
+    #                     d['N'+p+'ret'].append(info['numret'])
+    #                 except KeyError:
+    #                     d['N'+p+'ret'].append(0)
+    #                     self.logger.debug(
+    #                         'No ' +p+ '-waveforms retained for station' +
+    #                         info['network'] + '.' + info['station'])
         
-        # update pandas dataframe
-        if self.phase == 'P':
-            if d['code']:
-                old_df = self.db.query('NPret > 0')
-                self.db = old_df.append(pd.DataFrame.from_dict(d))
-        elif self.phase == 'S':
-            if d['code']:
-                old_df = self.db.query('NSret > 0')
-                self.db = old_df.append(pd.DataFrame.from_dict(d))
+    #     # update pandas dataframe
+    #     if self.phase == 'P':
+    #         if d['code']:
+    #             old_df = self.db.query('NPret > 0')
+    #             self.db = old_df.append(pd.DataFrame.from_dict(d))
+    #     elif self.phase == 'S':
+    #         if d['code']:
+    #             old_df = self.db.query('NSret > 0')
+    #             self.db = old_df.append(pd.DataFrame.from_dict(d))
         # elif not self.phase:
         #     if not data[0]['code'] and not data[1]['code']:
         #         return
