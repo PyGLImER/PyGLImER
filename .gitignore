@@ -7,5 +7,6 @@ gypsum.pkl
 *.png
 *info*
 output*
+*.csv
 tmp/*
 .vscode/settings.json
