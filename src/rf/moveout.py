@@ -99,7 +99,10 @@ def moveout(data, st, fname, latb, lonb, taper):
     # interpolate RF
     try:
         tck = interpolate.splrep(z, RF)
+
     except TypeError as e:
+        # Happens almost never, something must have gone wrong in moveout
+        # correction and RF is too short, just return everything 0
         print(len(z), len(RF), e)
         z2 = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
         RF2 = np.zeros(z2.shape)
