@@ -97,7 +97,16 @@ def moveout(data, st, fname, latb, lonb, taper):
     zq = np.hstack((np.arange(min(z), 0, .1), np.arange(0, max(z)+res, res)))
 
     # interpolate RF
-    tck = interpolate.splrep(z, RF)
+    try:
+        tck = interpolate.splrep(z, RF)
+    except TypeError as e:
+        print(len(z), len(RF), e)
+        z2 = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
+        RF2 = np.zeros(z2.shape)
+        delta2 = np.empty(z2.shape)
+        delta2.fill(np.nan)
+        return z2, RF2, delta2
+
     RF = interpolate.splev(zq, tck)
     if taper:
         # Taper the last 10 km
