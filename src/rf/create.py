@@ -155,7 +155,7 @@ def createRF(st_in, phase=config.phase, onset=None,
     # Deconvolution
     if method == "it":
         if phase == "S":
-            width = 1  # changed for Kind (2015) 1.5
+            width = 1.5  # change for Kind (2015) to 1
         elif phase == "P":
             width = 2.5
         RF[0].data = it(v, u, dt, shift=shift, width=width)[0]

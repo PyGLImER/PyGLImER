@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 28th May 2020 07:56:24 pm
+Last Modified: Thursday, 28th May 2020 08:11:48 pm
 '''
 
 #!/usr/bin/env python3d
@@ -435,7 +435,7 @@ def __waveform_loop(filestr, taper_perc, taper_type, model,
         if config.phase == "P":
             st.filter('lowpass', freq=1.5, zerophase=True, corners=2)
         elif config.phase == 'S':
-            st.filter('lowpass', freq=0.125, zerophase=True, corners=2)  # changed for Kind(2015) frequ=.25 freq=0.175Hz
+            st.filter('lowpass', freq=0.25, zerophase=True, corners=2)  # change for Kind(2015) to frequ=.125 freq=0.175Hz
 
         start = time.time()
 

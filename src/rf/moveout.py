@@ -259,6 +259,8 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
             qd = 0
 
         vpf, vsf = model.query(lat2, lon2, qd)
+        # Ignore invalid square root warning
+        warnings.filterwarnings('ignore', category=RuntimeWarning)
         q_a[kk+1] = np.sqrt(vpf**-2 - p**2)
         q_b[kk+1] = np.sqrt(vsf**-2 - p**2)
 
