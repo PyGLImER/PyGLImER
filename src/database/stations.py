@@ -32,14 +32,15 @@ def redownload_missing_stationxml(clients=config.waveform_client):
     ex = os.listdir(config.statloc)
     
     missing = []
-    for _, _ , files in os.walk(config.waveform[:-1]):
-        if not len(files):
-            continue
-        x = files[0].split()
-        req = (x[0], x[1], '*', '*', '*', '*')
-        xml = x[0] + '.' + x[1] +'.xml'
-        if xml not in ex and req not in missing:
-            missing.append(req)
+    for _, _ , fs in os.walk(config.waveform[:-1]):
+        for f in fs:
+            x = f.split()
+            if not f[-1] == 'mseed':
+                continue
+            req = (x[0], x[1], '*', '*', '*', '*')
+            xml = x[0] + '.' + x[1] +'.xml'
+            if xml not in ex and req not in missing:
+                missing.append(req)
     
     # Check for XMLS on every providers
     for c in clients:
