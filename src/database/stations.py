@@ -32,8 +32,10 @@ def redownload_missing_stationxml(clients=config.waveform_client):
     ex = os.listdir(config.statloc)
     
     missing = []
-    for files, _ , _ in os.walk(config.waveform[:-1]):
-        x = files.split()
+    for _, _ , files in os.walk(config.waveform[:-1]):
+        if not len(files):
+            continue
+        x = files[0].split()
         req = (x[0], x[1], '*', '*', '*', '*')
         xml = x[0] + '.' + x[1] +'.xml'
         if xml not in ex and req not in missing:
