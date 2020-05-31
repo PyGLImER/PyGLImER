@@ -27,11 +27,15 @@ import pandas as pd
 import config
 
 
-def redownload_missing_stationxml(clients=config.waveform_client):
+def redownload_missing_stationxml(clients=config.waveform_client, verbose=True):
     # find existing station xmls
     ex = os.listdir(config.statloc)
     
     missing = []
+    
+    if verbose:
+        logger = logging.Logger()
+    
     for _, _ , fs in os.walk(config.waveform[:-1]):
         for f in fs:
             x = f.split()
@@ -42,6 +46,9 @@ def redownload_missing_stationxml(clients=config.waveform_client):
             if xml not in ex and req not in missing:
                 missing.append(req)
     
+    if verbose:
+        logger.info([len(req), 'station xmls missing. \n Attempting\
+             download...'])
     # Check for XMLS on every providers
     for c in clients:
         client = Client(c)
@@ -54,6 +61,8 @@ def redownload_missing_stationxml(clients=config.waveform_client):
                 out.write(path, format="STATIONXML")
                 i = req.index((network.code, station.code, '*', '*', '*', '*'))
                 del req[i]
+            if verbose:
+                logger.info([len(req), 'remain missing. Download continues...'])
     # Return missing
     req = list(np.array(req)[:,:2])
     return req 
