@@ -34,7 +34,7 @@ def redownload_missing_stationxml(clients=config.waveform_client, verbose=True):
     missing = []
     
     if verbose:
-        logger = logging.Logger()
+        logger = logging.Logger('rdstxml')
     
     for _, _ , fs in os.walk(config.waveform[:-1]):
         for f in fs:
