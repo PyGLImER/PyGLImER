@@ -51,7 +51,8 @@ def redownload_missing_stationxml(clients=config.waveform_client):
                 out.write(path, format="STATIONXML")
                 i = req.index((network.code, station.code, '*', '*', '*', '*'))
                 del req[i]
-    # Return missing 
+    # Return missing
+    req = list(np.array(req)[:,:2])
     return req 
         
 
