@@ -11,6 +11,7 @@ Author:
 Last updated:
 """
 
+import fnmatch
 import logging
 import os
 import pickle
@@ -19,10 +20,40 @@ from copy import deepcopy
 from pathlib import Path
 
 import numpy as np
+from obspy.clients.fdsn import Client
+from obspy import read_inventory
 import pandas as pd
 
 import config
 
+
+def redownload_missing_stationxml(clients=config.waveform_client):
+    # find existing station xmls
+    ex = os.listdir(config.statloc)
+    
+    missing = []
+    for files, _ , _ in os.walk(config.waveform[:-1]):
+        x = files.split()
+        req = (x[0], x[1], '*', '*', '*', '*')
+        xml = x[0] + '.' + x[1] +'.xml'
+        if xml not in ex and req not in missing:
+            missing.append(req)
+    
+    # Check for XMLS on every providers
+    for c in clients:
+        client = Client(c)
+        inv = client.get_stations_bulk(missing, level='response')
+        for network in inv:
+            for station in network:
+                out = inv.select(network=network.code, station=station.code)
+                path = os.path.join(
+                    config.statloc, network.code+'.'+station.code+'.xml')
+                out.write(path, format="STATIONXML")
+                i = req.index((network.code, station.code, '*', '*', '*', '*'))
+                del req[i]
+    # Return missing 
+    return req 
+        
 
 class StationDB(object):
     def __init__(self, phase=None, use_old=False):
@@ -356,3 +387,4 @@ class StationDB(object):
     def find_stations(self, lat, lon, phase=None):
         subset = self.geo_boundary(lat, lon, phase)
         return list(subset['network']), list(subset['station'])
+    

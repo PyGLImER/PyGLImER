@@ -46,8 +46,6 @@ def redownload_statxml(st, network, station, statfile):
         try:
             client = Client(c)
             station_inv = client.get_stations(level="response",
-                                              channel=st[0].stats.channel[0:2]
-                                                      + '*',
                                               network=network, station=station)
             # write the new, working stationxml file
             station_inv.write(statfile, format="STATIONXML")
