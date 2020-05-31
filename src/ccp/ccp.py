@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Wednesday, 27th May 2020 02:32:20 pm
+Last Modified: Sunday, 31st May 2020 09:33:00 pm
 '''
 
 #!/usr/bin/env python3
@@ -513,7 +513,12 @@ class CCPStack(object):
         jj = []
         datal = []
         for st in stream:
-            rft = read_rf(st, format='SAC')
+            try:
+                rft = read_rf(st, format='SAC')
+            except IndexError as e:
+                # That happens when there is a corrupted sac file
+                logger.exception(e)
+                continue
 
             if filt:
                 rft.filter('bandpass', freqmin=filt[0], freqmax=filt[1],
