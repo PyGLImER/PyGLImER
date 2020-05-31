@@ -33,7 +33,7 @@ class Request(object):
     the waveforms, the preprocessing of the waveforms, and the creation of
     time domain receiver functions."""
 
-    def __init__(self, phase, starttime, endtime, event_coords=None,
+    def __init__(self, phase, starttime, endtime, minmag=5.5, event_coords=None,
                  network=None, station=None, waveform_client=None,
                  re_client=['IRIS'], evtcat=None):
         # Set velocity model
@@ -41,6 +41,7 @@ class Request(object):
 
         # Set variables in self
         self.phase = phase.upper()
+        self.minmag = minmag
 
         # Request time window
         self.starttime = starttime
@@ -122,7 +123,7 @@ class Request(object):
                             starttime=st, endtime=et,
                             minlatitude=self.eMINLAT, maxlatitude=self.eMAXLAT,
                             minlongitude=self.eMINLON,
-                            maxlongitude=self.eMAXLON, minmagnitude=5.5,
+                            maxlongitude=self.eMAXLON, minmagnitude=self.minmag,
                             maxmagnitude=10, maxdepth=self.maxdepth))
                 event_cat_done = True
 
