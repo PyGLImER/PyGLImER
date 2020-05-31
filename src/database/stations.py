@@ -47,7 +47,7 @@ def redownload_missing_stationxml(clients=config.waveform_client, verbose=True):
                 missing.append(req)
     
     if verbose:
-        logger.info([len(req), 'station xmls missing. \n Attempting\
+        logger.info([missing, 'station xmls missing. \n Attempting\
              download...'])
     # Check for XMLS on every providers
     for c in clients:
@@ -59,13 +59,13 @@ def redownload_missing_stationxml(clients=config.waveform_client, verbose=True):
                 path = os.path.join(
                     config.statloc, network.code+'.'+station.code+'.xml')
                 out.write(path, format="STATIONXML")
-                i = req.index((network.code, station.code, '*', '*', '*', '*'))
-                del req[i]
+                i = missing.index((network.code, station.code, '*', '*', '*', '*'))
+                del missing[i]
             if verbose:
-                logger.info([len(req), 'remain missing. Download continues...'])
+                logger.info([len(missing), 'remain missing. Download continues...'])
     # Return missing
-    req = list(np.array(req)[:,:2])
-    return req 
+    missing = list(np.array(missing)[:,:2])
+    return missing 
         
 
 class StationDB(object):
