@@ -65,7 +65,27 @@ def redownload_missing_stationxml(clients=config.waveform_client, verbose=True):
                 logger.info([len(missing), 'remain missing. Download continues...'])
     # Return missing
     missing = list(np.array(missing)[:,:2])
-    return missing 
+    return missing
+
+
+def find_missing_statxmls():
+    ex = os.listdir(config.statloc)
+    total = []
+    for _, _ , fs in os.walk(config.waveform[:-1]):
+        total.extend(fs)
+        # remove duplicates
+        total = list(set(total))
+    net = []  # missing networks
+    stat = []  # missing stations
+
+    for mseed in total:
+        f = mseed.split()
+        if not f[-1] == 'mseed':
+            continue
+        net.append(f[0])
+        stat.append(f[1])
+    
+    return net, stat
         
 
 class StationDB(object):
