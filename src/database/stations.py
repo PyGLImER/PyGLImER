@@ -18,53 +18,63 @@ import pickle
 import shelve
 from copy import deepcopy
 from pathlib import Path
+import time
 
+from joblib import Parallel, delayed
 import numpy as np
 from obspy.clients.fdsn import Client
 from obspy import read_inventory
 import pandas as pd
 
 import config
+from ..utils.utils import dt_string
 
 
 def redownload_missing_stationxml(clients=config.waveform_client, verbose=True):
     # find existing station xmls
-    ex = os.listdir(config.statloc)
+    # ex = os.listdir(config.statloc)
     
-    missing = []
+    # missing = []
     
     if verbose:
+        t0 = time.time()
         logger = logging.Logger('rdstxml')
     
-    for _, _ , fs in os.walk(config.waveform[:-1]):
-        for f in fs:
-            x = f.split()
-            if not f[-1] == 'mseed':
-                continue
-            req = (x[0], x[1], '*', '*', '*', '*')
-            xml = x[0] + '.' + x[1] +'.xml'
-            if xml not in ex and req not in missing:
-                missing.append(req)
+    net, stat = find_missing_statxmls()
+    
+    # for _, _ , fs in os.walk(config.waveform[:-1]):
+    #     for f in fs:
+    #         x = f.split()
+    #         if not f[-1] == 'mseed':
+    #             continue
+    #         req = (x[0], x[1], '*', '*', '*', '*')
+    #         xml = x[0] + '.' + x[1] +'.xml'
+    #         if xml not in ex and req not in missing:
+    #             missing.append(req)
     
     if verbose:
-        logger.info([missing, 'station xmls missing. \n Attempting\
+        dt = dt_string(time.time()-t0)
+        logger.info('Time elapsed')
+        logger.info([len(net), 'station xmls missing. \n Attempting\
              download...'])
+
     # Check for XMLS on every providers
-    for c in clients:
-        client = Client(c)
-        inv = client.get_stations_bulk(missing, level='response')
-        for network in inv:
-            for station in network:
-                out = inv.select(network=network.code, station=station.code)
-                path = os.path.join(
-                    config.statloc, network.code+'.'+station.code+'.xml')
-                out.write(path, format="STATIONXML")
-                i = missing.index((network.code, station.code, '*', '*', '*', '*'))
-                del missing[i]
-            if verbose:
-                logger.info([len(missing), 'remain missing. Download continues...'])
-    # Return missing
-    missing = list(np.array(missing)[:,:2])
+    
+    # for c in clients:
+    #     client = Client(c)
+    #     inv = client.get_stations_bulk(missing, level='response')
+    #     for network in inv:
+    #         for station in network:
+    #             out = inv.select(network=network.code, station=station.code)
+    #             path = os.path.join(
+    #                 config.statloc, network.code+'.'+station.code+'.xml')
+    #             out.write(path, format="STATIONXML")
+    #             i = missing.index((network.code, station.code, '*', '*', '*', '*'))
+    #             del missing[i]
+    #         if verbose:
+    #             logger.info([len(missing), 'remain missing. Download continues...'])
+    # # Return missing
+    # missing = list(np.array(missing)[:,:2])
     return missing
 
 
