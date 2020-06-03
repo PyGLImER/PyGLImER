@@ -1,7 +1,7 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
 Created: Tue May 26 2020 13:31:30
-Last Modified: Tuesday, 26th May 2020 1:47:36 pm
+Last Modified: Wednesday, 3rd June 2020 08:34:30 pm
 '''
 
 #!/usr/bin/env python3
@@ -151,7 +151,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
                 mdl.download(
                     domain, restrictions,
                     mseed_storage=get_mseed_storage,
-                    stationxml_storage=get_stationxml_storage,
+                    stationxml_storage=config.statloc,
                     threads_per_client=3, download_chunk_size_in_mb=50)
                 incomplete = False
             except IncompleteRead:
@@ -174,35 +174,35 @@ def get_mseed_storage(network, station, location, channel, starttime, endtime):
     return os.path.join(config.folder, "%s.%s.mseed" % (network, station))
 
 
-def get_stationxml_storage(network, station, channels, starttime, endtime):
-    """Download the station.xml for the stations. Check chanels that are
-    already available if channels are missing in the current file,
-    do only download the channels that are missing"""
-    available_channels = []
-    missing_channels = []
+# def get_stationxml_storage(network, station, channels, starttime, endtime):
+#     """Download the station.xml for the stations. Check chanels that are
+#     already available if channels are missing in the current file,
+#     do only download the channels that are missing"""
+#     available_channels = []
+#     missing_channels = []
 
-    for location, channel in channels:
-        if stat_in_db(network, station, location, channel, starttime,
-                      endtime):
-            available_channels.append((location, channel))
-        else:
-            missing_channels.append((location, channel,))
+#     for location, channel in channels:
+#         if stat_in_db(network, station, location, channel, starttime,
+#                       endtime):
+#             available_channels.append((location, channel))
+#         else:
+#             missing_channels.append((location, channel))
 
-    filename = os.path.join(config.statloc, "%s.%s.xml" % (network, station))
+#     filename = os.path.join(config.statloc, "%s.%s.xml" % (network, station))
 
-    return {
-        "available_channels": available_channels,
-        "missing_channels": missing_channels,
-        "filename": filename}
+#     return {
+#         "available_channels": available_channels,
+#         "missing_channels": missing_channels,
+#         "filename": filename}
 
 
-def stat_in_db(network, station):
-    """checks if station xml is already downloaded"""
-    path = Path(config.statloc, "%s.%s.xml" % (network, station))
-    if path.is_file():
-        return True
-    else:
-        return False
+# def stat_in_db(network, station):
+#     """checks if station xml is already downloaded"""
+#     path = Path(config.statloc, "%s.%s.xml" % (network, station))
+#     if path.is_file():
+#         return True
+#     else:
+#         return False
 
 
 def wav_in_db(network, station, location, channel, starttime, endtime):
