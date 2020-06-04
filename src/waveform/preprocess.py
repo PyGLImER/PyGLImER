@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 4th June 2020 03:45:30 pm
+Last Modified: Thursday, 4th June 2020 07:58:35 pm
 '''
 
 #!/usr/bin/env python3d
@@ -405,6 +405,8 @@ def __waveform_loop(filestr, taper_perc, taper_type, model,
 
             return infodict
 
+        except StreamLengthError as e:
+            logger.debug([filestr, e])        
         # Everything else that might have gone wrong
         except Exception as e:
             logger.exception([prepro_folder, filestr, e])
@@ -537,13 +539,14 @@ def __cut_resample(st, logger, first_arrival, network, station,
 
     if st.count() < 3:
         if not eh:
-            raise ValueError(
+            raise StreamLengthError(
                 ["The stream contains less than three traces.", filestr])
         st = redownload(network, station, starttime, endtime, st)
 
     # Check one last time. If stream to short raise Exception
     if st.count() < 3:
-        raise Exception("The stream contains less than 3 traces")
+        raise StreamLengthError(
+            "The stream contains less than 3 traces", filestr)
 
     # Change dtype
     for tr in st:
@@ -789,6 +792,17 @@ def write_info(network, station, dictionary):
 # program-specific Exceptions
 class SNRError(Exception):
     """raised when the SNR is too high"""
+    # Constructor method
+
+    def __init__(self, value):
+        self.value = value
+    # __str__ display function
+
+    def __str__(self):
+        return repr(self.value)
+
+class StreamLengthError(Exception):
+    """raised when stream has fewer than 3 components"""
     # Constructor method
 
     def __init__(self, value):
