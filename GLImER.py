@@ -31,16 +31,19 @@ request = Request(
     config.phase, config.starttime, config.endtime, event_coords=event_coords,
     network=config.network, station=config.station,
     waveform_client=config.waveform_client, re_client=config.re_clients,
-    evtcat=config.evtcat)
+    evtcat=config.evtcat, minmag=5.5)
 
 if config.wavdownload:
     config.folder = "not_started"  # resetting momentary event download folder
-    # multi-threading
-    if __name__ == '__main__':
-        multiprocessing.Process(target=request.download_waveforms,
-                                args=()).start()
+    # multi-threading doesn't work anymore this way on python 3.8?
+    # if __name__ == '__main__':
+    #     multiprocessing.Process(target=request.download_waveforms,
+    #                             args=()).start()
 
-        multiprocessing.Process(target=request.preprocess, args=()).start()
+    #     multiprocessing.Process(target=request.preprocess, args=()).start()
+    request.download_waveforms()
+    config.wavdownload = False  # Sop it utilises all cores
+    request.preprocess()
 
 else:  # Only preprocess files in waveform location
     config.folder = "finished"

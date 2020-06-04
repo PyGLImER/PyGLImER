@@ -1,7 +1,7 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
-Created: Tue May 26 2020 13:31:30
-Last Modified: Wednesday, 3rd June 2020 08:34:30 pm
+Created: Tue May 26 2019 13:31:30
+Last Modified: Wednesday, 3rd June 2020 08:55:34 pm
 '''
 
 #!/usr/bin/env python3

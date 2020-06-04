@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 28th May 2020 08:11:48 pm
+Last Modified: Thursday, 4th June 2020 03:45:30 pm
 '''
 
 #!/usr/bin/env python3d
@@ -159,7 +159,12 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
         # Returns generator object with evtcats with each 100 events
         evtcats = chunks(event_cat, n_split)
         for evtcat in evtcats:
-            out = Parallel(n_jobs=-1)(
+            if config.debug:
+                n_j = 3  # Only way to allow for redownload, maximum 3 requests
+                eh = True
+            else:
+                n_j = -1
+            out = Parallel(n_jobs=n_j)(
                     delayed(__event_loop)(
                         event, taper_perc, taper_type, model,
                         paz_sim, logger, rflogger, eh)
