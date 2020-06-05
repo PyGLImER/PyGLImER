@@ -22,7 +22,7 @@ import time
 
 from joblib import Parallel, delayed
 import numpy as np
-from obspy.clients.fdsn import Client
+from obspy.clients.fdsn import Client, header
 from obspy import read_inventory
 import pandas as pd
 
@@ -30,72 +30,108 @@ import config
 from ..utils.utils import dt_string
 
 
-def redownload_missing_stationxml(clients=config.waveform_client, verbose=True):
-    # find existing station xmls
-    # ex = os.listdir(config.statloc)
+# def redownload_missing_stationxml(clients=config.waveform_client, verbose=True):
+#     # find existing station xmls
+#     # ex = os.listdir(config.statloc)
     
-    # missing = []
+#     # missing = []
     
-    if verbose:
-        t0 = time.time()
-        logger = logging.Logger('rdstxml')
+#     if verbose:
+#         t0 = time.time()
+#         logger = logging.Logger('rdstxml')
     
-    net, stat = find_missing_statxmls()
+#     net, stat = find_missing_statxmls()
     
-    # for _, _ , fs in os.walk(config.waveform[:-1]):
-    #     for f in fs:
-    #         x = f.split()
-    #         if not f[-1] == 'mseed':
-    #             continue
-    #         req = (x[0], x[1], '*', '*', '*', '*')
-    #         xml = x[0] + '.' + x[1] +'.xml'
-    #         if xml not in ex and req not in missing:
-    #             missing.append(req)
+#     # for _, _ , fs in os.walk(config.waveform[:-1]):
+#     #     for f in fs:
+#     #         x = f.split()
+#     #         if not f[-1] == 'mseed':
+#     #             continue
+#     #         req = (x[0], x[1], '*', '*', '*', '*')
+#     #         xml = x[0] + '.' + x[1] +'.xml'
+#     #         if xml not in ex and req not in missing:
+#     #             missing.append(req)
     
-    if verbose:
-        dt = dt_string(time.time()-t0)
-        logger.info('Time elapsed')
-        logger.info([len(net), 'station xmls missing. \n Attempting\
-             download...'])
+#     if verbose:
+#         dt = dt_string(time.time()-t0)
+#         logger.info('Time elapsed')
+#         logger.info([len(net), 'station xmls missing. \n Attempting\
+#              download...'])
 
-    # Check for XMLS on every providers
+#     # Check for XMLS on every providers
     
-    # for c in clients:
-    #     client = Client(c)
-    #     inv = client.get_stations_bulk(missing, level='response')
-    #     for network in inv:
-    #         for station in network:
-    #             out = inv.select(network=network.code, station=station.code)
-    #             path = os.path.join(
-    #                 config.statloc, network.code+'.'+station.code+'.xml')
-    #             out.write(path, format="STATIONXML")
-    #             i = missing.index((network.code, station.code, '*', '*', '*', '*'))
-    #             del missing[i]
-    #         if verbose:
-    #             logger.info([len(missing), 'remain missing. Download continues...'])
-    # # Return missing
-    # missing = list(np.array(missing)[:,:2])
-    return missing
+#     # for c in clients:
+#     #     client = Client(c)
+#     #     inv = client.get_stations_bulk(missing, level='response')
+#     #     for network in inv:
+#     #         for station in network:
+#     #             out = inv.select(network=network.code, station=station.code)
+#     #             path = os.path.join(
+#     #                 config.statloc, network.code+'.'+station.code+'.xml')
+#     #             out.write(path, format="STATIONXML")
+#     #             i = missing.index((network.code, station.code, '*', '*', '*', '*'))
+#     #             del missing[i]
+#     #         if verbose:
+#     #             logger.info([len(missing), 'remain missing. Download continues...'])
+#     # # Return missing
+#     # missing = list(np.array(missing)[:,:2])
+#     return missing
 
-
-def find_missing_statxmls():
+def redownload_missing_statxmls(clients=config.re_clients, verbose=True,
+                                phase = config.phase):
     ex = os.listdir(config.statloc)
-    total = []
-    for _, _ , fs in os.walk(config.waveform[:-1]):
-        total.extend(fs)
-        # remove duplicates
-        total = list(set(total))
-    net = []  # missing networks
-    stat = []  # missing stations
-
-    for mseed in total:
-        f = mseed.split()
-        if not f[-1] == 'mseed':
-            continue
-        net.append(f[0])
-        stat.append(f[1])
     
-    return net, stat
+    # remove file identifier
+    for i, xml in enumerate(ex):
+        x = xml.split('.')
+        ex[i] = x[0] + '.' + x[1]
+    
+    wavdir = os.path.join(config.waveform[:-1], phase)
+
+    out = Parallel(n_jobs=-1)(
+        delayed(__client__loop__)(client, ex, wavdir)
+        for client in clients)
+
+        
+def __client__loop__(client, existing, wavdir):
+    client = Client(client)
+    
+    for _, _, files in os.walk(wavdir):
+        for fi in files:
+            f = fi.split('.')
+            if f[-1] != 'mseed':
+                continue
+            code = f[0] + '.' + f[1]
+            if code and code not in existing:
+                out = os.path.join(config.statloc, code + '.xml')
+                try:
+                    stat_inv = client.get_stations(
+                        network = f[0], station=f[1], level='response',
+                        filename=out)
+                    stat_inv.write(out, format="STATIONXML")
+                    existing.append(code)
+                except (header.FDSNNoDataException, header.FDSNException):
+                    pass  # wrong client
+        
+
+# def find_missing_statxmls():
+#     ex = os.listdir(config.statloc)
+#     total = []
+#     for _, _ , fs in os.walk(config.waveform[:-1]):
+#         total.extend(fs)
+#         # remove duplicates
+#         total = list(set(total))
+#     net = []  # missing networks
+#     stat = []  # missing stations
+
+#     for mseed in total:
+#         f = mseed.split()
+#         if not f[-1] == 'mseed':
+#             continue
+#         net.append(f[0])
+#         stat.append(f[1])
+    
+#     return net, stat
         
 
 class StationDB(object):
