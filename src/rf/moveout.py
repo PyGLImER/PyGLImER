@@ -127,20 +127,28 @@ def moveout(data, st, fname, latb, lonb, taper):
     else:
         # Taper the upper 5 km
         i = np.where(z>=5)[0][0]  # Find where rf is depth = 5
-        tap = hann((i+1)*2)
-        up, _ = np.split(tap, 2)
+        # tap = hann((i+1)*2)
+        tap = hann(8)
+        up, _ = np.hstack(np.zeros(i-3), np.split(tap, 2))
         if len(RF) > len(up):  # That usually doesn't happen, only for extreme
             # discontinuities in 3D model and errors in SRF data
             taper = np.ones(len(RF))
             taper[:len(up)] = up
             RF = np.multiply(taper, RF)
 
-    # z2 = np.arange(0, maxz+res, res)
     z2 = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
     RF2 = np.zeros(z2.shape)
 
     # np.where does not seem to work here
     starti = np.nonzero(np.isclose(z2, htab[0]))[0][0]
+    if len(RF)+starti > len(RF2):
+        # truncate
+        # Honestly do not know why that what happen, but it does once in a
+        # million times, perhaps rounding + interpolation.
+        mes = "The interpolated RF is too long, truncating."
+        warnings.warn(mes, category=UserWarning, stacklevel=1)
+        diff = len(RF) + starti - len(RF2)
+        RF = RF[:-diff]
     RF2[starti:starti+len(RF)] = RF
 
     # reshape delta - else that will mess with the CCP stacking
