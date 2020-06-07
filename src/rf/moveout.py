@@ -129,7 +129,7 @@ def moveout(data, st, fname, latb, lonb, taper):
         i = np.where(z>=5)[0][0]  # Find where rf is depth = 5
         # tap = hann((i+1)*2)
         tap = hann(8)
-        up, _ = np.hstack(np.zeros(i-3), np.split(tap, 2))
+        up, _ = np.hstack((np.zeros(i-3), np.split(tap, 2)))
         if len(RF) > len(up):  # That usually doesn't happen, only for extreme
             # discontinuities in 3D model and errors in SRF data
             taper = np.ones(len(RF))
