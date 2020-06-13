@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 4th June 2020 07:58:35 pm
+Last Modified: Saturday, 13th June 2020 11:22:44 am
 '''
 
 #!/usr/bin/env python3d
@@ -269,7 +269,7 @@ def __event_loop(event, taper_perc, taper_type, model,
         # If we are not downloading that's entirely normal as
         # an earlier iteration just deletes empty directories
         if config.wavdownload:
-            logger.exception([ot_fiss,
+            logger.info([ot_fiss,
                              """Waveforms missing in database."""])
         return infolist
 
