@@ -54,8 +54,8 @@ ccp = "output/ccps"
 # %% EVENT AND DOWNLOAD VALUES
 # Set values to "None" if they aren't requried / desired
 # Time frame is identical to the station inventory
-starttime = UTCDateTime("2020-04-15")
-endtime = UTCDateTime("1970-01-01")
+starttime = UTCDateTime("1970-01-10")
+endtime = UTCDateTime("2020-04-15")
 minmag = 5.5
 
 # Station and Network codes

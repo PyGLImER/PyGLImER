@@ -25,6 +25,7 @@ from obspy.clients.fdsn.client import FDSNException
 
 from .download import downloadwav
 from .preprocess import preprocess
+from .. import tmp
 
 
 class Request(object):
@@ -215,7 +216,7 @@ class Request(object):
                     starttime=self.starttime, endtime=self.endtime,
                     minlatitude=self.eMINLAT, maxlatitude=self.eMAXLAT,
                     minlongitude=self.eMINLON, maxlongitude=self.eMAXLON,
-                    minmagnitude=self.mimag, maxmagnitude=10, maxdepth=self.maxdepth)
+                    minmagnitude=self.minmag, maxmagnitude=10, maxdepth=self.maxdepth)
 
                 event_cat_done = True
             except FDSNException:
