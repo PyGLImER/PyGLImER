@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 16th June 2020 11:40:28 am
+Last Modified: Tuesday, 16th June 2020 06:13:49 pm
 '''
 
 #!/usr/bin/env python3
@@ -463,15 +463,20 @@ class CCPStack(object):
                             lonb, filt)
                         for st in chunks(streams, num_cores))
 
-        # The stacking is done here (one should not reassign variables in
-        # multi-core processes).
-        # Awful way to solve it, but the best I could find
-        for kk, jj, datal in out:
-            for k, j, data in zip(kk, jj, datal):
-                self.bins[k, j] = self.bins[k, j] + data[j]
+        # June 2020 - Combine everything into one stack
+        # Easier and saves Ram
+        for bins_copy, illum_copy in out:
+            self.bins = self.bins + bins_copy
+            self.illum = self.illum + illum_copy
+        # # The stacking is done here (one should not reassign variables in
+        # # multi-core processes).
+        # # Awful way to solve it, but the best I could find
+        # for kk, jj, datal in out:
+        #     for k, j, data in zip(kk, jj, datal):
+        #         self.bins[k, j] = self.bins[k, j] + data[j]
 
-                # hit counter + 1
-                self.illum[k, j] = self.illum[k, j] + 1
+        #         # hit counter + 1
+        #         self.illum[k, j] = self.illum[k, j] + 1
 
         end = time.time()
         logger.info("Stacking finished.")
@@ -511,9 +516,12 @@ class CCPStack(object):
         None.
 
         """
-        kk = []
-        jj = []
-        datal = []
+        # kk = []
+        # jj = []
+        # datal = []
+        bins_copy = np.copy(self.bins)
+        illum_copy = np.copy(self.illum)
+
         for st in stream:
             try:
                 rft = read_rf(st, format='SAC')
@@ -543,10 +551,17 @@ class CCPStack(object):
                 self.pplat.append(plat)
                 self.pplon.append(plon)
             k, j = self.query_bin_tree(lat, lon, rf.data, n_closest_points)
-            kk.append(k)
-            jj.append(j)
-            datal.append(rf.data)
-        return kk, jj, datal
+        
+            # Stack
+            bins_copy[k, j] = bins_copy[k, j] + rf.data[j]
+
+            # hit counter + 1
+            illum_copy[k, j] = illum_copy[k, j] + 1
+        return bins_copy, illum_copy
+        #     kk.append(k)
+        #     jj.append(j)
+        #     datal.append(rf.data)
+        # return kk, jj, datal
 
     def conclude_ccp(self, keep_empty=False, keep_water=False, r=3):
         """
