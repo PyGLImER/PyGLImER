@@ -14,10 +14,22 @@ Last updated:
 import numpy as np
 from obspy.signal import filter
 
-import config
+# QC parameters
+
+# filter frequencies for SNR check, all in Hz
+lowco = [.03, .1, .5]  # only for PRF
+
+lowcoS = .01  # Changed 18.05 to compare with Hopper et. al. 2018
+highco = np.linspace(.33, .25, 4)  # For SRFs, 16.06.2020 from .175 to .25 Hz
+
+# SNR criteria for QC
+SNR_criteriaP = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
+
+SNR_criteriaS = [24, .4, 1]  # QC4
+# [primary/noise, sidelobe/primary, r/z conversions]
 
 
-def qcp(st, dt, sampling_f, onset=config.tz):
+def qcp(st, dt, sampling_f, onset):
     """
     Quality control for the downloaded waveforms that are used to create
     PRFS. Works with various filters and SNR criteria
@@ -30,6 +42,8 @@ def qcp(st, dt, sampling_f, onset=config.tz):
         Sampling interval [s].
     sampling_f : FLOAT
         Sampling frequency (Hz).
+    onset : float
+        Onset in seconds after trace's start.
 
     Returns
     -------
@@ -66,10 +80,10 @@ def qcp(st, dt, sampling_f, onset=config.tz):
     # and calculate the SNR
 
     # matrix to save SNR
-    noisemat = np.zeros((len(config.lowco),
+    noisemat = np.zeros((len(lowco),
                          3), dtype=float)
 
-    for ii, f in enumerate(config.lowco):
+    for ii, f in enumerate(lowco):
         ftcomp = filter.bandpass(stream["T"], f,
                                  4.99, sampling_f, corners=2, zerophase=True)
         frcomp = filter.bandpass(stream["R"], f,
@@ -99,9 +113,9 @@ def qcp(st, dt, sampling_f, onset=config.tz):
         noisemat[ii, 1] = snrr2/snrr
         noisemat[ii, 2] = snrz
 
-        if snrr > config.SNR_criteriaP[0] and\
-            snrr2/snrr < config.SNR_criteriaP[1] and\
-                snrz > config.SNR_criteriaP[2]:  # accept
+        if snrr > SNR_criteriaP[0] and\
+            snrr2/snrr < SNR_criteriaP[1] and\
+                snrz > SNR_criteriaP[2]:  # accept
             crit = True
 
             # overwrite the old traces with the sucessfully filtered ones
@@ -120,7 +134,7 @@ def qcp(st, dt, sampling_f, onset=config.tz):
     return st, crit, f, noisemat
 
 
-def qcs(st, dt, sampling_f, onset=config.tz):
+def qcs(st, dt, sampling_f, onset):
     """
     Quality control for waveforms that are used to produce SRF. In contrast
     to the ones used for PRF this is a very rigid criterion and will reject
@@ -134,6 +148,8 @@ def qcs(st, dt, sampling_f, onset=config.tz):
         Sampling interval [s].
     sampling_f : FLOAT
         Sampling frequency (Hz).
+    onset : float
+        Onset in seconds after trace's start.
 
     Returns
     -------
@@ -173,20 +189,20 @@ def qcs(st, dt, sampling_f, onset=config.tz):
 
     # filter
     # matrix to save SNR
-    noisemat = np.zeros((len(config.highco), 3), dtype=float)
+    noisemat = np.zeros((len(highco), 3), dtype=float)
 
     # Filter
     # At some point, I might also want to consider to change the lowcof
-    for ii, hf in enumerate(config.highco):
-        ftcomp = filter.bandpass(stream["T"], config.lowcoS,
+    for ii, hf in enumerate(highco):
+        ftcomp = filter.bandpass(stream["T"], lowcoS,
                                  hf, sampling_f, corners=2, zerophase=True)
-        frcomp = filter.bandpass(stream["R"], config.lowcoS,
+        frcomp = filter.bandpass(stream["R"], lowcoS,
                                  hf, sampling_f, corners=2, zerophase=True)
         if "Z" in stream:
-            fzcomp = filter.bandpass(stream["Z"], config.lowcoS, hf,
+            fzcomp = filter.bandpass(stream["Z"], lowcoS, hf,
                                      sampling_f, corners=2, zerophase=True)
         elif "3" in stream:
-            fzcomp = filter.bandpass(stream["3"], config.lowcoS, hf,
+            fzcomp = filter.bandpass(stream["3"], lowcoS, hf,
                                      sampling_f, corners=2, zerophase=True)
 
         # Compute the SNR for given frequency bands
@@ -207,9 +223,9 @@ def qcs(st, dt, sampling_f, onset=config.tz):
         noisemat[ii, 2] = snrc
 
         # accept if
-        if snrr > config.SNR_criteriaS[0] and\
-            snrr2/snrr < config.SNR_criteriaS[1] and\
-                snrc < config.SNR_criteriaS[2]:
+        if snrr > SNR_criteriaS[0] and\
+            snrr2/snrr < SNR_criteriaS[1] and\
+                snrc < SNR_criteriaS[2]:
             # This bit didn't give good results
             # max(frcomp) == max(frcomp[round((onset-2)/dt):
             #                           round((onset+10)/dt)]):

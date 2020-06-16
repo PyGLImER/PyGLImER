@@ -9,13 +9,13 @@ Contains functions to rotate a stream into different domains
 import numpy as np
 
 from ..utils.createvmodel import load_avvmodel
-import config
 
 
 def rotate_PSV(statlat, statlon, rayp, st, phase):
     """
     Finds the incidence angle of an incoming ray with the weighted average
-    of the lithosphere's P velocity. Requires Litho1.0 to be installed.
+    of the lithosphere's P velocity with a velocity model compiled from 
+    Litho1.0.
 
     Parameters
     ----------
@@ -41,40 +41,6 @@ def rotate_PSV(statlat, statlon, rayp, st, phase):
 
     """
 
-    # x = subprocess.Popen([config.lith1, "-p", str(statlat),
-    #                       str(statlon)], stdout=subprocess.PIPE)
-    # ls = str(x.stdout.read()).split("\\n")  # save the output
-
-    # # Close file or it will remain open forever!
-    # x.stdout.close()
-
-    # for ii, item in enumerate(ls):
-    #     ls[ii] = item.split()
-    # # clean list
-    # del ls[-1]
-    # del ls[0][0]
-    # # reorder items
-    # depth = []
-    # vp = []
-    # vs = []
-    # name = []
-    # for item in ls:
-    #     depth.append(float(item[0]))  # in m
-    #     vp.append(float(item[2]))  # m/s
-    #     vs.append(float(item[3]))  # m/
-    #     name.append(item[-1])  # name of the boundary
-
-    # # build weighted average for upper 15km -10
-    # maxd = 15e3
-    # for ii, item in enumerate(depth):
-    #     if item <= maxd:
-    #         break
-    # avp = np.multiply(vp[ii+1:], -np.diff(depth)[ii:])
-    # avp = sum(avp) + vp[ii]*(-np.diff(depth)[ii-1] + maxd - depth[ii-1])
-    # avp = avp/maxd
-    # avs = np.multiply(vs[ii+1:], -np.diff(depth)[ii:])
-    # avs = sum(avs) + vs[ii]*(-np.diff(depth)[ii-1] + maxd - depth[ii-1])
-    # avs = avs/maxd
     model = load_avvmodel()
     avp, avs = model.query(statlat, statlon, phase)
 
@@ -123,7 +89,7 @@ def rotate_PSV(statlat, statlon, rayp, st, phase):
     return avp, avs, PSvSh
 
 
-def rotate_LQT(st, phase=config.phase, onset=config.tz):
+def rotate_LQT(st, phase):
     """
     Rotates a stream given in RTZ to LQT using Singular Value Decomposition
 
@@ -132,9 +98,7 @@ def rotate_LQT(st, phase=config.phase, onset=config.tz):
     st : obspy.Stream
         Input Stream in RTZ.
     phase : STRING, optional
-        "S" for Sp or "P" for Ps. The default is config.phase.
-    onset : float, optional
-        First arrival - starttime [s]. The default is config.tz.
+        "S" for Sp or "P" for Ps.
 
     Returns
     -------
@@ -145,6 +109,10 @@ def rotate_LQT(st, phase=config.phase, onset=config.tz):
         Should deviate from 1 as far as possible.
 
     """
+    if phase == 'P':
+        onset = 30
+    elif phase == 'S':
+        onset = 120
 
     dt = st[0].stats.delta  # sampling interval
 
@@ -234,7 +202,7 @@ def rotate_LQT(st, phase=config.phase, onset=config.tz):
     return LQT, QC
 
 
-def rotate_LQT_min(st, phase=config.phase, onset=config.tz):
+def rotate_LQT_min(st, phase):
     """
     Rotates stream to LQT by minimising the energy of the S-wave primary
     arrival on the L component (SRF) or maximising the primary arrival
@@ -245,9 +213,7 @@ def rotate_LQT_min(st, phase=config.phase, onset=config.tz):
     st : obspy.Stream
         Input stream in RTZ.
     phase : STRING, optional
-        "P" for Ps or "S" for Sp. The default is config.phase.
-    onset : float, optional
-        Onset after starttime in s.
+        "P" for Ps or "S" for Sp.
 
     Returns
     -------
@@ -257,14 +223,20 @@ def rotate_LQT_min(st, phase=config.phase, onset=config.tz):
         Computed incidence angle in degree. Can serve as QC criterion.
 
     """
+    if phase == 'P':
+        onset = 30
+    elif phase == 'S':
+        onset = 120
 
     dt = st[0].stats.delta
+
     # point of primary arrival
     pp1 = round((onset-2)/dt)
     pp2 = round((onset+10)/dt)
     LQT = st.copy()
     LQT.normalize()
     del st
+
     # identify components
     stream = {
         LQT[0].stats.channel[2]: LQT[0].data,
@@ -274,8 +246,8 @@ def rotate_LQT_min(st, phase=config.phase, onset=config.tz):
         ZR = np.array([stream["Z"], stream["R"]])
     elif "3" in stream:
         ZR = np.array([stream["3"], stream["R"]])
+
     # calculate energy of the two components around zero
-    # E_ZR = np.sum(np.square(ZR[:, pp1:pp2]), axis=1)/npp
     ia = np.linspace(0, np.pi/2, num=90)  # incidence angle
     E_L = []
     for ii in ia:
@@ -293,12 +265,7 @@ def rotate_LQT_min(st, phase=config.phase, onset=config.tz):
     A_rot = np.array([[np.cos(ia), np.sin(ia)],
                       [-np.sin(ia), np.cos(ia)]])
     LQ = np.dot(A_rot, ZR)
-    # for ii, x in enumerate(LQ[0]):  # Test for noise
-    #     if abs(x) < .1:
-    #         LQ[0, ii] = 0
-    # for ii, x in enumerate(LQ[1]):  # Test for noise
-    #     if abs(x) < .1:
-    #         LQ[1, ii] = 0
+
     # 3. save L and Q trace and change the label of the stream
     for tr in LQT:
         if tr.stats.channel[2] == "R":

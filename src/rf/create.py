@@ -29,16 +29,14 @@ from obspy.taup import TauPyModel
 from pkg_resources import resource_filename
 from scipy.signal.windows import hann
 
-# import ..ccp.ccp #import CCPStack
-import config
 from .deconvolve import it, spectraldivision, multitaper
 from .moveout import DEG2KM, maxz, res, moveout, dt_table, dt_table_3D
 
 logger = logging.Logger("rf")
 
 
-def createRF(st_in, phase=config.phase, pol=config.pol, onset=None,
-             method=config.decon_meth, trim=None, event=None, station=None,
+def createRF(st_in, phase, pol='v', onset=None,
+             method='it', trim=None, event=None, station=None,
              info=None):
     """
     Creates a receiver function with the defined method from an obspy
@@ -49,7 +47,7 @@ def createRF(st_in, phase=config.phase, pol=config.pol, onset=None,
     st_in : '~obspy.Stream'
         Stream of which components are to be deconvolved.
     phase : string, optional
-        Either "P" or "S". The default is config.phase.
+        Either "P" or "S".
     pol : string, optional
         Polarisation to be deconvolved from. Only for phase = P.
     onset: UTCDateTime, optional
@@ -59,7 +57,7 @@ def createRF(st_in, phase=config.phase, pol=config.pol, onset=None,
         Deconvolution method, "waterlevel", 'dampedf' for constant
         damping level, 'it' for iterative time domain deconvoltuion, 'multit'
         for multitaper or 'fqd' for frequency dependently damped spectral
-        division. The default is config.decon_meth.
+        division. The default is iterative time domain ('it')
     trim : tuple, optional
         taper/truncate. Given as list [a, b] in s - left,right.
         The default is None.
@@ -187,8 +185,8 @@ def createRF(st_in, phase=config.phase, pol=config.pol, onset=None,
 
     # create RFTrace object
     # create stats
-    stats = rfstats(info=info, starttime=st[0].stats.starttime, event=event,
-                    station=station, phase=phase)
+    stats = rfstats(phase, info=info, starttime=st[0].stats.starttime, event=event,
+                    station=station)
     stats.update({"type": "time"})
     RF = RFTrace(trace=RF[0])
     RF.stats.update(stats)
@@ -1013,8 +1011,8 @@ def obj2stats(event=None, station=None):
     return stats
 
 
-def rfstats(info=None, starttime=None, event=None, station=None,
-            tt_model="IASP91", phase=config.phase):
+def rfstats(phase, info=None, starttime=None, event=None, station=None,
+            tt_model="IASP91"):
     """
     Creates a stats object for a RFTrace object. Provide an info dic and
     starttime or event and station object. Latter will take longer since
@@ -1039,7 +1037,7 @@ def rfstats(info=None, starttime=None, event=None, station=None,
         TauPy model to calculate arrival, only used if no info file is given.
         The default is "IASP91".
     phase : string, optional
-        Either "P" or "S" for main phase. The default is config.phase.
+        Either "P" or "S" for main phase.
 
 
     Returns

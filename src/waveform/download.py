@@ -1,7 +1,7 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 3rd June 2020 08:55:34 pm
+Last Modified: Tuesday, 16th June 2020 12:07:28 pm
 '''
 
 #!/usr/bin/env python3
@@ -19,22 +19,23 @@ from obspy import UTCDateTime
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
 
-import config
+from .. import tmp
 from ..utils.roundhalf import roundhalf
 
 
-def downloadwav(min_epid, max_epid, model, event_cat):
+def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
+                rawloc, clients,
+                network=None, station=None, debug=False):
     """
     Downloads the waveforms for all events in the catalogue
      for a circular domain around the epicentre with defined epicentral
-     distances from Clients defined in config.waveform_client. Also Station
+     distances from Clients defined in clients. Also Station
      xmls for corresponding stations are downloaded.
-
-    Saves station xml in folder defined in config.py
-    Saves waveforms in folder defined in config.py
 
     Parameters
     ----------
+    phase : string
+        P or S for P or SRFS.
     min_epid : float
         Minimal epicentral distance to be downloaded.
     max_epid : float
@@ -44,7 +45,26 @@ def downloadwav(min_epid, max_epid, model, event_cat):
     event_cat : Obspy event catalog
         Catalog containing all events, for which waveforms should be
         downloaded.
-
+    tz : int
+        time window before first arrival to download (seconds)
+    ta : int
+        time window after first arrival to download (seconds)
+    statloc : string
+        Directory containing the station xmls.
+    rawloc : string
+        Directory containing the raw seismograms.
+    clients : list
+        List of FDSN servers. See obspy.Client documentation for acronyms.
+    network : string or list, optional
+        Network restrictions. Only download from these networks, wildcards
+        allowed. The default is None.
+    station : string or list, optional
+        Only allowed if network != None. Station restrictions.
+        Only download from these stations, wildcards are allowed.
+        The default is None.
+    debug : Bool, optional
+        All loggers go to debug mode.
+    
     Returns
     -------
     None
@@ -55,25 +75,25 @@ def downloadwav(min_epid, max_epid, model, event_cat):
     # according to minimum and maximum epicentral distance
     min_time = model.get_travel_times(source_depth_in_km=500,
                                       distance_in_degree=min_epid,
-                                      phase_list=[config.phase])[0].time
+                                      phase_list=[phase])[0].time
 
     max_time = model.get_travel_times(source_depth_in_km=0.001,
                                       distance_in_degree=max_epid,
-                                      phase_list=[config.phase])[0].time
+                                      phase_list=[phase])[0].time
 
-    mdl = MassDownloader(providers=config.waveform_client)
+    mdl = MassDownloader(providers=clients)
 
     ###########
     # logging for the download
     fdsn_mass_logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
     fdsn_mass_logger.setLevel(logging.INFO)
-    if config.debug:
+    if debug:
         fdsn_mass_logger.setLevel(logging.DEBUG)
 
     # Create handler to the log
     fh = logging.FileHandler('logs/download.log')
     fh.setLevel(logging.WARNING)
-    if config.debug:
+    if debug:
         fh.setLevel(logging.DEBUG)
     fdsn_mass_logger.addHandler(fh)
 
@@ -94,12 +114,12 @@ def downloadwav(min_epid, max_epid, model, event_cat):
         ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
         evtlat_loc = str(roundhalf(evtlat))
         evtlon_loc = str(roundhalf(evtlon))
-        config.folder = os.path.join(config.waveform, ot_loc + '_'
+        tmp.folder = os.path.join(rawloc, ot_loc + '_'
                                      + evtlat_loc + "_" + evtlon_loc)
 
         # create folder for each event
-        if not Path(config.folder).is_dir():
-            subprocess.call(["mkdir", "-p", config.folder])
+        if not Path(tmp.folder).is_dir():
+            subprocess.call(["mkdir", "-p", tmp.folder])
 
             # Circular domain around the epicenter. This module also offers
             # rectangular and global domains. More complex domains can be
@@ -112,9 +132,9 @@ def downloadwav(min_epid, max_epid, model, event_cat):
             # Get data from sufficient time before earliest arrival
             # and after the latest arrival
             # Note: All the traces will still have the same length
-            starttime=origin_time + min_time - config.tz,
-            endtime=origin_time + max_time + config.ta,
-            network=config.network, station=config.station,
+            starttime=origin_time + min_time - tz,
+            endtime=origin_time + max_time + ta,
+            network=network, station=station,
             # You might not want to deal with gaps in the data.
             # If this setting is
             # True, any trace with a gap/overlap will be discarded.
@@ -151,7 +171,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
                 mdl.download(
                     domain, restrictions,
                     mseed_storage=get_mseed_storage,
-                    stationxml_storage=config.statloc,
+                    stationxml_storage=statloc,
                     threads_per_client=3, download_chunk_size_in_mb=50)
                 incomplete = False
             except IncompleteRead:
@@ -159,7 +179,7 @@ def downloadwav(min_epid, max_epid, model, event_cat):
             except Exception:
                 incomplete = False  # Any other error: continue
 
-    config.folder = "finished"  # removes the restriction for preprocess.py
+    tmp.folder = "finished"  # removes the restriction for preprocess.py
 
 
 def get_mseed_storage(network, station, location, channel, starttime, endtime):
@@ -171,46 +191,15 @@ def get_mseed_storage(network, station, location, channel, starttime, endtime):
         return True
 
     # If a string is returned the file will be saved in that location.
-    return os.path.join(config.folder, "%s.%s.mseed" % (network, station))
-
-
-# def get_stationxml_storage(network, station, channels, starttime, endtime):
-#     """Download the station.xml for the stations. Check chanels that are
-#     already available if channels are missing in the current file,
-#     do only download the channels that are missing"""
-#     available_channels = []
-#     missing_channels = []
-
-#     for location, channel in channels:
-#         if stat_in_db(network, station, location, channel, starttime,
-#                       endtime):
-#             available_channels.append((location, channel))
-#         else:
-#             missing_channels.append((location, channel))
-
-#     filename = os.path.join(config.statloc, "%s.%s.xml" % (network, station))
-
-#     return {
-#         "available_channels": available_channels,
-#         "missing_channels": missing_channels,
-#         "filename": filename}
-
-
-# def stat_in_db(network, station):
-#     """checks if station xml is already downloaded"""
-#     path = Path(config.statloc, "%s.%s.xml" % (network, station))
-#     if path.is_file():
-#         return True
-#     else:
-#         return False
+    return os.path.join(tmp.folder, "%s.%s.mseed" % (network, station))
 
 
 def wav_in_db(network, station, location, channel, starttime, endtime):
     """Checks if waveform is already downloaded."""
-    path = Path(config.folder, "%s.%s.mseed" % (network, station))
+    path = Path(tmp.folder, "%s.%s.mseed" % (network, station))
                                                    #location))
     if path.is_file():
-        st = read(config.folder + '/' + network + "." + station + '.mseed')
+        st = read(tmp.folder + '/' + network + "." + station + '.mseed')
         # '.' + location +
     else:
         return False

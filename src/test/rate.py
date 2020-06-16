@@ -21,7 +21,6 @@ from obspy.taup import TauPyModel
 from obspy.clients.iris import Client
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 
-import config
 from ..rf.create import createRF, RFStream
 from ..waveform.qc import qcs, qcp
 from ..waveform.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
@@ -29,25 +28,26 @@ from ..waveform.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
 rating = {}  # mutable object
 
 
-def rate(network, station=None, onset=config.tz, phase=config.phase,
-         review=False, retained=False, decon_meth=config.decon_meth,
+def rate(network, phase, preproloc, station=None,
+         review=False, retained=False, decon_meth='it',
          test_tt_calculation=False):
     """
     Module to rate and review the quality of Sp or Ps waveforms from the given
-    station. Shows the automatic rating from. Tapers can be controlled with
-    the mouse. Rating is done with the keyboard.
+    station. Shows the automatic rating from qc. Tapers can be controlled with
+    the mouse. Rating is done with the keyboard. Makes only sense if the
+    files in preproloc have not been quality controlled (the script is a
+    reminant from an earlier alpha version).
 
     Parameters
     ----------
     network : STRING
         Network code (two letters).
+    phase : STRING
+        Either "P" for Ps or "S" Sp. The default is "S".
+    preproloc : string
+        Directory that contains the preprocessed files (not quality controlled)
     station : str or list, optional
         Station code (three letters).
-    onset : float, optional
-        Difference between starttime and theoretical first arrival.
-        The default is config.tz.
-    phase : STRING, optional
-        Either "P" for Ps or "S" Sp. The default is "S".
     review : INTEGER, optional
         If true, already rated waveforms are shown.
         Can also be an integer between 1 and 4. Then, only waveforms rated
@@ -58,8 +58,7 @@ def rate(network, station=None, onset=config.tz, phase=config.phase,
         Deconvolution method, "waterlevel", 'dampedf' for constant
         damping level, 'it' for iterative time domain deconvoltuion, 'multit'
         for multitaper or 'fqd' for frequency dependently damped spectral
-        division. The default is config.decon_meth.
-        The default is config.decon_meth.
+        division. The default is 'it'
 
     Raises
     ------
@@ -71,8 +70,12 @@ def rate(network, station=None, onset=config.tz, phase=config.phase,
     None.
 
     """
+    if phase == 'P':
+        onset = 30
+    elif phase == 'S':
+        onset = 120
 
-    inloc = os.path.join(config.outputloc[:-1], phase, 'by_station', network)
+    inloc = os.path.join(preproloc, phase, 'by_station', network)
 
     infiles = []  # List of all files in folder
     pattern = []  # List of input constraints
@@ -194,7 +197,7 @@ def rate(network, station=None, onset=config.tz, phase=config.phase,
 
             for arr in arrivals:
                 if arr.time < primary_time - onset or arr.time > \
-                        primary_time + config.ta or arr.name == phase:
+                        primary_time + 120 or arr.name == phase:
                     continue
                 ph_name.append(arr.name)
                 ph_time.append(arr.time - primary_time)
@@ -353,14 +356,16 @@ def __w_file(network, station, starttime):
         int(rating["k"])
     except ValueError:
         return False
-    with shelve.open(config.ratings + network + "." + station + "rating") as f:
+    with shelve.open(os.path.join('data', 'ratings')
+                     + network + "." + station + "rating") as f:
         if int(rating["k"]) != 5:
             f[starttime] = rating["k"]
             print("You've rated the stream", rating["k"])
 
 
 def __r_file(network, station, starttime):
-    with shelve.open(config.ratings + network + "." + station + "rating") as f:
+    with shelve.open(os.path.join('data', 'ratings')
+                      + network + "." + station + "rating") as f:
         if starttime in f:
             old = f[starttime]
         else:
@@ -368,7 +373,7 @@ def __r_file(network, station, starttime):
     return old
 
 
-def sort_rated(network, station, phase=config.phase):
+def sort_rated(network, station, phase, preproloc):
     """
     Functions that sorts waveforms in 4 folders,
     depending on their manual rating.
@@ -380,7 +385,9 @@ def sort_rated(network, station, phase=config.phase):
     station : STRING
         Station code (3 letters).
     phase : STRING, optional
-        "P" or "S". The default is config.phase.
+        "P" or "S".
+    preproloc : string
+        Directory that contains the preprocessed files (not quality controlled)
 
     Returns
     -------
@@ -388,11 +395,11 @@ def sort_rated(network, station, phase=config.phase):
 
     """
 
-    inloc = config.outputloc[:-1] + phase + "/by_station/" + network + \
-            '/' + station + '/'
+    inloc = os.path.join(preproloc, phase, "by_station", network, station)
     for n in range(1, 5):
         subprocess.call(["mkdir", "-p", inloc + str(n)])
-    dic = shelve.open(config.ratings + network + "." + station + "rating")
+    dic = shelve.open(
+        os.path.join('data', 'ratings') + network + "." + station + "rating")
     for file in os.listdir(inloc):
         if file[:4] == "info":  # Skip the info files
             continue
@@ -407,7 +414,7 @@ def sort_rated(network, station, phase=config.phase):
                              + file])
 
 
-def automatic_rate(network, station, phase=config.phase):
+def automatic_rate(network, station, phase, preproloc):
     """
     Checks the automatic QC criteria for SRF waveforms.
 
@@ -418,7 +425,9 @@ def automatic_rate(network, station, phase=config.phase):
     station : STRING
         Station code (3 letters).
     phase : STRING, optional
-        "P" or "S". The default is config.phase.
+        "P" or "S".
+    preproloc : string
+        Directory that contains the preprocessed files (not quality controlled)
 
     Returns
     -------
@@ -434,8 +443,7 @@ def automatic_rate(network, station, phase=config.phase):
 
     """
 
-    inloc = config.outputloc[:-1] + phase + "/by_station/" + network + \
-            '/' + station + '/'
+    inloc = os.path.join(preproloc, phase, '/by_station/', network, station)
     diff = 0
     ret = 0
     sts = []
@@ -456,8 +464,8 @@ def automatic_rate(network, station, phase=config.phase):
             st, crit, lf, noisemat = qcp(st, st[0].stats.delta,
                                          st[0].stats.sampling_rate)
 
-        with shelve.open(config.ratings + network + "." + station
-                         + "rating") as f:
+        with shelve.open(os.path.join('data', 'ratings') + network + "." +
+                         station + "rating") as f:
             f[starttime + "_auto"] = crit
             if starttime in f and int(f[starttime]) < 3 and crit:
                 diff = diff + 1
@@ -468,165 +476,166 @@ def automatic_rate(network, station, phase=config.phase):
     return diff, ret, sts, crits
 
 
-def sort_auto_rated(network, station, phase=config.phase):
-    """
-    Puts all retained RF and waveforms in one folder.
+# def sort_auto_rated(network, station, phase, preproloc, rfloc):
+#     """
+#     Puts all retained RF and waveforms in one folder.
 
-    Parameters
-    ----------
-    network : STRING
-        Network code (2 letters).
-    station : STRING
-        Station code (3 letters).
-    phase : STRING, optional
-        "P" or "S". The default is config.phase.
-    """
+#     Parameters
+#     ----------
+#     network : STRING
+#         Network code (2 letters).
+#     station : STRING
+#         Station code (3 letters).
+#     phase : STRING, optional
+#         "P" or "S".
+#     preproloc : string
+#         Directory that contains the preprocessed files (not quality controlled)
+#     """
 
-    inloc = config.outputloc[:-1] + phase + "/by_station/" + network + \
-            '/' + station + '/'
-    inloc_RF = config.RF[:-1] + phase + '/' + network + '/' + station + '/'
-    subprocess.call(["mkdir", "-p", inloc + "ret"])
-    subprocess.call(["mkdir", "-p", inloc_RF + "ret"])
-    dic = shelve.open(config.ratings + network + "." + station + "rating")
-    for file in os.listdir(inloc):
-        if file[:4] == "info":  # Skip the info files
-            continue
-        try:
-            st = read(inloc + file)
-        except IsADirectoryError as e:
-            print(e)
-            continue
-        starttime = str(st[0].stats.starttime) + "_auto"
-        if starttime in dic and dic[starttime]:
-            subprocess.call(["cp", inloc + file, inloc + 'ret/' + file])
-            subprocess.call(["cp", inloc + file, inloc_RF + 'ret/' + file])
-
-
-def auto_rate_stack(network, station, phase=config.phase,
-                    decon_meth=config.decon_meth, rot="PSS"):
-    """
-    Does a quality control on the downloaded files and shows a plot of the
-    stacked receiver function. Just meant to facilitate
-    the decision for QC parameters (config.SNR_criteria).
+#     inloc = os.path.join(preproloc, phase, "/by_station/", network, station)
+#     inloc_RF = config.RF[:-1] + phase + '/' + network + '/' + station + '/'
+#     subprocess.call(["mkdir", "-p", inloc + "ret"])
+#     subprocess.call(["mkdir", "-p", inloc_RF + "ret"])
+#     dic = shelve.open(config.ratings + network + "." + station + "rating")
+#     for file in os.listdir(inloc):
+#         if file[:4] == "info":  # Skip the info files
+#             continue
+#         try:
+#             st = read(inloc + file)
+#         except IsADirectoryError as e:
+#             print(e)
+#             continue
+#         starttime = str(st[0].stats.starttime) + "_auto"
+#         if starttime in dic and dic[starttime]:
+#             subprocess.call(["cp", inloc + file, inloc + 'ret/' + file])
+#             subprocess.call(["cp", inloc + file, inloc_RF + 'ret/' + file])
 
 
-    Parameters
-    ----------
-    network : STRING
-        Network code (2 letters).
-    station : STRING
-        Station code (3 letters).
-    phase : STRING, optional
-        "P" or "S". The default is config.phase.
-    decon_meth : STRING, optional
-        Deconvolution method, "waterlevel", 'dampedf' for constant
-        damping level, 'it' for iterative time domain deconvoltuion, 'multit'
-        for multitaper or 'fqd' for frequency dependently damped spectral
-        division. The default is config.decon_meth.
-        The default is config.decon_meth.
-    rot : STRING, optional
-        Kind of rotation that should be performed.
-        Either "PSS" for P-Sv-Sh, "LQT" for LQT via singular value
-        decomposition or "LQT_min" for LQT by minimising first arrival energy
-        on Q. The default is "LQT_min".
+# def auto_rate_stack(network, station, phase=config.phase,
+#                     decon_meth=config.decon_meth, rot="PSS"):
+#     """
+#     Does a quality control on the downloaded files and shows a plot of the
+#     stacked receiver function. Just meant to facilitate
+#     the decision for QC parameters (config.SNR_criteria).
 
-    Raises
-    ------
-    Exception
-        For unknown inputs.
 
-    Returns
-    -------
-    z : np.array
-        Vector containing depths.
-    stack : RFTrace
-        RFTrace object containing the stacked RF.
-    RF_mo : RFStream
-        RFStream object containg depth migrated receiver functions.
+#     Parameters
+#     ----------
+#     network : STRING
+#         Network code (2 letters).
+#     station : STRING
+#         Station code (3 letters).
+#     phase : STRING, optional
+#         "P" or "S". The default is config.phase.
+#     decon_meth : STRING, optional
+#         Deconvolution method, "waterlevel", 'dampedf' for constant
+#         damping level, 'it' for iterative time domain deconvoltuion, 'multit'
+#         for multitaper or 'fqd' for frequency dependently damped spectral
+#         division. The default is config.decon_meth.
+#         The default is config.decon_meth.
+#     rot : STRING, optional
+#         Kind of rotation that should be performed.
+#         Either "PSS" for P-Sv-Sh, "LQT" for LQT via singular value
+#         decomposition or "LQT_min" for LQT by minimising first arrival energy
+#         on Q. The default is "LQT_min".
 
-    """
+#     Raises
+#     ------
+#     Exception
+#         For unknown inputs.
 
-    diff, ret, sts, crits = automatic_rate(network, station, phase=phase)
-    sort_auto_rated(network, station, phase)
-    info_file = config.outputloc[:-1] + phase + '/by_station/' + network + \
-                '/' + station + '/info'
-    with shelve.open(info_file) as info:
-        statlat = info["statlat"]
-        statlon = info["statlon"]
-    outloc = config.RF[:-1] + phase + '/' + network + '/' + station + '/test/'
-    if Path(outloc).is_dir():
-        subprocess.call(['rm', '-rf', outloc])
-    subprocess.call(['mkdir', '-p', outloc])
-    subprocess.call(['cp', info_file + '.bak', outloc])
-    subprocess.call(['cp', info_file + '.dir', outloc])
-    subprocess.call(['cp', info_file + '.dat', outloc])
-    RFs = []
-    for jj, st in enumerate(sts):
-        if not crits[jj]:
-            continue
-        dt = st[0].stats.delta
-        with shelve.open(info_file) as info:
-            ii = info["starttime"].index(st[0].stats.starttime)
-            rayp = info["rayp_s_deg"][ii] / 111319.9
-            ot = info["ot_ret"][ii]
-            evt_depth = info["evt_depth"][ii]
-            rdelta = info["rdelta"][ii]
-        # to reproduce Rychert et al (2007)
-        # if int(ot[:4]) > 2002 or evt_depth > 1.5e5:
-        #     ret = ret-1
-        #     continue
-        if rot == "PSS":
-            _, _, st = rotate_PSV(statlat, statlon, rayp, st)
-        elif rot == "LQT":
-            st, rat = rotate_LQT(st)
-            if 0.75 < rat < 1.5 and phase == "S":
-                # The PCA did not work properly, L & Q too similar
-                ret = ret - 1
-                continue
-        elif rot == "LQT_min":
-            st, ia = rotate_LQT_min(st)
-            if ia > 70 or ia < 5:
-                # Unrealistic incidence angle
-                ret = ret - 1
-                continue
-        else:
-            raise Exception("Unknown rotation method rot=,", rot, """"Use
-                            either 'PSS', 'LQT', or 'LQT_min'.""")
-        # noise RF test
-        if phase == "S":
-            trim = [40, 0]
-            if rdelta >= 70:
-                trim[1] = config.ta - (-2 * rdelta + 180)
-            else:
-                trim[1] = config.ta - 40
-        elif phase == "P":
-            trim = False
-        info = shelve.open(info_file)
-        try:
-            RF = createRF(st, phase=phase, method=decon_meth,
-                          shift=config.tz, trim=trim, info=info)
-        except ValueError:
-            print("corrupted event")
-            continue
-        RFs.append(RF)
-        # with shelve.open(outloc+"info", writeback=True) as info:
-        #     info["starttime"][ii] = st[0].stats.starttime
-        #     info.sync()
-    RF = RFStream(traces=RFs)
-    # RF.write(outloc + station + '.sac', format="SAC")
-    print("N files that were not 3/4: ", diff, "N retained: ", ret)
-    # sta = station + "/test"
-    # plot_stack(network, sta, phase=phase)
-    z, stack, RF_mo = RF.station_stack()
-    stack.plot()
-    # plot unmigrated stack
-    # RF_av = np.average(RFs, axis=0)
-    # RF_av = -np.flip(RF_av)
-    # t = np.linspace(-15,15, len(RF_av))
-    # plt.close('all')
-    # fig = plt.figure()
-    # fig, ax = plt.subplots(1, 1, sharex=True)
-    # # Move left y-axis and bottim x-axis to centre, passing through (0,0)
-    # ax.spines['bottom'].set_position("center")
-    # # ax.spines['left'].set_visible(False)
-    return z, stack, RF_mo, RF
+#     Returns
+#     -------
+#     z : np.array
+#         Vector containing depths.
+#     stack : RFTrace
+#         RFTrace object containing the stacked RF.
+#     RF_mo : RFStream
+#         RFStream object containg depth migrated receiver functions.
+
+#     """
+
+#     diff, ret, sts, crits = automatic_rate(network, station, phase=phase)
+#     sort_auto_rated(network, station, phase)
+#     info_file = config.outputloc[:-1] + phase + '/by_station/' + network + \
+#                 '/' + station + '/info'
+#     with shelve.open(info_file) as info:
+#         statlat = info["statlat"]
+#         statlon = info["statlon"]
+#     outloc = config.RF[:-1] + phase + '/' + network + '/' + station + '/test/'
+#     if Path(outloc).is_dir():
+#         subprocess.call(['rm', '-rf', outloc])
+#     subprocess.call(['mkdir', '-p', outloc])
+#     subprocess.call(['cp', info_file + '.bak', outloc])
+#     subprocess.call(['cp', info_file + '.dir', outloc])
+#     subprocess.call(['cp', info_file + '.dat', outloc])
+#     RFs = []
+#     for jj, st in enumerate(sts):
+#         if not crits[jj]:
+#             continue
+#         dt = st[0].stats.delta
+#         with shelve.open(info_file) as info:
+#             ii = info["starttime"].index(st[0].stats.starttime)
+#             rayp = info["rayp_s_deg"][ii] / 111319.9
+#             ot = info["ot_ret"][ii]
+#             evt_depth = info["evt_depth"][ii]
+#             rdelta = info["rdelta"][ii]
+#         # to reproduce Rychert et al (2007)
+#         # if int(ot[:4]) > 2002 or evt_depth > 1.5e5:
+#         #     ret = ret-1
+#         #     continue
+#         if rot == "PSS":
+#             _, _, st = rotate_PSV(statlat, statlon, rayp, st)
+#         elif rot == "LQT":
+#             st, rat = rotate_LQT(st)
+#             if 0.75 < rat < 1.5 and phase == "S":
+#                 # The PCA did not work properly, L & Q too similar
+#                 ret = ret - 1
+#                 continue
+#         elif rot == "LQT_min":
+#             st, ia = rotate_LQT_min(st)
+#             if ia > 70 or ia < 5:
+#                 # Unrealistic incidence angle
+#                 ret = ret - 1
+#                 continue
+#         else:
+#             raise Exception("Unknown rotation method rot=,", rot, """"Use
+#                             either 'PSS', 'LQT', or 'LQT_min'.""")
+#         # noise RF test
+#         if phase == "S":
+#             trim = [40, 0]
+#             if rdelta >= 70:
+#                 trim[1] = config.ta - (-2 * rdelta + 180)
+#             else:
+#                 trim[1] = config.ta - 40
+#         elif phase == "P":
+#             trim = False
+#         info = shelve.open(info_file)
+#         try:
+#             RF = createRF(st, phase=phase, method=decon_meth,
+#                           shift=config.tz, trim=trim, info=info)
+#         except ValueError:
+#             print("corrupted event")
+#             continue
+#         RFs.append(RF)
+#         # with shelve.open(outloc+"info", writeback=True) as info:
+#         #     info["starttime"][ii] = st[0].stats.starttime
+#         #     info.sync()
+#     RF = RFStream(traces=RFs)
+#     # RF.write(outloc + station + '.sac', format="SAC")
+#     print("N files that were not 3/4: ", diff, "N retained: ", ret)
+#     # sta = station + "/test"
+#     # plot_stack(network, sta, phase=phase)
+#     z, stack, RF_mo = RF.station_stack()
+#     stack.plot()
+#     # plot unmigrated stack
+#     # RF_av = np.average(RFs, axis=0)
+#     # RF_av = -np.flip(RF_av)
+#     # t = np.linspace(-15,15, len(RF_av))
+#     # plt.close('all')
+#     # fig = plt.figure()
+#     # fig, ax = plt.subplots(1, 1, sharex=True)
+#     # # Move left y-axis and bottim x-axis to centre, passing through (0,0)
+#     # ax.spines['bottom'].set_position("center")
+#     # # ax.spines['left'].set_visible(False)
+#     return z, stack, RF_mo, RF

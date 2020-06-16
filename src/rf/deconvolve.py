@@ -10,7 +10,6 @@ Various Deconvolution approaches used for the RF technique.
 import numpy as np
 from scipy.signal.windows import dpss
 
-import config
 from src.utils.nextpowof2 import nextPowerOf2
 import src.utils.signalproc as sptb
 
@@ -314,7 +313,7 @@ def damped(P, H, mu=10):
 #     return h, var
 
 
-def spectraldivision(v, u, ndt, tshift, regul, phase=config.phase):
+def spectraldivision(v, u, ndt, tshift, regul, phase):
     """
     Function spectraldivision(v,u,ndt,tshift,regul) is a standard spectral
     division frequency domain deconvolution.
@@ -333,8 +332,8 @@ def spectraldivision(v, u, ndt, tshift, regul, phase=config.phase):
         Regularization, can be chosen by the variable "regul", this can be
         'con', 'wat', or 'fqd' for constant damping factor, waterlevel,
         or frequency-dependent damping, respectively.
-    phase : str, optional
-        Phase either "P" for Ps or "S" for Sp. The default is config.phase.
+    phase : str
+        Phase either "P" for Ps or "S" for Sp.
 
     Raises
     ------

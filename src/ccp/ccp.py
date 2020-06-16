@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Sunday, 31st May 2020 09:33:00 pm
+Last Modified: Tuesday, 16th June 2020 11:40:28 am
 '''
 
 #!/usr/bin/env python3
@@ -22,7 +22,6 @@ from mpl_toolkits.basemap import Basemap
 from pathlib import Path
 import subprocess
 
-import config
 from .compute.bin import BinGrid
 from ..database.stations import StationDB
 from ..rf.create import read_rf
@@ -46,13 +45,14 @@ fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
 fh.setFormatter(fmt)
 
 
-def init_ccp(spacing, vel_model, phase=config.phase, network=None,
+def init_ccp(spacing, vel_model, phase, statloc='output/stations',
+             rfloc='output/waveforms/RF', network=None,
              station=None, geocoords=None,
              compute_stack=False, binrad=np.cos(np.radians(30)),
              append_pp=False, save=False, verbose=True):
     """
-    Computes a ccp stack in self.ccp using the standard folder
-    structure set in config. The stack can be limited to some networks and
+    Computes a ccp stack in self.ccp using data from statloc and rfloc.
+    The stack can be limited to some networks and
     stations.
 
     Parameters
@@ -93,7 +93,7 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
         The default is False
     save : Bool or str, optional
         Either False if the ccp should not be saved or string with filename
-        will be saved in config.ccp. Will be saved as pickle file.
+        will be saved. Will be saved as pickle file.
         The default is False.
     verbose : Bool, optional
         Display info in terminal. The default is True.
@@ -104,7 +104,6 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
         Returns a CCPStack object containing all information.
 
     """
-
     # create empty lists for station latitude and longitude
     lats = []
     lons = []
@@ -120,7 +119,7 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
         files = []
         for pat in pattern:
             files.extend(
-                fnmatch.filter(os.listdir(config.statloc), pat+'.xml'))
+                fnmatch.filter(os.listdir(statloc), pat+'.xml'))
 
     # As strings
     elif network and type(network) == list:
@@ -134,28 +133,28 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
                 for stat in station:
                     pattern = net + '.' + stat
                     files.extend(
-                        fnmatch.filter(os.listdir(config.statloc), pattern))
+                        fnmatch.filter(os.listdir(statloc), pattern))
         else:
             for net in network:
                 pattern = net + '.' + (station or '') + '*'
                 files.extend(
-                    fnmatch.filter(os.listdir(config.statloc), pattern))
+                    fnmatch.filter(os.listdir(statloc), pattern))
     elif network and type(station) == list:
         files = []
         for stat in station:
             pattern = network + '.' + stat + '*'
-            files.extend(fnmatch.filter(os.listdir(config.statloc), pattern))
+            files.extend(fnmatch.filter(os.listdir(statloc), pattern))
     elif network:
         pattern = network + '.' + (station or '') + '*'
-        files = fnmatch.filter(os.listdir(config.statloc), pattern)
+        files = fnmatch.filter(os.listdir(statloc), pattern)
 
     # In this case, it will process all available data (for global ccps)
     else:
-        files = os.listdir(config.statloc)
+        files = os.listdir(statloc)
 
     # read out station latitudes and longitudes
     for file in files:
-        stat = read_inventory(os.path.join(config.statloc, file))
+        stat = read_inventory(os.path.join(statloc, file))
         lats.append(stat[0][0].latitude)
         lons.append(stat[0][0].longitude)
 
@@ -168,14 +167,14 @@ def init_ccp(spacing, vel_model, phase=config.phase, network=None,
     if compute_stack:
         ccp.compute_stack(
             vel_model=vel_model, network=network, station=station, save=save,
-            pattern=pattern, append_pp=append_pp, binrad=binrad)
+            pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc)
 
     # _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
 
     return ccp
 
 
-def read_ccp(filename='ccp.pkl', folder=config.ccp, fmt=None):
+def read_ccp(filename='ccp.pkl', folder='output/ccps', fmt=None):
     """
     Read CCP-Stack class file from input folder.
 
@@ -185,7 +184,6 @@ def read_ccp(filename='ccp.pkl', folder=config.ccp, fmt=None):
         Filename of the input file with file ending. The default is 'ccp.pkl'.
     folder : str, optional
         Input folder without concluding forward slash.
-        The default is config.ccp.
     fmt : str, optional
         File format, can be none if the filename has an ending, possible
         options are "pickle. The default is None.
@@ -227,7 +225,7 @@ class CCPStack(object):
     """Is a CCP Stack matrix. It's size depends on stations that are used as
     input."""
 
-    def __init__(self, latitude, longitude, edist, phase=config.phase,
+    def __init__(self, latitude, longitude, edist, phase,
                  verbose=True):
         """
         Creates an empy Matrix template for a CCP stack
@@ -310,12 +308,13 @@ class CCPStack(object):
 
         return k, j
 
-    def compute_stack(self, vel_model, network=None, station=None, pattern=None,
+    def compute_stack(self, vel_model, rfloc='output/waveforms/RF',
+                      network=None, station=None, pattern=None,
                       save=False,
                       binrad=np.cos(np.radians(30)), append_pp=False):
         """
-        Computes a ccp stack in self.ccp, using the standard folder
-        structure set in config. The stack can be limited to some networks and
+        Computes a ccp stack in self.ccp, using the data from rfloc.
+        The stack can be limited to some networks and
         stations. This will take a long while for big data sets!
         Note that the grid should be big enough for the provided networks and
         stations. Best to create the CCPStack object by using ccp.init_ccp().
@@ -326,6 +325,9 @@ class CCPStack(object):
             Velocity model located in data. Either 'iasp91' for 1D raytracing
             or 3D for 3D raytracing with GYPSuM model. Using 3D Raytracing
             will cause the code to take about 30% longer.
+        rfloc : str , optional
+            Parental folder in which the receiver functions in time domain are.
+            The default is 'output/waveforms/RF.
         network : str or list, optional
             Network or networks that are to be included in the ccp stack.
             Standard unix wildcards are allowed. If None, the whole database
@@ -371,7 +373,7 @@ class CCPStack(object):
         # Compute maxdist in euclidean space
         self.binrad_eucl = epi2euc(self.binrad)
 
-        folder = config.RF[:-1] + self.bingrid.phase
+        folder = rfloc + self.bingrid.phase
 
         start = time.time()
         logger.info('Stacking started')
@@ -609,7 +611,7 @@ class CCPStack(object):
             self.coords_new = (np.delete(self.coords_new[0], index, 1),
                                np.delete(self.coords_new[1], index, 1))
 
-    def write(self, filename=None, folder=config.ccp, fmt="pickle"):
+    def write(self, filename=None, folder='output/ccps', fmt="pickle"):
         """
         Saves the CCPStream file as pickle or matlab file. Only save
         as Matlab file for exporting, as not all information can be
@@ -620,7 +622,7 @@ class CCPStack(object):
         filename : str, optional
             Name as which to save, file extensions aren't necessary.
         folder : str, optional
-            Output folder, standard is defined in config.
+            Output folder.
         fmt : str, optional
             Either "pickle" or "matlab" for .mat.
         """
@@ -684,6 +686,9 @@ class CCPStack(object):
             raise ValueError("The format type ", fmt, "is unkown.")
 
     def plot_bins(self):
+        """
+        A simple map view of the bins.
+        """
         if hasattr(self, 'coords_new'):
             coords = self.coords_new
         else:

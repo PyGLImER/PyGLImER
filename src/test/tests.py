@@ -19,7 +19,6 @@ from obspy.core import Stats
 from obspy.signal.filter import lowpass
 from geographiclib.geodesic import Geodesic
 
-import config
 from ..ccp import CCPStack
 from ..rf import RFTrace, RFStream
 from ..rf.create import createRF
@@ -190,14 +189,17 @@ def read_geom(geom_file):
 
 
 def rf_test(
-        phase, dip, geom_file='3D.geom'):
+        phase, dip, rfloc='output/waveforms/RF', geom_file='3D.geom'):
     """
     Creates synthetic PRFs from Raysum data.
 
     Parameters
     ----------
+    phase : string
+        "P" or "S".
     dip : int
         Dip of the LAB in deg, determines, which files to use
+    rfloc : The parental directory, in which the RFs are saved.
     geom_file : str, optional
         Filename of the geometry file
 
@@ -253,7 +255,7 @@ def rf_test(
              equal the number of backazimuths in the geom file""", M])
 
     rfs = []
-    odir = os.path.join(config.RF[:-1], phase, 'raysum', str(dip))
+    odir = os.path.join(rfloc, phase, 'raysum', str(dip))
     ch = ['BHP', 'BHV', 'BHH']  # Channel names
 
     if not Path(odir).is_dir():
@@ -453,13 +455,12 @@ def decon_test(PSS_file, phase, method):
     return RF, dt
 
 
-def test_SNR(network, station, phase=config.phase):
+def test_SNR(network, station, phase, preproloc='ouput/waveforms/preprocessed'):
     """Test the automatic QC scripts for a certain station and writes ratings
     in the rating file."""
     noisematls = []
     critls = []
-    loc = config.outputloc[:-1] + phase + '/by_station/' + \
-        network + '/' + station
+    loc = os.path.join(preproloc, phase, '/by_station/', network, station)
     for file in os.listdir(loc):
         try:
             st = read(loc + '/' + file)

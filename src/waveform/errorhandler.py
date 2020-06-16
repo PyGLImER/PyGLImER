@@ -5,7 +5,7 @@ Files contains all Errorhandler for the Glimer to obspy project
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Saturday, 21th March 2020 19:16:41
-Last Modified: Tuesday, 26th May 2020 6:55:27 pm
+Last Modified: Tuesday, 16th June 2020 12:11:13 pm
 '''
 
 #!/usr/bin/env python3
@@ -14,13 +14,13 @@ Last Modified: Tuesday, 26th May 2020 6:55:27 pm
 
 from obspy.clients.fdsn import Client, header  # web sevice
 
-import config
+from .. import tmp
 
 
 def redownload(network, station, starttime, endtime, st):
     """Errorhandler that Redownloads the stream for the given input.
     Used when the stream has less than three channels."""
-    for c in config.re_clients:
+    for c in tmp.re_client:
         try:
             client = Client(c)
             if len(st) < 3:
@@ -42,7 +42,7 @@ def redownload(network, station, starttime, endtime, st):
 
 def redownload_statxml(st, network, station, statfile):
     """Errorhandler: Redownload station xml in case that it is not found."""
-    for c in config.re_clients:
+    for c in tmp.re_client:
         try:
             client = Client(c)
             station_inv = client.get_stations(level="response",
@@ -55,9 +55,9 @@ def redownload_statxml(st, network, station, statfile):
     return station_inv
 
 
-def NoMatchingResponseHandler(st, network, station):
+def NoMatchingResponseHandler(st, network, station, statloc):
     """Error handler for when the No matching response found error occurs."""
-    for c in config.re_clients:
+    for c in tmp.re_client:
         try:
             client = Client(c)
             station_inv = client.get_stations(level="response",
@@ -67,7 +67,7 @@ def NoMatchingResponseHandler(st, network, station):
             st.remove_response(inventory=station_inv, output='VEL',
                                water_level=60)
             # write the new, working stationxml file
-            station_inv.write(config.statloc + "/" + network + "." + station + ".xml",
+            station_inv.write(os.path.join(statloc, network + "." + station + ".xml"),
                               format="STATIONXML")
             break
         except (header.FDSNNoDataException, header.FDSNException):
@@ -79,7 +79,7 @@ def NoMatchingResponseHandler(st, network, station):
 
 def NotLinearlyIndependentHandler(st, network, station, starttime, endtime,
                                   station_inv, paz_sim):
-    for c in config.re_clients:
+    for c in tmp.re_client:
         client = Client(c)
         while len(st) < 3:
             try:

@@ -2,15 +2,9 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Monday, 25th May 2020 10:40:03
-Last Modified: Tuesday, 26th May 2020 06:57:56
+Last Modified: Tuesday, 16th June 2020 12:01:45 pm
 '''
 
-'''
-Author: Peter Makus (peter.makus@student.uib.no)
-
-Created: Monday, 25th May 2020 10:40:03 am
-Last Modified: Tuesday, 26th May 2020 6:54:16 pm
-'''
 
 import os
 import subprocess
@@ -19,18 +13,21 @@ from obspy import UTCDateTime
 from pathlib import Path
 from joblib import Parallel, delayed, cpu_count
 
-import config
 from .roundhalf import roundhalf
 from .utils import chunks
 
 
-def shortennames(phase):
+def shortennames(phase, rawloc):
+    """That was kinda a one-time function to correct a bug.
+
+    Parameters
+    ----------
+    phase : [type]
+        [description]
+    """
     # %%
     # parent folder
-    # import config
-    # phase = 'P'
-    # os.chdir('/home/pm/Documents/Masters/PyGLImER')
-    di = os.path.join(config.waveform[:-1], phase)
+    di = os.path.join(rawloc, phase)
 
     # sub directories
     sudi = os.listdir(di)

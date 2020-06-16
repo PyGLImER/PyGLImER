@@ -16,7 +16,6 @@ import time
 import numpy as np
 from scipy.spatial import KDTree
 
-import config
 from src.constants import R_EARTH
 # Local imports
 # from ... import logger
@@ -48,7 +47,7 @@ def fibonacci_sphere(epi=1):
 class BinGrid(object):
     """Creates Bingrid object from parameters"""
 
-    def __init__(self, latitude, longitude, edist, phase=config.phase,
+    def __init__(self, latitude, longitude, edist, phase,
                  verbose=True):
         """
 

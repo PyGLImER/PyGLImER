@@ -15,26 +15,28 @@ Last updated:
 """
 import multiprocessing
 from joblib import Parallel, delayed
+from obspy import UTCDateTime
 
 import config
+from src import tmp
 from src.waveform.request import Request
 
 
-# !values are located in subfunctions/config.py!
-
 ##############################################################################
 ##############################################################################
 
-event_coords = (config.eMINLAT, config.eMAXLAT, config.eMINLON, config.eMAXLON)
+event_coords = (None, None, None, None)
 
 request = Request(
-    config.phase, config.starttime, config.endtime, event_coords=event_coords,
+    config.phase, config.rot, config.evtloc, config.statloc, config.waveform, config.outputloc,
+    config.RF, config.decon_meth,
+    config.starttime, config.endtime, pol='v', wavdownload=config.wavdownload, event_coords=event_coords,
     network=config.network, station=config.station,
     waveform_client=config.waveform_client, re_client=config.re_clients,
-    evtcat=config.evtcat, minmag=5.5)
+    evtcat=config.evtcat, minmag=config.minmag)
 
 if config.wavdownload:
-    config.folder = "not_started"  # resetting momentary event download folder
+    tmp.folder = "not_started"  # resetting momentary event download folder
     # multi-threading doesn't work anymore this way on python 3.8?
     # if __name__ == '__main__':
     #     multiprocessing.Process(target=request.download_waveforms,
@@ -46,5 +48,5 @@ if config.wavdownload:
     request.preprocess()
 
 else:  # Only preprocess files in waveform location
-    config.folder = "finished"
+    tmp.folder = "finished"
     request.preprocess()

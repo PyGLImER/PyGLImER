@@ -14,7 +14,7 @@ from obspy.taup import TauPyModel  # arrival times in 1D v-model
 # %% general settings
 # If debug setting is true, all loggers will go to DEBUG mode and all warnings
 # will be shown. That will result in a lot of information being shown!
-debug = False
+# debug = False
 
 # Define if you want to download new files or use old
 evtcat = None # 'all_greater55'  # either None (downloads new) or string of filename
@@ -35,18 +35,17 @@ decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
 phase = "S"
 
 # polarisation of converted wave for PRFs ("h" or "v")
-pol = "v"
+#pol = "v"
 # don't change
-pol = pol.lower()
-phase = phase.upper()
+#pol = pol.lower()
+#phase = phase.upper()
 
 # %% DIRECTORY CONFIGURATION
-lith1 = '/home/pm/LITHO1.0/bin/access_litho'  # location of lith1 file
+# lith1 = '/home/pm/LITHO1.0/bin/access_litho'  # location of lith1 file
 
-RF = "output/waveforms/RF/" + phase  # save RF here
-waveform = "output/waveforms/raw/" + phase
-outputloc = "output/waveforms/preprocessed/" + phase
-failloc = "output/waveforms/rejected"  # Not in use anymore
+RF = "output/waveforms/RF/"  # save RF here
+waveform = "output/waveforms/raw/"
+outputloc = "output/waveforms/preprocessed/"
 statloc = "output/stations"
 evtloc = "output/event_catalogues"
 ratings = "data/ratings/"
@@ -57,10 +56,7 @@ ccp = "output/ccps"
 # Time frame is identical to the station inventory
 starttime = UTCDateTime("2020-04-15")
 endtime = UTCDateTime("1970-01-01")
-eMINLAT = None
-eMAXLAT = None
-eMINLON = None
-eMAXLON = None
+minmag = 5.5
 
 # Station and Network codes
 # type : str
@@ -101,42 +97,6 @@ re_clients = ['http://auspass.edu.au/', "IRIS",  'BGR', 'EMSC', 'ETH', 'GEONET',
 # "RTZ", "LQT", "LQT_min", or "PSS"
 rot = "PSS"
 
-# time window before and after first arrival
-if phase == "P":
-    # time window before
-    tz = 30
-    # time window after
-    ta = 120
-elif phase == "S":
-    tz = 120
-    ta = 120
-
-taper_perc = 0.05  # max taping percentage - float (0.05)
-taper_type = 'hann'
-# define type of taper, Options: {cosine,barthann,bartlett,blackman,
-# blackmannharris, bohman,boxcar,chebwin, flattop,gaussian,general_gaussian,
-# hamming,hann,kaiser,nuttall,parzen,slepian,triang}
-# type = string                 ('hann')
-
-# low-cut-off frequencies for SNR check
-lowco = [.03, .1, .5]  # only for PRF
-# lowcoS = 0.03  # 0.05 lowco frequency for SRF
-lowcoS = .01  # Changed 18.05 to compare with Hopper et. al. 2018
-highco = np.linspace(.33, .175, 4)
-
-# highco = [0.175]  # Rychert et al
-# highco = [.5, .33, .25]  # only for SRF
-
-# SNR criteria for QC
-QC = True  # Do quality control or not
-
-SNR_criteriaP = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
-
-SNR_criteriaS = [24, .4, 1]  # QC4
-# SNR_criteriaS = [27.5, .4, 1]  # QC3
-# SNR_criteriaS = [20, .5, 1]  # QC2
-# SNR_criteriaS = [35, .4, 1]  # QC1
-# [primary/noise, sidelobe/primary, r/z conversions]
 
 # %% CCP settings
 # Should the 3D velocity models be saved? That saves some computation time
@@ -144,6 +104,3 @@ SNR_criteriaS = [24, .4, 1]  # QC4
 # with many cores this can lead to unforseen errors (usually UnpicklingErrors)
 # The model will however still be cached
 savevmodel = False
-
-# %% DON'T change program will change automatically!
-folder = "undefined"  # the download is happening here right now

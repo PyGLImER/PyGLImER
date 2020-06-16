@@ -26,74 +26,43 @@ from obspy.clients.fdsn import Client, header
 from obspy import read_inventory
 import pandas as pd
 
-import config
 from ..utils.utils import dt_string
 
 
-# def redownload_missing_stationxml(clients=config.waveform_client, verbose=True):
-#     # find existing station xmls
-#     # ex = os.listdir(config.statloc)
-    
-#     # missing = []
-    
-#     if verbose:
-#         t0 = time.time()
-#         logger = logging.Logger('rdstxml')
-    
-#     net, stat = find_missing_statxmls()
-    
-#     # for _, _ , fs in os.walk(config.waveform[:-1]):
-#     #     for f in fs:
-#     #         x = f.split()
-#     #         if not f[-1] == 'mseed':
-#     #             continue
-#     #         req = (x[0], x[1], '*', '*', '*', '*')
-#     #         xml = x[0] + '.' + x[1] +'.xml'
-#     #         if xml not in ex and req not in missing:
-#     #             missing.append(req)
-    
-#     if verbose:
-#         dt = dt_string(time.time()-t0)
-#         logger.info('Time elapsed')
-#         logger.info([len(net), 'station xmls missing. \n Attempting\
-#              download...'])
+def redownload_missing_statxmls(clients, phase, statloc, rawdir, verbose=True):
+    """Fairly primitive program that walks through existing raw waveforms in
+    rawdir and looks for missing station xmls in statloc and, afterwards,
+    attemps a redownload
 
-#     # Check for XMLS on every providers
-    
-#     # for c in clients:
-#     #     client = Client(c)
-#     #     inv = client.get_stations_bulk(missing, level='response')
-#     #     for network in inv:
-#     #         for station in network:
-#     #             out = inv.select(network=network.code, station=station.code)
-#     #             path = os.path.join(
-#     #                 config.statloc, network.code+'.'+station.code+'.xml')
-#     #             out.write(path, format="STATIONXML")
-#     #             i = missing.index((network.code, station.code, '*', '*', '*', '*'))
-#     #             del missing[i]
-#     #         if verbose:
-#     #             logger.info([len(missing), 'remain missing. Download continues...'])
-#     # # Return missing
-#     # missing = list(np.array(missing)[:,:2])
-#     return missing
-
-def redownload_missing_statxmls(clients=config.re_clients, verbose=True,
-                                phase = config.phase):
-    ex = os.listdir(config.statloc)
+    Parameters
+    ----------
+    clients : list
+        List of clients (see obspy documentation for obspy.Client).
+    phase : string
+        Either "P" or "S", defines in which folder to look for mseeds.
+    statloc : string
+        Folder, in which the station xmls are saved.
+    rawdir : string
+        Uppermost directory, in which the raw mseeds are saved (i.e. the
+        directory above the phase division).
+    verbose : bool, optional
+        Show some extra information, by default True
+    """    
+    ex = os.listdir(statloc)
     
     # remove file identifier
     for i, xml in enumerate(ex):
         x = xml.split('.')
         ex[i] = x[0] + '.' + x[1]
     
-    wavdir = os.path.join(config.waveform[:-1], phase)
+    wavdir = os.path.join(rawdir, phase)
 
     out = Parallel(n_jobs=-1)(
-        delayed(__client__loop__)(client, ex, wavdir)
+        delayed(__client__loop__)(client, ex, wavdir, statloc)
         for client in clients)
 
         
-def __client__loop__(client, existing, wavdir):
+def __client__loop__(client, existing, wavdir, statloc):
     client = Client(client)
     
     for _, _, files in os.walk(wavdir):
@@ -103,7 +72,7 @@ def __client__loop__(client, existing, wavdir):
                 continue
             code = f[0] + '.' + f[1]
             if code and code not in existing:
-                out = os.path.join(config.statloc, code + '.xml')
+                out = os.path.join(statloc, code + '.xml')
                 try:
                     stat_inv = client.get_stations(
                         network = f[0], station=f[1], level='response',
@@ -111,31 +80,10 @@ def __client__loop__(client, existing, wavdir):
                     stat_inv.write(out, format="STATIONXML")
                     existing.append(code)
                 except (header.FDSNNoDataException, header.FDSNException):
-                    pass  # wrong client
-        
-
-# def find_missing_statxmls():
-#     ex = os.listdir(config.statloc)
-#     total = []
-#     for _, _ , fs in os.walk(config.waveform[:-1]):
-#         total.extend(fs)
-#         # remove duplicates
-#         total = list(set(total))
-#     net = []  # missing networks
-#     stat = []  # missing stations
-
-#     for mseed in total:
-#         f = mseed.split()
-#         if not f[-1] == 'mseed':
-#             continue
-#         net.append(f[0])
-#         stat.append(f[1])
-    
-#     return net, stat
-        
+                    pass  # wrong client        
 
 class StationDB(object):
-    def __init__(self, phase=None, use_old=False):
+    def __init__(self, preproloc, phase=None, use_old=False):
         """
         Creates a pandas database of all available receiver functions.
         This database is entirely based on the info files in the "preprocessed"
@@ -146,6 +94,9 @@ class StationDB(object):
 
         Parameters
         ----------
+        preproloc: str
+            Parental folder, in which the preprocessed mseeds are saved
+            (i.e. the folder above the phase division).
         phase: str - optional
             If just one of the primary phases should be checked - useful for
             computational efficiency, when creating ccp. Default is None.
@@ -158,6 +109,8 @@ class StationDB(object):
         None.
 
         """
+        self.preproloc
+        
         if phase:
             self.phase = phase.upper()           
         else:
@@ -213,7 +166,7 @@ class StationDB(object):
                 o = 'P'
             
             folder = os.path.join(
-                config.outputloc[:-1], self.phase, 'by_station')
+                self.preproloc, self.phase, 'by_station')
             
             # Check data availability
             for root, _, files in os.walk(folder):
@@ -250,8 +203,8 @@ class StationDB(object):
         dataS = deepcopy(dataP)  
 
         # Read in info files
-        folderP = os.path.join(config.outputloc[:-1], 'P', 'by_station')
-        folderS = os.path.join(config.outputloc[:-1], 'S', 'by_station')
+        folderP = os.path.join(self.preproloc, 'P', 'by_station')
+        folderS = os.path.join(self.preproloc, 'S', 'by_station')
 
         # Check data availability of PRFs
         for root, _, files in os.walk(folderP):
@@ -317,118 +270,6 @@ class StationDB(object):
                 dataP['NPret'].append(0)
         del dataS
         return pd.DataFrame.from_dict(dataP)
-    
-    # def update(self):
-    #     """Updates the current pandas dataframe."""
-    #     dataP = {
-    #         'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
-    #         'elevation': [], 'NP': [], 'NPret': [], 'NS': [], 'NSret': []
-    #         }
-    #     dataS = deepcopy(dataP)
-        
-    #     # if self.phase:
-    #     data = [dataP]
-    #     folder = [
-    #         os.path.join(config.outputloc[:-1], self.phase, 'by_station')]
-    #     # else:
-    #     #     data = [dataP, dataS]
-    #     #     folderP = os.path.join(config.outputloc[:-1], 'P', 'by_station')
-    #     #     folderS = os.path.join(config.outputloc[:-1], 'S', 'by_station')
-    #     #     folder = [folderP, folderS]
-
-    #     for f, d, p in zip(folder,data, self.phase or ['P', 'S']):
-    #         for root, _, files in os.walk(f):
-    #             # identify current phase
-    #             # p = self.phase or d[-1]
-    #             if 'info.dat' not in files:
-    #                 continue  # Skip parent folders or empty folders
-    #             x = root.split('/')
-    #             stat = x[-1]
-    #             net = x[-2]
-    #             if p == 'P' and not self.db.query(
-    #                 '(network == @net) & (station == @stat) & (NPret)').empty \
-    #                 or p == 'S' and not self.db.query(
-    #                 '(network == @net) & (station == @stat) & (NSret)').empty:
-    #                 continue
-                
-    #             infof = (os.path.join(root, 'info'))
-
-    #             with shelve.open(infof, flag='r') as info:
-    #                 d['code'].append(info['network']+'.'+info['station'])
-    #                 d['network'].append(info['network'])
-    #                 d['station'].append(info['station'])
-    #                 d['lat'].append(info['statlat'])
-    #                 d['lon'].append(info['statlon'])
-    #                 d['elevation'].append(info['statel'])
-    #                 d['N'+p].append(info['num'])
-    #                 if p == 'P':
-    #                     d['NS'].append(0)
-    #                     d['NSret'].append(0)
-    #                 if p == 'S':
-    #                     d['NP'].append(0)
-    #                     d['NPret'].append(0)
-    #                 try:
-    #                     d['N'+p+'ret'].append(info['numret'])
-    #                 except KeyError:
-    #                     d['N'+p+'ret'].append(0)
-    #                     self.logger.debug(
-    #                         'No ' +p+ '-waveforms retained for station' +
-    #                         info['network'] + '.' + info['station'])
-        
-    #     # update pandas dataframe
-    #     if self.phase == 'P':
-    #         if d['code']:
-    #             old_df = self.db.query('NPret > 0')
-    #             self.db = old_df.append(pd.DataFrame.from_dict(d))
-    #     elif self.phase == 'S':
-    #         if d['code']:
-    #             old_df = self.db.query('NSret > 0')
-    #             self.db = old_df.append(pd.DataFrame.from_dict(d))
-        # elif not self.phase:
-        #     if not data[0]['code'] and not data[1]['code']:
-        #         return
-        #     dataP = data[0]
-        #     dataS = data[1]
-        #     old_df = self.db.query('(NPret > 0) & (NSret > 0)')
-            
-        #     # Merge the two dictionaries
-        #     for i, c in enumerate(dataS['code']):
-        #         if c in dataP['code']:
-        #             j = dataP['code'].index(c)
-        #             dataP['NS'][j] = dataS['NS'][i]
-        #             dataP['NSret'][j] = dataS['NSret'][i]
-                
-                
-        #         else:
-        #             dataP['code'].append(c)
-        #             dataP['network'].append(dataS['network'][i])
-        #             dataP['station'].append(dataS['station'])
-        #             dataP['lat'].append(dataS['lat'][i])
-        #             dataP['lon'].append(dataS['lon'][i])
-        #             dataP['elevation'].append(dataS['elevation'][i])
-        #             dataP['NS'].append(dataS['NS'][i])
-        #             dataP['NSret'].append(dataS['NSret'][i])
-                    
-        #             row = self.db[self.db.code.isin([c])]
-        #             if not row.empty:
-        #                 dataP['NP'].append(int(row['NP']))
-        #                 dataP['NPret'].append(int(row['NPret']))
-        #             else:
-        #                 dataP['NP'].append(0)
-        #                 dataP['NPret'].append(0)
-        #     del dataS
-        #     # Check for wrong NS values
-        #     try:
-        #         i = np.where(np.array(dataP['NS']) == 0)
-        #         codes = np.array(dataP['code'])[i]
-        #         rows = self.db[self.db.code.isin(list(codes))]
-        #         dataP['NS'][i] = list(rows['NS'])
-        #         dataP['NSret'][i] = list(rows['NSret'])
-        #     except ValueError:
-        #         pass
-
-            # # append
-            # self.db = old_df.append(pd.DataFrame.from_dict(dataP))
 
     def geo_boundary(self, lat, lon, phase=None):
         """
@@ -464,6 +305,8 @@ class StationDB(object):
         return subset
 
     def find_stations(self, lat, lon, phase=None):
+        """Returns list of networks and stations inside a geoboundary
+        """        
         subset = self.geo_boundary(lat, lon, phase)
         return list(subset['network']), list(subset['station'])
     

@@ -21,7 +21,6 @@ from geographiclib.geodesic import Geodesic
 from scipy import interpolate
 from scipy.signal.windows import hann
 
-import config
 from ..constants import R_EARTH, DEG2KM, maxz, res
 from ..utils.createvmodel import load_gyps
 

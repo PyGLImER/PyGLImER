@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 16th June 2020 08:39:08 am
+Last Modified: Tuesday, 16th June 2020 12:20:03 pm
 '''
 
 #!/usr/bin/env python3d
@@ -25,7 +25,7 @@ from obspy.clients.iris import Client
 from obspy.clients.fdsn import Client as Webclient
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 
-import config
+from .. import tmp
 from .errorhandler import redownload, redownload_statxml, \
     NoMatchingResponseHandler, NotLinearlyIndependentHandler
 from ..constants import DEG2KM
@@ -36,43 +36,56 @@ from ..utils.roundhalf import roundhalf
 from ..utils.utils import dt_string, chunks
 
 
-def preprocess(taper_perc, event_cat,model, taper_type="hann"):
+def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
+               ta, statloc, rawloc, preproloc, rfloc, deconmeth, wavdownload,
+               netrestr=None, statrestr=None, debug=False):
     """
      Preprocesses waveforms to create receiver functions
 
         1. Clips waveform to the right length
-        (config.tz before and config.ta after theorethical arrival.)
+        (tz before and ta after theorethical arrival.)
         2. Demean & Detrend
         3. Tapering
         4. Remove Instrument response, convert to velocity &
         simulate havard station.
         5. Rotation to NEZ and, subsequently, to RTZ.
         6. Compute SNR for highpass filtered waveforms
-        (highpass f defined in config.lowco).
-        If SNR lower than in config.SNR_criteria for all filters,
+        (highpass f defined in qc.lowco).
+        If SNR lower than in qc.SNR_criteria for all filters,
         rejects waveform.
         7. Write finished and filtered waveforms to folder
-        specified in config.outputloc.
+        specified in qc.outputloc.
         8. Write info file with shelf containing station,
         event and waveform information.
 
         Only starts after all waveforms of the event have been
         downloaded by download.py.
-        (checked over the dynamic variables prepro_folder and config.folder)
+        (checked over the dynamic variables prepro_folder and tmp.folder)
 
         Saves preprocessed waveform files.
         Creates info file to save parameters.
 
     Parameters
     ----------
+    phase : string
+        "P" or "S"
+    rot : string
+        Coordinate system to cast seismogram in before deconvolution.
+        Options are "RTZ", "LQT", "LQT_min", or "PSS".
+    pol : string
+        "h" for Sh or "v" for Sv, only for PRFs.
     taper_perc : FLOAT
-        Percemtage to be tapered in beginning and at the end of waveforms.
-    taper_type : STRING, optional
-        DESCRIPTION. The default is "hann".
+        Percentage to be tapered in beginning and at the end of waveforms.
+    taper_type : STRING
+        Taper type (see obspy documentation stream.taper).
     event_cat : event catalogue
         catalogue containing all events of waveforms.
     model : obspy.taup.TauPyModel
         1D velocity model to calculate arrival.
+    tz : int
+        time window before first arrival in seconds
+    ta : int
+        time window after first arrival in seconds
 
     Returns
     -------
@@ -83,13 +96,13 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
     # logging
     logger = logging.Logger("src.waveform.preprocess")
     logger.setLevel(logging.WARNING)
-    if config.debug:
+    if debug:
         logger.setLevel(logging.DEBUG)
 
     # Create handler to the log
     fh = logging.FileHandler('logs/preprocess.log')
     fh.setLevel(logging.WARNING)
-    if config.debug:
+    if debug:
         fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
 
@@ -101,13 +114,13 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
     # Logging for RF creation
     rflogger = logging.getLogger("src.waveform.preprocess.RF")
     rflogger.setLevel(logging.WARNING)
-    if config.debug:
+    if debug:
         rflogger.setLevel(logging.DEBUG)
 
     # Create handler to the log
     fhrf = logging.FileHandler('logs/RF.log')
     fhrf.setLevel(logging.WARNING)
-    if config.debug:
+    if debug:
         fhrf.setLevel(logging.DEBUG)
     rflogger.addHandler(fhrf)
 
@@ -117,7 +130,7 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
     fhrf.setFormatter(fmtrf)
 
     # We don't really want to see all the warnings.
-    if not config.debug:
+    if not debug:
         warnings.filterwarnings("ignore")
 
     #########
@@ -139,7 +152,7 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
                "zeros": paz_sim.get_paz().zeros}
 
     
-    if not config.wavdownload:
+    if not wavdownload:
         # Here, we work with all available cores to speed things up
         # Split up event catalogue to mitigate danger of data loss
         # Now the infodicts will be written in an even way
@@ -159,7 +172,7 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
         # Returns generator object with evtcats with each 100 events
         evtcats = chunks(event_cat, n_split)
         for evtcat in evtcats:
-            if config.debug:
+            if debug:
                 n_j = 3  # Only way to allow for redownload, maximum 3 requests
                 eh = True
             else:
@@ -204,7 +217,7 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
             for d in masterdict:
                 try:
                     net, stat = d.split('.')
-                    write_info(net, stat, masterdict[d])
+                    write_info(net, stat, masterdict[d], preproloc)
                 except (ValueError, KeyError) as e:
                     logger.exception([e, d])
                     continue
@@ -216,15 +229,18 @@ def preprocess(taper_perc, event_cat,model, taper_type="hann"):
         eh = False  # Don't send additional requests to the FDSN servers!
         # Else it'll overload and no data will arrive
         Parallel(n_jobs=1)(
-            delayed(__event_loop)(event, taper_perc, taper_type,
-                                model, paz_sim, logger, rflogger, eh)
+            delayed(__event_loop)(wavdownload, phase, rot, pol, event, taper_perc, taper_type,
+                                model, paz_sim, logger, rflogger, eh, tz, ta,
+                                statloc, rawloc, preproloc, rfloc, deconmeth,
+                                netrestr, statrestr)
             for event in event_cat)
 
     print("Download and preprocessing finished.")
 
 
-def __event_loop(event, taper_perc, taper_type, model,
-                 paz_sim, logger, rflogger, eh):
+def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, model,
+                 paz_sim, logger, rflogger, eh, tz, ta, statloc, rawloc,
+                 preproloc, rfloc, deconmeth, netrestr, statrestr):
     """
     Loops over each event in the event catalogue
     """
@@ -244,7 +260,7 @@ def __event_loop(event, taper_perc, taper_type, model,
     evtlat_loc = str(roundhalf(evtlat))
     evtlon_loc = str(roundhalf(evtlon))
     by_event = os.path.join(
-        config.outputloc, 'by_event', ot_loc + '_' + evtlat_loc
+        preproloc, 'by_event', ot_loc + '_' + evtlat_loc
         + '_' + evtlon_loc)
 
     # make folder that will contain softlinks
@@ -253,10 +269,10 @@ def __event_loop(event, taper_perc, taper_type, model,
 
     # Folder, in which the preprocessing is actually happening
     prepro_folder = os.path.join(
-        config.waveform, ot_loc + '_' + evtlat_loc + '_' + evtlon_loc)
+        rawloc, ot_loc + '_' + evtlat_loc + '_' + evtlon_loc)
 
-    while prepro_folder == config.folder or config.folder == "not_started" \
-        and config.wavdownload:
+    while prepro_folder == tmp.folder or tmp.folder == "not_started" \
+        and wavdownload:
         print('preprocessing suspended, awaiting download')
         time.sleep(2.5)
 
@@ -268,7 +284,7 @@ def __event_loop(event, taper_perc, taper_type, model,
     except FileNotFoundError:
         # If we are not downloading that's entirely normal as
         # an earlier iteration just deletes empty directories
-        if config.wavdownload:
+        if wavdownload:
             logger.info([ot_fiss,
                              """Waveforms missing in database."""])
         return infolist
@@ -276,18 +292,19 @@ def __event_loop(event, taper_perc, taper_type, model,
     # Preprocessing just for some stations?
     # Then skip files that should not be preprocessed
 
-    if config.network:
-        pattern = config.network + '.' + (config.station or '') + '*'
+    if netrestr:
+        pattern = netrestr + '.' + (statrestr or '') + '*'
         files = fnmatch.filter(os.listdir(prepro_folder), pattern)
     else:
         files = os.listdir(prepro_folder)
 
     for filestr in files:
         try:
-            info = __waveform_loop(filestr, taper_perc, taper_type, model,
-                                paz_sim, origin_time, ot_fiss, evtlat, evtlon,
-                                depth, prepro_folder, event, logger, rflogger,
-                                by_event, eh)
+            info = __waveform_loop(
+                wavdownload, phase, rot, pol, filestr, taper_perc, taper_type,
+                model, paz_sim, origin_time, ot_fiss, evtlat, evtlon, depth,
+                prepro_folder, event, logger, rflogger, by_event, eh, tz, ta,
+                statloc, preproloc, rfloc, deconmeth)
             infolist.append(info)
         except Exception as e:
             # Unhandled exceptions should not cause the loop to quit
@@ -298,10 +315,11 @@ def __event_loop(event, taper_perc, taper_type, model,
     return infolist
 
 
-def __waveform_loop(filestr, taper_perc, taper_type, model,
-                    paz_sim, origin_time, ot_fiss, evtlat, evtlon,
-                    depth, prepro_folder, event, logger, rflogger,
-                    by_event, eh):
+def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
+                    taper_type, model, paz_sim, origin_time, ot_fiss, evtlat,
+                    evtlon, depth, prepro_folder, event, logger, rflogger,
+                    by_event, eh, tz, ta, statloc, preproloc, rfloc,
+                    deconmeth):
     """
     Loops over each waveform for a specific event and a specific station
     """
@@ -321,7 +339,7 @@ def __waveform_loop(filestr, taper_perc, taper_type, model,
     network = st[0].stats.network
 
     # Location definitions
-    outdir = os.path.join(config.outputloc, 'by_station', network, station)
+    outdir = os.path.join(preproloc, 'by_station', network, station)
 
     # Info file
     infof = os.path.join(outdir, 'info')
@@ -330,7 +348,7 @@ def __waveform_loop(filestr, taper_perc, taper_type, model,
 
     outf = os.path.join(outdir, network+'.'+station+'.'+ot_loc+'.mseed')
     
-    statfile = os.path.join(config.statloc, network + '.' + station + '.xml')
+    statfile = os.path.join(statloc, network + '.' + station + '.xml')
 
     # Create directory for preprocessed file
     if not Path(outdir).is_dir():
@@ -365,7 +383,7 @@ def __waveform_loop(filestr, taper_perc, taper_type, model,
             # compute time of first arrival & ray parameter
             arrival = model.get_travel_times(source_depth_in_km=depth / 1000,
                                              distance_in_degree=distance,
-                                             phase_list=config.phase)[0]
+                                             phase_list=phase)[0]
             rayp_s_deg = arrival.ray_param_sec_degree
             rayp = rayp_s_deg / 111319.9  # apparent slowness
             first_arrival = origin_time + arrival.time
@@ -378,15 +396,14 @@ def __waveform_loop(filestr, taper_perc, taper_type, model,
             if st[0].stats.sampling_rate != 10:
                 st = __cut_resample(st, logger, first_arrival, network,
                                     station, prepro_folder, filestr,
-                                    taper_perc, taper_type, eh)
+                                    taper_perc, taper_type, eh, tz, ta)
 
             # Finalise preprocessing
-            st, crit, infodict = __rotate_qc(st, station_inv, network, station,
-                                             paz_sim, baz, distance, outf,
-                                             ot_fiss, event, evtlat, evtlon,
-                                             depth, rayp_s_deg, first_arrival,
-                                             infof, logger, infodict, by_event,
-                                             eh)
+            st, crit, infodict = __rotate_qc(
+                phase, st, station_inv, network, station, paz_sim, baz,
+                distance, outf, ot_fiss, event, evtlat, evtlon, depth,
+                rayp_s_deg, first_arrival, infof, logger, infodict, by_event,
+                eh, tz, statloc)
 
         # Exceptions & logging
 
@@ -434,14 +451,14 @@ def __waveform_loop(filestr, taper_perc, taper_type, model,
 
     # Check if RF was already computed and if it should be
     # computed at all, and if the waveform was retained (SNR)
-    if config.decon_meth and not\
-        __file_in_db(config.RF + '/' + network + '/' + station, network +
+    if deconmeth and not\
+        __file_in_db(os.path.join(rfloc, network, station), network +
                      '.' + station + '.' + ot_loc + '.sac') and crit:
 
         # 21.04.2020 Second highcut filter
-        if config.phase == "P":
+        if phase == "P":
             st.filter('lowpass', freq=1.5, zerophase=True, corners=2)
-        elif config.phase == 'S':
+        elif phase == 'S':
             st.filter('lowpass', freq=0.25, zerophase=True, corners=2)  # change for Kind(2015) to frequ=.125 freq=0.175Hz
 
         start = time.time()
@@ -449,16 +466,16 @@ def __waveform_loop(filestr, taper_perc, taper_type, model,
         ####
         try:
             # Rotate to LQT or PSS
-            if config.rot == "LQT_min":
-                st, ia = rotate_LQT_min(st)
+            if rot == "LQT_min":
+                st, ia = rotate_LQT_min(st, phase)
                 # additional QC
                 if ia < 5 or ia > 75:
                     crit = False
                     raise SNRError("""The estimated incidence angle is
                                    unrealistic with """ + str(ia) + 'degree.')
 
-            if config.rot == "LQT":
-                st, b = rotate_LQT(st)
+            if rot == "LQT":
+                st, b = rotate_LQT(st, phase)
                 # addional QC
                 if b > 0.75 or b < 1.5:
                     crit = False
@@ -466,34 +483,34 @@ def __waveform_loop(filestr, taper_perc, taper_type, model,
                                    at theoretical arrival is too close
                                    to 1 with """ + str(b) + '.')
 
-            elif config.rot == "PSS":
+            elif rot == "PSS":
                 avp, avs, st = rotate_PSV(
                     station_inv[0][0][0].latitude,
                     station_inv[0][0][0].longitude,
-                    rayp, st, config.phase)
+                    rayp, st, phase)
 
             # Create RF object
-            if config.phase == "S":
+            if phase == "S":
                 trim = [40, 0]
                 if distance >= 70:
-                    trim[1] = config.ta - (-2*distance + 180)
+                    trim[1] = ta - (-2*distance + 180)
                 else:
-                    trim[1] = config.ta - 40
-            elif config.phase == "P":
+                    trim[1] = ta - 40
+            elif phase == "P":
                 trim = False
 
             if not infodict:
                 info = shelve.open(infof, flag='r')
 
-                RF = createRF(st, info=info, trim=trim)
+                RF = createRF(st, info=info, trim=trim, method=deconmeth)
 
             else:
-                RF = createRF(st, info=infodict, trim=trim)
+                RF = createRF(st, info=infodict, trim=trim, method=deconmeth)
 
         # Write RF
-            rfdir = os.path.join(config.RF, network, station)
-            if config.pol.lower() == 'h' and config.phase == 'P':
-                rfdir = rfdir + config.pol.lower()
+            rfdir = os.path.join(rfloc, network, station)
+            if pol == 'h' and phase == 'P':
+                rfdir = rfdir + pol
 
             if not Path(rfdir).is_dir():
                 subprocess.call(["mkdir", "-p", rfdir])
@@ -516,7 +533,7 @@ def __waveform_loop(filestr, taper_perc, taper_type, model,
             rflogger.exception([network, station, ot_loc, e])
 
         finally:
-            if config.wavdownload and infodict:
+            if wavdownload and infodict:
                 # Single-core case
                 write_info(network, station, infodict)
 
@@ -529,15 +546,15 @@ def __waveform_loop(filestr, taper_perc, taper_type, model,
 
 
 def __cut_resample(st, logger, first_arrival, network, station,
-                   prepro_folder, filestr, taper_perc, taper_type, eh):
+                   prepro_folder, filestr, taper_perc, taper_type, eh, tz, ta):
     """Cut and resample raw file. Will overwrite original raw"""
 
     start = time.time()
 
     # Trim TO RIGHT LENGTH BEFORE AND AFTER FIRST ARRIVAL  #
     # start and endtime of stream
-    starttime = first_arrival - config.tz
-    endtime = first_arrival + config.ta
+    starttime = first_arrival - tz
+    endtime = first_arrival + ta
 
     if st.count() < 3:
         if not eh:
@@ -591,10 +608,10 @@ def __cut_resample(st, logger, first_arrival, network, station,
     return st
 
 
-def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
+def __rotate_qc(phase, st, station_inv, network, station, paz_sim, baz,
                 distance, outf, ot_fiss, event, evtlat, evtlon, depth,
                 rayp_s_deg, first_arrival, infof, logger, infodict, by_event,
-                eh):
+                eh, tz, statloc):
     """REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
     Bugs occur here due to station inventories without response information
     Looks like the bulk downloader sometimes donwnloads
@@ -609,7 +626,7 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
         try:
             if eh:
                 station_inv, st = NoMatchingResponseHandler(
-                    st, network, station)
+                    st, network, station, statloc)
             else:
                 raise ValueError(["No matching response file found for",
                                   network, station])
@@ -655,10 +672,8 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
     dt = st[0].stats.delta  # sampling interval
     sampling_f = st[0].stats.sampling_rate
 
-    if not config.QC:
-        crit, f, noisemat = True, None, None
-    elif config.phase == "P":
-        st, crit, f, noisemat = qcp(st, dt, sampling_f)
+    if phase == "P":
+        st, crit, f, noisemat = qcp(st, dt, sampling_f, tz)
         if not crit:
             infodict['dt'] = dt
             infodict['sampling_rate'] = sampling_f
@@ -669,8 +684,8 @@ def __rotate_qc(st, station_inv, network, station, paz_sim, baz,
             infodict['statel'] = station_inv[0][0][0].elevation
             raise SNRError(np.array2string(noisemat))
 
-    elif config.phase == "S":
-        st, crit, f, noisemat = qcs(st, dt, sampling_f)
+    elif phase == "S":
+        st, crit, f, noisemat = qcs(st, dt, sampling_f, tz)
 
         if not crit:
             infodict['dt'] = dt
@@ -739,7 +754,7 @@ def __file_in_db(loc, filename):
         return False
 
 
-def write_info(network, station, dictionary):
+def write_info(network, station, dictionary, preproloc):
     """
     Writes information dictionary in shelve format in each of the station
     folders.
@@ -758,7 +773,7 @@ def write_info(network, station, dictionary):
     None.
 
     """
-    loc = os.path.join(config.outputloc, 'by_station', network, station)
+    loc = os.path.join(preproloc, 'by_station', network, station)
     infof = os.path.join(loc, 'info')
     
     if not __file_in_db(loc, 'info.dat'):
