@@ -259,7 +259,7 @@ class Request(object):
         """
         downloadwav(
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
-            self.tz, self.ta, self.statloc, self.rawloc, self.waveform_clients,
+            self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
              network=self.network, station=self.station, debug=self.debug)
 
     def preprocess(self):

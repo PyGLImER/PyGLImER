@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 16th June 2020 12:20:03 pm
+Last Modified: Tuesday, 16th June 2020 12:32:35 pm
 '''
 
 #!/usr/bin/env python3d
@@ -179,8 +179,10 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
                 n_j = -1
             out = Parallel(n_jobs=n_j)(
                     delayed(__event_loop)(
-                        event, taper_perc, taper_type, model,
-                        paz_sim, logger, rflogger, eh)
+                        wavdownload, phase, rot, pol, event, taper_perc,
+                        taper_type, model, paz_sim, logger, rflogger, eh, tz,
+                        ta, statloc, rawloc, preproloc, rfloc, deconmeth,
+                        netrestr, statrestr)
                     for event in evtcat)
 
             # For simultaneous download, dicts are written

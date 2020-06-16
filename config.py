@@ -20,7 +20,7 @@ from obspy.taup import TauPyModel  # arrival times in 1D v-model
 evtcat = None # 'all_greater55'  # either None (downloads new) or string of filename
 # in evtloc
 
-wavdownload = False  # Bool - true for completing download, false: only
+wavdownload = True  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
 decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
