@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 16th June 2020 06:13:49 pm
+Last Modified: Tuesday, 16th June 2020 06:16:26 pm
 '''
 
 #!/usr/bin/env python3
@@ -46,6 +46,7 @@ fh.setFormatter(fmt)
 
 
 def init_ccp(spacing, vel_model, phase, statloc='output/stations',
+             preproloc='output/waveforms/preprocessed',
              rfloc='output/waveforms/RF', network=None,
              station=None, geocoords=None,
              compute_stack=False, binrad=np.cos(np.radians(30)),
@@ -113,7 +114,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
     if geocoords:
         lat = (geocoords[0], geocoords[1])
         lon = (geocoords[2], geocoords[3])
-        db = StationDB(phase=phase, use_old=False)
+        db = StationDB(preproloc, phase=phase, use_old=False)
         net, stat = db.find_stations(lat, lon, phase=phase)
         pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
         files = []

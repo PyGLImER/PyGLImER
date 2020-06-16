@@ -109,7 +109,7 @@ class StationDB(object):
         None.
 
         """
-        self.preproloc
+        self.preproloc = preproloc
         
         if phase:
             self.phase = phase.upper()           
