@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Saturday, 13th June 2020 11:22:44 am
+Last Modified: Tuesday, 16th June 2020 08:39:08 am
 '''
 
 #!/usr/bin/env python3d
@@ -492,6 +492,8 @@ def __waveform_loop(filestr, taper_perc, taper_type, model,
 
         # Write RF
             rfdir = os.path.join(config.RF, network, station)
+            if config.pol.lower() == 'h' and config.phase == 'P':
+                rfdir = rfdir + config.pol.lower()
 
             if not Path(rfdir).is_dir():
                 subprocess.call(["mkdir", "-p", rfdir])

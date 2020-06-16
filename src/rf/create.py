@@ -37,7 +37,7 @@ from .moveout import DEG2KM, maxz, res, moveout, dt_table, dt_table_3D
 logger = logging.Logger("rf")
 
 
-def createRF(st_in, phase=config.phase, onset=None,
+def createRF(st_in, phase=config.phase, pol=config.pol, onset=None,
              method=config.decon_meth, trim=None, event=None, station=None,
              info=None):
     """
@@ -50,6 +50,8 @@ def createRF(st_in, phase=config.phase, onset=None,
         Stream of which components are to be deconvolved.
     phase : string, optional
         Either "P" or "S". The default is config.phase.
+    pol : string, optional
+        Polarisation to be deconvolved from. Only for phase = P.
     onset: UTCDateTime, optional
         Is used to shift function rather than shift if provided.
         If info is provided, it will be extracted from info file.
@@ -81,6 +83,8 @@ def createRF(st_in, phase=config.phase, onset=None,
         RFTrace object containing receiver function.
 
     """
+    pol = pol.lower()
+    
     if info:
         ii = info['starttime'].index(st_in[0].stats.starttime)
         shift = info['onset'][ii] - st_in[0].stats.starttime
@@ -132,13 +136,22 @@ def createRF(st_in, phase=config.phase, onset=None,
             v = stream["Z"]
         elif "3" in stream:
             v = stream["3"]
-        u = stream["R"]
+        if pol == 'v':
+            u = stream["R"]
+        elif pol == 'h':
+            u = stream["T"]
     elif phase == "P" and "Q" in stream:
         v = stream["L"]
-        u = stream["Q"]
+        if pol == 'v':
+            u = stream["Q"]
+        elif pol == 'h':
+            u = stream['T']
     elif phase == "P" and "V" in stream:
         v = stream["P"]
-        u = stream["V"]
+        if pol == 'v':
+            u = stream["V"]
+        elif pol == 'h':
+            u = stream["H"]
     elif phase == "S" and "R" in stream:
         if "Z" in stream:
             u = stream["Z"]

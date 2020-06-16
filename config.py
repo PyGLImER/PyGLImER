@@ -17,10 +17,10 @@ from obspy.taup import TauPyModel  # arrival times in 1D v-model
 debug = False
 
 # Define if you want to download new files or use old
-evtcat = 'all_greater55'  # either None (downloads new) or string of filename
+evtcat = None # 'all_greater55'  # either None (downloads new) or string of filename
 # in evtloc
 
-wavdownload = True  # Bool - true for completing download, false: only
+wavdownload = False  # Bool - true for completing download, false: only
 # processes already existing waveforms in waveform of phase phase.
 
 decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
@@ -33,7 +33,11 @@ decon_meth = "it"  # it=iterative deconvolution (Ligorria & Ammon, 1999)
 # %% P or S ####
 # put string either "P" or "S"
 phase = "S"
+
+# polarisation of converted wave for PRFs ("h" or "v")
+pol = "v"
 # don't change
+pol = pol.lower()
 phase = phase.upper()
 
 # %% DIRECTORY CONFIGURATION
@@ -51,8 +55,8 @@ ccp = "output/ccps"
 # %% EVENT AND DOWNLOAD VALUES
 # Set values to "None" if they aren't requried / desired
 # Time frame is identical to the station inventory
-starttime = UTCDateTime("1970-01-01")
-endtime = UTCDateTime("2019-05-19")
+starttime = UTCDateTime("2020-04-15")
+endtime = UTCDateTime("1970-01-01")
 eMINLAT = None
 eMAXLAT = None
 eMINLON = None
@@ -75,16 +79,20 @@ model = TauPyModel(model="iasp91")
 # !!NOTE: For machines with little RAM, the script might interrupt if too
 # many clients are chosen.
 #
-waveform_client = ["IRIS", 'NCEDC', 'TEXNET', 'SCEDC']
+waveform_client = ['http://auspass.edu.au/', "IRIS",  'BGR', 'EMSC', 'ETH', 'GEONET', 'GFZ', 'ICGC', 'INGV', 'IPGP', 'IRIS', 'ISC',
+ 'KNMI', 'KOERI', 'LMU', 'NCEDC', 'NIEP', 'NOA', 'ODC', 'ORFEUS',
+ 'RESIF', 'SCEDC', 'TEXNET', 'USP']  # ["IRIS", 'NCEDC', 'TEXNET', 'SCEDC']
 # See https://www.fdsn.org/webservices/datacenters/
 # Possible options:
 # 'http://auspass.edu.au/'
-# ‘BGR’, ‘EMSC’, ‘ETH’, ‘GEONET’, ‘GFZ’, ‘ICGC’, ‘INGV’, ‘IPGP’, ‘IRIS’, ‘ISC’,
-# ‘KNMI’, ‘KOERI’, ‘LMU’, ‘NCEDC’, ‘NIEP’, ‘NOA’, ‘ODC’, ‘ORFEUS’,
-# ‘RASPISHAKE’, ‘RESIF’, ‘SCEDC’, ‘TEXNET’, ‘USP’
+# 'BGR', 'EMSC', 'ETH', 'GEONET', 'GFZ', 'ICGC', 'INGV', 'IPGP', 'IRIS', 'ISC',
+# 'KNMI', 'KOERI', 'LMU', 'NCEDC', 'NIEP', 'NOA', 'ODC', 'ORFEUS',
+# 'RASPISHAKE', 'RESIF', 'SCEDC', 'TEXNET', 'USP'
 #
 # clients on which the download should be retried, list:
-re_clients = ["IRIS"]  # It's usually enoguh to have only IRIS here
+re_clients = ['http://auspass.edu.au/', "IRIS",  'BGR', 'EMSC', 'ETH', 'GEONET', 'GFZ', 'ICGC', 'INGV', 'IPGP', 'IRIS', 'ISC',
+ 'KNMI', 'KOERI', 'LMU', 'NCEDC', 'NIEP', 'NOA', 'ODC', 'ORFEUS',
+ 'RESIF', 'SCEDC', 'TEXNET', 'USP']  # It's usually enoguh to have only IRIS here
 # as IRIS tends to be very unreliable
 #
 # %% PRE-PROCESSING VALUES #####
