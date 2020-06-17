@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Wednesday, 17th June 2020 12:58:56 pm
+Last Modified: Wednesday, 17th June 2020 08:47:16 pm
 '''
 
 #!/usr/bin/env python3
@@ -403,9 +403,6 @@ class CCPStack(object):
         elif geocoords and not pattern:
             # Stations by coordinates
             # create empty lists for station latitude and longitude
-            lats = []
-            lons = []
-
             lat = (geocoords[0], geocoords[1])
             lon = (geocoords[2], geocoords[3])
             db = StationDB(preproloc, phase=self.bingrid.phase, use_old=False)
@@ -488,7 +485,7 @@ class CCPStack(object):
         latb = (self.coords[0].min(), self.coords[0].max())
         lonb = (self.coords[1].min(), self.coords[1].max())
 
-        out = Parallel(n_jobs=num_cores, prefer='processes')(
+        out = Parallel(n_jobs=num_cores)( # prefer='processes'
                         delayed(self.multicore_stack)(
                             st, append_pp, n_closest_points, vel_model, latb,
                             lonb, filt)

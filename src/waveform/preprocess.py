@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Wednesday, 17th June 2020 02:35:41 pm
+Last Modified: Wednesday, 17th June 2020 08:36:59 pm
 '''
 
 #!/usr/bin/env python3d
@@ -539,7 +539,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
         finally:
             if wavdownload and infodict:
                 # Single-core case
-                write_info(network, station, infodict)
+                write_info(network, station, infodict, preproloc)
 
                 # just to save RAM - not needed for single-core
                 infodict = None
