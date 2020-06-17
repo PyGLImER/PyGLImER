@@ -127,14 +127,15 @@ def moveout(data, st, fname, latb, lonb, taper):
         # Taper the upper 5 km
         i = np.where(z>=5)[0][0]  # Find where rf is depth = 5
         # tap = hann((i+1)*2)
-        tap = hann(8)
-        up, _ = np.split(tap, 2)
-        up = np.hstack((np.zeros(i-3), up))
-        if len(RF) > len(up):  # That usually doesn't happen, only for extreme
-            # discontinuities in 3D model and errors in SRF data
-            taper = np.ones(len(RF))
-            taper[:len(up)] = up
-            RF = np.multiply(taper, RF)
+        if i >= 4:  # Some OBSs might be lower than that
+            tap = hann(8)
+            up, _ = np.split(tap, 2)
+            up = np.hstack((np.zeros(i-3), up))
+            if len(RF) > len(up):  # That usually doesn't happen, only for extreme
+                # discontinuities in 3D model and errors in SRF data
+                taper = np.ones(len(RF))
+                taper[:len(up)] = up
+                RF = np.multiply(taper, RF)
 
     z2 = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
     RF2 = np.zeros(z2.shape)
