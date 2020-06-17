@@ -5,7 +5,7 @@ Files contains all Errorhandler for the Glimer to obspy project
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Saturday, 21th March 2020 19:16:41
-Last Modified: Wednesday, 17th June 2020 02:29:15 pm
+Last Modified: Wednesday, 17th June 2020 02:33:01 pm
 '''
 
 #!/usr/bin/env python3
@@ -74,6 +74,7 @@ def NoMatchingResponseHandler(st, network, station, statloc):
             pass  # wrong client
         except Exception as e:
             break  # the response file doesn't seem to be available at all
+    return None, None
 
 
 def NotLinearlyIndependentHandler(st, network, station, starttime, endtime,
