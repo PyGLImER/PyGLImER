@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 16th June 2020 06:16:26 pm
+Last Modified: Wednesday, 17th June 2020 12:27:43 pm
 '''
 
 #!/usr/bin/env python3
@@ -374,7 +374,7 @@ class CCPStack(object):
         # Compute maxdist in euclidean space
         self.binrad_eucl = epi2euc(self.binrad)
 
-        folder = rfloc + self.bingrid.phase
+        folder = os.path.join(rfloc, self.bingrid.phase)
 
         start = time.time()
         logger.info('Stacking started')
