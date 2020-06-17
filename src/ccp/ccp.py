@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Wednesday, 17th June 2020 12:27:43 pm
+Last Modified: Wednesday, 17th June 2020 12:49:15 pm
 '''
 
 #!/usr/bin/env python3
@@ -310,7 +310,9 @@ class CCPStack(object):
         return k, j
 
     def compute_stack(self, vel_model, rfloc='output/waveforms/RF',
-                      network=None, station=None, pattern=None,
+                      statloc='output/stations',
+                      preproloc='output/waveforms/preprocessed',
+                      network=None, station=None, geocoords=None, pattern=None,
                       save=False,
                       binrad=np.cos(np.radians(30)), append_pp=False):
         """
@@ -329,16 +331,29 @@ class CCPStack(object):
         rfloc : str , optional
             Parental folder in which the receiver functions in time domain are.
             The default is 'output/waveforms/RF.
+        statloc : str, optional
+            Folder containing the response information. Only needed if option
+            geocoords is used. The default is 'output/stations'.
+        statloc : str, optional
+            Parental folder containing the preprocessed mseeds. Only needed if
+            option geocoords is used.
+            The default is 'output/waveforms/preprocessed'.
         network : str or list, optional
+            This parameter is ignored if the pattern is given.
             Network or networks that are to be included in the ccp stack.
             Standard unix wildcards are allowed. If None, the whole database
             will be used. The default is None.
         station : str or list, optional
+            This parameter is ignored if the pattern is given.
             Station or stations that are to be included in the ccp stack.
             Standard unix wildcards are allowed.
             Can only be list if type(network)=str.
             If None, the whole database
             will be used. The default is None.
+        geocoords : Tuple, optional
+            Include all stations in the rectangle given by (minlat, maxlat,
+            minlon, maxlon). Will be ignored if pattern or network is given,
+            by default None.
         save : str or Bool
             Either False if the ccp should not be saved or string with filename
             will be saved in config.ccp. Will be saved as pickle file.
@@ -384,6 +399,21 @@ class CCPStack(object):
             folder = os.path.join(folder, network)
             if station and type(station) == str:
                 folder = os.path.join(folder, station)
+        
+        elif geocoords and not pattern:
+            # Stations by coordinates
+            # create empty lists for station latitude and longitude
+            lats = []
+            lons = []
+
+            lat = (geocoords[0], geocoords[1])
+            lon = (geocoords[2], geocoords[3])
+            db = StationDB(preproloc, phase=self.phase, use_old=False)
+            net, stat = db.find_stations(lat, lon, phase=self.phase)
+            pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
+            # Clear memory
+            del db, net, stat
+
 
         infiles = []  # List of all files in folder
         if not pattern:
