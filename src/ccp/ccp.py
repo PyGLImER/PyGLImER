@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Wednesday, 17th June 2020 12:49:15 pm
+Last Modified: Wednesday, 17th June 2020 12:58:56 pm
 '''
 
 #!/usr/bin/env python3
@@ -408,8 +408,8 @@ class CCPStack(object):
 
             lat = (geocoords[0], geocoords[1])
             lon = (geocoords[2], geocoords[3])
-            db = StationDB(preproloc, phase=self.phase, use_old=False)
-            net, stat = db.find_stations(lat, lon, phase=self.phase)
+            db = StationDB(preproloc, phase=self.bingrid.phase, use_old=False)
+            net, stat = db.find_stations(lat, lon, phase=self.bingrid.phase)
             pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
             # Clear memory
             del db, net, stat
