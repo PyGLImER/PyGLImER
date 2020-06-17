@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Wednesday, 17th June 2020 02:19:19 pm
+Last Modified: Wednesday, 17th June 2020 02:24:44 pm
 '''
 
 #!/usr/bin/env python3d
@@ -569,7 +569,7 @@ def __cut_resample(st, logger, first_arrival, network, station,
     # Check one last time. If stream to short raise Exception
     if st.count() < 3:
         raise StreamLengthError(
-            "The stream contains less than 3 traces", filestr)
+            ["The stream contains less than 3 traces", filestr])
 
     # Change dtype
     for tr in st:
