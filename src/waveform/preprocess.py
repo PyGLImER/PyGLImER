@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Wednesday, 17th June 2020 02:24:44 pm
+Last Modified: Wednesday, 17th June 2020 02:35:41 pm
 '''
 
 #!/usr/bin/env python3d
@@ -627,17 +627,14 @@ def __rotate_qc(phase, st, station_inv, network, station, paz_sim, baz,
                            water_level=60)
     except ValueError:
         # Occurs for "No matching response file found"
-        try:
-            if eh:
-                station_inv, st = NoMatchingResponseHandler(
-                    st, network, station, statloc)
-            else:
-                raise ValueError(["No matching response file found for",
-                                  network, station])
-        except UnboundLocalError:
-            logger.exception(["Could not download response information.",
-                             network, station])
-            return
+    
+        if eh:
+            station_inv, st = NoMatchingResponseHandler(
+                st, network, station, statloc)
+                
+        if not eh or not station_inv:
+            raise ValueError(["No matching response file found for",
+                                network, station])
 
     st.remove_sensitivity(inventory=station_inv)
 
