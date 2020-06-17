@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 16th June 2020 12:32:35 pm
+Last Modified: Wednesday, 17th June 2020 02:19:19 pm
 '''
 
 #!/usr/bin/env python3d
@@ -504,10 +504,12 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
             if not infodict:
                 info = shelve.open(infof, flag='r')
 
-                RF = createRF(st, info=info, trim=trim, method=deconmeth)
+                RF = createRF(
+                    st, phase, pol=pol, info=info, trim=trim, method=deconmeth)
 
             else:
-                RF = createRF(st, info=infodict, trim=trim, method=deconmeth)
+                RF = createRF(
+                    st, phase, pol=pol, info=infodict, trim=trim, method=deconmeth)
 
         # Write RF
             rfdir = os.path.join(rfloc, network, station)
