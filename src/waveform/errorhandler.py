@@ -5,12 +5,12 @@ Files contains all Errorhandler for the Glimer to obspy project
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Saturday, 21th March 2020 19:16:41
-Last Modified: Tuesday, 16th June 2020 12:11:13 pm
+Last Modified: Wednesday, 17th June 2020 12:55:49 pm
 '''
 
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import os
 
 from obspy.clients.fdsn import Client, header  # web sevice
 
