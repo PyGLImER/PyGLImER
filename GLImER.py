@@ -33,7 +33,7 @@ request = Request(
     config.starttime, config.endtime, pol='v', wavdownload=config.wavdownload, event_coords=event_coords,
     network=config.network, station=config.station,
     waveform_client=config.waveform_client, re_client=config.re_clients,
-    evtcat=config.evtcat, minmag=config.minmag)
+    evtcat=config.evtcat, minmag=config.minmag, debug=False)
 
 if config.wavdownload:
     tmp.folder = "not_started"  # resetting momentary event download folder

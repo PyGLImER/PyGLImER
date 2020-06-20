@@ -116,7 +116,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
         lon = (geocoords[2], geocoords[3])
         db = StationDB(preproloc, phase=phase, use_old=False)
         net, stat = db.find_stations(lat, lon, phase=phase)
-        pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
+        pattern = ["*{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
         files = []
         for pat in pattern:
             files.extend(
@@ -132,22 +132,22 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
                     networks as parameter.""")
             for net in network:
                 for stat in station:
-                    pattern = net + '.' + stat
+                    pattern2 = net + '.' + stat + '.xml'
                     files.extend(
-                        fnmatch.filter(os.listdir(statloc), pattern))
+                        fnmatch.filter(os.listdir(statloc), pattern2))
         else:
             for net in network:
-                pattern = net + '.' + (station or '') + '*'
+                pattern2 = net + '.xml'
                 files.extend(
-                    fnmatch.filter(os.listdir(statloc), pattern))
+                    fnmatch.filter(os.listdir(statloc), pattern2))
     elif network and type(station) == list:
         files = []
         for stat in station:
-            pattern = network + '.' + stat + '*'
-            files.extend(fnmatch.filter(os.listdir(statloc), pattern))
+            pattern2 = network + '.' + stat + '.xml'
+            files.extend(fnmatch.filter(os.listdir(statloc), pattern2))
     elif network:
-        pattern = network + '.' + (station or '') + '*'
-        files = fnmatch.filter(os.listdir(statloc), pattern)
+        pattern2 = network + '.' + (station or '*') + '.xml'
+        files = fnmatch.filter(os.listdir(statloc), pattern2)
 
     # In this case, it will process all available data (for global ccps)
     else:
@@ -164,6 +164,9 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
 
     # Clear Memory
     del stat, lats, lons, files
+
+    if not geocoords:
+        pattern = None
 
     if compute_stack:
         ccp.compute_stack(
@@ -407,7 +410,7 @@ class CCPStack(object):
             lon = (geocoords[2], geocoords[3])
             db = StationDB(preproloc, phase=self.bingrid.phase, use_old=False)
             net, stat = db.find_stations(lat, lon, phase=self.bingrid.phase)
-            pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
+            pattern = ["*{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
             # Clear memory
             del db, net, stat
 
@@ -435,22 +438,22 @@ class CCPStack(object):
                     if type(station) == list:
                         for net in network:
                             for stat in station:
-                                pattern.append('*%s*%s*.sac' % (net, stat))
+                                pattern.append('*%s.%s.*.sac' % (net, stat))
                     else:
                         raise ValueError("""The combination of network
                                          and station are invalid""")
                 else:
                     for net in network:
-                        pattern.append('*%s*.sac' % (net))
+                        pattern.append('*%s.*.sac' % (net))
             elif type(network) == str:
                 if station:
                     if type(station) == str:
-                        pattern.append('*%s*%s*.sac' % (net, station))
+                        pattern.append('*%s.%s.*.sac' % (network, station))
                     elif type(station) == list:
                         for stat in station:
-                            pattern.append('*%s*%s*.sac' % (net, stat))
+                            pattern.append('*%s.%s.*.sac' % (net, stat))
                 else:
-                    pattern.append('*%s*.sac' % (network))
+                    pattern.append('*%s.*.sac' % (network))
         elif station:
             raise ValueError("""You have to provide both network and station
                              code if you want to filter by station""")
@@ -485,7 +488,7 @@ class CCPStack(object):
         latb = (self.coords[0].min(), self.coords[0].max())
         lonb = (self.coords[1].min(), self.coords[1].max())
 
-        out = Parallel(n_jobs=num_cores)( # prefer='processes'
+        out = Parallel(n_jobs=num_cores, prefer='processes')( # prefer='processes'
                         delayed(self.multicore_stack)(
                             st, append_pp, n_closest_points, vel_model, latb,
                             lonb, filt)
@@ -493,18 +496,18 @@ class CCPStack(object):
 
         # June 2020 - Combine everything into one stack
         # Easier and saves Ram
-        for bins_copy, illum_copy in out:
-            self.bins = self.bins + bins_copy
-            self.illum = self.illum + illum_copy
-        # # The stacking is done here (one should not reassign variables in
-        # # multi-core processes).
-        # # Awful way to solve it, but the best I could find
-        # for kk, jj, datal in out:
-        #     for k, j, data in zip(kk, jj, datal):
-        #         self.bins[k, j] = self.bins[k, j] + data[j]
+        # for bins_copy, illum_copy in out:
+        #     self.bins = self.bins + bins_copy
+        #     self.illum = self.illum + illum_copy
+        # The stacking is done here (one should not reassign variables in
+        # multi-core processes).
+        # Awful way to solve it, but the best I could find
+        for kk, jj, datal in out:
+            for k, j, data in zip(kk, jj, datal):
+                self.bins[k, j] = self.bins[k, j] + data[j]
 
-        #         # hit counter + 1
-        #         self.illum[k, j] = self.illum[k, j] + 1
+                # hit counter + 1
+                self.illum[k, j] = self.illum[k, j] + 1
 
         end = time.time()
         logger.info("Stacking finished.")
@@ -544,16 +547,16 @@ class CCPStack(object):
         None.
 
         """
-        # kk = []
-        # jj = []
-        # datal = []
-        bins_copy = np.copy(self.bins)
-        illum_copy = np.copy(self.illum)
+        kk = []
+        jj = []
+        datal = []
+        # bins_copy = np.copy(self.bins)
+        # illum_copy = np.copy(self.illum)
 
         for st in stream:
             try:
                 rft = read_rf(st, format='SAC')
-            except IndexError as e:
+            except (IndexError, Exception) as e:
                 # That happens when there is a corrupted sac file
                 logger.exception(e)
                 continue
@@ -568,6 +571,11 @@ class CCPStack(object):
                 # Wrong stations codes can raise this
                 logger.warning(e)
                 continue
+            except Exception as e:
+                # Just so the script does not interrupt. Did not occur up
+                # to now
+                logger.exception(e)
+                continue
 
             lat = np.array(rf.stats.pp_latitude)
             lon = np.array(rf.stats.pp_longitude)
@@ -579,17 +587,19 @@ class CCPStack(object):
                 self.pplat.append(plat)
                 self.pplon.append(plon)
             k, j = self.query_bin_tree(lat, lon, rf.data, n_closest_points)
-        
+
             # Stack
-            bins_copy[k, j] = bins_copy[k, j] + rf.data[j]
+            # bins_copy[k, j] = bins_copy[k, j] + rf.data[j]
+            # self.bins[k,j] = self.bins[k, j] + rf.data[j]
 
             # hit counter + 1
-            illum_copy[k, j] = illum_copy[k, j] + 1
-        return bins_copy, illum_copy
-        #     kk.append(k)
-        #     jj.append(j)
-        #     datal.append(rf.data)
-        # return kk, jj, datal
+            #illum_copy[k, j] = illum_copy[k, j] + 1
+            # self.illum[k,j] = self.illum[k,j] +1
+        #return bins_copy, illum_copy
+            kk.append(k)
+            jj.append(j)
+            datal.append(rf.data)
+        return kk, jj, datal
 
     def conclude_ccp(self, keep_empty=False, keep_water=False, r=3):
         """
