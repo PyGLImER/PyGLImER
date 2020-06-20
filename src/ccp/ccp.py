@@ -471,8 +471,12 @@ class CCPStack(object):
         # Data counter
         self.N = self.N + len(streams)
 
+        logger.info('Number of receiver functions used: '+str(self.N))
+
         # Split job into n chunks
         num_cores = cpu_count()
+
+        logger.info('Number of cores used: '+str(num_cores))
 
         # Actual CCP stack
         # Note loki does mess up the output and threads is slower than
@@ -553,7 +557,7 @@ class CCPStack(object):
         # bins_copy = np.copy(self.bins)
         # illum_copy = np.copy(self.illum)
 
-        for st in stream:
+        for progress, st in enumerate(stream):
             try:
                 rft = read_rf(st, format='SAC')
             except (IndexError, Exception) as e:
@@ -599,6 +603,12 @@ class CCPStack(object):
             kk.append(k)
             jj.append(j)
             datal.append(rf.data)
+
+            if int(progress/50) == progress/50:
+                perc = str(progress*100/len(stream)) + '%'
+                msg = 'Stacking progress about: ' + perc
+                logger.info(msg)
+                print(msg)
         return kk, jj, datal
 
     def conclude_ccp(self, keep_empty=False, keep_water=False, r=3):
