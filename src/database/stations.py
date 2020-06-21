@@ -113,8 +113,8 @@ class StationDB(object):
         
         if phase:
             self.phase = phase.upper()           
-        else:
-            self.phase = phase
+        #else:
+        #    self.phase = phase
         
         # 1. Initiate logger
         self.logger = logging.Logger(
@@ -122,7 +122,7 @@ class StationDB(object):
         self.logger.setLevel(logging.WARNING)
 
         # FileHandler
-        fh = logging.FileHandler('logs/StationDBase.log')
+        fh = logging.FileHandler(os.path.join('logs', 'StationDBase.log'))
         fh.setLevel(logging.WARNING)
         self.logger.addHandler(fh)
 
@@ -132,7 +132,7 @@ class StationDB(object):
         fh.setFormatter(fmt)
 
         # Check if there is already a saved database
-        oloc = 'data/database.csv'
+        oloc = os.path.join('data', 'database.csv')
         
         if use_old and Path(oloc).is_file():
             self.db = pd.read_csv(oloc)

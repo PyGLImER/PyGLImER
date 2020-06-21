@@ -12,6 +12,7 @@ import fnmatch
 import os
 import pickle
 import logging
+import shutil
 import time
 from joblib import Parallel, delayed, cpu_count
 
@@ -21,6 +22,7 @@ import scipy.io as sio
 from mpl_toolkits.basemap import Basemap
 from pathlib import Path
 import subprocess
+from tqdm import tqdm
 
 from .compute.bin import BinGrid
 from ..database.stations import StationDB
@@ -116,7 +118,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
         lon = (geocoords[2], geocoords[3])
         db = StationDB(preproloc, phase=phase, use_old=False)
         net, stat = db.find_stations(lat, lon, phase=phase)
-        pattern = ["*{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
+        pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
         files = []
         for pat in pattern:
             files.extend(
@@ -137,7 +139,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
                         fnmatch.filter(os.listdir(statloc), pattern2))
         else:
             for net in network:
-                pattern2 = net + '.xml'
+                pattern2 = net + '.*.xml'
                 files.extend(
                     fnmatch.filter(os.listdir(statloc), pattern2))
     elif network and type(station) == list:
@@ -217,7 +219,7 @@ def read_ccp(filename='ccp.pkl', folder='output/ccps', fmt=None):
 
     # Open provided file
     if fmt == "pickle":
-        with open(folder + '/' + filename, 'rb') as infile:
+        with open(os.path.join(folder, filename), 'rb') as infile:
             ccp = pickle.load(infile)
     else:
         raise ValueError("Unknown format ", fmt)
@@ -410,15 +412,19 @@ class CCPStack(object):
             lon = (geocoords[2], geocoords[3])
             db = StationDB(preproloc, phase=self.bingrid.phase, use_old=False)
             net, stat = db.find_stations(lat, lon, phase=self.bingrid.phase)
-            pattern = ["*{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
+            pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
             # Clear memory
             del db, net, stat
 
-
-        infiles = []  # List of all files in folder
         if not pattern:
             pattern = []  # List of input constraints
+            if not network and not station:  # global
+                pattern.append('*.sac')
+        else:
+            pattern = ["*{}.*.sac".format(_a) for _a in pattern]
+
         streams = []  # List of files filtered for input criteria
+        infiles = []  # List of all files in folder
 
         for root, dirs, files in os.walk(folder):
             for name in files:
@@ -427,9 +433,6 @@ class CCPStack(object):
         # Special rule for files imported from Matlab
         if network == 'matlab' or network == 'raysum':
             pattern.append('*.sac')
-
-        elif pattern:
-            pattern = ["*{}.*.sac".format(_a) for _a in pattern]
 
         # Set filter patterns
         elif network:
@@ -457,9 +460,6 @@ class CCPStack(object):
         elif station:
             raise ValueError("""You have to provide both network and station
                              code if you want to filter by station""")
-        else:
-            # Global CCP
-            pattern.append('*.sac')
 
         # Do filtering
         for pat in pattern:
@@ -492,11 +492,31 @@ class CCPStack(object):
         latb = (self.coords[0].min(), self.coords[0].max())
         lonb = (self.coords[1].min(), self.coords[1].max())
 
-        out = Parallel(n_jobs=num_cores, prefer='processes')( # prefer='processes'
+        # How many tasks should the main process be split in?
+        # i.e. how long is one list
+        len_split = int(len(streams)/num_cores)
+        if len_split > 20:
+            len_split = int(len_split/np.ceil(len_split/10))
+        num_split = int(np.ceil(len(streams)/len_split))
+
+        # Dump the output arrays to files to prevent memory leaps
+        folder = './joblib_memmap'
+        try:
+            os.mkdir(folder)
+        except FileExistsError:
+            pass
+        output_bin = np.memmap(os.path.join(folder,'bin'), dtype=self.bins.dtype,
+                   shape=(*self.bins.shape, num_split), mode='w+')
+        output_illum = np.memmap(os.path.join(folder,'illum'), dtype=self.illum.dtype,
+                   shape=(*self.illum.shape, num_split), mode='w+')
+
+        out = Parallel(n_jobs=num_cores)( # prefer='processes'
                         delayed(self.multicore_stack)(
                             st, append_pp, n_closest_points, vel_model, latb,
-                            lonb, filt)
-                        for st in chunks(streams, num_cores))
+                            lonb, filt, i, output_bin, output_illum)
+                        for i, st in zip(
+                            tqdm(range(num_split)),
+                            chunks(streams, len_split)))
 
         # June 2020 - Combine everything into one stack
         # Easier and saves Ram
@@ -506,12 +526,19 @@ class CCPStack(object):
         # The stacking is done here (one should not reassign variables in
         # multi-core processes).
         # Awful way to solve it, but the best I could find
-        for kk, jj, datal in out:
-            for k, j, data in zip(kk, jj, datal):
-                self.bins[k, j] = self.bins[k, j] + data[j]
+        # for kk, jj, datal in out:
+        #     for k, j, data in zip(kk, jj, datal):
+        #         self.bins[k, j] = self.bins[k, j] + data[j]
 
-                # hit counter + 1
-                self.illum[k, j] = self.illum[k, j] + 1
+        #         # hit counter + 1
+        #         self.illum[k, j] = self.illum[k, j] + 1
+        self.bins = output_bin.sum(axis=2)
+        self.illum = output_illum.sum(axis=2)
+
+        try:
+            shutil.rmtree(folder)
+        except:  # noqa
+            print('Could not clean-up automatically.')
 
         end = time.time()
         logger.info("Stacking finished.")
@@ -523,7 +550,7 @@ class CCPStack(object):
             self.write(filename=save)
 
     def multicore_stack(self, stream, append_pp, n_closest_points, vmodel,
-                        latb, lonb, filt=False):
+                        latb, lonb, filt, idx, output_bin, output_illum):
         """
         Takes in chunks of data to be processed on one core.
 
@@ -551,13 +578,13 @@ class CCPStack(object):
         None.
 
         """
-        kk = []
-        jj = []
-        datal = []
+        # kk = []
+        # jj = []
+        # datal = []
         # bins_copy = np.copy(self.bins)
         # illum_copy = np.copy(self.illum)
 
-        for progress, st in enumerate(stream):
+        for st in stream:
             try:
                 rft = read_rf(st, format='SAC')
             except (IndexError, Exception) as e:
@@ -567,7 +594,7 @@ class CCPStack(object):
 
             if filt:
                 rft.filter('bandpass', freqmin=filt[0], freqmax=filt[1],
-                           zerophase=True, corners=2)
+                            zerophase=True, corners=2)
             try:
                 _, rf = rft[0].moveout(
                     vmodel, latb=latb, lonb=lonb, taper=False)
@@ -585,31 +612,33 @@ class CCPStack(object):
             lon = np.array(rf.stats.pp_longitude)
             if append_pp:
                 plat = np.pad(lat, (0, len(self.z)-len(lat)),
-                              constant_values=np.nan)
+                                constant_values=np.nan)
                 plon = np.pad(lon, (0, len(self.z)-len(lon)),
-                              constant_values=np.nan)
+                                constant_values=np.nan)
                 self.pplat.append(plat)
                 self.pplon.append(plon)
             k, j = self.query_bin_tree(lat, lon, rf.data, n_closest_points)
 
             # Stack
+            output_bin[k, j, idx] = output_bin[k, j, idx] + rf.data[j]
             # bins_copy[k, j] = bins_copy[k, j] + rf.data[j]
             # self.bins[k,j] = self.bins[k, j] + rf.data[j]
 
             # hit counter + 1
-            #illum_copy[k, j] = illum_copy[k, j] + 1
+            # illum_copy[k, j] = illum_copy[k, j] + 1
+            output_illum[k, j, idx] = output_illum[k, j, idx] + 1
             # self.illum[k,j] = self.illum[k,j] +1
-        #return bins_copy, illum_copy
-            kk.append(k)
-            jj.append(j)
-            datal.append(rf.data)
+        # return bins_copy, illum_copy
+            # kk.append(k)
+            # jj.append(j)
+            # datal.append(rf.data)
 
-            if int(progress/50) == progress/50:
-                perc = str(progress*100/len(stream)) + '%'
-                msg = 'Stacking progress about: ' + perc
-                logger.info(msg)
-                print(msg)
-        return kk, jj, datal
+            #if int(progress/50) == progress/50:
+                #perc = str(progress*100/len(stream)) + '%'
+                #msg = 'Stacking progress about: ' + perc
+                #logger.info(msg)
+                #print(msg)
+        # return kk, jj, datal
 
     def conclude_ccp(self, keep_empty=False, keep_water=False, r=3):
         """
