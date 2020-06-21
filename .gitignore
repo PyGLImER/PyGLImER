@@ -10,3 +10,4 @@ output*
 *.csv
 tmp/*
 .vscode/settings.json
+ccps.py
