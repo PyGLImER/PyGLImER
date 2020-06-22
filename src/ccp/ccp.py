@@ -472,11 +472,13 @@ class CCPStack(object):
         self.N = self.N + len(streams)
 
         logger.info('Number of receiver functions used: '+str(self.N))
+        print('Number of receiver functions used: '+str(self.N))
 
         # Split job into n chunks
         num_cores = cpu_count()
 
         logger.info('Number of cores used: '+str(num_cores))
+        print('Number of cores used: '+str(num_cores))
 
         # Actual CCP stack
         # Note loki does mess up the output and threads is slower than
@@ -493,10 +495,16 @@ class CCPStack(object):
         lonb = (self.coords[1].min(), self.coords[1].max())
 
         # How many tasks should the main process be split in?
-        # i.e. how long is one list
+        # If the number is too high, it will need unnecessarily
+        # much disk space or caching (probably also slower).
+        # If it's too low, the progressbar won't work anymore.
+        num_split_max = num_cores*100  # maximal no of sublists
         len_split = int(len(streams)/num_cores)
-        if len_split > 20:
-            len_split = int(len_split/np.ceil(len_split/10))
+        if len_split > 10:
+            if int(np.ceil(len(streams)/len_split)) > num_split_max:
+                len_split = int(len_split/num_split_max)
+            else:
+                len_split = int(len_split/np.ceil(len(streams)/len_split))
         num_split = int(np.ceil(len(streams)/len_split))
 
         # Dump the output arrays to files to prevent memory leaps
