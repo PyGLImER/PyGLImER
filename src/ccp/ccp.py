@@ -276,7 +276,7 @@ class CCPStack(object):
         self.z = np.hstack(
             (np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
         self.bins = np.zeros([self.coords[0].size, len(self.z)])
-        self.illum = np.zeros(np.shape(self.bins))
+        self.illum = np.zeros(np.shape(self.bins), dtype=int)
         self.pplat = []
         self.pplon = []
         self.ppz = self.z
@@ -498,7 +498,11 @@ class CCPStack(object):
         # If the number is too high, it will need unnecessarily
         # much disk space or caching (probably also slower).
         # If it's too low, the progressbar won't work anymore.
-        num_split_max = num_cores*100  # maximal no of sublists
+        # !Memmap arrays are getting extremely big, size in byte
+        # is given by: nrows*ncolumns*nbands
+        # with 64 cores and 10 bands/core that results in about
+        # 90 GB for each of the arrays
+        num_split_max = num_cores*10  # maximal no of bands
         len_split = int(len(streams)/num_cores)
         if len_split > 10:
             if int(np.ceil(len(streams)/len_split)) > num_split_max:
