@@ -501,7 +501,8 @@ class CCPStack(object):
         # !Memmap arrays are getting extremely big, size in byte
         # is given by: nrows*ncolumns*nbands
         # with 64 cores and 10 bands/core that results in about
-        # 90 GB for each of the arrays
+        # 90 GB for each of the arrays for a finely gridded
+        # CCP stack of North-America
         num_split_max = num_cores*10  # maximal no of bands
         len_split = int(len(streams)/num_cores)
         if len_split > 10:
