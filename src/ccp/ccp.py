@@ -15,6 +15,8 @@ import logging
 import shutil
 import time
 from joblib import Parallel, delayed, cpu_count
+from psutil import virtual_memory
+
 
 import numpy as np
 from obspy import read_inventory
@@ -83,6 +85,9 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
     compute_stack : Bool, optional
         If true it will compute the stack by calling ccp.compute_stack().
         That can take a long time! The default is False.
+    cache : Bool, optional
+        Only relevant if compute_stack. Cache computed arrays to free RAM.
+        Will increase computation time. The default is False
     binrad : float, optional
             Only used if compute_stack=True
             Defines the bin radius with bin radius = binrad*distance_bins.
@@ -370,7 +375,10 @@ class CCPStack(object):
             appends piercing point coordinates if True, so tey can later be
             plotted. Not recommended for big data sets.
             The default is false.
-
+        cache : Bool, optional
+            If one experiences memory leaps, this should be set = True.
+            Will be slower than working entirely in the RAM & need a considerable
+            amount of hd space. The default is False.
 
         Returns
         -------
@@ -480,6 +488,26 @@ class CCPStack(object):
         logger.info('Number of cores used: '+str(num_cores))
         print('Number of cores used: '+str(num_cores))
 
+        mem = virtual_memory()
+
+        logger.info('Available system memory: '+str(mem.total*1e-6)+'MB')
+        print('Available system memory: '+str(mem.total*1e-6)+'MB')
+
+        # Check maximum information that can be saved
+        # using half of the RAM.
+        # approximately 8 byte per element in RF + 8 byte for idx
+        mem_needed = 3*8*850*len(streams)
+
+        # Split into several jobs if too much data
+        if mem_needed > mem.total/50:
+            N_splits = int(np.ceil(mem_needed*50/mem.total))
+            split_size = int(np.ceil(len(streams)/N_splits))
+            print('Splitting RFs into '+str(N_splits)+' chunks \
+due to insufficient memory. Each progressbar will \
+only show the progress per chunk.')
+        else:
+            split_size = len(streams)
+
         # Actual CCP stack
         # Note loki does mess up the output and threads is slower than
         # using a single core
@@ -503,33 +531,68 @@ class CCPStack(object):
         # with 64 cores and 10 bands/core that results in about
         # 90 GB for each of the arrays for a finely gridded
         # CCP stack of North-America
-        num_split_max = num_cores*10  # maximal no of bands
-        len_split = int(len(streams)/num_cores)
-        if len_split > 10:
-            if int(np.ceil(len(streams)/len_split)) > num_split_max:
-                len_split = int(len_split/num_split_max)
-            else:
-                len_split = int(len_split/np.ceil(len(streams)/len_split))
-        num_split = int(np.ceil(len(streams)/len_split))
+        # num_split_max = num_cores*100  # maximal no of jobs
+        # len_split = int(len(streams)/num_cores)
+        # if len_split > 10:
+        #     if int(np.ceil(len(streams)/len_split)) > num_split_max:
+        #         len_split = int(len_split/num_split_max)
+        #     else:
+        #         len_split = int(len_split/np.ceil(len(streams)/len_split))
+        # num_split = int(np.ceil(len(streams)/len_split))
 
-        # Dump the output arrays to files to prevent memory leaps
-        folder = './joblib_memmap'
-        try:
-            os.mkdir(folder)
-        except FileExistsError:
-            pass
-        output_bin = np.memmap(os.path.join(folder,'bin'), dtype=self.bins.dtype,
-                   shape=(*self.bins.shape, num_split), mode='w+')
-        output_illum = np.memmap(os.path.join(folder,'illum'), dtype=self.illum.dtype,
-                   shape=(*self.illum.shape, num_split), mode='w+')
+        # if cache:
+        #     # Dump the output arrays to files to prevent memory leaps
+        #     folder = './joblib_memmap'
+        #     try:
+        #         os.mkdir(folder)
+        #     except FileExistsError:
+        #         pass
+        #     output_bin = np.memmap(os.path.join(folder,'bin'), dtype=self.bins.dtype,
+        #             shape=(*self.bins.shape, num_cores), mode='w+')
+        #     output_illum = np.memmap(os.path.join(folder,'illum'), dtype=self.illum.dtype,
+        #             shape=(*self.illum.shape, num_cores), mode='w+')
+        # else:
+        #     self.output_bin = np.zeros((*self.bins.shape, num_cores))
+        #     self.output_illum = np.zeros((*self.bins.shape, num_cores), dtype=int)
+        # Avoid writing in the same dimension
+        # self.busy = np.zeros((num_cores,), dtype=bool)
 
-        out = Parallel(n_jobs=num_cores)( # prefer='processes'
-                        delayed(self.multicore_stack)(
-                            st, append_pp, n_closest_points, vel_model, latb,
-                            lonb, filt, i, output_bin, output_illum)
-                        for i, st in zip(
-                            tqdm(range(num_split)),
-                            chunks(streams, len_split)))
+        for stream_chunk in chunks(streams, split_size):
+            num_split_max = num_cores*100  # maximal no of jobs
+            len_split = int(np.ceil(len(stream_chunk)/num_cores))
+            print([len(stream_chunk), len_split])
+            if len_split > 10:
+                if int(np.ceil(len(stream_chunk)/len_split)) > num_split_max:
+                    len_split = int(np.ceil(len_split/num_split_max))
+                else:
+                    len_split = int(np.ceil(len_split/(len_split/10)))
+                    # len_split = int(len_split/np.ceil(len(stream_chunk)/len_split))
+            num_split = int(np.ceil(len(stream_chunk)/len_split))
+
+            out = Parallel(n_jobs=num_cores)( # prefer='processes'
+                            delayed(self.multicore_stack)(
+                                st, append_pp, n_closest_points, vel_model, latb,
+                                lonb, filt, i)
+                            for i, st in zip(
+                                tqdm(range(num_split)),
+                                chunks(stream_chunk, len_split)))
+
+            # Awful way to solve it, but the best I could find
+            for kk, jj, datal in out:
+                for k, j, data in zip(kk, jj, datal):
+                    self.bins[k, j] = self.bins[k, j] + data[j]
+
+                    # hit counter + 1
+                    self.illum[k, j] = self.illum[k, j] + 1
+        
+        # else:
+        #     out = Parallel(n_jobs=num_cores)( # prefer='processes'
+        #         delayed(self.multicore_stack)(
+        #             st, append_pp, n_closest_points, vel_model, latb,
+        #             lonb, filt, i)
+        #         for i, st in zip(
+        #             tqdm(range(num_split)),
+        #             chunks(streams, len_split)))
 
         # June 2020 - Combine everything into one stack
         # Easier and saves Ram
@@ -545,16 +608,20 @@ class CCPStack(object):
 
         #         # hit counter + 1
         #         self.illum[k, j] = self.illum[k, j] + 1
-        self.bins = output_bin.sum(axis=2)
-        self.illum = output_illum.sum(axis=2)
+        # self.bins = self.output_bin.sum(axis=2)
+        # self.illum = self.output_illum.sum(axis=2)
 
-        try:
-            shutil.rmtree(folder)
-        except:  # noqa
-            print('Could not clean-up automatically.')
+        # del self.output_bin, self.output_illum
+
+        # if cache:
+        #     try:
+        #         shutil.rmtree(folder)
+        #     except:  # noqa
+        #         print('Could not clean-up automatically.')
 
         end = time.time()
         logger.info("Stacking finished.")
+        print('Stacking finished.')
         logger.info(dt_string(end-start))
         self.conclude_ccp()
 
@@ -563,7 +630,7 @@ class CCPStack(object):
             self.write(filename=save)
 
     def multicore_stack(self, stream, append_pp, n_closest_points, vmodel,
-                        latb, lonb, filt, idx, output_bin, output_illum):
+                        latb, lonb, filt, idx):
         """
         Takes in chunks of data to be processed on one core.
 
@@ -591,11 +658,17 @@ class CCPStack(object):
         None.
 
         """
-        # kk = []
-        # jj = []
-        # datal = []
+        kk = []
+        jj = []
+        datal = []
         # bins_copy = np.copy(self.bins)
         # illum_copy = np.copy(self.illum)
+    
+        # indexing system, find vacant dimension
+        # idx = np.where(self.busy==False)[0][0]
+
+        # occupy idx
+        # self.busy[idx] = True
 
         for st in stream:
             try:
@@ -633,25 +706,28 @@ class CCPStack(object):
             k, j = self.query_bin_tree(lat, lon, rf.data, n_closest_points)
 
             # Stack
-            output_bin[k, j, idx] = output_bin[k, j, idx] + rf.data[j]
+            # self.output_bin[k, j, idx] = self.output_bin[k, j, idx] + rf.data[j]
             # bins_copy[k, j] = bins_copy[k, j] + rf.data[j]
             # self.bins[k,j] = self.bins[k, j] + rf.data[j]
 
             # hit counter + 1
             # illum_copy[k, j] = illum_copy[k, j] + 1
-            output_illum[k, j, idx] = output_illum[k, j, idx] + 1
+            # self.output_illum[k, j, idx] = self.output_illum[k, j, idx] + 1
+
+        # Free index
+        # self.busy[idx] = False
             # self.illum[k,j] = self.illum[k,j] +1
         # return bins_copy, illum_copy
-            # kk.append(k)
-            # jj.append(j)
-            # datal.append(rf.data)
+            kk.append(k)
+            jj.append(j)
+            datal.append(rf.data)
 
             #if int(progress/50) == progress/50:
                 #perc = str(progress*100/len(stream)) + '%'
                 #msg = 'Stacking progress about: ' + perc
                 #logger.info(msg)
                 #print(msg)
-        # return kk, jj, datal
+        return kk, jj, datal
 
     def conclude_ccp(self, keep_empty=False, keep_water=False, r=3):
         """
