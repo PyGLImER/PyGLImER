@@ -496,11 +496,11 @@ class CCPStack(object):
         # Check maximum information that can be saved
         # using half of the RAM.
         # approximately 8 byte per element in RF + 8 byte for idx
-        mem_needed = 3*8*850*len(streams)
+        mem_needed = 3*8*850*len(streams)*100
 
         # Split into several jobs if too much data
-        if mem_needed > mem.total/50:
-            N_splits = int(np.ceil(mem_needed*50/mem.total))
+        if mem_needed > mem.total:
+            N_splits = int(np.ceil(mem_needed/mem.total))
             split_size = int(np.ceil(len(streams)/N_splits))
             print('Splitting RFs into '+str(N_splits)+' chunks \
 due to insufficient memory. Each progressbar will \
@@ -560,13 +560,11 @@ only show the progress per chunk.')
         for stream_chunk in chunks(streams, split_size):
             num_split_max = num_cores*100  # maximal no of jobs
             len_split = int(np.ceil(len(stream_chunk)/num_cores))
-            print([len(stream_chunk), len_split])
             if len_split > 10:
                 if int(np.ceil(len(stream_chunk)/len_split)) > num_split_max:
                     len_split = int(np.ceil(len_split/num_split_max))
                 else:
                     len_split = int(np.ceil(len_split/(len_split/10)))
-                    # len_split = int(len_split/np.ceil(len(stream_chunk)/len_split))
             num_split = int(np.ceil(len(stream_chunk)/len_split))
 
             out = Parallel(n_jobs=num_cores)( # prefer='processes'
