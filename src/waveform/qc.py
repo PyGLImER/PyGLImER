@@ -20,7 +20,7 @@ from obspy.signal import filter
 lowco = [.03, .1, .5]  # only for PRF
 
 lowcoS = .01  # Changed 18.05 to compare with Hopper et. al. 2018
-highco = np.linspace(.33, .25, 4)  # For SRFs, 16.06.2020 from .175 to .25 Hz
+highco = np.linspace(.33, .175, 4)  # For SRFs, 16.06.2020 from .175 to .25 Hz
 
 # SNR criteria for QC
 SNR_criteriaP = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
