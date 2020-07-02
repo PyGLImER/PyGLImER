@@ -379,7 +379,7 @@ def dt_table(rayp, fname, phase, el, debug=False):
 
 def ppoint(q_a, q_b, dz, p, phase):
     """
-    Calculate Euclidean distance between piercing point and station.
+    Calculate spherical distance between piercing point and station.
     INPUT has to be in Cartesian/ flat Earth:
 
     Parameters
