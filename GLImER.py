@@ -18,8 +18,8 @@ from joblib import Parallel, delayed
 from obspy import UTCDateTime
 
 import config
-from src import tmp
-from src.waveform.request import Request
+from pyglimer import tmp
+from pyglimer.waveform.request import Request
 
 
 ##############################################################################

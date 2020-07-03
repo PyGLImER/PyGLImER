@@ -1,0 +1,22 @@
+name: PyGLImER
+dependencies:
+  - basemap
+  - geographiclib
+  - h5py
+  - joblib
+  - matplotlib
+  - numpy
+  - obspy
+  - pandas
+  - pathlib
+  - plotly
+  - psutil
+  - python=3.8
+  - scipy
+  - pip
+  - tqdm
+  - pip:
+    - sphinx
+    - sphinx-rtd-theme
+    - pytest
+    - -e .

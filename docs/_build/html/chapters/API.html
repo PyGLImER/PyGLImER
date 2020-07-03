@@ -1,0 +1,879 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>PyGLImER API &mdash; PyGLImER 0.01 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Common Conversion Point Stacking" href="ccp.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> PyGLImER
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pyglimer-waveform">pyglimer.waveform</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pyglimer-waveform-request">pyglimer.waveform.request</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyglimer-waveform-download">pyglimer.waveform.download</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyglimer-waveform-preprocess">pyglimer.waveform.preprocess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyglimer.waveform.qc">pyglimer.waveform.qc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyglimer.waveform.rotate">pyglimer.waveform.rotate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyglimer-waveform-errorhandler">pyglimer.waveform.errorhandler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pyglimer-rf">pyglimer.rf</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pyglimer-rf-create">pyglimer.rf.create</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyglimer-rf-deconvolve">pyglimer.rf.deconvolve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyglimer-rf-moveout">pyglimer.rf.moveout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pyglimer-database">pyglimer.database</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyglimer.database.stations">pyglimer.database.stations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pyglimer-test">pyglimer.test</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pyglimer-test-rate">pyglimer.test.rate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyglimer.test.synthetic">pyglimer.test.synthetic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyglimer-test-tests">pyglimer.test.tests</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pyglimer-utils">pyglimer.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyglimer.utils.changedb">pyglimer.utils.changedb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyglimer.utils.create_geom">pyglimer.utils.create_geom</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyglimer.utils.createvmodel">pyglimer.utils.createvmodel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyglimer.utils.geo_utils">pyglimer.utils.geo_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyglimer.utils.nextpowof2">pyglimer.utils.nextpowof2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyglimer.utils.roundhalf">pyglimer.utils.roundhalf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyglimer.utils.signalproc">pyglimer.utils.signalproc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyglimer.utils.utils">pyglimer.utils.utils</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pyglimer-ccp">pyglimer.ccp</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pyglimer-ccp-ccp">pyglimer.ccp.ccp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyglimer-ccp-compute-bin">pyglimer.ccp.compute.bin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyGLImER</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/chapters/API.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pyglimer-api">
+<span id="api-label"></span><h1><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API<a class="headerlink" href="#pyglimer-api" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="pyglimer-waveform">
+<h2>pyglimer.waveform<a class="headerlink" href="#pyglimer-waveform" title="Permalink to this headline">¶</a></h2>
+<p>Waveform download and preprocess</p>
+<div class="section" id="pyglimer-waveform-request">
+<h3>pyglimer.waveform.request<a class="headerlink" href="#pyglimer-waveform-request" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="pyglimer-waveform-download">
+<h3>pyglimer.waveform.download<a class="headerlink" href="#pyglimer-waveform-download" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="pyglimer-waveform-preprocess">
+<h3>pyglimer.waveform.preprocess<a class="headerlink" href="#pyglimer-waveform-preprocess" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="module-pyglimer.waveform.qc">
+<span id="pyglimer-waveform-qc"></span><h3>pyglimer.waveform.qc<a class="headerlink" href="#module-pyglimer.waveform.qc" title="Permalink to this headline">¶</a></h3>
+<p>Contains quality control for waveforms used for receiver function creation.</p>
+<p>Created on Fri Apr 10 11:38:21 2020</p>
+<dl class="simple">
+<dt>Author:</dt><dd><p>Peter Makus (<a class="reference external" href="mailto:peter&#46;makus&#37;&#52;&#48;student&#46;uib&#46;no">peter<span>&#46;</span>makus<span>&#64;</span>student<span>&#46;</span>uib<span>&#46;</span>no</a>)</p>
+</dd>
+</dl>
+<p>Last updated:</p>
+<dl class="py function">
+<dt id="pyglimer.waveform.qc.qcp">
+<code class="sig-prename descclassname">pyglimer.waveform.qc.</code><code class="sig-name descname">qcp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">st</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">sampling_f</span></em>, <em class="sig-param"><span class="n">onset</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/waveform/qc.html#qcp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.waveform.qc.qcp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quality control for the downloaded waveforms that are used to create
+PRFS. Works with various filters and SNR criteria</p>
+<dl class="simple">
+<dt>st<span class="classifier">‘~obspy.Stream’</span></dt><dd><p>Input stream.</p>
+</dd>
+<dt>dt<span class="classifier">FLOAT</span></dt><dd><p>Sampling interval [s].</p>
+</dd>
+<dt>sampling_f<span class="classifier">FLOAT</span></dt><dd><p>Sampling frequency (Hz).</p>
+</dd>
+<dt>onset<span class="classifier">float</span></dt><dd><p>Onset in seconds after trace’s start.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>st<span class="classifier">‘~obspy.Stream’</span></dt><dd><p>Output stream. If stream was accepted, then this will contain the
+filtered stream, filtered with the broadest accepted filter.</p>
+</dd>
+<dt>crit<span class="classifier">BOOL</span></dt><dd><p>True if stream was accepted, false if it wasn’t.</p>
+</dd>
+<dt>f<span class="classifier">FLOAT</span></dt><dd><p>Last used low-cut frequency. If crit=True, this will be the frequency
+for which the stream was accepted.</p>
+</dd>
+<dt>noisemat<span class="classifier">np.array</span></dt><dd><p>SNR values in form of a matrix. Rows represent the different filters
+and columns the different criteria.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.waveform.qc.qcs">
+<code class="sig-prename descclassname">pyglimer.waveform.qc.</code><code class="sig-name descname">qcs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">st</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">sampling_f</span></em>, <em class="sig-param"><span class="n">onset</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/waveform/qc.html#qcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.waveform.qc.qcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quality control for waveforms that are used to produce SRF. In contrast
+to the ones used for PRF this is a very rigid criterion and will reject
+&gt;95% of the waveforms.</p>
+<dl class="simple">
+<dt>st<span class="classifier">‘~obspy.Stream’</span></dt><dd><p>Input stream.</p>
+</dd>
+<dt>dt<span class="classifier">FLOAT</span></dt><dd><p>Sampling interval [s].</p>
+</dd>
+<dt>sampling_f<span class="classifier">FLOAT</span></dt><dd><p>Sampling frequency (Hz).</p>
+</dd>
+<dt>onset<span class="classifier">float</span></dt><dd><p>Onset in seconds after trace’s start.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>st<span class="classifier">‘~obspy.Stream’</span></dt><dd><p>Output stream. If stream was accepted, then this will contain the
+filtered stream, filtered with the broadest accepted filter.</p>
+</dd>
+<dt>crit<span class="classifier">BOOL</span></dt><dd><p>True if stream was accepted, false if it wasn’t.</p>
+</dd>
+<dt>f<span class="classifier">FLOAT</span></dt><dd><p>Last used high-cut frequency. If crit=True, this will be the frequency
+for which the stream was accepted.</p>
+</dd>
+<dt>noisemat<span class="classifier">np.array</span></dt><dd><p>SNR values in form of a matrix. Rows represent the different filters
+and columns the different criteria.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyglimer.waveform.rotate">
+<span id="pyglimer-waveform-rotate"></span><h3>pyglimer.waveform.rotate<a class="headerlink" href="#module-pyglimer.waveform.rotate" title="Permalink to this headline">¶</a></h3>
+<p>Created on Sat Mar 21 19:26:57 2020</p>
+<p>&#64;author: pm
+Contains functions to rotate a stream into different domains</p>
+<dl class="py function">
+<dt id="pyglimer.waveform.rotate.rotate_LQT">
+<code class="sig-prename descclassname">pyglimer.waveform.rotate.</code><code class="sig-name descname">rotate_LQT</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">st</span></em>, <em class="sig-param"><span class="n">phase</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/waveform/rotate.html#rotate_LQT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.waveform.rotate.rotate_LQT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotates a stream given in RTZ to LQT using Singular Value Decomposition</p>
+<dl class="simple">
+<dt>st<span class="classifier">obspy.Stream</span></dt><dd><p>Input Stream in RTZ.</p>
+</dd>
+<dt>phase<span class="classifier">STRING, optional</span></dt><dd><p>“S” for Sp or “P” for Ps.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>LQT<span class="classifier">obspy.Stream</span></dt><dd><p>Output Stream in LQT.</p>
+</dd>
+<dt>QC<span class="classifier">FLOAT</span></dt><dd><p>Quality control criterion. Energy balance at first arrival for L and Q.
+Should deviate from 1 as far as possible.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.waveform.rotate.rotate_LQT_min">
+<code class="sig-prename descclassname">pyglimer.waveform.rotate.</code><code class="sig-name descname">rotate_LQT_min</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">st</span></em>, <em class="sig-param"><span class="n">phase</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/waveform/rotate.html#rotate_LQT_min"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.waveform.rotate.rotate_LQT_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotates stream to LQT by minimising the energy of the S-wave primary
+arrival on the L component (SRF) or maximising the primary arrival
+energy on L (PRF).</p>
+<dl class="simple">
+<dt>st<span class="classifier">obspy.Stream</span></dt><dd><p>Input stream in RTZ.</p>
+</dd>
+<dt>phase<span class="classifier">STRING, optional</span></dt><dd><p>“P” for Ps or “S” for Sp.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>LQT<span class="classifier">obspy.Stream</span></dt><dd><p>Output stream in LQT.</p>
+</dd>
+<dt>ia<span class="classifier">float</span></dt><dd><p>Computed incidence angle in degree. Can serve as QC criterion.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.waveform.rotate.rotate_PSV">
+<code class="sig-prename descclassname">pyglimer.waveform.rotate.</code><code class="sig-name descname">rotate_PSV</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">statlat</span></em>, <em class="sig-param"><span class="n">statlon</span></em>, <em class="sig-param"><span class="n">rayp</span></em>, <em class="sig-param"><span class="n">st</span></em>, <em class="sig-param"><span class="n">phase</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/waveform/rotate.html#rotate_PSV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.waveform.rotate.rotate_PSV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the incidence angle of an incoming ray with the weighted average
+of the lithosphere’s P velocity with a velocity model compiled from 
+Litho1.0.</p>
+<dl class="simple">
+<dt>statlat<span class="classifier">FLOAT</span></dt><dd><p>station latitude.</p>
+</dd>
+<dt>statlon<span class="classifier">FLOAT</span></dt><dd><p>station longitude.</p>
+</dd>
+<dt>rayp<span class="classifier">FLOAT</span></dt><dd><p>ray parameter / slownesss in s/m.</p>
+</dd>
+<dt>st<span class="classifier">obspy.Stream</span></dt><dd><p>Input stream given in RTZ.</p>
+</dd>
+<dt>phase<span class="classifier">str</span></dt><dd><p>Primary phase, either P or S.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>avp<span class="classifier">FLOAT</span></dt><dd><p>Average P-wave velocity.</p>
+</dd>
+<dt>avs<span class="classifier">FLOAT</span></dt><dd><p>Average S-wave velocity.</p>
+</dd>
+<dt>PSvSh<span class="classifier">obspy.Stream</span></dt><dd><p>Stream in P-Sv-Sh.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="pyglimer-waveform-errorhandler">
+<h3>pyglimer.waveform.errorhandler<a class="headerlink" href="#pyglimer-waveform-errorhandler" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-pyglimer.waveform.errorhandler"></span><p>Files contains all Errorhandler for the Glimer to obspy project</p>
+<p>Author: Peter Makus (<a class="reference external" href="mailto:peter&#46;makus&#37;&#52;&#48;student&#46;uib&#46;no">peter<span>&#46;</span>makus<span>&#64;</span>student<span>&#46;</span>uib<span>&#46;</span>no</a>)</p>
+<p>Created: Saturday, 21th March 2020 19:16:41
+Last Modified: Wednesday, 17th June 2020 02:33:01 pm</p>
+<dl class="py function">
+<dt id="pyglimer.waveform.errorhandler.NoMatchingResponseHandler">
+<code class="sig-prename descclassname">pyglimer.waveform.errorhandler.</code><code class="sig-name descname">NoMatchingResponseHandler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">st</span></em>, <em class="sig-param"><span class="n">network</span></em>, <em class="sig-param"><span class="n">station</span></em>, <em class="sig-param"><span class="n">statloc</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/waveform/errorhandler.html#NoMatchingResponseHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.waveform.errorhandler.NoMatchingResponseHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Error handler for when the No matching response found error occurs.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.waveform.errorhandler.redownload">
+<code class="sig-prename descclassname">pyglimer.waveform.errorhandler.</code><code class="sig-name descname">redownload</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">network</span></em>, <em class="sig-param"><span class="n">station</span></em>, <em class="sig-param"><span class="n">starttime</span></em>, <em class="sig-param"><span class="n">endtime</span></em>, <em class="sig-param"><span class="n">st</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/waveform/errorhandler.html#redownload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.waveform.errorhandler.redownload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Errorhandler that Redownloads the stream for the given input.
+Used when the stream has less than three channels.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.waveform.errorhandler.redownload_statxml">
+<code class="sig-prename descclassname">pyglimer.waveform.errorhandler.</code><code class="sig-name descname">redownload_statxml</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">st</span></em>, <em class="sig-param"><span class="n">network</span></em>, <em class="sig-param"><span class="n">station</span></em>, <em class="sig-param"><span class="n">statfile</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/waveform/errorhandler.html#redownload_statxml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.waveform.errorhandler.redownload_statxml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Errorhandler: Redownload station xml in case that it is not found.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="pyglimer-rf">
+<h2>pyglimer.rf<a class="headerlink" href="#pyglimer-rf" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pyglimer-rf-create">
+<h3>pyglimer.rf.create<a class="headerlink" href="#pyglimer-rf-create" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="pyglimer-rf-deconvolve">
+<h3>pyglimer.rf.deconvolve<a class="headerlink" href="#pyglimer-rf-deconvolve" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="pyglimer-rf-moveout">
+<h3>pyglimer.rf.moveout<a class="headerlink" href="#pyglimer-rf-moveout" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="pyglimer-database">
+<h2>pyglimer.database<a class="headerlink" href="#pyglimer-database" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyglimer.database.stations">
+<span id="pyglimer-database-stations"></span><h3>pyglimer.database.stations<a class="headerlink" href="#module-pyglimer.database.stations" title="Permalink to this headline">¶</a></h3>
+<p>Database management and overview for the GLImER database.</p>
+<p>Created on Mon May 11 11:09:05 2020</p>
+<dl class="simple">
+<dt>Author:</dt><dd><p>Peter Makus (<a class="reference external" href="mailto:peter&#46;makus&#37;&#52;&#48;student&#46;uib&#46;no">peter<span>&#46;</span>makus<span>&#64;</span>student<span>&#46;</span>uib<span>&#46;</span>no</a>)</p>
+</dd>
+</dl>
+<p>Last updated:</p>
+<dl class="py function">
+<dt id="pyglimer.database.stations.redownload_missing_statxmls">
+<code class="sig-prename descclassname">pyglimer.database.stations.</code><code class="sig-name descname">redownload_missing_statxmls</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clients</span></em>, <em class="sig-param"><span class="n">phase</span></em>, <em class="sig-param"><span class="n">statloc</span></em>, <em class="sig-param"><span class="n">rawdir</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/database/stations.html#redownload_missing_statxmls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.database.stations.redownload_missing_statxmls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fairly primitive program that walks through existing raw waveforms in
+rawdir and looks for missing station xmls in statloc and, afterwards,
+attemps a redownload</p>
+<dl class="simple">
+<dt>clients<span class="classifier">list</span></dt><dd><p>List of clients (see obspy documentation for obspy.Client).</p>
+</dd>
+<dt>phase<span class="classifier">string</span></dt><dd><p>Either “P” or “S”, defines in which folder to look for mseeds.</p>
+</dd>
+<dt>statloc<span class="classifier">string</span></dt><dd><p>Folder, in which the station xmls are saved.</p>
+</dd>
+<dt>rawdir<span class="classifier">string</span></dt><dd><p>Uppermost directory, in which the raw mseeds are saved (i.e. the
+directory above the phase division).</p>
+</dd>
+<dt>verbose<span class="classifier">bool, optional</span></dt><dd><p>Show some extra information, by default True</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="pyglimer-test">
+<h2>pyglimer.test<a class="headerlink" href="#pyglimer-test" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pyglimer-test-rate">
+<h3>pyglimer.test.rate<a class="headerlink" href="#pyglimer-test-rate" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="module-pyglimer.test.synthetic">
+<span id="pyglimer-test-synthetic"></span><h3>pyglimer.test.synthetic<a class="headerlink" href="#module-pyglimer.test.synthetic" title="Permalink to this headline">¶</a></h3>
+<p>Created on Wed Oct 23 09:37:49 2019
+Create synthetic impulse resonses.
+Used to test the deconvolve module.
+&#64;author: pm</p>
+<dl class="py function">
+<dt id="pyglimer.test.synthetic.create_R">
+<code class="sig-prename descclassname">pyglimer.test.synthetic.</code><code class="sig-name descname">create_R</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">N2</span></em>, <em class="sig-param"><span class="n">M</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/test/synthetic.html#create_R"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.test.synthetic.create_R" title="Permalink to this definition">¶</a></dt>
+<dd><p>Program to create random reflectivity series
+INPUT
+N2: half-length of the signal (N=2*N2+1)
+M: number of seismic discontinuities</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.test.synthetic.synthetic">
+<code class="sig-prename descclassname">pyglimer.test.synthetic.</code><code class="sig-name descname">synthetic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">N2</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">R</span></em>, <em class="sig-param"><span class="n">SNR</span></em>, <em class="sig-param"><span class="n">stdv</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/test/synthetic.html#synthetic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.test.synthetic.synthetic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to create synthetic seismograms (given Impulse response convolved with a Ricker wavelet)
+INPUT:</p>
+<blockquote>
+<div><p>N2: half-length of the Input traces, (full length N= N2*2+1)
+dt: sampling rate
+R: Impulse response / reflectivity series with length N
+SNR: ratio of maximal amplitude of the source wavelet to max noise amplitude
+stdv : standard deviation of the source pulse (controls width)</p>
+</div></blockquote>
+<dl>
+<dt>Output:</dt><dd><dl class="simple">
+<dt>v_noise: the theorethical source wavelet with noise independent from the noise on the horizontal compoennt</dt><dd><p>(equal to the hoizontal component of a seismogram in RF)</p>
+</dd>
+</dl>
+<p>h_noise: The horizontal component of the seismogram with noise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="pyglimer-test-tests">
+<h3>pyglimer.test.tests<a class="headerlink" href="#pyglimer-test-tests" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="pyglimer-utils">
+<h2>pyglimer.utils<a class="headerlink" href="#pyglimer-utils" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyglimer.utils.changedb">
+<span id="pyglimer-utils-changedb"></span><h3>pyglimer.utils.changedb<a class="headerlink" href="#module-pyglimer.utils.changedb" title="Permalink to this headline">¶</a></h3>
+<p>Author: Peter Makus (<a class="reference external" href="mailto:peter&#46;makus&#37;&#52;&#48;student&#46;uib&#46;no">peter<span>&#46;</span>makus<span>&#64;</span>student<span>&#46;</span>uib<span>&#46;</span>no</a>)</p>
+<p>Created: Monday, 25th May 2020 10:40:03
+Last Modified: Tuesday, 16th June 2020 12:01:45 pm</p>
+<dl class="py function">
+<dt id="pyglimer.utils.changedb.shortennames">
+<code class="sig-prename descclassname">pyglimer.utils.changedb.</code><code class="sig-name descname">shortennames</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">phase</span></em>, <em class="sig-param"><span class="n">rawloc</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/changedb.html#shortennames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.changedb.shortennames" title="Permalink to this definition">¶</a></dt>
+<dd><p>That was kinda a one-time function to correct a bug.</p>
+<dl class="simple">
+<dt>phase<span class="classifier">[type]</span></dt><dd><p>[description]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyglimer.utils.create_geom">
+<span id="pyglimer-utils-create-geom"></span><h3>pyglimer.utils.create_geom<a class="headerlink" href="#module-pyglimer.utils.create_geom" title="Permalink to this headline">¶</a></h3>
+<p>Automatic creation of raysum geom files</p>
+<p>Created on Thu May 14 10:23:39 2020</p>
+<dl class="simple">
+<dt>Author:</dt><dd><p>Peter Makus (<a class="reference external" href="mailto:peter&#46;makus&#37;&#52;&#48;student&#46;uib&#46;no">peter<span>&#46;</span>makus<span>&#64;</span>student<span>&#46;</span>uib<span>&#46;</span>no</a>)</p>
+</dd>
+</dl>
+<p>Last updated:</p>
+<dl class="py function">
+<dt id="pyglimer.utils.create_geom.create_geom">
+<code class="sig-prename descclassname">pyglimer.utils.create_geom.</code><code class="sig-name descname">create_geom</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">N</span></em>, <em class="sig-param"><span class="n">bazv</span></em>, <em class="sig-param"><span class="n">raypv</span></em>, <em class="sig-param"><span class="n">shift_max</span></em>, <em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">shape</span><span class="o">=</span><span class="default_value">'cross'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/create_geom.html#create_geom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.create_geom.create_geom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates geometry files for Raysum.</p>
+<dl class="simple">
+<dt>N<span class="classifier">int</span></dt><dd><p>Number of stations. Has to be uneven if shape=cross.
+Else has to be N=M**2. Were M is a natural number</p>
+</dd>
+<dt>bazv<span class="classifier">np.ndarray(1D)</span></dt><dd><p>1D array containing the backzimuths per station (deg).</p>
+</dd>
+<dt>raypv<span class="classifier">np.ndarray(1D)</span></dt><dd><p>1D array containing the slownesses in s/m per backzimuth.</p>
+</dd>
+<dt>shift_max<span class="classifier">int</span></dt><dd><p>Maximum horizontal shift in m.</p>
+</dd>
+<dt>filename<span class="classifier">str</span></dt><dd><p>Name of the output file.</p>
+</dd>
+<dt>shape<span class="classifier">str</span></dt><dd><p>shape of the array</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>For Even Ns.</p>
+</dd>
+</dl>
+<p>None.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyglimer.utils.createvmodel">
+<span id="pyglimer-utils-createvmodel"></span><h3>pyglimer.utils.createvmodel<a class="headerlink" href="#module-pyglimer.utils.createvmodel" title="Permalink to this headline">¶</a></h3>
+<p>Create a 3D velocity model using Litho1.0</p>
+<p>Created on Fri May  1 12:11:03 2020</p>
+<dl class="simple">
+<dt>Author:</dt><dd><p>Peter Makus (<a class="reference external" href="mailto:peter&#46;makus&#37;&#52;&#48;student&#46;uib&#46;no">peter<span>&#46;</span>makus<span>&#64;</span>student<span>&#46;</span>uib<span>&#46;</span>no</a>)</p>
+</dd>
+</dl>
+<p>Last updated:</p>
+<dl class="py function">
+<dt id="pyglimer.utils.createvmodel.load_avvmodel">
+<code class="sig-prename descclassname">pyglimer.utils.createvmodel.</code><code class="sig-name descname">load_avvmodel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/createvmodel.html#load_avvmodel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.createvmodel.load_avvmodel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a model over the average P and S-wave velocities in the upper
+crust. These are used by the P-SV-SH rotation algorithm. Model data
+is extracted from the Litho1.0 model (location provided above).
+The package is distributed with a readily compiled model.</p>
+<p>Litho1.0 must be installed and location must be set correct for a
+complete compilation! However, function will first look in RAM and then
+in data for a pickle file.</p>
+<p>Compiling takes up to one hour!</p>
+<p>Model containing average velocities for upper crust.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.createvmodel.load_gyps">
+<code class="sig-prename descclassname">pyglimer.utils.createvmodel.</code><code class="sig-name descname">load_gyps</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">save</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">latb</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lonb</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/createvmodel.html#load_gyps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.createvmodel.load_gyps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiles the GyPSuM 3D-velocity object from included GyPSuM text files</p>
+<dl class="simple">
+<dt>save<span class="classifier">Bool, optional</span></dt><dd><p>Pickle the 3D velocity model after compiling it for the first time.
+This will allow for faster access to the model. Saving the model takes
+about 800 MB disk space.
+The default is False, as it lead to unstabilities with joblib.</p>
+</dd>
+<dt>latb<span class="classifier">Tuple, optional</span></dt><dd><p>Creates a submodel from the full model. In form (minlat, maxlat).</p>
+</dd>
+<dt>lonb<span class="classifier">Tuple, optional</span></dt><dd><p>(minlon, maxlon)</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>ComplexModel object</dt><dd><p>Object that can be queried for velocities.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyglimer.utils.geo_utils">
+<span id="pyglimer-utils-geo-utils"></span><h3>pyglimer.utils.geo_utils<a class="headerlink" href="#module-pyglimer.utils.geo_utils" title="Permalink to this headline">¶</a></h3>
+<p>Geographical utilities.</p>
+<dl class="simple">
+<dt>Author:</dt><dd><p>Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)</p>
+</dd>
+</dl>
+<p>Last Update: November 2019</p>
+<dl class="py function">
+<dt id="pyglimer.utils.geo_utils.cart2geo">
+<code class="sig-prename descclassname">pyglimer.utils.geo_utils.</code><code class="sig-name descname">cart2geo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">z</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/geo_utils.html#cart2geo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.cart2geo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes geographical coordinates from cartesian coordinates</p>
+<p>x (<cite>numpy.array</cite> corresponding to y/z arrays): x coordinate
+y (<cite>numpy.array</cite>): y coordinate
+z (<cite>numpy.array</cite>):  z coordinate</p>
+<p>r, latitude, longitude tuple</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.geo_utils.epi2euc">
+<code class="sig-prename descclassname">pyglimer.utils.geo_utils.</code><code class="sig-name descname">epi2euc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">epi</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/geo_utils.html#epi2euc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.epi2euc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts epicentral distance in to a euclidean distance along the
+corresponding chord.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.geo_utils.euc2epi">
+<code class="sig-prename descclassname">pyglimer.utils.geo_utils.</code><code class="sig-name descname">euc2epi</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">euc</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/geo_utils.html#euc2epi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.euc2epi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts euclidean distance to epicentral distance</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.geo_utils.geo2cart">
+<code class="sig-prename descclassname">pyglimer.utils.geo_utils.</code><code class="sig-name descname">geo2cart</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">r</span></em>, <em class="sig-param"><span class="n">latitude</span></em>, <em class="sig-param"><span class="n">longitude</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/geo_utils.html#geo2cart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.geo2cart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes cartesian coordinates from geographical coordinates</p>
+<p>r (float or <cite>numpy.array</cite> corresponding to lat/lon arrays): Radius of the
+location
+latitude (<cite>numpy.array</cite>): Latitude
+longitude (<cite>numpy.array</cite>): Longitude</p>
+<p>xyz coordinates coordinates of same size as latitude and longitude arrays</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.geo_utils.reckon">
+<code class="sig-prename descclassname">pyglimer.utils.geo_utils.</code><code class="sig-name descname">reckon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">distance</span></em>, <em class="sig-param"><span class="n">bearing</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/geo_utils.html#reckon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.reckon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes new latitude and longitude from bearing and distance.</p>
+<p>lat: in degrees
+lon: in degrees
+bearing: in degrees
+distance: in degrees</p>
+<p>lat, lon</p>
+<p>lat1 = math.radians(52.20472)  # Current lat point converted to radians
+lon1 = math.radians(0.14056)  # Current long point converted to radians
+bearing = np.pi/2 # 90 degrees
+# lat2  52.20444 - the lat result I’m hoping for
+# lon2  0.36056 - the long result I’m hoping for.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyglimer.utils.nextpowof2">
+<span id="pyglimer-utils-nextpowof2"></span><h3>pyglimer.utils.nextpowof2<a class="headerlink" href="#module-pyglimer.utils.nextpowof2" title="Permalink to this headline">¶</a></h3>
+<p>Created on Fri Oct 18 20:36:40 2019</p>
+<p>&#64;author: pm</p>
+<dl class="py function">
+<dt id="pyglimer.utils.nextpowof2.nextPowerOf2">
+<code class="sig-prename descclassname">pyglimer.utils.nextpowof2.</code><code class="sig-name descname">nextPowerOf2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/nextpowof2.html#nextPowerOf2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.nextpowof2.nextPowerOf2" title="Permalink to this definition">¶</a></dt>
+<dd><p>just returns the next higher power of two from n</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyglimer.utils.roundhalf">
+<span id="pyglimer-utils-roundhalf"></span><h3>pyglimer.utils.roundhalf<a class="headerlink" href="#module-pyglimer.utils.roundhalf" title="Permalink to this headline">¶</a></h3>
+<p>Rounds to next 0.5</p>
+<p>Created on Sat May  2 13:48:00 2020</p>
+<dl class="simple">
+<dt>Author:</dt><dd><p>Peter Makus (<a class="reference external" href="mailto:peter&#46;makus&#37;&#52;&#48;student&#46;uib&#46;no">peter<span>&#46;</span>makus<span>&#64;</span>student<span>&#46;</span>uib<span>&#46;</span>no</a>)</p>
+</dd>
+</dl>
+<p>Last updated:</p>
+<dl class="py function">
+<dt id="pyglimer.utils.roundhalf.roundhalf">
+<code class="sig-prename descclassname">pyglimer.utils.roundhalf.</code><code class="sig-name descname">roundhalf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">number</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/roundhalf.html#roundhalf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.roundhalf.roundhalf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rounds to next half of integer</p>
+<dl class="simple">
+<dt>number<span class="classifier">float/int</span></dt><dd><p>number to be rounded.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>float</dt><dd><p>Closest half of integer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyglimer.utils.signalproc">
+<span id="pyglimer-utils-signalproc"></span><h3>pyglimer.utils.signalproc<a class="headerlink" href="#module-pyglimer.utils.signalproc" title="Permalink to this headline">¶</a></h3>
+<p>Created on Sun Oct 20 10:31:02 2019</p>
+<p>&#64;author: pm</p>
+<dl class="py function">
+<dt id="pyglimer.utils.signalproc.convf">
+<code class="sig-prename descclassname">pyglimer.utils.signalproc.</code><code class="sig-name descname">convf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">nf</span></em>, <em class="sig-param"><span class="n">dt</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/signalproc.html#convf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.signalproc.convf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convolution conducted in the frequency domain.</p>
+<dl class="simple">
+<dt>u<span class="classifier">np.array</span></dt><dd><p>Array 1.</p>
+</dd>
+<dt>v<span class="classifier">np.array</span></dt><dd><p>Array 2.</p>
+</dd>
+<dt>nf<span class="classifier">INTEGER</span></dt><dd><p>Array length in frequency domain (use next power of 2).</p>
+</dd>
+<dt>dt<span class="classifier">FLOAT</span></dt><dd><p>Sampling Interval [s].</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>c<span class="classifier">np.array</span></dt><dd><p>Convolution of u with v.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.signalproc.corrf">
+<code class="sig-prename descclassname">pyglimer.utils.signalproc.</code><code class="sig-name descname">corrf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">nf</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/signalproc.html#corrf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.signalproc.corrf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cross-correlation in frequency domain,
+calculates the x=crosscorr(u,v). Hence, v is the flipped vector.</p>
+<dl class="simple">
+<dt>u<span class="classifier">np.array</span></dt><dd><p>flipped vector.</p>
+</dd>
+<dt>v<span class="classifier">np.array</span></dt><dd><p>Vector that the correlation is measured to.</p>
+</dd>
+<dt>nf<span class="classifier">INTEGER</span></dt><dd><p>Array length in frequency domain (use next power of 2).</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>x<span class="classifier">np.array</span></dt><dd><p>Correlation vector.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.signalproc.filter">
+<code class="sig-prename descclassname">pyglimer.utils.signalproc.</code><code class="sig-name descname">filter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">s</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">nf</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/signalproc.html#filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.signalproc.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convolves a filter with a signal (given in time domain).</p>
+<dl class="simple">
+<dt>s<span class="classifier">np.array</span></dt><dd><p>Signal given in time domain.</p>
+</dd>
+<dt>F<span class="classifier">np.array</span></dt><dd><p>Filter’s amplitude response.</p>
+</dd>
+<dt>dt<span class="classifier">FLOAT</span></dt><dd><p>Sampling interval [s].</p>
+</dd>
+<dt>nf<span class="classifier">INTEGER</span></dt><dd><p>Array length in frequency domain (use next power of 2).</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>s_f<span class="classifier">np.array</span></dt><dd><p>Filtered signal.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.signalproc.gaussian">
+<code class="sig-prename descclassname">pyglimer.utils.signalproc.</code><code class="sig-name descname">gaussian</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">N</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">width</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/signalproc.html#gaussian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.signalproc.gaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a zero-phase Gaussian function. In particular meant to be
+convolved with the impulse
+response that is the output of an iterative deconvolution</p>
+<dl class="simple">
+<dt>N<span class="classifier">INTEGER</span></dt><dd><p>Length of the desired array.</p>
+</dd>
+<dt>dt<span class="classifier">FLOAT</span></dt><dd><p>Sampling interval [s].</p>
+</dd>
+<dt>width<span class="classifier">FLOAT</span></dt><dd><p>Width parameter of the Gaussian function.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>G<span class="classifier">np.array</span></dt><dd><p>Gaussian window.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.signalproc.noise">
+<code class="sig-prename descclassname">pyglimer.utils.signalproc.</code><code class="sig-name descname">noise</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">N</span></em>, <em class="sig-param"><span class="n">A</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/signalproc.html#noise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.signalproc.noise" title="Permalink to this definition">¶</a></dt>
+<dd><p>create random noise
+INPUT:</p>
+<blockquote>
+<div><p>N: signal length
+A: maximal amplitude</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.signalproc.ricker">
+<code class="sig-prename descclassname">pyglimer.utils.signalproc.</code><code class="sig-name descname">ricker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sigma</span></em>, <em class="sig-param"><span class="n">N2</span></em>, <em class="sig-param"><span class="n">dt</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/signalproc.html#ricker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.signalproc.ricker" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a zero-phase Ricker / Mexican hat wavelet
+INPUT:</p>
+<blockquote>
+<div><p>sigma - standard deviation
+dt - sampling Interval
+N2 - number of samples/2 (halflength). Full length = 2*N2+1</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.signalproc.sshift">
+<code class="sig-prename descclassname">pyglimer.utils.signalproc.</code><code class="sig-name descname">sshift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">s</span></em>, <em class="sig-param"><span class="n">N2</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">shift</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/signalproc.html#sshift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.signalproc.sshift" title="Permalink to this definition">¶</a></dt>
+<dd><p>shift a signal by a given time-shift in the frequency domain
+INPUT:</p>
+<blockquote>
+<div><p>s: signal
+N2: length of the signal in f-domain (usually equals the next pof 2)
+dt: sampling interval
+shift: the time shift in seconds</p>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyglimer.utils.utils">
+<span id="pyglimer-utils-utils"></span><h3>pyglimer.utils.utils<a class="headerlink" href="#module-pyglimer.utils.utils" title="Permalink to this headline">¶</a></h3>
+<p>Module containing mini-utilities/convenience functions.</p>
+<dl class="simple">
+<dt>Author:</dt><dd><p>Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)</p>
+</dd>
+</dl>
+<p>Last Update: November 2019</p>
+<dl class="py function">
+<dt id="pyglimer.utils.utils.chunks">
+<code class="sig-prename descclassname">pyglimer.utils.utils.</code><code class="sig-name descname">chunks</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lst</span></em>, <em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/utils.html#chunks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.utils.chunks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yield successive n-sized chunks from lst. Useful for multi-threading</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.utils.dt_string">
+<code class="sig-prename descclassname">pyglimer.utils.utils.</code><code class="sig-name descname">dt_string</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyglimer/utils/utils.html#dt_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyglimer.utils.utils.dt_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns Time elapsed string depending on how much time has passed.
+After a certain amount of seconds it returns minutes, and after a certain
+amount of minutes it returns the elapsed time in hours.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="pyglimer-ccp">
+<h2>pyglimer.ccp<a class="headerlink" href="#pyglimer-ccp" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pyglimer-ccp-ccp">
+<h3>pyglimer.ccp.ccp<a class="headerlink" href="#pyglimer-ccp-ccp" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="pyglimer-ccp-compute-bin">
+<h3>pyglimer.ccp.compute.bin<a class="headerlink" href="#pyglimer-ccp-compute-bin" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="ccp.html" class="btn btn-neutral float-left" title="Common Conversion Point Stacking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Peter Makus
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
