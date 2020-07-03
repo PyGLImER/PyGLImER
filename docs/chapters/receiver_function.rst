@@ -22,15 +22,15 @@ Methods available for both RFStream and RFTrace objects
 .. hlist::
     :columns: 1
 
-    * :func:`pyglimer.rf.create.RFTrace.write()`
+    * :func:`~pyglimer.rf.create.RFTrace.write()`
         to write receiver function(s) to SAC file(s) (in time domain).
-    * :func:`pyglimer.rf.create.RFTrace.moveout()`
+    * :func:`~pyglimer.rf.create.RFTrace.moveout()`
         to migrate the receiver function(s) to depth domain using one of the provided depth models (either '3D' for GyPsum or 'iasp91.dat' for iasp91).
         Piercing points will be appended to the object.
-    * :func:`pyglimer.rf.create.RFTrace.ppoint()`
+    * :func:`~pyglimer.rf.create.RFTrace.ppoint()`
         to compute the piercing points in depth without migrating
         the receiver function
-    * :func:`pyglimer.rf.create.RFTrace.plot()`
+    * :func:`~pyglimer.rf.create.RFTrace.plot()`
         to plot the receiver function(s). The plot will be different
         depending on the type of receiver function: **1.** For `depth-migrated` RFs, the plot will be against
         depth. **2.** For an :class:`~pyglimer.rf.create.RFTrace` in time domain, the plot will be against time.
@@ -42,6 +42,6 @@ Methods for RFStream objects
 .. hlist::
     :columns: 1
 
-    * :func:`pyglimer.rf.create.RFTrace.station_stack()`
+    * :func:`~pyglimer.rf.create.RFStream.station_stack()`
         to create a station specific stack of all receiver function in the object.
         For that to work, all RFs, have to be from the same station.

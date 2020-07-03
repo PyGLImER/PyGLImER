@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Friday, 3rd July 2020 11:15:01 am
+Last Modified: Friday, 3rd July 2020 04:21:35 pm
 '''
 
 #!/usr/bin/env python3d
@@ -94,7 +94,7 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
     """
     ###########
     # logging
-    logger = logging.Logger("src.waveform.preprocess")
+    logger = logging.Logger("pyglimer.waveform.preprocess")
     logger.setLevel(logging.WARNING)
     if debug:
         logger.setLevel(logging.DEBUG)
@@ -112,7 +112,7 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
 
     #########
     # Logging for RF creation
-    rflogger = logging.getLogger("src.waveform.preprocess.RF")
+    rflogger = logging.getLogger("pyglimer.waveform.preprocess.RF")
     rflogger.setLevel(logging.WARNING)
     if debug:
         rflogger.setLevel(logging.DEBUG)

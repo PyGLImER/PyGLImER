@@ -34,35 +34,28 @@ def moveout(data, st, fname, latb, lonb, taper):
     Corrects the for the moveout of a converted phase. Flips time axis
     and polarity of SRF.
 
-    Parameters
-    ----------
-    data : np.array
-        Receiver Function.
-    st : obspy.core.AttributeDict
-        Stats from stream object.
-    fname : string
-        1D velocity model for moveout correction. Use '3D' for a 3D raytracing.
-    latb : Tuple
-        Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
+    :param data: Receiver Function.
+    :type data: 1D np.ndarray
+    :param st: Stats from stream object.
+    :type st: :class:`~obspy.core.AttributeDict`
+    :param fname: 1D velocity model for moveout correction.
+        Use '3D' for a 3D raytracing.
+    :type fname: str
+    :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
         Will remain unused for 1D RT.
-    lonb : Tuple
-        Tuple in Form (minlon, maxlon)
-    taper : Bool
-        If True, the last 10km of the RF will be tapered, which avoids
+    :type latb: tuple
+    :param lonb: Tuple in Form (minlon, maxlon)
+    :type lonb: tuple
+    :param taper: If True, the last 10km of the RF will be tapered, which avoids
         jumps in station stacks. If False,
         the upper 5 km will be tapered.
         Should be False for CCP stacks.
-
-    Returns
-    -------
-    z2 : np.array
-        Depth vector in km.
-    RF2 : np.array
-        Vector containing the depth migrated RF.
-    delta : np.array
-        Vector containing Euclidian distance of piercing point from the
-        station at depth z.
-
+    :type taper: bool
+    :return: z2 : Depth vector in km.
+        RF2 : Vector containing the depth migrated RF.
+        delta : Vector containing Euclidian distance of piercing point from the
+            station at depth z.
+    :rtype: 3 times 1D np.ndarray
     """
 
     onset = st.onset
@@ -160,7 +153,7 @@ def moveout(data, st, fname, latb, lonb, taper):
     return z2, RF2, delta2
 
 
-def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
+def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):    
     """
     Creates a phase delay table and calculates piercing points
     for a specific ray parameter,

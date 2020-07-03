@@ -1,14 +1,12 @@
-"""
-
+'''
 Module that covers the binning part of the CCP computation.
+Authors: Peter Makus (peter.makus@student.uib.no)
+        and
+        Lucas Sawade (lsawade@princeton.edu)
 
-Author:
-    Lucas Sawade (lsawade@princeton.edu)
-
-
-Last Update: November 2019
-
-"""
+Created: November 2019
+Last Modified: Friday, 3rd July 2020 05:03:45 pm
+'''
 
 import logging
 import time
@@ -16,11 +14,11 @@ import time
 import numpy as np
 from scipy.spatial import KDTree
 
-from src.constants import R_EARTH
+from ...constants import R_EARTH
 # Local imports
 # from ... import logger
-from src.utils.geo_utils import geo2cart, cart2geo, epi2euc
-from src.utils.utils import dt_string
+from ...utils.geo_utils import geo2cart, cart2geo, epi2euc
+from ...utils.utils import dt_string
 
 logger = logging.Logger("binlogger")
 
@@ -50,29 +48,23 @@ class BinGrid(object):
     def __init__(self, latitude, longitude, edist, phase,
                  verbose=True):
         """
-
-        Parameters
-        ----------
-        latitude (1-D `numpy.array`): Latitudes
-
-        longitude (1-D `numpy.array`): Longitudes
-
-        edist (float): epicentral distance between bin centres
-
-        phase : str
-            Seismic phase either "S" or "P". Phase "S" will lead to more
-            grid points being created due to flatter incidence angle. Hence,
-            Phase can be "S" for PRFs but not the other way around. However,
-            "P" is computationally more efficient.
-
-        verbose: if True --> console output
-
-        Returns
-        -------
         BinGrid object that can be used to find closest neighbours to
         stations and CCP bins
 
-        """
+        :param latitude: Latitudes
+        :type latitude: 1-D `numpy.array`
+        :param longitude: Longitudes
+        :type longitude: 1-D `numpy.array`
+        :param edist: Distance (in degree) between bin centres.
+        :type edist: float
+        :param phase: Seismic phase either "S" or "P". Phase "S" will lead to
+            more grid points being created due to flatter incidence angle.
+            Hence, phase can be "S" for PRFs but not the other way around.
+            However, "P" is computationally more efficient.
+        :type phase: str
+        :param verbose: consoel output?, defaults to True
+        :type verbose: bool, optional
+        """        
 
         # Populate stuff
         self.stations = np.unique(np.stack((latitude, longitude)).T, axis=0)
@@ -204,23 +196,19 @@ class BinGrid(object):
         return self.bins
 
     def query_station_tree(self, latitude, longitude, maxdist):
-        """Uses the query function of the KDTree but takes geolocations as
+        """
+        Uses the query function of the KDTree but takes geolocations as
         input.
 
-        Parameters
-        ----------
-        latitude: latitudes to be queried
-        longitude: longitudes to be queried
-        maxdist: maximum  distance to be queried in epicentral distance
-
-        Returns
-        -------
-        eucd : 1Dnp.array
-            Euclidian distances to next point
-
-        i: 1D np.array
-            Indices of next neighbour.
-        """
+        :param latitude: latitudes to be queried
+        :type latitude: 1D `numpy.ndarray`
+        :param longitude: longitudes to be queried
+        :type longitude: 1D `numpy.ndarray`
+        :param maxdist: maximum  distance to be queried in degree
+        :type maxdist: float
+        :return: Euclidian distances to next point, indices of next neighbour.
+        :rtype: Tuple with 2 1D `numpy.ndarray`
+        """        
 
         # Compute maxdist in euclidean space
         maxdist_euc = epi2euc(maxdist)
@@ -236,28 +224,23 @@ class BinGrid(object):
         return eucd, i
 
     def query_bin_tree(self, latitude, longitude, binrad, k):
-        """Uses the query function of the KDTree but takes geolocations as
+        """
+        Uses the query function of the KDTree but takes geolocations as
         input.
 
-        Parameters
-        ----------
-        latitude: latitudes to be queried
-        longitude: longitudes to be queried
-        binrad: maximum  distance to be queried in euclidean distance
+        :param latitude: latitudes to be queried
+        :type latitude: 1-D `numpy.ndarray`
+        :param longitude: longitudes to be queried
+        :type longitude: 1-D `numpy.ndarray`
+        :param binrad: maximum  distance to be queried in euclidean distance
                 Equals the radius of the bin, higher = more averaging ->
                 --> less noise, lower resolution
-        k: int
-            Number of neighbours to return. Note that this directly depends
-            on the ratio of deltabin/binrad.
-
-
-        Returns
-        -------
-        eucd : 1Dnp.array
-            Euclidian distances to next point
-
-        i: 1D np.array
-            Indices of next neighbour.
+        :type binrad: float
+        :param k: Number of neighbours to return. Note that this directly
+            depends on the ratio of deltabin/binrad.
+        :type k: int
+        :return: Indices of next neighbour.
+        :rtype: 1D np.array
         """
 
         # Get cartesian coordinate points

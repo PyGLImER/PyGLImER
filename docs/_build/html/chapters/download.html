@@ -90,6 +90,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ccp.html">Common Conversion Point Stacking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
 </ul>
 
@@ -161,7 +162,7 @@
 <p>Our first step will be to download the data from FDSN webservices for a certain time window.</p>
 <div class="section" id="the-request-class">
 <h2>The Request Class<a class="headerlink" href="#the-request-class" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference internal" href="API.html#src.waveform.request.Request" title="src.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.waveform.request.Request</span></code></a> class handles all steps from download, over preprocessing,
+<p>The <a class="reference internal" href="API.html#id0" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> class handles all steps from download, over preprocessing,
 to deconvolution (i.e. the creation of a receiver function in time domain).
 It will first create a folder structure as defined by the user. Those contain raw (i.e. unprocessed, but downsampled)
 waveform files in miniseed format, preprocessed (3 component in RTZ coordinate system, and filtered/discarded
@@ -175,9 +176,9 @@ rawdir is chosen (i.e. download new data, if any available).</p>
 </div>
 <p>A Request object has three public methods:</p>
 <table class="hlist"><tr><td><ul class="simple">
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">src.waveform.request.Request.download_evtcat()</span></code></p></li>
-<li><p><a class="reference internal" href="API.html#src.waveform.request.Request.download_waveforms" title="src.waveform.request.Request.download_waveforms"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.waveform.request.Request.download_waveforms()</span></code></a></p></li>
-<li><p><a class="reference internal" href="API.html#src.waveform.request.Request.preprocess" title="src.waveform.request.Request.preprocess"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.waveform.request.Request.preprocess()</span></code></a></p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">download_evtcat()</span></code></p></li>
+<li><p><a class="reference internal" href="API.html#id2" title="pyglimer.waveform.request.Request.download_waveforms"><code class="xref py py-func docutils literal notranslate"><span class="pre">download_waveforms()</span></code></a></p></li>
+<li><p><a class="reference internal" href="API.html#id3" title="pyglimer.waveform.request.Request.preprocess"><code class="xref py py-func docutils literal notranslate"><span class="pre">preprocess()</span></code></a></p></li>
 </ul>
 </td></tr></table>
 <p>The functions are responsible for:</p>
@@ -187,7 +188,7 @@ rawdir is chosen (i.e. download new data, if any available).</p>
 <li><p>Downsampling the raw data, preprocessing the raw data and saving the filtered data in a different directory, and creating receiver functions.</p></li>
 </ul>
 </td></tr></table>
-<p>However, all parameters are already set, when initialising the <a class="reference internal" href="API.html#src.waveform.request.Request" title="src.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.waveform.request.Request</span></code></a> object.</p>
+<p>However, all parameters are already set, when initialising the <a class="reference internal" href="API.html#id0" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> object.</p>
 </div>
 </div>
 

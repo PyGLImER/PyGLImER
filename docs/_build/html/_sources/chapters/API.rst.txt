@@ -16,20 +16,22 @@ pyglimer.waveform.request
     :show-inheritance:
 
 pyglimer.waveform.download
-=========================
+==========================
 
 .. automodule:: pyglimer.waveform.request
     :members:
     :show-inheritance:
 
 pyglimer.waveform.preprocess
-=========================
+============================
+
 .. automodule:: pyglimer.waveform.preprocess
     :members:
     :show-inheritance:
 
 pyglimer.waveform.qc
 =========================
+
 .. automodule:: pyglimer.waveform.qc
     :members:
     :show-inheritance:
@@ -41,7 +43,7 @@ pyglimer.waveform.rotate
     :show-inheritance:
 
 pyglimer.waveform.errorhandler
-=========================
+==============================
 .. automodule:: pyglimer.waveform.errorhandler
     :members:
     :show-inheritance:

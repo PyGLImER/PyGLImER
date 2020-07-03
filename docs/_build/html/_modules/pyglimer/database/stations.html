@@ -183,24 +183,25 @@
 
 
 <div class="viewcode-block" id="redownload_missing_statxmls"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.database.stations.redownload_missing_statxmls">[docs]</a><span class="k">def</span> <span class="nf">redownload_missing_statxmls</span><span class="p">(</span><span class="n">clients</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">statloc</span><span class="p">,</span> <span class="n">rawdir</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Fairly primitive program that walks through existing raw waveforms in</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fairly primitive program that walks through existing raw waveforms in</span>
 <span class="sd">    rawdir and looks for missing station xmls in statloc and, afterwards,</span>
 <span class="sd">    attemps a redownload</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    clients : list</span>
-<span class="sd">        List of clients (see obspy documentation for obspy.Client).</span>
-<span class="sd">    phase : string</span>
-<span class="sd">        Either &quot;P&quot; or &quot;S&quot;, defines in which folder to look for mseeds.</span>
-<span class="sd">    statloc : string</span>
-<span class="sd">        Folder, in which the station xmls are saved.</span>
-<span class="sd">    rawdir : string</span>
-<span class="sd">        Uppermost directory, in which the raw mseeds are saved (i.e. the</span>
-<span class="sd">        directory above the phase division).</span>
-<span class="sd">    verbose : bool, optional</span>
-<span class="sd">        Show some extra information, by default True</span>
+<span class="sd">    :param clients: List of clients (see obspy documentation for</span>
+<span class="sd">        `~obspy.Client`).</span>
+<span class="sd">    :type clients: list</span>
+<span class="sd">    :param phase: Either &quot;P&quot; or &quot;S&quot;, defines in which folder to look for mseeds.</span>
+<span class="sd">    :type phase: str</span>
+<span class="sd">    :param statloc: Folder, in which the station xmls are saved</span>
+<span class="sd">    :type statloc: str</span>
+<span class="sd">    :param rawdir: Uppermost directory, in which the raw mseeds are saved</span>
+<span class="sd">        (i.e. the directory above the phase division).</span>
+<span class="sd">    :type rawdir: str</span>
+<span class="sd">    :param verbose: Show some extra information, by default True</span>
+<span class="sd">    :type verbose: bool, optional</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
+
     <span class="n">ex</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">statloc</span><span class="p">)</span>
     
     <span class="c1"># remove file identifier</span>
@@ -245,23 +246,19 @@
 <span class="sd">        will be no option to save it, as it should be up to date.</span>
 <span class="sd">        However, there is an export function</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        preproloc: str</span>
-<span class="sd">            Parental folder, in which the preprocessed mseeds are saved</span>
-<span class="sd">            (i.e. the folder above the phase division).</span>
-<span class="sd">        phase: str - optional</span>
-<span class="sd">            If just one of the primary phases should be checked - useful for</span>
-<span class="sd">            computational efficiency, when creating ccp. Default is None.</span>
-<span class="sd">        use_old: Bool - optional</span>
-<span class="sd">            When turned on it will read in the saved csv file. That is a lot</span>
-<span class="sd">            faster, but it will obviously not update.</span>
-<span class="sd">        </span>
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        None.</span>
+<span class="sd">        :param preproloc: Parental folder, in which the preprocessed mseeds are</span>
+<span class="sd">            saved (i.e. the folder above the phase division).</span>
+<span class="sd">        :type preproloc: str</span>
+<span class="sd">        :param phase: If just one of the primary phases should be checked -</span>
+<span class="sd">            useful for computational efficiency, when creating ccp.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        :type phase: str, optional</span>
+<span class="sd">        :param use_old: When turned on it will read in the saved csv file.</span>
+<span class="sd">            That is a lot faster, but it will obviously not update,</span>
+<span class="sd">            defaults to False</span>
+<span class="sd">        :type use_old: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
 
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preproloc</span> <span class="o">=</span> <span class="n">preproloc</span>
         
         <span class="k">if</span> <span class="n">phase</span><span class="p">:</span>
@@ -271,7 +268,7 @@
         
         <span class="c1"># 1. Initiate logger</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">(</span>
-            <span class="s2">&quot;src.database.stations.StationDBaseLogger&quot;</span><span class="p">)</span>
+            <span class="s2">&quot;pyglimer.database.stations.StationDBaseLogger&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
 
         <span class="c1"># FileHandler</span>
@@ -299,11 +296,6 @@
     <span class="k">def</span> <span class="nf">__create__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create panda database.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        None.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">:</span>
             <span class="c1"># Create data dictionary</span>
@@ -428,22 +420,20 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a subset of the database filtered by location.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        lat : Tuple</span>
-<span class="sd">            Latitude boundaries in the form (minimum latitude, maximum lat).</span>
-<span class="sd">        lon : Tuple</span>
-<span class="sd">            Longitude boundaries in the form (minimum longitude, maximum lon).</span>
-<span class="sd">        phase: string - optional</span>
-<span class="sd">            &#39;P&#39; or &#39;S&#39;. If option is given, it will only return stations with</span>
-<span class="sd">            accepted receiver functions for this phase. The default is None.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        subset : pandas.DataFrame</span>
-<span class="sd">            Subset of the original DataFrame filtered by location.</span>
-
+<span class="sd">        :param lat: Latitude boundaries in the form</span>
+<span class="sd">            (minimum latitude, maximum lat).</span>
+<span class="sd">        :type lat: Tuple</span>
+<span class="sd">        :param lon: Longitude boundaries in the form</span>
+<span class="sd">            (minimum longitude, maximum lon).</span>
+<span class="sd">        :type lon: Tuple</span>
+<span class="sd">        :param phase: &#39;P&#39; or &#39;S&#39;. If option is given, it will only return</span>
+<span class="sd">            stations with accepted receiver functions for this phase.</span>
+<span class="sd">            The default is None.</span>
+<span class="sd">        :type phase: str, optional</span>
+<span class="sd">        :return: Subset of the original DataFrame filtered by location.</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
+      
         <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">lat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">lat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">lon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -458,7 +448,8 @@
         <span class="k">return</span> <span class="n">subset</span>
 
     <span class="k">def</span> <span class="nf">find_stations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns list of networks and stations inside a geoboundary</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns list of networks and stations inside a geoboundary</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geo_boundary</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">phase</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">subset</span><span class="p">[</span><span class="s1">&#39;network&#39;</span><span class="p">]),</span> <span class="nb">list</span><span class="p">(</span><span class="n">subset</span><span class="p">[</span><span class="s1">&#39;station&#39;</span><span class="p">])</span>

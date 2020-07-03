@@ -8,7 +8,7 @@ Conversion Point (CCP) stacks.
 
 CCPStack objects
 ++++++++++++++++
-In PyGLImER, the base class enabling CCP stacking is the :class:`~PyGLImER.ccp.CCPStack` class. However, to understand how CCP-Stacking
+In PyGLImER, the base class enabling CCP stacking is the :class:`~pyglimer.ccp.ccp.CCPStack` class. However, to understand how CCP-Stacking
 in GLImER is implemented, we will have to have a small intermezzo about binning.
 
 CCP bins
@@ -32,21 +32,21 @@ our digital image, but the resolving power will not increase). Therefore, PyGLIm
 
 Creating a CCP stack in PyGLImER
 ================================
-CCP stacks in PyGLImER are usually not created by initialising the :class:`~PyGLImER.ccp.CCPStack` class but by calling the
-:func:`~PyGLImER.ccp.init_ccp()` function, which, itself, initialises the aforementioned object.
+CCP stacks in PyGLImER are usually not created by initialising the :class:`~pyglimer.ccp.ccp.CCPStack` class but by calling the
+:func:`~pyglimer.ccp.ccp.init_ccp()` function, which, itself, initialises the aforementioned object.
 
-Using :func:`~PyGLImER.ccp.init_ccp()`, there are two ways to create a :class:`~PyGLImER.ccp.CCPStack` object:
+Using :func:`~pyglimer.ccp.ccp.init_ccp()`, there are two ways to create a :class:`~pyglimer.ccp.ccp.CCPStack` object:
 **1.** By Creating a bingrid tailored to be used with data from predefined networks and stations (i.e. one
 has to know network and station codes for the desired stack. **2.** More commonly, one would like to create
-a CCP stack containing all available data for a given area. In order to that, :func:`~PyGLImER.ccp.init_ccp()`
+a CCP stack containing all available data for a given area. In order to that, :func:`~pyglimer.ccp.ccp.init_ccp()`
 can be called with the ``geocoords`` parameter. Then, PyGLImER will automatically find all stations available
 in the given area and create a bingrid around those data.
 
-**Populating the CCP object** is done by :func:`~PyGLImER.ccp.init_ccp()` if called using the ``compute_stack=True``
-argument (recommended), else one will have to call :func:`~PyGLImER.ccp.CCPStack.compute_stack()`.
+**Populating the CCP object** is done by :func:`~pyglimer.ccp.ccp.init_ccp()` if called using the ``compute_stack=True``
+argument (recommended), else one will have to call :func:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`.
 
 **Finalising the CCP object.** Up to now data was only saved in the object and we have not created an actual CCP stack, yet.
-We can do just that by calling :func:`~PyGLImER.ccp.CCPStack.conclude_ccp()`. Here, we can decide **1.** if we want to keep
+We can do just that by calling :func:`~pyglimer.ccp.ccp.CCPStack.conclude_ccp()`. Here, we can decide **1.** if we want to keep
 empty bins **2.** what should be the threshold for a minimum amount of data per bin **3.** Whether we want to discards bins
 that are on water surfaces or keep them.
 

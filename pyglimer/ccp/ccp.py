@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Friday, 3rd July 2020 03:47:37 pm
+Last Modified: Friday, 3rd July 2020 05:36:27 pm
 '''
 
 #!/usr/bin/env python3
@@ -34,20 +34,6 @@ from ..utils.createvmodel import _MODEL_CACHE, ComplexModel
 from ..utils.geo_utils import epi2euc
 from .plot_utils.plot_bins import plot_bins
 
-# Loggers for the CCP script
-logger = logging.Logger('pyglimer.ccp.ccplogger')
-logger.setLevel(logging.INFO)
-
-# Create handler to the log
-fh = logging.FileHandler('logs/ccp.log')
-fh.setLevel(logging.INFO)
-logger.addHandler(fh)
-
-# Create Formatter
-fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
-fh.setFormatter(fmt)
-
-
 def init_ccp(spacing, vel_model, phase, statloc='output/stations',
              preproloc='output/waveforms/preprocessed',
              rfloc='output/waveforms/RF', network=None,
@@ -59,58 +45,60 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
     The stack can be limited to some networks and
     stations.
 
-    Parameters
-    ----------
-    spacing : float
-        Angular distance between each bin point.
-    vel_model : str
-        Velocity model located in data. Either iasp91 (1D raytracing) or
-        3D for 3D raytracing using a model compiled from GyPSuM.
-    phase : str, optional
-        Either 'S' or 'P'. Use 'S' if dataset contains both SRFs and PRFs.
-        The default is config.phase.
-    network : str or list, optional
-        Network or networks that are to be included in the ccp stack.
+    :param spacing: Angular distance between each bingrid point.
+    :type spacing: float
+    :param vel_model: Velocity model located in data. Either iasp91 (1D
+        raytracing) or 3D for 3D raytracing using a model compiled from GyPSuM.
+    :type vel_model: str
+    :param phase: Either 'S' or 'P'. Use 'S' if dataset contains both SRFs and
+        PRFs.
+    :type phase: str
+    :param statloc: Directory in that the station xmls are saved,
+        defaults to 'output/stations'
+    :type statloc: str, optional
+    :param preproloc: Parental directory in that the preprocessed miniseeds are
+        saved, defaults to 'output/waveforms/preprocessed'
+    :type preproloc: str, optional
+    :param rfloc: Parental directory in that the RFs are saved,
+        defaults to 'output/waveforms/RF'
+    :type rfloc: str, optional
+    :param network: Network or networks that are to be included in the ccp stack.
         Standard unix wildcards are allowed. If None, the whole database
-        will be used. The default is None.
-    station : str or list, optional
-        Station or stations that are to be included in the ccp stack.
-        Standard unix wildcards are allowed. Can only be list if
+        will be used. The default is None., defaults to None
+    :type network: str or list, optional
+    :param station: Station or stations that are to be included in the ccp
+        stack. Standard unix wildcards are allowed. Can only be list if
         type(network)=str. If None, the whole database will be used.
         The default is None.
-    geocoords : Tuple, optional
-        An alternative way of selecting networks and stations. Given
-        in the form (minlat, maxlat, minlon, maxlon)
-    compute_stack : Bool, optional
-        If true it will compute the stack by calling ccp.compute_stack().
+    :type station: str or list, optional
+    :param geocoords: An alternative way of selecting networks and stations.
+        Given in the form (minlat, maxlat, minlon, maxlon), defaults to None
+    :type geocoords: Tuple, optional
+    :param compute_stack: If true it will compute the stack by calling
+        :func:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`.
         That can take a long time! The default is False.
-    cache : Bool, optional
-        Only relevant if compute_stack. Cache computed arrays to free RAM.
-        Will increase computation time. The default is False
-    binrad : float, optional
-            Only used if compute_stack=True
+    :type compute_stack: bool, optional
+    :param binrad: Only used if compute_stack=True
             Defines the bin radius with bin radius = binrad*distance_bins.
             Full Overlap = cosd(30), Full coverage: 1.
-            The default is full overlap
-    append_pp : Bool, optional
-        Only used if compute_stack=True.
+            The default is full overlap.
+    :type binrad: float, optional
+    :param append_pp: Only used if compute_stack=True.
         Appends piercing point locations to object. Can be used to plot
         pps on map. Not recommended for large datasets as it takes A LOT
         longer and makes the file a lot larger.
-        The default is False
-    save : Bool or str, optional
-        Either False if the ccp should not be saved or string with filename
+        The default is False., defaults to False
+    :type append_pp: bool, optional
+    :param save: Either False if the ccp should not be saved or string with filename
         will be saved. Will be saved as pickle file.
         The default is False.
-    verbose : Bool, optional
-        Display info in terminal. The default is True.
-
-    Returns
-    -------
-    ccp : .ccp.CCPStack
-        Returns a CCPStack object containing all information.
-
-    """
+    :type save: ool or str, optional
+    :param verbose: Display info in terminal., defaults to True
+    :type verbose: bool, optional
+    :raises TypeError: For wrong inputs.
+    :return: CCPStack object.
+    :rtype: :class:`~pyglimer.ccp.ccp.CCPstack`
+    """    
     # create empty lists for station latitude and longitude
     lats = []
     lons = []
@@ -188,27 +176,19 @@ def read_ccp(filename='ccp.pkl', folder='output/ccps', fmt=None):
     """
     Read CCP-Stack class file from input folder.
 
-    Parameters
-    ----------
-    filename : str, optional
-        Filename of the input file with file ending. The default is 'ccp.pkl'.
-    folder : str, optional
-        Input folder without concluding forward slash.
-    fmt : str, optional
-        File format, can be none if the filename has an ending, possible
-        options are "pickle. The default is None.
-
-    Raises
-    ------
-    ValueError
-        For wrong input.
-
-    Returns
-    -------
-    ccp : ccp.CCPStack
-        CCPStack object.
-
+    :param filename: Filename of the input file with file ending.
+        The default is 'ccp.pkl'.
+    :type filename: str, optional
+    :param folder: Input folder, defaults to 'output/ccps'
+    :type folder: str, optional
+    :param fmt: File format, can be none if the filename has an ending,
+        possible options are "pickle. The default is None.
+    :type fmt: str, optional
+    :raises ValueError: For unknown formats
+    :return: CCPStack object
+    :rtype: :class:`~pyglimer.ccp.ccp.CCPStack`
     """
+
     # Trying to identify filetype from ending:
     if not fmt:
         x = filename.split('.')
@@ -232,35 +212,42 @@ def read_ccp(filename='ccp.pkl', folder='output/ccps', fmt=None):
 
 
 class CCPStack(object):
-    """Is a CCP Stack matrix. It's size depends on stations that are used as
+    """Is a CCP Stack matrix. Its size depends upon stations that are used as
     input."""
 
     def __init__(self, latitude, longitude, edist, phase,
                  verbose=True):
         """
-        Creates an empy Matrix template for a CCP stack
+        Creates an empy object template for a CCP stack
 
-        Parameters
-        ----------
-        latitude : 1-D np.array
-            Latitudes of all seismic stations.
-        longitude : 1-D np.array
-            Longitudes of all seismic stations.
-        edist : float
-            Grid density in angular distance.
-        phase : str
-            Seismic phase either "S" or "P". Phase "S" will lead to more
-            grid points being created due to flatter incidence angle. Hence,
-            Phase can be "S" for PRFs but not the other way around. However,
-            "P" is computationally more efficient.
-        verbose : Bool, optional
-            If true -> console output. The default is True.
-
-        Returns
-        -------
-        None.
-
+        :param latitude: Latitudes of all seismic stations.
+        :type latitude: 1-D numpy.ndarray
+        :param longitude: Longitudes of all seismic stations.
+        :type longitude: 1-D numpy.ndarray
+        :param edist: Inter bin distance in angular distance.
+        :type edist: float
+        :param phase: Seismic phase either "S" or "P". Phase "S" will lead to
+            more grid points being created due to flatter incidence angle.
+            Hence, phase can be "S" for PRFs but not the other way around.
+            However, "P" is computationally more efficient.
+        :type phase: str
+        :param verbose: If true -> console output. The default is True., defaults to True
+        :type verbose: bool, optional
         """
+
+        # Loggers for the CCP script
+        self.logger = logging.Logger('pyglimer.ccp.ccp')
+        self.logger.setLevel(logging.INFO)
+
+        # Create handler to the log
+        fh = logging.FileHandler('logs/ccp.log')
+        fh.setLevel(logging.INFO)
+        self.logger.addHandler(fh)
+
+        # Create Formatter
+        fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
+        fh.setFormatter(fmt)
+
         # Create bingrid
         self.bingrid = BinGrid(latitude, longitude, edist, phase=phase,
                                verbose=verbose)
@@ -288,22 +275,19 @@ class CCPStack(object):
 
     def query_bin_tree(self, latitude, longitude, data, n_closest_points):
         """
-        Find closest bins for given latitude and longitude.
+        Find closest bins for provided latitude and longitude.
 
-        Parameters
-        ----------
-        latitude : 1D np.array
-            Latitudes of piercing points.
-        longitude : 1D np.array
-            Longitudes of piercing points.
-        data : 1D np.array
-            Depth migrated receiver function data
-
-        Returns
-        -------
-        None.
-
-        """
+        :param latitude: Latitudes of piercing points.
+        :type latitude: 1-D numpy.ndarray
+        :param longitude: Longitudes of piercing points.
+        :type longitude: 1-D numpy.ndarray
+        :param data: Depth migrated receiver function data
+        :type data: 1-D numpy.ndarray
+        :param n_closest_points: Number of closest points to be found.
+        :type n_closest_points: int
+        :return: bin index k and depth index j
+        :rtype: int
+        """        
         i = self.bingrid.query_bin_tree(latitude, longitude, self.binrad_eucl,
                                         n_closest_points)
 
@@ -331,59 +315,55 @@ class CCPStack(object):
         Note that the grid should be big enough for the provided networks and
         stations. Best to create the CCPStack object by using ccp.init_ccp().
 
-        Parameters
-        ----------
-        vel_model : str
-            Velocity model located in data. Either 'iasp91' for 1D raytracing
-            or 3D for 3D raytracing with GYPSuM model. Using 3D Raytracing
-            will cause the code to take about 30% longer.
-        rfloc : str , optional
-            Parental folder in which the receiver functions in time domain are.
-            The default is 'output/waveforms/RF.
-        statloc : str, optional
-            Folder containing the response information. Only needed if option
-            geocoords is used. The default is 'output/stations'.
-        statloc : str, optional
-            Parental folder containing the preprocessed mseeds. Only needed if
-            option geocoords is used.
-            The default is 'output/waveforms/preprocessed'.
-        network : str or list, optional
-            This parameter is ignored if the pattern is given.
+        :param vel_model: Velocity model located in data. Either `iasp91.dat`
+            for 1D raytracing or `3D` for 3D raytracing with GYPSuM model.
+            Using 3D Raytracing will cause the code to take about 30% longer.
+        :type vel_model: str
+        :param rfloc: Parental folder in which the receiver functions in
+            time domain are. The default is 'output/waveforms/RF.
+        :type rfloc: str, optional
+        :param statloc: Folder containing the response information. Only needed
+             if option geocoords is used. The default is 'output/stations'.
+        :type statloc: str, optional
+        :param preproloc: Parental folder containing the preprocessed mseeds.
+            Only needed if option geocoords is used. The default is
+            'output/waveforms/preprocessed'. 
+        :type preproloc: str, optional
+        :param network: This parameter is ignored if the pattern is given.
             Network or networks that are to be included in the ccp stack.
             Standard unix wildcards are allowed. If None, the whole database
             will be used. The default is None.
-        station : str or list, optional
-            This parameter is ignored if the pattern is given.
+        :type network: str or list, optional
+        :param station: This parameter is ignored if the pattern is given.
             Station or stations that are to be included in the ccp stack.
             Standard unix wildcards are allowed.
             Can only be list if type(network)=str.
             If None, the whole database
             will be used. The default is None.
-        geocoords : Tuple, optional
-            Include all stations in the rectangle given by (minlat, maxlat,
-            minlon, maxlon). Will be ignored if pattern or network is given,
-            by default None.
-        save : str or Bool
-            Either False if the ccp should not be saved or string with filename
-            will be saved in config.ccp. Will be saved as pickle file.
-        binrad : float, optional
-            Defines the bin radius with bin radius = binrad*distance_bins.
+        :type station: str or list, optional
+        :param geocoords: Include all stations in the rectangle given by
+            (minlat, maxlat, minlon, maxlon). Will be ignored if pattern or
+            network is given, by default None.
+        :type geocoords: Tuple, optional
+        :param pattern: Search pattern for .sac files. Overwrites network,
+            station, and geocooords options. Usually only used by
+            :func:`~pyglimer.ccp.ccp.init_ccp()`, defaults to None.
+        :type pattern: list, optional
+        :param save: Either False if the ccp should not be saved or string with
+            filename will be saved in config.ccp. Will be saved as pickle file.
+        :type save: str or bool, optional
+        :param binrad: Defines the bin radius with
+            bin radius = binrad*distance_bins.
             Full Overlap = cosd(30), Full coverage: 1.
-            The default is full overlap
-        append_pp : Bool, optional
-            appends piercing point coordinates if True, so tey can later be
-            plotted. Not recommended for big data sets.
-            The default is false.
-        cache : Bool, optional
-            If one experiences memory leaps, this should be set = True.
-            Will be slower than working entirely in the RAM & need a considerable
-            amount of hd space. The default is False.
+            The default is full overlap.
+        :type binrad: float, optional
+        :param append_pp: appends piercing point coordinates if True, so they
+            can later be plotted. Not recommended for big data sets.
+            The default is false. **Deprecated for multi-core**
+        :type append_pp: bool, optional
+        :raises ValueError: For wrong inputs
+        """        
 
-        Returns
-        -------
-        None (Data are appended to ccp object).
-
-        """
         if binrad < np.cos(np.radians(30)):
             raise ValueError(
                 """Minimum allowed binradius is cos(30deg)* bin distance.
@@ -409,7 +389,7 @@ class CCPStack(object):
         folder = os.path.join(rfloc, self.bingrid.phase)
 
         start = time.time()
-        logger.info('Stacking started')
+        self.logger.info('Stacking started')
 
         if network and type(network) == str and not pattern:
             # Loop over fewer files
@@ -483,18 +463,18 @@ class CCPStack(object):
         # Data counter
         self.N = self.N + len(streams)
 
-        logger.info('Number of receiver functions used: '+str(self.N))
+        self.logger.info('Number of receiver functions used: '+str(self.N))
         print('Number of receiver functions used: '+str(self.N))
 
         # Split job into n chunks
         num_cores = cpu_count()
 
-        logger.info('Number of cores used: '+str(num_cores))
+        self.logger.info('Number of cores used: '+str(num_cores))
         print('Number of cores used: '+str(num_cores))
 
         mem = virtual_memory()
 
-        logger.info('Available system memory: '+str(mem.total*1e-6)+'MB')
+        self.logger.info('Available system memory: '+str(mem.total*1e-6)+'MB')
         print('Available system memory: '+str(mem.total*1e-6)+'MB')
 
         # Check maximum information that can be saved
@@ -622,9 +602,9 @@ only show the progress per chunk.')
         #         print('Could not clean-up automatically.')
 
         end = time.time()
-        logger.info("Stacking finished.")
+        self.logger.info("Stacking finished.")
         print('Stacking finished.')
-        logger.info(dt_string(end-start))
+        self.logger.info(dt_string(end-start))
         self.conclude_ccp()
 
         # save file
@@ -636,30 +616,31 @@ only show the progress per chunk.')
         """
         Takes in chunks of data to be processed on one core.
 
-        Parameters
-        ----------
-        stream : list
-            List of file locations.
-        append_pp : Bool
-            Should piercing points be appended?.
-        n_closest_points : int
-            Number of Closest points that the KDTree should query.
-        vmodel : str
-            Name of the velocity model that should be used for the raytraycing.
-        latb : Tuple
-            Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
-            Will remain unused for 1D RT.
-        lonb : Tuple
-            Tuple in Form (minlon, maxlon).
-        filter : Bool, Tuple - optional
-            Should the RFs be filtered before the ccp stack? If so, provide
-            (lowcof, highcof).
+        :param stream: List of file locations.
+        :type stream: list
+        :param append_pp: Should piercing points be appended?.
+        :type append_pp: Bool
+        :param n_closest_points: Number of Closest points that the KDTree
+            should query.
+        :type n_closest_points: int
+        :param vmodel: Name of the velocity model that should be used for the
+            raytraycing.
+        :type vmodel: str
+        :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
+            raytraycing. Will remain unused for 1D RT.
+        :type latb: Tuple
+        :param lonb: Tuple in Form (minlon, maxlon). To save RAM on 3D
+            raytraycing. Will remain unused for 1D RT
+        :type lonb: Tuple
+        :param filt: Should the RFs be filtered before the ccp stack?
+            If so, provide (lowcof, highcof).
+        :type filt: bool or tuple]
+        :param idx: Index for progress bar
+        :type idx: int
+        :return: Three lists containing indices and rf-data.
+        :rtype: list, list, list
+        """        
 
-        Returns
-        -------
-        None.
-
-        """
         kk = []
         jj = []
         datal = []
@@ -677,7 +658,7 @@ only show the progress per chunk.')
                 rft = read_rf(st, format='SAC')
             except (IndexError, Exception) as e:
                 # That happens when there is a corrupted sac file
-                logger.exception(e)
+                self.logger.exception(e)
                 continue
 
             if filt:
@@ -688,12 +669,12 @@ only show the progress per chunk.')
                     vmodel, latb=latb, lonb=lonb, taper=False)
             except ComplexModel.CoverageError as e:
                 # Wrong stations codes can raise this
-                logger.warning(e)
+                self.logger.warning(e)
                 continue
             except Exception as e:
                 # Just so the script does not interrupt. Did not occur up
                 # to now
-                logger.exception(e)
+                self.logger.exception(e)
                 continue
 
             lat = np.array(rf.stats.pp_latitude)
@@ -737,25 +718,18 @@ only show the progress per chunk.')
         neighbouring cells. No matter which option is
         chosen for the parameters, data is never lost entirely. One can always
         execute a new conclude_ccp() command. However, decisions that are
-        taken here will affect the *.mat output and plotting outputs.
+        taken here will affect the .mat output and plotting outputs.
 
+        :param keep_empty: Keep entirely empty bins. The default is False.
+        :type keep_empty: bool, optional
+        :param keep_water: For False all bins that are on water-covered areas
+            will be discarded, defaults to False
+        :type keep_water: bool, optional
+        :param r: Fields with less than r hits will be set equal 0.
+            r has to be >= 1, defaults to 3.
+        :type r: int, optional
+        """        
 
-        Parameters
-        ----------
-        keep_empty : Bool or str, optional
-            Keep entirely empty bins. The default is True.
-        keep_water : Bool , optional
-            For False all bins that are on water-covered areas
-            will be discarded. The default is True.
-        r : int, optional
-            Fields with less than r hits will be set equal 0.
-            r has to be >= 1. The default is 1.
-
-        Returns
-        -------
-        None.
-
-        """
         self.ccp = np.divide(self.bins, self.illum+1)
 
         self.hits = self.illum.copy()
@@ -800,15 +774,16 @@ only show the progress per chunk.')
         as Matlab file for exporting, as not all information can be
         preserved!
 
-        Parameters
-        ----------
-        filename : str, optional
-            Name as which to save, file extensions aren't necessary.
-        folder : str, optional
-            Output folder.
-        fmt : str, optional
-            Either "pickle" or "matlab" for .mat.
-        """
+        :param filename: Name as which to save, file extensions aren't
+            necessary.
+        :type filename: str, optional
+        :param folder: Output folder, defaults to 'output/ccps'
+        :type folder: str, optional
+        :param fmt: Either "pickle" or "matlab" for .mat, defaults to "pickle".
+        :type fmt: str, optional
+        :raises ValueError: For unknown formats.
+        """        
+
 
         # Standard filename
         if not filename:

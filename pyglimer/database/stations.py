@@ -30,24 +30,25 @@ from ..utils.utils import dt_string
 
 
 def redownload_missing_statxmls(clients, phase, statloc, rawdir, verbose=True):
-    """Fairly primitive program that walks through existing raw waveforms in
+    """
+    Fairly primitive program that walks through existing raw waveforms in
     rawdir and looks for missing station xmls in statloc and, afterwards,
     attemps a redownload
 
-    Parameters
-    ----------
-    clients : list
-        List of clients (see obspy documentation for obspy.Client).
-    phase : string
-        Either "P" or "S", defines in which folder to look for mseeds.
-    statloc : string
-        Folder, in which the station xmls are saved.
-    rawdir : string
-        Uppermost directory, in which the raw mseeds are saved (i.e. the
-        directory above the phase division).
-    verbose : bool, optional
-        Show some extra information, by default True
+    :param clients: List of clients (see obspy documentation for
+        `~obspy.Client`).
+    :type clients: list
+    :param phase: Either "P" or "S", defines in which folder to look for mseeds.
+    :type phase: str
+    :param statloc: Folder, in which the station xmls are saved
+    :type statloc: str
+    :param rawdir: Uppermost directory, in which the raw mseeds are saved
+        (i.e. the directory above the phase division).
+    :type rawdir: str
+    :param verbose: Show some extra information, by default True
+    :type verbose: bool, optional
     """    
+
     ex = os.listdir(statloc)
     
     # remove file identifier
@@ -92,23 +93,19 @@ class StationDB(object):
         will be no option to save it, as it should be up to date.
         However, there is an export function
 
-        Parameters
-        ----------
-        preproloc: str
-            Parental folder, in which the preprocessed mseeds are saved
-            (i.e. the folder above the phase division).
-        phase: str - optional
-            If just one of the primary phases should be checked - useful for
-            computational efficiency, when creating ccp. Default is None.
-        use_old: Bool - optional
-            When turned on it will read in the saved csv file. That is a lot
-            faster, but it will obviously not update.
-        
-        Returns
-        -------
-        None.
+        :param preproloc: Parental folder, in which the preprocessed mseeds are
+            saved (i.e. the folder above the phase division).
+        :type preproloc: str
+        :param phase: If just one of the primary phases should be checked -
+            useful for computational efficiency, when creating ccp.
+            Default is None.
+        :type phase: str, optional
+        :param use_old: When turned on it will read in the saved csv file.
+            That is a lot faster, but it will obviously not update,
+            defaults to False
+        :type use_old: bool, optional
+        """        
 
-        """
         self.preproloc = preproloc
         
         if phase:
@@ -118,7 +115,7 @@ class StationDB(object):
         
         # 1. Initiate logger
         self.logger = logging.Logger(
-            "src.database.stations.StationDBaseLogger")
+            "pyglimer.database.stations.StationDBaseLogger")
         self.logger.setLevel(logging.WARNING)
 
         # FileHandler
@@ -146,11 +143,6 @@ class StationDB(object):
     def __create__(self):
         """
         Create panda database.
-
-        Returns
-        -------
-        None.
-
         """
         if self.phase:
             # Create data dictionary
@@ -275,22 +267,20 @@ class StationDB(object):
         """
         Return a subset of the database filtered by location.
 
-        Parameters
-        ----------
-        lat : Tuple
-            Latitude boundaries in the form (minimum latitude, maximum lat).
-        lon : Tuple
-            Longitude boundaries in the form (minimum longitude, maximum lon).
-        phase: string - optional
-            'P' or 'S'. If option is given, it will only return stations with
-            accepted receiver functions for this phase. The default is None.
-
-        Returns
-        -------
-        subset : pandas.DataFrame
-            Subset of the original DataFrame filtered by location.
-
+        :param lat: Latitude boundaries in the form
+            (minimum latitude, maximum lat).
+        :type lat: Tuple
+        :param lon: Longitude boundaries in the form
+            (minimum longitude, maximum lon).
+        :type lon: Tuple
+        :param phase: 'P' or 'S'. If option is given, it will only return
+            stations with accepted receiver functions for this phase.
+            The default is None.
+        :type phase: str, optional
+        :return: Subset of the original DataFrame filtered by location.
+        :rtype: pandas.DataFrame
         """        
+      
         a = self.db['lat'] >= lat[0]
         b = self.db['lat'] <= lat[1]
         c = self.db['lon'] >= lon[0]
@@ -305,7 +295,8 @@ class StationDB(object):
         return subset
 
     def find_stations(self, lat, lon, phase=None):
-        """Returns list of networks and stations inside a geoboundary
+        """
+        Returns list of networks and stations inside a geoboundary
         """        
         subset = self.geo_boundary(lat, lon, phase)
         return list(subset['network']), list(subset['station'])

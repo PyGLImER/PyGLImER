@@ -10,8 +10,8 @@ Various Deconvolution approaches used for the RF technique.
 import numpy as np
 from scipy.signal.windows import dpss
 
-from src.utils.nextpowof2 import nextPowerOf2
-import src.utils.signalproc as sptb
+from ..utils.nextpowof2 import nextPowerOf2
+import pyglimer.utils as sptb
 
 
 def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
@@ -22,40 +22,35 @@ def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
     by Wang & Pavlis (2016)
     Essentially, P will be deconvolved from H.
 
-    Parameters
-    ----------
-    P : np.array
-        The source wavelet estimation (denominator).
-    H : np.array
-        Impulse response convolved with source wavelet (enumerator).
-    dt : float
-        Sampling interval [s].
-    mu : float
-        Damping factor for least-square damping.
-    shift : float, optional
-        Time shift of theoretical arrival [s]. The default is 0.
-    width : float, optional
-        Width parameter for Gaussian. The default is 2.5.
-    e_min : float, optional
-        Is the energy ratio of residual and original data
+    :param P: The source wavelet estimation (denominator).
+    :type P: np.ndarray
+    :param H: Impulse response convolved with source wavelet (enumerator).
+    :type H: np.ndarray
+    :param dt: Sampling interval [s]
+    :type dt: float
+    :param mu: Damping factor for least-square damping.
+    :type mu: float
+    :param shift: Time shift of theoretical arrival [s]. The default is 0.
+    :type shift: float, optional
+    :param width: Width parameter for Gaussian. The default is 2.5.
+    :type width: float, optional
+    :param e_min: Is the energy ratio of residual and original data
         after the nth iteration; given in per cent. The default is 5.
-    omega_min : float, optional
-        secondary control parameter (percentage improvement per iteration),
-        given in per cent - used as criterion to test significance.
+    :type e_min: float, optional
+    :param omega_min: secondary control parameter (percentage improvement per
+        iteration), given in per cent - used as criterion to test significance.
         The default is 0.5.
-    it_max : int, optional
-        Maximum number of iterations. The default is 400.
-
-    Returns
-    -------
-    rf : np.array
-        The receiver function.
-    IR : np.array
-        The estimation of the medium's impulse response.
-    it : int
-        Number of iterations
-    rej : int
-        Number of peaks that did not meet the criterion of significance.
+    :type omega_min: float, optional
+    :param it_max: Maximum number of iterations. defaults to 400
+    :type it_max: int, optional
+    :return: rf : The receiver function.
+        IR : The estimation of the medium's impulse response.
+        it : Number of iterations
+        rej : Number of peaks that did not meet the criterion of significance.
+    :rtype: rf : 1D np.ndarray
+        IR : 1D np.ndarray
+        it : int
+        rej : int
     """
 
     # From per cent to decimal
@@ -144,39 +139,33 @@ def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
     return rf, IR, it, rej
 
 
-def it(P, H, dt, shift=0, width=2.5, omega_min=0.5, it_max=400):
+def it(P, H, dt, shift=0, width=2.5, omega_min=0.5, it_max=200):
     """
     Iterative deconvolution after Ligorria & Ammon (1999)
     Essentially, P will be deconvolved from H.
 
-    Parameters
-    ----------
-    P : np.array
-        The source wavelet estimation / denominator.
-    H : np.array
-        The enumerator (impulse response * source wavelet estimation).
-    dt : float
-        Sampling interval [s].
-    shift : float, optional
-        Time shift of main arrival [s]. The default is 0.
-    width : float, optional
-        Gaussian width parameter. The default is 2.5.
-    omega_min : float, optional
-        Convergence control parameter (percentage improvement periteration).
-        The default is 0.5.
-    it_max : int, optional
-        Maximal number of iterations before the algorithm interrupts.
-        The default is 400.
-
-    Returns
-    -------
-    rf : np.array
-        The receiver function.
-    it : int
-        Number of iterations until algorithm converged.
-    IR : np.array
-        Estimation of the medium's impulse response.
-
+    :param P: The source wavelet estimation / denominator.
+    :type P: 1D np.ndarray
+    :param H: The enumerator (impulse response * source wavelet estimation).
+    :type H: 1D np.ndarray
+    :param dt: Sampling interval [s].
+    :type dt: float
+    :param shift: Time shift of main arrival [s]. The default is 0.
+    :type shift: float, optional
+    :param width: Gaussian width parameter. The default is 2.5.
+    :type width: float, optional
+    :param omega_min: Convergence control parameter (percentage improvement
+        per iteration). The default is 0.5.
+    :type omega_min: float, optional
+    :param it_max: Maximal number of iterations before the algorithm
+        interrupts, defaults to 400
+    :type it_max: int, optional
+    :return: rf : The receiver function.
+        it : Number of iterations until algorithm converged.
+        IR : Estimation of the medium's impulse response.
+    :rtype: rf : np.ndarray
+        it : int
+        IR : np.ndarray
     """
 
     omega_min = omega_min/100  # change from per cent to decimal
@@ -318,37 +307,26 @@ def spectraldivision(v, u, ndt, tshift, regul, phase):
     Function spectraldivision(v,u,ndt,tshift,regul) is a standard spectral
     division frequency domain deconvolution.
 
-    Parameters
-    ----------
-    v : np.array
-        Source wavelet estimation (denominator).
-    u : np.array
-        Impulse response convolved by v (enumerator).
-    ndt : float
-        Sampling interval [s].
-    tshift : float
-        Time shift of primary arrival [s].
-    regul : str
-        Regularization, can be chosen by the variable "regul", this can be
-        'con', 'wat', or 'fqd' for constant damping factor, waterlevel,
-        or frequency-dependent damping, respectively.
-    phase : str
-        Phase either "P" for Ps or "S" for Sp.
-
-    Raises
-    ------
-    Exception
-        For unknown inputs.
-
-    Returns
-    -------
-    qrf : np.array
-        Receiver function.
-    lrf : np.array
-        Output of deoncolution of source wavelet estimation from longitudinal
-        component.
-
-    """
+    :param v: Source wavelet estimation (denominator).
+    :type v: 1D np.ndarray
+    :param u: Impulse response convolved by v (enumerator).
+    :type u: 1D np.ndarray
+    :param ndt: Sampling interval [s].
+    :type ndt: float
+    :param tshift: Time shift of primary arrival [s].
+    :type tshift: float
+    :param regul: Regularization, can be chosen by the variable "regul", this
+        can be 'con', 'wat', or 'fqd' for constant damping factor, waterlevel,
+        or frequency-dependent damping, respectively
+    :type regul: str
+    :param phase: Phase either "P" for Ps or "S" for Sp.
+    :type phase: str
+    :raises Exception: for uknown regulisations
+    :return: qrf : Receiver function.
+        lrf : Output of deoncolution of source wavelet estimation from
+        longitudinal component.
+    :rtype: 1D np.ndarray
+    """    
 
     N = len(v)
 

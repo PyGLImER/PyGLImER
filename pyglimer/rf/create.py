@@ -74,7 +74,7 @@ def createRF(st_in, phase, pol='v', onset=None,
     :raises Exception: If deconvolution method is unknown.
     :raises Exception: For wrong trim input.
     :return: RFTrace object containing receiver function.
-    :rtype: ~src.create.RFTrace
+    :rtype: :class:`~pyglimer.create.RFTrace`
     """
 
     pol = pol.lower()
@@ -288,7 +288,7 @@ def read_rf(pathname_or_url, format=None, **kwargs):
     :type format: e.g. "MSEED" or "SAC". Will attempt to determine from ending
         if = None. The default is None.
     :return: RFStream object from file.
-    :rtype: `~src.createRF.RFStream`
+    :rtype: :class:`~pyglimer.createRF.RFStream`
     """    
 
     stream = read(pathname_or_url, format=format, **kwargs)
@@ -423,28 +423,23 @@ class RFStream(Stream):
         Depth migration of all receiver functions given Stream.
         Also calculates piercing points and adds them to RFTrace.stats.
 
-        Parameters
-        ----------
-        vmodel_file : file
-            Velocity model located in /data/vmodel.
-            Standard options are iasp91 and 3D (GYPSuM).
-        latb : Tuple, optional
-            Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
-            Will remain unused for 1D RT.
-        lonb : Tuple, optional
-            Tuple in Form (minlon, maxlon)
-        taper : Bool, optional
-            If True, the last 10km of the RF will be tapered, which avoids
-            jumps in station stacks. Should be False for CCP stacks.
-
-        Returns
-        -------
-        z : np.array
-            DESCRIPTION.
-        RF_mo : RFTrace
-            Depth migrated receiver function.
-
+        :param vmodel: Velocity model located in /data/vmodel.
+            Standard options are iasp91.dat and 3D (GYPSuM).
+        :type vmodel: str
+        :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
+            raytraycing. Will remain unused for 1D RT, defaults to None
+        :type latb: Tuple, optional
+        :param lonb: Tuple in Form (minlon, maxlon), defaults to None
+        :type lonb: Tuple, optional
+        :param taper: If True, the last 10km of the RF will be tapered, which
+            avoids jumps in station stacks. Should be False for CCP stacks,
+            defaults to True.
+        :type taper: bool, optional
+        :return: 1D np.ndarray containing depths and an
+             object of type depth.
+        :rtype: 1D np.ndarray, :class:`~pyglimer.rf.create.RFStream`
         """
+
         RF_mo = []
         for tr in self:
             try:
@@ -464,21 +459,16 @@ class RFStream(Stream):
         Calculates piercing points for all receiver functions in given
         RFStream and adds them to self.stats in form of lat, lon and depth.
 
-        Parameters
-        ----------
-        vmodel_file : file, optional
-            velocity model located in /data/vmodel.
+        :param vmodel_file: velocity model located in /data/vmodel.
             The default is 'iasp91.dat'.
-        latb : Tuple
-            Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
-            Will remain unused for 1D RT.
-        lonb : Tuple
-            Tuple in Form (minlon, maxlon)
+        :type vmodel_file: str, optional
+        :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
+            raytraycing. Will remain unused for 1D RT, defaults to None.
+        :type latb: tuple, optional
+        :param lonb: Tuple in Form (minlon, maxlon), defaults to None
+        :type lonb: tuple, optional.
+        """        
 
-        Returns
-        -------
-        None.
-        """
         for tr in self:
             tr.ppoint(vmodel=vmodel_file, latb=latb, lonb=lonb)
 
@@ -487,21 +477,17 @@ class RFStream(Stream):
         Performs a moveout correction and stacks all receiver functions
         in Stream. Make sure that Stream only contains RF from one station!
 
-        Parameters
-        ----------
-        vmodel_file : file, optional
-            1D velocity model in data/vmodels. The default is 'iasp91.dat'.
+        :param vmodel_file: 1D velocity model in data/vmodels.
+            The default is 'iasp91.dat'.
+        :type vmodel_file: str, optional
+        :return: z : Depth Vector.
+            stack : Object containing station stack.
+            RF_mo : Object containing depth migrated traces.
+        :rtype: z : 1D np.ndarray
+            stack : :class:`~pyglimer.rf.create.RFTrace`
+            RF_mo : :class:`~pyglimer.rf.create.RFStream`
+        """        
 
-        Returns
-        -------
-        z : np.array
-            Depth Vector.
-        stack : subfunctions.createRF.RFTrace
-            Object containing station stack.
-        RF_mo : subfunctions.createRF.RFStream
-            Object containing depth migrated traces.
-
-        """
         latb = (self.station_latitude-10, self.station_latitude+10)
         lonb = (self.statio_longitude-20, self.station_longitude+20)
 
@@ -519,14 +505,14 @@ class RFStream(Stream):
 
     def plot(self, scale=2):
         """
-        USE RFTrace.plot() instead
+        Plot receiver functions depending on epicentral distance
 
-        Raises
-        ------
-        NotImplementedError
-            DESCRIPTION.
+        :param scale: Y-scaling, defaults to 2
+        :type scale: int, optional
+        :return: Figure and axis object
+        :rtype: [type]
+        """        
 
-        """
         # deep copy stream
         if len(self.traces) == 1:
             fig, ax = self[0].plot()
@@ -736,30 +722,25 @@ class RFTrace(Trace):
     def moveout(self, vmodel, latb=None, lonb=None, taper=True):
         """
         Depth migration of the receiver function.
-        Also calculates piercing points.
+        Also calculates piercing points and adds them to RFTrace.stats.
 
-        Parameters
-        ----------
-        vmodel : str
-            Velocity model located in /data/vmodel.
-            Standard choices are '3D' for GYPSuM 3D model or iasp91.dat.
-        latb : Tuple
-            Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
-            Will remain unused for 1D RT.
-        lonb : Tuple
-            Tuple in Form (minlon, maxlon)
-        taper : Bool, optional
-            If True, the last 10km of the RF will be tapered, which avoids
-            jumps in station stacks. Should be False for CCP stacks.
+        :param vmodel: Velocity model located in /data/vmodel.
+            Standard options are iasp91.dat and 3D (GYPSuM).
+        :type vmodel: str
+        :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
+            raytraycing. Will remain unused for 1D RT, defaults to None
+        :type latb: Tuple, optional
+        :param lonb: Tuple in Form (minlon, maxlon), defaults to None
+        :type lonb: Tuple, optional
+        :param taper: If True, the last 10km of the RF will be tapered, which
+            avoids jumps in station stacks. Should be False for CCP stacks,
+            defaults to True.
+        :type taper: bool, optional
+        :return: 1D np.ndarray containing depths and an
+            RFTrace object of type depth.
+        :rtype: 1D np.ndarray, :class:`~pyglimer.rf.create.RFTrace`
+        """   
 
-        Returns
-        -------
-        z : np.array
-            DESCRIPTION.
-        RF_mo : RFTrace
-            Depth migrated receiver function.
-
-        """
         if self.stats.type == "depth" or self.stats.type == "stastack":
             raise TypeError("RF is already depth migrated.")
         st = self.stats
@@ -795,24 +776,17 @@ class RFTrace(Trace):
 
     def ppoint(self, vmodel, latb=None, lonb=None):
         """
-        Calculates piercing points for receiver function and adds them to
-        self.stats in form of lat, lon and depth.
+        Calculates piercing points for receiver function in and adds them
+        to self.stats in form of lat, lon and depth.
 
-        Parameters
-        ----------
-        vmodel : str, optional
-            velocity model located in /data/vmodel.
-            Standard choices are 'iasp91.dat' or 3D
-        latb : Tuple, optional
-            Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
-            Will remain unused for 1D RT.
-        lonb : Tuple, optional
-            Tuple in Form (minlon, maxlon)
-
-        Returns
-        -------
-        None.
-
+        :param vmodel_file: velocity model located in /data/vmodel.
+            The default is 'iasp91.dat'.
+        :type vmodel_file: str, optional
+        :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
+            raytraycing. Will remain unused for 1D RT, defaults to None.
+        :type latb: tuple, optional
+        :param lonb: Tuple in Form (minlon, maxlon), defaults to None
+        :type lonb: tuple, optional.
         """
 
         st = self.stats
@@ -864,21 +838,16 @@ class RFTrace(Trace):
     def plot(self, grid=False):
         """
         Plots the Receiver function against either depth or time, depending on
-        information given in stats.type.
+        information given in self.stats.type.
 
-        Parameters
-        ----------
-        grid : Bool, optional
-            Show a grid. The default is False.
+        :param grid: Show a grid. The default is False.
+        :type grid: bool, optional
+        :return: Figure parameter if one wishes to edit figure and ax
+                If one wishes to edit axes.
+        :rtype: matplotlib.figure.Figure
+            matplotlib.axes._subplots.AxesSubplot
+        """        
 
-        Returns
-        -------
-        fig : matplotlib.figure.Figure
-            Figure parameter if one wishes to edit figure.
-        ax : matplotlib.axes._subplots.AxesSubplot
-            If one wishes to edit axes.
-
-        """
         # plt.style.use('data/plot_data/PaperDoubleFig.mplstyle')
         # Make some style choices for plotting
         colourWheel = ['#329932', '#ff6961', 'b', '#6a3d9a', '#fb9a99',
@@ -971,20 +940,14 @@ def obj2stats(event=None, station=None):
     """
     Map event and station object to stats with attributes.
 
-    Parameters
-    ----------
-    event : `~obspy.core.event.event.Event`, optional
-        Event File. The default is None.
-    station : station object, optional
-        Station file with attributes lat, lon, and elevation.
+    :param event: Event File. The default is None.
+    :type event: :class:`~obspy.core.event.event.Event`, optional
+    :param station: Station file with attributes lat, lon, and elevation.
         The default is None.
-
-    Returns
-    -------
-    stats : obspy.core.AttribDict
-        Stats object with station and event attributes.
-
-    """
+    :type station: :class:`~obspy.core.Station`, optional
+    :return: Stats object with station and event attributes.
+    :rtype: :class:`~obspy.core.AttribDict`
+    """    
 
     stats = AttribDict({})
     if event is not None:
@@ -1003,35 +966,29 @@ def rfstats(phase, info=None, starttime=None, event=None, station=None,
     starttime or event and station object. Latter will take longer since
     computations are redone.
 
-    Parameters
-    ----------
-    info : dict, optional
-        Dictionary containing information about waveform. Can be None if
-        event and station are provided. Has to be given in combination with
-        starttime
-    starttime : obspy.core.UTCDateTime, optional
-        Starttime of first trace in stream, used as identifier in
+    :param phase: Either "P" or "S" for main phase.
+    :type phase: str
+    :param info: Dictionary containing information about waveform. Can be None
+        if event and station are provided. Has to be given in combination with
+        starttime, defaults to None.
+    :type info: dict
+    :param starttime: Starttime of first trace in stream, used as identifier in
             info dict. The default is None.
-    event : `~obspy.core.event.event.Event`, optional
-        Event file, provide together with station file if info=None.
+    :type starttime: :class:`~obspy.core.UTCDateTime`, optional
+    :param event: Event file, provide together with station file if info=None.
         The default is None.
-    station : station object, optional
-        Station file with attributes lat, lon, and elevation.
-        The default is None.
-    tt_model : obspy.taup.TauPyModel, optional
-        TauPy model to calculate arrival, only used if no info file is given.
-        The default is "IASP91".
-    phase : string, optional
-        Either "P" or "S" for main phase.
-
-
-    Returns
-    -------
-    stats : obspy.core.AttributeDict
-        Stats file for a RFTrace object with event and station
+    :type event: :class:`~obspy.core.event.event.Event`, optional
+    :param station: Station inventory with attributes lat, lon, and elevation,
+        defaults to None
+    :type station: :class:`~obspy.core.Station`, optional
+    :param tt_model: TauPy model to calculate arrival, only used if no info
+        file is given. The default is "IASP91".
+    :type tt_model: str, optional
+    :raises Exception: For unavailable phases
+    :return: Stats file for a RFTrace object with event and station
         attributes, distance, back_azimuth, onset and
         ray parameter.
-
+    :rtype: :class:`~obspy.core.AttribDict`
     """
 
     stats = AttribDict({})

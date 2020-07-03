@@ -162,42 +162,42 @@
 <h1>Handling Receiver Functions<a class="headerlink" href="#handling-receiver-functions" title="Permalink to this headline">¶</a></h1>
 <p>Supposing that you have created receiver functions and have them available in the directory <code class="docutils literal notranslate"><span class="pre">output/RF</span></code>,
 we can now start imaging!</p>
-<p>Handling of receiver functions is generally done by using the <code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code> classes. These
+<p>Handling of receiver functions is generally done by using the <a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a> and <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> classes. These
 classes are built upon a modified version of the <a class="reference external" href="https://rf.readthedocs.io/en/latest/index.html">rf</a> project
 by Tom Eulenfeld.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Just as in the obspy base classes, an <code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code> can hold several receiver functions,
-while an <code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code> object can only hold one receiver function. As all rfs are saved in .sac format,
-saving <code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code> will lead to the creation of several files.</p>
+<p>Just as in the obspy base classes, an <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> can hold several receiver functions,
+while an <a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a> object can only hold one receiver function. As all rfs are saved in .sac format,
+saving <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> will lead to the creation of several files.</p>
 </div>
-<p>Receiver functions in .sac format can be read using the <code class="xref py py-func docutils literal notranslate"><span class="pre">read_rf()</span></code> function. By doing so, we
-obtain an <code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code> object, on which we can apply a number of functions.</p>
+<p>Receiver functions in .sac format can be read using the <a class="reference internal" href="API.html#pyglimer.rf.create.read_rf" title="pyglimer.rf.create.read_rf"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_rf()</span></code></a> function. By doing so, we
+obtain an <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> object, on which we can apply a number of functions.</p>
 <div class="section" id="methods-available-for-both-rfstream-and-rftrace-objects">
 <h2>Methods available for both RFStream and RFTrace objects<a class="headerlink" href="#methods-available-for-both-rfstream-and-rftrace-objects" title="Permalink to this headline">¶</a></h2>
 <table class="hlist"><tr><td><ul class="simple">
 <li><dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">PyGLImER.rf.create.RFTrace.write()</span></code></dt><dd><p>to write receiver function(s) to SAC file(s) (in time domain).</p>
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace.write" title="pyglimer.rf.create.RFTrace.write"><code class="xref py py-func docutils literal notranslate"><span class="pre">write()</span></code></a></dt><dd><p>to write receiver function(s) to SAC file(s) (in time domain).</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">PyGLImER.rf.create.RFTrace.moveout()</span></code></dt><dd><p>to migrate the receiver function(s) to depth domain using one of the provided depth models (either ‘3D’ for GyPsum or ‘iasp91.dat’ for iasp91).
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace.moveout" title="pyglimer.rf.create.RFTrace.moveout"><code class="xref py py-func docutils literal notranslate"><span class="pre">moveout()</span></code></a></dt><dd><p>to migrate the receiver function(s) to depth domain using one of the provided depth models (either ‘3D’ for GyPsum or ‘iasp91.dat’ for iasp91).
 Piercing points will be appended to the object.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">PyGLImER.rf.create.RFTrace.ppoint()</span></code></dt><dd><p>to compute the piercing points in depth without migrating
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace.ppoint" title="pyglimer.rf.create.RFTrace.ppoint"><code class="xref py py-func docutils literal notranslate"><span class="pre">ppoint()</span></code></a></dt><dd><p>to compute the piercing points in depth without migrating
 the receiver function</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">PyGLImER.rf.create.RFTrace.plot()</span></code></dt><dd><p>to plot the receiver function(s). The plot will be different
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace.plot" title="pyglimer.rf.create.RFTrace.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a></dt><dd><p>to plot the receiver function(s). The plot will be different
 depending on the type of receiver function: <strong>1.</strong> For <cite>depth-migrated</cite> RFs, the plot will be against
-depth. <strong>2.</strong> For an <code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code> in time domain, the plot will be against time.
-<strong>3.</strong> For an <code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code> in time domain, the plot will show the receiver functions
+depth. <strong>2.</strong> For an <a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a> in time domain, the plot will be against time.
+<strong>3.</strong> For an <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> in time domain, the plot will show the receiver functions
 depending on epicentral distance.</p>
 </dd>
 </dl>
@@ -209,7 +209,7 @@ depending on epicentral distance.</p>
 <h2>Methods for RFStream objects<a class="headerlink" href="#methods-for-rfstream-objects" title="Permalink to this headline">¶</a></h2>
 <table class="hlist"><tr><td><ul class="simple">
 <li><dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">PyGLImER.rf.create.RFTrace.station_stack()</span></code></dt><dd><p>to create a station specific stack of all receiver function in the object.
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFStream.station_stack" title="pyglimer.rf.create.RFStream.station_stack"><code class="xref py py-func docutils literal notranslate"><span class="pre">station_stack()</span></code></a></dt><dd><p>to create a station specific stack of all receiver function in the object.
 For that to work, all RFs, have to be from the same station.</p>
 </dd>
 </dl>
