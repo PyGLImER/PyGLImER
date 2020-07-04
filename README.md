@@ -1,4 +1,5 @@
-# PyGLImER - A worflow to create a global database for Ps and Sp receiver function imaging of crustal and upper mantle discontinuties 
+# PyGLImER
+##A worflow to create a global database for Ps and Sp receiver function imaging of crustal and upper mantle discontinuties 
 
 This project was created in the framework of a Master's thesis by Peter Makus.
 It aims to **automate receiver function (RF) processing from download of raw waveform data to common conversion point (CCP) imaging with a minimum amount
