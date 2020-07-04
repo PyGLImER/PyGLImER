@@ -191,7 +191,7 @@ def load_gyps(save=False, latb=None, lonb=None):
     return model
 
 
-# Depricated, just work with a 1D model.
+# Deprecated, just work with a 1D model.
 # def raysum3D(dip):
 #     """
 #     Compiles the provided Raysum test model (3D). Fairly clumpsy solved,
