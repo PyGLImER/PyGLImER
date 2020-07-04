@@ -491,7 +491,7 @@ class RFStream(Stream):
         latb = (self.station_latitude-10, self.station_latitude+10)
         lonb = (self.statio_longitude-20, self.station_longitude+20)
 
-        z, RF_mo = self.moveout(vmodel_file=vmodel_file, latb=latb, lonb=lonb)
+        z, RF_mo = self.moveout(vmodel=vmodel_file, latb=latb, lonb=lonb)
         RF_mo.normalize()  # make sure traces are normalised
         traces = []
         for tr in RF_mo:
