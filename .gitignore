@@ -12,3 +12,5 @@ tmp/*
 .vscode/settings.json
 ccps.py
 src
+./config.py
+GLImER.py
