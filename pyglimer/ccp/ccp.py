@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Saturday, 4th July 2020 02:06:56 pm
+Last Modified: Saturday, 4th July 2020 02:10:50 pm
 '''
 
 #!/usr/bin/env python3
@@ -363,16 +363,6 @@ class CCPStack(object):
         :type append_pp: bool, optional
         :raises ValueError: For wrong inputs
         """
-        
-        if not hasattr(self, 'logger') in self:
-            # Loggers for the CCP script
-            self.logger = logging.Logger('pyglimer.ccp.ccp')
-            self.logger.setLevel(logging.INFO)
-
-            # Create handler to the log
-            fh = logging.FileHandler('logs/ccp.log')
-            fh.setLevel(logging.INFO)
-            self.logger.addHandler(fh)
 
         if binrad < np.cos(np.radians(30)):
             raise ValueError(
@@ -399,7 +389,19 @@ class CCPStack(object):
         folder = os.path.join(rfloc, self.bingrid.phase)
 
         start = time.time()
-        self.logger.info('Stacking started')
+
+        try:
+            self.logger.info('Stacking started')
+        except AttributeError:
+            # Loggers for the CCP script
+            self.logger = logging.Logger('pyglimer.ccp.ccp')
+            self.logger.setLevel(logging.INFO)
+
+            # Create handler to the log
+            fh = logging.FileHandler('logs/ccp.log')
+            fh.setLevel(logging.INFO)
+            self.logger.addHandler(fh)
+            self.logger.info('Stacking started')
 
         if network and type(network) == str and not pattern:
             # Loop over fewer files
