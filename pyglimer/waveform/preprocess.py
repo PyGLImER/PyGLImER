@@ -38,7 +38,7 @@ from ..utils.utils import dt_string, chunks
 
 def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
                ta, statloc, rawloc, preproloc, rfloc, deconmeth, wavdownload,
-               netrestr=None, statrestr=None, debug=False):
+               netrestr=None, statrestr=None, logdir=None, debug=False):
     """
      Preprocesses waveforms to create receiver functions
 
@@ -100,7 +100,10 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
         logger.setLevel(logging.DEBUG)
 
     # Create handler to the log
-    fh = logging.FileHandler('logs/preprocess.log')
+    if logdir is None:
+        fh = logging.FileHandler('logs/preprocess.log')
+    else:
+        fh = logging.FileHandler(os.path.join(logdir, 'preprocess.log'))
     fh.setLevel(logging.WARNING)
     if debug:
         fh.setLevel(logging.DEBUG)
@@ -118,7 +121,10 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
         rflogger.setLevel(logging.DEBUG)
 
     # Create handler to the log
-    fhrf = logging.FileHandler('logs/RF.log')
+    if logdir is None:
+        fhrf = logging.FileHandler('logs/RF.log')
+    else:
+        fhrf = logging.FileHandler(os.path.join(logdir, 'RF.log'))
     fhrf.setLevel(logging.WARNING)
     if debug:
         fhrf.setLevel(logging.DEBUG)
