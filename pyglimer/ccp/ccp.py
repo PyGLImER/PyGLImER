@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Friday, 3rd July 2020 05:36:27 pm
+Last Modified: Saturday, 4th July 2020 01:53:17 pm
 '''
 
 #!/usr/bin/env python3
@@ -362,7 +362,17 @@ class CCPStack(object):
             The default is false. **Deprecated for multi-core**
         :type append_pp: bool, optional
         :raises ValueError: For wrong inputs
-        """        
+        """
+        
+        if not logger in self:
+            # Loggers for the CCP script
+            self.logger = logging.Logger('pyglimer.ccp.ccp')
+            self.logger.setLevel(logging.INFO)
+
+            # Create handler to the log
+            fh = logging.FileHandler('logs/ccp.log')
+            fh.setLevel(logging.INFO)
+            self.logger.addHandler(fh)
 
         if binrad < np.cos(np.radians(30)):
             raise ValueError(
@@ -783,7 +793,8 @@ only show the progress per chunk.')
         :type fmt: str, optional
         :raises ValueError: For unknown formats.
         """        
-
+        # delete logger (cannot be pickled)
+        del self.logger
 
         # Standard filename
         if not filename:
