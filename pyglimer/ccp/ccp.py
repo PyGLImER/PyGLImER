@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Saturday, 4th July 2020 01:53:17 pm
+Last Modified: Saturday, 4th July 2020 02:06:56 pm
 '''
 
 #!/usr/bin/env python3
@@ -364,7 +364,7 @@ class CCPStack(object):
         :raises ValueError: For wrong inputs
         """
         
-        if not logger in self:
+        if not hasattr(self, 'logger') in self:
             # Loggers for the CCP script
             self.logger = logging.Logger('pyglimer.ccp.ccp')
             self.logger.setLevel(logging.INFO)
