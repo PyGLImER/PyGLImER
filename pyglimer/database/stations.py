@@ -154,8 +154,10 @@ class StationDB(object):
             # oposing phase
             if self.phase == 'P':
                 o = 'S'
-            if self.phase == 'S':
+            elif self.phase == 'S':
                 o = 'P'
+            else:
+                raise ValueError('Phase '+self.phase+' not supported.')
             
             folder = os.path.join(
                 self.preproloc, self.phase, 'by_station')

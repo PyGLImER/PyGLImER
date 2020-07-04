@@ -1,7 +1,7 @@
 Introduction
 ------------
 This project was created in the framework of a Master's thesis by Peter Makus.
-It aims to automate receiver function (RF) processing from download of raw waveform data to CCP imaging with a minimum of user interference.
+It aims to automate receiver function (RF) processing from download of raw waveform data to CCP imaging with a minimum amount of user interference.
 This project is largely based on the ObsPy project and can be seen as a more powerful and user-friendly successor of the GLImER project.
 
 A review of the receiver function technique is given here:
