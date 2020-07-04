@@ -24,4 +24,4 @@ pip install  $InstallationDirectory$
 
 ## Documentation
 Documentation will be available on github pages, as soon as this project goes public. Right now,
-the documentation is location in `docs/` as .html.
+the documentation is location in `./docs/_build/hmtl/`.
