@@ -62,6 +62,8 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
         Only allowed if network != None. Station restrictions.
         Only download from these stations, wildcards are allowed.
         The default is None.
+    logdir : string, optional
+        Set the directory to where the download log is saved
     debug : Bool, optional
         All loggers go to debug mode.
     

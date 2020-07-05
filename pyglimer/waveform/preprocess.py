@@ -86,6 +86,10 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
         time window before first arrival in seconds
     ta : int
         time window after first arrival in seconds
+    logdir : string, optional
+        Set the directory to where the download log is saved
+    debug : Bool, optional
+        All loggers go to debug mode.
 
     Returns
     -------
