@@ -24,6 +24,7 @@ def set_mpl_params():
         'font.family': 'Avenir Next',
         'pdf.fonttype': 42,
         'font.weight': 'bold',
+        'figure.dpi': 150,
         'axes.labelweight': 'bold',
         'axes.linewidth': 1.5,
         'axes.labelsize': 15,
@@ -31,29 +32,30 @@ def set_mpl_params():
         'axes.titleweight': 'bold',
         'xtick.labelsize': 14,
         'xtick.direction': 'in',
-        'xtick.top': True,  # draw label on the top
-        'xtick.bottom': True,  # draw label on the bottom
-        'xtick.minor.visible': True,
-        'xtick.major.top': True,  # draw x axis top major ticks
-        'xtick.major.bottom': True,  # draw x axis bottom major ticks
-        'xtick.minor.top': True,  # draw x axis top minor ticks
-        'xtick.minor.bottom': True,  # draw x axis bottom minor ticks
+#         'xtick.top': True,  # draw label on the top
+#         'xtick.bottom': True,  # draw label on the bottom
+#         'xtick.minor.visible': True,
+#         'xtick.major.top': True,  # draw x axis top major ticks
+#         'xtick.major.bottom': True,  # draw x axis bottom major ticks
+#         'xtick.minor.top': True,  # draw x axis top minor ticks
+#         'xtick.minor.bottom': True,  # draw x axis bottom minor ticks
         'ytick.labelsize': 14,
-        'ytick.direction': 'in',
-        'ytick.left': True,  # draw label on the top
-        'ytick.right': True,  # draw label on the bottom
-        'ytick.minor.visible': True,
-        'ytick.major.left': True,  # draw x axis top major ticks
-        'ytick.major.right': True,  # draw x axis bottom major ticks
-        'ytick.minor.left': True,  # draw x axis top minor ticks
-        'ytick.minor.right': True,  # draw x axis bottom minor ticks
-        'legend.fancybox'] = False,
-        'legend.loc'] = 'upper left',
-        'legend.numpoints' = 2,
-        'legend.fontsize' = 'large',
-        'legend.framealpha' = 1,
-        'legend.scatterpoints' = 3,
-        'legend.edgecolor' = 'inherit'
+#         'ytick.direction': 'in',
+#         'ytick.left': True,  # draw label on the top
+#         'ytick.right': True,  # draw label on the bottom
+#         'ytick.minor.visible': True,
+#         'ytick.major.left': True,  # draw x axis top major ticks
+#         'ytick.major.right': True,  # draw x axis bottom major ticks
+#         'ytick.minor.left': True,  # draw x axis top minor ticks
+#         'ytick.minor.right': True,  # draw x axis bottom minor ticks
+        'legend.fancybox': False,
+        'legend.frameon': False,
+        'legend.loc': 'upper left',
+        'legend.numpoints': 2,
+        'legend.fontsize': 'large',
+        'legend.framealpha': 1,
+        'legend.scatterpoints': 3,
+        'legend.edgecolor': 'inherit'
     }
     matplotlib.rcParams.update(params)
     matplotlib.font_manager._rebuild()
