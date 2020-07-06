@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 6th July 2020 12:26:26 pm
+Last Modified: Monday, 6th July 2020 12:38:16 pm
 '''
 
 #!/usr/bin/env python3
@@ -520,8 +520,6 @@ only show the progress per chunk.')
         # The test data needs to be filtered
         if network == 'matlab':
             filt = [.03, 1.5]  # bandpass frequencies
-        elif not filt:
-            filt = False
 
         # Define grid boundaries for 3D RT
         latb = (self.coords[0].min(), self.coords[0].max())
@@ -675,6 +673,7 @@ only show the progress per chunk.')
         # self.busy[idx] = True
 
         for st in stream:
+            # read RFs in time domain
             try:
                 rft = read_rf(st, format='SAC')
             except (IndexError, Exception) as e:
