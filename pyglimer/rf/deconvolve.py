@@ -11,7 +11,7 @@ import numpy as np
 from scipy.signal.windows import dpss
 
 from ..utils.nextpowof2 import nextPowerOf2
-import pyglimer.utils as sptb
+import pyglimer.utils.signalproc as sptb
 
 
 def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
