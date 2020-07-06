@@ -85,6 +85,9 @@ def createRF(st_in, phase, pol='v', onset=None,
 
     elif onset:
         shift = onset - st_in[0].stats.starttime
+    else:
+        raise ValueError('Provide either info dict as input or give data\
+            manually (see docstring).')
 
     # sampling interval
     dt = st_in[0].stats.delta
@@ -94,7 +97,8 @@ def createRF(st_in, phase, pol='v', onset=None,
     RF = st.copy()
 
     # Normalise stream
-    st.normalize()
+    # Don't! Normalisation only for spectraldivision
+    #st.normalize()
 
     # Shorten RF stream
     while RF.count() > 1:
@@ -158,6 +162,11 @@ def createRF(st_in, phase, pol='v', onset=None,
     elif phase == "S" and "V" in stream:
         u = stream["P"]
         v = stream["V"]
+    else:
+        raise ValueError('Strange Input. Is you stream in a valid coordinate\
+            system? Is your phase accepted?\
+            For example, PyGLImER does not allow for deconvolution of\
+                a stream in NEZ.')
 
     # Deconvolution
     if method == "it":
@@ -165,24 +174,39 @@ def createRF(st_in, phase, pol='v', onset=None,
             width = 1.5  # change for Kind (2015) to 1
         elif phase == "P":
             width = 2.5
+        else:
+            raise ValueError('Phase '+phase+' is not supported.')
         RF[0].data = it(v, u, dt, shift=shift, width=width)[0]
+        lrf = None
     elif method == "dampedf":
-        RF[0].data, _ = spectraldivision(v, u, dt, shift, "con", phase=phase)
+        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "con", phase=phase)
     elif method == "waterlevel":
-        RF[0].data, _ = spectraldivision(v, u, dt, shift, "wat", phase=phase)
+        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "wat", phase=phase)
     elif method == 'fqd':
-        RF[0].data, _ = spectraldivision(v, u, dt, shift, "fqd", phase=phase)
+        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "fqd", phase=phase)
     elif method == 'multit':
-        RF[0].data, _, _, _ = multitaper(v, u, dt, shift, "fqd")
+        RF[0].data, lrf, _, _ = multitaper(v, u, dt, shift, "fqd")
         # remove noise caused by multitaper
         RF.filter('lowpass', freq=2.50, zerophase=True, corners=2)
     else:
-        raise Exception(method, "is no valid deconvolution method.")
+        raise ValueError(method+ " is no valid deconvolution method.")
+    if lrf:
+        # Normalisation for spectral division and multitaper
+        # In order to do that, we have to find the factor that is necassary to
+        # bring the zero-time pulse to 1
+        fact = lrf[round(shift/dt)]
+        RF[0].data = RF[0].data/fact
+        # I could probably create another QC here and check if fact is
+        # the maximum of RF[0].data or even close to the maximum. Let's try:
+        if abs(fact) < abs(lrf).max()/2:
+            raise ValueError('The noise level of the created receiver funciton\
+                is too high.')
+        
 
     # create RFTrace object
     # create stats
-    stats = rfstats(phase, info=info, starttime=st[0].stats.starttime, event=event,
-                    station=station)
+    stats = rfstats(phase, info=info, starttime=st[0].stats.starttime,
+                    event=event, station=station)
     stats.update({"type": "time"})
     RF = RFTrace(trace=RF[0])
     RF.stats.update(stats)
@@ -492,7 +516,7 @@ class RFStream(Stream):
         lonb = (self.statio_longitude-20, self.station_longitude+20)
 
         z, RF_mo = self.moveout(vmodel=vmodel_file, latb=latb, lonb=lonb)
-        RF_mo.normalize()  # make sure traces are normalised
+        # RF_mo.normalize()  # make sure traces are normalised
         traces = []
         for tr in RF_mo:
             traces.append(tr.data)
@@ -541,14 +565,14 @@ class RFStream(Stream):
                 data = data[TAS:round(TAS + 30 / stats.delta)]
                 stats["npts"] = len(data)
                 trace = Trace(data=data, header=stats)
-                trace.normalize()
+                #trace.normalize()
 
             elif tr.stats.type == "depth":
                 stats.delta = res
                 data = tr.data
                 stats["npts"] = len(data)
                 trace = Trace(data=data, header=stats)
-                trace.normalize()
+                #trace.normalize()
 
             elif tr.stats.type == "stastack":
                 # That should be a single plot
