@@ -18,7 +18,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import cartopy
 from cartopy.crs import PlateCarree
-from pyglimer import RFTrace
+from pyglimer import RFTrace, RFStream
 
 
 def set_mpl_params():
