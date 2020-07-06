@@ -17,3 +17,5 @@ GLImER.py
 *.sac
 examples/database
 .vscode/*.DS_Store
+*.pdf
+.DS_Store
