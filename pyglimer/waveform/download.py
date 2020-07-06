@@ -24,8 +24,8 @@ from ..utils.roundhalf import roundhalf
 
 
 def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
-                rawloc, clients,
-                network=None, station=None, debug=False):
+                rawloc, clients, network=None, station=None, 
+                logdir=None, debug=False):
     """
     Downloads the waveforms for all events in the catalogue
      for a circular domain around the epicentre with defined epicentral
@@ -62,6 +62,8 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
         Only allowed if network != None. Station restrictions.
         Only download from these stations, wildcards are allowed.
         The default is None.
+    logdir : string, optional
+        Set the directory to where the download log is saved
     debug : Bool, optional
         All loggers go to debug mode.
     
@@ -86,16 +88,22 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
     ###########
     # logging for the download
     fdsn_mass_logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
-    fdsn_mass_logger.setLevel(logging.INFO)
+    fdsn_mass_logger.setLevel(logging.WARNING)
     if debug:
         fdsn_mass_logger.setLevel(logging.DEBUG)
 
     # Create handler to the log
-    fh = logging.FileHandler('logs/download.log')
-    fh.setLevel(logging.WARNING)
+    if logdir is None:
+        fh = logging.FileHandler('logs/download.log')
+    else:
+        fh = logging.FileHandler(os.path.join(logdir, 'download.log'))
+
+    fh.setLevel(logging.INFO)
     if debug:
         fh.setLevel(logging.DEBUG)
     fdsn_mass_logger.addHandler(fh)
+
+    fdsn_mass_logger.propagate = False
 
     # Create Formatter
     fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
@@ -104,6 +112,7 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
     ####
     # Loop over each event
     for event in event_cat:
+        fdsn_mass_logger.warning('Downloading event: ')
         # fetch event-data
         origin_time = event.origins[0].time
         ot_fiss = UTCDateTime(origin_time).format_fissures()
