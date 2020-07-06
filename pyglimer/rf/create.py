@@ -198,7 +198,7 @@ def createRF(st_in, phase, pol='v', onset=None,
         RF[0].data = RF[0].data/fact
         # I could probably create another QC here and check if fact is
         # the maximum of RF[0].data or even close to the maximum. Let's try:
-        if fact < abs(RF[0].data).max()/2:
+        if abs(fact) < abs(lrf).max()/2:
             raise ValueError('The noise level of the created receiver funciton\
                 is too high.')
         
