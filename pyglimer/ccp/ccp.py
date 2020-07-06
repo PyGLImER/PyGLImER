@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Saturday, 4th July 2020 02:10:50 pm
+Last Modified: Monday, 6th July 2020 12:38:16 pm
 '''
 
 #!/usr/bin/env python3
@@ -38,7 +38,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
              preproloc='output/waveforms/preprocessed',
              rfloc='output/waveforms/RF', network=None,
              station=None, geocoords=None,
-             compute_stack=False, binrad=np.cos(np.radians(30)),
+             compute_stack=False, filt=None, binrad=np.cos(np.radians(30)),
              append_pp=False, save=False, verbose=True):
     """
     Computes a ccp stack in self.ccp using data from statloc and rfloc.
@@ -78,6 +78,10 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
         :func:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`.
         That can take a long time! The default is False.
     :type compute_stack: bool, optional
+    :param filt: Decides whether to filter the receiver function prior to
+            depth migration. Either a Tuple of form `(lowpassf, highpassf)` or
+            `None` / `False`.
+    :type filt: tuple, optional
     :param binrad: Only used if compute_stack=True
             Defines the bin radius with bin radius = binrad*distance_bins.
             Full Overlap = cosd(30), Full coverage: 1.
@@ -165,6 +169,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
     if compute_stack:
         ccp.compute_stack(
             vel_model=vel_model, network=network, station=station, save=save,
+            filt=filt,
             pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc)
 
     # _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
@@ -306,7 +311,7 @@ class CCPStack(object):
                       statloc='output/stations',
                       preproloc='output/waveforms/preprocessed',
                       network=None, station=None, geocoords=None, pattern=None,
-                      save=False,
+                      save=False, filt=None,
                       binrad=np.cos(np.radians(30)), append_pp=False):
         """
         Computes a ccp stack in self.ccp, using the data from rfloc.
@@ -351,6 +356,10 @@ class CCPStack(object):
         :type pattern: list, optional
         :param save: Either False if the ccp should not be saved or string with
             filename will be saved in config.ccp. Will be saved as pickle file.
+        :param filt: Decides whether to filter the receiver function prior to
+            depth migration. Either a Tuple of form `(lowpassf, highpassf)` or
+            `None` / `False`.
+        :type filt: tuple, optional
         :type save: str or bool, optional
         :param binrad: Defines the bin radius with
             bin radius = binrad*distance_bins.
@@ -511,8 +520,6 @@ only show the progress per chunk.')
         # The test data needs to be filtered
         if network == 'matlab':
             filt = [.03, 1.5]  # bandpass frequencies
-        else:
-            filt = False
 
         # Define grid boundaries for 3D RT
         latb = (self.coords[0].min(), self.coords[0].max())
@@ -666,6 +673,7 @@ only show the progress per chunk.')
         # self.busy[idx] = True
 
         for st in stream:
+            # read RFs in time domain
             try:
                 rft = read_rf(st, format='SAC')
             except (IndexError, Exception) as e:
@@ -796,7 +804,11 @@ only show the progress per chunk.')
         :raises ValueError: For unknown formats.
         """        
         # delete logger (cannot be pickled)
-        del self.logger
+        try:
+            del self.logger
+        except AttributeError:
+            # For backwards compatibility
+            pass
 
         # Standard filename
         if not filename:
