@@ -9,7 +9,6 @@ gypsum.pkl
 output*
 *.csv
 tmp/*
-.vscode/settings.json
 ccps.py
 src
 config.py
@@ -17,3 +16,4 @@ GLImER.py
 .ipynb_checkpoints
 *.sac
 examples/database
+.vscode/*
