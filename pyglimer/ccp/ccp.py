@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Saturday, 4th July 2020 02:10:50 pm
+Last Modified: Monday, 6th July 2020 11:30:55 am
 '''
 
 #!/usr/bin/env python3
@@ -796,7 +796,11 @@ only show the progress per chunk.')
         :raises ValueError: For unknown formats.
         """        
         # delete logger (cannot be pickled)
-        del self.logger
+        try:
+            del self.logger
+        except AttributeError:
+            # For backwards compatibility
+            pass
 
         # Standard filename
         if not filename:
