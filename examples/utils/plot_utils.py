@@ -18,6 +18,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import cartopy
 from cartopy.crs import PlateCarree
+from pyglimer import RFTrace
+
 
 def set_mpl_params():
     params = {
@@ -95,3 +97,87 @@ def plot_catalog(catalog):
     cbar = plt.colorbar(c, pad=0.005, shrink=1)    
     cbar.ax.set_ylabel(r"       $M_w$", rotation=0)
     
+    
+def plot_single_rf(rf: RFTrace, outputdir=None)
+    """Creates plot of a single receiver function
+    
+    """
+    
+    
+    
+def plot_section(st, timelimits=[0, 7200], epilimits=[0, 180], 
+                 scalingfactor: float = 2.0, linewidth: float = 0.25,
+                 outputdir: str or None = None, title: str or None = None,
+                 show: bool = True):
+    
+    # Setup
+    components = ["R", "T", "Z"]
+    colors = [(0.7, 0.1, 0.1), (0.1, 0.5, 0.1), (0.1, 0.1, 0.5)]
+    
+    # 
+    for _color, _comp in zip(colors, components):
+        
+        plt.figure(figsize=(10,15))
+        
+        for tr in st.select(component=_comp):
+            plt.plot(scalingfactor * tr.data/np.max(np.abs(tr.data)) + tr.stats.distance, 
+                     tr.times(), c=_color, lw=linewidth)
+        
+        plt.xlim(epilimits[0], epilimits[1])
+        plt.ylim(timelimits[0], timelimits[1])
+        plt.xlabel(r"$\Delta$ [$^{\circ}$]")
+        plt.ylabel(r"Time [s]")
+        
+        if title is not None:
+            plt.title(title + " - %s" % _comp)
+        else:
+            plt.title("%s component" % _comp)
+        
+        if outputdir is None:
+            plt.show()
+        else:
+            outputfilename = os.path.join(outputdir, "component_%s.pdf" % _comp)
+            plt.savefig(outputfilename, format="pdf")
+            
+
+
+def baz_hist(baz, nbins):
+    ax = plt.gca()
+    bin_edges = np.linspace(0,360, nbins+1)
+    cts, edges = np.histogram(baz, bins=bin_edges)
+    xbaz = edges[:-1] + 0.5 * np.diff(edges)
+    wbaz = np.diff(edges)# * 0.8
+    bars = plt.bar(xbaz/180*np.pi, cts, wbaz/180*np.pi, bottom=0.0)
+    for r, bar in zip(cts, bars):
+        bar.set_facecolor(plt.cm.magma_r(r / np.max(cts)))
+    ax.set_theta_zero_location('N')
+    ax.set_theta_direction(-1)
+    ax.invert_yaxis()
+    ax.set_xticklabels(['N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE'])
+
+def rayp_hist(rayp, nbins, v=5.8):
+    # Get Incidence angle p = sin i/v <--> v sin i / p <--> i = asin(vp)
+    # 5.8 taken from PREM
+    shift= 180
+    barshift = shift/180*np.pi
+    angle = np.arcsin(rayp*v)
+    ax = plt.gca()
+    bin_edges = np.linspace(0,np.pi/2, nbins+1)
+    cts, edges = np.histogram(angle, bins=bin_edges)
+    xbaz = edges[:-1] + 0.5 * np.diff(edges)
+    wbaz = np.diff(edges)# * 0.8
+    bars = plt.bar(xbaz, cts, wbaz, bottom=0.0)
+    bars = plt.bar(barshift-xbaz, cts, wbaz, bottom=0.0)
+    for r, bar in zip(cts, bars):
+        bar.set_facecolor(plt.cm.magma_r(r / np.max(cts)))
+    ax.set_theta_zero_location('N')
+    ax.set_theta_direction(-1)
+    ax.set_thetamin(shift-0)
+    ax.set_thetamax(shift-50)
+    labelvals = np.array([130, 140, 150,160, 170, 180])
+    ax.set_xticklabels(["%d$^\circ$" % np.round(shift-x) for x in labelvals])
+    ax.invert_yaxis()
+    ax.set_rlabel_position(10)
+
+
+def rfstream_baz_dist()

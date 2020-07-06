@@ -15,6 +15,7 @@ dependencies:
   - scipy
   - pip
   - tqdm
+  - flake8
   - pip:
     - sphinx
     - sphinx-rtd-theme
