@@ -30,10 +30,10 @@ def set_mpl_params():
         'figure.dpi': 150,
         'axes.labelweight': 'bold',
         'axes.linewidth': 1.5,
-        'axes.labelsize': 15,
-        'axes.titlesize': 20,
+        'axes.labelsize': 14,
+        'axes.titlesize': 18,
         'axes.titleweight': 'bold',
-        'xtick.labelsize': 14,
+        'xtick.labelsize': 13,
         'xtick.direction': 'in',
         'xtick.top': True,  # draw label on the top
         'xtick.bottom': True,  # draw label on the bottom
@@ -42,7 +42,7 @@ def set_mpl_params():
         'xtick.major.bottom': True,  # draw x axis bottom major ticks
         'xtick.minor.top': True,  # draw x axis top minor ticks
         'xtick.minor.bottom': True,  # draw x axis bottom minor ticks
-        'ytick.labelsize': 14,
+        'ytick.labelsize': 13,
         'ytick.direction': 'in',
         'ytick.left': True,  # draw label on the top
         'ytick.right': True,  # draw label on the bottom
@@ -167,7 +167,7 @@ def plot_single_rf(rf: RFTrace, tlim: list or tuple or None = None,
     if ax is None:
         width, height = 10, 2.5
         fig = plt.figure(figsize=(width, height))
-        ax = plt.gca()
+        ax = plt.gca(zorder=9999999)
         axtmp = None
     else:
         bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
@@ -201,6 +201,8 @@ def plot_single_rf(rf: RFTrace, tlim: list or tuple or None = None,
     if clean:
         remove_all()
     else:
+        ax.set_xlabel("Conversion Time [s]")
+        ax.set_ylabel("A    ", rotation=0)
         text = rf.stats.starttime.isoformat(sep=" ") + "\n" + rf.get_id()
         ax.text(0.995, 1.0-0.005*ratio, text, transform=ax.transAxes,
                 horizontalalignment="right", verticalalignment="top")
@@ -222,7 +224,8 @@ def plot_single_rf(rf: RFTrace, tlim: list or tuple or None = None,
 def plot_section(rfst: RFStream, channel = "PRF",
                  timelimits: list or tuple or None = None, 
                  epilimits: list or tuple or None = None,
-                 scalingfactor: float = 2.0,
+                 scalingfactor: float = 2.0, ax: plt.Axes = None,
+                 line: bool = True,
                  linewidth: float = 0.25, outputdir: str or None = None, 
                  title: str or None = None, show: bool = True):
     """Creates plot of a receiver function section as a function
@@ -232,19 +235,24 @@ def plot_section(rfst: RFStream, channel = "PRF",
     ----------
     rfst : :class:`pyglimer.RFStream`
         Stream of receiver functions
-    timelimits: list or tuple or None
+    timelimits : list or tuple or None
         y axis time limits in seconds (len(list)==2).
         If `None` full traces is plotted.
         Default None.
-    epilimits: list or tuple or None = None,
+    epilimits : list or tuple or None = None,
         y axis time limits in seconds (len(list)==2).
         If `None` from 30 to 90 degrees plotted.
         Default None.
-    scalingfactor: float
+    scalingfactor : float
         sets the scale for the traces. Could be automated in 
         future functions(Something like mean distance between
         traces)
         Defaults to 2.0
+    line : bool
+        plots black line of the actual RF
+        Defaults to True
+    linewidth: float
+        sets linewidth of individual traces
     ax : `matplotlib.pyplot.Axes`, optional
         Can define an axes to plot the RF into. Defaults to None.
         If None, new figure is created.
@@ -262,13 +270,13 @@ def plot_section(rfst: RFStream, channel = "PRF",
     """
     
         
-    # Create figure
-    plt.figure(figsize=(10,15))
-    ax = plt.gca()
+    # Create figure if no axes is specified
+    if ax is None:
+        plt.figure(figsize=(10,15))
+        ax = plt.gca(zorder=999999)
 
     # Grab one component only
-    rfst_chan = rfst.select(channel=channel).sort(keys=['distance'], 
-                                                  reverse=True)
+    rfst_chan = rfst.select(channel=channel).sort(keys=['distance'])
 
     # Plot traces
     for _i, rf in enumerate(rfst_chan):
@@ -276,14 +284,15 @@ def plot_section(rfst: RFStream, channel = "PRF",
         rftmp = rf.data * scalingfactor \
             + rf.stats.distance
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
-                         where=rftmp>rf.stats.distance, 
-                         interpolate=True, color=(0.9, 0.2, 0.2),
-                         zorder=_i)
-        ax.fill_betweenx(times, rf.stats.distance, rftmp,
                          where=rftmp<rf.stats.distance, 
                          interpolate=True, color=(0.2, 0.2, 0.7),
-                         zorder=_i + 0.1)
-        ax.plot(rftmp, times, 'k', lw=linewidth, zorder=_i + 0.2)
+                         zorder=-_i)
+        ax.fill_betweenx(times, rf.stats.distance, rftmp,
+                         where=rftmp>rf.stats.distance, 
+                         interpolate=True, color=(0.9, 0.2, 0.2),
+                         zorder=-_i - 0.1)
+        if line:
+            ax.plot(rftmp, times, 'k', lw=linewidth, zorder=-_i + 0.1)
 
     # Set limits
     if epilimits is None:
@@ -313,7 +322,7 @@ def plot_section(rfst: RFStream, channel = "PRF",
     if outputdir is None:
         plt.show()
     else:
-        outputfilename = os.path.join(outputdir, "component_%s.pdf" % _comp)
+        outputfilename = os.path.join(outputdir, "channel_%s.pdf" % channel)
         plt.savefig(outputfilename, format="pdf")
 
 
