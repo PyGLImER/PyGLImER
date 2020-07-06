@@ -14,6 +14,7 @@ Last updated:
 """
 import os
 import subprocess
+import logging
 from http.client import IncompleteRead
 from datetime import datetime
 from pathlib import Path
@@ -145,6 +146,7 @@ class Request(object):
         self.deconmeth = deconmeth
         
         # Directories
+        self.logdir = os.path.dirname(rawloc)
         self.evtloc = evtloc
         self.statloc = statloc
         self.rawloc = os.path.join(rawloc, self.phase)
@@ -261,7 +263,8 @@ class Request(object):
         downloadwav(
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
-             network=self.network, station=self.station, debug=self.debug)
+             network=self.network, station=self.station, 
+             logdir=self.logdir, debug=self.debug)
 
     def preprocess(self):
         """
@@ -270,5 +273,5 @@ class Request(object):
         preprocess(
             self.phase, self.rot, self.pol, 0.05, self.evtcat, self.model,
             'hann', self.tz, self.ta, self.statloc, self.rawloc, self.preproloc,
-            self.rfloc, self.deconmeth, self.wavdownload, netrestr=self.network, statrestr=self.station,
-            debug=self.debug)
+            self.rfloc, self.deconmeth, self.wavdownload, netrestr=self.network,
+            statrestr=self.station, logdir=self.logdir, debug=self.debug)

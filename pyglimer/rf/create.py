@@ -534,7 +534,7 @@ class RFStream(Stream):
                 TAS = round((
                     tr.stats.onset - tr.stats.starttime) / stats.delta)
                 TAS = 1201
-                print(TAS)
+                # print(TAS)
                 if tr.stats.phase == "S":
                     data = -np.flip(data)
 
