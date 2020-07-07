@@ -16,6 +16,6 @@ GLImER.py
 .ipynb_checkpoints
 *.sac
 examples/database
-.vscode/*.DS_Store
+.vscode
 *.pdf
 .DS_Store
