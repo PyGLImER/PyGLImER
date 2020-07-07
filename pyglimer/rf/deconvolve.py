@@ -15,7 +15,7 @@ import pyglimer.utils.signalproc as sptb
 
 
 def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
-           it_max=400):
+           it_max=200):
     """
     Has a bug in the normalisation!
     This function provides a generalised iterative deconvolution as given
@@ -125,7 +125,7 @@ def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
             IR = IR_new
             r = r_new  # set new residual value
         else:  # reject peak
-            IR_new = IR  # discard insignifcant peak
+            IR_new = IR  # discard insignificant peak
             rej = rej+1
 
     # Create receiver function
