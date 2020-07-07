@@ -202,7 +202,8 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     
     # Set limits
     if tlim is None:
-        ax.set_xlim(times[0], times[-1])
+        # ax.set_xlim(times[0], times[-1])
+        ax.set_xlim(0, times[-1]) # don't really wanna see the stuff before 
     else:
         ax.set_xlim(tlim)
     
@@ -291,7 +292,8 @@ def plot_section(rfst, channel = "PRF",
         ax = plt.gca(zorder=999999)
 
     # Grab one component only
-    rfst_chan = rfst.select(channel=channel).sort(keys=['distance'])
+    #rfst_chan = rfst.select(channel=channel).sort(keys=['distance'])
+    rfst_chan = rfst.sort(keys=['distance'])
 
     # Plot traces
     for _i, rf in enumerate(rfst_chan):
@@ -326,7 +328,8 @@ def plot_section(rfst, channel = "PRF",
     
     if timelimits is None:
         if rfst[0].stats.type == 'time':
-            ylim0 = rfst_chan[0].stats.starttime - rfst_chan[0].stats.onset
+            ylim0 = 0
+            #rfst_chan[0].stats.starttime - rfst_chan[0].stats.onset
         else:
             ylim0 = times[0]
         ylim1 = times[-1] + ylim0
@@ -337,7 +340,7 @@ def plot_section(rfst, channel = "PRF",
     
     # Set labels
     plt.xlabel(r"$\Delta$ [$^{\circ}$]")
-    if rfst.stats.type == 'time':
+    if rfst[0].stats.type == 'time':
         plt.ylabel(r"Time [s]")
     else:
         plt.ylabel(r"Depth [km]")

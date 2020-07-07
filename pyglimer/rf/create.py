@@ -29,7 +29,7 @@ from obspy.geodetics import gps2dist_azimuth
 from obspy.taup import TauPyModel
 from scipy.signal.windows import hann
 
-from .deconvolve import it, spectraldivision, multitaper
+from .deconvolve import it, spectraldivision, multitaper, gen_it
 from .moveout import DEG2KM, maxz, res, moveout, dt_table, dt_table_3D
 from examples.utils.plot_utils import plot_section, plot_single_rf
 
@@ -177,8 +177,8 @@ def createRF(st_in, phase, pol='v', onset=None,
             width = 2.5
         else:
             raise ValueError('Phase '+phase+' is not supported.')
-        RF[0].data = it(v, u, dt, shift=shift, width=width)[0]
         lrf = None
+        RF[0].data = it(v, u, dt, shift=shift, width=width)[0]
     elif method == "dampedf":
         RF[0].data, lrf = spectraldivision(v, u, dt, shift, "con", phase=phase)
     elif method == "waterlevel":

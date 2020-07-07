@@ -14,7 +14,7 @@ from ..utils.nextpowof2 import nextPowerOf2
 import pyglimer.utils.signalproc as sptb
 
 
-def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
+def gen_it(P, H, dt, phase, shift=0, width=2.5, e_min=5, omega_min=0,
            it_max=200):
     """
     Has a bug in the normalisation!
@@ -28,7 +28,6 @@ def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
     :type H: np.ndarray
     :param dt: Sampling interval [s]
     :type dt: float
-    :param mu: Damping factor for least-square damping.
     :type mu: float
     :param shift: Time shift of theoretical arrival [s]. The default is 0.
     :type shift: float, optional
@@ -67,6 +66,20 @@ def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
     P = np.append(P, (N2-N)*[0])
     H = np.append(H, (N2-N)*[0])
 
+    # pre-event noise needed for regularisation parameter
+    vn = np.zeros(N)
+    if phase == "P":
+        vn[:round((shift-2)/N)] = P[:round((shift-2)/N)]
+    elif phase == "S":
+        vn[:round((shift/2)/N)] = P[:round((shift/2)/N)]
+
+    # fourier transform
+    vnf = np.fft.fft(vn, n=N2)
+
+    # denominator and regularisation
+    noise = np.multiply(vnf, np.conj(vnf))
+    mu = noise.real.max()
+
     # cast source wavelet estimation into frequency domain
     P_ft = np.fft.fft(P, n=N2)
 
@@ -88,7 +101,8 @@ def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
     # WHILE LOOP FOR ITERATIVE DECON #####
     while e > e_min and it < it_max:
         it = it+1
-        # convolve eestimated source pulse & residual
+
+        # convolve estimated source pulse & residual
         a = sptb.convf(P_d, r, N2, dt)
 
         # Find position of maximum correlation, with k*dt
@@ -96,12 +110,22 @@ def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
 
         # That's the scaling from the original paper,
         # which doesn't make very much sense to me
-        # s2 = a[k]*P
-        # scale = np.sqrt(np.dot(s2,H))/np.linalg.norm(H)
+        #s2 = a[k]*P[round(shift/dt)] # estimated source wavelet only for a[k]
+        s2 = a[k]*P
+        l = np.argmax(abs(s2))
+        print(a[k])
+        #scale = H[l]/s2[l]
+        # scale = H[k+round(shift/dt)]/s2
+        
+        scale = 1/(P_d.max()/P.max())
+        #np.dot(s2,H)/np.linalg.norm(H[k])
+        #print(scale)
 
         # scale akin to the original by Ligorria
-        scale = (mu + np.linalg.norm(P_ft))/(np.sum(P**2))
-        ak = a[k]*scale
+        #scale = (mu + np.linalg.norm(P_ft))/(np.sum(P**2))
+        # scale = H[k]/a[k]
+        # scale = H[k]/sptb.convf(a, P, N2, dt)[k]
+        ak = scale*a[k]
 
         IR_new[k] = IR[k] + ak  # construct estimated impulse response
 
@@ -113,6 +137,7 @@ def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
         r_new = H - est
         omega = abs((np.linalg.norm(r)**2-np.linalg.norm(r_new)**2)
                     / np.linalg.norm(r)**2)  # significance criterion
+        r = r_new  # set new residual value
 
         # Calculate criterion for convergence
         e = np.linalg.norm(r_new)**2/np.linalg.norm(H)**2
@@ -121,9 +146,9 @@ def gen_it(P, H, dt, mu, shift=0, width=2.5, e_min=5, omega_min=0.5,
         # If convergence criteria weren't met and sigificance criterion was met
         # Else the significance criterion isn't met and the peak is most
         # likely noise and thus discarded
+        
         if omega > omega_min:
             IR = IR_new
-            r = r_new  # set new residual value
         else:  # reject peak
             IR_new = IR  # discard insignificant peak
             rej = rej+1

@@ -22,7 +22,7 @@ from geographiclib.geodesic import Geodesic
 from ..ccp import CCPStack
 from ..rf import RFTrace, RFStream
 from ..rf.create import createRF
-from ..rf.deconvolve import it, multitaper, spectraldivision
+from ..rf.deconvolve import it, multitaper, spectraldivision, gen_it
 from ..rf.moveout import moveout, DEG2KM
 from ..waveform.qc import qcs, qcp
 
@@ -441,8 +441,10 @@ def decon_test(PSS_file, phase, method):
             v = PSS[i, 0, :]
         if method == "it":
             data, _, _ = it(u, v, dt, shift=shift)
+        elif method == "gen_it":
+            data, IR, iters, rej = gen_it(u, v, dt, phase=phase, shift=shift)
         elif method == "fqd" or method == "wat" or method == "con":
-            data, _ = spectraldivision(v, u, dt, shift, regul=method)
+            data, _ = spectraldivision(v, u, dt, shift, phase=phase, regul=method)
         elif method == "multit_fqd":
             data, _, _, _ = multitaper(u, v, dt, shift, 'fqd')
             data = lowpass(data, 4.99, 1/dt, zerophase=True)
