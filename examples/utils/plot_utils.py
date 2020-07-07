@@ -19,8 +19,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import cartopy
 from cartopy.crs import PlateCarree
-from pyglimer import RFTrace, RFStream
 
+from pyglimer.constants import maxz, res
 
 def set_mpl_params():
     params = {
@@ -135,7 +135,7 @@ def plot_catalog(catalog):
     cbar.ax.set_ylabel(r"       $M_w$", rotation=0)
     
     
-def plot_single_rf(rf: RFTrace, tlim: list or tuple or None = None, 
+def plot_single_rf(rf, tlim: list or tuple or None = None, 
                    ax: plt.Axes = None, outputdir: str = None, 
                    clean: bool = False):
     """Creates plot of a single receiver function
@@ -145,7 +145,8 @@ def plot_single_rf(rf: RFTrace, tlim: list or tuple or None = None,
     rf : :class:`pyglimer.RFTrace`
         single receiver function trace
     tlim: list or tuple or None
-        x axis time limits in seconds (len(list)==2).
+        x axis time limits in seconds if type=='time' or depth in km if
+        type==depth (len(list)==2).
         If `None` full trace is plotted.
         Default None.
     ax : `matplotlib.pyplot.Axes`, optional
@@ -160,7 +161,7 @@ def plot_single_rf(rf: RFTrace, tlim: list or tuple or None = None,
     
      Returns
     -------
-    None.
+    ax : `matplotlib.pyplot.Axes`
     """
     
     # Get figure/axes dimensions
@@ -178,8 +179,13 @@ def plot_single_rf(rf: RFTrace, tlim: list or tuple or None = None,
     # is perfectly distanced from top left/right corner
     ratio = width/height
     
-    # Get times
-    times = rf.times() - (rf.stats.onset - rf.stats.starttime)
+    if rf.stats.type == 'time':
+        # Get times
+        times = rf.times() - (rf.stats.onset - rf.stats.starttime)
+    else:
+        z = np.hstack(
+                 ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+        times = z
     
     # Plot stuff into axes
     ax.fill_between(times, 0, rf.data, where=rf.data>0, 
@@ -201,7 +207,10 @@ def plot_single_rf(rf: RFTrace, tlim: list or tuple or None = None,
     if clean:
         remove_all()
     else:
-        ax.set_xlabel("Conversion Time [s]")
+        if rf.stats.type == 'time':
+            ax.set_xlabel("Conversion Time [s]")
+        else:
+            ax.set_xlabel("Conversion Depth [km]")
         ax.set_ylabel("A    ", rotation=0)
         text = rf.stats.starttime.isoformat(sep=" ") + "\n" + rf.get_id()
         ax.text(0.995, 1.0-0.005*ratio, text, transform=ax.transAxes,
@@ -219,9 +228,9 @@ def plot_single_rf(rf: RFTrace, tlim: list or tuple or None = None,
                                 + rf.stats.starttime._strftime_replacement('%Y%m%dT%H%M%S')
                                 + ".pdf")
         plt.savefig(filename, format="pdf")
-
+    return ax
     
-def plot_section(rfst: RFStream, channel = "PRF",
+def plot_section(rfst, channel = "PRF",
                  timelimits: list or tuple or None = None, 
                  epilimits: list or tuple or None = None,
                  scalingfactor: float = 2.0, ax: plt.Axes = None,
@@ -265,7 +274,7 @@ def plot_section(rfst: RFStream, channel = "PRF",
     
      Returns
     -------
-    None.
+    ax : `matplotlib.pyplot.Axes`
     
     """
     
@@ -280,7 +289,12 @@ def plot_section(rfst: RFStream, channel = "PRF",
 
     # Plot traces
     for _i, rf in enumerate(rfst_chan):
-        times = rf.times() - (rf.stats.onset - rf.stats.starttime)
+        if rfst[0].stats.type == 'time':
+            times = rf.times() - (rf.stats.onset - rf.stats.starttime)
+        else:
+            z = np.hstack(
+                 ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+            times = z
         rftmp = rf.data * scalingfactor \
             + rf.stats.distance
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
@@ -301,7 +315,10 @@ def plot_section(rfst: RFStream, channel = "PRF",
         plt.xlim(epilimits)
     
     if timelimits is None:
-        ylim0 = rfst_chan[0].stats.starttime - rfst_chan[0].stats.onset
+        if rfst[0].stats.type == 'time':
+            ylim0 = rfst_chan[0].stats.starttime - rfst_chan[0].stats.onset
+        else:
+            ylim0 = times[0]
         ylim1 = times[-1] + ylim0
         plt.ylim(ylim0, ylim1)
     else:
@@ -310,7 +327,10 @@ def plot_section(rfst: RFStream, channel = "PRF",
     
     # Set labels
     plt.xlabel(r"$\Delta$ [$^{\circ}$]")
-    plt.ylabel(r"Time [s]")
+    if rfst.stats.type == 'time':
+        plt.ylabel(r"Time [s]")
+    else:
+        plt.ylabel(r"Depth [km]")
 
     # Set title
     if title is not None:
@@ -324,6 +344,7 @@ def plot_section(rfst: RFStream, channel = "PRF",
     else:
         outputfilename = os.path.join(outputdir, "channel_%s.pdf" % channel)
         plt.savefig(outputfilename, format="pdf")
+    return ax
 
 
         

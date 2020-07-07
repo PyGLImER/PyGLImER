@@ -31,6 +31,7 @@ from scipy.signal.windows import hann
 
 from .deconvolve import it, spectraldivision, multitaper
 from .moveout import DEG2KM, maxz, res, moveout, dt_table, dt_table_3D
+from examples.utils.plot_utils import plot_section, plot_single_rf
 
 logger = logging.Logger("rf")
 
@@ -527,69 +528,115 @@ class RFStream(Stream):
                             "pp_longitude": None})
         return z, stack, RF_mo
 
-    def plot(self, scale=2):
-        """
-        Plot receiver functions depending on epicentral distance
-
-        :param scale: Y-scaling, defaults to 2
-        :type scale: int, optional
-        :return: Figure and axis object
-        :rtype: [type]
-        """        
-
+    def plot(self, channel = "PRF",
+            lim: list or tuple or None = None, 
+            epilimits: list or tuple or None = None,
+            scalingfactor: float = 2.0, ax: plt.Axes = None,
+            line: bool = True,
+            linewidth: float = 0.25, outputdir: str or None = None, 
+            title: str or None = None, show: bool = True):
+        """Creates plot of a receiver function section as a function
+        of epicentral distance or single plot if len(RFStream)==1.
+        
+        Parameters
+        ----------
+        lim : list or tuple or None
+            y axis time limits in seconds (if self.stats.type==time)
+            or depth in km (if self.stats==depth) (len(list)==2).
+            If `None` full traces is plotted.
+            Default None.
+        epilimits : list or tuple or None = None,
+            y axis time limits in seconds (len(list)==2).
+            If `None` from 30 to 90 degrees plotted.
+            Default None.
+        scalingfactor : float
+            sets the scale for the traces. Could be automated in 
+            future functions(Something like mean distance between
+            traces)
+            Defaults to 2.0
+        line : bool
+            plots black line of the actual RF
+            Defaults to True
+        linewidth: float
+            sets linewidth of individual traces
+        ax : `matplotlib.pyplot.Axes`, optional
+            Can define an axes to plot the RF into. Defaults to None.
+            If None, new figure is created.
+        outputdir : str, optional
+            If set, saves a pdf of the plot to the directory.
+            If None, plot will be shown instantly. Defaults to None.
+        clean: bool
+            If True, clears out all axes and plots RF only.
+            Defaults to False.
+        
+        Returns
+        -------
+        ax : `matplotlib.pyplot.Axes`
+        
+        """     
+        if self.count() == 1:
+            # Do single plot
+            ax = plot_single_rf(
+                self[0], tlim=lim, ax=ax, outputdir=outputdir, clean=clean)
+        else:
+            ax = plot_section(
+                self, timelimits=lim, epilimits=epilimits,
+                scalingfactor=scalingfactor, line=line, linewidth=linewidth,
+                ax=ax, outputdir=outputdir, clean=clean)
+        return ax
         # deep copy stream
-        if len(self.traces) == 1:
-            fig, ax = self[0].plot()
-            return fig, ax
+        # if len(self.traces) == 1:
+        #     fig, ax = self[0].plot()
+        #     return fig, ax
 
-        traces = []
-        for tr in self:
-            stats = AttribDict({})
-            stats["coordinates"] = {}
-            stats["coordinates"]["latitude"] = tr.stats["event_latitude"]
-            stats["coordinates"]["longitude"] = tr.stats["event_longitude"]
-            stats["network"] = tr.stats["network"]
-            stats["station"] = tr.stats["station"]
+        # traces = []
+        # for tr in self:
+        #     stats = AttribDict({})
+        #     stats["coordinates"] = {}
+        #     stats["coordinates"]["latitude"] = tr.stats["event_latitude"]
+        #     stats["coordinates"]["longitude"] = tr.stats["event_longitude"]
+        #     stats["network"] = tr.stats["network"]
+        #     stats["station"] = tr.stats["station"]
 
-            # Check type
-            if tr.stats.type == "time":
-                stats.delta = tr.stats.delta
-                data = tr.data
-                TAS = round((
-                    tr.stats.onset - tr.stats.starttime) / stats.delta)
-                TAS = 1201
-                # print(TAS)
-                if tr.stats.phase == "S":
-                    data = -np.flip(data)
+        #     # Check type
+        #     if tr.stats.type == "time":
+        #         stats.delta = tr.stats.delta
+        #         data = tr.data
+        #         TAS = round((
+        #             tr.stats.onset - tr.stats.starttime) / stats.delta)
+        #         TAS = 1201
+        #         # print(TAS)
+        #         if tr.stats.phase == "S":
+        #             data = -np.flip(data)
 
-                data = data[TAS:round(TAS + 30 / stats.delta)]
-                stats["npts"] = len(data)
-                trace = Trace(data=data, header=stats)
-                #trace.normalize()
+        #         data = data[TAS:round(TAS + 30 / stats.delta)]
+        #         stats["npts"] = len(data)
+        #         trace = Trace(data=data, header=stats)
+        #         #trace.normalize()
 
-            elif tr.stats.type == "depth":
-                stats.delta = res
-                data = tr.data
-                stats["npts"] = len(data)
-                trace = Trace(data=data, header=stats)
-                #trace.normalize()
+        #     elif tr.stats.type == "depth":
+        #         stats.delta = res
+        #         data = tr.data
+        #         stats["npts"] = len(data)
+        #         trace = Trace(data=data, header=stats)
+        #         #trace.normalize()
 
-            elif tr.stats.type == "stastack":
-                # That should be a single plot
-                tr.plot()
-            traces.append(trace)
-        statlat = tr.stats.station_latitude
-        statlon = tr.stats.station_longitude
-        st = Stream(traces=traces)
-        fig = st.plot(type='section', dist_degree=True,
-                      ev_coord=(statlat, statlon), scale=scale, time_down=True,
-                      linewidth=1.5, handle=True, fillcolors=('r', 'c'))
-        fig.suptitle([tr.stats.network, tr.stats.station])
-        ax = fig.get_axes()[0]
-        # ax.set_ylim(0, 30)
-        if tr.stats.type == "depth":
-            ax.set_ylabel('Depth [km]')
-        return fig, ax
+        #     elif tr.stats.type == "stastack":
+        #         # That should be a single plot
+        #         tr.plot()
+        #     traces.append(trace)
+        # statlat = tr.stats.station_latitude
+        # statlon = tr.stats.station_longitude
+        # st = Stream(traces=traces)
+        # fig = st.plot(type='section', dist_degree=True,
+        #               ev_coord=(statlat, statlon), scale=scale, time_down=True,
+        #               linewidth=1.5, handle=True, fillcolors=('r', 'c'))
+        # fig.suptitle([tr.stats.network, tr.stats.station])
+        # ax = fig.get_axes()[0]
+        # # ax.set_ylim(0, 30)
+        # if tr.stats.type == "depth":
+        #     ax.set_ylabel('Depth [km]')
+        # return fig, ax
 
 
 class RFTrace(Trace):
@@ -859,98 +906,114 @@ class RFTrace(Trace):
             st.pp_longitude.append(lon2)
         return delta2
 
-    def plot(self, grid=False):
+    def plot(self, lim: list or tuple or None = None, 
+                   ax: plt.Axes = None, outputdir: str = None, 
+                   clean: bool = False):
+        """Creates plot of a single receiver function
+        
+        Parameters
+        ----------
+        lim: list or tuple or None
+            x axis time limits in seconds or km (depth) (len(list)==2).
+            If `None` full trace is plotted.
+            Default None.
+        ax : `matplotlib.pyplot.Axes`, optional
+            Can define an axes to plot the RF into. Defaults to None.
+            If None, new figure is created.
+        outputdir : str, optional
+            If set, saves a pdf of the plot to the directory.
+            If None, plot will be shown instantly. Defaults to None.
+        clean: bool
+            If True, clears out all axes and plots RF only.
+            Defaults to False.
+        
+        Returns
+        -------
+        ax : `matplotlib.pyplot.Axes`
         """
-        Plots the Receiver function against either depth or time, depending on
-        information given in self.stats.type.
+        ax = plot_single_rf(
+            self, lim, ax=ax, outputdir=outputdir, clean=clean)
+        return ax
 
-        :param grid: Show a grid. The default is False.
-        :type grid: bool, optional
-        :return: Figure parameter if one wishes to edit figure and ax
-                If one wishes to edit axes.
-        :rtype: matplotlib.figure.Figure
-            matplotlib.axes._subplots.AxesSubplot
-        """        
+        # # plt.style.use('data/plot_data/PaperDoubleFig.mplstyle')
+        # # Make some style choices for plotting
+        # colourWheel = ['#329932', '#ff6961', 'b', '#6a3d9a', '#fb9a99',
+        #                '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a',
+        #                '#ffff99', '#b15928', '#67001f', '#b2182b', '#d6604d',
+        #                '#f4a582', '#fddbc7', '#f7f7f7', '#d1e5f0', '#92c5de',
+        #                '#4393c3', '#2166ac', '#053061']
+        # dashesStyles = [[3, 1], [1000, 1], [2, 1, 10, 1], [4, 1, 1, 1, 1, 1]]
+        # fig, ax = plt.subplots(1, 1)
 
-        # plt.style.use('data/plot_data/PaperDoubleFig.mplstyle')
-        # Make some style choices for plotting
-        colourWheel = ['#329932', '#ff6961', 'b', '#6a3d9a', '#fb9a99',
-                       '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a',
-                       '#ffff99', '#b15928', '#67001f', '#b2182b', '#d6604d',
-                       '#f4a582', '#fddbc7', '#f7f7f7', '#d1e5f0', '#92c5de',
-                       '#4393c3', '#2166ac', '#053061']
-        dashesStyles = [[3, 1], [1000, 1], [2, 1, 10, 1], [4, 1, 1, 1, 1, 1]]
-        fig, ax = plt.subplots(1, 1)
+        # # Move y-axis and x-axis to centre, passing through (0,0)
+        # ax.spines['bottom'].set_position("zero")
 
-        # Move y-axis and x-axis to centre, passing through (0,0)
-        ax.spines['bottom'].set_position("zero")
+        # # Eliminate upper and right axes
+        # ax.spines['right'].set_color('none')
+        # ax.spines['top'].set_color('none')
 
-        # Eliminate upper and right axes
-        ax.spines['right'].set_color('none')
-        ax.spines['top'].set_color('none')
+        # # Show ticks in the left and lower axes only
+        # ax.xaxis.set_ticks_position('bottom')
 
-        # Show ticks in the left and lower axes only
-        ax.xaxis.set_ticks_position('bottom')
+        # ax.xaxis.set_major_formatter(ScalarFormatter())
+        # ax.yaxis.major.formatter._useMathText = True
+        # ax.yaxis.set_major_formatter(ScalarFormatter())
+        # ax.xaxis.major.formatter._useMathText = True
+        # # ax.yaxis.set_minor_locator(AutoMinorLocator(5))
+        # ax.xaxis.set_minor_locator(AutoMinorLocator(5))
 
-        ax.xaxis.set_major_formatter(ScalarFormatter())
-        ax.yaxis.major.formatter._useMathText = True
-        ax.yaxis.set_major_formatter(ScalarFormatter())
-        ax.xaxis.major.formatter._useMathText = True
-        # ax.yaxis.set_minor_locator(AutoMinorLocator(5))
-        ax.xaxis.set_minor_locator(AutoMinorLocator(5))
+        # ax.set_ylabel('normalised Amplitude')
+        # if grid:
+        #     plt.grid(color='c', which="both", linewidth=.25)
 
-        ax.set_ylabel('normalised Amplitude')
-        if grid:
-            plt.grid(color='c', which="both", linewidth=.25)
+        # y = self.data
 
-        y = self.data
+        # # Determine type
+        # if self.stats.type == "time":
 
-        # Determine type
-        if self.stats.type == "time":
+        #     # theoretical arrival sample in seconds (plotted as 0)
+        #     # TAS = round((self.stats.onset-self.stats.starttime)
+        #     #             / self.stats.delta)
+        #     if self.stats.phase == "S":  # flip trace
+        #         y = np.flip(y)
+        #         y = -y  # polarity
+        #         # TAS = -TAS
+        #         t = np.linspace(self.stats.onset - self.stats.endtime,
+        #                         self.stats.onset - self.stats.starttime,
+        #                         len(self.data))
+        #     elif self.stats.phase == "P":
+        #         t = np.linspace(self.stats.starttime - self.stats.onset,
+        #                         self.stats.endtime - self.stats.onset,
+        #                         len(self.data))
 
-            # theoretical arrival sample in seconds (plotted as 0)
-            # TAS = round((self.stats.onset-self.stats.starttime)
-            #             / self.stats.delta)
-            if self.stats.phase == "S":  # flip trace
-                y = np.flip(y)
-                y = -y  # polarity
-                # TAS = -TAS
-                t = np.linspace(self.stats.onset - self.stats.endtime,
-                                self.stats.onset - self.stats.starttime,
-                                len(self.data))
-            elif self.stats.phase == "P":
-                t = np.linspace(self.stats.starttime - self.stats.onset,
-                                self.stats.endtime - self.stats.onset,
-                                len(self.data))
+        #     # plot
+        #     ax.plot(t, y, color="k", linewidth=1.5)
+        #     ax.set_xlabel('conversion time in s')
+        #     ax.set_xlim(-10, 30)
+        #     ax.set_title("Receiver Function " + str(self.stats.network) + " " +
+        #                  str(self.stats.station) + " " +
+        #                  str(self.stats.event_time))
 
-            # plot
-            ax.plot(t, y, color="k", linewidth=1.5)
-            ax.set_xlabel('conversion time in s')
-            ax.set_xlim(-10, 30)
-            ax.set_title("Receiver Function " + str(self.stats.network) + " " +
-                         str(self.stats.station) + " " +
-                         str(self.stats.event_time))
+        # elif self.stats.type == "stastack" or self.stats.type == "depth":
+        #     # plot against depth
+        #     # z = np.linspace(0, maxz, len(self.data))
+        #     z = np.hstack(
+        #         ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
 
-        elif self.stats.type == "stastack" or self.stats.type == "depth":
-            # plot against depth
-            # z = np.linspace(0, maxz, len(self.data))
-            z = np.hstack(
-                ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+        #     # plot
+        #     ax.plot(z, y, color="k", linewidth=1.5)
 
-            # plot
-            ax.plot(z, y, color="k", linewidth=1.5)
-
-            ax.set_xlabel('Depth in km')
-            ax.set_xlim(0, 250)
-            if self.stats.type == "depth":
-                ax.set_title("Receiver Function " + self.stats.network
-                             + " " + self.stats.station + " " +
-                             str(self.stats.event_time))
-            elif self.stats.type == "stastack":
-                ax.set_title("Receiver Function stack " +
-                             str(self.stats.network) + " " +
-                             str(self.stats.station))
-        return fig, ax
+        #     ax.set_xlabel('Depth in km')
+        #     ax.set_xlim(0, 250)
+        #     if self.stats.type == "depth":
+        #         ax.set_title("Receiver Function " + self.stats.network
+        #                      + " " + self.stats.station + " " +
+        #                      str(self.stats.event_time))
+        #     elif self.stats.type == "stastack":
+        #         ax.set_title("Receiver Function stack " +
+        #                      str(self.stats.network) + " " +
+        #                      str(self.stats.station))
+        # return fig, ax
 
     def write(self, filename, format, **kwargs):
         """
