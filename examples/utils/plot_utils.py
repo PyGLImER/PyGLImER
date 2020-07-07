@@ -163,6 +163,7 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     -------
     ax : `matplotlib.pyplot.Axes`
     """
+    set_mpl_params()
     
     # Get figure/axes dimensions
     if ax is None:
@@ -179,20 +180,25 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     # is perfectly distanced from top left/right corner
     ratio = width/height
     
+    ydata = rf.data
     if rf.stats.type == 'time':
         # Get times
         times = rf.times() - (rf.stats.onset - rf.stats.starttime)
+        if rf.stats.phase == 'S':
+            times = np.flip(times)
+            ydata = np.flip(-rf.data)
     else:
         z = np.hstack(
                  ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
         times = z
     
+    
     # Plot stuff into axes
-    ax.fill_between(times, 0, rf.data, where=rf.data>0, 
+    ax.fill_between(times, 0, ydata, where=ydata>0, 
                     interpolate=True, color=(0.9, 0.2, 0.2))
-    ax.fill_between(times, 0, rf.data, where=rf.data<0, 
+    ax.fill_between(times, 0, ydata, where=ydata<0, 
                     interpolate=True, color=(0.2, 0.2, 0.7))
-    ax.plot(times, rf.data, 'k', lw=0.75)
+    ax.plot(times, ydata, 'k', lw=0.75)
     
     # Set limits
     if tlim is None:
@@ -277,7 +283,7 @@ def plot_section(rfst, channel = "PRF",
     ax : `matplotlib.pyplot.Axes`
     
     """
-    
+    #set_mpl_params()
         
     # Create figure if no axes is specified
     if ax is None:
@@ -289,8 +295,12 @@ def plot_section(rfst, channel = "PRF",
 
     # Plot traces
     for _i, rf in enumerate(rfst_chan):
-        if rfst[0].stats.type == 'time':
+        ydata = rf.data
+        if rf.stats.type == 'time':
             times = rf.times() - (rf.stats.onset - rf.stats.starttime)
+            if rf.stats.phase == 'S':
+                ydata = np.flip(-rf.data)
+                times = np.flip(times)
         else:
             z = np.hstack(
                  ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))

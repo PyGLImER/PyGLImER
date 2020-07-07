@@ -577,12 +577,12 @@ class RFStream(Stream):
         if self.count() == 1:
             # Do single plot
             ax = plot_single_rf(
-                self[0], tlim=lim, ax=ax, outputdir=outputdir, clean=clean)
+                self[0], tlim=lim, ax=ax, outputdir=outputdir)
         else:
             ax = plot_section(
                 self, timelimits=lim, epilimits=epilimits,
                 scalingfactor=scalingfactor, line=line, linewidth=linewidth,
-                ax=ax, outputdir=outputdir, clean=clean)
+                ax=ax, outputdir=outputdir)
         return ax
         # deep copy stream
         # if len(self.traces) == 1:
