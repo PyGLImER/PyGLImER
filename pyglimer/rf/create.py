@@ -191,7 +191,7 @@ def createRF(st_in, phase, pol='v', onset=None,
         RF.filter('lowpass', freq=2.50, zerophase=True, corners=2)
     else:
         raise ValueError(method+ " is no valid deconvolution method.")
-    if lrf:
+    if lrf is not None:
         # Normalisation for spectral division and multitaper
         # In order to do that, we have to find the factor that is necassary to
         # bring the zero-time pulse to 1
@@ -323,6 +323,39 @@ def read_rf(pathname_or_url, format=None, **kwargs):
         if tr.stats.type == "depth":
             tr.ppoint()
     return stream
+
+def read_by_station(network: str, station: str, phase: str, rfdir: str):
+    """
+    Convenience method to read all available receiver functions of one station
+    and a particular phase into one single stream. Subsequently, one could
+    for instance do a station stack by using
+    :func:`~pyglimer.rf.create.RFStream.station_stack()`.
+
+    Parameters
+    ----------
+    network : str
+        Network shortcut, two digits, e.g. "IU".
+    station : str
+        Station shortcut, three digits, e.g. "HRV"
+    phase : str
+        Primary phase ("S" or "P")
+    rfdir : str
+        Parental directory, in that the RF database is located
+
+    Returns
+    -------
+    :class:`~pyglimer.rf.create.RFStream`
+        RFStream object containing all receiver function of station x.
+    """
+    files = os.listdir(os.path.join(rfdir, phase, network, station))
+    rflist = []
+    for f in files:
+        infile = os.path.join(rfdir, phase, network, f)
+        # Append RFTrace
+        rflist.append(read_rf(infile)[0])
+    # Create RFStream object
+    rfst = RFStream(traces=rflist)
+    return rfst
 
 
 class RFStream(Stream):

@@ -441,18 +441,27 @@ def decon_test(PSS_file, phase, method):
             v = PSS[i, 0, :]
         if method == "it":
             data, _, _ = it(u, v, dt, shift=shift)
+            lrf = None
         elif method == "gen_it":
             data, IR, iters, rej = gen_it(u, v, dt, phase=phase, shift=shift)
+            lrf = None
         elif method == "fqd" or method == "wat" or method == "con":
-            data, _ = spectraldivision(v, u, dt, shift, phase=phase, regul=method)
+            data, lrf = spectraldivision(v, u, dt, shift, phase=phase, regul=method)
         elif method == "multit_fqd":
-            data, _, _, _ = multitaper(u, v, dt, shift, 'fqd')
+            data, lrf, _, _ = multitaper(u, v, dt, shift, 'fqd')
             data = lowpass(data, 4.99, 1/dt, zerophase=True)
         elif method == "multit_con":
-            data, _, _, data2 = multitaper(u, v, dt, shift, 'con')
+            data, lrf, _, data2 = multitaper(u, v, dt, shift, 'con')
             data = lowpass(data, 4.99, 1/dt, zerophase=True)
         else:
             raise NameError
+        if lrf is not None:
+            # Normalisation for spectral division and multitaper
+            # In order to do that, we have to find the factor that is necassary to
+            # bring the zero-time pulse to 1
+            fact = abs(lrf).max() #[round(shift/dt)]
+            print(fact)
+            data = data/fact
         RF.append(data)
     return RF, dt
 
