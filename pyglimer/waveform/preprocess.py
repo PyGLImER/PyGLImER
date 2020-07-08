@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Friday, 3rd July 2020 04:21:35 pm
+Last Modified: Wednesday, 8th July 2020 10:42:53 am
 '''
 
 #!/usr/bin/env python3d
@@ -105,7 +105,7 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
 
     # Create handler to the log
     if logdir is None:
-        fh = logging.FileHandler('logs/preprocess.log')
+        fh = logging.FileHandler(os.path.join('logs','preprocess.log'))
     else:
         fh = logging.FileHandler(os.path.join(logdir, 'preprocess.log'))
     fh.setLevel(logging.WARNING)
@@ -126,7 +126,7 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
 
     # Create handler to the log
     if logdir is None:
-        fhrf = logging.FileHandler('logs/RF.log')
+        fhrf = logging.FileHandler(os.path.join('logs', 'RF.log'))
     else:
         fhrf = logging.FileHandler(os.path.join(logdir, 'RF.log'))
     fhrf.setLevel(logging.WARNING)

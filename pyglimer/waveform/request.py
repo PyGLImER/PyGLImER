@@ -36,7 +36,7 @@ class Request(object):
 
     def __init__(self, phase, rot, evtloc, statloc, rawloc, preproloc,
                  rfloc, deconmeth, starttime, endtime, wavdownload=True,
-                 pol = 'v', minmag=5.5,
+                 pol: str = 'v', minmag: float or int=5.5,
                  event_coords=None,  network=None, station=None,
                  waveform_client=None, re_client=['IRIS'], evtcat=None,
                  debug=False):
@@ -146,7 +146,8 @@ class Request(object):
         self.deconmeth = deconmeth
         
         # Directories
-        self.logdir = os.path.dirname(rawloc)
+        self.logdir = os.path.join(
+            os.path.dirname(os.path.abspath(rawloc)), 'logs')
         self.evtloc = evtloc
         self.statloc = statloc
         self.rawloc = os.path.join(rawloc, self.phase)

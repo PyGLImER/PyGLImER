@@ -84,7 +84,8 @@ def __client__loop__(client, existing, wavdir, statloc):
                     pass  # wrong client        
 
 class StationDB(object):
-    def __init__(self, preproloc, phase=None, use_old=False):
+    def __init__(self, preproloc, phase=None, use_old=False,
+                 logdir:str or None = None):
         """
         Creates a pandas database of all available receiver functions.
         This database is entirely based on the info files in the "preprocessed"
@@ -104,6 +105,8 @@ class StationDB(object):
             That is a lot faster, but it will obviously not update,
             defaults to False
         :type use_old: bool, optional
+        :param logdir: Directory for log file
+        :type logdr: str, optional
         """        
 
         self.preproloc = preproloc
@@ -119,7 +122,10 @@ class StationDB(object):
         self.logger.setLevel(logging.WARNING)
 
         # FileHandler
-        fh = logging.FileHandler(os.path.join('logs', 'StationDBase.log'))
+        if not logdir:
+            fh = logging.FileHandler(os.path.join('logs', 'StationDBase.log'))
+        else:
+            fh = logging.FileHandler(os.path.join(logdir, 'StationDBase.log'))
         fh.setLevel(logging.WARNING)
         self.logger.addHandler(fh)
 

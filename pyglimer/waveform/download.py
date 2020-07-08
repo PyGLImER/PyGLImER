@@ -1,7 +1,7 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 3rd July 2020 11:14:15 am
+Last Modified: Wednesday, 8th July 2020 10:38:33 am
 '''
 
 #!/usr/bin/env python3
@@ -94,7 +94,7 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
 
     # Create handler to the log
     if logdir is None:
-        fh = logging.FileHandler('logs/download.log')
+        fh = logging.FileHandler(os.path.join('logs','download.log'))
     else:
         fh = logging.FileHandler(os.path.join(logdir, 'download.log'))
 
@@ -112,10 +112,10 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
     ####
     # Loop over each event
     for event in event_cat:
-        fdsn_mass_logger.warning('Downloading event: ')
         # fetch event-data
         origin_time = event.origins[0].time
         ot_fiss = UTCDateTime(origin_time).format_fissures()
+        fdsn_mass_logger.info('Downloading event: '+ot_fiss)
         evtlat = event.origins[0].latitude
         evtlon = event.origins[0].longitude
 

@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 6th July 2020 12:38:16 pm
+Last Modified: Wednesday, 8th July 2020 10:37:25 am
 '''
 
 #!/usr/bin/env python3
@@ -221,7 +221,7 @@ class CCPStack(object):
     input."""
 
     def __init__(self, latitude, longitude, edist, phase,
-                 verbose=True):
+                 verbose=True, logdir: str or None=None):
         """
         Creates an empy object template for a CCP stack
 
@@ -238,6 +238,8 @@ class CCPStack(object):
         :type phase: str
         :param verbose: If true -> console output. The default is True., defaults to True
         :type verbose: bool, optional
+        :param logdir: Directory for log file
+        :type logdr: str, optional
         """
 
         # Loggers for the CCP script
@@ -245,7 +247,10 @@ class CCPStack(object):
         self.logger.setLevel(logging.INFO)
 
         # Create handler to the log
-        fh = logging.FileHandler('logs/ccp.log')
+        if not logdir:
+            fh = logging.FileHandler(os.path.join('logs', 'ccp.log'))
+        else:
+            fh = logging.FileHandler(os.path.join(logdir, 'ccp.log'))
         fh.setLevel(logging.INFO)
         self.logger.addHandler(fh)
 
