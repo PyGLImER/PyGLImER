@@ -214,6 +214,66 @@ def createRF(st_in, phase, pol='v', onset=None,
     return RF
 
 
+def read_by_station(network: str, station: str, phase: str, rfdir: str):
+    """
+    Convenience method to read all available receiver functions of one station
+    and a particular phase into one single stream. Subsequently, one could
+    for instance do a station stack by using
+    :func:`~pyglimer.rf.create.RFStream.station_stack()`.
+
+    Parameters
+    ----------
+    network : str
+        Network shortcut, two digits, e.g. "IU".
+    station : str
+        Station shortcut, three digits, e.g. "HRV"
+    phase : str
+        Primary phase ("S" or "P")
+    rfdir : str
+        Parental directory, in that the RF database is located
+
+    Returns
+    -------
+    :class:`~pyglimer.rf.create.RFStream`
+        RFStream object containing all receiver function of station x.
+    """
+    files = os.listdir(os.path.join(rfdir, phase, network, station))
+    rflist = []
+    for f in files:
+        infile = os.path.join(rfdir, phase, network, f)
+        # Append RFTrace
+        rflist.append(read_rf(infile)[0])
+    # Create RFStream object
+    rfst = RFStream(traces=rflist)
+    return rfst
+
+
+"""
+All objects and functions below are modified versions as in Tom Eulenfeld's
+rf project or contain substantial parts from this code. License below.
+
+The MIT License (MIT)
+
+Copyright (c) 2013-2019 Tom Eulenfeld
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+
 def __get_event_origin_prop(h):
     def wrapper(event):
         try:
@@ -323,39 +383,6 @@ def read_rf(pathname_or_url, format=None, **kwargs):
         if tr.stats.type == "depth":
             tr.ppoint()
     return stream
-
-def read_by_station(network: str, station: str, phase: str, rfdir: str):
-    """
-    Convenience method to read all available receiver functions of one station
-    and a particular phase into one single stream. Subsequently, one could
-    for instance do a station stack by using
-    :func:`~pyglimer.rf.create.RFStream.station_stack()`.
-
-    Parameters
-    ----------
-    network : str
-        Network shortcut, two digits, e.g. "IU".
-    station : str
-        Station shortcut, three digits, e.g. "HRV"
-    phase : str
-        Primary phase ("S" or "P")
-    rfdir : str
-        Parental directory, in that the RF database is located
-
-    Returns
-    -------
-    :class:`~pyglimer.rf.create.RFStream`
-        RFStream object containing all receiver function of station x.
-    """
-    files = os.listdir(os.path.join(rfdir, phase, network, station))
-    rflist = []
-    for f in files:
-        infile = os.path.join(rfdir, phase, network, f)
-        # Append RFTrace
-        rflist.append(read_rf(infile)[0])
-    # Create RFStream object
-    rfst = RFStream(traces=rflist)
-    return rfst
 
 
 class RFStream(Stream):
@@ -675,6 +702,30 @@ class RFStream(Stream):
 class RFTrace(Trace):
     """
     Class providing the Trace object for receiver function calculation.
+    
+    This object is a modified version of Tom Eulenfeld's rf project's RFStream
+    class. License below.
+    
+    The MIT License (MIT)
+
+    Copyright (c) 2013-2019 Tom Eulenfeld
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of
+    this software and associated documentation files (the "Software"), to deal in
+    the Software without restriction, including without limitation the rights to
+    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+    the Software, and to permit persons to whom the Software is furnished to do so,
+    subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     """
 
     def __init__(self, data=None, header=None, trace=None):
