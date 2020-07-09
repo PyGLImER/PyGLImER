@@ -267,12 +267,23 @@ class Request(object):
              network=self.network, station=self.station, 
              logdir=self.logdir, debug=self.debug)
 
-    def preprocess(self):
+    def preprocess(self, hc_filt:float or int or None = None):
         """
-        Preprocess an existing database.
+        Preprocess an existing database. With parameters defined in self.
+
+        Parameters
+        ----------
+        hc_filt : float or int or None, optional
+            Highcut frequency to filter with right before deconvolution.
+            Recommended if time domain deconvolution is used. For spectral
+            division, filtering can still be done after deconvolution (i.e.
+            set in :func:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`).
+            Value for PRFs should usually be lower than 2 Hz and for SRFs lower
+            than .4 Hz, by default None.
         """
         preprocess(
             self.phase, self.rot, self.pol, 0.05, self.evtcat, self.model,
             'hann', self.tz, self.ta, self.statloc, self.rawloc, self.preproloc,
-            self.rfloc, self.deconmeth, self.wavdownload, netrestr=self.network,
-            statrestr=self.station, logdir=self.logdir, debug=self.debug)
+            self.rfloc, self.deconmeth, hc_filt, self.wavdownload,
+            netrestr=self.network, statrestr=self.station, logdir=self.logdir,
+            debug=self.debug)

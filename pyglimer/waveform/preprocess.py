@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Wednesday, 8th July 2020 10:42:53 am
+Last Modified: Thursday, 9th July 2020 02:18:12 pm
 '''
 
 #!/usr/bin/env python3d
@@ -37,8 +37,9 @@ from ..utils.utils import dt_string, chunks
 
 
 def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
-               ta, statloc, rawloc, preproloc, rfloc, deconmeth, wavdownload,
-               netrestr=None, statrestr=None, logdir=None, debug=False):
+               ta, statloc, rawloc, preproloc, rfloc, deconmeth, hc_filt,
+               wavdownload, netrestr=None, statrestr=None, logdir=None,
+               debug=False):
     """
      Preprocesses waveforms to create receiver functions
 
@@ -244,7 +245,7 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
             delayed(__event_loop)(wavdownload, phase, rot, pol, event, taper_perc, taper_type,
                                 model, paz_sim, logger, rflogger, eh, tz, ta,
                                 statloc, rawloc, preproloc, rfloc, deconmeth,
-                                netrestr, statrestr)
+                                hc_filt, netrestr, statrestr)
             for event in event_cat)
 
     print("Download and preprocessing finished.")
@@ -252,7 +253,7 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
 
 def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, model,
                  paz_sim, logger, rflogger, eh, tz, ta, statloc, rawloc,
-                 preproloc, rfloc, deconmeth, netrestr, statrestr):
+                 preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr):
     """
     Loops over each event in the event catalogue
     """
@@ -316,7 +317,7 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
                 wavdownload, phase, rot, pol, filestr, taper_perc, taper_type,
                 model, paz_sim, origin_time, ot_fiss, evtlat, evtlon, depth,
                 prepro_folder, event, logger, rflogger, by_event, eh, tz, ta,
-                statloc, preproloc, rfloc, deconmeth)
+                statloc, preproloc, rfloc, deconmeth, hc_filt)
             infolist.append(info)
         except Exception as e:
             # Unhandled exceptions should not cause the loop to quit
@@ -331,7 +332,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
                     taper_type, model, paz_sim, origin_time, ot_fiss, evtlat,
                     evtlon, depth, prepro_folder, event, logger, rflogger,
                     by_event, eh, tz, ta, statloc, preproloc, rfloc,
-                    deconmeth):
+                    deconmeth, hc_filt):
     """
     Loops over each waveform for a specific event and a specific station
     """
@@ -468,10 +469,12 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
                      '.' + station + '.' + ot_loc + '.sac') and crit:
 
         # 21.04.2020 Second highcut filter
-        if phase == "P":
-            st.filter('lowpass', freq=1.5, zerophase=True, corners=2)
-        elif phase == 'S':
-            st.filter('lowpass', freq=0.25, zerophase=True, corners=2)  # change for Kind(2015) to frequ=.125 freq=0.175Hz
+        if hc_filt:
+            st.filter('lowpass', freq=hc_filt, zerophase=True, corners=2)
+        # if phase == "P":
+        #     st.filter('lowpass', freq=1.5, zerophase=True, corners=2)
+        # elif phase == 'S':
+        #     st.filter('lowpass', freq=0.25, zerophase=True, corners=2)  # change for Kind(2015) to frequ=.125 freq=0.175Hz
 
         start = time.time()
 
