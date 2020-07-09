@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 9th July 2020 05:00:56 pm
+Last Modified: Thursday, 9th July 2020 05:11:41 pm
 '''
 
 #!/usr/bin/env python3d
@@ -719,7 +719,7 @@ def __rotate_qc(phase, st, station_inv, network, station, paz_sim, baz,
 
     # create softlink
     try:
-        os.symlink(outf, by_event, exist)
+        os.symlink(outf, by_event)
     except FileExistsError:
         pass
 
