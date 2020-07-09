@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Wednesday, 8th July 2020 10:37:25 am
+Last Modified: Thursday, 9th July 2020 04:12:09 pm
 '''
 
 #!/usr/bin/env python3
@@ -827,10 +827,9 @@ only show the progress per chunk.')
                 filename = ''.join(x[:-1])
 
         # output location
-        oloc = folder + '/' + filename
+        oloc = os.path.join(folder, filename)
 
-        if not Path(oloc).is_dir:
-            subprocess.call(['mkdir', '-p', oloc])
+        os.makedirs(oloc, exist_ok=True)
 
         if fmt == "pickle":
             with open(oloc + ".pkl", 'wb') as output:

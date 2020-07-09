@@ -147,7 +147,8 @@ class Request(object):
         
         # Directories
         self.logdir = os.path.join(
-            os.path.dirname(os.path.abspath(rawloc)), 'logs')
+            os.path.dirname(os.path.abspath(statloc)), 'logs')
+        os.makedirs(self.logdir, exist_ok=True)
         self.evtloc = evtloc
         self.statloc = statloc
         self.rawloc = os.path.join(rawloc, self.phase)
@@ -251,8 +252,7 @@ class Request(object):
                       catalogue download is restarted.")
                 continue
 
-        if not Path(self.evtloc).is_dir():
-            subprocess.call(["mkdir", "-p", self.evtloc])
+        os.makdirs(self.evtloc, exist_ok=True)
             # check if there is a better format for event catalog
         self.evtcat.write(os.path.join(self.evtloc, str(datetime.now())),
                           format="QUAKEML")

@@ -9,6 +9,7 @@ Contains various functions used to evaluate the quality of RF and waveforms
 import os
 from pathlib import Path
 import shelve
+import shutil
 import subprocess
 import fnmatch
 
@@ -397,7 +398,7 @@ def sort_rated(network, station, phase, preproloc):
 
     inloc = os.path.join(preproloc, phase, "by_station", network, station)
     for n in range(1, 5):
-        subprocess.call(["mkdir", "-p", inloc + str(n)])
+        os.makedirs(inloc + str(n), exist_ok=True)
     dic = shelve.open(
         os.path.join('data', 'ratings') + network + "." + station + "rating")
     for file in os.listdir(inloc):
@@ -410,8 +411,8 @@ def sort_rated(network, station, phase, preproloc):
             continue
         starttime = str(st[0].stats.starttime)
         if starttime in dic:
-            subprocess.call(["cp", inloc + file, inloc + dic[starttime] + '/'
-                             + file])
+            shutil.copy(inloc + file, os.path.join(inloc + dic[starttime],
+                             + file))
 
 
 def automatic_rate(network, station, phase, preproloc):

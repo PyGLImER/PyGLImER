@@ -1,7 +1,7 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 8th July 2020 10:38:33 am
+Last Modified: Thursday, 9th July 2020 04:20:27 pm
 '''
 
 #!/usr/bin/env python3
@@ -127,8 +127,7 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
                                      + evtlat_loc + "_" + evtlon_loc)
 
         # create folder for each event
-        if not Path(tmp.folder).is_dir():
-            subprocess.call(["mkdir", "-p", tmp.folder])
+        os.makedirs(tmp.folder, exist_ok=True)
 
             # Circular domain around the epicenter. This module also offers
             # rectangular and global domains. More complex domains can be
@@ -208,7 +207,7 @@ def wav_in_db(network, station, location, channel, starttime, endtime):
     path = Path(tmp.folder, "%s.%s.mseed" % (network, station))
                                                    #location))
     if path.is_file():
-        st = read(tmp.folder + '/' + network + "." + station + '.mseed')
+        st = read(os.path.join(tmp.folder, network + "." + station + '.mseed'))
         # '.' + location +
     else:
         return False

@@ -703,9 +703,7 @@ class AverageVelModel(object):
         if len(x) > 1:
             filename = filename + '.' - x[-1]
         oloc = os.path.join(folder, filename)
-
-        if not Path(oloc).is_dir:
-            subprocess.call(['mkdir', '-p', oloc])
+        os.makedirs(oloc, exist_ok=True)
 
         with open(oloc + ".pkl", 'wb') as output:
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)

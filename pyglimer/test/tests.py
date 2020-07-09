@@ -258,8 +258,7 @@ def rf_test(
     odir = os.path.join(rfloc, phase, 'raysum', str(dip))
     ch = ['BHP', 'BHV', 'BHH']  # Channel names
 
-    if not Path(odir).is_dir():
-        subprocess.call(['mkdir', '-p', odir])
+    os.makedirs(odir, exist_ok=True)
 
     # Create RF objects
     for i, st in enumerate(streams):
@@ -520,8 +519,7 @@ def read_rfs_mat(filename, path='output/ccps',
     mat = h5py.File(inp, 'r')
 
     # Create ouput dir
-    if not Path(outdir).is_dir():
-        subprocess.call(['mkdir', '-p', outdir])
+    os.makedirs(outdir, exist_ok=True)
 
     # Create RFTrace objects and save them for each of the RF
 

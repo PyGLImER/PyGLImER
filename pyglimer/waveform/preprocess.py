@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 9th July 2020 02:18:12 pm
+Last Modified: Thursday, 9th July 2020 04:25:30 pm
 '''
 
 #!/usr/bin/env python3d
@@ -277,8 +277,7 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
         + '_' + evtlon_loc)
 
     # make folder that will contain softlinks
-    if not Path(by_event).is_dir():
-        subprocess.call(["mkdir", "-p", by_event])
+    os.makedirs(by_event, exist_ok=True)
 
     # Folder, in which the preprocessing is actually happening
     prepro_folder = os.path.join(
@@ -292,7 +291,7 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
     try:  # If one event has no folder it interrupts else
         # Remove empty folders in the raw directory
         if not os.listdir(prepro_folder):
-            subprocess.call(['rmdir', prepro_folder])
+            os.rmdir(prepro_folder)
             return infolist  # It's important to return empty lists!
     except FileNotFoundError:
         # If we are not downloading that's entirely normal as
@@ -364,8 +363,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
     statfile = os.path.join(statloc, network + '.' + station + '.xml')
 
     # Create directory for preprocessed file
-    if not Path(outdir).is_dir():
-        subprocess.call(["mkdir", "-p", outdir])
+    os.makedirs(outdir, exist_ok=True)
 
     # If the file hasn't been downloaded and preprocessed
     # in an earlier iteration of the program
@@ -529,8 +527,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
             if pol == 'h' and phase == 'P':
                 rfdir = rfdir + pol
 
-            if not Path(rfdir).is_dir():
-                subprocess.call(["mkdir", "-p", rfdir])
+            os.makedirs(rfdir, exist_ok=True)
 
             RF.write(os.path.join(rfdir, network + '.' + station + '.' + ot_loc
                      + '.sac'), format='SAC')
@@ -721,7 +718,7 @@ def __rotate_qc(phase, st, station_inv, network, station, paz_sim, baz,
         st.write(outf, format="MSEED", encoding="ASCII")
 
     # create softlink
-    subprocess.call(["ln", "-s", outf, by_event])
+    os.symlink(outf, by_event)
 
     # WRITE AN INFO FILE
     # append_info: [key,value]
@@ -761,7 +758,7 @@ def __rotate_qc(phase, st, station_inv, network, station, paz_sim, baz,
 
 def __file_in_db(loc, filename):
     """Checks if file "filename" is already in location "loc"."""
-    path = Path(loc+"/"+filename)
+    path = Path(os.path.join(loc, filename))
     if path.is_file():
         return True
     else:
