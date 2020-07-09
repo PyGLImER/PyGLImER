@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 9th July 2020 04:25:30 pm
+Last Modified: Thursday, 9th July 2020 04:45:28 pm
 '''
 
 #!/usr/bin/env python3d
@@ -193,7 +193,7 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
                         wavdownload, phase, rot, pol, event, taper_perc,
                         taper_type, model, paz_sim, logger, rflogger, eh, tz,
                         ta, statloc, rawloc, preproloc, rfloc, deconmeth,
-                        netrestr, statrestr)
+                        hc_filt, netrestr, statrestr)
                     for event in evtcat)
 
             # For simultaneous download, dicts are written
