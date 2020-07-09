@@ -252,7 +252,7 @@ class Request(object):
                       catalogue download is restarted.")
                 continue
 
-        os.makdirs(self.evtloc, exist_ok=True)
+        os.makedirs(self.evtloc, exist_ok=True)
             # check if there is a better format for event catalog
         self.evtcat.write(os.path.join(self.evtloc, str(datetime.now())),
                           format="QUAKEML")
