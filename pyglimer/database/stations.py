@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Database management and overview for the GLImER database.
+Database management and overview for the PyGLImER database.
 
 Created on Mon May 11 11:09:05 2020
 

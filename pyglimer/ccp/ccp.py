@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 9th July 2020 04:12:09 pm
+Last Modified: Thursday, 9th July 2020 09:50:55 pm
 '''
 
 #!/usr/bin/env python3
@@ -33,6 +33,7 @@ from ..utils.utils import dt_string, chunks
 from ..utils.createvmodel import _MODEL_CACHE, ComplexModel
 from ..utils.geo_utils import epi2euc
 from .plot_utils.plot_bins import plot_bins
+
 
 def init_ccp(spacing, vel_model, phase, statloc='output/stations',
              preproloc='output/waveforms/preprocessed',
@@ -156,9 +157,11 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
         stat = read_inventory(os.path.join(statloc, file))
         lats.append(stat[0][0].latitude)
         lons.append(stat[0][0].longitude)
+    
+    logdir = os.path.dirname(os.path.abspath(statloc)), 'logs')
 
     ccp = CCPStack(
-        lats, lons, spacing, phase=phase, verbose=verbose)
+        lats, lons, spacing, phase=phase, verbose=verbose, logdir=logdir)
 
     # Clear Memory
     del stat, lats, lons, files

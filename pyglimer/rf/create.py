@@ -8,6 +8,8 @@ Created on Wed Feb 19 13:41:10 2020
 Author:
     Peter Makus (peter.makus@student.uib.no)
 
+
+!The file is split and has a second copyright disclaimer!
 Some parts of this code are modified versions of the rf module by
 Tom Eulenfeld.
 

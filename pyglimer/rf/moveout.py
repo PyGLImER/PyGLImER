@@ -3,10 +3,12 @@
 """
 Created on Tue Apr  7 10:08:42 2020
 
-Contains functions for moveout correction and station stacking
+Contains functions for moveout correction and station stacking.
 
 Author:
     Peter Makus (peter.makus@student.uib.no)
+  
+!The file is split and has a second copyright disclaimer!
 
 Last updated:
 """
