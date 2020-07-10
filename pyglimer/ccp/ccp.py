@@ -158,7 +158,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
         lats.append(stat[0][0].latitude)
         lons.append(stat[0][0].longitude)
     
-    logdir = os.path.dirname(os.path.abspath(statloc)), 'logs')
+    logdir = os.path.join(os.path.dirname(os.path.abspath(statloc)), 'logs')
 
     ccp = CCPStack(
         lats, lons, spacing, phase=phase, verbose=verbose, logdir=logdir)
