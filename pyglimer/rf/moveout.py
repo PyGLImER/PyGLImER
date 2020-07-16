@@ -77,8 +77,8 @@ def moveout(data, st, fname, latb, lonb, taper):
         htab, dt, delta = dt_table(rayp, fname, phase, el)
 
     # queried times
-    tq = np.arange(0, round(max(dt), 1), st.delta)
-    z = np.interp(tq, dt, htab)  # Depth array
+    tq = np.arange(0, round(max(dt)+st.delta, 1), st.delta)
+    z = np.interp(tq, dt, htab)  # Depth array for first RF (not evenly spaced)
 
     # Flip SRF
     if phase.upper() == "S":
@@ -87,8 +87,18 @@ def moveout(data, st, fname, latb, lonb, taper):
         tas = -tas
 
     # Shorten RF
-    RF = data[tas:tas+len(z)]
-    zq = np.hstack((np.arange(min(z), 0, .1), np.arange(0, max(z)+res, res)))
+    if len(z)+tas <= len(data):
+        RF = data[tas:tas+len(z)]
+    else:  # truncate z not RF
+        # 16.07.2020 this shouldn't be happening, but I'm experiencing an error
+        # that might be prevented here
+        z = z[:len(data[tas:])]
+        RF = data[tas:len(z)]
+        
+    if round(min(z), int(-np.log10(res))) <= 0:
+        zq = np.hstack((np.arange(min(z), 0, .1), np.arange(0, max(z)+res, res)))
+    else:
+        zq = np.arange(round(min(z), int(-np.log10(res))), max(z)+res)
 
     # interpolate RF
     try:
