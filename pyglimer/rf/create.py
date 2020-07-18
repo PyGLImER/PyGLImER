@@ -20,6 +20,7 @@ import logging
 from operator import itemgetter
 from pkg_resources import resource_filename
 import warnings
+import os
 
 from geographiclib.geodesic import Geodesic
 from matplotlib import pyplot as plt
@@ -242,7 +243,7 @@ def read_by_station(network: str, station: str, phase: str, rfdir: str):
     files = os.listdir(os.path.join(rfdir, phase, network, station))
     rflist = []
     for f in files:
-        infile = os.path.join(rfdir, phase, network, f)
+        infile = os.path.join(rfdir, phase, network, station, f)
         # Append RFTrace
         rflist.append(read_rf(infile)[0])
     # Create RFStream object
@@ -505,7 +506,7 @@ class RFStream(Stream):
             traces.append(sliced_trace)
         return self.__class__(traces)
 
-    def moveout(self, vmodel, latb=None, lonb=None, taper=True):
+    def moveout(self, vmodel, multiple=False, latb=None, lonb=None, taper=True):
         """
         Depth migration of all receiver functions given Stream.
         Also calculates piercing points and adds them to RFTrace.stats.
@@ -513,6 +514,10 @@ class RFStream(Stream):
         :param vmodel: Velocity model located in /data/vmodel.
             Standard options are iasp91.dat and 3D (GYPSuM).
         :type vmodel: str
+        :param multiple: Either False (don't include multiples), 'linear' for
+            linear stack, 'PWS' (phase weighted stack or "zk" for a zhu &
+            kanamori approach). False by default.
+        :type multiple: bool or str, optional
         :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
             raytraycing. Will remain unused for 1D RT, defaults to None
         :type latb: Tuple, optional
@@ -530,7 +535,8 @@ class RFStream(Stream):
         RF_mo = []
         for tr in self:
             try:
-                z, mo = tr.moveout(vmodel, latb=latb, lonb=lonb, taper=taper)
+                z, mo = tr.moveout(
+                    vmodel, latb=latb, lonb=lonb, taper=taper, multiple=multiple)
             except TypeError:
                 # This trace is already depth migrated
                 RF_mo.append(tr)
@@ -559,7 +565,7 @@ class RFStream(Stream):
         for tr in self:
             tr.ppoint(vmodel=vmodel_file, latb=latb, lonb=lonb)
 
-    def station_stack(self, vmodel_file='iasp91.dat'):
+    def station_stack(self, vmodel_file='iasp91.dat', multiple=False):
         """
         Performs a moveout correction and stacks all receiver functions
         in Stream. Make sure that Stream only contains RF from one station!
@@ -567,6 +573,10 @@ class RFStream(Stream):
         :param vmodel_file: 1D velocity model in data/vmodels.
             The default is 'iasp91.dat'.
         :type vmodel_file: str, optional
+        :param multiple: Either False (don't include multiples), 'linear' for
+            linear stack, 'PWS' (phase weighted stack or "zk" for a zhu &
+            kanamori approach). False by default.
+        :type multiple: bool or str, optional
         :return: z : Depth Vector.
             stack : Object containing station stack.
             RF_mo : Object containing depth migrated traces.
@@ -574,11 +584,12 @@ class RFStream(Stream):
             stack : :class:`~pyglimer.rf.create.RFTrace`
             RF_mo : :class:`~pyglimer.rf.create.RFStream`
         """        
+        st = self[0].stats
+        latb = (st.station_latitude-10, st.station_latitude+10)
+        lonb = (st.station_longitude-20, st.station_longitude+20)
 
-        latb = (self.station_latitude-10, self.station_latitude+10)
-        lonb = (self.statio_longitude-20, self.station_longitude+20)
-
-        z, RF_mo = self.moveout(vmodel=vmodel_file, latb=latb, lonb=lonb)
+        z, RF_mo = self.moveout(
+            vmodel=vmodel_file, latb=latb, lonb=lonb, multiple=multiple)
         # RF_mo.normalize()  # make sure traces are normalised
         traces = []
         for tr in RF_mo:
@@ -876,7 +887,7 @@ class RFTrace(Trace):
             reftime = self.stats[reftime]
         return reftime + seconds
 
-    def moveout(self, vmodel, latb=None, lonb=None, taper=True):
+    def moveout(self, vmodel, multiple=False, latb=None, lonb=None, taper=True):
         """
         Depth migration of the receiver function.
         Also calculates piercing points and adds them to RFTrace.stats.
@@ -884,6 +895,10 @@ class RFTrace(Trace):
         :param vmodel: Velocity model located in /data/vmodel.
             Standard options are iasp91.dat and 3D (GYPSuM).
         :type vmodel: str
+        :param multiple: Either False (don't include multiples), 'linear' for
+            linear stack, 'PWS' (phase weighted stack or "zk" for a zhu &
+            kanamori approach). False by default.
+        :type multiple: bool or str, optional
         :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
             raytraycing. Will remain unused for 1D RT, defaults to None
         :type latb: Tuple, optional
@@ -903,7 +918,7 @@ class RFTrace(Trace):
         st = self.stats
 
         z, RF_mo, delta = moveout(self.data, st, vmodel, latb=latb, lonb=lonb,
-                                  taper=taper)
+                                  taper=taper, multiple=multiple)
         st.pp_latitude = []
         st.pp_longitude = []
 

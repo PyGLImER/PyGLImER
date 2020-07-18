@@ -30,7 +30,7 @@ from ..utils.createvmodel import load_gyps
 _MODEL_CACHE = {}
 
 
-def moveout(data, st, fname, latb, lonb, taper):
+def moveout(data, st, fname, latb, lonb, taper, multiple=False):
     """
     Depth migration for RF.
     Corrects the for the moveout of a converted phase. Flips time axis
@@ -53,6 +53,10 @@ def moveout(data, st, fname, latb, lonb, taper):
         the upper 5 km will be tapered.
         Should be False for CCP stacks.
     :type taper: bool
+    :param multiple: Either False (don't include multiples), 'linear' for
+        linear stack, 'PWS' (phase weighted stack or "zk" for a zhu &
+        kanamori approach). False by default.
+    :type multiple: bool or str, optional
     :return: z2 : Depth vector in km.
         RF2 : Vector containing the depth migrated RF.
         delta : Vector containing Euclidian distance of piercing point from the
@@ -73,13 +77,17 @@ def moveout(data, st, fname, latb, lonb, taper):
         htab, dt, delta = dt_table_3D(
             rayp, phase, st.station_latitude, st.station_longitude,
             st.back_azimuth, el, latb, lonb, test=test)
+        # Multiple modes
+
     else:
-        htab, dt, delta = dt_table(rayp, fname, phase, el)
+        # dtm1 is PPS for PRFs (SSP SRFs), dtm2 PSS (SPP SRFs) 
+        htab, dt, delta, dtm1, dtm2 = dt_table(
+            rayp, fname, phase, el, multiple)
 
     # queried times
     tq = np.arange(0, round(max(dt)+st.delta, 1), st.delta)
     z = np.interp(tq, dt, htab)  # Depth array for first RF (not evenly spaced)
-
+    
     # Flip SRF
     if phase.upper() == "S":
         data = np.flip(data)
@@ -115,8 +123,88 @@ def moveout(data, st, fname, latb, lonb, taper):
         delta2 = np.empty(z2.shape)
         delta2.fill(np.nan)
         return z2, RF2, delta2
-
+    
     RF = interpolate.splev(zq, tck)
+
+    # for the multiple modes
+    if multiple:
+        if phase == 'P':
+            tqm1 = np.arange(0, round(max(dtm1)+st.delta, 1), st.delta)
+            tqm2 = np.arange(0, round(max(dtm2)+st.delta, 1), st.delta)
+            zm1 = np.interp(tqm1, dtm1, htab[:len(dtm1)])
+            zm2 = np.interp(tqm2, dtm2, htab[:len(dtm2)])
+            # truncate RF
+            RFm1 = data[tas:tas+len(zm1)]
+            RFm2 = data[tas:tas+len(zm2)]
+        else:
+            # For SRFs that's a bit more complicated as multiples arrive
+            # after first arrival, whereas conversions arrive before
+            tqm1 = np.arange(round(min(dtm1), 1), st.delta/2, st.delta)
+            tqm2 = np.arange(round(min(dtm2), 1), st.delta/2, st.delta)
+            zm1 = np.interp(tqm1, np.flip(dtm1), np.flip(htab[:len(dtm1)]))
+            zm2 = np.interp(tqm2, np.flip(dtm2), np.flip(htab[:len(dtm2)]))
+            # truncate RFs
+            RFm1 = data[tas-len(zm1):tas]
+            RFm2 = data[tas-len(zm2):tas]
+            # Now they need to be flipped again, so the deepest depth are at
+            # the end
+            zm1 = np.flip(zm1)
+            zm2 = np.flip(zm2)
+            RFm1 = np.flip(RFm1)
+            RFm2 = np.flip(RFm2)
+
+        try:
+            tckm1 = interpolate.splrep(zm1, RFm1)
+            tckm2 = interpolate.splrep(zm2, RFm2)
+        except TypeError as e:
+            multiple = False
+            pass
+    
+    if multiple:
+        # query depths
+        if round(min(zm1), int(-np.log10(res))) <= 0:
+            zqm1 = np.hstack(
+                (np.arange(min(zm1), 0, .1), np.arange(0, max(zm1)+res, res)))
+            zqm2 = np.hstack(
+                (np.arange(min(zm2), 0, .1), np.arange(0, max(zm2)+res, res)))
+        else:
+            zqm1 = np.arange(
+                round(min(zm1), int(-np.log10(res))), max(zm1)+res)
+            zqm2 = np.arange(
+                round(min(zm2), int(-np.log10(res))), max(zm2)+res)
+
+        RFm1 = interpolate.splev(zqm1, tckm1)
+        RFm2 = -interpolate.splev(zqm2, tckm2)  # negative due to polarity change
+        
+        if multiple == 'linear':
+            if len(RFm1) > len(RFm2):
+                shortest = RFm2
+                longer = RFm1
+                shortflag = True
+            elif len(RFm1) < len(RFm2):
+                shortest = RFm1
+                longer = RFm2
+                shortflag = True
+            else:
+                shortflag = False
+            if shortflag:
+                RF[:len(shortest)] = (shortest + longer[:len(shortest)] \
+                    + RF[:len(shortest)])/3
+                RF[len(shortest):len(longer)] = (RF[len(shortest):len(longer)]\
+                    + longer[len(shortest):len(longer)])/2
+            else:
+                RF[:len(RFm1)] = (RFm1 + RFm2 \
+                    + RF[:len(RFm1)])/3
+        elif multiple == 'zk':
+            RFm1 = .2*RFm1
+            RFm2 = .1*RFm2
+            if len(RFm1) > len(RFm2):
+                RF[:len(RFm2)] = .7*RF[:len(RFm2)] + RFm1[:len(RFm2)] + RFm2
+                RF[len(RFm2):len(RFm1)] = .8*RF[len(RFm2):len(RFm1)] + RFm1[len(RFm2):]
+            elif len(RFm1) < len(RFm2):
+                RF[:len(RFm1)] = .7*RF[:len(RFm1)] + RFm1 + RFm2[:len(RFm1)]
+                RF[len(RFm1):len(RFm2)] = .9*RF[len(RFm1):len(RFm2)] + RFm2[len(RFm1):]
+
     if taper:
         # Taper the last 10 km
         tap = hann(20)
@@ -293,7 +381,7 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
     return htab[:len(delta)], dt, delta
 
 
-def dt_table(rayp, fname, phase, el, debug=False):
+def dt_table(rayp, fname, phase, el, multiple, debug=False):
     """
     Creates a phase delay table and calculates piercing points
     for a specific ray parameter,
@@ -355,7 +443,9 @@ def dt_table(rayp, fname, phase, el, debug=False):
         res_f = np.diff(htab)
 
     # delay times
-    dt = np.zeros(np.shape(htab))
+    #dt = np.zeros(np.shape(htab))
+    dt_a = np.zeros(np.shape(htab))
+    dt_b = np.zeros(np.shape(htab))
 
     # angular distances of piercing points
     delta = np.zeros(np.shape(htab))
@@ -369,9 +459,16 @@ def dt_table(rayp, fname, phase, el, debug=False):
         ii = np.where(zf >= h)[0][0] - 1
         if ii == -1:
             ii = 0
-        dt[kk+1] = (q_b[ii]-q_a[ii])*res_f[kk]
+        # dt[kk+1] = (q_b[ii]-q_a[ii])*res_f[kk]
+        dt_a[kk+1] = q_a[ii]*res_f[kk]
+        dt_b[kk+1] = q_b[ii]*res_f[kk]
         delta[kk+1] = ppoint(q_a[ii], q_b[ii], res_f[kk], p, phase)
-    dt = np.cumsum(dt)
+
+    dt_a = np.cumsum(dt_a)
+    dt_b = np.cumsum(dt_b)
+    dt = dt_b-dt_a  # Travel time difference primary and converted phase
+    #dt = np.cumsum(dt)
+
     delta = np.cumsum(delta)
 
     # Determine if Sp is supercritical
@@ -379,7 +476,39 @@ def dt_table(rayp, fname, phase, el, debug=False):
         index = np.nonzero(np.isnan(dt))[0][0]
     except IndexError:
         index = len(dt)
-    return htab[:index], dt[:index], delta[:index]
+
+    # Find travel times for multiples
+    # In the 1D vel model ppoint don't play any role for multiples
+    if multiple:
+        # This assumes that the elevation is the same as at the station location
+        # possible weakspot! Maybe I should do a lookup?
+        # mphase 1 is PPs for P and SSp for S
+        # mphase 2 is PSs, and SPp, respectively
+        if phase == 'P':
+            dt_mphase1 = dt + 2*dt_a
+            dt_mphase2 = dt + dt_b + dt_a
+            # Truncate The travel time table for multiples
+            if dt_mphase1.max() > 110:
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1>=110)[0][0]]
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=110)[0][0]]
+            elif dt_mphase2.max() > 110:
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=110)[0][0]]               
+        else:
+            # Reduce travel times for S since the data will be flipped
+            dt_mphase1 = dt - 2*dt_b
+            dt_mphase2 = dt - dt_b - dt_a
+            if dt_mphase2.min() < -80:
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1<=-80)[0][0]]
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2<=-80)[0][0]]
+            elif dt_mphase1.min() < -80:
+                dt_mphase1 = dt_mphase2[:np.where(dt_mphase1<=-80)[0][0]]
+        dt_mphase1 = dt_mphase1[:index]
+        dt_mphase2 = dt_mphase2[:index]
+    else:
+        dt_mphase1 = None
+        dt_mphase2 = None
+
+    return htab[:index], dt[:index], delta[:index], dt_mphase1, dt_mphase2
 
 
 def ppoint(q_a, q_b, dz, p, phase):
