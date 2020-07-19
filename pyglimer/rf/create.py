@@ -15,6 +15,7 @@ Tom Eulenfeld.
 
 Last updated:
 """
+from copy import deepcopy
 import json
 import logging
 from operator import itemgetter
@@ -514,10 +515,9 @@ class RFStream(Stream):
         :param vmodel: Velocity model located in /data/vmodel.
             Standard options are iasp91.dat and 3D (GYPSuM).
         :type vmodel: str
-        :param multiple: Either False (don't include multiples), 'linear' for
-            linear stack, 'PWS' (phase weighted stack or "zk" for a zhu &
-            kanamori approach). False by default.
-        :type multiple: bool or str, optional
+        :param multiple: Appends two multiple mode RFs to the returned RFStream.
+            False by default.
+        :type multiple: bool, optional
         :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
             raytraycing. Will remain unused for 1D RT, defaults to None
         :type latb: Tuple, optional
@@ -535,13 +535,15 @@ class RFStream(Stream):
         RF_mo = []
         for tr in self:
             try:
-                z, mo = tr.moveout(
+                z, mo, RFm1, RFm2 = tr.moveout(
                     vmodel, latb=latb, lonb=lonb, taper=taper, multiple=multiple)
             except TypeError:
                 # This trace is already depth migrated
                 RF_mo.append(tr)
                 continue
             RF_mo.append(mo)
+            RF_mo.append(RFm1)
+            RF_mo.append(RFm2)
         st = RFStream(traces=RF_mo)
         if 'z' not in locals():
             z = np.linspace(0, maxz, len(st[0].data))
@@ -573,9 +575,11 @@ class RFStream(Stream):
         :param vmodel_file: 1D velocity model in data/vmodels.
             The default is 'iasp91.dat'.
         :type vmodel_file: str, optional
-        :param multiple: Either False (don't include multiples), 'linear' for
-            linear stack, 'PWS' (phase weighted stack or "zk" for a zhu &
-            kanamori approach). False by default.
+        :param multiple: Should RFs for multiples be calculated? If yes,
+            the parameter has to be a string, providing the stacking mode;
+            i.e. 'linear', 'zk' for a Zhu & Kanamori approach, or 'pws' for
+            a phase-weighted stacking.
+            False by default.
         :type multiple: bool or str, optional
         :return: z : Depth Vector.
             stack : Object containing station stack.
@@ -592,9 +596,23 @@ class RFStream(Stream):
             vmodel=vmodel_file, latb=latb, lonb=lonb, multiple=multiple)
         # RF_mo.normalize()  # make sure traces are normalised
         traces = []
-        for tr in RF_mo:
-            traces.append(tr.data)
-        stack = np.average(traces, axis=0)
+        if not multiple:
+            for tr in RF_mo:
+                if tr.stats.channel == 'm1' or tr.stats.channel == 'm2':
+                    # skip multiples
+                    continue
+                traces.append(tr.data)
+            stack = np.average(traces, axis=0)
+        elif multiple == 'linear':
+            ii = np.where(z == 100)[0][0]  # maximal depth for multiples
+            for tr in RF_mo:
+                tempdata = deepcopy(tr.data)
+                if len(z) > len(tempdata):
+                    tempdata = np.pad(tempdata,(0, len(z)-len(tempdata)))
+                else:
+                    tempdata[ii+1:] = tempdata[ii+1]*3
+                traces.append(tempdata)
+            stack = np.average(traces, axis=0)
         stack = RFTrace(data=stack, header=self[0].stats)
         stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0),
                             "pp_depth": None, "pp_latitude": None,
@@ -895,10 +913,9 @@ class RFTrace(Trace):
         :param vmodel: Velocity model located in /data/vmodel.
             Standard options are iasp91.dat and 3D (GYPSuM).
         :type vmodel: str
-        :param multiple: Either False (don't include multiples), 'linear' for
-            linear stack, 'PWS' (phase weighted stack or "zk" for a zhu &
-            kanamori approach). False by default.
-        :type multiple: bool or str, optional
+        :param multiple: Should RFs from multiples be computed and returned?
+            False by default.
+        :type multiple: bool , optional
         :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
             raytraycing. Will remain unused for 1D RT, defaults to None
         :type latb: Tuple, optional
@@ -917,8 +934,9 @@ class RFTrace(Trace):
             raise TypeError("RF is already depth migrated.")
         st = self.stats
 
-        z, RF_mo, delta = moveout(self.data, st, vmodel, latb=latb, lonb=lonb,
-                                  taper=taper, multiple=multiple)
+        z, RF_mo, delta, RFm1, RFm2 = moveout
+        (self.data, st, vmodel, latb=latb, lonb=lonb, taper=taper,
+         multiple=multiple)
         st.pp_latitude = []
         st.pp_longitude = []
 
@@ -944,7 +962,15 @@ class RFTrace(Trace):
         # Create trace object
         RF_mo = RFTrace(data=RF_mo, header=st)
         RF_mo.stats.update({"type": "depth", "npts": len(RF_mo.data)})
-        return z, RF_mo
+        if multiple:
+            RFm1 = RFTrace(data=RFm1, header=st)
+            RFm2 = RFTrace(data=RFm2, header=st)
+            RFm1.stats.update(
+                {"type": "depth", "npts": len(RFm1.data), "channel": 'm1'}))
+            RFm2.stats.update(
+                {"type": "depth", "npts": len(RFm2.data), "channel": 'm1'}))
+
+        return z, RF_mo, RFm1, RFm2
 
     def ppoint(self, vmodel, latb=None, lonb=None):
         """

@@ -19,6 +19,7 @@ import warnings
 
 import numpy as np
 from obspy import read
+from obspy.signal.filter import lowpass
 from geographiclib.geodesic import Geodesic
 from scipy import interpolate
 from scipy.signal.windows import hann
@@ -30,7 +31,7 @@ from ..utils.createvmodel import load_gyps
 _MODEL_CACHE = {}
 
 
-def moveout(data, st, fname, latb, lonb, taper, multiple=False):
+def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
     """
     Depth migration for RF.
     Corrects the for the moveout of a converted phase. Flips time axis
@@ -76,7 +77,7 @@ def moveout(data, st, fname, latb, lonb, taper, multiple=False):
             test = int(st.station)  # The dip of the LAB
         htab, dt, delta = dt_table_3D(
             rayp, phase, st.station_latitude, st.station_longitude,
-            st.back_azimuth, el, latb, lonb, test=test)
+            st.back_azimuth, el, latb, lonb, multiple, test=test)
         # Multiple modes
 
     else:
@@ -108,6 +109,9 @@ def moveout(data, st, fname, latb, lonb, taper, multiple=False):
     else:
         zq = np.arange(round(min(z), int(-np.log10(res))), max(z)+res)
 
+    if multiple:
+        # lowpass filter see Tauzin et. al. (2016)
+        RF = lowpass(RF, 1, st.sampling_rate, zerophase=True)
     # interpolate RF
     try:
         tck = interpolate.splrep(z, RF)
@@ -128,6 +132,12 @@ def moveout(data, st, fname, latb, lonb, taper, multiple=False):
 
     # for the multiple modes
     if multiple:
+        # Multiples are only useful for the upper part of the lithosphere
+        # I will go with the upper 100 km for now (I might have to reduce that)
+        if htab[len(dtm1)] > 100:
+            dtm1 = dtm1[:np.where(htab>=100)[0][0]]
+        if htab[len(dtm2)] > 100:
+            dtm1 = dtm2[:np.where(htab>=100)[0][0]]
         if phase == 'P':
             tqm1 = np.arange(0, round(max(dtm1)+st.delta, 1), st.delta)
             tqm2 = np.arange(0, round(max(dtm2)+st.delta, 1), st.delta)
@@ -152,12 +162,17 @@ def moveout(data, st, fname, latb, lonb, taper, multiple=False):
             zm2 = np.flip(zm2)
             RFm1 = np.flip(RFm1)
             RFm2 = np.flip(RFm2)
-
+        # lowpass filter see Tauzin et. al. (2016)
+        RFm1 = lowpass(RFm1, .2, st.sampling_rate, zerophase=True)
+        RFm2 = lowpass(RFm2, .2, st.sampling_rate, zerophase=True)
         try:
             tckm1 = interpolate.splrep(zm1, RFm1)
             tckm2 = interpolate.splrep(zm2, RFm2)
         except TypeError as e:
             multiple = False
+            mes = "Interpolation error in multiples. Only primary conversion\
+                will be used."
+            warnings.warn(mes, category=UserWarning, stacklevel=1)
             pass
     
     if multiple:
@@ -176,34 +191,34 @@ def moveout(data, st, fname, latb, lonb, taper, multiple=False):
         RFm1 = interpolate.splev(zqm1, tckm1)
         RFm2 = -interpolate.splev(zqm2, tckm2)  # negative due to polarity change
         
-        if multiple == 'linear':
-            if len(RFm1) > len(RFm2):
-                shortest = RFm2
-                longer = RFm1
-                shortflag = True
-            elif len(RFm1) < len(RFm2):
-                shortest = RFm1
-                longer = RFm2
-                shortflag = True
-            else:
-                shortflag = False
-            if shortflag:
-                RF[:len(shortest)] = (shortest + longer[:len(shortest)] \
-                    + RF[:len(shortest)])/3
-                RF[len(shortest):len(longer)] = (RF[len(shortest):len(longer)]\
-                    + longer[len(shortest):len(longer)])/2
-            else:
-                RF[:len(RFm1)] = (RFm1 + RFm2 \
-                    + RF[:len(RFm1)])/3
-        elif multiple == 'zk':
-            RFm1 = .2*RFm1
-            RFm2 = .1*RFm2
-            if len(RFm1) > len(RFm2):
-                RF[:len(RFm2)] = .7*RF[:len(RFm2)] + RFm1[:len(RFm2)] + RFm2
-                RF[len(RFm2):len(RFm1)] = .8*RF[len(RFm2):len(RFm1)] + RFm1[len(RFm2):]
-            elif len(RFm1) < len(RFm2):
-                RF[:len(RFm1)] = .7*RF[:len(RFm1)] + RFm1 + RFm2[:len(RFm1)]
-                RF[len(RFm1):len(RFm2)] = .9*RF[len(RFm1):len(RFm2)] + RFm2[len(RFm1):]
+        # if multiple == 'linear':
+        #     if len(RFm1) > len(RFm2):
+        #         shortest = RFm2
+        #         longer = RFm1
+        #         shortflag = True
+        #     elif len(RFm1) < len(RFm2):
+        #         shortest = RFm1
+        #         longer = RFm2
+        #         shortflag = True
+        #     else:
+        #         shortflag = False
+        #     if shortflag:
+        #         RF[:len(shortest)] = (shortest + longer[:len(shortest)] \
+        #             + RF[:len(shortest)])/3
+        #         RF[len(shortest):len(longer)] = (RF[len(shortest):len(longer)]\
+        #             + longer[len(shortest):len(longer)])/2
+        #     else:
+        #         RF[:len(RFm1)] = (RFm1 + RFm2 \
+        #             + RF[:len(RFm1)])/3
+        # elif multiple == 'zk':
+        #     RFm1 = .2*RFm1
+        #     RFm2 = .1*RFm2
+        #     if len(RFm1) > len(RFm2):
+        #         RF[:len(RFm2)] = .7*RF[:len(RFm2)] + RFm1[:len(RFm2)] + RFm2
+        #         RF[len(RFm2):len(RFm1)] = .8*RF[len(RFm2):len(RFm1)] + RFm1[len(RFm2):]
+        #     elif len(RFm1) < len(RFm2):
+        #         RF[:len(RFm1)] = .7*RF[:len(RFm1)] + RFm1 + RFm2[:len(RFm1)]
+        #         RF[len(RFm1):len(RFm2)] = .9*RF[len(RFm1):len(RFm2)] + RFm2[len(RFm1):]
 
     if taper:
         # Taper the last 10 km
@@ -229,6 +244,11 @@ def moveout(data, st, fname, latb, lonb, taper, multiple=False):
                 taper = np.ones(len(RF))
                 taper[:len(up)] = up
                 RF = np.multiply(taper, RF)
+                if multiple:
+                    RFm1 = np.multiply(taper, RFm1)
+                    RFm2 = np.multiply(taper, RFm2)
+                    RFm1_2 = np.zeros(z2.shape)
+                    RFm2_2 = np.zeros(z2.shape)
 
     z2 = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
     RF2 = np.zeros(z2.shape)
@@ -244,16 +264,23 @@ def moveout(data, st, fname, latb, lonb, taper, multiple=False):
         diff = len(RF) + starti - len(RF2)
         RF = RF[:-diff]
     RF2[starti:starti+len(RF)] = RF
+    if multiple:
+        RFm1_2 = RFm1_2[starti:starti+len(RFm1)] = RFm1
+        RFm2_2 = RFm2_2[starti:starti+len(RFm2)] = RFm2
+    else:
+        RFm1_2 = None
+        RFm2_2 = None
 
     # reshape delta - else that will mess with the CCP stacking
     delta2 = np.empty(z2.shape)
     delta2.fill(np.nan)
     delta2[starti:starti+len(delta)] = delta
 
-    return z2, RF2, delta2
+    return z2, RF2, delta2, RFm1_2, RFm1_2
 
 
-def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):    
+def dt_table_3D(
+    rayp, phase, lat, lon, baz, el, latb, lonb, multiple:bool, test=False):    
     """
     Creates a phase delay table and calculates piercing points
     for a specific ray parameter,
@@ -314,8 +341,9 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
 
     res_f = np.diff(htab_f)  # earth flattened resolution
 
-    # delay times
-    dt = np.zeros(np.shape(htab))
+    # travel times for alpha (P) and beta (S)
+    dt_a = np.zeros(np.shape(htab))
+    dt_b = np.zeros(np.shape(htab))
 
     # angular distances of piercing points
     delta = np.zeros(np.shape(htab))
@@ -374,14 +402,51 @@ def dt_table_3D(rayp, phase, lat, lon, baz, el, latb, lonb, test=False):
             delta = delta[:kk+1]
             break
 
-        dt[kk+1] = (q_b[kk]-q_a[kk])*res_f[kk]
+        # dt[kk+1] = (q_b[kk]-q_a[kk])*res_f[kk]
+        dt_a[kk+1] = q_a[kk]*res_f[kk]
+        dt_b[kk+1] = q_b[kk]*res_f[kk]
+    
+    dt_a = np.cumsum(dt_a)[:len(delta)]
+    dt_b = np.cumsum(dt_b)[:len(delta)]
+    dt = dt_b-dt_a  # Delay primary conversion
 
-    dt = np.cumsum(dt)[:len(delta)]
+    # Find travel times for multiples
+    # We will have to assume that the multiples don't cross into a different
+    # bin of the velocity model. Else the computation would be blown up crazily
+    if multiple:
+        # This assumes that the elevation is the same as at the station location
+        # possible weakspot! Maybe I should do a lookup?
+        # mphase 1 is PPs for P and SSp for S
+        # mphase 2 is PSs, and SPp, respectively
+        if phase == 'P':
+            dt_mphase1 = dt + 2*dt_a
+            dt_mphase2 = dt + dt_b + dt_a
+            # Truncate The travel time table for multiples
+            if dt_mphase1.max() > 60:
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1>=60)[0][0]]
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=60)[0][0]]
+            elif dt_mphase2.max() > 60:
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=60)[0][0]]               
+        else:
+            # Reduce travel times for S since the data will be flipped
+            dt_mphase1 = dt - 2*dt_b
+            dt_mphase2 = dt - dt_b - dt_a
+            if dt_mphase2.min() < -50:
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1<=-50)[0][0]]
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2<=-50)[0][0]]
+            elif dt_mphase1.min() < -50:
+                dt_mphase1 = dt_mphase2[:np.where(dt_mphase1<=-50)[0][0]]
+        dt_mphase1 = dt_mphase1[:index]
+        dt_mphase2 = dt_mphase2[:index]
+    else:
+        dt_mphase1 = None
+        dt_mphase2 = None
+    # dt = np.cumsum(dt)[:len(delta)]
 
-    return htab[:len(delta)], dt, delta
+    return htab[:len(delta)], dt, delta, dt_mphase1, dt_mphase2
 
 
-def dt_table(rayp, fname, phase, el, multiple, debug=False):
+def dt_table(rayp, fname, phase, el, multiple:bool, debug=False):
     """
     Creates a phase delay table and calculates piercing points
     for a specific ray parameter,
@@ -488,20 +553,20 @@ def dt_table(rayp, fname, phase, el, multiple, debug=False):
             dt_mphase1 = dt + 2*dt_a
             dt_mphase2 = dt + dt_b + dt_a
             # Truncate The travel time table for multiples
-            if dt_mphase1.max() > 110:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1>=110)[0][0]]
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=110)[0][0]]
-            elif dt_mphase2.max() > 110:
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=110)[0][0]]               
+            if dt_mphase1.max() > 60:
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1>=60)[0][0]]
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=60)[0][0]]
+            elif dt_mphase2.max() > 60:
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=60)[0][0]]               
         else:
             # Reduce travel times for S since the data will be flipped
             dt_mphase1 = dt - 2*dt_b
             dt_mphase2 = dt - dt_b - dt_a
-            if dt_mphase2.min() < -80:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1<=-80)[0][0]]
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2<=-80)[0][0]]
-            elif dt_mphase1.min() < -80:
-                dt_mphase1 = dt_mphase2[:np.where(dt_mphase1<=-80)[0][0]]
+            if dt_mphase2.min() < -50:
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1<=-50)[0][0]]
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2<=-50)[0][0]]
+            elif dt_mphase1.min() < -50:
+                dt_mphase1 = dt_mphase2[:np.where(dt_mphase1<=-50)[0][0]]
         dt_mphase1 = dt_mphase1[:index]
         dt_mphase2 = dt_mphase2[:index]
     else:
