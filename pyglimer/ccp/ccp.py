@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Sunday, 12th July 2020 11:56:02 am
+Last Modified: Monday, 20th July 2020 08:51:51 pm
 '''
 
 #!/usr/bin/env python3
@@ -40,7 +40,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
              rfloc='output/waveforms/RF', network=None,
              station=None, geocoords=None,
              compute_stack=False, filt=None, binrad=np.cos(np.radians(30)),
-             append_pp=False, save=False, verbose=True):
+             append_pp=False, multiple=False, save=False, verbose=True):
     """
     Computes a ccp stack in self.ccp using data from statloc and rfloc.
     The stack can be limited to some networks and
@@ -94,6 +94,10 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
         longer and makes the file a lot larger.
         The default is False., defaults to False
     :type append_pp: bool, optional
+    :param multiple: Should the CCP Stack be prepared to work with multiples?
+        It can be chosen later, whether the RFs from multiples are to be
+        incorporated into the CCP Stack. By default False.
+    :type multiple: bool, optional
     :param save: Either False if the ccp should not be saved or string with filename
         will be saved. Will be saved as pickle file.
         The default is False.
@@ -172,7 +176,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
     if compute_stack:
         ccp.compute_stack(
             vel_model=vel_model, network=network, station=station, save=save,
-            filt=filt,
+            filt=filt, multiple=multiple,
             pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc)
 
     # _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
@@ -320,7 +324,8 @@ class CCPStack(object):
                       preproloc='output/waveforms/preprocessed',
                       network=None, station=None, geocoords=None, pattern=None,
                       save=False, filt=None,
-                      binrad=np.cos(np.radians(30)), append_pp=False):
+                      binrad=np.cos(np.radians(30)), append_pp=False,
+                      multiple=False):
         """
         Computes a ccp stack in self.ccp, using the data from rfloc.
         The stack can be limited to some networks and
@@ -378,6 +383,10 @@ class CCPStack(object):
             can later be plotted. Not recommended for big data sets.
             The default is false. **Deprecated for multi-core**
         :type append_pp: bool, optional
+        :param multiple: Append receiver functions for first order multiples.
+            It can be decided later, whether they should be used in the final
+            ccp stack. Will result in a longer computation time.
+        :type multiple: bool, optional
         :raises ValueError: For wrong inputs
         """
 
@@ -419,6 +428,13 @@ class CCPStack(object):
             fh.setLevel(logging.INFO)
             self.logger.addHandler(fh)
             self.logger.info('Stacking started')
+        
+        if multiple:
+            # Use multiples?
+            endi = np.where(self.z==100)[0][0]+1
+            self.bins_m1 = np.zeros(self.bins[:endi].shape)
+            self.bins_m2 = np.zeros(self.bins[:endi].shape)
+            self.illumm = np.zeros(self.bins[:endi].shape, dtype=int)
 
         if network and type(network) == str and not pattern:
             # Loop over fewer files
@@ -581,18 +597,38 @@ only show the progress per chunk.')
             out = Parallel(n_jobs=num_cores)( # prefer='processes'
                             delayed(self.multicore_stack)(
                                 st, append_pp, n_closest_points, vel_model, latb,
-                                lonb, filt, i)
+                                lonb, filt, i, multiple)
                             for i, st in zip(
                                 tqdm(range(num_split)),
                                 chunks(stream_chunk, len_split)))
 
             # Awful way to solve it, but the best I could find
-            for kk, jj, datal in out:
-                for k, j, data in zip(kk, jj, datal):
-                    self.bins[k, j] = self.bins[k, j] + data[j]
+            if multiple:
+                for kk, jj, datal, datalm1, datalm2 in out:
+                    for k, j, data, datam1, datam2 in zip(
+                        kk, jj, datal, datalm1, datalm2):
+                        self.bins[k, j] = self.bins[k, j] + data[j]
+                        
+                        # hit counter + 1
+                        self.illum[k, j] = self.illum[k, j] + 1
+                        
+                        # multiples
+                        jm = np.where(j<=100)[0]
+                        try:
+                            self.bins_m1[k, jm] = self.bins_m1[k, jm] + datam1[jm]
+                            self.bins_m2[k, jm] = self.bins_m1[k, jm] + datam1[jm]
+                            self.illumm[k, jm] = self.illum[k, jm] + 1
+                        except TypeError:
+                            continue
 
-                    # hit counter + 1
-                    self.illum[k, j] = self.illum[k, j] + 1
+            else:
+                for kk, jj, datal, _, _ in out:
+                    for k, j, data in zip(
+                        kk, jj, datal):
+                        self.bins[k, j] = self.bins[k, j] + data[j]
+
+                        # hit counter + 1
+                        self.illum[k, j] = self.illum[k, j] + 1
         
         # else:
         #     out = Parallel(n_jobs=num_cores)( # prefer='processes'
@@ -639,7 +675,7 @@ only show the progress per chunk.')
             self.write(filename=save)
 
     def multicore_stack(self, stream, append_pp, n_closest_points, vmodel,
-                        latb, lonb, filt, idx):
+                        latb, lonb, filt, idx, multiple):
         """
         Takes in chunks of data to be processed on one core.
 
@@ -671,6 +707,8 @@ only show the progress per chunk.')
         kk = []
         jj = []
         datal = []
+        datalm1 = []
+        datalm2 = []
         # bins_copy = np.copy(self.bins)
         # illum_copy = np.copy(self.illum)
     
@@ -693,7 +731,7 @@ only show the progress per chunk.')
                 rft.filter('bandpass', freqmin=filt[0], freqmax=filt[1],
                             zerophase=True, corners=2)
             try:
-                _, rf = rft[0].moveout(
+                z, rf, rfm1, rfm2 = rft[0].moveout(
                     vmodel, latb=latb, lonb=lonb, taper=False)
             except ComplexModel.CoverageError as e:
                 # Wrong stations codes can raise this
@@ -732,6 +770,16 @@ only show the progress per chunk.')
             kk.append(k)
             jj.append(j)
             datal.append(rf.data)
+            
+            if multiple:
+                depthi = np.find(z==100)[0][0]
+                try:
+                    datalm1.append(rfm1.data[:depthi+1])
+                    datalm2.append(rfm2.data[:depthi+1])
+                except AttributeError:
+                    # for Interpolationerrors
+                    datalm1.append(None)
+                    datalm2.append(None)
 
             #if int(progress/50) == progress/50:
                 #perc = str(progress*100/len(stream)) + '%'
@@ -740,7 +788,9 @@ only show the progress per chunk.')
                 #print(msg)
         return kk, jj, datal
 
-    def conclude_ccp(self, keep_empty=False, keep_water=False, r=3):
+    def conclude_ccp(
+        self, keep_empty=False, keep_water=False, r=3,
+        multiple=False, z_multiple:int = 100):
         """
         Averages the CCP-bin and populates empty cells with average of
         neighbouring cells. No matter which option is
@@ -756,9 +806,35 @@ only show the progress per chunk.')
         :param r: Fields with less than r hits will be set equal 0.
             r has to be >= 1, defaults to 3.
         :type r: int, optional
-        """        
-
-        self.ccp = np.divide(self.bins, self.illum+1)
+        :param multiple: Use multiples in stack. Either False or weigthing;
+            i.e. 'linear' for linearly weighted stack between the three phases,
+            'zk' for a Zhu & Kanamori approach, or 'pws' for a phase weighted
+            stack. By default False.
+        :type multiple: bool or str
+        :param z_multiple: Until which depth [km] should multiples be considered,
+            maximal value is 100 [km]. Will only be used if multiple=True.
+            By default 100 km.
+        :type z_multiple: int, optional
+        """
+        if z_multiple > 100:
+            raise ValueError('Maximal depth for multiples is 100 km.')
+        endi = np.where(self.z == z_multiple)+1   
+        if multiple == 'linear':
+            
+            self.ccp = np.divide(self.bins, self.illum+1)
+            self.ccp[:, :endi] = (self.ccp[:, :endi] +
+                np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]) +
+                    np.divide(self.bins_2[:, :endi], self.illumm[:, :endi]))/3
+        elif multiple == 'zk':
+            self.ccp = np.divide(self.bins, self.illum+1)
+            self.ccp[:, :endi] = (.7*self.ccp[:, :endi] +
+                .2*np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]) +
+                    .1*np.divide(self.bins_2[:, :endi], self.illumm[:, :endi]))
+        elif not multiple:
+            self.ccp = np.divide(self.bins, self.illum+1)
+        else:
+            raise ValueError('The requested multiple stacking mode is \
+misspelled or not yet implemented')
 
         self.hits = self.illum.copy()
 

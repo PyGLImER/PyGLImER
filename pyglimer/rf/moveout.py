@@ -75,7 +75,7 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         test = fname == 'raysum3D'
         if test:
             test = int(st.station)  # The dip of the LAB
-        htab, dt, delta = dt_table_3D(
+        htab, dt, delta, dtm1, dtm2 = dt_table_3D(
             rayp, phase, st.station_latitude, st.station_longitude,
             st.back_azimuth, el, latb, lonb, multiple, test=test)
         # Multiple modes
@@ -134,9 +134,9 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
     if multiple:
         # Multiples are only useful for the upper part of the lithosphere
         # I will go with the upper 100 km for now (I might have to reduce that)
-        if htab[len(dtm1)] > 100:
+        if htab[len(dtm1)-1] > 100:
             dtm1 = dtm1[:np.where(htab>=100)[0][0]]
-        if htab[len(dtm2)] > 100:
+        if htab[len(dtm2)-1] > 100:
             dtm1 = dtm2[:np.where(htab>=100)[0][0]]
         if phase == 'P':
             tqm1 = np.arange(0, round(max(dtm1)+st.delta, 1), st.delta)
@@ -247,8 +247,6 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
                 if multiple:
                     RFm1 = np.multiply(taper, RFm1)
                     RFm2 = np.multiply(taper, RFm2)
-                    RFm1_2 = np.zeros(z2.shape)
-                    RFm2_2 = np.zeros(z2.shape)
 
     z2 = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
     RF2 = np.zeros(z2.shape)
@@ -265,8 +263,11 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         RF = RF[:-diff]
     RF2[starti:starti+len(RF)] = RF
     if multiple:
-        RFm1_2 = RFm1_2[starti:starti+len(RFm1)] = RFm1
-        RFm2_2 = RFm2_2[starti:starti+len(RFm2)] = RFm2
+        RFm1_2 = np.zeros(RF2.shape)
+        RFm2_2 = np.zeros(RF2.shape)
+        RFm1_2[starti:starti+len(RFm1)] = RFm1
+        RFm2_2[starti:starti+len(RFm2)] = RFm2
+        
     else:
         RFm1_2 = None
         RFm2_2 = None
@@ -436,8 +437,6 @@ def dt_table_3D(
                 dt_mphase2 = dt_mphase2[:np.where(dt_mphase2<=-50)[0][0]]
             elif dt_mphase1.min() < -50:
                 dt_mphase1 = dt_mphase2[:np.where(dt_mphase1<=-50)[0][0]]
-        dt_mphase1 = dt_mphase1[:index]
-        dt_mphase2 = dt_mphase2[:index]
     else:
         dt_mphase1 = None
         dt_mphase2 = None

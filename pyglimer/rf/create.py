@@ -542,8 +542,9 @@ class RFStream(Stream):
                 RF_mo.append(tr)
                 continue
             RF_mo.append(mo)
-            RF_mo.append(RFm1)
-            RF_mo.append(RFm2)
+            if multiple:
+                RF_mo.append(RFm1)
+                RF_mo.append(RFm2)
         st = RFStream(traces=RF_mo)
         if 'z' not in locals():
             z = np.linspace(0, maxz, len(st[0].data))
@@ -604,15 +605,50 @@ class RFStream(Stream):
                 traces.append(tr.data)
             stack = np.average(traces, axis=0)
         elif multiple == 'linear':
+            continue_again = False
             ii = np.where(z == 100)[0][0]  # maximal depth for multiples
             for tr in RF_mo:
-                tempdata = deepcopy(tr.data)
-                if len(z) > len(tempdata):
-                    tempdata = np.pad(tempdata,(0, len(z)-len(tempdata)))
+                if tr.stats.channel == 'm1' or tr.stats.channel == 'm2':
+                    if tr.stats.type == 'empty':                        
+                        if continue_again:
+                            traces.append(np.zeros(traces[0].shape))
+                            continue_again = False
+                            continue
+                        traces[-1][:ii] = traces[-1][:ii]*3
+                        traces.append(np.zeros(traces[0].shape))
+                        warnings.warn('Skipping multiple mode for trace.')
+                        continue_again = True
+                        continue
+                    traces.append(tr.data)
                 else:
-                    tempdata[ii+1:] = tempdata[ii+1]*3
-                traces.append(tempdata)
+                    tempdata = deepcopy(tr.data)
+                    tempdata[ii+1:] = tempdata[ii+1:]*3
+                    traces.append(tempdata)
             stack = np.average(traces, axis=0)
+        elif multiple == 'zk':
+            ii = np.where(z == 100)[0][0]
+            continue_again = False
+            for tr in RF_mo:
+                tempdata = deepcopy(tr.data)
+                if tr.stats.type == 'empty':
+                    if continue_again:
+                        traces.append(np.zeros(traces[0].shape))
+                        continue_again = False
+                        continue
+                    traces[-1][:ii] = traces[-1][:ii]/.7
+                    traces.append(np.zeros(traces[0].shape))
+                    warnings.warn('Skipping multiple mode for trace.')
+                    continue_again = True
+                    continue
+                elif tr.stats.channel == 'm1':
+                    tempdata = tempdata*.2
+                elif tr.stats.channel == 'm2':
+                    tempdata = tempdata*.1
+                else:
+                    tempdata[:ii] = tempdata[:ii]*.7
+                traces.append(tempdata)
+            stack = np.average(traces, axis=0)*3
+
         stack = RFTrace(data=stack, header=self[0].stats)
         stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0),
                             "pp_depth": None, "pp_latitude": None,
@@ -675,60 +711,6 @@ class RFStream(Stream):
                 scalingfactor=scalingfactor, line=line, linewidth=linewidth,
                 ax=ax, outputdir=outputdir)
         return ax
-        # deep copy stream
-        # if len(self.traces) == 1:
-        #     fig, ax = self[0].plot()
-        #     return fig, ax
-
-        # traces = []
-        # for tr in self:
-        #     stats = AttribDict({})
-        #     stats["coordinates"] = {}
-        #     stats["coordinates"]["latitude"] = tr.stats["event_latitude"]
-        #     stats["coordinates"]["longitude"] = tr.stats["event_longitude"]
-        #     stats["network"] = tr.stats["network"]
-        #     stats["station"] = tr.stats["station"]
-
-        #     # Check type
-        #     if tr.stats.type == "time":
-        #         stats.delta = tr.stats.delta
-        #         data = tr.data
-        #         TAS = round((
-        #             tr.stats.onset - tr.stats.starttime) / stats.delta)
-        #         TAS = 1201
-        #         # print(TAS)
-        #         if tr.stats.phase == "S":
-        #             data = -np.flip(data)
-
-        #         data = data[TAS:round(TAS + 30 / stats.delta)]
-        #         stats["npts"] = len(data)
-        #         trace = Trace(data=data, header=stats)
-        #         #trace.normalize()
-
-        #     elif tr.stats.type == "depth":
-        #         stats.delta = res
-        #         data = tr.data
-        #         stats["npts"] = len(data)
-        #         trace = Trace(data=data, header=stats)
-        #         #trace.normalize()
-
-        #     elif tr.stats.type == "stastack":
-        #         # That should be a single plot
-        #         tr.plot()
-        #     traces.append(trace)
-        # statlat = tr.stats.station_latitude
-        # statlon = tr.stats.station_longitude
-        # st = Stream(traces=traces)
-        # fig = st.plot(type='section', dist_degree=True,
-        #               ev_coord=(statlat, statlon), scale=scale, time_down=True,
-        #               linewidth=1.5, handle=True, fillcolors=('r', 'c'))
-        # fig.suptitle([tr.stats.network, tr.stats.station])
-        # ax = fig.get_axes()[0]
-        # # ax.set_ylim(0, 30)
-        # if tr.stats.type == "depth":
-        #     ax.set_ylabel('Depth [km]')
-        # return fig, ax
-
 
 class RFTrace(Trace):
     """
@@ -934,8 +916,8 @@ class RFTrace(Trace):
             raise TypeError("RF is already depth migrated.")
         st = self.stats
 
-        z, RF_mo, delta, RFm1, RFm2 = moveout
-        (self.data, st, vmodel, latb=latb, lonb=lonb, taper=taper,
+        z, RF_mo, delta, RFm1, RFm2 = moveout(
+            self.data, st, vmodel, latb=latb, lonb=lonb, taper=taper,
          multiple=multiple)
         st.pp_latitude = []
         st.pp_longitude = []
@@ -963,12 +945,21 @@ class RFTrace(Trace):
         RF_mo = RFTrace(data=RF_mo, header=st)
         RF_mo.stats.update({"type": "depth", "npts": len(RF_mo.data)})
         if multiple:
-            RFm1 = RFTrace(data=RFm1, header=st)
-            RFm2 = RFTrace(data=RFm2, header=st)
-            RFm1.stats.update(
-                {"type": "depth", "npts": len(RFm1.data), "channel": 'm1'}))
-            RFm2.stats.update(
-                {"type": "depth", "npts": len(RFm2.data), "channel": 'm1'}))
+            try:
+                RFm1 = RFTrace(data=RFm1, header=st)
+                RFm2 = RFTrace(data=RFm2, header=st)
+                RFm1.stats.update(
+                    {"type": "depth", "npts": len(RFm1.data), "channel": 'm1'})
+                RFm2.stats.update(
+                    {"type": "depth", "npts": len(RFm2.data), "channel": 'm2'})
+            except ValueError:
+                # For interpolation errors -> RFm1 or m2 is None
+                RFm1 = RFTrace(data=np.array([]), header=st)
+                RFm2 = RFTrace(data=np.array([]), header=st)
+                RFm1.stats.update(
+                    {"type": "empty", "npts": 0, "channel": 'm1'})
+                RFm2.stats.update(
+                    {"type": "empty", "npts": 0, "channel": 'm2'})
 
         return z, RF_mo, RFm1, RFm2
 
@@ -1061,86 +1052,6 @@ class RFTrace(Trace):
         ax = plot_single_rf(
             self, lim, ax=ax, outputdir=outputdir, clean=clean)
         return ax
-
-        # # plt.style.use('data/plot_data/PaperDoubleFig.mplstyle')
-        # # Make some style choices for plotting
-        # colourWheel = ['#329932', '#ff6961', 'b', '#6a3d9a', '#fb9a99',
-        #                '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a',
-        #                '#ffff99', '#b15928', '#67001f', '#b2182b', '#d6604d',
-        #                '#f4a582', '#fddbc7', '#f7f7f7', '#d1e5f0', '#92c5de',
-        #                '#4393c3', '#2166ac', '#053061']
-        # dashesStyles = [[3, 1], [1000, 1], [2, 1, 10, 1], [4, 1, 1, 1, 1, 1]]
-        # fig, ax = plt.subplots(1, 1)
-
-        # # Move y-axis and x-axis to centre, passing through (0,0)
-        # ax.spines['bottom'].set_position("zero")
-
-        # # Eliminate upper and right axes
-        # ax.spines['right'].set_color('none')
-        # ax.spines['top'].set_color('none')
-
-        # # Show ticks in the left and lower axes only
-        # ax.xaxis.set_ticks_position('bottom')
-
-        # ax.xaxis.set_major_formatter(ScalarFormatter())
-        # ax.yaxis.major.formatter._useMathText = True
-        # ax.yaxis.set_major_formatter(ScalarFormatter())
-        # ax.xaxis.major.formatter._useMathText = True
-        # # ax.yaxis.set_minor_locator(AutoMinorLocator(5))
-        # ax.xaxis.set_minor_locator(AutoMinorLocator(5))
-
-        # ax.set_ylabel('normalised Amplitude')
-        # if grid:
-        #     plt.grid(color='c', which="both", linewidth=.25)
-
-        # y = self.data
-
-        # # Determine type
-        # if self.stats.type == "time":
-
-        #     # theoretical arrival sample in seconds (plotted as 0)
-        #     # TAS = round((self.stats.onset-self.stats.starttime)
-        #     #             / self.stats.delta)
-        #     if self.stats.phase == "S":  # flip trace
-        #         y = np.flip(y)
-        #         y = -y  # polarity
-        #         # TAS = -TAS
-        #         t = np.linspace(self.stats.onset - self.stats.endtime,
-        #                         self.stats.onset - self.stats.starttime,
-        #                         len(self.data))
-        #     elif self.stats.phase == "P":
-        #         t = np.linspace(self.stats.starttime - self.stats.onset,
-        #                         self.stats.endtime - self.stats.onset,
-        #                         len(self.data))
-
-        #     # plot
-        #     ax.plot(t, y, color="k", linewidth=1.5)
-        #     ax.set_xlabel('conversion time in s')
-        #     ax.set_xlim(-10, 30)
-        #     ax.set_title("Receiver Function " + str(self.stats.network) + " " +
-        #                  str(self.stats.station) + " " +
-        #                  str(self.stats.event_time))
-
-        # elif self.stats.type == "stastack" or self.stats.type == "depth":
-        #     # plot against depth
-        #     # z = np.linspace(0, maxz, len(self.data))
-        #     z = np.hstack(
-        #         ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
-
-        #     # plot
-        #     ax.plot(z, y, color="k", linewidth=1.5)
-
-        #     ax.set_xlabel('Depth in km')
-        #     ax.set_xlim(0, 250)
-        #     if self.stats.type == "depth":
-        #         ax.set_title("Receiver Function " + self.stats.network
-        #                      + " " + self.stats.station + " " +
-        #                      str(self.stats.event_time))
-        #     elif self.stats.type == "stastack":
-        #         ax.set_title("Receiver Function stack " +
-        #                      str(self.stats.network) + " " +
-        #                      str(self.stats.station))
-        # return fig, ax
 
     def write(self, filename, format, **kwargs):
         """
