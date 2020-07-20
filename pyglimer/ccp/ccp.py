@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 20th July 2020 08:59:45 pm
+Last Modified: Monday, 20th July 2020 09:07:52 pm
 '''
 
 #!/usr/bin/env python3
@@ -629,40 +629,6 @@ only show the progress per chunk.')
 
                         # hit counter + 1
                         self.illum[k, j] = self.illum[k, j] + 1
-        
-        # else:
-        #     out = Parallel(n_jobs=num_cores)( # prefer='processes'
-        #         delayed(self.multicore_stack)(
-        #             st, append_pp, n_closest_points, vel_model, latb,
-        #             lonb, filt, i)
-        #         for i, st in zip(
-        #             tqdm(range(num_split)),
-        #             chunks(streams, len_split)))
-
-        # June 2020 - Combine everything into one stack
-        # Easier and saves Ram
-        # for bins_copy, illum_copy in out:
-        #     self.bins = self.bins + bins_copy
-        #     self.illum = self.illum + illum_copy
-        # The stacking is done here (one should not reassign variables in
-        # multi-core processes).
-        # Awful way to solve it, but the best I could find
-        # for kk, jj, datal in out:
-        #     for k, j, data in zip(kk, jj, datal):
-        #         self.bins[k, j] = self.bins[k, j] + data[j]
-
-        #         # hit counter + 1
-        #         self.illum[k, j] = self.illum[k, j] + 1
-        # self.bins = self.output_bin.sum(axis=2)
-        # self.illum = self.output_illum.sum(axis=2)
-
-        # del self.output_bin, self.output_illum
-
-        # if cache:
-        #     try:
-        #         shutil.rmtree(folder)
-        #     except:  # noqa
-        #         print('Could not clean-up automatically.')
 
         end = time.time()
         self.logger.info("Stacking finished.")
@@ -709,14 +675,6 @@ only show the progress per chunk.')
         datal = []
         datalm1 = []
         datalm2 = []
-        # bins_copy = np.copy(self.bins)
-        # illum_copy = np.copy(self.illum)
-    
-        # indexing system, find vacant dimension
-        # idx = np.where(self.busy==False)[0][0]
-
-        # occupy idx
-        # self.busy[idx] = True
 
         for st in stream:
             # read RFs in time domain
@@ -768,7 +726,7 @@ only show the progress per chunk.')
                     datalm1.append(None)
                     datalm2.append(None)
 
-        return kk, jj, datal
+        return kk, jj, datal, datalm1, datalm2
 
     def conclude_ccp(
         self, keep_empty=False, keep_water=False, r=3,
