@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 20th July 2020 09:17:04 pm
+Last Modified: Monday, 20th July 2020 09:31:57 pm
 '''
 
 #!/usr/bin/env python3
@@ -588,11 +588,13 @@ only show the progress per chunk.')
                         self.illum[k, j] = self.illum[k, j] + 1
                         
                         # multiples
-                        jm = np.where(j<=endi)[0]
+                        iii = np.where(j<=endi)[0]
+                        jm = j[iii]
+                        km = k[iii]
                         try:
-                            self.bins_m1[k, jm] = self.bins_m1[k, jm] + datam1[jm]
-                            self.bins_m2[k, jm] = self.bins_m1[k, jm] + datam1[jm]
-                            self.illumm[k, jm] = self.illum[k, jm] + 1
+                            self.bins_m1[km, jm] = self.bins_m1[km, jm] + datam1[jm]
+                            self.bins_m2[km, jm] = self.bins_m1[km, jm] + datam1[jm]
+                            self.illumm[km, jm] = self.illum[km, jm] + 1
                         except TypeError:
                             continue
 
