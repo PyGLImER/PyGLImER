@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 20th July 2020 08:51:51 pm
+Last Modified: Monday, 20th July 2020 08:59:45 pm
 '''
 
 #!/usr/bin/env python3
@@ -754,25 +754,12 @@ only show the progress per chunk.')
                 self.pplon.append(plon)
             k, j = self.query_bin_tree(lat, lon, rf.data, n_closest_points)
 
-            # Stack
-            # self.output_bin[k, j, idx] = self.output_bin[k, j, idx] + rf.data[j]
-            # bins_copy[k, j] = bins_copy[k, j] + rf.data[j]
-            # self.bins[k,j] = self.bins[k, j] + rf.data[j]
-
-            # hit counter + 1
-            # illum_copy[k, j] = illum_copy[k, j] + 1
-            # self.output_illum[k, j, idx] = self.output_illum[k, j, idx] + 1
-
-        # Free index
-        # self.busy[idx] = False
-            # self.illum[k,j] = self.illum[k,j] +1
-        # return bins_copy, illum_copy
             kk.append(k)
             jj.append(j)
             datal.append(rf.data)
             
             if multiple:
-                depthi = np.find(z==100)[0][0]
+                depthi = np.where(z==100)[0][0]
                 try:
                     datalm1.append(rfm1.data[:depthi+1])
                     datalm2.append(rfm2.data[:depthi+1])
@@ -781,11 +768,6 @@ only show the progress per chunk.')
                     datalm1.append(None)
                     datalm2.append(None)
 
-            #if int(progress/50) == progress/50:
-                #perc = str(progress*100/len(stream)) + '%'
-                #msg = 'Stacking progress about: ' + perc
-                #logger.info(msg)
-                #print(msg)
         return kk, jj, datal
 
     def conclude_ccp(
