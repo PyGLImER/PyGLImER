@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 20th July 2020 09:07:52 pm
+Last Modified: Monday, 20th July 2020 09:17:04 pm
 '''
 
 #!/usr/bin/env python3
@@ -558,31 +558,6 @@ only show the progress per chunk.')
         # with 64 cores and 10 bands/core that results in about
         # 90 GB for each of the arrays for a finely gridded
         # CCP stack of North-America
-        # num_split_max = num_cores*100  # maximal no of jobs
-        # len_split = int(len(streams)/num_cores)
-        # if len_split > 10:
-        #     if int(np.ceil(len(streams)/len_split)) > num_split_max:
-        #         len_split = int(len_split/num_split_max)
-        #     else:
-        #         len_split = int(len_split/np.ceil(len(streams)/len_split))
-        # num_split = int(np.ceil(len(streams)/len_split))
-
-        # if cache:
-        #     # Dump the output arrays to files to prevent memory leaps
-        #     folder = './joblib_memmap'
-        #     try:
-        #         os.mkdir(folder)
-        #     except FileExistsError:
-        #         pass
-        #     output_bin = np.memmap(os.path.join(folder,'bin'), dtype=self.bins.dtype,
-        #             shape=(*self.bins.shape, num_cores), mode='w+')
-        #     output_illum = np.memmap(os.path.join(folder,'illum'), dtype=self.illum.dtype,
-        #             shape=(*self.illum.shape, num_cores), mode='w+')
-        # else:
-        #     self.output_bin = np.zeros((*self.bins.shape, num_cores))
-        #     self.output_illum = np.zeros((*self.bins.shape, num_cores), dtype=int)
-        # Avoid writing in the same dimension
-        # self.busy = np.zeros((num_cores,), dtype=bool)
 
         for stream_chunk in chunks(streams, split_size):
             num_split_max = num_cores*100  # maximal no of jobs
@@ -613,7 +588,7 @@ only show the progress per chunk.')
                         self.illum[k, j] = self.illum[k, j] + 1
                         
                         # multiples
-                        jm = np.where(j<=100)[0]
+                        jm = np.where(j<=endi)[0]
                         try:
                             self.bins_m1[k, jm] = self.bins_m1[k, jm] + datam1[jm]
                             self.bins_m2[k, jm] = self.bins_m1[k, jm] + datam1[jm]
