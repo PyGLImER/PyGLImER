@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 21st July 2020 11:17:27 am
+Last Modified: Tuesday, 21st July 2020 12:57:02 pm
 '''
 
 #!/usr/bin/env python3
@@ -596,6 +596,7 @@ only show the progress per chunk.')
                             self.bins_m2[km, jm] = self.bins_m1[km, jm] + datam1[jm]
                             self.illumm[km, jm] = self.illum[km, jm] + 1
                         except TypeError:
+                            print(type(datam1))
                             continue
 
             else:
@@ -667,7 +668,8 @@ only show the progress per chunk.')
                             zerophase=True, corners=2)
             try:
                 z, rf, rfm1, rfm2 = rft[0].moveout(
-                    vmodel, latb=latb, lonb=lonb, taper=False)
+                    vmodel, latb=latb, lonb=lonb, taper=False,
+                    multiple=multiple)
             except ComplexModel.CoverageError as e:
                 # Wrong stations codes can raise this
                 self.logger.warning(e)

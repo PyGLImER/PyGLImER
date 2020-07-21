@@ -245,8 +245,8 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
                 taper[:len(up)] = up
                 RF = np.multiply(taper, RF)
                 if multiple:
-                    RFm1 = np.multiply(taper, RFm1)
-                    RFm2 = np.multiply(taper, RFm2)
+                    RFm1 = np.multiply(taper[:len(RFm1)], RFm1)
+                    RFm2 = np.multiply(taper[:len(RFm2)], RFm2)
 
     z2 = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
     RF2 = np.zeros(z2.shape)
