@@ -654,7 +654,7 @@ class RFStream(Stream):
         stack = RFTrace(data=stack, header=self[0].stats)
         stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0),
                             "pp_depth": None, "pp_latitude": None,
-                            "pp_longitude": None, 'npts': len(stack.data)})
+                            "pp_longitude": None, 'npts': len(stack)})
         return z, stack, RF_mo
 
     def plot(self, channel = "PRF",
