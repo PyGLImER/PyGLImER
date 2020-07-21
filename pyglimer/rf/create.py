@@ -35,7 +35,7 @@ from scipy.signal.windows import hann
 
 from .deconvolve import it, spectraldivision, multitaper, gen_it
 from .moveout import DEG2KM, maxz, res, moveout, dt_table, dt_table_3D
-from examples.utils.plot_utils import plot_section, plot_single_rf
+from ..plot.plot_utils import plot_section, plot_single_rf, stream_dist
 
 logger = logging.Logger("rf")
 
@@ -588,7 +588,8 @@ class RFStream(Stream):
         :rtype: z : 1D np.ndarray
             stack : :class:`~pyglimer.rf.create.RFTrace`
             RF_mo : :class:`~pyglimer.rf.create.RFStream`
-        """        
+        """
+
         st = self[0].stats
         latb = (st.station_latitude-10, st.station_latitude+10)
         lonb = (st.station_longitude-20, st.station_longitude+20)
@@ -609,7 +610,7 @@ class RFStream(Stream):
             ii = np.where(z == 100)[0][0]  # maximal depth for multiples
             for tr in RF_mo:
                 if tr.stats.channel == 'm1' or tr.stats.channel == 'm2':
-                    if tr.stats.type == 'empty':                        
+                    if tr.stats.type == 'empty':
                         if continue_again:
                             traces.append(np.zeros(traces[0].shape))
                             continue_again = False
@@ -711,6 +712,45 @@ class RFStream(Stream):
                 scalingfactor=scalingfactor, line=line, linewidth=linewidth,
                 ax=ax, outputdir=outputdir)
         return ax
+
+    def plot_rb_dist(self, nbins=50, phase="P",
+                     outputfile=None, format="pdf", dpi=300):
+        """
+        Plot back azimuth and rayparameter distributions.
+
+        Parameters:
+        -----------
+        nbins (int) : Number of bins. Default
+        v (float) : assummed surface velocity for the computation of the
+            incidence angle. Default 5.8 km/s.
+        outputfile (str or None) : Path to savefile. If None plot is not saved
+            just shown. Defaults to None.
+        format (str): outputfile format
+        dpi (int) : only used if file format is none vector.
+
+        Returns:
+        --------
+        None
+
+        """
+
+        # Define velocity depending on the incident phase
+        if phase == "P":
+            v = 5.793  # PREM vp velocity at the surface
+        else:
+            v = 3.191  # PREM vs velocity at the surface
+
+        # Get rayparameter and backazimuth from stream.
+        rayp = []
+        baz = []
+
+        for rf in self:
+            rayp.append(rf.stats.slowness / DEG2KM)
+            baz.append(rf.stats.back_azimuth)
+
+        stream_dist(np.array(rayp), np.array(baz), nbins=nbins, v=v,
+                    outputfile=outputfile, format=format,  dpi=dpi)
+
 
 class RFTrace(Trace):
     """
@@ -1024,9 +1064,10 @@ class RFTrace(Trace):
             st.pp_longitude.append(lon2)
         return delta2
 
-    def plot(self, lim: list or tuple or None = None, 
-                   ax: plt.Axes = None, outputdir: str = None, 
-                   clean: bool = False):
+    def plot(self, lim: list or tuple or None = None,
+             depth: np.ndarray or None = None,
+             ax: plt.Axes = None, outputdir: str = None,
+             clean: bool = False):
         """Creates plot of a single receiver function
         
         Parameters
@@ -1035,6 +1076,8 @@ class RFTrace(Trace):
             x axis time limits in seconds or km (depth) (len(list)==2).
             If `None` full trace is plotted.
             Default None.
+        depth: :class:`numpy.ndarray`
+            1D array of depths
         ax : `matplotlib.pyplot.Axes`, optional
             Can define an axes to plot the RF into. Defaults to None.
             If None, new figure is created.
@@ -1050,7 +1093,7 @@ class RFTrace(Trace):
         ax : `matplotlib.pyplot.Axes`
         """
         ax = plot_single_rf(
-            self, lim, ax=ax, outputdir=outputdir, clean=clean)
+            self, lim, depth=depth, ax=ax, outputdir=outputdir, clean=clean)
         return ax
 
     def write(self, filename, format, **kwargs):

@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import cartopy
 from cartopy.crs import PlateCarree
 
-from pyglimer.constants import maxz, res
+from ..constants import maxz, res
 
 def set_mpl_params():
     params = {
@@ -133,13 +133,14 @@ def plot_catalog(catalog):
                edgecolor="k", linewidth=0.75, zorder=201)
     cbar = plt.colorbar(c, pad=0.005, shrink=1)    
     cbar.ax.set_ylabel(r"       $M_w$", rotation=0)
-    
-    
-def plot_single_rf(rf, tlim: list or tuple or None = None, 
-                   ax: plt.Axes = None, outputdir: str = None, 
+
+
+def plot_single_rf(rf, tlim: list or tuple or None = None,
+                   depth: np.ndarray or None = None,
+                   ax: plt.Axes = None, outputdir: str = None,
                    clean: bool = False):
     """Creates plot of a single receiver function
-    
+
     Parameters
     ----------
     rf : :class:`pyglimer.RFTrace`
@@ -149,6 +150,8 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
         type==depth (len(list)==2).
         If `None` full trace is plotted.
         Default None.
+    depth: :class:`numpy.ndarray`
+        1D array of depths
     ax : `matplotlib.pyplot.Axes`, optional
         Can define an axes to plot the RF into. Defaults to None.
         If None, new figure is created.
@@ -158,13 +161,13 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     clean: bool
         If True, clears out all axes and plots RF only.
         Defaults to False.
-    
+
      Returns
     -------
     ax : `matplotlib.pyplot.Axes`
     """
     set_mpl_params()
-    
+
     # Get figure/axes dimensions
     if ax is None:
         width, height = 10, 2.5
@@ -176,10 +179,11 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
         width, height = bbox.width, bbox.height
         axtmp = ax
 
-    # The ratio ensures that the text 
+    # The ratio ensures that the text
     # is perfectly distanced from top left/right corner
     ratio = width/height
-    
+
+    # Use times depending on phase and moveout correction
     ydata = rf.data
     if rf.stats.type == 'time':
         # Get times
@@ -187,29 +191,34 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
         if rf.stats.phase == 'S':
             times = np.flip(times)
             ydata = np.flip(-rf.data)
+    elif rf.stats.type == 'stastack':
+        if depth is None:
+            raise ValueError("If type is stastack a depth vector"
+                             "must be feed.")
+        times = depth
     else:
         z = np.hstack(
                  ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
         times = z
-    
-    
+
     # Plot stuff into axes
-    ax.fill_between(times, 0, ydata, where=ydata>0, 
+    ax.fill_between(times, 0, ydata, where=ydata > 0, 
                     interpolate=True, color=(0.9, 0.2, 0.2))
-    ax.fill_between(times, 0, ydata, where=ydata<0, 
+    ax.fill_between(times, 0, ydata, where=ydata < 0, 
                     interpolate=True, color=(0.2, 0.2, 0.7))
     ax.plot(times, ydata, 'k', lw=0.75)
-    
+
     # Set limits
     if tlim is None:
         # ax.set_xlim(times[0], times[-1])
-        ax.set_xlim(0, times[-1]) # don't really wanna see the stuff before 
+        ax.set_xlim(0, times[-1])  # don't really wanna see the stuff before  
     else:
         ax.set_xlim(tlim)
-    
-    # Removes top/right axes spines. If you want the whole thing, comment or remove
+
+    # Removes top/right axes spines. If you want the whole thing, comment
+    # or remove
     remove_topright()
-    
+
     # Plot RF only
     if clean:
         remove_all()
@@ -226,7 +235,7 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     # Only use tight layout if not part of plot.
     if axtmp is None:
         plt.tight_layout()
-    
+
     # Outout the receiver function as pdf using 
     # its station name and starttime
     if outputdir is not None:
@@ -236,7 +245,7 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
                                 + ".pdf")
         plt.savefig(filename, format="pdf")
     return ax
-    
+
 def plot_section(rfst, channel = "PRF",
                  timelimits: list or tuple or None = None, 
                  epilimits: list or tuple or None = None,
@@ -292,7 +301,6 @@ def plot_section(rfst, channel = "PRF",
         ax = plt.gca(zorder=999999)
 
     # Grab one component only
-    #rfst_chan = rfst.select(channel=channel).sort(keys=['distance'])
     rfst_chan = rfst.sort(keys=['distance'])
 
     # Plot traces
@@ -325,7 +333,7 @@ def plot_section(rfst, channel = "PRF",
         plt.xlim(epilimits)
     else:
         plt.xlim(epilimits)
-    
+
     if timelimits is None:
         if rfst[0].stats.type == 'time':
             ylim0 = 0
@@ -360,18 +368,151 @@ def plot_section(rfst, channel = "PRF",
     return ax
 
 
-        
-### --- Will work on these tomorrow. Helpful for array analysis. --- ###
-def baz_hist(baz, nbins):
+def baz_hist(az, nbins):
+    """
+    Takes in backazimuth distribution and number of bins to compute
+    the distribution of incoming angles.
+
+    Parameters:
+    -----------
+    az : `numpy.ndarray`
+        azimuthal distribution in 1D array
+    nbins : int
+        Number of bins
+
+    Returns:
+    --------
+    None
+
+    """
+
+    # Get axes (or create one)
     ax = plt.gca()
-    bin_edges = np.linspace(0,360, nbins+1)
-    cts, edges = np.histogram(baz, bins=bin_edges)
+
+    # Define bins
+    bin_edges = np.linspace(0, 360, nbins+1)
+    cts, edges = np.histogram(az, bins=bin_edges)
+
+    # Define bars
     xbaz = edges[:-1] + 0.5 * np.diff(edges)
-    wbaz = np.diff(edges)# * 0.8
+    wbaz = np.diff(edges)
+
+    # Plot bars
     bars = plt.bar(xbaz/180*np.pi, cts, wbaz/180*np.pi, bottom=0.0)
     for r, bar in zip(cts, bars):
         bar.set_facecolor(plt.cm.magma_r(r / np.max(cts)))
+
+    # Define limits and labels
     ax.set_theta_zero_location('N')
     ax.set_theta_direction(-1)
     ax.invert_yaxis()
     ax.set_xticklabels(['N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE'])
+    labels = ax.get_xticklabels()
+    for label in labels:
+        pos = label.get_position()
+        label.set_position([pos[0], pos[1]-0.02])
+
+
+def rayp_hist(rayp, nbins, v=5.8):
+    """
+    Takes in rayparameter distribution and number of bins to compute
+    the distribution of incoming angles.
+
+    Parameters:
+    -----
+    rayp: :class:`numpy.ndarray`
+        1D ndarray of rayparameters
+    nbins: int
+        Number of bins
+    v: float
+        assummed surface velocity for the computation of the
+        incidence angle. Default 5.8 km/s.
+
+    Returns:
+    --------
+    None
+
+    Note:
+    -----
+    Get Incidence angle p = sin i/v <--> v sin i / p <--> i = asin(vp)
+    Default value 5.8 km/s taken from PREM.
+
+    """
+
+    # Compute the angle
+    angle = np.arcsin(rayp*v)
+
+    # Use existing polar axis
+    ax = plt.gca()
+
+    # Define bins and bin angles
+    bin_edges = np.linspace(0, np.pi/2, nbins+1)
+    cts, edges = np.histogram(angle, bins=bin_edges)
+
+    # Compute bars
+    xbaz = edges[:-1] + 0.5 * np.diff(edges)
+    wbaz = np.diff(edges)
+
+    # Plot colored histogram
+    bars = plt.bar(xbaz, cts, wbaz, bottom=0.0)
+    bars = plt.bar(xbaz, cts, wbaz, bottom=0.0)
+    for r, bar in zip(cts, bars):
+        bar.set_facecolor(plt.cm.magma_r(r / np.max(cts)))
+
+    # Change axis limits and labels
+    ax.set_rorigin(2*np.max(cts))
+    ax.set_rmin(1.05*np.max(cts))
+    ax.set_rmax(0)
+    ax.set_theta_zero_location('S')
+    ax.set_theta_direction(1)
+    ax.set_thetamin(7.5)
+    ax.set_thetamax(35)
+    labels = ax.get_xticklabels()
+    for label in labels:
+        pos = label.get_position()
+        label.set_position([pos[0], pos[1]-0.02])
+    ax.tick_params(labelleft=True, labelright=False,
+                   labeltop=False, labelbottom=True)
+
+
+def stream_dist(rayp, baz, nbins=50, v=5.8,
+                outputfile=None, format="pdf", dpi=300):
+    """Uses backazimuth and rayparameter histogram plotting tools to create
+    combined overview over the Distribution ov incident waves.
+
+    Parameters:
+    rayp: :class:`numpy.ndarray`
+        1D ndarray of rayparameters
+    az: `numpy.ndarray`
+        azimuthal distribution in 1D array
+    nbins: int
+        Number of bins
+    v: float
+        assummed surface velocity for the computation of the
+        incidence angle. Default 5.8 km/s.
+
+    outputfile:  str or None
+        Path to savefile. If None plot is not saved just shown. 
+        Defaults to None.
+    format: str
+        outputfile format
+    dpi: int
+        only used if file format is none vector.
+
+    """
+
+    plt.figure(figsize=(15, 9))
+    plt.subplot(121, projection="polar")
+    baz_hist(baz, nbins)
+    plt.title("Backazimuth distribution")
+    plt.subplot(122, projection="polar")
+    rayp_hist(rayp, nbins, v=5.8)
+    plt.title("Rayparameter distribution")
+    plt.tight_layout()
+
+    if outputfile is None:
+        plt.show()
+    else:
+        if format in ["pdf", "epsg", "svg", "ps"]:
+            dpi = None
+        plt.savefig(outputfile, format=format, dpi=dpi)
