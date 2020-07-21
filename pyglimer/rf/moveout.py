@@ -24,7 +24,7 @@ from geographiclib.geodesic import Geodesic
 from scipy import interpolate
 from scipy.signal.windows import hann
 
-from ..constants import R_EARTH, DEG2KM, maxz, res
+from ..constants import R_EARTH, DEG2KM, maxz, res, maxzm
 from ..utils.createvmodel import load_gyps
 
 
@@ -133,11 +133,11 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
     # for the multiple modes
     if multiple:
         # Multiples are only useful for the upper part of the lithosphere
-        # I will go with the upper 100 km for now (I might have to reduce that)
-        if htab[len(dtm1)-1] > 100:
-            dtm1 = dtm1[:np.where(htab>=100)[0][0]]
-        if htab[len(dtm2)-1] > 100:
-            dtm1 = dtm2[:np.where(htab>=100)[0][0]]
+        # I will go with the upper ~constants.maxzm km for now (I might have to reduce that)
+        if htab[len(dtm1)-1] > maxzm:
+            dtm1 = dtm1[:np.where(htab>=maxzm)[0][0]]
+        if htab[len(dtm2)-1] > maxzm:
+            dtm1 = dtm2[:np.where(htab>=maxzm)[0][0]]
         if phase == 'P':
             tqm1 = np.arange(0, round(max(dtm1)+st.delta, 1), st.delta)
             tqm2 = np.arange(0, round(max(dtm2)+st.delta, 1), st.delta)
@@ -170,8 +170,12 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
             tckm2 = interpolate.splrep(zm2, RFm2)
         except TypeError as e:
             multiple = False
-            mes = "Interpolation error in multiples. Only primary conversion\
-                will be used."
+            u, c = np.unique(zm1, return_counts=True)
+            dup = u[c > 1]
+            u, c = np.unique(zm2, return_counts=True)
+            dup2 = u[c > 1]
+            mes = "Interpolation error in multiples. Only primary conversion"+\
+                " will be used."
             warnings.warn(mes, category=UserWarning, stacklevel=1)
             pass
     
@@ -245,8 +249,8 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
                 taper[:len(up)] = up
                 RF = np.multiply(taper, RF)
                 if multiple:
-                    RFm1 = np.multiply(taper, RFm1)
-                    RFm2 = np.multiply(taper, RFm2)
+                    RFm1 = np.multiply(taper[:len(RFm1)], RFm1)
+                    RFm2 = np.multiply(taper[:len(RFm2)], RFm2)
 
     z2 = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
     RF2 = np.zeros(z2.shape)

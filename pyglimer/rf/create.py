@@ -547,7 +547,8 @@ class RFStream(Stream):
                 RF_mo.append(RFm2)
         st = RFStream(traces=RF_mo)
         if 'z' not in locals():
-            z = np.linspace(0, maxz, len(st[0].data))
+            z = np.hstack(
+                 ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
         return z, st
 
     def ppoint(self, vmodel_file='iasp91.dat', latb=None, lonb=None):
@@ -1031,20 +1032,11 @@ class RFTrace(Trace):
                 st.slowness, vmodel, st.phase, st.station_elevation)
 
         st.pp_depth = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
-        # if st.station_elevation > 0:
-        #     st.pp_depth = np.hstack(
-        #         (np.arange(-round(st.station_elevation/1000, 1), 0, .1),
-        #          np.arange(0, maxz + res)))[:len(delta)]
-        # else:
-        #     st.pp_depth = np.arange(-round(st.station_elevation/1000),
-        #                             maxz + res, res)[0:len(delta)]
-        # st.pp_depth = np.hstack(
-        #     (np.arange(-10, 0, .1), np.arange(0, htab.max(), res)))
+
         delta2 = np.empty(st.pp_depth.shape)
         delta2.fill(np.nan)
 
         # Find first pp depth
-        # starti = np.nonzero(np.isclose(st.ppdepth, -st.station_elevation))
         starti = np.nonzero(np.isclose(st.pp_depth, htab[0]))[0][0]
 
         # print(len(delta))

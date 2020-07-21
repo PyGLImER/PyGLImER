@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 20th July 2020 09:31:57 pm
+Last Modified: Tuesday, 21st July 2020 01:48:14 pm
 '''
 
 #!/usr/bin/env python3
@@ -25,14 +25,14 @@ from psutil import virtual_memory
 import subprocess
 from tqdm import tqdm
 
-from .compute.bin import BinGrid
-from ..database.stations import StationDB
-from ..rf.create import read_rf
-from ..rf.moveout import res, maxz
-from ..utils.utils import dt_string, chunks
-from ..utils.createvmodel import _MODEL_CACHE, ComplexModel
-from ..utils.geo_utils import epi2euc
-from .plot_utils.plot_bins import plot_bins
+from pyglimer.ccp.compute.bin import BinGrid
+from pyglimer.database.stations import StationDB
+from pyglimer.rf.create import read_rf
+from pyglimer.rf.moveout import res, maxz
+from pyglimer.utils.utils import dt_string, chunks
+from pyglimer.utils.createvmodel import _MODEL_CACHE, ComplexModel
+from pyglimer.utils.geo_utils import epi2euc
+from pyglimer.ccp.plot_utils.plot_bins import plot_bins
 
 
 def init_ccp(spacing, vel_model, phase, statloc='output/stations',
@@ -432,9 +432,9 @@ class CCPStack(object):
         if multiple:
             # Use multiples?
             endi = np.where(self.z==100)[0][0]+1
-            self.bins_m1 = np.zeros(self.bins[:endi].shape)
-            self.bins_m2 = np.zeros(self.bins[:endi].shape)
-            self.illumm = np.zeros(self.bins[:endi].shape, dtype=int)
+            self.bins_m1 = np.zeros(self.bins[:, :endi].shape)
+            self.bins_m2 = np.zeros(self.bins[:, :endi].shape)
+            self.illumm = np.zeros(self.bins[:, :endi].shape, dtype=int)
 
         if network and type(network) == str and not pattern:
             # Loop over fewer files
@@ -588,15 +588,18 @@ only show the progress per chunk.')
                         self.illum[k, j] = self.illum[k, j] + 1
                         
                         # multiples
-                        iii = np.where(j<=endi)[0]
+                        iii = np.where(j<=endi-1)[0]
                         jm = j[iii]
                         km = k[iii]
                         try:
                             self.bins_m1[km, jm] = self.bins_m1[km, jm] + datam1[jm]
                             self.bins_m2[km, jm] = self.bins_m1[km, jm] + datam1[jm]
                             self.illumm[km, jm] = self.illum[km, jm] + 1
-                        except TypeError:
-                            continue
+                        except IndexError as e:
+                            if not len(datam1) or not len(datam2):
+                                continue
+                            else:
+                                raise IndexError(e)
 
             else:
                 for kk, jj, datal, _, _ in out:
@@ -667,7 +670,8 @@ only show the progress per chunk.')
                             zerophase=True, corners=2)
             try:
                 z, rf, rfm1, rfm2 = rft[0].moveout(
-                    vmodel, latb=latb, lonb=lonb, taper=False)
+                    vmodel, latb=latb, lonb=lonb, taper=False,
+                    multiple=multiple)
             except ComplexModel.CoverageError as e:
                 # Wrong stations codes can raise this
                 self.logger.warning(e)
@@ -735,18 +739,18 @@ only show the progress per chunk.')
         """
         if z_multiple > 100:
             raise ValueError('Maximal depth for multiples is 100 km.')
-        endi = np.where(self.z == z_multiple)+1   
+        endi = np.where(self.z == z_multiple)[0][0]+1   
         if multiple == 'linear':
             
             self.ccp = np.divide(self.bins, self.illum+1)
             self.ccp[:, :endi] = (self.ccp[:, :endi] +
-                np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]) +
-                    np.divide(self.bins_2[:, :endi], self.illumm[:, :endi]))/3
+                np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
+                    np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1))/3
         elif multiple == 'zk':
             self.ccp = np.divide(self.bins, self.illum+1)
             self.ccp[:, :endi] = (.7*self.ccp[:, :endi] +
-                .2*np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]) +
-                    .1*np.divide(self.bins_2[:, :endi], self.illumm[:, :endi]))
+                .2*np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
+                    .1*np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1))
         elif not multiple:
             self.ccp = np.divide(self.bins, self.illum+1)
         else:
