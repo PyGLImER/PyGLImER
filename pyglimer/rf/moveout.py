@@ -171,7 +171,7 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         except TypeError as e:
             multiple = False
             mes = "Interpolation error in multiples. Only primary conversion"+\
-                " will be used. zm1, zm2 are" + str(zm1) + str(zm2)
+                " will be used."
             warnings.warn(mes, category=UserWarning, stacklevel=1)
             pass
     
