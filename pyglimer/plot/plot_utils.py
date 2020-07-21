@@ -191,11 +191,11 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
         if rf.stats.phase == 'S':
             times = np.flip(times)
             ydata = np.flip(-rf.data)
-    elif rf.stats.type == 'stastack':
-        if depth is None:
-            raise ValueError("If type is stastack a depth vector"
-                             "must be feed.")
-        times = depth
+    # elif rf.stats.type == 'stastack':
+    #     if depth is None:
+    #         raise ValueError("If type is stastack a depth vector"
+    #                          "must be feed.")
+    #     times = depth
     else:
         z = np.hstack(
                  ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
