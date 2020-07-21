@@ -362,44 +362,16 @@ def plot_section(rfst, channel = "PRF",
 
         
 ### --- Will work on these tomorrow. Helpful for array analysis. --- ###
-# def baz_hist(baz, nbins):
-#     ax = plt.gca()
-#     bin_edges = np.linspace(0,360, nbins+1)
-#     cts, edges = np.histogram(baz, bins=bin_edges)
-#     xbaz = edges[:-1] + 0.5 * np.diff(edges)
-#     wbaz = np.diff(edges)# * 0.8
-#     bars = plt.bar(xbaz/180*np.pi, cts, wbaz/180*np.pi, bottom=0.0)
-#     for r, bar in zip(cts, bars):
-#         bar.set_facecolor(plt.cm.magma_r(r / np.max(cts)))
-#     ax.set_theta_zero_location('N')
-#     ax.set_theta_direction(-1)
-#     ax.invert_yaxis()
-#     ax.set_xticklabels(['N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE'])
-
-    
-# def rayp_hist(rayp, nbins, v=5.8):
-#     # Get Incidence angle p = sin i/v <--> v sin i / p <--> i = asin(vp)
-#     # 5.8 taken from PREM
-#     shift= 180
-#     barshift = shift/180*np.pi
-#     angle = np.arcsin(rayp*v)
-#     ax = plt.gca()
-#     bin_edges = np.linspace(0,np.pi/2, nbins+1)
-#     cts, edges = np.histogram(angle, bins=bin_edges)
-#     xbaz = edges[:-1] + 0.5 * np.diff(edges)
-#     wbaz = np.diff(edges)# * 0.8
-#     bars = plt.bar(xbaz, cts, wbaz, bottom=0.0)
-#     bars = plt.bar(barshift-xbaz, cts, wbaz, bottom=0.0)
-#     for r, bar in zip(cts, bars):
-#         bar.set_facecolor(plt.cm.magma_r(r / np.max(cts)))
-#     ax.set_theta_zero_location('N')
-#     ax.set_theta_direction(-1)
-#     ax.set_thetamin(shift-0)
-#     ax.set_thetamax(shift-50)
-#     labelvals = np.array([130, 140, 150,160, 170, 180])
-#     ax.set_xticklabels(["%d$^\circ$" % np.round(shift-x) for x in labelvals])
-#     ax.invert_yaxis()
-#     ax.set_rlabel_position(10)
-
-
-# def stream_baz_dist()
+def baz_hist(baz, nbins):
+    ax = plt.gca()
+    bin_edges = np.linspace(0,360, nbins+1)
+    cts, edges = np.histogram(baz, bins=bin_edges)
+    xbaz = edges[:-1] + 0.5 * np.diff(edges)
+    wbaz = np.diff(edges)# * 0.8
+    bars = plt.bar(xbaz/180*np.pi, cts, wbaz/180*np.pi, bottom=0.0)
+    for r, bar in zip(cts, bars):
+        bar.set_facecolor(plt.cm.magma_r(r / np.max(cts)))
+    ax.set_theta_zero_location('N')
+    ax.set_theta_direction(-1)
+    ax.invert_yaxis()
+    ax.set_xticklabels(['N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE'])
