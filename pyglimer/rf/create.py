@@ -547,7 +547,8 @@ class RFStream(Stream):
                 RF_mo.append(RFm2)
         st = RFStream(traces=RF_mo)
         if 'z' not in locals():
-            z = np.linspace(0, maxz, len(st[0].data))
+            z = np.hstack(
+                 ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
         return z, st
 
     def ppoint(self, vmodel_file='iasp91.dat', latb=None, lonb=None):
