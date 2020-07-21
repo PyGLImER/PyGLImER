@@ -35,7 +35,7 @@ from scipy.signal.windows import hann
 
 from .deconvolve import it, spectraldivision, multitaper, gen_it
 from .moveout import DEG2KM, maxz, res, moveout, dt_table, dt_table_3D
-from examples.utils.plot_utils import plot_section, plot_single_rf
+from ..plot.plot_utils import plot_section, plot_single_rf
 
 logger = logging.Logger("rf")
 
