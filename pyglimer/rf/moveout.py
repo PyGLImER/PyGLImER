@@ -24,7 +24,7 @@ from geographiclib.geodesic import Geodesic
 from scipy import interpolate
 from scipy.signal.windows import hann
 
-from ..constants import R_EARTH, DEG2KM, maxz, res
+from ..constants import R_EARTH, DEG2KM, maxz, res, maxz_m
 from ..utils.createvmodel import load_gyps
 
 
@@ -133,11 +133,11 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
     # for the multiple modes
     if multiple:
         # Multiples are only useful for the upper part of the lithosphere
-        # I will go with the upper 100 km for now (I might have to reduce that)
-        if htab[len(dtm1)-1] > 100:
-            dtm1 = dtm1[:np.where(htab>=100)[0][0]]
-        if htab[len(dtm2)-1] > 100:
-            dtm1 = dtm2[:np.where(htab>=100)[0][0]]
+        # I will go with the upper ~constants.maxz_m km for now (I might have to reduce that)
+        if htab[len(dtm1)-1] > maxz_m:
+            dtm1 = dtm1[:np.where(htab>=maxzm)[0][0]]
+        if htab[len(dtm2)-1] > maxz_m:
+            dtm1 = dtm2[:np.where(htab>=maxzm)[0][0]]
         if phase == 'P':
             tqm1 = np.arange(0, round(max(dtm1)+st.delta, 1), st.delta)
             tqm2 = np.arange(0, round(max(dtm2)+st.delta, 1), st.delta)
@@ -170,8 +170,8 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
             tckm2 = interpolate.splrep(zm2, RFm2)
         except TypeError as e:
             multiple = False
-            mes = "Interpolation error in multiples. Only primary conversion\
-                will be used."
+            mes = "Interpolation error in multiples. Only primary conversion"+\
+                " will be used. zm1, zm2 are" + str(zm1) + str(zm2)
             warnings.warn(mes, category=UserWarning, stacklevel=1)
             pass
     
