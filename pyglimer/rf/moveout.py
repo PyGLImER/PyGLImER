@@ -170,6 +170,10 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
             tckm2 = interpolate.splrep(zm2, RFm2)
         except TypeError as e:
             multiple = False
+            u, c = np.unique(zm1, return_counts=True)
+            dup = u[c > 1]
+            u, c = np.unique(zm2, return_counts=True)
+            dup2 = u[c > 1]
             mes = "Interpolation error in multiples. Only primary conversion"+\
                 " will be used."
             warnings.warn(mes, category=UserWarning, stacklevel=1)

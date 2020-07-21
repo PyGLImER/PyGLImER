@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 21st July 2020 01:11:40 pm
+Last Modified: Tuesday, 21st July 2020 01:48:14 pm
 '''
 
 #!/usr/bin/env python3
@@ -744,13 +744,13 @@ only show the progress per chunk.')
             
             self.ccp = np.divide(self.bins, self.illum+1)
             self.ccp[:, :endi] = (self.ccp[:, :endi] +
-                np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]) +
-                    np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]))/3
+                np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
+                    np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1))/3
         elif multiple == 'zk':
             self.ccp = np.divide(self.bins, self.illum+1)
             self.ccp[:, :endi] = (.7*self.ccp[:, :endi] +
-                .2*np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]) +
-                    .1*np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]))
+                .2*np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
+                    .1*np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1))
         elif not multiple:
             self.ccp = np.divide(self.bins, self.illum+1)
         else:
