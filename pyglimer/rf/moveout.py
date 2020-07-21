@@ -24,7 +24,7 @@ from geographiclib.geodesic import Geodesic
 from scipy import interpolate
 from scipy.signal.windows import hann
 
-from ..constants import R_EARTH, DEG2KM, maxz, res, maxz_m
+from ..constants import R_EARTH, DEG2KM, maxz, res, maxzm
 from ..utils.createvmodel import load_gyps
 
 
@@ -133,10 +133,10 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
     # for the multiple modes
     if multiple:
         # Multiples are only useful for the upper part of the lithosphere
-        # I will go with the upper ~constants.maxz_m km for now (I might have to reduce that)
-        if htab[len(dtm1)-1] > maxz_m:
+        # I will go with the upper ~constants.maxzm km for now (I might have to reduce that)
+        if htab[len(dtm1)-1] > maxzm:
             dtm1 = dtm1[:np.where(htab>=maxzm)[0][0]]
-        if htab[len(dtm2)-1] > maxz_m:
+        if htab[len(dtm2)-1] > maxzm:
             dtm1 = dtm2[:np.where(htab>=maxzm)[0][0]]
         if phase == 'P':
             tqm1 = np.arange(0, round(max(dtm1)+st.delta, 1), st.delta)
