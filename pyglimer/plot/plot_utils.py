@@ -185,6 +185,7 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
 
     # Use times depending on phase and moveout correction
     ydata = rf.data
+    print(rf.stats.type)
     if rf.stats.type == 'time':
         # Get times
         times = rf.times() - (rf.stats.onset - rf.stats.starttime)
