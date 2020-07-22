@@ -74,7 +74,7 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
     if fname[-2:] == '3D':
         test = fname == 'raysum3D'
         if test:
-            test = int(st.station)  # The dip of the LAB
+            test = int(st.station)  # The dip of the LABx
         htab, dt, delta, dtm1, dtm2 = dt_table_3D(
             rayp, phase, st.station_latitude, st.station_longitude,
             st.back_azimuth, el, latb, lonb, multiple, test=test)
