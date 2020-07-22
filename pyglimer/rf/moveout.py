@@ -14,6 +14,7 @@ Last updated:
 """
 
 import os
+from pathlib import Path
 import shelve
 import warnings
 
@@ -24,6 +25,7 @@ from geographiclib.geodesic import Geodesic
 from scipy import interpolate
 from scipy.signal.windows import hann
 
+from pyglimer.data  import finddir
 from ..constants import R_EARTH, DEG2KM, maxz, res, maxzm
 from ..utils.createvmodel import load_gyps
 
@@ -194,35 +196,6 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
 
         RFm1 = interpolate.splev(zqm1, tckm1)
         RFm2 = -interpolate.splev(zqm2, tckm2)  # negative due to polarity change
-        
-        # if multiple == 'linear':
-        #     if len(RFm1) > len(RFm2):
-        #         shortest = RFm2
-        #         longer = RFm1
-        #         shortflag = True
-        #     elif len(RFm1) < len(RFm2):
-        #         shortest = RFm1
-        #         longer = RFm2
-        #         shortflag = True
-        #     else:
-        #         shortflag = False
-        #     if shortflag:
-        #         RF[:len(shortest)] = (shortest + longer[:len(shortest)] \
-        #             + RF[:len(shortest)])/3
-        #         RF[len(shortest):len(longer)] = (RF[len(shortest):len(longer)]\
-        #             + longer[len(shortest):len(longer)])/2
-        #     else:
-        #         RF[:len(RFm1)] = (RFm1 + RFm2 \
-        #             + RF[:len(RFm1)])/3
-        # elif multiple == 'zk':
-        #     RFm1 = .2*RFm1
-        #     RFm2 = .1*RFm2
-        #     if len(RFm1) > len(RFm2):
-        #         RF[:len(RFm2)] = .7*RF[:len(RFm2)] + RFm1[:len(RFm2)] + RFm2
-        #         RF[len(RFm2):len(RFm1)] = .8*RF[len(RFm2):len(RFm1)] + RFm1[len(RFm2):]
-        #     elif len(RFm1) < len(RFm2):
-        #         RF[:len(RFm1)] = .7*RF[:len(RFm1)] + RFm1 + RFm2[:len(RFm1)]
-        #         RF[len(RFm1):len(RFm2)] = .9*RF[len(RFm1):len(RFm2)] + RFm2[len(RFm1):]
 
     if taper:
         # Taper the last 10 km
@@ -717,7 +690,8 @@ def load_model(fname='iasp91.dat'):
         return _MODEL_CACHE[fname]
     except KeyError:
         pass
-    values = np.loadtxt('data/velocity_models/' + fname, unpack=True)
+    filepath = os.path.join(finddir(), 'velocity_models', fname)
+    values = np.loadtxt(filepath, unpack=True)
     try:
         z, vp, vs, n = values
         n = n.astype(int)

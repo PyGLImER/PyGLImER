@@ -19,6 +19,7 @@ from obspy.core import Stats
 from obspy.signal.filter import lowpass
 from geographiclib.geodesic import Geodesic
 
+from pyglimer.data import finddir
 from ..ccp import CCPStack
 from ..rf import RFTrace, RFStream
 from ..rf.create import createRF
@@ -26,7 +27,7 @@ from ..rf.deconvolve import it, multitaper, spectraldivision, gen_it
 from ..rf.moveout import moveout, DEG2KM
 from ..waveform.qc import qcs, qcp
 
-tr_folder = "data/raysum_traces/"
+tr_folder = os.path.join(finddir(), 'raysum_traces')
 
 
 def read_raysum(NEZ_file=None, RTZ_file=None, PSS_file=None):

@@ -23,6 +23,7 @@ from pathlib import Path
 import plotly.graph_objs as go
 from plotly.offline import plot
 
+from pyglimer.data import finddir
 from ..constants import R_EARTH, maxz, res, DEG2KM
 from ..utils.geo_utils import geo2cart, cart2geo
 
@@ -30,7 +31,7 @@ from ..utils.geo_utils import geo2cart, cart2geo
 lith1 = os.path.join('/home', 'pm', 'LITHO1.0', 'bin', 'access_litho')
 
 #  Location of the GyPSuM textfiles
-gyps = os.path.join('data', 'velocity_models', 'GyPSuM')
+gyps = os.path.join(finddir(), 'velocity_models', 'GyPSuM')
 
 _MODEL_CACHE = {}
 
@@ -72,7 +73,7 @@ def load_gyps(save=False, latb=None, lonb=None):
         except KeyError:
             pass
         try:
-            with open('tmp/'+str(latb)+str(lonb)+'.pkl', 'rb') as infile:
+            with open(os.path.join('tmp', str(latb)+str(lonb)+'.pkl', 'rb')) as infile:
                 model = pickle.load(infile)
 
             _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model
@@ -92,7 +93,8 @@ def load_gyps(save=False, latb=None, lonb=None):
         pass
 
     try:
-        with open('data/velocity_models/gypsum.pkl', 'rb') as infile:
+        filepath = os.path.join(finddir(), 'velocity_models', 'gypsum.pkl')
+        with open(filepath, 'rb') as infile:
             model = pickle.load(infile)
         if not latb:
             _MODEL_CACHE['gyps'] = model
@@ -190,69 +192,6 @@ def load_gyps(save=False, latb=None, lonb=None):
 
     return model
 
-
-# Deprecated, just work with a 1D model.
-# def raysum3D(dip):
-#     """
-#     Compiles the provided Raysum test model (3D). Fairly clumpsy solved,
-#     which makes it quite slow and RAM intense. An interpolated model instead
-#     of a gridded model would probably be faster and more accurate. However,
-#     this one is closer to the "real 3D model".
-
-#     Parameters
-#     ----------
-#     dip : int
-#         Dip of the LAB in degree. Options are 10, 20, 30, 40 deg.
-#         Rest of the model is set.
-
-#     Returns
-#     -------
-#     model : ComplexModel
-#         Complexmodel object that can be queried.
-
-#     """
-
-#     try:
-#         return _MODEL_CACHE['raysum'+str(dip)]
-#     except KeyError:
-#         pass
-
-#     z = np.arange(0, maxz+10, 10)  # depth in km
-#     lat = np.arange(-5, 5.01, 0.25)
-#     lon = np.arange(-5, 5.01, 0.25)
-
-#     # Populate velocity models
-#     vp = np.empty((len(lat), len(lon), len(z)))
-#     vs = np.empty((len(lat), len(lon), len(z)))
-
-#     # above Moho
-#     im = np.where(z == 20)[0][0]
-#     vp[:, :, :im].fill(3.54)
-#     vs[:, :, :im].fill(1.41)
-#     vp[:, :, im:].fill(7.7)
-#     vs[:, :, im:].fill(4.2)
-
-#     # calculate position of dipping layer
-#     d0 = 150  # depth at origin (0,0)
-#     a = np.tan(np.deg2rad(dip))
-
-#     for m, latitude in enumerate(lat):
-#         x = DEG2KM*latitude
-#         for n, longitude in enumerate(lon):
-#             y, _, _ = gps2dist_azimuth(latitude, 0, latitude, longitude)
-#             y = y/1000
-#             if longitude < 0:
-#                 y = -y
-#                 # Depth depending on x, y
-#                 d = int(round(a*np.dot([1, -1], (x, y))/np.sqrt(2) + d0))
-#                 vp[m, n, d:] = 6.3
-#                 vs[m, n, d:] = 3
-#     _MODEL_CACHE['raysum'+str(dip)] = \
-#         model = ComplexModel(z, vp, vs, lat, lon, flatten=False, zf=z)
-
-#     return model
-
-
 class ComplexModel(object):
     def __init__(self, z, vp, vs, lat, lon, flatten=True, zf=None):
         """
@@ -331,10 +270,6 @@ class ComplexModel(object):
             S-wave velocity.
 
         """
-        # m = np.where(round(lat, self.ndec) == self.lat)[0][0]
-        # n = np.where(round(lon, self.ndec) == self.lon)[0][0]
-        # m = np.nonzero(np.isclose(round(lat, self.ndec), self.lat))[0][0]
-        # n = np.nonzero(np.isclose(round(lon, self.ndec), self.lon))[0][0]
         xs, ys, zs = geo2cart(R_EARTH, lat, lon)
         d, i = self.tree.query([xs, ys, zs])
 
@@ -351,7 +286,7 @@ class ComplexModel(object):
         vs = self.vsf[m, n, p]
         return vp, vs
 
-    def write(self, filename='gypsum', folder='data/velocity_models'):
+    def write(self, filename='gypsum'):
         """
         Save the model.
 
@@ -359,14 +294,13 @@ class ComplexModel(object):
         ----------
         filename : str, optional
             Filename. The default is 'avvmodel'.
-        folder : str, optional
-            Direcotry to save the model. The default is 'data/velocity_models'.
 
         Returns
         -------
         None.
 
         """
+        folder = os.path.join(finddir(), 'velocity_models')
         # Remove filetype identifier if provided
         x = filename.split('.')
         if len(x) > 1:
@@ -425,8 +359,6 @@ class ComplexModel(object):
             ComplexModel daughter object.
 
         """
-        # latv = np.arange(np.floor(lat[0]), np.ceil(lat[1])+1, 1)
-        # lonv = np.arange(np.floor(lon[0]), np.ceil(lon[1])+1, 1)
 
         m0 = np.where(self.lat == np.floor(lat[0]))[0][0]
         m1 = np.where(self.lat == np.ceil(lat[1]))[0][0] + 1
@@ -518,7 +450,8 @@ def load_avvmodel():
         pass
 
     try:
-        with open('data/velocity_models/avvmodel.pkl', 'rb') as infile:
+        filepath = os.path.join(finddir(), 'velocity_models', 'avvmodel.pkl')
+        with open(filepath, 'rb') as infile:
             _MODEL_CACHE['avv'] = model = pickle.load(infile)
             return model
     except FileNotFoundError:
@@ -533,8 +466,6 @@ def load_avvmodel():
     # self.vp, self.vs, _ = np.mgrid[-180:181, -360:361, -10:801]
 
     # Grid of average P and S-wave velocities, used for P-SV-SH rotation
-    # self.avpS, self.avsS = np.mgrid[-90:90.5:.5, -180:180.5:.5]
-    # self.avpP, self.avsP = np.mgrid[-90:90.5:.5, -180:180.5:.5]
     avpS, avsS = np.mgrid[-90:91, -180:181]
     avpP, avsP = np.mgrid[-90:91, -180:181]
 
@@ -682,7 +613,7 @@ class AverageVelModel(object):
 
         return avp, avs
 
-    def write(self, filename='avvmodel', folder='data/velocity_models'):
+    def write(self, filename='avvmodel'):
         """
         Save the model.
 
@@ -690,14 +621,13 @@ class AverageVelModel(object):
         ----------
         filename : str, optional
             Filename. The default is 'avvmodel'.
-        folder : str, optional
-            Direcotry to save the model. The default is 'data/velocity_models'.
 
         Returns
         -------
         None.
 
         """
+        folder = os.path.join(finddir(), 'velocity_models')
         # Remove filetype identifier if provided
         x = filename.split('.')
         if len(x) > 1:
