@@ -20,17 +20,17 @@ from obspy.signal.filter import lowpass
 from geographiclib.geodesic import Geodesic
 
 from pyglimer.data import finddir
-from ..ccp import CCPStack
-from ..rf import RFTrace, RFStream
-from ..rf.create import createRF
-from ..rf.deconvolve import it, multitaper, spectraldivision, gen_it
-from ..rf.moveout import moveout, DEG2KM
-from ..waveform.qc import qcs, qcp
+from pyglimer.ccp import CCPStack
+from pyglimer.rf import RFTrace, RFStream
+from pyglimer.rf.create import createRF, read_by_station
+from pyglimer.rf.deconvolve import it, multitaper, spectraldivision, gen_it
+from pyglimer.rf.moveout import moveout, DEG2KM
+from pyglimer.waveform.qc import qcs, qcp
 
 tr_folder = os.path.join(finddir(), 'raysum_traces')
 
 
-def read_raysum(NEZ_file=None, RTZ_file=None, PSS_file=None):
+def read_raysum(phase, NEZ_file=None, RTZ_file=None, PSS_file=None):
     """
     Reads the output of the raysum program (by Andrew Frederiksen).
 
@@ -61,15 +61,15 @@ def read_raysum(NEZ_file=None, RTZ_file=None, PSS_file=None):
     """
 
     if NEZ_file:
-        NEZ_f = open(tr_folder + NEZ_file)
+        NEZ_f = open(os.path.join(tr_folder, phase, NEZ_file))
     else:
         NEZ_f = None
     if RTZ_file:
-        RTZ_f = open(tr_folder + RTZ_file)
+        RTZ_f = open(os.path.join(tr_folder, phase, RTZ_file))
     else:
         RTZ_f = None
     if PSS_file:
-        PSS_f = open(tr_folder + PSS_file)
+        PSS_f = open(os.path.join(tr_folder, phase, PSS_file))
     else:
         PSS_f = None
     files = []
@@ -139,7 +139,7 @@ def read_raysum(NEZ_file=None, RTZ_file=None, PSS_file=None):
             return PSS, dt, M, N, shift
 
 
-def read_geom(geom_file):
+def read_geom(geom_file,phase):
     """
     Reads in the geometry file of the raysum program to determine parameters.
 
@@ -160,7 +160,7 @@ def read_geom(geom_file):
         Array containing the east shift of each trace [m].
 
     """
-    geom = open(os.path.join(tr_folder, geom_file))
+    geom = open(os.path.join(tr_folder, phase, geom_file))
     x = geom.readlines()
 
     baz = []  # back-azimuths [deg]
@@ -216,7 +216,7 @@ def rf_test(
         PSS_file.append('3D_' + str(dip) + '_' + str(i) + '.tr')
 
     # Read geometry
-    baz, q, dN, dE = read_geom(geom_file)
+    baz, q, dN, dE = read_geom(geom_file, phase)
 
     # statlat = dN/(DEG2KM*1000)
     d = np.sqrt(np.square(dN) + np.square(dE))
@@ -242,7 +242,7 @@ def rf_test(
     stream = []
 
     for f in PSS_file:
-        PSS, dt, _, N, shift = read_raysum(PSS_file=f)
+        PSS, dt, _, N, shift = read_raysum(phase, PSS_file=f)
         stream.append(PSS)
 
     streams = np.vstack(stream)
@@ -321,14 +321,23 @@ def rf_test(
 #     rfs.append(rf)
 
 
-def ccp_test(phase, dip, geom_file='3D.geom'):
-    rfs, statlat, statlon = rf_test(phase, dip, geom_file)
-    print("RFs created")
+def ccp_test(phase, dip, geom_file='3D.geom', multiple=False, use_old_rfs=True):
+    if not use_old_rfs:
+        _, statlat, statlon = rf_test(phase, dip, geom_file=geom_file)
+        print("RFs created")
+    
+    else:
+        rfs = read_by_station('raysum', str(dip), phase, 'output/waveforms/RF')
+        statlat = []
+        statlon = []
+        for rf in rfs:
+            statlat.append(rf.stats.station_latitude)
+            statlon.append(rf.stats.station_longitude)
 
     coords = np.unique(np.column_stack((statlat, statlon)), axis=0)
 
     # Create empty CCP object
-    ccp = CCPStack(coords[:, 0], coords[:, 1], 0.05, phase='P')
+    ccp = CCPStack(coords[:, 0], coords[:, 1], 0.1, phase='P')
     ccp.bingrid.phase = phase  # I'm doing it this way because computing a
     # bingrid for phase S takes way longer and I don't really need the extra
     # area
@@ -336,10 +345,10 @@ def ccp_test(phase, dip, geom_file='3D.geom'):
 
     # Create stack
     ccp.compute_stack(
-        'raysum.dat', network='raysum', station=str(dip), save=False)
+        'raysum.dat', network='raysum', station=str(dip), save=False, multiple=multiple)
     print('ccp stack concluded')
     ccp.conclude_ccp(r=1, keep_water=True)
-    ccp.write('raysum'+str(dip), fmt='matlab')
+    ccp.write('raysum'+phase+str(dip))
     return ccp
 
 
@@ -373,7 +382,7 @@ def moveout_test(PSS_file, q, phase):
 
     """
     rayp = q*1.111949e5
-    PSS, dt, M, N, shift = read_raysum(PSS_file=PSS_file)
+    PSS, dt, M, N, shift = read_raysum(phase, PSS_file=PSS_file)
 
     # Create receiver functions
     RF = []
@@ -428,7 +437,7 @@ def decon_test(PSS_file, phase, method):
         Sampling interval.
 
     """
-    PSS, dt, M, N, shift = read_raysum(PSS_file=PSS_file)
+    PSS, dt, M, N, shift = read_raysum(phase, PSS_file=PSS_file)
 
     # Create receiver functions
     RF = []

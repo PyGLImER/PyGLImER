@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 9th July 2020 05:11:41 pm
+Last Modified: Wednesday, 22nd July 2020 03:07:49 pm
 '''
 
 #!/usr/bin/env python3d
@@ -394,7 +394,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
             # compute time of first arrival & ray parameter
             arrival = model.get_travel_times(source_depth_in_km=depth / 1000,
                                              distance_in_degree=distance,
-                                             phase_list=phase)[0]
+                                             phase_list=[phase])[0]
             rayp_s_deg = arrival.ray_param_sec_degree
             rayp = rayp_s_deg / 111319.9  # apparent slowness
             first_arrival = origin_time + arrival.time
@@ -503,13 +503,13 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
                     rayp, st, phase)
 
             # Create RF object
-            if phase == "S":
+            if phase[-1] == "S":
                 trim = [40, 0]
                 if distance >= 70:
                     trim[1] = ta - (-2*distance + 180)
                 else:
                     trim[1] = ta - 40
-            elif phase == "P":
+            elif phase[-1] == "P":
                 trim = False
 
             if not infodict:
@@ -683,7 +683,7 @@ def __rotate_qc(phase, st, station_inv, network, station, paz_sim, baz,
     dt = st[0].stats.delta  # sampling interval
     sampling_f = st[0].stats.sampling_rate
 
-    if phase == "P":
+    if phase[-1] == "P":
         st, crit, f, noisemat = qcp(st, dt, sampling_f, tz)
         if not crit:
             infodict['dt'] = dt
@@ -695,7 +695,7 @@ def __rotate_qc(phase, st, station_inv, network, station, paz_sim, baz,
             infodict['statel'] = station_inv[0][0][0].elevation
             raise SNRError(np.array2string(noisemat))
 
-    elif phase == "S":
+    elif phase[-1] == "S":
         st, crit, f, noisemat = qcs(st, dt, sampling_f, tz)
 
         if not crit:

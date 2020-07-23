@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import cartopy
 from cartopy.crs import PlateCarree
 
-from ..constants import maxz, res
+from pyglimer.constants import maxz, res
 
 def set_mpl_params():
     params = {
@@ -188,7 +188,7 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     if rf.stats.type == 'time':
         # Get times
         times = rf.times() - (rf.stats.onset - rf.stats.starttime)
-        if rf.stats.phase == 'S':
+        if rf.stats.phase[-1] == 'S':
             times = np.flip(times)
             ydata = np.flip(-rf.data)
     # elif rf.stats.type == 'stastack':
@@ -308,7 +308,7 @@ def plot_section(rfst, channel = "PRF",
         ydata = rf.data
         if rf.stats.type == 'time':
             times = rf.times() - (rf.stats.onset - rf.stats.starttime)
-            if rf.stats.phase == 'S':
+            if rf.stats.phase[-1] == 'S':
                 ydata = np.flip(-rf.data)
                 times = np.flip(times)
         else:

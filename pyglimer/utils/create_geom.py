@@ -14,11 +14,12 @@ Last updated:
 import os
 import numpy as np
 
+from pyglimer.data import finddir
 
 def geom3D():
     N = 21
     bazv = np.arange(0, 360, 20)
-    raypv = np.linspace(5e-5, 1.5e-4, 8)#np.arange(.1e-5, .31e-4, .25e-5)
+    raypv = np.linspace(0.000040541,0.000081081, 8) # for P:0.000040541,0.000081081 S:0.00009009, 0.00011982
     shift_max = 55660/2  # 55660
     filename = '3D'
     create_geom(N, bazv, raypv, shift_max, filename)
@@ -28,7 +29,7 @@ def geom3D_even():
     N = 100
     bazv = np.arange(0, 360, 20)
     # raypv = np.arange(.1e-5, .11e-4, .25e-5)
-    raypv = np.arange(.7e-4, 1e-4, 1e-5)
+    raypv = np.linspace(0.000040541, 0.000081081, 8)
     shift_max = 55660
     filename = '3D'
     create_geom(N, bazv, raypv, shift_max, filename, shape='even')
@@ -115,13 +116,13 @@ def create_geom(N, bazv, raypv, shift_max, filename, shape='cross'):
 
     # Write text to file
     # open outfile
-    of = os.path.join('data', 'raysum_traces', filename+'.geom')
+    of = os.path.join(finddir(), 'raysum_traces', filename+'.geom')
     with open(of, 'w') as text:
         text.writelines(lines)
 
     # Write splitted files
     for i, j in enumerate(fpi):
-        of = os.path.join('data', 'raysum_traces', filename+str(i)+'.geom')
+        of = os.path.join(finddir(), 'raysum_traces', filename+str(i)+'.geom')
         with open(of, 'w') as text:
             if i:
                 text.writelines(lines[fpi[i-1]+1:j+1])

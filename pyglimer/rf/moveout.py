@@ -26,8 +26,8 @@ from scipy import interpolate
 from scipy.signal.windows import hann
 
 from pyglimer.data  import finddir
-from ..constants import R_EARTH, DEG2KM, maxz, res, maxzm
-from ..utils.createvmodel import load_gyps
+from pyglimer.constants import R_EARTH, DEG2KM, maxz, res, maxzm
+from pyglimer.utils.createvmodel import load_gyps
 
 
 _MODEL_CACHE = {}
@@ -72,6 +72,8 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
     rayp = st.slowness  # Ray parameter
     phase = st.phase  # Primary phase
     el = st.station_elevation
+
+    phase = phase[-1]
 
     if fname[-2:] == '3D':
         test = fname == 'raysum3D'
@@ -172,10 +174,10 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
             tckm2 = interpolate.splrep(zm2, RFm2)
         except TypeError as e:
             multiple = False
-            u, c = np.unique(zm1, return_counts=True)
-            dup = u[c > 1]
-            u, c = np.unique(zm2, return_counts=True)
-            dup2 = u[c > 1]
+            # u, c = np.unique(zm1, return_counts=True)
+            # dup = u[c > 1]
+            # u, c = np.unique(zm2, return_counts=True)
+            # dup2 = u[c > 1]
             mes = "Interpolation error in multiples. Only primary conversion"+\
                 " will be used."
             warnings.warn(mes, category=UserWarning, stacklevel=1)
@@ -400,11 +402,11 @@ def dt_table_3D(
             dt_mphase1 = dt + 2*dt_a
             dt_mphase2 = dt + dt_b + dt_a
             # Truncate The travel time table for multiples
-            if dt_mphase1.max() > 60:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1>=60)[0][0]]
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=60)[0][0]]
-            elif dt_mphase2.max() > 60:
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=60)[0][0]]               
+            # if dt_mphase1.max() > 60:
+            #     dt_mphase1 = dt_mphase1[:np.where(dt_mphase1>=60)[0][0]]
+            #     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=60)[0][0]]
+            # elif dt_mphase2.max() > 60:
+            #     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=60)[0][0]]               
         else:
             # Reduce travel times for S since the data will be flipped
             dt_mphase1 = dt - 2*dt_b

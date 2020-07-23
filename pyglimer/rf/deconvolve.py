@@ -51,6 +51,7 @@ def gen_it(P, H, dt, phase, shift=0, width=2.5, e_min=5, omega_min=0,
         it : int
         rej : int
     """
+    phase = phase[-1]
 
     # From per cent to decimal
     e_min = e_min/100
@@ -352,6 +353,7 @@ def spectraldivision(v, u, ndt, tshift, regul, phase):
         longitudinal component.
     :rtype: 1D np.ndarray
     """    
+    phase = phase[-1]
 
     N = len(v)
 

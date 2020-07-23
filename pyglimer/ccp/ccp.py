@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 21st July 2020 01:48:14 pm
+Last Modified: Thursday, 23rd July 2020 08:52:37 pm
 '''
 
 #!/usr/bin/env python3
@@ -28,7 +28,7 @@ from tqdm import tqdm
 from pyglimer.ccp.compute.bin import BinGrid
 from pyglimer.database.stations import StationDB
 from pyglimer.rf.create import read_rf
-from pyglimer.rf.moveout import res, maxz
+from pyglimer.rf.moveout import res, maxz, maxzm
 from pyglimer.utils.utils import dt_string, chunks
 from pyglimer.utils.createvmodel import _MODEL_CACHE, ComplexModel
 from pyglimer.utils.geo_utils import epi2euc
@@ -255,6 +255,7 @@ class CCPStack(object):
 
         # Create handler to the log
         if not logdir:
+            os.makedirs('logs', exist_ok=True)
             fh = logging.FileHandler(os.path.join('logs', 'ccp.log'))
         else:
             fh = logging.FileHandler(os.path.join(logdir, 'ccp.log'))
@@ -431,7 +432,7 @@ class CCPStack(object):
         
         if multiple:
             # Use multiples?
-            endi = np.where(self.z==100)[0][0]+1
+            endi = np.where(self.z==maxzm)[0][0]+1
             self.bins_m1 = np.zeros(self.bins[:, :endi].shape)
             self.bins_m2 = np.zeros(self.bins[:, :endi].shape)
             self.illumm = np.zeros(self.bins[:, :endi].shape, dtype=int)
@@ -698,7 +699,7 @@ only show the progress per chunk.')
             datal.append(rf.data)
             
             if multiple:
-                depthi = np.where(z==100)[0][0]
+                depthi = np.where(z==maxzm)[0][0]
                 try:
                     datalm1.append(rfm1.data[:depthi+1])
                     datalm2.append(rfm2.data[:depthi+1])
@@ -711,7 +712,7 @@ only show the progress per chunk.')
 
     def conclude_ccp(
         self, keep_empty=False, keep_water=False, r=3,
-        multiple=False, z_multiple:int = 100):
+        multiple=False, z_multiple:int = 200):
         """
         Averages the CCP-bin and populates empty cells with average of
         neighbouring cells. No matter which option is
@@ -733,12 +734,12 @@ only show the progress per chunk.')
             stack. By default False.
         :type multiple: bool or str
         :param z_multiple: Until which depth [km] should multiples be considered,
-            maximal value is 100 [km]. Will only be used if multiple=True.
-            By default 100 km.
+            maximal value is 200 [km]. Will only be used if multiple=True.
+            By default 200 km.
         :type z_multiple: int, optional
         """
-        if z_multiple > 100:
-            raise ValueError('Maximal depth for multiples is 100 km.')
+        if z_multiple > 200:
+            raise ValueError('Maximal depth for multiples is 200 km.')
         endi = np.where(self.z == z_multiple)[0][0]+1   
         if multiple == 'linear':
             

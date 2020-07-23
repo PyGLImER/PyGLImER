@@ -109,9 +109,9 @@ def rotate_LQT(st, phase):
         Should deviate from 1 as far as possible.
 
     """
-    if phase == 'P':
+    if phase[-1] == 'P':
         onset = 30
-    elif phase == 'S':
+    elif phase[-1] == 'S':
         onset = 120
 
     dt = st[0].stats.delta  # sampling interval
@@ -123,10 +123,10 @@ def rotate_LQT(st, phase):
 
     # only check around phase-arrival
     # window
-    if phase == "S":
+    if phase[-1] == "S":
         ws = round((onset-3)/dt)
         we = round((onset+5)/dt)
-    elif phase == "P":
+    elif phase[-1] == "P":
         ws = round((onset-5)/dt)
         we = round((onset+5)/dt)
 
@@ -169,10 +169,10 @@ def rotate_LQT(st, phase):
     pp2 = round((onset+10)/dt)
     npp = pp2 - pp1
     # point where converted Sp arrive
-    if phase == "S":
+    if phase[-1] == "S":
         pc1 = round((onset-40)/dt)
         pc2 = round((onset-15)/dt)
-    elif phase == "P":
+    elif phase[-1] == "P":
         # Point where PS arrives
         pc1 = round((onset+20)/dt)
         pc2 = round((onset+40)/dt)
@@ -182,10 +182,10 @@ def rotate_LQT(st, phase):
         np.sum(np.square(LQ[0][pc1:pc2])/npc)
     b = np.sum(np.square(LQ[1][pp1:pp2])/npp) /\
         np.sum(np.square(LQ[1][pc1:pc2])/npc)
-    if a > b and phase == "S" or a < b and phase == "P":
+    if a > b and phase[-1] == "S" or a < b and phase[-1] == "P":
         Q = LQ[0]
         L = LQ[1]
-    elif a < b and phase == "S" or a > b and phase == "P":
+    elif a < b and phase[-1] == "S" or a > b and phase[-1] == "P":
         Q = LQ[1]
         L = LQ[0]
 
@@ -223,6 +223,7 @@ def rotate_LQT_min(st, phase):
         Computed incidence angle in degree. Can serve as QC criterion.
 
     """
+    phase = phase[-1]
     if phase == 'P':
         onset = 30
     elif phase == 'S':

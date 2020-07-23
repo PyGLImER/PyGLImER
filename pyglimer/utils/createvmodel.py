@@ -24,8 +24,8 @@ import plotly.graph_objs as go
 from plotly.offline import plot
 
 from pyglimer.data import finddir
-from ..constants import R_EARTH, maxz, res, DEG2KM
-from ..utils.geo_utils import geo2cart, cart2geo
+from pyglimer.constants import R_EARTH, maxz, res, DEG2KM
+from pyglimer.utils.geo_utils import geo2cart, cart2geo
 
 # location of lith1 file
 lith1 = os.path.join('/home', 'pm', 'LITHO1.0', 'bin', 'access_litho')
@@ -604,12 +604,14 @@ class AverageVelModel(object):
         m = np.where(self.latv == lat)[0][0]
         n = np.where(self.lonv == lon)[0][0]
 
-        if phase == 'P':
+        if phase[-1] == 'P':
             avp = self.avpP[m, n]
             avs = self.avsP[m, n]
-        elif phase == 'S':
+        elif phase[-1] == 'S':
             avp = self.avpS[m, n]
             avs = self.avsS[m, n]
+        else:
+            raise NameError('Phase '+phase+' is not known.')
 
         return avp, avs
 

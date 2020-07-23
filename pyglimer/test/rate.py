@@ -22,9 +22,10 @@ from obspy.taup import TauPyModel
 from obspy.clients.iris import Client
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 
-from ..rf.create import createRF, RFStream
-from ..waveform.qc import qcs, qcp
-from ..waveform.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
+from pyglimer.data import finddir
+from pyglimer.rf.create import createRF, RFStream
+from pyglimer.waveform.qc import qcs, qcp
+from pyglimer.waveform.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
 
 rating = {}  # mutable object
 
@@ -73,7 +74,7 @@ def rate(network, phase, preproloc, station=None,
     """
     if phase == 'P':
         onset = 30
-    elif phase == 'S':
+    elif phase[-1] == 'S':
         onset = 120
 
     inloc = os.path.join(preproloc, phase, 'by_station', network)
@@ -357,7 +358,7 @@ def __w_file(network, station, starttime):
         int(rating["k"])
     except ValueError:
         return False
-    with shelve.open(os.path.join('data', 'ratings')
+    with shelve.open(os.path.join(finddir(), 'ratings')
                      + network + "." + station + "rating") as f:
         if int(rating["k"]) != 5:
             f[starttime] = rating["k"]
@@ -365,7 +366,7 @@ def __w_file(network, station, starttime):
 
 
 def __r_file(network, station, starttime):
-    with shelve.open(os.path.join('data', 'ratings')
+    with shelve.open(os.path.join(finddir, 'ratings')
                       + network + "." + station + "rating") as f:
         if starttime in f:
             old = f[starttime]
@@ -400,7 +401,7 @@ def sort_rated(network, station, phase, preproloc):
     for n in range(1, 5):
         os.makedirs(inloc + str(n), exist_ok=True)
     dic = shelve.open(
-        os.path.join('data', 'ratings') + network + "." + station + "rating")
+        os.path.join(finddir(), 'ratings') + network + "." + station + "rating")
     for file in os.listdir(inloc):
         if file[:4] == "info":  # Skip the info files
             continue
@@ -465,7 +466,7 @@ def automatic_rate(network, station, phase, preproloc):
             st, crit, lf, noisemat = qcp(st, st[0].stats.delta,
                                          st[0].stats.sampling_rate)
 
-        with shelve.open(os.path.join('data', 'ratings') + network + "." +
+        with shelve.open(os.path.join(finddir(), 'ratings') + network + "." +
                          station + "rating") as f:
             f[starttime + "_auto"] = crit
             if starttime in f and int(f[starttime]) < 3 and crit:

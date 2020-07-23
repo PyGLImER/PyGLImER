@@ -24,9 +24,9 @@ from obspy.clients.fdsn import Client as Webclient
 from obspy.taup import TauPyModel
 from obspy.clients.fdsn.client import FDSNException
 
-from .download import downloadwav
-from .preprocess import preprocess
-from .. import tmp
+from pyglimer.waveform.download import downloadwav
+from pyglimer.waveform.preprocess import preprocess
+from pyglimer import tmp
 
 
 class Request(object):
@@ -44,9 +44,9 @@ class Request(object):
         Create object that is used to start the receiver function
         workflow.
 
-        :param phase: Primary arrival that is to be used as source phase.
+        :param phase: Arrival phase that is to be used as source phase.
             "S" to create S-Sp receiver functions and "P" for P-Ps receiver
-            functions.
+            functions, "SKS" or "ScS" are allowed as well.
         :type phase: str
         :param rot: The coordinate system in that the seismogram should be rotated
             prior to deconvolution. Options are "RTZ" for radial, transverse,
@@ -184,8 +184,19 @@ class Request(object):
             self.min_epid = 55
             self.max_epid = 80
             self.tz = 120
+        # (see Yuan et al. 2006)
+        elif self.phase == 'SCS':
+            self.maxdepth = 300
+            self.min_epid = 50
+            self.max_epid = 75
+            self.tz = 120
+        elif self.phase == 'SKS':
+            self.maxdepth = 300
+            self.min_epid = 85
+            self.max_epid = 120
+            self.tz = 120
         else:
-            raise NameError('The phase', phase, """is not valid or not
+            raise NameError('The phase', self.phase, """is not valid or not
                             implemented yet.""")
 
         # network and station filters
@@ -254,7 +265,8 @@ class Request(object):
 
         os.makedirs(self.evtloc, exist_ok=True)
             # check if there is a better format for event catalog
-        self.evtcat.write(os.path.join(self.evtloc, str(datetime.now())),
+        self.evtcat.write(os.path.join(self.evtloc,
+                                       datetime.now().strftime("%Y%m%dT%H%M%S")),
                           format="QUAKEML")
 
     def download_waveforms(self):

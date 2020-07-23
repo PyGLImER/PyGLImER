@@ -5,7 +5,7 @@ Authors: Peter Makus (peter.makus@student.uib.no)
         Lucas Sawade (lsawade@princeton.edu)
 
 Created: November 2019
-Last Modified: Friday, 3rd July 2020 05:03:45 pm
+Last Modified: Wednesday, 22nd July 2020 11:45:19 am
 '''
 
 import logging
@@ -71,7 +71,7 @@ class BinGrid(object):
         self.latitude = self.stations[:, 0]
         self.longitude = self.stations[:, 1]
         self.edist = edist
-        self.phase = phase
+        self.phase = phase.upper()
 
         # Verbosity
         self.verbose = verbose
@@ -168,9 +168,9 @@ class BinGrid(object):
             start = time.time()
 
         # maximal distance of bins to station depends upon phase
-        if self.phase == "S":
+        if self.phase[-1] == "S":
             maxepid = 12
-        elif self.phase == "P":
+        elif self.phase[-1] == "P":
             maxepid = 4
         d, i = self.KDS.query(R_EARTH * points,
                               distance_upper_bound=epi2euc(maxepid))

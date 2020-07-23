@@ -12,5 +12,5 @@ R_EARTH = 6371.
 
 DEG2KM = degrees2kilometers(1)
 maxz = 750  # maximum interpolation depth in km
-maxzm = 100  # maximum depth for multiple interpolation in km
+maxzm = 200  # maximum depth for multiple interpolation in km
 res = 1  # vertical resolution in km for interpolation and ccp bins

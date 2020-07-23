@@ -33,9 +33,9 @@ from obspy.geodetics import gps2dist_azimuth
 from obspy.taup import TauPyModel
 from scipy.signal.windows import hann
 
-from .deconvolve import it, spectraldivision, multitaper, gen_it
-from .moveout import DEG2KM, maxz, res, moveout, dt_table, dt_table_3D
-from ..plot.plot_utils import plot_section, plot_single_rf, stream_dist
+from pyglimer.rf.deconvolve import it, spectraldivision, multitaper, gen_it
+from pyglimer.rf.moveout import DEG2KM, maxz, res, moveout, dt_table, dt_table_3D
+from pyglimer.plot.plot_utils import plot_section, plot_single_rf, stream_dist
 
 logger = logging.Logger("rf")
 
@@ -134,7 +134,7 @@ def createRF(st_in, phase, pol='v', onset=None,
         stream[tr.stats.channel[2]] = tr.data
 
     # define denominator v and enumerator u
-    if phase == "P" and "R" in stream:
+    if phase[-1] == "P" and "R" in stream:
         if "Z" in stream:
             v = stream["Z"]
         elif "3" in stream:
@@ -143,28 +143,28 @@ def createRF(st_in, phase, pol='v', onset=None,
             u = stream["R"]
         elif pol == 'h':
             u = stream["T"]
-    elif phase == "P" and "Q" in stream:
+    elif phase[-1] == "P" and "Q" in stream:
         v = stream["L"]
         if pol == 'v':
             u = stream["Q"]
         elif pol == 'h':
             u = stream['T']
-    elif phase == "P" and "V" in stream:
+    elif phase[-1] == "P" and "V" in stream:
         v = stream["P"]
         if pol == 'v':
             u = stream["V"]
         elif pol == 'h':
             u = stream["H"]
-    elif phase == "S" and "R" in stream:
+    elif phase[-1] == "S" and "R" in stream:
         if "Z" in stream:
             u = stream["Z"]
         elif "3" in stream:
             u = stream["3"]
         v = stream["R"]
-    elif phase == "S" and "Q" in stream:
+    elif phase[-1] == "S" and "Q" in stream:
         u = stream["L"]
         v = stream["Q"]
-    elif phase == "S" and "V" in stream:
+    elif phase[-1] == "S" and "V" in stream:
         u = stream["P"]
         v = stream["V"]
     else:
@@ -175,20 +175,20 @@ def createRF(st_in, phase, pol='v', onset=None,
 
     # Deconvolution
     if method == "it":
-        if phase == "S":
+        if phase[-1] == "S":
             width = 1.5  # change for Kind (2015) to 1
-        elif phase == "P":
+        elif phase[-1] == "P":
             width = 2.5
         else:
             raise ValueError('Phase '+phase+' is not supported.')
         lrf = None
         RF[0].data = it(v, u, dt, shift=shift, width=width)[0]
     elif method == "dampedf":
-        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "con", phase=phase)
+        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "con", phase=phase[-1])
     elif method == "waterlevel":
-        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "wat", phase=phase)
+        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "wat", phase=phase[-1])
     elif method == 'fqd':
-        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "fqd", phase=phase)
+        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "fqd", phase=phase[-1])
     elif method == 'multit':
         RF[0].data, lrf, _, _ = multitaper(v, u, dt, shift, "fqd")
         # remove noise caused by multitaper
@@ -736,7 +736,7 @@ class RFStream(Stream):
         """
 
         # Define velocity depending on the incident phase
-        if phase == "P":
+        if phase[-1] == "P":
             v = 5.793  # PREM vp velocity at the surface
         else:
             v = 3.191  # PREM vs velocity at the surface

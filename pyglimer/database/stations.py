@@ -26,7 +26,8 @@ from obspy import read_inventory
 import pandas as pd
 from pathlib import Path
 
-from ..utils.utils import dt_string
+from pyglimer.data import finddir
+from pyglimer.utils.utils import dt_string
 
 
 def redownload_missing_statxmls(clients, phase, statloc, rawdir, verbose=True):
@@ -135,7 +136,7 @@ class StationDB(object):
         fh.setFormatter(fmt)
 
         # Check if there is already a saved database
-        oloc = os.path.join('data', 'database.csv')
+        oloc = os.path.join(finddir(), 'database.csv')
         
         if use_old and Path(oloc).is_file():
             self.db = pd.read_csv(oloc)

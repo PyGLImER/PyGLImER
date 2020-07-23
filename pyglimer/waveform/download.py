@@ -1,7 +1,7 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
 Created: Tue May 26 2019 13:31:30
-Last Modified: Thursday, 9th July 2020 04:20:27 pm
+Last Modified: Wednesday, 22nd July 2020 11:41:35 am
 '''
 
 #!/usr/bin/env python3
@@ -35,7 +35,7 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
     Parameters
     ----------
     phase : string
-        P or S for P or SRFS.
+        Arrival phase to be used. P, S, SKS, or ScS.
     min_epid : float
         Minimal epicentral distance to be downloaded.
     max_epid : float
