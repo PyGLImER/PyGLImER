@@ -952,10 +952,13 @@ class RFTrace(Trace):
             RFTrace object of type depth.
         :rtype: 1D np.ndarray, :class:`~pyglimer.rf.create.RFTrace`
         """   
-
-        if self.stats.type == "depth" or self.stats.type == "stastack":
-            raise TypeError("RF is already depth migrated.")
         st = self.stats
+
+        if st.type == "depth" or st.type == "stastack":
+            raise TypeError("RF is already depth migrated.")
+        if st.phase[-1] == 'S' and multiple:
+            raise NotImplementedError(
+                'Multiple mode for S receiver functions is not supported')
 
         z, RF_mo, delta, RFm1, RFm2 = moveout(
             self.data, st, vmodel, latb=latb, lonb=lonb, taper=taper,
