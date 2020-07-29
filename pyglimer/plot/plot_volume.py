@@ -1,41 +1,16 @@
-# This import registers the 3D projection, but is otherwise unused.
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
-
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from matplotlib import cm
 from matplotlib import colors as matcolors
+from matplotlib.widgets import Slider, CheckButtons
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
 import numpy as np
 from cartopy.crs import PlateCarree
 import cartopy.feature as cfeature
 
-class slice:
-    
-    def __init__(self, X, Y, Z, C):
-    
-        if ((X.shape != Y.shape)
-            or (Y.shape != Z.shape) 
-            or (Z.shape != C.shape) 
-            or (C.shape != X.shape)):
-            print("X", X.shape)
-            print("Y", Y.shape)
-            print("Z", Z.shape)
-            print("C", C.shape)
-            raise ValueError("Shapes not equal.")
-        self.X = X
-        self.Y = Y
-        self.Z = Z
-        self.C = C
-        self.pl = None
-    """
-    def plot(self, cmap="coolwarm", norm=None, ax=None):
-        if ax is None:
-            ax = plt.gca()
-        ax.pcolor(self.Y, self.Z, scmap=self.cmap, norm=self.norm)
-    """
 
-class volume_plot:
+class VolumePlot:
 
     def __init__(self, X, Y, Z, V,
                  xl: float or None = None,
@@ -71,6 +46,9 @@ class volume_plot:
         self.xl = xl
         self.yl = yl
         self.zl = zl
+        self.nx = len(X)
+        self.ny = len(Y)
+        self.nz = len(Z)
 
         # Slices
         self.xsl = None
@@ -91,17 +69,26 @@ class volume_plot:
         self.zlp = None
 
         # Figure stuff
-        self.axx = None
-        self.axy = None
-        self.axz = None
+        self.ax = {'x': None,
+                   'y': None,
+                   'z': None,
+                   'm': {'main': None,
+                         'inset': None}}
+        self.slice = {'x': None,
+                      'y': None,
+                      'z': None}
+        self.lines = {'x': {'y': None, 'z': None},
+                      'y': {'x': None, 'z': None},
+                      'z': {'x': None, 'y': None},
+                      'm': {'x': None, 'y': None}}
         self.axtopright = None
         self.mapax = None
         self.fig = None
-        self.view = None
         self.minX, self.maxX = np.min(X), np.max(X)
         self.minY, self.maxY = np.min(Y), np.max(Y)
         self.minZ, self.maxZ = np.min(Z), np.max(Z)
-        self.buffer = 0.1 # in fraction
+        self.minV, self.maxV = np.min(V), np.max(V)
+        self.buffer = 0.1  # in fraction
         self.xbuffer = (self.maxX - self.minX) * self.buffer
         self.ybuffer = (self.maxY - self.minY) * self.buffer
         self.mapextent = [self.minX - self.xbuffer, self.maxX + self.xbuffer,
@@ -109,8 +96,9 @@ class volume_plot:
         self.linewidth = 1.5
 
         # Colormap settings
-        self.vmin, self.vmax = [np.min(V), np.max(V)];
-        self.norm = matcolors.Normalize(self.vmin, self.vmax);
+        self.vmin, self.vmax = [np.min(V), np.max(V)]
+        self.norm = matcolors.TwoSlopeNorm(
+            vmin=self.vmin, vcenter=0.0, vmax=self.vmax)
         self.cmap = plt.cm.coolwarm
         self.mappable = cm.ScalarMappable(norm=self.norm, cmap=self.cmap)
 
@@ -123,13 +111,12 @@ class volume_plot:
 
     def init_plot(self):
 
-        self.compute_slices()
-
         self.fig = plt.figure(figsize=(10, 10))
-        self.axx = plt.subplot(224)
-        self.axtopright = plt.subplot(222)
-        self.axy = plt.subplot(223)  #, sharey=self.axx)
-        self.axz = plt.subplot(221)  #, sharex=self.axy)
+        self.ax["x"] = plt.subplot(224)
+        self.ax["y"] = plt.subplot(223)  # , sharey=self.axx)
+        self.ax["z"] = plt.subplot(221)  # , sharex=self.axy)
+        self.ax["m"].update({"main": plt.subplot(222),
+                             "inset": None})
 
         self.plot_xsl()
         self.plot_ysl()
@@ -140,32 +127,43 @@ class volume_plot:
         self.plot_zlines()
 
         self.fig.subplots_adjust(hspace=0.0, wspace=0.0)
+        print(self.ax)
         self.fig.colorbar(self.mappable, shrink=1., aspect=50,
                           orientation="horizontal",
-                          ax=[self.axz, self.axtopright, self.axy, self.axx])
+                          ax=[self.ax['z'], self.ax['m']['main'], self.ax['y'], self.ax['x']])
 
-        plt.show(block=False)
+        plt.show()
 
     def plot_xsl(self):
-        self.axx.pcolor(self.Y, self.Z, self.V[self.xli, :, :].T,
-                        cmap=self.cmap, norm=self.norm)
-        self.axx.set_xlabel("y")
-        plt.setp(self.axx.get_yticklabels(), visible=False)
+        # self.slice['x'] = self.ax['x'].pcolor(self.Y, self.Z, 
+        #                                       self.V[self.xli, :, :].T,
+        #                                       cmap=self.cmap, norm=self.norm)
+        self.slice['x'] = self.ax['x'].imshow(self.V[self.xli, :, :].T,
+                                              extent=[self.minY, self.maxY,
+                                                      self.minZ, self.maxZ],
+                                              interpolation='nearest', 
+                                              origin='bottom', 
+                                              aspect='auto',
+                                              cmap=self.cmap, norm=self.norm)
+        self.ax['x'].set_xlabel("y")
+        plt.setp(self.ax['x'].get_yticklabels(), visible=False)
 
     def plot_ysl(self):
-        self.axy.pcolor(self.X, self.Z, self.V[:, self.yli, :].T,
-                        cmap=self.cmap, norm=self.norm)
-        self.axy.set_xlabel("x")
-        self.axy.set_ylabel("z")
+        self.slice['y'] = self.ax['y'].pcolor(self.X, self.Z, 
+                                              self.V[:, self.yli, :].T,
+                                              cmap=self.cmap, norm=self.norm)
+        self.ax['y'].set_xlabel("x")
+        self.ax['y'].set_ylabel("z")
 
     def plot_zsl(self):
-        self.axz.pcolor(self.X, self.Y, self.V[:, :, self.zli].T,
-                        cmap=self.cmap, norm=self.norm)
-        self.axz.set_ylabel("y")
-        plt.setp(self.axz.get_xticklabels(), visible=False)
+        self.slice['z'] = self.ax['z'].pcolor(self.X, self.Y,
+                                              self.V[:, :, self.zli].T,
+                                              cmap=self.cmap, norm=self.norm)
+        self.ax['z'].set_ylabel("y")
+        plt.setp(self.ax['z'].get_xticklabels(), visible=False)
 
     def plot_map(self):
-        self.axtopright.axis("off")
+        self.ax['m']['main'].axis("off")
         # inset location relative to main plot (ax) in normalized units
         inset_x = 0.5
         inset_y = 0.5
@@ -174,35 +172,44 @@ class volume_plot:
                      inset_y - inset_size / 2,
                      inset_size, inset_size]
 
-        self.mapax = plt.axes([0, 0, 1, 1], projection=PlateCarree())
-        self.mapax.add_feature(cfeature.LAND)
-        self.mapax.add_feature(cfeature.OCEAN)
-        self.mapax.add_feature(cfeature.COASTLINE)
-        ip = InsetPosition(self.axtopright, inset_dim)
-        self.mapax.set_axes_locator(ip)
-        self.mapax.set_extent(self.mapextent)
+        self.ax['m']['inset'] = plt.axes([0, 0, 1, 1],
+                                         projection=PlateCarree())
+        self.ax['m']['inset'].add_feature(cfeature.LAND)
+        self.ax['m']['inset'].add_feature(cfeature.OCEAN)
+        self.ax['m']['inset'].add_feature(cfeature.COASTLINE)
+        ip = InsetPosition(self.ax['m']['main'], inset_dim)
+        self.ax['m']['inset'].set_axes_locator(ip)
+        self.ax['m']['inset'].set_extent(self.mapextent)
 
     def plot_xlines(self):
-        xliney = self.axy.plot([self.xlp, self.xlp], [self.minZ, self.maxZ], "k",
-                               lw=self.linewidth)
-        xlinez = self.axz.plot([self.xlp, self.xlp], [self.minY, self.maxY], "k",
-                               lw=self.linewidth)
-        xlinem = self.mapax.plot([self.xlp, self.xlp], [self.minY, self.maxY], "k",
-                                 lw=self.linewidth)
+        self.lines['y']['x'] = self.ax['y'].plot(
+            [self.xlp, self.xlp], [self.minZ, self.maxZ], "k", 
+            lw=self.linewidth)
+        self.lines['z']['x'] = self.ax['z'].plot(
+            [self.xlp, self.xlp], [self.minY, self.maxY], "k",
+            lw=self.linewidth)
+        self.lines['m']['x'] = self.ax['m']['inset'].plot(
+            [self.xlp, self.xlp], [self.minY, self.maxY], "k", 
+            lw=self.linewidth)
 
     def plot_ylines(self):
-        ylinex = self.axx.plot([self.ylp, self.ylp], [self.minZ, self.maxZ], "k",
-                               lw=self.linewidth)
-        ylinez = self.axz.plot([self.minX, self.maxX], [self.ylp, self.ylp], "k",
-                               lw=self.linewidth)
-        ylinem = self.mapax.plot([self.minX, self.maxX], [self.ylp, self.ylp], "k",
-                                 lw=self.linewidth)
+        self.lines['x']['y'] = self.ax['x'].plot(
+            [self.ylp, self.ylp], [self.minZ, self.maxZ], "k",
+            lw=self.linewidth)
+        self.lines['z']['y'] = self.ax['z'].plot(
+            [self.minX, self.maxX], [self.ylp, self.ylp], "k",
+            lw=self.linewidth)
+        self.lines['m']['y'] = self.ax['m']['inset'].plot(
+            [self.minX, self.maxX], [self.ylp, self.ylp], "k", 
+            lw=self.linewidth)
 
     def plot_zlines(self):
-        zlinex = self.axx.plot([self.minY, self.maxY], [self.zlp, self.zlp], "k",
-                               lw=self.linewidth)
-        zliney = self.axy.plot([self.minX, self.maxX], [self.zlp, self.zlp], "k",
-                               lw=self.linewidth)
+        self.lines['x']['z'] = self.ax['x'].plot(
+            [self.minY, self.maxY], [self.zlp, self.zlp], "k",
+            lw=self.linewidth)
+        self.lines['y']['z'] = self.ax['y'].plot(
+            [self.minX, self.maxX], [self.zlp, self.zlp], "k",
+            lw=self.linewidth)
 
     def compute_slices(self):
         if self.xli is not None:
@@ -211,24 +218,6 @@ class volume_plot:
             self.compute_yl()
         if self.zli is not None:
             self.compute_zl()
-
-    def compute_xl(self):
-        # Get coords
-        YY, ZZ = np.meshgrid(self.Y, self.Z)
-        XX = self.X[self.xli] * np.ones_like(YY)
-        self.xsl = slice(XX, YY, ZZ, self.V[self.xli, :, :].T)
-
-    def compute_yl(self):
-        # Get coords
-        XX, ZZ = np.meshgrid(self.X, self.Z)
-        YY = self.Y[self.yli] * np.ones_like(XX)
-        self.ysl = slice(XX, YY, ZZ, self.V[:, self.yli, :].T)
-
-    def compute_zl(self):
-        # Get coords
-        XX, YY = np.meshgrid(self.X, self.Y)
-        ZZ = self.Z[self.zli] * np.ones_like(XX)
-        self.zsl = slice(XX, YY, ZZ, self.V[:, :, self.xli].T)
 
     def update_xl(self, value):
         pass
@@ -249,10 +238,101 @@ class volume_plot:
             self.zli = np.argmin(np.abs(self.Z - self.zl))
             self.zlp = self.Z[self.zli]
 
-    def view(self, elevation, angle):
-        self.vax.view_init(elevation, angle)
 
+class VolumeExploration:
+    
+    def __init__(self, X, Y, Z, V, xl=135, yl=37.5, zl=-50):
+        """ Control Panel that controls a volume plot.
 
+        Args:
+            X (`numpy.ndarray`): X (Longitude) Offset
+            Y ([type]): Y (Latitude) Offset
+            Z ([type]): Depth
+            V ([type]): Input Volume
+            xl (int, optional): [description]. Defaults to 135.
+            yl (float, optional): [description]. Defaults to 37.5.
+            zl (int, optional): [description]. Defaults to -50.
+        """
+        plt.ion()
+
+        self.vp = VolumePlot(X, Y, Z, V, xl=xl, yl=yl, zl=zl)
+        self.max = np.max(abs(V))
+
+        self.slices = {
+            'x': {'slider': None, 'ax': None}, 
+            'y': {'slider': None, 'ax': None}, 
+            'z': {'slider': None, 'ax': None}
+        }
+
+        self.cmap = {
+            'pos': {'slider': None, 'ax': None}, 
+            'neg': {'slider': None, 'ax': None}, 
+            'checkbox': {'box': None, 'ax': None}, 
+        }
+
+        self.controlpanel()
+        self.activate_slicers()
+        print(self.vp.V[self.vp.xli, :, :].shape)
+        plt.show(block=True)
+
+    def controlpanel(self):
+
+        self.cp = plt.figure(figsize=(5, 10))
+        self.gs = gridspec.GridSpec(ncols=1, nrows=10)
+
+        self.slices['x']['ax'] = self.cp.add_subplot(self.gs[0, :])
+        self.slices['x']['slider'] = Slider(self.slices['x']['ax'], r'x_l',
+                                            self.vp.minX, self.vp.maxX,
+                                            valinit=np.mean(X),
+                                            valfmt='%f', valstep=np.diff(X)[0])
+        self.slices['y']['ax'] = self.cp.add_subplot(self.gs[1, :])
+        self.slices['y']['slider'] = Slider(self.slices['y']['ax'], r'y_l',
+                                            0, self.vp.ny,
+                                            valinit=int(len(Y/2)), valfmt='%d')
+        self.slices['z']['ax'] = self.cp.add_subplot(self.gs[2, :])
+        self.slices['z']['slider'] = Slider(self.slices['z']['ax'], r'z_l',
+                                            0, self.vp.nz,
+                                            valinit=int(len(Z/2)), valfmt='%d')
+
+        self.cmap['checkbox']['ax'] = self.cp.add_subplot(self.gs[3, :])
+        self.cmap['checkbox']['box'] = CheckButtons(
+            self.cmap['checkbox']['ax'], ["Symmetric"], [False])
+        self.cmap['pos']['ax'] = self.cp.add_subplot(self.gs[4, :])
+        self.cmap['pos']['slider'] = Slider(self.cmap['pos']['ax'], r'+',
+                                            0, self.vp.maxV,
+                                            valinit=self.vp.maxV)
+        self.cmap['neg']['ax'] = self.cp.add_subplot(self.gs[5, :])
+        self.cmap['neg']['slider'] = Slider(self.cmap['neg']['ax'], r'-',
+                                            self.vp.minV, 0, 
+                                            valinit=self.vp.minV)
+        plt.subplots_adjust(hspace=2)
+        
+        # Slider(slidercmin, 'ColorMin', -3 * np.max(np.abs(RF_PLOT)), 0, valinit=vmin, valfmt='%1.2E')
+        # Slider(slidercmin, 'ColorMin', -3 * np.max(np.abs(RF_PLOT)), 0, valinit=vmin, valfmt='%1.2E')
+        # self.cmap['z']['ax'] = self.cp.add_subplot(self.gs[6, :])
+
+    def activate_slicers(self):
+        self.slices['x']['slider'].on_changed(self.xslice)
+        print("hello")
+
+    def xslice(self, val):
+        print("Hello")
+        # Set new min color
+        self.vp.xli = np.argmin(np.abs(self.vp.X - val))
+        self.vp.xlp = self.vp.X[self.vp.xli]
+
+        self.vp.slice['x'].set_data(self.vp.V[self.vp.xli, :, :].T)
+        # Update colors
+        # plt.setp(self.vp.slice['x'], 'facecolors',
+        #          self.vp.cmap(self.vp.norm(self.vp.V[self.vp.xli, :, :].reshape(-1, order='C'))))
+        print(self.vp.xli)
+        # Update figure
+
+        self.vp.fig.canvas.draw_idle()
+
+    def _activate_cmap(self):
+        pass
+    
 
 # Sample volume                
 X = np.linspace(126.588, 152.46, 100)
@@ -266,5 +346,4 @@ V = np.sqrt(((XX - np.mean(X))/np.mean(np.abs(X)))**2
     + 0.5 * np.cos(8*np.pi*((YY - np.mean(YY))/np.mean(np.abs(YY))))
 
 
-vp = volume_plot(X, Y, Z, V,
-                 xl=135, yl=37.5, zl=-50)
+vp = VolumeExploration(X, Y, Z, V, xl=135, yl=37.5, zl=-50)
