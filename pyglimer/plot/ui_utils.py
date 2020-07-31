@@ -1,4 +1,27 @@
 from matplotlib import pyplot as plt
+from matplotlib.widgets import Slider
+
+
+def set_sliderval_no_callback(slider: Slider, val):
+    """
+    Set slider value to *val*
+
+    Parameters
+    ----------
+    val : float
+    """
+    xy = slider.poly.xy
+    if slider.orientation == 'vertical':
+        xy[1] = 0, val
+        xy[2] = 1, val
+    else:
+        xy[2] = val, 1
+        xy[3] = val, 0
+    slider.poly.xy = xy
+    slider.valtext.set_text(self.valfmt % val)
+    if slider.drawon:
+        slider.ax.figure.canvas.draw_idle()
+
 
 class LineBuilder:
     def __init__(self, line):
