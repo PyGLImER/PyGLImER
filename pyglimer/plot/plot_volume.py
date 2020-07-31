@@ -8,6 +8,7 @@ from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
 import numpy as np
 from cartopy.crs import PlateCarree
 import cartopy.feature as cfeature
+from .ui_utils import set_sliderval_no_callback
 
 
 class VolumePlot:
@@ -39,17 +40,34 @@ class VolumePlot:
         Default None.
         """
 
+        # Input allocation
         self.X = X
         self.Y = Y
         self.Z = Z
         self.V = V
-        self.xl = xl
-        self.yl = yl
-        self.zl = zl
         self.nx = len(X)
         self.ny = len(Y)
         self.nz = len(Z)
 
+        if xl is None:
+            self.xl = np.mean(X)
+        else:
+            self.xl = xl
+        if yl is None:
+            self.yl = np.mean(Y)
+        else:
+            self.yl = yl
+        if zl is None:
+            self.zl = np.mean(Z)
+        else:
+            self.zl = zl
+
+        # For reset
+        self.xl0 = xl
+        self.yl0 = yl
+        self.zl0 = zl
+
+        # Allocate stuff that is going to be used.
         # Slices
         self.xsl = None
         self.ysl = None
@@ -96,18 +114,30 @@ class VolumePlot:
         self.linewidth = 1.5
 
         # Colormap settings
-        self.vmin, self.vmax = [np.min(V), np.max(V)]
+        self.vmin0, self.vmax0 = [np.min(V), np.max(V)]
+        self.vmin, self.vmax = self.vmin0, self.vmax0
         self.norm = matcolors.TwoSlopeNorm(
             vmin=self.vmin, vcenter=0.0, vmax=self.vmax)
         self.cmap = plt.cm.coolwarm
         self.mappable = cm.ScalarMappable(norm=self.norm, cmap=self.cmap)
+        self.cbar = None
 
         # First initialization
         self.get_locations()
         self.init_plot()
 
     def reset(self):
-        pass
+
+        # Colorbar reset
+        self.norm = matcolors.TwoSlopeNorm(
+            vmin=self.vmin0, vcenter=0.0, vmax=self.vmax0)
+        self.cmap = plt.cm.coolwarm
+        self.mappable = cm.ScalarMappable(norm=self.norm, cmap=self.cmap)
+
+        # Update slices and lines
+        self.update_xslice(self.xl0)
+        self.update_yslice(self.yl0)
+        self.update_zslice(self.zl0)
 
     def init_plot(self):
 
@@ -127,38 +157,37 @@ class VolumePlot:
         self.plot_zlines()
 
         self.fig.subplots_adjust(hspace=0.0, wspace=0.0)
-        print(self.ax)
-        self.fig.colorbar(self.mappable, shrink=1., aspect=50,
-                          orientation="horizontal",
-                          ax=[self.ax['z'], self.ax['m']['main'], self.ax['y'], self.ax['x']])
+        self.cbar = self.fig.colorbar(
+            self.mappable, shrink=1., aspect=50, orientation="horizontal",
+            ax=[self.ax['z'], self.ax['m']['main'], 
+                self.ax['y'], self.ax['x']])
 
         plt.show()
 
     def plot_xsl(self):
-        # self.slice['x'] = self.ax['x'].pcolor(self.Y, self.Z, 
-        #                                       self.V[self.xli, :, :].T,
-        #                                       cmap=self.cmap, norm=self.norm)
-        self.slice['x'] = self.ax['x'].imshow(self.V[self.xli, :, :].T,
-                                              extent=[self.minY, self.maxY,
-                                                      self.minZ, self.maxZ],
-                                              interpolation='nearest', 
-                                              origin='bottom', 
-                                              aspect='auto',
-                                              cmap=self.cmap, norm=self.norm)
+        self.slice['x'] = self.ax['x'].imshow(
+            self.V[self.xli, :, :].T,
+            extent=[self.minY, self.maxY, self.minZ, self.maxZ],
+            interpolation='nearest', origin='bottom', aspect='auto', 
+            cmap=self.cmap, norm=self.norm)
         self.ax['x'].set_xlabel("y")
         plt.setp(self.ax['x'].get_yticklabels(), visible=False)
 
     def plot_ysl(self):
-        self.slice['y'] = self.ax['y'].pcolor(self.X, self.Z, 
-                                              self.V[:, self.yli, :].T,
-                                              cmap=self.cmap, norm=self.norm)
+        self.slice['y'] = self.ax['y'].imshow(
+            self.V[:, self.yli, :].T,
+            extent=[self.minX, self.maxX, self.minZ, self.maxZ],
+            interpolation='nearest', origin='bottom', aspect='auto',
+            cmap=self.cmap, norm=self.norm)
         self.ax['y'].set_xlabel("x")
         self.ax['y'].set_ylabel("z")
 
     def plot_zsl(self):
-        self.slice['z'] = self.ax['z'].pcolor(self.X, self.Y,
-                                              self.V[:, :, self.zli].T,
-                                              cmap=self.cmap, norm=self.norm)
+        self.slice['z'] = self.ax['z'].imshow(
+            self.V[:, :, self.zli].T,
+            extent=[self.minX, self.maxX, self.minY, self.maxY],
+            interpolation='nearest', origin='bottom', aspect='auto',
+            cmap=self.cmap, norm=self.norm)
         self.ax['z'].set_ylabel("y")
         plt.setp(self.ax['z'].get_xticklabels(), visible=False)
 
@@ -184,47 +213,96 @@ class VolumePlot:
     def plot_xlines(self):
         self.lines['y']['x'] = self.ax['y'].plot(
             [self.xlp, self.xlp], [self.minZ, self.maxZ], "k", 
-            lw=self.linewidth)
+            lw=self.linewidth)[0]
         self.lines['z']['x'] = self.ax['z'].plot(
             [self.xlp, self.xlp], [self.minY, self.maxY], "k",
-            lw=self.linewidth)
+            lw=self.linewidth)[0]
         self.lines['m']['x'] = self.ax['m']['inset'].plot(
             [self.xlp, self.xlp], [self.minY, self.maxY], "k", 
-            lw=self.linewidth)
+            lw=self.linewidth)[0]
 
     def plot_ylines(self):
         self.lines['x']['y'] = self.ax['x'].plot(
             [self.ylp, self.ylp], [self.minZ, self.maxZ], "k",
-            lw=self.linewidth)
+            lw=self.linewidth)[0]
         self.lines['z']['y'] = self.ax['z'].plot(
             [self.minX, self.maxX], [self.ylp, self.ylp], "k",
-            lw=self.linewidth)
+            lw=self.linewidth)[0]
         self.lines['m']['y'] = self.ax['m']['inset'].plot(
             [self.minX, self.maxX], [self.ylp, self.ylp], "k", 
-            lw=self.linewidth)
+            lw=self.linewidth)[0]
 
     def plot_zlines(self):
         self.lines['x']['z'] = self.ax['x'].plot(
             [self.minY, self.maxY], [self.zlp, self.zlp], "k",
-            lw=self.linewidth)
+            lw=self.linewidth)[0]
         self.lines['y']['z'] = self.ax['y'].plot(
             [self.minX, self.maxX], [self.zlp, self.zlp], "k",
-            lw=self.linewidth)
+            lw=self.linewidth)[0]
 
-    def compute_slices(self):
-        if self.xli is not None:
-            self.compute_xl()
-        if self.yli is not None:
-            self.compute_yl()
-        if self.zli is not None:
-            self.compute_zl()
+    def update_xslice(self, val):
+        # Get Slice location
+        self.xli = np.argmin(np.abs(self.X - val))
+        self.xlp = self.X[self.xli]
 
-    def update_xl(self, value):
-        pass
-    def update_yl(self, value):
-        pass
-    def update_zl(self, value):
-        pass
+        # Set Color
+        self.slice['x'].set_data(self.V[self.xli, :, :].T)
+
+        # Update line locations
+        self.lines['y']['x'].set_xdata([self.xlp, self.xlp])
+        self.lines['z']['x'].set_xdata([self.xlp, self.xlp])
+        self.lines['m']['x'].set_xdata([self.xlp, self.xlp])
+        
+        # Set lines on the other slices and the map.
+        self.fig.canvas.draw_idle()
+
+    def update_yslice(self, val):
+        # Get Slice location
+        self.yli = np.argmin(np.abs(self.Y - val))
+        self.ylp = self.Y[self.yli]
+
+        # Set Color
+        self.slice['y'].set_data(self.V[:, self.yli, :].T)
+
+        # Update line locations
+        self.lines['x']['y'].set_xdata([self.ylp, self.ylp])
+        self.lines['z']['y'].set_ydata([self.ylp, self.ylp])
+        self.lines['m']['y'].set_ydata([self.ylp, self.ylp])
+
+        # Set lines on the other slices and the map.
+        self.fig.canvas.draw_idle()
+
+    def update_zslice(self, val):
+        # Get Slice location
+        self.zli = np.argmin(np.abs(self.Z - val))
+        self.zlp = self.Z[self.zli]
+
+        # Set Color
+        self.slice['z'].set_data(self.V[:, :, self.zli].T)
+
+        # Update line locations
+        self.lines['x']['z'].set_ydata([self.zlp, self.zlp])
+        self.lines['y']['z'].set_ydata([self.zlp, self.zlp])
+
+        # Set lines on the other slices and the map.
+        self.fig.canvas.draw_idle()
+
+    def update_cmap(self, vmin, vcenter, vmax):
+
+        # Colormap settings
+        self.vmin, self.vmax = [vmin, vmax]
+        self.norm = matcolors.TwoSlopeNorm(
+            vmin=vmin, vcenter=vcenter, vmax=vmax)
+        self.cmap = plt.cm.coolwarm
+        self.mappable = cm.ScalarMappable(norm=self.norm, cmap=self.cmap)
+
+        self.slice['x'].norm = self.norm
+        self.slice['x'].set_data(self.V[self.xli, :, :].T)
+        self.slice['y'].norm = self.norm
+        self.slice['y'].set_data(self.V[:, self.yli, :].T)
+        self.slice['z'].norm = self.norm
+        self.slice['z'].set_data(self.V[:, :, self.zli].T)
+        self.fig.canvas.draw_idle()
 
     def get_locations(self):
 
@@ -287,23 +365,26 @@ class VolumeExploration:
                                             valfmt='%f', valstep=np.diff(X)[0])
         self.slices['y']['ax'] = self.cp.add_subplot(self.gs[1, :])
         self.slices['y']['slider'] = Slider(self.slices['y']['ax'], r'y_l',
-                                            0, self.vp.ny,
-                                            valinit=int(len(Y/2)), valfmt='%d')
+                                            self.vp.minY, self.vp.maxY,
+                                            valinit=np.mean(Y),
+                                            valfmt='%d', valstep=np.diff(Y)[0])
+
         self.slices['z']['ax'] = self.cp.add_subplot(self.gs[2, :])
-        self.slices['z']['slider'] = Slider(self.slices['z']['ax'], r'z_l',
-                                            0, self.vp.nz,
-                                            valinit=int(len(Z/2)), valfmt='%d')
+        self.slices['z']['slider'] = Slider(self.slices['z']['ax'], r'y_l',
+                                            self.vp.minZ, self.vp.maxZ,
+                                            valinit=np.mean(Z),
+                                            valfmt='%d', valstep=np.diff(Z)[0])
 
         self.cmap['checkbox']['ax'] = self.cp.add_subplot(self.gs[3, :])
         self.cmap['checkbox']['box'] = CheckButtons(
-            self.cmap['checkbox']['ax'], ["Symmetric"], [False])
+        self.cmap['checkbox']['ax'], ["Symmetric"], [False])
         self.cmap['pos']['ax'] = self.cp.add_subplot(self.gs[4, :])
         self.cmap['pos']['slider'] = Slider(self.cmap['pos']['ax'], r'+',
-                                            0, self.vp.maxV,
+                                            1e-10, self.vp.maxV,
                                             valinit=self.vp.maxV)
         self.cmap['neg']['ax'] = self.cp.add_subplot(self.gs[5, :])
         self.cmap['neg']['slider'] = Slider(self.cmap['neg']['ax'], r'-',
-                                            self.vp.minV, 0, 
+                                            self.vp.minV, -1e-10, 
                                             valinit=self.vp.minV)
         plt.subplots_adjust(hspace=2)
         
@@ -312,27 +393,40 @@ class VolumeExploration:
         # self.cmap['z']['ax'] = self.cp.add_subplot(self.gs[6, :])
 
     def activate_slicers(self):
-        self.slices['x']['slider'].on_changed(self.xslice)
-        print("hello")
+        self.slices['x']['slider'].on_changed(self.vp.update_xslice)
+        self.slices['y']['slider'].on_changed(self.vp.update_yslice)
+        self.slices['z']['slider'].on_changed(self.vp.update_zslice)
+        self.cmap['pos']['slider'].on_changed(self.update_pos)
+        self.cmap['neg']['slider'].on_changed(self.update_neg)
+        self.cmap['checkbox']['box'].on_clicked(self.update_sym)
 
-    def xslice(self, val):
-        print("Hello")
-        # Set new min color
-        self.vp.xli = np.argmin(np.abs(self.vp.X - val))
-        self.vp.xlp = self.vp.X[self.vp.xli]
+    def update_pos(self, val):
+        if self.cmap['checkbox']['box'].get_status()[0]:
+            vmin = -val
+        else:
+            vmin = self.vp.vmin
+        vmax = val
+        vcenter = 0
+        self.vp.update_cmap(vmin, vcenter, vmax)
+        set_sliderval_no_callback(self.cmap['neg']['slider'], vmin)
 
-        self.vp.slice['x'].set_data(self.vp.V[self.vp.xli, :, :].T)
-        # Update colors
-        # plt.setp(self.vp.slice['x'], 'facecolors',
-        #          self.vp.cmap(self.vp.norm(self.vp.V[self.vp.xli, :, :].reshape(-1, order='C'))))
-        print(self.vp.xli)
-        # Update figure
+    def update_neg(self, val):
+        if self.cmap['checkbox']['box'].get_status()[0]:
+            vmax = np.abs(val)
+        else:
+            vmax = self.vp.vmax
+        vmin = val
+        vcenter = 0
+        self.vp.update_cmap(vmin, vcenter, vmax)
+        set_sliderval_no_callback(self.cmap['pos']['slider'], vmax)
 
-        self.vp.fig.canvas.draw_idle()
-
-    def _activate_cmap(self):
-        pass
-    
+    def update_sym(self, val):
+        if val[0]:
+            val = np.mean([np.abs(self.vp.vmin), np.abs(self.vp.vmax)])
+            vmin = -val
+            vmax = val
+            self.cmap['pos']['slider'].set_val(vmax)
+            self.cmap['neg']['slider'].set_val(vmin)
 
 # Sample volume                
 X = np.linspace(126.588, 152.46, 100)
