@@ -18,10 +18,10 @@ def set_sliderval_no_callback(slider: Slider, val):
         xy[2] = val, 1
         xy[3] = val, 0
     slider.poly.xy = xy
-    slider.valtext.set_text(self.valfmt % val)
+    slider.valtext.set_text(slider.valfmt % val)
     if slider.drawon:
         slider.ax.figure.canvas.draw_idle()
-
+'''
 
 class LineBuilder:
     def __init__(self, line):
@@ -48,16 +48,16 @@ plt.show()
 
 
 
-    def on_release(self, event):
-        'on release we reset the press data'
-        self.press = None
-        self.rect.figure.canvas.draw()
+def on_release(self, event):
+    'on release we reset the press data'
+    self.press = None
+    self.rect.figure.canvas.draw()
 
-    def disconnect(self):
-        'disconnect all the stored connection ids'
-        self.rect.figure.canvas.mpl_disconnect(self.cidpress)
-        self.rect.figure.canvas.mpl_disconnect(self.cidrelease)
-        self.rect.figure.canvas.mpl_disconnect(self.cidmotion)
+def disconnect(self):
+    'disconnect all the stored connection ids'
+    self.rect.figure.canvas.mpl_disconnect(self.cidpress)
+    self.rect.figure.canvas.mpl_disconnect(self.cidrelease)
+    self.rect.figure.canvas.mpl_disconnect(self.cidmotion)
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -158,3 +158,5 @@ def onpick(event):
 fig.canvas.mpl_connect('pick_event', onpick)
 
 plt.show()
+
+'''

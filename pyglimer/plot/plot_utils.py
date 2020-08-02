@@ -414,7 +414,7 @@ def baz_hist(az, nbins):
         label.set_position([pos[0], pos[1]-0.02])
 
 
-def rayp_hist(rayp, nbins, v=5.8):
+def rayp_hist(rayp, nbins, v=5.8, phase='P'):
     """
     Takes in rayparameter distribution and number of bins to compute
     the distribution of incoming angles.
@@ -428,6 +428,9 @@ def rayp_hist(rayp, nbins, v=5.8):
     v: float
         assummed surface velocity for the computation of the
         incidence angle. Default 5.8 km/s.
+    phase: string
+        indicates which incidence wave is meant 'S' or 'P'. Default is 'P'
+        simple defines boundaries of the plot nothing more nothing less.
 
     Returns:
     --------
@@ -466,8 +469,12 @@ def rayp_hist(rayp, nbins, v=5.8):
     ax.set_rmax(0)
     ax.set_theta_zero_location('S')
     ax.set_theta_direction(1)
-    ax.set_thetamin(7.5)
-    ax.set_thetamax(35)
+    if phase == 'P'
+        ax.set_thetamin(7.5)
+        ax.set_thetamax(35)
+    else:
+        ax.set_thetamin(7.5)
+        ax.set_thetamax(35)
     labels = ax.get_xticklabels()
     for label in labels:
         pos = label.get_position()
@@ -476,8 +483,10 @@ def rayp_hist(rayp, nbins, v=5.8):
                    labeltop=False, labelbottom=True)
 
 
-def stream_dist(rayp, baz, nbins=50, v=5.8,
-                outputfile=None, format="pdf", dpi=300):
+def stream_dist(rayp: list or np.array, baz: list or np.array,
+                nbins: float = 50, v: float = 5.8, phase: str = 'P'
+                outputfile: None or str = None, format: str = "pdf", 
+                dpi: int = 300):
     """Uses backazimuth and rayparameter histogram plotting tools to create
     combined overview over the Distribution ov incident waves.
 
@@ -491,7 +500,10 @@ def stream_dist(rayp, baz, nbins=50, v=5.8,
     v: float
         assummed surface velocity for the computation of the
         incidence angle. Default 5.8 km/s.
-
+    phase: string
+        indicates which incidence wave is meant 'S' or 'P'. Default is 'P'
+        simple defines boundaries of the rayparemeter plot nothing
+        more nothing less.
     outputfile:  str or None
         Path to savefile. If None plot is not saved just shown. 
         Defaults to None.
@@ -507,7 +519,7 @@ def stream_dist(rayp, baz, nbins=50, v=5.8,
     baz_hist(baz, nbins)
     plt.title("Backazimuth distribution")
     plt.subplot(122, projection="polar")
-    rayp_hist(rayp, nbins, v=5.8)
+    rayp_hist(rayp, nbins, v=v, phase=phase)
     plt.title("Rayparameter distribution")
     plt.tight_layout()
 
