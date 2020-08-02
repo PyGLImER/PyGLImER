@@ -714,8 +714,8 @@ class RFStream(Stream):
                 ax=ax, outputdir=outputdir)
         return ax
 
-    def plot_rb_dist(self, nbins=50, phase="P",
-                     outputfile=None, format="pdf", dpi=300):
+    def plot_distribution(self, nbins=50, phase="P",
+                          outputfile=None, format="pdf", dpi=300):
         """
         Plot back azimuth and rayparameter distributions.
 

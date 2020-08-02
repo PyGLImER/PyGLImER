@@ -403,22 +403,23 @@ class VolumeExploration:
     def update_pos(self, val):
         if self.cmap['checkbox']['box'].get_status()[0]:
             vmin = -val
+            set_sliderval_no_callback(self.cmap['neg']['slider'], vmin)
         else:
             vmin = self.vp.vmin
         vmax = val
         vcenter = 0
         self.vp.update_cmap(vmin, vcenter, vmax)
-        set_sliderval_no_callback(self.cmap['neg']['slider'], vmin)
 
     def update_neg(self, val):
         if self.cmap['checkbox']['box'].get_status()[0]:
             vmax = np.abs(val)
+            set_sliderval_no_callback(self.cmap['pos']['slider'], vmax)
         else:
             vmax = self.vp.vmax
         vmin = val
         vcenter = 0
         self.vp.update_cmap(vmin, vcenter, vmax)
-        set_sliderval_no_callback(self.cmap['pos']['slider'], vmax)
+        
 
     def update_sym(self, val):
         if val[0]:
