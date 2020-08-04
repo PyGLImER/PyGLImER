@@ -973,7 +973,6 @@ class RFTrace(Trace):
         else:
             st.pp_depth = np.arange(-round(st.station_elevation/1000),
                                     maxz + res, res)[0:len(delta)]
-        # np.arange(0, maxz + res, res)[0:len(delta)]
 
         # Calculate ppoint position
         for dis in delta:
