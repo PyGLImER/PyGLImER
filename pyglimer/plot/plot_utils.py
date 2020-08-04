@@ -517,7 +517,7 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
     plt.title("Backazimuth distribution")
     plt.subplot(122, projection="polar")
     rayp_hist(rayp, nbins, v=v)
-    plt.title("Rayparameter distribution")
+    plt.title("Incident angle distribution")
     plt.tight_layout()
 
     if outputfile is None:
