@@ -247,7 +247,7 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
         plt.savefig(filename, format="pdf")
     return ax
 
-def plot_section(rfst, channel = "PRF",
+def plot_section(rfst, channel="PRF",
                  timelimits: list or tuple or None = None, 
                  epilimits: list or tuple or None = None,
                  scalingfactor: float = 2.0, ax: plt.Axes = None,
@@ -298,11 +298,11 @@ def plot_section(rfst, channel = "PRF",
         
     # Create figure if no axes is specified
     if ax is None:
-        plt.figure(figsize=(10,15))
+        plt.figure(figsize=(10, 15))
         ax = plt.gca(zorder=999999)
 
     # Grab one component only
-    rfst_chan = rfst.sort(keys=['distance'])
+    rfst_chan = rfst.select(channel=channel).sort(keys=['distance'])
 
     # Plot traces
     for _i, rf in enumerate(rfst_chan):
@@ -316,14 +316,15 @@ def plot_section(rfst, channel = "PRF",
             z = np.hstack(
                  ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
             times = z
+
         rftmp = rf.data * scalingfactor \
             + rf.stats.distance
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
-                         where=rftmp<rf.stats.distance, 
+                         where=rftmp < rf.stats.distance,
                          interpolate=True, color=(0.2, 0.2, 0.7),
                          zorder=-_i)
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
-                         where=rftmp>rf.stats.distance, 
+                         where=rftmp > rf.stats.distance,
                          interpolate=True, color=(0.9, 0.2, 0.2),
                          zorder=-_i - 0.1)
         if line:
@@ -414,7 +415,7 @@ def baz_hist(az, nbins):
         label.set_position([pos[0], pos[1]-0.02])
 
 
-def rayp_hist(rayp, nbins, v=5.8, phase='P'):
+def rayp_hist(rayp, nbins, v=5.8):
     """
     Takes in rayparameter distribution and number of bins to compute
     the distribution of incoming angles.
@@ -469,12 +470,8 @@ def rayp_hist(rayp, nbins, v=5.8, phase='P'):
     ax.set_rmax(0)
     ax.set_theta_zero_location('S')
     ax.set_theta_direction(1)
-    if phase == 'P'
-        ax.set_thetamin(7.5)
-        ax.set_thetamax(35)
-    else:
-        ax.set_thetamin(7.5)
-        ax.set_thetamax(35)
+    ax.set_thetamin(7.5)
+    ax.set_thetamax(35)
     labels = ax.get_xticklabels()
     for label in labels:
         pos = label.get_position()
@@ -484,7 +481,7 @@ def rayp_hist(rayp, nbins, v=5.8, phase='P'):
 
 
 def stream_dist(rayp: list or np.array, baz: list or np.array,
-                nbins: float = 50, v: float = 5.8, phase: str = 'P'
+                nbins: float = 50, v: float = 5.8, phase: str = 'P',
                 outputfile: None or str = None, format: str = "pdf", 
                 dpi: int = 300):
     """Uses backazimuth and rayparameter histogram plotting tools to create
@@ -519,7 +516,7 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
     baz_hist(baz, nbins)
     plt.title("Backazimuth distribution")
     plt.subplot(122, projection="polar")
-    rayp_hist(rayp, nbins, v=v, phase=phase)
+    rayp_hist(rayp, nbins, v=v)
     plt.title("Rayparameter distribution")
     plt.tight_layout()
 
