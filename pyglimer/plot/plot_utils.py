@@ -185,6 +185,7 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
 
     # Use times depending on phase and moveout correction
     ydata = rf.data
+    print(rf.stats.type)
     if rf.stats.type == 'time':
         # Get times
         times = rf.times() - (rf.stats.onset - rf.stats.starttime)
@@ -246,7 +247,7 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
         plt.savefig(filename, format="pdf")
     return ax
 
-def plot_section(rfst, channel = "PRF",
+def plot_section(rfst, channel="PRF",
                  timelimits: list or tuple or None = None, 
                  epilimits: list or tuple or None = None,
                  scalingfactor: float = 2.0, ax: plt.Axes = None,
@@ -297,11 +298,11 @@ def plot_section(rfst, channel = "PRF",
         
     # Create figure if no axes is specified
     if ax is None:
-        plt.figure(figsize=(10,15))
+        plt.figure(figsize=(10, 15))
         ax = plt.gca(zorder=999999)
 
     # Grab one component only
-    rfst_chan = rfst.sort(keys=['distance'])
+    rfst_chan = rfst.select(channel=channel).sort(keys=['distance'])
 
     # Plot traces
     for _i, rf in enumerate(rfst_chan):
@@ -315,14 +316,15 @@ def plot_section(rfst, channel = "PRF",
             z = np.hstack(
                  ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
             times = z
+
         rftmp = rf.data * scalingfactor \
             + rf.stats.distance
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
-                         where=rftmp<rf.stats.distance, 
+                         where=rftmp < rf.stats.distance,
                          interpolate=True, color=(0.2, 0.2, 0.7),
                          zorder=-_i)
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
-                         where=rftmp>rf.stats.distance, 
+                         where=rftmp > rf.stats.distance,
                          interpolate=True, color=(0.9, 0.2, 0.2),
                          zorder=-_i - 0.1)
         if line:
@@ -427,6 +429,9 @@ def rayp_hist(rayp, nbins, v=5.8):
     v: float
         assummed surface velocity for the computation of the
         incidence angle. Default 5.8 km/s.
+    phase: string
+        indicates which incidence wave is meant 'S' or 'P'. Default is 'P'
+        simple defines boundaries of the plot nothing more nothing less.
 
     Returns:
     --------
@@ -475,8 +480,10 @@ def rayp_hist(rayp, nbins, v=5.8):
                    labeltop=False, labelbottom=True)
 
 
-def stream_dist(rayp, baz, nbins=50, v=5.8,
-                outputfile=None, format="pdf", dpi=300):
+def stream_dist(rayp: list or np.array, baz: list or np.array,
+                nbins: float = 50, v: float = 5.8, phase: str = 'P',
+                outputfile: None or str = None, format: str = "pdf", 
+                dpi: int = 300):
     """Uses backazimuth and rayparameter histogram plotting tools to create
     combined overview over the Distribution ov incident waves.
 
@@ -490,7 +497,10 @@ def stream_dist(rayp, baz, nbins=50, v=5.8,
     v: float
         assummed surface velocity for the computation of the
         incidence angle. Default 5.8 km/s.
-
+    phase: string
+        indicates which incidence wave is meant 'S' or 'P'. Default is 'P'
+        simple defines boundaries of the rayparemeter plot nothing
+        more nothing less.
     outputfile:  str or None
         Path to savefile. If None plot is not saved just shown. 
         Defaults to None.
@@ -506,7 +516,7 @@ def stream_dist(rayp, baz, nbins=50, v=5.8,
     baz_hist(baz, nbins)
     plt.title("Backazimuth distribution")
     plt.subplot(122, projection="polar")
-    rayp_hist(rayp, nbins, v=5.8)
+    rayp_hist(rayp, nbins, v=v)
     plt.title("Rayparameter distribution")
     plt.tight_layout()
 

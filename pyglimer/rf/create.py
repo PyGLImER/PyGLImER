@@ -657,16 +657,16 @@ class RFStream(Stream):
                             "pp_longitude": None, 'npts': len(stack)})
         return z, stack, RF_mo
 
-    def plot(self, channel = "PRF",
-            lim: list or tuple or None = None, 
-            epilimits: list or tuple or None = None,
-            scalingfactor: float = 2.0, ax: plt.Axes = None,
-            line: bool = True,
-            linewidth: float = 0.25, outputdir: str or None = None, 
-            title: str or None = None, show: bool = True):
+    def plot(self, channel: str = "PRF",
+             lim: list or tuple or None = None,
+             epilimits: list or tuple or None = None,
+             scalingfactor: float = 2.0, ax: plt.Axes = None,
+             line: bool = True,
+             linewidth: float = 0.25, outputdir: str or None = None,
+             title: str or None = None, show: bool = True):
         """Creates plot of a receiver function section as a function
         of epicentral distance or single plot if len(RFStream)==1.
-        
+
         Parameters
         ----------
         lim : list or tuple or None
@@ -697,11 +697,11 @@ class RFStream(Stream):
         clean: bool
             If True, clears out all axes and plots RF only.
             Defaults to False.
-        
+
         Returns
         -------
         ax : `matplotlib.pyplot.Axes`
-        
+
         """     
         if self.count() == 1:
             # Do single plot
@@ -714,8 +714,8 @@ class RFStream(Stream):
                 ax=ax, outputdir=outputdir)
         return ax
 
-    def plot_rb_dist(self, nbins=50, phase="P",
-                     outputfile=None, format="pdf", dpi=300):
+    def plot_distribution(self, nbins=50, phase="P",
+                          outputfile=None, format="pdf", dpi=300):
         """
         Plot back azimuth and rayparameter distributions.
 
@@ -756,10 +756,10 @@ class RFStream(Stream):
 class RFTrace(Trace):
     """
     Class providing the Trace object for receiver function calculation.
-    
+
     This object is a modified version of Tom Eulenfeld's rf project's RFStream
     class. License below.
-    
+
     The MIT License (MIT)
 
     Copyright (c) 2013-2019 Tom Eulenfeld
