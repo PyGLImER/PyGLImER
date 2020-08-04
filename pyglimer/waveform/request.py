@@ -50,9 +50,8 @@ class Request(object):
         :type phase: str
         :param rot: The coordinate system in that the seismogram should be rotated
             prior to deconvolution. Options are "RTZ" for radial, transverse,
-            vertical; "LQT" for an orthogonal coordinate system computed using
-            singular value decomposition, "LQT_min" for an orthogonal
-            coordinate system computed by minimising primary energy on the
+            vertical; "LQT" for an orthogonal coordinate system computed by
+            minimising primary energy on the
             converted component, or "PSS" for a rotation along the polarisation
             directions using the Litho1.0 surface wave tomography model.
         :type rot: str

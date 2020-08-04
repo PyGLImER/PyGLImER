@@ -518,7 +518,7 @@ def read_rfs_mat(filename, path='output/ccps',
     Yields
     ------
     rf : RFTrace
-        RFTracec object, one per receiver function.
+        RFTrace object, one per receiver function.
     i : int
         position in .mat.
 
@@ -547,3 +547,37 @@ def read_rfs_mat(filename, path='output/ccps',
         rf.stats.starttime = UTCDateTime(0)
         rf.stats.onset = UTCDateTime(30)
         rf.write(out+str(i)+'.sac', 'SAC')
+
+
+# def test_rot(NEZ_file:str, phase:str, rot:str, baz:float, rayp:float):
+#     NEZ, dt, M, N, shift = read_raysum(phase, NEZ_file=NEZ_file)
+#     if M>1:
+#         NEZ = NEZ[0]
+#     stream = []
+#     for tr in NEZ:
+#         stats = Stats()
+#         stats.npts = N
+#         stats.delta = dt
+#         stats.starttime = UTCDateTime(0)
+#         stats.channel = ch[j]
+#         stats.network = 'RS'
+#         stats.station = 'rot'
+#         stream.append(Trace(data=tr, header=stats))
+#     stream = Stream(stream)
+#     RTZ = stream.rotate
+#     if rot=='PSS'
+
+# def rot_PSS(avp, avs, rayp, RTZ):
+#     # Do the rotation as in Rondenay (2009)
+#     qa = np.sqrt(1 / avp ** 2 - rayp ** 2)
+#     qb = np.sqrt(1 / avs ** 2 - rayp ** 2)
+#     a = avs ** 2 * rayp ** 2 - .5
+#     rotmat = np.array([[-a / (avp * qa), rayp * avs ** 2 / avp, 0],
+#                        [-rayp * avs, -a / (avs * qb), 0],
+#                        [0, 0, 0.5]])
+#     A_in = np.array([RTZ[2],
+#                      RTZ[0],
+#                      RTZ[1]])
+#     PSS = np.dot(rotmat, A_in)
+
+#     return PSS, rotmat

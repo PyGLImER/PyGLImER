@@ -92,6 +92,7 @@ def rotate_PSV(statlat, statlon, rayp, st, phase):
 def rotate_LQT(st, phase):
     """
     Rotates a stream given in RTZ to LQT using Singular Value Decomposition
+    Use rotate_LQT_min as it tends to deliver better results.
 
     Parameters
     ----------
