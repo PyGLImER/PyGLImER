@@ -24,7 +24,7 @@ from ..utils.roundhalf import roundhalf
 
 
 def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
-                rawloc, clients, network=None, station=None, 
+                rawloc, clients, network=None, station=None,
                 logdir=None, debug=False):
     """
     Downloads the waveforms for all events in the catalogue

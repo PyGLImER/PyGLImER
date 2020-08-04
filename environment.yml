@@ -16,9 +16,6 @@ dependencies:
   - pip
   - tqdm
   - flake8
-  - vtk
-  - pyqt=5
-  - mayavi
   - pip:
     - sphinx
     - sphinx-rtd-theme
