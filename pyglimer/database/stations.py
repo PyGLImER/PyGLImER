@@ -28,6 +28,7 @@ from pathlib import Path
 
 from pyglimer.data import finddir
 from pyglimer.utils.utils import dt_string
+from pyglimer.plot.plot_map import plot_station_db
 
 
 def redownload_missing_statxmls(clients, phase, statloc, rawdir, verbose=True):
@@ -114,8 +115,8 @@ class StationDB(object):
         
         if phase:
             self.phase = phase.upper()           
-        #else:
-        #    self.phase = phase
+        else:
+            self.phase = phase
         
         # 1. Initiate logger
         self.logger = logging.Logger(
@@ -309,4 +310,9 @@ class StationDB(object):
         """        
         subset = self.geo_boundary(lat, lon, phase)
         return list(subset['network']), list(subset['station'])
+    
+    def plot(self, outputfile=None, format='pdf', dpi=300):
+        plot_station_db(list(self.db['lat']), list(self.db['lon']),
+                        outputfile=outputfile, format=format, dpi=dpi)
+        
     
