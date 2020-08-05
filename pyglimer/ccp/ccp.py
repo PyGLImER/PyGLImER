@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 23rd July 2020 08:52:37 pm
+Last Modified: Wednesday, 5th August 2020 01:15:30 pm
 '''
 
 #!/usr/bin/env python3
@@ -107,7 +107,9 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
     :raises TypeError: For wrong inputs.
     :return: CCPStack object.
     :rtype: :class:`~pyglimer.ccp.ccp.CCPstack`
-    """    
+    """
+    if phase[-1].upper() == 'S' and multiple:
+        raise NotImplementedError('Multiple mode is not supported for phase S.')
     # create empty lists for station latitude and longitude
     lats = []
     lons = []
