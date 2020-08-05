@@ -469,9 +469,16 @@ def decon_test(PSS_file, phase, method):
             # In order to do that, we have to find the factor that is necassary to
             # bring the zero-time pulse to 1
             fact = abs(lrf).max() #[round(shift/dt)]
-            print(fact)
             data = data/fact
-        RF.append(data)
+        RF.append(RFTrace(data))
+        RF[-1].stats.delta = dt
+        RF[-1].stats.starttime = UTCDateTime(0)
+        RF[-1].stats.onset = UTCDateTime(0) + shift
+        RF[-1].stats.type = 'time'
+        RF[-1].stats.phase = phase
+        RF[-1].stats.channel = phase + 'RF'
+        RF[-1].stats.network = 'RS'
+    RF = RFStream(RF)
     return RF, dt
 
 

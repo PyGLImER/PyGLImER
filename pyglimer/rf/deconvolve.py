@@ -442,7 +442,8 @@ def spectraldivision(v, u, ndt, tshift, regul, phase):
     return qrf, lrf
 
 
-def multitaper(P, D, dt, tshift, regul):
+def multitaper(
+    P:np.ndarray, D:np.ndarray, dt:float, tshift:int or float, regul:str):
     """
     Output has to be filtered (Noise appears in high-frequency)!
     multitaper: takes Ved-Kathrins code and changes inputs to
@@ -471,9 +472,9 @@ def multitaper(P, D, dt, tshift, regul):
 
     Parameters
     ----------
-    P : np.array
+    P : np.ndarray
         Source time function estimation.
-    D : np.array
+    D : np.ndarray
         Component containing the converted wave.
     dt : float
         Sampling interval [s].
@@ -490,13 +491,13 @@ def multitaper(P, D, dt, tshift, regul):
 
     Returns
     -------
-    rf : np.array
+    rf : np.ndarray
         The receiver function.
-    lrf : np.array
+    lrf : np.ndarray
         The source-time wavelet convolved by itself.
-    var_rf : np.array
+    var_rf : np.ndarray
         The receiver function's variance.
-    tmpp : np.array
+    tmpp : np.ndarray
         Receiver function without variance weighting.
 
     """
@@ -534,15 +535,18 @@ def multitaper(P, D, dt, tshift, regul):
 
     # Construct Slepians
     Etmp, lambdas = dpss(Nwin, TB, Kmax=NT, return_ratios=True)
-    E = np.zeros([len(starts)*NT, nh])
+    Etmp = Etmp.T  # 05.08.2020 tranpose slepian windows
+    E = np.zeros((len(starts)*NT, nh))
+    
+    # Start Index
     n = 0
 
-    NUM = np.zeros([NT, len(P)])
-    DEN = np.zeros([NT, len(D)])
-    DUM = np.zeros([NT, len(D)])
+    NUM = np.zeros((NT, len(P)))
+    DEN = np.zeros((NT, len(D)))
+    DUM = np.zeros((NT, len(D)))
 
-    ESTP = np.zeros([NT, len(P)])
-    ESTD = np.zeros([NT, len(D)])
+    ESTP = np.zeros((NT, len(P)))
+    ESTD = np.zeros((NT, len(D)))
 
     # finding frequency dependent regularisation parameter DEN_noise
     # added: KS 26.06.2016
@@ -554,7 +558,7 @@ def multitaper(P, D, dt, tshift, regul):
     # stop 10s before theoretical start of P
     # wave to aviod including it
 
-    DEN_noise = np.zeros([NT, len(P)])
+    DEN_noise = np.zeros((NT, len(P)))
 
     # Multitaper
     # SR: problem here is how the loop is done ... there's only a peak
@@ -565,7 +569,7 @@ def multitaper(P, D, dt, tshift, regul):
 
     for k in range(NT):
         for j in starts:
-            E[n, j:(j+Nwin)] = Etmp[k, :].transpose()
+            E[n, j:j+Nwin] = Etmp[:, k].transpose()
 
             tmp1 = np.fft.fft(np.multiply(E[n, :], P))
             tmp2 = np.fft.fft(np.multiply(E[n, :], D))
@@ -625,14 +629,14 @@ def multitaper(P, D, dt, tshift, regul):
                         or "con" for constant value regularization.""")
 
     # RF without variance weighting
-    tmp1 = np.real(np.fft.ifft(tmpp))
+    tmp1 = np.fft.ifft(tmpp).real
     tmp1_l = np.fft.ifft(tmpp_l).real
 
     # Interpolate to desired
     N = len(P)
-    rf = tmp1[round(N-tshift/dt):N]
+    rf = tmp1[N-round(tshift/dt):N]
     rf = np.append(rf, tmp1[:N-round(tshift/dt)])
-    # rf[round(tshift/dt):N] = tmp1[:N-round(tshift/dt)]
+    #rf[round(tshift/dt):] = tmp1[:N-round(tshift/dt)]
 
     lrf = tmp1_l[round(N-tshift/dt):N]
     lrf = np.append(lrf, tmp1_l[:round(N-tshift/dt)])

@@ -304,6 +304,10 @@ def plot_section(rfst, channel="PRF",
     # Grab one component only
     rfst_chan = rfst.select(channel=channel).sort(keys=['distance'])
 
+    if not len(rfst_chan):
+        raise ValueError('There are no receiver functions of channel ' +channel
+    +' in the RFStream.')
+
     # Plot traces
     for _i, rf in enumerate(rfst_chan):
         ydata = rf.data

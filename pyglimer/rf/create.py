@@ -190,7 +190,7 @@ def createRF(st_in, phase, pol='v', onset=None,
     elif method == 'fqd':
         RF[0].data, lrf = spectraldivision(v, u, dt, shift, "fqd", phase=phase[-1])
     elif method == 'multit':
-        RF[0].data, lrf, _, _ = multitaper(v, u, dt, shift, "fqd")
+        RF[0].data, lrf, _, _ = multitaper(v, u, dt, shift, "con")
         # remove noise caused by multitaper
         RF.filter('lowpass', freq=2.50, zerophase=True, corners=2)
     else:
@@ -711,7 +711,7 @@ class RFStream(Stream):
             ax = plot_section(
                 self, timelimits=lim, epilimits=epilimits,
                 scalingfactor=scalingfactor, line=line, linewidth=linewidth,
-                ax=ax, outputdir=outputdir)
+                ax=ax, outputdir=outputdir, channel=channel)
         return ax
 
     def plot_distribution(self, nbins=50, phase="P",
