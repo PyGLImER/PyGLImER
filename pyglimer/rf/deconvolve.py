@@ -636,6 +636,7 @@ def multitaper(
     N = len(P)
     rf = tmp1[N-round(tshift/dt):N]
     rf = np.append(rf, tmp1[:N-round(tshift/dt)])
+    # Python has to append, whereas in Matlab this here worked:
     #rf[round(tshift/dt):] = tmp1[:N-round(tshift/dt)]
 
     lrf = tmp1_l[round(N-tshift/dt):N]
