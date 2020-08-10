@@ -117,6 +117,21 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         # lowpass filter see Tauzin et. al. (2016)
         RF = lowpass(RF, 1, st.sampling_rate, zerophase=True)
     # interpolate RF
+    
+    
+    # Taper the first 4 seconds
+    i = round(4/st.delta)  # Find where rf is depth = 5
+    tap = hann((i+1)*2)
+    up, _ = np.split(tap, 2)
+    if len(RF) > len(up):  # That usually doesn't happen, only for extreme
+        # discontinuities in 3D model and errors in SRF data
+        taperfun = np.ones(len(RF))
+        taperfun[:len(up)] = up
+        RF = np.multiply(taperfun, RF)
+        if multiple:
+            RFm1 = np.multiply(taperfun[:len(RFm1)], RFm1)
+            RFm2 = np.multiply(taperfun[:len(RFm2)], RFm2)
+    
     try:
         tck = interpolate.splrep(z, RF)
 
@@ -210,22 +225,22 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
             taper[-len(down):] = down
             RF = np.multiply(taper, RF)
     
-    else:
-        # Taper the upper 5 km
-        i = np.where(z>=5)[0][0]  # Find where rf is depth = 5
-        # tap = hann((i+1)*2)
-        if i >= 4:  # Some OBSs might be lower than that
-            tap = hann(8)
-            up, _ = np.split(tap, 2)
-            up = np.hstack((np.zeros(i-3), up))
-            if len(RF) > len(up):  # That usually doesn't happen, only for extreme
-                # discontinuities in 3D model and errors in SRF data
-                taper = np.ones(len(RF))
-                taper[:len(up)] = up
-                RF = np.multiply(taper, RF)
-                if multiple:
-                    RFm1 = np.multiply(taper[:len(RFm1)], RFm1)
-                    RFm2 = np.multiply(taper[:len(RFm2)], RFm2)
+    # else:
+    #     # Taper the upper 5 km
+    #     i = np.where(z>=5)[0][0]  # Find where rf is depth = 5
+    #     # tap = hann((i+1)*2)
+    #     if i >= 4:  # Some OBSs might be lower than that
+    #         tap = hann(8)
+    #         up, _ = np.split(tap, 2)
+    #         up = np.hstack((np.zeros(i-3), up))
+    #         if len(RF) > len(up):  # That usually doesn't happen, only for extreme
+    #             # discontinuities in 3D model and errors in SRF data
+    #             taper = np.ones(len(RF))
+    #             taper[:len(up)] = up
+    #             RF = np.multiply(taper, RF)
+    #             if multiple:
+    #                 RFm1 = np.multiply(taper[:len(RFm1)], RFm1)
+    #                 RFm2 = np.multiply(taper[:len(RFm2)], RFm2)
 
     z2 = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
     RF2 = np.zeros(z2.shape)

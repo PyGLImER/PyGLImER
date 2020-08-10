@@ -190,7 +190,7 @@ def read_geom(geom_file,phase):
 
 
 def rf_test(
-        phase, dip, rfloc='output/waveforms/RF', geom_file='3D.geom'):
+        phase, dip, rfloc='output/waveforms/RF', geom_file='3D.geom', decon_meth='it'):
     """
     Creates synthetic PRFs from Raysum data.
 
@@ -282,7 +282,7 @@ def rf_test(
             'rdelta': [np.nan], 'ot_ret': [0], 'magnitude': [np.nan],
             'evt_depth': [np.nan], 'evtlon': [np.nan], 'evtlat': [np.nan]}
 
-        rf = createRF(s, phase=phase, method='it', info=info)
+        rf = createRF(s, phase=phase, method=decon_meth, info=info)
 
         # Write RF
         rf.write(os.path.join(odir, str(i)+'.sac'), format='SAC')
@@ -455,7 +455,7 @@ def decon_test(PSS_file, phase, method):
             data, IR, iters, rej = gen_it(u, v, dt, phase=phase, shift=shift)
             lrf = None
         elif method == "fqd" or method == "wat" or method == "con":
-            data, lrf = spectraldivision(v, u, dt, shift, phase=phase, regul=method)
+            data, lrf = spectraldivision(v, u, dt, shift, phase=phase, regul=method, test=True)
         elif method == "multit_fqd":
             data, lrf, _, _ = multitaper(u, v, dt, shift, 'fqd')
             data = lowpass(data, 4.99, 1/dt, zerophase=True)
@@ -464,12 +464,12 @@ def decon_test(PSS_file, phase, method):
             data = lowpass(data, 4.99, 1/dt, zerophase=True)
         else:
             raise NameError
-        if lrf is not None:
-            # Normalisation for spectral division and multitaper
-            # In order to do that, we have to find the factor that is necassary to
-            # bring the zero-time pulse to 1
-            fact = abs(lrf).max() #[round(shift/dt)]
-            data = data/fact
+        # if lrf is not None:
+        #     # Normalisation for spectral division and multitaper
+        #     # In order to do that, we have to find the factor that is necassary to
+        #     # bring the zero-time pulse to 1
+        #     fact = abs(lrf).max() #[round(shift/dt)]
+        #     data = data/fact
         RF.append(RFTrace(data))
         RF[-1].stats.delta = dt
         RF[-1].stats.starttime = UTCDateTime(0)

@@ -592,8 +592,12 @@ class RFStream(Stream):
         """
 
         st = self[0].stats
-        latb = (st.station_latitude-10, st.station_latitude+10)
-        lonb = (st.station_longitude-20, st.station_longitude+20)
+        if vmodel_file == 'iasp91.dat' or vmodel_file == 'raysum.dat':
+            latb = None
+            lonb = None
+        else:
+            latb = (st.station_latitude-10, st.station_latitude+10)
+            lonb = (st.station_longitude-20, st.station_longitude+20)
 
         z, RF_mo = self.moveout(
             vmodel=vmodel_file, latb=latb, lonb=lonb, multiple=multiple)

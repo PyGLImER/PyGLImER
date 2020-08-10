@@ -328,7 +328,7 @@ def damped(P, H, mu=10):
 #     return h, var
 
 
-def spectraldivision(v, u, ndt, tshift, regul, phase):
+def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
     """
     Function spectraldivision(v,u,ndt,tshift,regul) is a standard spectral
     division frequency domain deconvolution.
@@ -392,16 +392,20 @@ def spectraldivision(v, u, ndt, tshift, regul, phase):
                         for water-level.""")
 
     # constant damping factor regularization
-    if const:
+    if test:
+        eps = max(den.real)*0.25
+        # den = den + eps
+        den[den.real < eps] = eps
+    elif const:
         eps = max(noise.real)
         den = den + eps
 
     # frequency-dependent damping
-    if freqdep:
+    elif freqdep:
         den = den+noise
 
     # waterlevel regularization
-    if water:
+    elif water:
         eps = max(noise.real)
         # eps = 10
         # eps = 100  # constant wl to reproduce Rychert et al
