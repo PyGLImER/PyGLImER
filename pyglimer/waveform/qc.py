@@ -26,6 +26,8 @@ highco = np.linspace(.33, .175, 4)  # For SRFs, 16.06.2020 from .175 to .25 Hz
 SNR_criteriaP = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
 
 SNR_criteriaS = [24, .4, 1]  # QC4
+# 11.08 Test with a criterion that lets more waveforms pass:
+# old: [7, .5, 1]
 # [primary/noise, sidelobe/primary, r/z conversions]
 
 
