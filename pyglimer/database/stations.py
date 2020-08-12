@@ -125,7 +125,17 @@ class StationDB(object):
 
         # FileHandler
         if not logdir:
-            fh = logging.FileHandler(os.path.join('logs', 'StationDBase.log'))
+            try:
+                fh = logging.FileHandler(
+                    os.path.join(
+                        preproloc, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
+            except FileNotFoundError:
+                os.makedirs(os.path.join(
+                        preproloc, os.pardir, os.pardir, 'logs'), exist_ok=True)
+                fh = logging.FileHandler(
+                    os.path.join(
+                        preproloc, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
+            # fh = logging.FileHandler(os.path.join('logs', 'StationDBase.log'))
         else:
             fh = logging.FileHandler(os.path.join(logdir, 'StationDBase.log'))
         fh.setLevel(logging.WARNING)
@@ -311,8 +321,56 @@ class StationDB(object):
         subset = self.geo_boundary(lat, lon, phase)
         return list(subset['network']), list(subset['station'])
     
-    def plot(self, outputfile=None, format='pdf', dpi=300):
-        plot_station_db(list(self.db['lat']), list(self.db['lon']),
-                        outputfile=outputfile, format=format, dpi=dpi)
+    def plot(self, lat:tuple or None=None, lon:tuple or None=None,
+             profile:list or tuple or None=None, p_direct=True,
+             outputfile:str or None=None, format='pdf', dpi=300):
+        """
+        Plot the station coverage for a given area. Also allows plotting
+        ccp-profiles.
+
+        Parameters
+        ----------
+        lat : tuple or None, optional
+            Latitude boundaries for the stations that should be included
+            in the form (latmin, latmax), by default None.
+        lon : tuple or None, optional
+            Longitude boundaries for the stations that should be included
+            in the form (lonmin, lonmax), by default None
+        profile : list or tuple or None, optional
+            Profile or profiles that will be drawn as lines on the projection,
+            each profile is defined as a tuple: (lon1,lon2,lat1,lat2). Can be
+            a list of such tuples. If p_direct is set to false, define the left
+            and right corner the same way (then the plot is a rectangle),
+            by default None.
+        p_direct : bool, optional
+            PLot the profile as a rectangle, by default True
+        outputfile : str or None, optional
+            Write the plot to the given file, by default None
+        format : str, optional
+            Output format if outputfile, by default 'pdf'
+        dpi : int, optional
+            Pixel density, by default 300
+
+        Raises
+        ------
+        ValueError
+            For wrong inputs.
+        """
+        if lat and lon:
+            subset = self.geo_boundary(lat=lat, lon=lon)
+            lat = (lat[0]-10, lat[1]+10)
+            lon = (lon[0]-10, lon[1]+10)
+            plot_station_db(
+                list(subset['lat']), list(subset['lon']), lat=lat, lon=lon,
+                profile=profile, p_direct=p_direct,
+                outputfile=outputfile, format=format, dpi=dpi)
+        elif not lat and not lon:
+            plot_station_db(
+                list(self.db['lat']), list(self.db['lon']), profile=profile,
+                p_direct=p_direct,
+                outputfile=outputfile, format=format, dpi=dpi)
+        else:
+            raise ValueError('You have to provide both lat and lon as tuple'+
+                             ' or None.')
         
     
