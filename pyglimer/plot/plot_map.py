@@ -2,12 +2,14 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Tuesday, 4th August 2020 11:42:53 am
+Last Modified: Wednesday, 12th August 2020 12:11:51 pm
 '''
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib
 from cartopy.crs import PlateCarree
+from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
+import cartopy.crs as ccrs
 import cartopy
 
 def set_mpl_params():
@@ -37,11 +39,13 @@ def set_mpl_params():
     matplotlib.rcParams.update(params)
 
 
-def plot_map(cl=0.0):
+def plot_map(cl=0.0, lat=None, lon=None, profile=None, p_direct=True):
         """plot a map"""
-
         ax = plt.gca()
-        ax.set_global()
+        if lat and lon:
+            ax.set_extent((lon[0],lon[1],lat[0],lat[1]))
+        else:
+            ax.set_global()
         ax.frameon = True
         ax.outline_patch.set_linewidth(0.75)
 
@@ -58,6 +62,51 @@ def plot_map(cl=0.0):
         # Add Coastline
         ax.add_feature(cartopy.feature.LAND, zorder=-2, edgecolor='black',
                        linewidth=0.5, facecolor=(0.9, 0.9, 0.9))
+        
+        if lat and lon:
+            dy = np.floor((lat[1] - lat[0])/6)
+            dx = np.floor((lat[1] - lat[0])/6)
+            xt = np.arange(lon[0], lon[1], dx)
+            yt = np.arange(lat[0], lat[1], dx)
+        else:
+            xt = np.linspace(-180, 180, 13)
+            yt = np.linspace(-90, 90, 13)
+        ax.set_xticks(xt, crs=ccrs.PlateCarree())
+        ax.set_yticks(yt, crs=ccrs.PlateCarree())
+
+        ax.xaxis.set_major_formatter(LongitudeFormatter())
+        ax.yaxis.set_major_formatter(LatitudeFormatter())
+        # ax.set_xticks(xt, crs=ccrs.Robinson())
+        # ax.set_yticks(yt, crs=ccrs.Robinson())
+
+        # ax.xaxis.set_major_formatter(LongitudeFormatter())
+        # ax.yaxis.set_major_formatter(LatitudeFormatter())
+        if profile:
+            if type(profile) == tuple:
+                if p_direct:
+                    plt.plot((profile[0], profile[1]), (profile[2], profile[3]),
+                    color='blue', linewidth=1, transform=PlateCarree())
+                else:
+                    p = profile
+                    ax.add_patch(
+                        matplotlib.patches.Rectangle(
+                            xy=(p[0], p[2]), height=p[3]-p[2], width=p[1]-p[0],
+                            alpha=.2, facecolor='blue'))
+            else:
+                # colorlist
+                if p_direct:
+                    for ii, p in enumerate(profile):
+                        plt.plot((p[0], p[1]), (p[2], p[3]),
+                        linewidth=1, transform=PlateCarree(), label=ii)
+                else:
+                    cl = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'grey', 'tab:purple']
+                    for ii, p in enumerate(profile):
+                        ax.add_patch(
+                            matplotlib.patches.Rectangle(
+                                xy=(p[0], p[2]), height=p[3]-p[2], width=p[1]-p[0],
+                                alpha=.2, label=ii, facecolor=cl[ii]))
+                ax.legend()
+            
         return ax
 
 
@@ -78,12 +127,14 @@ def plot_stations(slat, slon, cl=0.0):
         ax.scatter(slon, slat, s=13, marker='v', c=((0.7, 0.2, 0.2),),
                    edgecolors='k', linewidths=0.25, zorder=-1)
 
-def plot_station_db(slat, slon, outputfile=None, format='pdf', dpi=300):
+def plot_station_db(slat, slon, lat:tuple or None=None, lon:tuple or None=None,
+                    profile=None, p_direct=True, outputfile=None, format='pdf',
+                    dpi=300):
     cl = 0.0
     set_mpl_params()
     plt.figure(figsize=(9,4.5))
     plt.subplot(projection=PlateCarree(central_longitude=cl))
-    plot_map(cl=cl)
+    plot_map(cl=cl, lat=lat, lon=lon, profile=profile, p_direct=p_direct)
     plot_stations(slat, slon, cl=cl)
     if outputfile is None:
         plt.show()
