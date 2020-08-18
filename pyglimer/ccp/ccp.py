@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Wednesday, 5th August 2020 01:15:30 pm
+Last Modified: Tuesday, 18th August 2020 09:36:29 pm
 '''
 
 #!/usr/bin/env python3
@@ -713,7 +713,7 @@ only show the progress per chunk.')
         return kk, jj, datal, datalm1, datalm2
 
     def conclude_ccp(
-        self, keep_empty=False, keep_water=False, r=3,
+        self, keep_empty=False, keep_water=False, r=0,
         multiple=False, z_multiple:int = 200):
         """
         Averages the CCP-bin and populates empty cells with average of
