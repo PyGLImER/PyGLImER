@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 18th August 2020 09:36:29 pm
+Last Modified: Wednesday, 19th August 2020 01:02:10 pm
 '''
 
 #!/usr/bin/env python3
@@ -733,7 +733,8 @@ only show the progress per chunk.')
         :param multiple: Use multiples in stack. Either False or weigthing;
             i.e. 'linear' for linearly weighted stack between the three phases,
             'zk' for a Zhu & Kanamori approach, or 'pws' for a phase weighted
-            stack. By default False.
+            stack. Use 'm1' to use only first multiple mode (no stack), 'm2' for
+            RFs created only with 2nd multiple phase (PSS), By default False.
         :type multiple: bool or str
         :param z_multiple: Until which depth [km] should multiples be considered,
             maximal value is 200 [km]. Will only be used if multiple=True.
@@ -754,6 +755,14 @@ only show the progress per chunk.')
             self.ccp[:, :endi] = (.7*self.ccp[:, :endi] +
                 .2*np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
                     .1*np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1))
+        elif multiple == 'm1':
+            self.ccp = np.hstack((
+                np.divide(self.bins_m1[:, :endi], self.illum[:, :endi]+1),
+                np.zeros(self.bins[:,endi:].shape)))
+        elif multiple == 'm2':
+            self.ccp = np.hstack((
+                np.divide(self.bins_m2[:, :endi], self.illum[:, :endi]+1),
+                np.zeros(self.bins[:,endi:].shape)))
         elif not multiple:
             self.ccp = np.divide(self.bins, self.illum+1)
         else:

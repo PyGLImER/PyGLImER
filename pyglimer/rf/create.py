@@ -34,7 +34,7 @@ from obspy.taup import TauPyModel
 from scipy.signal.windows import hann
 
 from pyglimer.rf.deconvolve import it, spectraldivision, multitaper, gen_it
-from pyglimer.rf.moveout import DEG2KM, maxz, res, moveout, dt_table, dt_table_3D
+from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table, dt_table_3D
 from pyglimer.plot.plot_utils import plot_section, plot_single_rf, stream_dist
 
 logger = logging.Logger("rf")
@@ -612,7 +612,7 @@ class RFStream(Stream):
             stack = np.average(traces, axis=0)
         elif multiple == 'linear':
             continue_again = False
-            ii = np.where(z == 100)[0][0]  # maximal depth for multiples
+            ii = np.where(z == maxzm)[0][0]  # maximal depth for multiples
             for tr in RF_mo:
                 if tr.stats.channel == 'm1' or tr.stats.channel == 'm2':
                     if tr.stats.type == 'empty':
@@ -632,7 +632,7 @@ class RFStream(Stream):
                     traces.append(tempdata)
             stack = np.average(traces, axis=0)
         elif multiple == 'zk':
-            ii = np.where(z == 100)[0][0]
+            ii = np.where(z == maxzm)[0][0]
             continue_again = False
             for tr in RF_mo:
                 tempdata = deepcopy(tr.data)
@@ -654,6 +654,12 @@ class RFStream(Stream):
                     tempdata[:ii] = tempdata[:ii]*.7
                 traces.append(tempdata)
             stack = np.average(traces, axis=0)*3
+        # Only use multiples (no stacking of several modes)
+        elif multiple == 'm1' or multiple == 'm2':
+            for tr in RF_mo:
+                if tr.stats.channel == multiple:
+                    traces.append(tr.data)
+            stack = np.average(traces, axis=0)
 
         stack = RFTrace(data=stack, header=self[0].stats)
         stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0),
