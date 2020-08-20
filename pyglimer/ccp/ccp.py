@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Wednesday, 19th August 2020 01:02:10 pm
+Last Modified: Thursday, 20th August 2020 10:24:29 am
 '''
 
 #!/usr/bin/env python3
@@ -529,6 +529,9 @@ class CCPStack(object):
         # using half of the RAM.
         # approximately 8 byte per element in RF + 8 byte for idx
         mem_needed = 3*8*850*len(streams)*100
+        # For stacking with multiple modes, we'll need more memory
+        if multiple:
+            mem_needed = mem_needed*1.75
 
         # Split into several jobs if too much data
         if mem_needed > mem.total:
@@ -734,7 +737,8 @@ only show the progress per chunk.')
             i.e. 'linear' for linearly weighted stack between the three phases,
             'zk' for a Zhu & Kanamori approach, or 'pws' for a phase weighted
             stack. Use 'm1' to use only first multiple mode (no stack), 'm2' for
-            RFs created only with 2nd multiple phase (PSS), By default False.
+            RFs created only with 2nd multiple phase (PSS), and m for an
+            equal-weight stack of m1 and m2. By default False.
         :type multiple: bool or str
         :param z_multiple: Until which depth [km] should multiples be considered,
             maximal value is 200 [km]. Will only be used if multiple=True.
@@ -762,6 +766,11 @@ only show the progress per chunk.')
         elif multiple == 'm2':
             self.ccp = np.hstack((
                 np.divide(self.bins_m2[:, :endi], self.illum[:, :endi]+1),
+                np.zeros(self.bins[:,endi:].shape)))
+        elif multiple == 'm':
+            self.ccp = np.hstack((
+                np.divide(self.bins_m2[:, :endi]+self.bins_m1[:, :endi],
+                          2*(self.illum[:, :endi])+1),
                 np.zeros(self.bins[:,endi:].shape)))
         elif not multiple:
             self.ccp = np.divide(self.bins, self.illum+1)

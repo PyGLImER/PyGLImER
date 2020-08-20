@@ -660,6 +660,11 @@ class RFStream(Stream):
                 if tr.stats.channel == multiple:
                     traces.append(tr.data)
             stack = np.average(traces, axis=0)
+        elif multiple == 'm':
+            for tr in RF_mo:
+                if tr.stats.channel[0] == 'm':
+                    traces.append(tr.data)
+            stack = np.average(traces, axis=0)
 
         stack = RFTrace(data=stack, header=self[0].stats)
         stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0),
