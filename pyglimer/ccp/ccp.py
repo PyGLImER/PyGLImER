@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 20th August 2020 10:24:29 am
+Last Modified: Thursday, 20th August 2020 11:45:09 am
 '''
 
 #!/usr/bin/env python3
@@ -750,27 +750,31 @@ only show the progress per chunk.')
         endi = np.where(self.z == z_multiple)[0][0]+1   
         if multiple == 'linear':
             
-            self.ccp = np.divide(self.bins, self.illum+1)
-            self.ccp[:, :endi] = (self.ccp[:, :endi] +
+            # self.ccp = np.divide(self.bins, self.illum+1)
+            self.ccp = np.hstack(((
+                np.divide(self.bins[:, :endi], self.illum[:, :endi]+1) +
                 np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
-                    np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1))/3
+                    np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1))/3,
+            np.zeros(self.bins[:,endi:].shape)))
         elif multiple == 'zk':
-            self.ccp = np.divide(self.bins, self.illum+1)
-            self.ccp[:, :endi] = (.7*self.ccp[:, :endi] +
+            # self.ccp = np.divide(self.bins, self.illum+1)
+            self.ccp = np.hstack((
+                .7*np.divide(self.bins[:, :endi], self.illum[:, :endi]+1) +
                 .2*np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
-                    .1*np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1))
+                    .1*np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1),
+                    np.zeros(self.bins[:,endi:].shape)))
         elif multiple == 'm1':
             self.ccp = np.hstack((
-                np.divide(self.bins_m1[:, :endi], self.illum[:, :endi]+1),
+                np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1),
                 np.zeros(self.bins[:,endi:].shape)))
         elif multiple == 'm2':
             self.ccp = np.hstack((
-                np.divide(self.bins_m2[:, :endi], self.illum[:, :endi]+1),
+                np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1),
                 np.zeros(self.bins[:,endi:].shape)))
         elif multiple == 'm':
             self.ccp = np.hstack((
                 np.divide(self.bins_m2[:, :endi]+self.bins_m1[:, :endi],
-                          2*(self.illum[:, :endi])+1),
+                          2*(self.illumm[:, :endi])+1),
                 np.zeros(self.bins[:,endi:].shape)))
         elif not multiple:
             self.ccp = np.divide(self.bins, self.illum+1)
