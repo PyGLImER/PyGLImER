@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Friday, 21st August 2020 02:28:33 pm
+Last Modified: Friday, 21st August 2020 08:54:13 pm
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -164,7 +164,7 @@ def plot_illum(binlat, binlon, dbin, illum, cl=0.0):
         #                                                       bins=plot_res))
         # ax.imshow(heatmap.T, origin='lower')
         il = ax.scatter(
-            binlon, binlat, c=illumflat,cmap='coolwarm', s=10, edgecolors=None,
+            binlon, binlat, c=illumflat,cmap='plasma', s=10, edgecolors=None,
             label='bin centres', zorder=-1)
         cb = plt.colorbar(il, ax=ax)
 
