@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 20th August 2020 11:45:09 am
+Last Modified: Friday, 21st August 2020 01:13:13 pm
 '''
 
 #!/usr/bin/env python3
@@ -33,6 +33,7 @@ from pyglimer.utils.utils import dt_string, chunks
 from pyglimer.utils.createvmodel import _MODEL_CACHE, ComplexModel
 from pyglimer.utils.geo_utils import epi2euc
 from pyglimer.ccp.plot_utils.plot_bins import plot_bins
+from pyglimer.plot.plot_map import plot_map_ccp
 
 
 def init_ccp(spacing, vel_model, phase, statloc='output/stations',
@@ -904,3 +905,22 @@ misspelled or not yet implemented')
         else:
             coords = self.coords
         plot_bins(self.bingrid.stations, coords)
+
+    def map_plot(
+        self, plot_stations=False, plot_bins=False, plot_illum=False,
+        profile: list or tuple or None=None, p_direct=True,
+        outputfile: str or None=None, format='pdf', dpi=300):
+        if hasattr(self, 'coords_new') and self.coords_new[0].size:
+            bincoords = self.coords_new
+        else:
+            bincoords = self.coords
+        # Set boundaries for map:
+        lat = (
+            np.floor(min(bincoords[0][0]))-1, np.ceil(max(bincoords[0][0])+1))
+        lon = (np.floor(min(bincoords[1][0]))-1,
+               np.ceil(max(bincoords[1][0])+1))
+        plot_map_ccp(
+            lat, lon, plot_stations, self.bingrid.latitude,
+            self.bingrid.longitude, plot_bins, bincoords, self.bingrid.edist,
+            plot_illum, self.hits, profile, p_direct, outputfile=outputfile,
+            format=format, dpi=dpi)
