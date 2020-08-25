@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 24th August 2020 12:05:10 pm
+Last Modified: Tuesday, 25th August 2020 04:00:26 pm
 '''
 
 #!/usr/bin/env python3
@@ -33,7 +33,7 @@ from pyglimer.utils.utils import dt_string, chunks
 from pyglimer.utils.createvmodel import _MODEL_CACHE, ComplexModel
 from pyglimer.utils.geo_utils import epi2euc
 from pyglimer.ccp.plot_utils.plot_bins import plot_bins
-from pyglimer.plot.plot_map import plot_map_ccp
+from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
 
 
 def init_ccp(spacing, vel_model, phase, statloc='output/stations',
@@ -805,7 +805,7 @@ misspelled or not yet implemented')
                 llcrnrlon=self.coords[1][0].min(),
                 urcrnrlat=self.coords[0][0].max(),
                 urcrnrlon=self.coords[1][0].max())
-            if not hasattr(self, 'coords_new'):
+            if keep_empty:
                 self.coords_new = self.coords.copy()
 
             lats, lons = self.coords_new
@@ -951,3 +951,117 @@ misspelled or not yet implemented')
             self.bingrid.longitude, plot_bins, bincoords, self.bingrid.edist,
             plot_illum, self.hits, profile, p_direct, outputfile=outputfile,
             format=format, dpi=dpi)
+        
+    def pick_phase(self, pol:str = '+', depth:list=[None, None]):
+        """
+        Pick the strongest negative or strongest positive gradient from a
+        predefined depth-range.
+
+        Parameters
+        ----------
+        pol : str, optional
+            Either '+' for positive velocity gradient or '-' for negative
+            gradient, by default '+'
+        depth : list, optional
+            List with two elements [minz, maxz], defines in which depth window
+            the phase picker is gonna look for maxima and minima,
+            by default [None, None]
+
+        Returns
+        -------
+        PhasePick
+            A phasepick object, which subsequently can be plotted.
+
+        Raises
+        ------
+        ValueError
+            For errandeous inputs.
+        """
+        self.conclude_ccp(r=3)
+        # Find indices
+        for ii, d in enumerate(depth):
+            if d or d==0:
+                depth[ii] = np.abs(self.z-d).argmin()
+        # Find minimum in vector
+        ccp_short = self.ccp[:, depth[0]:depth[1]]
+        # There should be a line here excluding insufficiently illuminated bins
+        illum_flat = np.sum(self.hits[:, depth[0]:depth[1]], axis=1)
+        id = np.where(illum_flat<ccp_short.shape[1]*10)  # delete those bins
+
+        ccp_short = np.delete(ccp_short, id, 0)
+        coords = (np.delete(self.coords_new[0], id, 1),
+                   np.delete(self.coords_new[1], id, 1))
+        
+        if pol == '+':
+            # Amplitudes
+            a = ccp_short.max(axis=1)
+            # Depths
+            z = self.z[depth[0]:depth[1]][ccp_short.argmax(axis=1)]
+        elif pol == '-':
+            a = ccp_short.min(axis=1)
+            z = self.z[depth[0]:depth[1]][ccp_short.argmin(axis=1)]
+        else:
+            raise ValueError('Choose either \'+\' to return the highest '
+                +'positive velocity gradient or \'-\' to return the '+
+                'highest negative velocity gradient.')
+        
+        p_phase = PhasePick(coords, a, pol, z, depth)
+        return p_phase
+
+class PhasePick(object):
+    """
+    A phasepick object, just created for more convenient plotting.
+    """
+    def __init__(
+        self, coords:np.ndarray, amplitudes:np.ndarray, polarity:str,
+        z:np.ndarray, depthrange:list=[None, None]):
+        """
+        Initialise object
+
+        Parameters
+        ----------
+        coords : np.ndarray
+            2-d array containing latitudes and longitudes.
+        amplitudes : np.ndarray
+            1-D array containg amplitude values of each bin
+        polarity : str
+            Either '+' for positive velocity gradients or '-' for negative
+        z : np.ndarray
+            1D array containing depth of maxima/minima per bin
+        depthrange : list, optional
+            list containing depth restrictions in form of [zmin, zmax],
+            by default [None, None]
+        """
+        # assign vars
+        self.coords = coords
+        self.a = amplitudes
+        self.z = z
+        self.pol = polarity
+        self.depthr = depthrange
+
+    def plot(
+        self, plot_amplitude:bool=False, outputfile:str or None=None,
+        format='pdf', dpi=300):
+        """
+        Plot heatmap containing depth or amplitude of picked phase.
+
+        Parameters
+        ----------
+        plot_amplitude : bool, optional
+            If True amplitude instead of depths is plotted, by default False
+        outputfile : str or None, optional
+            Write Figure to file, by default None
+        format : str, optional
+            File format, by default 'pdf'
+        dpi : int, optional
+            Resolution for non-vector graphics, by default 300
+        """
+        lat = (
+            np.floor(min(self.coords[0][0]))-1, np.ceil(max(self.coords[0][0])+1))
+        lon = (np.floor(min(self.coords[1][0]))-1,
+               np.ceil(max(self.coords[1][0])+1))
+        
+        plot_vel_grad(
+            self.coords, self.a, self.z, plot_amplitude, lat, lon, outputfile,
+            dpi=dpi, format=format)
+
