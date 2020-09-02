@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Tuesday, 25th August 2020 04:04:18 pm
+Last Modified: Tuesday, 1st September 2020 01:28:17 pm
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -171,12 +171,13 @@ def plot_illum(binlat, binlon, dbin, illum, cl=0.0):
     cb.set_label('log10(hits)')
 
 def plot_scattered_colormap(
-    binlat:np.ndarray, binlon:np.ndarray, vals:np.ndarray, amplitude:bool=False):
+    binlat:np.ndarray, binlon:np.ndarray, vals:np.ndarray, amplitude:bool=False,
+    cmap:str='gist_rainbow'):
     ax = plt.gca()
     
     pltfig = ax.scatter(
-    binlon, binlat, c=vals, cmap='viridis', s=100, edgecolors=None,
-    label='bin centres', zorder=-1)
+    binlon, binlat, c=vals, cmap=cmap, s=10, edgecolors=None,
+    label='bin centres', zorder=-1) #'viridris', 'gist_rainbow
     cb = plt.colorbar(pltfig, ax=ax)
     if amplitude:
         cb.set_label('Amplitude')
@@ -234,7 +235,7 @@ def plot_map_ccp(
 
 def plot_vel_grad(
     coords, a, z, plot_amplitude:bool, lat:tuple or None, lon:tuple or None,
-    outputfile=None, format='pdf', dpi=300):
+    outputfile=None, format='pdf', dpi=300, cmap:str='gist_rainbow'):
     """
     Plot velocity gradient. Use method implemented into object!
 
@@ -272,7 +273,7 @@ def plot_vel_grad(
         data = z
         
     plot_scattered_colormap(
-        coords[0][0], coords[1][0], data, amplitude=plot_amplitude)
+        coords[0][0], coords[1][0], data, amplitude=plot_amplitude, cmap=cmap)
     plt.legend()
 
     # Write file

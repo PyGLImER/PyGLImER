@@ -665,6 +665,8 @@ class RFStream(Stream):
                 if tr.stats.channel[0] == 'm':
                     traces.append(tr.data)
             stack = np.average(traces, axis=0)
+        elif multiple != False:
+            raise ValueError('Unknown multiple mode: '+multiple)
 
         stack = RFTrace(data=stack, header=self[0].stats)
         stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0),

@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 25th August 2020 04:00:26 pm
+Last Modified: Wednesday, 2nd September 2020 06:03:11 pm
 '''
 
 #!/usr/bin/env python3
@@ -328,7 +328,7 @@ class CCPStack(object):
                       preproloc='output/waveforms/preprocessed',
                       network=None, station=None, geocoords=None, pattern=None,
                       save=False, filt=None,
-                      binrad=np.cos(np.radians(30)), append_pp=False,
+                      binrad=1/(2*np.cos(np.radians(30))), append_pp=False,
                       multiple=False):
         """
         Computes a ccp stack in self.ccp, using the data from rfloc.
@@ -380,7 +380,7 @@ class CCPStack(object):
         :type save: str or bool, optional
         :param binrad: Defines the bin radius with
             bin radius = binrad*distance_bins.
-            Full Overlap = cosd(30), Full coverage: 1.
+            Full Overlap = 1/(2*cosd(30)), Full coverage: 1.
             The default is full overlap.
         :type binrad: float, optional
         :param append_pp: appends piercing point coordinates if True, so they
@@ -394,9 +394,9 @@ class CCPStack(object):
         :raises ValueError: For wrong inputs
         """
 
-        if binrad < np.cos(np.radians(30)):
+        if binrad < 1/(2*np.cos(np.radians(30))):
             raise ValueError(
-                """Minimum allowed binradius is cos(30deg)* bin distance.
+                """Minimum allowed binradius is bin distance/(2*cos(30deg)).
                 Else the grid will not cover all the surface area."""
             )
 
@@ -818,6 +818,13 @@ misspelled or not yet implemented')
             self.hits = np.delete(self.hits, index, 0)
             self.coords_new = (np.delete(self.coords_new[0], index, 1),
                                np.delete(self.coords_new[1], index, 1))
+        
+        # Else everything will always pick coords_new instead of coords
+        if keep_water and keep_empty:
+            try:
+                del self.coords_new
+            except NameError:
+                pass
 
     def write(self, filename=None, folder='output/ccps', fmt="pickle"):
         """
@@ -1041,7 +1048,7 @@ class PhasePick(object):
 
     def plot(
         self, plot_amplitude:bool=False, outputfile:str or None=None,
-        format='pdf', dpi=300):
+        format='pdf', dpi=300, cmap:str='gist_rainbow'):
         """
         Plot heatmap containing depth or amplitude of picked phase.
 
@@ -1055,6 +1062,8 @@ class PhasePick(object):
             File format, by default 'pdf'
         dpi : int, optional
             Resolution for non-vector graphics, by default 300
+        cmap : str, optional
+            Colormap
         """
         lat = (
             np.floor(min(self.coords[0][0]))-1, np.ceil(max(self.coords[0][0])+1))
@@ -1063,5 +1072,5 @@ class PhasePick(object):
         
         plot_vel_grad(
             self.coords, self.a, self.z, plot_amplitude, lat, lon, outputfile,
-            dpi=dpi, format=format)
+            dpi=dpi, format=format, cmap=cmap)
 
