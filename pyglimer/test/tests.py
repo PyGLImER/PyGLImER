@@ -347,7 +347,7 @@ def ccp_test(phase, dip, geom_file='3D.geom', multiple=False, use_old_rfs=True):
     ccp.compute_stack(
         'raysum.dat', network='raysum', station=str(dip), save=False, multiple=multiple)
     print('ccp stack concluded')
-    ccp.conclude_ccp(r=1, keep_water=True)
+    ccp.conclude_ccp(r=0, keep_water=True)
     ccp.write('raysum'+phase+str(dip))
     return ccp
 

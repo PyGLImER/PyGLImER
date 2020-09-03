@@ -302,7 +302,7 @@ def plot_section(rfst, channel="PRF",
         ax = plt.gca(zorder=999999)
 
     # Grab one component only
-    rfst_chan = rfst.select(channel=channel).sort(keys=['distance'])
+    rfst_chan = rfst.sort(channel=channel).sort(keys=['distance'])
 
     if not len(rfst_chan):
         raise ValueError('There are no receiver functions of channel ' +channel

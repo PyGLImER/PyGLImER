@@ -763,8 +763,14 @@ class RFStream(Stream):
         baz = []
 
         for rf in self:
+            if rf.stats.phase != phase:
+                continue
             rayp.append(rf.stats.slowness / DEG2KM)
             baz.append(rf.stats.back_azimuth)
+        
+        if not len(baz):
+            raise ValueError('No Receiver Functions of Phase '+phase+
+                             ' found, did you choose the right phase?')
 
         stream_dist(np.array(rayp), np.array(baz), nbins=nbins, v=v,
                     outputfile=outputfile, format=format,  dpi=dpi)
