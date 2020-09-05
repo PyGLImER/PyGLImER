@@ -446,6 +446,12 @@ def dt_table(rayp, fname, phase, el, multiple:bool, debug=False):
         Either "S" for Sp or "P" for Ps.
     el : float
         station elevation in m.
+    multiple : bool
+        Compute conversion time for PPS and PSS.
+    debug : bool, optional
+        If True, A Cartesioan rather than a spherical Earth is assumed. By
+        default False.
+
 
     Returns
     -------
