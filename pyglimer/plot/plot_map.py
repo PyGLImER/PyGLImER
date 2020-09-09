@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Tuesday, 1st September 2020 01:28:17 pm
+Last Modified: Wednesday, 9th September 2020 11:39:57 am
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,7 +39,7 @@ def set_mpl_params():
     matplotlib.rcParams.update(params)
 
 
-def plot_map(cl=0.0, lat=None, lon=None, profile=None, p_direct=True):
+def plot_map(cl=0.0, lat=None, lon=None, profile=None, p_direct=True, geology=False):
     """plot a map"""
     ax = plt.gca()
     if lat and lon:
@@ -62,6 +62,11 @@ def plot_map(cl=0.0, lat=None, lon=None, profile=None, p_direct=True):
     # Add Coastline
     ax.add_feature(cartopy.feature.LAND, zorder=-2, edgecolor='black',
                     linewidth=0.5, facecolor=(0.9, 0.9, 0.9))
+    # Add the biggest waterbodies
+    ax.add_feature(cartopy.feature.NaturalEarthFeature('physical', 'lakes', '110m'), zorder=-2, edgecolor='black',
+                linewidth=0.5, facecolor='w')
+    # ax.add_feature(cartopy.feature.RIVERS, zorder=-2, edgecolor='black',
+    #                 linewidth=0.5, facecolor=(0.9, 0.9, 0.9))
     
     if lat and lon:
         dy = np.floor((lat[1] - lat[0])/6)
@@ -81,6 +86,9 @@ def plot_map(cl=0.0, lat=None, lon=None, profile=None, p_direct=True):
 
     # ax.xaxis.set_major_formatter(LongitudeFormatter())
     # ax.yaxis.set_major_formatter(LatitudeFormatter())
+    if geology:
+        ax.add_wms(
+            wms='https://mrdata.usgs.gov/services/worldgeol?', layers=['geology'], zorder=-2)
     if profile:
         if type(profile) == tuple:
             if p_direct:
@@ -179,6 +187,7 @@ def plot_scattered_colormap(
     binlon, binlat, c=vals, cmap=cmap, s=10, edgecolors=None,
     label='bin centres', zorder=-1) #'viridris', 'gist_rainbow
     cb = plt.colorbar(pltfig, ax=ax)
+    plt.tight_layout()
     if amplitude:
         cb.set_label('Amplitude')
     else:
@@ -187,13 +196,15 @@ def plot_scattered_colormap(
 
 def plot_station_db(slat, slon, lat:tuple or None=None, lon:tuple or None=None,
                     profile=None, p_direct=True, outputfile=None, format='pdf',
-                    dpi=300):
+                    dpi=300, geology=False):
     cl = 0.0
     set_mpl_params()
     plt.figure(figsize=(9,4.5))
     plt.subplot(projection=PlateCarree(central_longitude=cl))
-    plot_map(cl=cl, lat=lat, lon=lon, profile=profile, p_direct=p_direct)
+    plot_map(cl=cl, lat=lat, lon=lon, profile=profile, p_direct=p_direct,
+             geology=geology)
     plot_stations(slat, slon, cl=cl)
+    plt.tight_layout()
     if outputfile is None:
         plt.show()
     else:
@@ -207,12 +218,14 @@ def plot_map_ccp(
     slon:list or np.ndarray,
     bins:bool, bincoords: tuple, dbin, illum:bool, illummatrix:np.ndarray,
     profile: list or None,
-    p_direct=True, outputfile=None, format='pdf', dpi=300):
+    p_direct=True, outputfile=None, format='pdf', dpi=300, geology=False):
     cl = 0.0
     set_mpl_params()
     plt.figure(figsize=(9,4.5))
     plt.subplot(projection=PlateCarree(central_longitude=cl))
-    ax = plot_map(cl=cl, lat=lat, lon=lon, profile=profile, p_direct=p_direct)
+    ax = plot_map(
+        cl=cl, lat=lat, lon=lon, profile=profile, p_direct=p_direct,
+        geology=geology)
     if bins:
         plot_bins(bincoords[0], bincoords[1], cl=cl)
     if illum:
@@ -225,6 +238,7 @@ def plot_map_ccp(
            ncol=4, mode="expand", borderaxespad=0.)
         #plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            #ncol=2, mode="expand", borderaxespad=0.)
+    plt.tight_layout()
     if outputfile is None:
         plt.show()
     else:
@@ -235,7 +249,8 @@ def plot_map_ccp(
 
 def plot_vel_grad(
     coords, a, z, plot_amplitude:bool, lat:tuple or None, lon:tuple or None,
-    outputfile=None, format='pdf', dpi=300, cmap:str='gist_rainbow'):
+    outputfile=None, format='pdf', dpi=300, cmap:str='gist_rainbow',
+    geology=False):
     """
     Plot velocity gradient. Use method implemented into object!
 
@@ -265,7 +280,7 @@ def plot_vel_grad(
     fig = plt.figure(figsize=(9,4.5))
 
     plt.subplot(projection=PlateCarree(central_longitude=cl))
-    ax = plot_map(cl=cl, lat=lat, lon=lon)
+    ax = plot_map(cl=cl, lat=lat, lon=lon, geology=geology)
     # plot depth distribution or amplitude?
     if plot_amplitude:
         data = a
@@ -275,6 +290,7 @@ def plot_vel_grad(
     plot_scattered_colormap(
         coords[0][0], coords[1][0], data, amplitude=plot_amplitude, cmap=cmap)
     plt.legend()
+    plt.tight_layout()
 
     # Write file
     if outputfile is None:

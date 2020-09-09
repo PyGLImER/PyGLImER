@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Wednesday, 2nd September 2020 06:03:11 pm
+Last Modified: Wednesday, 9th September 2020 11:29:56 am
 '''
 
 #!/usr/bin/env python3
@@ -916,7 +916,7 @@ misspelled or not yet implemented')
     def map_plot(
         self, plot_stations=False, plot_bins=False, plot_illum=False,
         profile: list or tuple or None=None, p_direct=True,
-        outputfile: str or None=None, format='pdf', dpi=300):
+        outputfile: str or None=None, format='pdf', dpi=300, geology=False):
         """
         Create a map plot of the CCP Stack containing user-defined information.
 
@@ -943,6 +943,8 @@ misspelled or not yet implemented')
             Format for the file to be saved as, by default 'pdf'
         dpi : int, optional
             DPI for none vector format plots, by default 300
+        geology : bool, optional
+            Plot a geological map.
         """
         if hasattr(self, 'coords_new') and self.coords_new[0].size:
             bincoords = self.coords_new
@@ -957,7 +959,7 @@ misspelled or not yet implemented')
             lat, lon, plot_stations, self.bingrid.latitude,
             self.bingrid.longitude, plot_bins, bincoords, self.bingrid.edist,
             plot_illum, self.hits, profile, p_direct, outputfile=outputfile,
-            format=format, dpi=dpi)
+            format=format, dpi=dpi, geology=geology)
         
     def pick_phase(self, pol:str = '+', depth:list=[None, None]):
         """
@@ -1048,7 +1050,7 @@ class PhasePick(object):
 
     def plot(
         self, plot_amplitude:bool=False, outputfile:str or None=None,
-        format='pdf', dpi=300, cmap:str='gist_rainbow'):
+        format='pdf', dpi=300, cmap:str='gist_rainbow', geology=False):
         """
         Plot heatmap containing depth or amplitude of picked phase.
 
@@ -1064,6 +1066,8 @@ class PhasePick(object):
             Resolution for non-vector graphics, by default 300
         cmap : str, optional
             Colormap
+        geology : bool, optional
+            Plot geological map.
         """
         lat = (
             np.floor(min(self.coords[0][0]))-1, np.ceil(max(self.coords[0][0])+1))
@@ -1072,5 +1076,5 @@ class PhasePick(object):
         
         plot_vel_grad(
             self.coords, self.a, self.z, plot_amplitude, lat, lon, outputfile,
-            dpi=dpi, format=format, cmap=cmap)
+            dpi=dpi, format=format, cmap=cmap, geology=geology)
 
