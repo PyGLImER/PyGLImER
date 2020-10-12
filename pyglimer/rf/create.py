@@ -775,9 +775,12 @@ class RFStream(Stream):
         stream_dist(np.array(rayp), np.array(baz), nbins=nbins, v=v,
                     outputfile=outputfile, format=format,  dpi=dpi)
 
-    def dirty_ccp_stacks(self, binlon, binlat, binz):
+    def __dirty_ccp_stacks(self, binlon, binlat, binz):
         """This is the simplest way of creating quick not really accurate 
         CCP stacks.
+
+        This function is still empty, but I'm leaving it here, because I think
+        it should be implemented. Sometime this week maybe
 
         Parameters:
         binlon:  `numpy.ndarray`
