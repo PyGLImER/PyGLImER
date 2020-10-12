@@ -17,6 +17,10 @@ import time
 
 from joblib import Parallel, delayed, cpu_count
 import numpy as np
+from scipy.interpolate import griddata
+from scipy.spatial import Delaunay
+from scipy.interpolate import LinearNDInterpolator, Rbf
+
 from obspy import read_inventory
 import scipy.io as sio
 from mpl_toolkits.basemap import Basemap
@@ -402,7 +406,7 @@ class CCPStack(object):
         # How many closest points are queried by the bintree?
         # See Gauss circle problem
         # sum of squares for 2 squares for max binrad=4
-        # Using the ceiling funciton to account for inaccuracies
+        # Using the ceiling function to account for inaccuracies
         sosq = [1, 4, 4, 0, 4, 8, 0, 0, 4, 4, 8, 0, 0, 8, 0, 0, 4]
         try:
             n_closest_points = sum(sosq[0:int(np.ceil(binrad**2+1))])
@@ -713,7 +717,7 @@ only show the progress per chunk.')
     def conclude_ccp(
         self, keep_empty=False, keep_water=False, r=3,
         multiple=False, z_multiple:int = 200):
-        """
+        """x
         Averages the CCP-bin and populates empty cells with average of
         neighbouring cells. No matter which option is
         chosen for the parameters, data is never lost entirely. One can always
@@ -880,3 +884,68 @@ misspelled or not yet implemented')
         else:
             coords = self.coords
         plot_bins(self.bingrid.stations, coords)
+
+    def create_volume(self,
+                      glon: np.ndarray or list,
+                      glat: np.ndarray or list,
+                      gz: np.array or list):
+        """This function uses the CCPStacks to create a volume for a given set
+        of 
+
+        Args:
+            glat (np.ndarrayorlist): [description]
+            glon (np.ndarrayorlist): [description]
+            gz (np.arrayorlist): [description]
+        """
+
+        # Get points array from CCPStack
+        z, lon = np.meshgrid(self.z, self.coords_new[1])
+        _, lat = np.meshgrid(self.z, self.coords_new[0])
+
+        # Create mgrid for interpolation
+        # grid_x, grid_y, grid_z = np.meshgrid(glon, glat, gz)
+
+        # shape = grid_y.shape
+        # print("Gridshape: ", shape)
+
+        print("Ravelshapes: ")
+        print("X:   ", lon.shape)
+        print("Y:   ", lat.shape)
+        print("Z:   ", z.shape)
+        print("CCP: ", self.ccp.shape)
+        print(" ")
+        # Triangulation
+        print("Starting triangulation ...")
+        # tri = Delaunay(np.vstack((lon.ravel(), lat.ravel(), z.ravel())).T)  # Compute the triangulation
+        print("weird shape ", np.vstack((lon.ravel(), lat.ravel(), z.ravel())).T.shape)
+        vv, edges = np.histogramdd(
+            np.vstack((lon.ravel(), lat.ravel(), z.ravel())).T,
+            bins=(glon, glat, gz), weights=self.ccp.ravel())
+        cnts, _ = np.histogramdd(
+            np.vstack((lon.ravel(), lat.ravel(), z.ravel())).T,
+            bins=(glon, glat, gz))
+        
+        # Workaround for zero count values tto not get an error.
+        # Where counts == 0, zi = 0, else zi = zz/counts
+        vi = np.zeros_like(vv)
+        vi[cnts.astype(bool)] = vv[cnts.astype(bool)]/cnts[cnts.astype(bool)]
+        vi = np.ma.masked_equal(vi, 0)
+
+        print("Done triangulation ...")
+        print(" ")
+
+        # Perform the interpolation with the given values:
+        # print("Creating interpolator ...")
+        # interpolator = LinearNDInterpolator(tri, self.ccp.ravel())
+        # print("done interpolator.")
+        # print(" ")
+
+        # Interpolation
+        print("Interpolate ...")
+        # V = rbfi(grid_x.ravel(), grid_y.ravel(), grid_z.ravel())
+        print("Done interpolation.")
+        # V = griddata(, ,
+        #              ,
+        #              fill_value=np.NaN)
+
+        return vi  # V.reshape(shape)

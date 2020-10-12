@@ -17,8 +17,8 @@ def plot_map(ax):
     gl = ax.gridlines(crs=PlateCarree(), draw_labels=False,
                       linewidth=1, color='lightgray', alpha=0.5,
                       linestyle='-')
-    gl.xlabels_top = False
-    gl.ylabels_left = False
+    gl.top_labels = False
+    gl.left_labels = False
     gl.xlines = True
 
     # Change fontsize

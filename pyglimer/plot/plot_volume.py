@@ -10,13 +10,12 @@ from cartopy.crs import PlateCarree
 import cartopy.feature as cfeature
 from .ui_utils import set_sliderval_no_callback
 
-
 class VolumePlot:
 
     def __init__(self, X, Y, Z, V,
                  xl: float or None = None,
                  yl: float or None = None,
-                 zl: float or None = None):
+                 zl: float or None = None,):
         """
 
         Parameters:
@@ -28,11 +27,11 @@ class VolumePlot:
         Z : `numpy.ndarray`
         1d vector with z data
         V : `numpy.ndarray`
-        3D array with volumetric data 
+        3D array with volumetric data
         xl : float
-        X slice location. No slice is plotted if None. 
+        X slice location. No slice is plotted if None.
         Default None.
-        yl ( float ) : 
+        yl : float
         Y slice location. No slice is plotted if None.
         Default None.
         zl : float
@@ -172,6 +171,7 @@ class VolumePlot:
             cmap=self.cmap, norm=self.norm)
         self.ax['x'].set_xlabel("y")
         plt.setp(self.ax['x'].get_yticklabels(), visible=False)
+        self.ax['x'].invert_yaxis()
 
     def plot_ysl(self):
         self.slice['y'] = self.ax['y'].imshow(
@@ -181,6 +181,7 @@ class VolumePlot:
             cmap=self.cmap, norm=self.norm)
         self.ax['y'].set_xlabel("x")
         self.ax['y'].set_ylabel("z")
+        self.ax['y'].invert_yaxis()
 
     def plot_zsl(self):
         self.slice['z'] = self.ax['z'].imshow(
@@ -319,7 +320,7 @@ class VolumePlot:
 
 class VolumeExploration:
     
-    def __init__(self, X, Y, Z, V, xl=135, yl=37.5, zl=-50):
+    def __init__(self, X, Y, Z, V, xl=None, yl=None, zl=None):
         """ Control Panel that controls a volume plot.
 
         Args:
@@ -361,19 +362,22 @@ class VolumeExploration:
         self.slices['x']['ax'] = self.cp.add_subplot(self.gs[0, :])
         self.slices['x']['slider'] = Slider(self.slices['x']['ax'], r'x_l',
                                             self.vp.minX, self.vp.maxX,
-                                            valinit=np.mean(X),
-                                            valfmt='%f', valstep=np.diff(X)[0])
+                                            valinit=np.mean(self.vp.X),
+                                            valfmt='%f',
+                                            valstep=np.diff(self.vp.X)[0])
         self.slices['y']['ax'] = self.cp.add_subplot(self.gs[1, :])
         self.slices['y']['slider'] = Slider(self.slices['y']['ax'], r'y_l',
                                             self.vp.minY, self.vp.maxY,
-                                            valinit=np.mean(Y),
-                                            valfmt='%d', valstep=np.diff(Y)[0])
+                                            valinit=np.mean(self.vp.Y),
+                                            valfmt='%d',
+                                            valstep=np.diff(self.vp.Y)[0])
 
         self.slices['z']['ax'] = self.cp.add_subplot(self.gs[2, :])
         self.slices['z']['slider'] = Slider(self.slices['z']['ax'], r'y_l',
                                             self.vp.minZ, self.vp.maxZ,
-                                            valinit=np.mean(Z),
-                                            valfmt='%d', valstep=np.diff(Z)[0])
+                                            valinit=np.mean(self.vp.Z),
+                                            valfmt='%d',
+                                            valstep=np.diff(self.vp.Z)[0])
 
         self.cmap['checkbox']['ax'] = self.cp.add_subplot(self.gs[3, :])
         self.cmap['checkbox']['box'] = CheckButtons(
