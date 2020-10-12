@@ -17,7 +17,7 @@ class VolumePlot:
                  yl: float or None = None,
                  zl: float or None = None,
                  nancolor='w',
-                 cmap='coolwarm'):
+                 cmap='seismic'):
         """
 
         Parameters:

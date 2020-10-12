@@ -922,11 +922,31 @@ misspelled or not yet implemented')
                               glon: np.ndarray or list,
                               glat: np.ndarray or list,
                               gz: np.array or list,
-                              r: float or None):
+                              r: float or None,
+                              minillum: int or None = None):
         """Using the CCP kdtree, we get the closest few points and compute 
         the weighting using a distance metric. if points are too far away,
         they aren't weighted
 
+
+        Parameters
+        ----------
+        glon : np.ndarray or list
+            grid defining array for longitude
+        glat : np.ndarray or list
+            grid defining array for latitude
+        gz : np.array or list
+            grid defining array for z
+        r : float or None
+            outside r everything is nan
+        minillum: int or None, optional
+            Minimum number of illumation points use in the interpolation, 
+            everything below is downweighted by the square reciprocal
+
+        Returns
+        -------
+        [type]
+            [description]
         """
 
         # Get points array from CCPStack
@@ -941,7 +961,7 @@ misspelled or not yet implemented')
                               lat.ravel(), lon.ravel())
         xi, yi, zi = geo2cart((R_EARTH - mz.ravel())/R_EARTH,
                               mlat.ravel(), mlon.ravel())
-
+        
         # Create kdtree form source coordinates
         tree = cKDTree(np.c_[xs, ys, zs])
 
@@ -952,26 +972,60 @@ misspelled or not yet implemented')
         # Take things that are further than a certain distance
         V = np.sum(w * self.ccp.ravel()[inds], axis=1) / np.sum(w, axis=1)
 
+        # Taking the Illumination into account is easy peasy with this
+        # interpolation. Note that the all points above the minillumination
+        # value are multiplied by one and the rest are linearly decreased by 
+        # division by the minillumination value. Then, the illumination
+        # values below 1.0 are squared for a quadratic decrease
+        if minillum is not None:
+            illum = np.sum(w * self.hits.ravel()[inds], axis=1) / np.sum(w, axis=1)
+            mpos = np.where(illum <= minillum)
+            pos1 = np.where(illum > minillum)
+            illum[mpos] /= minillum
+            illum[pos1] = 1
+            V = V * illum ** 2
+
+        # Removes things that are too far from the samples.
         if r is not None:
             pos = np.where(d > r/R_EARTH)
             w[pos] = 0
             nanpos = np.where(np.sum(w, axis=1) == 0)[0]
-            print("Nanpos")
-            print(len(nanpos))
             V[nanpos] = np.nan
 
+        # Reshape!
         V.shape = mlat.shape
 
         return V
 
-    def explore(self, factor: float = 0.5, maxz: float or None = None):
+    def explore(self, factor: float = 0.5, maxz: float or None = None,
+                minillum: int or None = None):
         """Creates a volume exploration window set. One window is for all
         plots, and the other window is generated with sliders such that one
         can explore how future plots should be generated. It technically does
-        not require any inputs, as simply the binning size will be used to 
+        not require any inputs, as simply the binning size will be used to
         create a meshgrid fitting to the bin distance distribution.
-        One can however set a factor by which to divide the bin distance for a 
+        One can however set a factor by which to divide the bin distance for a
         finer grid.
+
+
+        Parameters:
+        -----------
+
+        factor: float, optional
+            Bingrid epicentral distance multiplier to refine grid. 
+            Defaults to 0.5.
+        maxz: float or None, optional
+            Maximum Depth if None, the max ccp bin depth is used. 
+            Defaults to None.
+        minillum: int or None, optional
+            Minimum number of illumation points use in the interpolation, 
+            everything below is downweighted by the square reciprocal
+
+        Returns
+        -------
+
+        VolumeExploration
+
         """
 
         # Get extent of the CCP Stack
@@ -989,14 +1043,68 @@ misspelled or not yet implemented')
         else:
             z = np.arange(np.min(self.z), maxz, res)
 
-        print("dx:", self.bingrid.edist * factor)
-        print("r: ", self.bingrid.edist * DEG2KM 2)
         # Compute the volume max radius at depth is z*0.33
         V = self.compute_kdtree_volume(glon=lons, glat=lats, gz=z,
-                                       r=self.bingrid.edist * DEG2KM * 2.0)
+                                       r=self.bingrid.edist * DEG2KM * 2.0,
+                                       minillum=minillum)
 
         # Launch plotting tool
-        VolumeExploration(lons, lats, z, V)
+        return VolumeExploration(lons, lats, z, V)
+
+    def plot_volume_sections(self, lon: np.ndarray, lat: np.ndarray,
+                             z: np.ndarray,
+                             lonsl: float or None = None,
+                             latsl: float or None = None,
+                             zsl: float or None = None,
+                             r: float or None = None,
+                             minillum: int or None = None):
+        """Creates the same plot as the `explore` tool, but(!) statically and
+        with more options left to the user.
+
+        !!! IT IS IMPORTANT for the plotting function that the input arrays
+        are monotonically increasing!!!
+
+        Parameters
+        ----------
+        lons : np.ndarray
+            Monotonically increasing ndarray. No failsafes implemented.
+        lats : np.ndarray
+            Monotonically increasing ndarray. No failsafes implemented.
+        z : np.ndarray
+            Monotonically increasing ndarray. No failsafes implemented.
+        lonsl : float or None, optional
+            Slice location, if None, the center of lon is used,
+            by default None
+        latsl : float or None, optional
+            Slice location, if None, the center of lat is used,
+            by default None
+        zsl : float or None, optional
+            Slice location, if None, the center of depth is used,
+            by default None
+        r : float or None, optional
+            Max radius for interpolation values taken into account [km],
+            if None bingrid.edist * DEG2KM * 2.0, by default None
+        minillum: int or None, optional
+            Minimum number of illumation points use in the interpolation, 
+            everything below is downweighted by the square reciprocal
+
+        Returns
+        -------
+        VolumePlot
+            [description]
+        """
+
+        # Change distance to delete things
+        if r is None:
+            r = self.bingrid.edist * DEG2KM * 2.0
+
+        # Compute the volume max radius at depth is z*0.33
+        V = self.compute_kdtree_volume(glon=lon, glat=lat, gz=z,
+                                       r=r, minillum=minillum)
+
+        return VolumePlot(lon, lat, z, V, xl=lonsl, yl=latsl, zl=zsl)
+
+
 
     def map_plot(
         self, plot_stations=False, plot_bins=False, plot_illum=False,
