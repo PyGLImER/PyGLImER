@@ -724,7 +724,7 @@ only show the progress per chunk.')
     def conclude_ccp(
         self, keep_empty=False, keep_water=False, r=0,
         multiple=False, z_multiple:int = 200):
-        """x
+        """
         Averages the CCP-bin and populates empty cells with average of
         neighbouring cells. No matter which option is
         chosen for the parameters, data is never lost entirely. One can always
