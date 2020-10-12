@@ -15,7 +15,9 @@ class VolumePlot:
     def __init__(self, X, Y, Z, V,
                  xl: float or None = None,
                  yl: float or None = None,
-                 zl: float or None = None,):
+                 zl: float or None = None,
+                 nancolor='w',
+                 cmap='coolwarm'):
         """
 
         Parameters:
@@ -104,7 +106,7 @@ class VolumePlot:
         self.minX, self.maxX = np.min(X), np.max(X)
         self.minY, self.maxY = np.min(Y), np.max(Y)
         self.minZ, self.maxZ = np.min(Z), np.max(Z)
-        self.minV, self.maxV = np.min(V), np.max(V)
+        self.minV, self.maxV = np.nanmin(V), np.nanmax(V)
         self.buffer = 0.1  # in fraction
         self.xbuffer = (self.maxX - self.minX) * self.buffer
         self.ybuffer = (self.maxY - self.minY) * self.buffer
@@ -113,11 +115,14 @@ class VolumePlot:
         self.linewidth = 1.5
 
         # Colormap settings
-        self.vmin0, self.vmax0 = [np.min(V), np.max(V)]
+        self.vmin0, self.vmax0 = [np.nanmin(V), np.nanmax(V)]
         self.vmin, self.vmax = self.vmin0, self.vmax0
         self.norm = matcolors.TwoSlopeNorm(
             vmin=self.vmin, vcenter=0.0, vmax=self.vmax)
-        self.cmap = plt.cm.coolwarm
+        self.cmapname = cmap
+        self.nancolor = nancolor
+        self.cmap = plt.get_cmap(self.cmapname)
+        self.cmap.set_bad(color=self.nancolor)
         self.mappable = cm.ScalarMappable(norm=self.norm, cmap=self.cmap)
         self.cbar = None
 
@@ -130,9 +135,9 @@ class VolumePlot:
         # Colorbar reset
         self.norm = matcolors.TwoSlopeNorm(
             vmin=self.vmin0, vcenter=0.0, vmax=self.vmax0)
-        self.cmap = plt.cm.coolwarm
+        self.cmap = plt.get_cmap(self.cmapname)
+        self.cmap.set_bad(color=self.nancolor)
         self.mappable = cm.ScalarMappable(norm=self.norm, cmap=self.cmap)
-
         # Update slices and lines
         self.update_xslice(self.xl0)
         self.update_yslice(self.yl0)
@@ -142,8 +147,8 @@ class VolumePlot:
 
         self.fig = plt.figure(figsize=(10, 10))
         self.ax["x"] = plt.subplot(224)
-        self.ax["y"] = plt.subplot(223)  # , sharey=self.axx)
-        self.ax["z"] = plt.subplot(221)  # , sharex=self.axy)
+        self.ax["y"] = plt.subplot(223)  # , sharey=self.ax['x'])
+        self.ax["z"] = plt.subplot(221)  # , sharex=self.ax['y'])
         self.ax["m"].update({"main": plt.subplot(222),
                              "inset": None})
 
@@ -167,7 +172,7 @@ class VolumePlot:
         self.slice['x'] = self.ax['x'].imshow(
             self.V[self.xli, :, :].T,
             extent=[self.minY, self.maxY, self.minZ, self.maxZ],
-            interpolation='nearest', origin='bottom', aspect='auto', 
+            interpolation='nearest', origin='bottom', aspect='auto',
             cmap=self.cmap, norm=self.norm)
         self.ax['x'].set_xlabel("y")
         plt.setp(self.ax['x'].get_yticklabels(), visible=False)
@@ -434,15 +439,15 @@ class VolumeExploration:
             self.cmap['neg']['slider'].set_val(vmin)
 
 # Sample volume                
-X = np.linspace(126.588, 152.46, 100)
-Y = np.linspace(30.063, 46.862, 100)
-Z = np.linspace(0, -100, 200)
-YY, XX, ZZ = np.meshgrid(Y, X, Z)
-V = np.sqrt(((XX - np.mean(X))/np.mean(np.abs(X)))**2
-            + ((YY - np.mean(Y))/np.mean(np.abs(Y)))**2
-            + ((ZZ - np.mean(Z))/np.mean(np.abs(Z)))**2) - 0.5 \
-    + 0.5 * np.sin(8*np.pi*((XX - np.mean(XX))/np.mean(np.abs(XX)))) \
-    + 0.5 * np.cos(8*np.pi*((YY - np.mean(YY))/np.mean(np.abs(YY))))
+# X = np.linspace(126.588, 152.46, 100)
+# Y = np.linspace(30.063, 46.862, 100)
+# Z = np.linspace(0, -100, 200)
+# YY, XX, ZZ = np.meshgrid(Y, X, Z)
+# V = np.sqrt(((XX - np.mean(X))/np.mean(np.abs(X)))**2
+#             + ((YY - np.mean(Y))/np.mean(np.abs(Y)))**2
+#             + ((ZZ - np.mean(Z))/np.mean(np.abs(Z)))**2) - 0.5 \
+#     + 0.5 * np.sin(8*np.pi*((XX - np.mean(XX))/np.mean(np.abs(XX)))) \
+#     + 0.5 * np.cos(8*np.pi*((YY - np.mean(YY))/np.mean(np.abs(YY))))
 
 
-vp = VolumeExploration(X, Y, Z, V, xl=135, yl=37.5, zl=-50)
+# vp = VolumeExploration(X, Y, Z, V, xl=135, yl=37.5, zl=-50)

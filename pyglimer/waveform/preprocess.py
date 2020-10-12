@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Wednesday, 22nd July 2020 03:07:49 pm
+Last Modified: Tuesday, 4th August 2020 06:44:54 pm
 '''
 
 #!/usr/bin/env python3d
@@ -72,7 +72,7 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
         "P" or "S"
     rot : string
         Coordinate system to cast seismogram in before deconvolution.
-        Options are "RTZ", "LQT", "LQT_min", or "PSS".
+        Options are "RTZ", "LQT", or "PSS".
     pol : string
         "h" for Sh or "v" for Sv, only for PRFs.
     taper_perc : FLOAT
@@ -479,7 +479,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
         ####
         try:
             # Rotate to LQT or PSS
-            if rot == "LQT_min":
+            if rot == "LQT":
                 st, ia = rotate_LQT_min(st, phase)
                 # additional QC
                 if ia < 5 or ia > 75:
@@ -487,14 +487,14 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
                     raise SNRError("""The estimated incidence angle is
                                    unrealistic with """ + str(ia) + 'degree.')
 
-            if rot == "LQT":
-                st, b = rotate_LQT(st, phase)
-                # addional QC
-                if b > 0.75 or b < 1.5:
-                    crit = False
-                    raise SNRError("""The energy ratio between Q and L
-                                   at theoretical arrival is too close
-                                   to 1 with """ + str(b) + '.')
+            # if rot == "LQT":
+            #     st, b = rotate_LQT(st, phase)
+            #     # addional QC
+            #     if b > 0.75 or b < 1.5:
+            #         crit = False
+            #         raise SNRError("""The energy ratio between Q and L
+            #                        at theoretical arrival is too close
+            #                        to 1 with """ + str(b) + '.')
 
             elif rot == "PSS":
                 avp, avs, st = rotate_PSV(

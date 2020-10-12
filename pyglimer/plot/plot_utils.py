@@ -302,7 +302,11 @@ def plot_section(rfst, channel="PRF",
         ax = plt.gca(zorder=999999)
 
     # Grab one component only
-    rfst_chan = rfst.select(channel=channel).sort(keys=['distance'])
+    rfst_chan = rfst.sort(channel=channel).sort(keys=['distance'])
+
+    if not len(rfst_chan):
+        raise ValueError('There are no receiver functions of channel ' +channel
+    +' in the RFStream.')
 
     # Plot traces
     for _i, rf in enumerate(rfst_chan):
@@ -485,7 +489,7 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
                 outputfile: None or str = None, format: str = "pdf", 
                 dpi: int = 300):
     """Uses backazimuth and rayparameter histogram plotting tools to create
-    combined overview over the Distribution ov incident waves.
+    combined overview over the Distribution of incident waves.
 
     Parameters:
     rayp: :class:`numpy.ndarray`
@@ -517,7 +521,7 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
     plt.title("Backazimuth distribution")
     plt.subplot(122, projection="polar")
     rayp_hist(rayp, nbins, v=v)
-    plt.title("Rayparameter distribution")
+    plt.title("Incident angle distribution")
     plt.tight_layout()
 
     if outputfile is None:

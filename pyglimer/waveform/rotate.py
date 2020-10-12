@@ -85,13 +85,14 @@ def rotate_PSV(statlat, statlon, rayp, st, phase):
         elif tr.stats.channel[2] == "T":
             tr.stats.channel = tr.stats.channel[0:2] + "H"
             tr.data = PSS[2]
-    PSvSh.normalize()
+    # PSvSh.normalize()
     return avp, avs, PSvSh
 
 
 def rotate_LQT(st, phase):
     """
     Rotates a stream given in RTZ to LQT using Singular Value Decomposition
+    Use rotate_LQT_min as it tends to deliver better results.
 
     Parameters
     ----------
@@ -118,7 +119,7 @@ def rotate_LQT(st, phase):
 
     # Deep copy stream & Normalise
     LQT = st.copy()
-    LQT.normalize()
+    #LQT.normalize()
     del st
 
     # only check around phase-arrival
@@ -235,7 +236,7 @@ def rotate_LQT_min(st, phase):
     pp1 = round((onset-2)/dt)
     pp2 = round((onset+10)/dt)
     LQT = st.copy()
-    LQT.normalize()
+    #LQT.normalize()
     del st
 
     # identify components

@@ -34,7 +34,7 @@ from obspy.taup import TauPyModel
 from scipy.signal.windows import hann
 
 from pyglimer.rf.deconvolve import it, spectraldivision, multitaper, gen_it
-from pyglimer.rf.moveout import DEG2KM, maxz, res, moveout, dt_table, dt_table_3D
+from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table, dt_table_3D
 from pyglimer.plot.plot_utils import plot_section, plot_single_rf, stream_dist
 
 logger = logging.Logger("rf")
@@ -190,7 +190,7 @@ def createRF(st_in, phase, pol='v', onset=None,
     elif method == 'fqd':
         RF[0].data, lrf = spectraldivision(v, u, dt, shift, "fqd", phase=phase[-1])
     elif method == 'multit':
-        RF[0].data, lrf, _, _ = multitaper(v, u, dt, shift, "fqd")
+        RF[0].data, lrf, _, _ = multitaper(v, u, dt, shift, "con")
         # remove noise caused by multitaper
         RF.filter('lowpass', freq=2.50, zerophase=True, corners=2)
     else:
@@ -592,8 +592,12 @@ class RFStream(Stream):
         """
 
         st = self[0].stats
-        latb = (st.station_latitude-10, st.station_latitude+10)
-        lonb = (st.station_longitude-20, st.station_longitude+20)
+        if vmodel_file == 'iasp91.dat' or vmodel_file == 'raysum.dat':
+            latb = None
+            lonb = None
+        else:
+            latb = (st.station_latitude-10, st.station_latitude+10)
+            lonb = (st.station_longitude-20, st.station_longitude+20)
 
         z, RF_mo = self.moveout(
             vmodel=vmodel_file, latb=latb, lonb=lonb, multiple=multiple)
@@ -608,7 +612,7 @@ class RFStream(Stream):
             stack = np.average(traces, axis=0)
         elif multiple == 'linear':
             continue_again = False
-            ii = np.where(z == 100)[0][0]  # maximal depth for multiples
+            ii = np.where(z == maxzm)[0][0]  # maximal depth for multiples
             for tr in RF_mo:
                 if tr.stats.channel == 'm1' or tr.stats.channel == 'm2':
                     if tr.stats.type == 'empty':
@@ -628,7 +632,7 @@ class RFStream(Stream):
                     traces.append(tempdata)
             stack = np.average(traces, axis=0)
         elif multiple == 'zk':
-            ii = np.where(z == 100)[0][0]
+            ii = np.where(z == maxzm)[0][0]
             continue_again = False
             for tr in RF_mo:
                 tempdata = deepcopy(tr.data)
@@ -650,6 +654,19 @@ class RFStream(Stream):
                     tempdata[:ii] = tempdata[:ii]*.7
                 traces.append(tempdata)
             stack = np.average(traces, axis=0)*3
+        # Only use multiples (no stacking of several modes)
+        elif multiple == 'm1' or multiple == 'm2':
+            for tr in RF_mo:
+                if tr.stats.channel == multiple:
+                    traces.append(tr.data)
+            stack = np.average(traces, axis=0)
+        elif multiple == 'm':
+            for tr in RF_mo:
+                if tr.stats.channel[0] == 'm':
+                    traces.append(tr.data)
+            stack = np.average(traces, axis=0)
+        elif multiple != False:
+            raise ValueError('Unknown multiple mode: '+multiple)
 
         stack = RFTrace(data=stack, header=self[0].stats)
         stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0),
@@ -711,7 +728,7 @@ class RFStream(Stream):
             ax = plot_section(
                 self, timelimits=lim, epilimits=epilimits,
                 scalingfactor=scalingfactor, line=line, linewidth=linewidth,
-                ax=ax, outputdir=outputdir)
+                ax=ax, outputdir=outputdir, channel=channel)
         return ax
 
     def plot_distribution(self, nbins=50, phase="P",
@@ -746,8 +763,14 @@ class RFStream(Stream):
         baz = []
 
         for rf in self:
+            if rf.stats.phase != phase:
+                continue
             rayp.append(rf.stats.slowness / DEG2KM)
             baz.append(rf.stats.back_azimuth)
+        
+        if not len(baz):
+            raise ValueError('No Receiver Functions of Phase '+phase+
+                             ' found, did you choose the right phase?')
 
         stream_dist(np.array(rayp), np.array(baz), nbins=nbins, v=v,
                     outputfile=outputfile, format=format,  dpi=dpi)
@@ -998,7 +1021,6 @@ class RFTrace(Trace):
         else:
             st.pp_depth = np.arange(-round(st.station_elevation/1000),
                                     maxz + res, res)[0:len(delta)]
-        # np.arange(0, maxz + res, res)[0:len(delta)]
 
         # Calculate ppoint position
         for dis in delta:

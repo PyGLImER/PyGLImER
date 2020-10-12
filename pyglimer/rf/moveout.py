@@ -100,13 +100,25 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         tas = -tas
 
     # Shorten RF
-    if len(z)+tas <= len(data):
-        RF = data[tas:tas+len(z)]
+    data = data[tas:]
+
+    # Taper the first 4 seconds
+    i = round(4/st.delta)  # Find where rf is depth = 5
+    tap = hann((i+1)*2)
+    up, _ = np.split(tap, 2)
+    if len(data) > len(up):  # That usually doesn't happen, only for extreme
+        # discontinuities in 3D model and errors in SRF data
+        taperfun = np.ones(len(data))
+        taperfun[:len(up)] = up
+        data = np.multiply(taperfun, data)
+
+    if len(z) <= len(data):
+        RF = data[:len(z)]
     else:  # truncate z not RF
         # 16.07.2020 this shouldn't be happening, but I'm experiencing an error
         # that might be prevented here
-        z = z[:len(data[tas:])]
-        RF = data[tas:len(z)]
+        z = z[:len(data)]
+        RF = data[:len(z)]
         
     if round(min(z), int(-np.log10(res))) <= 0:
         zq = np.hstack((np.arange(min(z), 0, .1), np.arange(0, max(z)+res, res)))
@@ -117,6 +129,7 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         # lowpass filter see Tauzin et. al. (2016)
         RF = lowpass(RF, 1, st.sampling_rate, zerophase=True)
     # interpolate RF
+    
     try:
         tck = interpolate.splrep(z, RF)
 
@@ -141,31 +154,31 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         if htab[len(dtm1)-1] > maxzm:
             dtm1 = dtm1[:np.where(htab>=maxzm)[0][0]]
         if htab[len(dtm2)-1] > maxzm:
-            dtm1 = dtm2[:np.where(htab>=maxzm)[0][0]]
-        if phase == 'P':
-            tqm1 = np.arange(0, round(max(dtm1)+st.delta, 1), st.delta)
-            tqm2 = np.arange(0, round(max(dtm2)+st.delta, 1), st.delta)
-            zm1 = np.interp(tqm1, dtm1, htab[:len(dtm1)])
-            zm2 = np.interp(tqm2, dtm2, htab[:len(dtm2)])
-            # truncate RF
-            RFm1 = data[tas:tas+len(zm1)]
-            RFm2 = data[tas:tas+len(zm2)]
-        else:
-            # For SRFs that's a bit more complicated as multiples arrive
-            # after first arrival, whereas conversions arrive before
-            tqm1 = np.arange(round(min(dtm1), 1), st.delta/2, st.delta)
-            tqm2 = np.arange(round(min(dtm2), 1), st.delta/2, st.delta)
-            zm1 = np.interp(tqm1, np.flip(dtm1), np.flip(htab[:len(dtm1)]))
-            zm2 = np.interp(tqm2, np.flip(dtm2), np.flip(htab[:len(dtm2)]))
-            # truncate RFs
-            RFm1 = data[tas-len(zm1):tas]
-            RFm2 = data[tas-len(zm2):tas]
-            # Now they need to be flipped again, so the deepest depth are at
-            # the end
-            zm1 = np.flip(zm1)
-            zm2 = np.flip(zm2)
-            RFm1 = np.flip(RFm1)
-            RFm2 = np.flip(RFm2)
+            dtm2 = dtm2[:np.where(htab>=maxzm)[0][0]]
+        # if phase == 'P':
+        tqm1 = np.arange(0, round(max(dtm1)+st.delta, 1), st.delta)
+        tqm2 = np.arange(0, round(max(dtm2)+st.delta, 1), st.delta)
+        zm1 = np.interp(tqm1, dtm1, htab[:len(dtm1)])
+        zm2 = np.interp(tqm2, dtm2, htab[:len(dtm2)])
+        # truncate RF
+        RFm1 = data[:len(zm1)]
+        RFm2 = data[:len(zm2)]
+        # else:
+        #     # For SRFs that's a bit more complicated as multiples arrive
+        #     # after first arrival, whereas conversions arrive before
+        #     tqm1 = np.arange(round(min(dtm1), 1), st.delta/2, st.delta)
+        #     tqm2 = np.arange(round(min(dtm2), 1), st.delta/2, st.delta)
+        #     zm1 = np.interp(tqm1, np.flip(dtm1), np.flip(htab[:len(dtm1)]))
+        #     zm2 = np.interp(tqm2, np.flip(dtm2), np.flip(htab[:len(dtm2)]))
+        #     # truncate RFs
+        #     RFm1 = data[-len(zm1):tas]
+        #     RFm2 = data[tas-len(zm2):tas]
+        #     # Now they need to be flipped again, so the deepest depth are at
+        #     # the end
+        #     zm1 = np.flip(zm1)
+        #     zm2 = np.flip(zm2)
+        #     RFm1 = np.flip(RFm1)
+        #     RFm2 = np.flip(RFm2)
         # lowpass filter see Tauzin et. al. (2016)
         RFm1 = lowpass(RFm1, .2, st.sampling_rate, zerophase=True)
         RFm2 = lowpass(RFm2, .2, st.sampling_rate, zerophase=True)
@@ -209,23 +222,6 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
             taper = np.ones(len(RF))
             taper[-len(down):] = down
             RF = np.multiply(taper, RF)
-    
-    else:
-        # Taper the upper 5 km
-        i = np.where(z>=5)[0][0]  # Find where rf is depth = 5
-        # tap = hann((i+1)*2)
-        if i >= 4:  # Some OBSs might be lower than that
-            tap = hann(8)
-            up, _ = np.split(tap, 2)
-            up = np.hstack((np.zeros(i-3), up))
-            if len(RF) > len(up):  # That usually doesn't happen, only for extreme
-                # discontinuities in 3D model and errors in SRF data
-                taper = np.ones(len(RF))
-                taper[:len(up)] = up
-                RF = np.multiply(taper, RF)
-                if multiple:
-                    RFm1 = np.multiply(taper[:len(RFm1)], RFm1)
-                    RFm2 = np.multiply(taper[:len(RFm2)], RFm2)
 
     z2 = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
     RF2 = np.zeros(z2.shape)
@@ -256,7 +252,7 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
     delta2.fill(np.nan)
     delta2[starti:starti+len(delta)] = delta
 
-    return z2, RF2, delta2, RFm1_2, RFm1_2
+    return z2, RF2, delta2, RFm1_2, RFm2_2
 
 
 def dt_table_3D(
@@ -381,8 +377,8 @@ def dt_table_3D(
             # Supercritical, can really only happen for q_a
             delta = delta[:kk+1]
             break
-
-        # dt[kk+1] = (q_b[kk]-q_a[kk])*res_f[kk]
+        
+        # travel time for P and S, respectively through dz
         dt_a[kk+1] = q_a[kk]*res_f[kk]
         dt_b[kk+1] = q_b[kk]*res_f[kk]
     
@@ -399,14 +395,23 @@ def dt_table_3D(
         # mphase 1 is PPs for P and SSp for S
         # mphase 2 is PSs, and SPp, respectively
         if phase == 'P':
-            dt_mphase1 = dt + 2*dt_a
-            dt_mphase2 = dt + dt_b + dt_a
+            # dt_mphase1 = dt + 2*dt_a
+            # dt_mphase2 = dt + dt_b + dt_a
+            # The two are the same, first one just overly complicated
+            dt_mphase1 = dt_b + dt_a
+            dt_mphase2 = 2*dt_b
             # Truncate The travel time table for multiples
-            # if dt_mphase1.max() > 60:
-            #     dt_mphase1 = dt_mphase1[:np.where(dt_mphase1>=60)[0][0]]
-            #     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=60)[0][0]]
-            # elif dt_mphase2.max() > 60:
-            #     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=60)[0][0]]               
+            # if dt_mphase1.max() > 100 or dt_mphase2.max() > 100:
+            try:
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1>=100)[0][0]]
+            except IndexError:
+                pass
+            try:
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=100)[0][0]]
+            except IndexError:
+                pass
+            # elif dt_mphase2.max() > 100:
+            #     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=100)[0][0]]               
         else:
             # Reduce travel times for S since the data will be flipped
             dt_mphase1 = dt - 2*dt_b
@@ -415,11 +420,10 @@ def dt_table_3D(
                 dt_mphase1 = dt_mphase1[:np.where(dt_mphase1<=-50)[0][0]]
                 dt_mphase2 = dt_mphase2[:np.where(dt_mphase2<=-50)[0][0]]
             elif dt_mphase1.min() < -50:
-                dt_mphase1 = dt_mphase2[:np.where(dt_mphase1<=-50)[0][0]]
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1<=-50)[0][0]]
     else:
         dt_mphase1 = None
         dt_mphase2 = None
-    # dt = np.cumsum(dt)[:len(delta)]
 
     return htab[:len(delta)], dt, delta, dt_mphase1, dt_mphase2
 
@@ -440,6 +444,14 @@ def dt_table(rayp, fname, phase, el, multiple:bool, debug=False):
         1D velocity model, located in data/vmodels.
     phase : string
         Either "S" for Sp or "P" for Ps.
+    el : float
+        station elevation in m.
+    multiple : bool
+        Compute conversion time for PPS and PSS.
+    debug : bool, optional
+        If True, A Cartesioan rather than a spherical Earth is assumed. By
+        default False.
+
 
     Returns
     -------
@@ -528,14 +540,21 @@ def dt_table(rayp, fname, phase, el, multiple:bool, debug=False):
         # mphase 1 is PPs for P and SSp for S
         # mphase 2 is PSs, and SPp, respectively
         if phase == 'P':
-            dt_mphase1 = dt + 2*dt_a
-            dt_mphase2 = dt + dt_b + dt_a
+            dt_mphase1 = dt_b + dt_a
+            dt_mphase2 = 2*dt_b
             # Truncate The travel time table for multiples
-            if dt_mphase1.max() > 60:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1>=60)[0][0]]
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=60)[0][0]]
-            elif dt_mphase2.max() > 60:
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=60)[0][0]]               
+            # if dt_mphase1.max() > 100 or dt_mphase2.max() > 100:
+            try:
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1>=100)[0][0]]
+            except IndexError:
+                pass
+            try:
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=100)[0][0]]
+            except IndexError:
+                pass
+            # elif dt_mphase2.max() > 100:
+            #     print('h2')
+            #     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=100)[0][0]]               
         else:
             # Reduce travel times for S since the data will be flipped
             dt_mphase1 = dt - 2*dt_b
@@ -544,7 +563,7 @@ def dt_table(rayp, fname, phase, el, multiple:bool, debug=False):
                 dt_mphase1 = dt_mphase1[:np.where(dt_mphase1<=-50)[0][0]]
                 dt_mphase2 = dt_mphase2[:np.where(dt_mphase2<=-50)[0][0]]
             elif dt_mphase1.min() < -50:
-                dt_mphase1 = dt_mphase2[:np.where(dt_mphase1<=-50)[0][0]]
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase1<=-50)[0][0]]
         dt_mphase1 = dt_mphase1[:index]
         dt_mphase2 = dt_mphase2[:index]
     else:

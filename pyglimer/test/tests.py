@@ -190,7 +190,7 @@ def read_geom(geom_file,phase):
 
 
 def rf_test(
-        phase, dip, rfloc='output/waveforms/RF', geom_file='3D.geom'):
+        phase, dip, rfloc='output/waveforms/RF', geom_file='3D.geom', decon_meth='it'):
     """
     Creates synthetic PRFs from Raysum data.
 
@@ -282,7 +282,7 @@ def rf_test(
             'rdelta': [np.nan], 'ot_ret': [0], 'magnitude': [np.nan],
             'evt_depth': [np.nan], 'evtlon': [np.nan], 'evtlat': [np.nan]}
 
-        rf = createRF(s, phase=phase, method='it', info=info)
+        rf = createRF(s, phase=phase, method=decon_meth, info=info)
 
         # Write RF
         rf.write(os.path.join(odir, str(i)+'.sac'), format='SAC')
@@ -347,7 +347,7 @@ def ccp_test(phase, dip, geom_file='3D.geom', multiple=False, use_old_rfs=True):
     ccp.compute_stack(
         'raysum.dat', network='raysum', station=str(dip), save=False, multiple=multiple)
     print('ccp stack concluded')
-    ccp.conclude_ccp(r=1, keep_water=True)
+    ccp.conclude_ccp(r=0, keep_water=True)
     ccp.write('raysum'+phase+str(dip))
     return ccp
 
@@ -455,7 +455,7 @@ def decon_test(PSS_file, phase, method):
             data, IR, iters, rej = gen_it(u, v, dt, phase=phase, shift=shift)
             lrf = None
         elif method == "fqd" or method == "wat" or method == "con":
-            data, lrf = spectraldivision(v, u, dt, shift, phase=phase, regul=method)
+            data, lrf = spectraldivision(v, u, dt, shift, phase=phase, regul=method, test=True)
         elif method == "multit_fqd":
             data, lrf, _, _ = multitaper(u, v, dt, shift, 'fqd')
             data = lowpass(data, 4.99, 1/dt, zerophase=True)
@@ -464,14 +464,21 @@ def decon_test(PSS_file, phase, method):
             data = lowpass(data, 4.99, 1/dt, zerophase=True)
         else:
             raise NameError
-        if lrf is not None:
-            # Normalisation for spectral division and multitaper
-            # In order to do that, we have to find the factor that is necassary to
-            # bring the zero-time pulse to 1
-            fact = abs(lrf).max() #[round(shift/dt)]
-            print(fact)
-            data = data/fact
-        RF.append(data)
+        # if lrf is not None:
+        #     # Normalisation for spectral division and multitaper
+        #     # In order to do that, we have to find the factor that is necassary to
+        #     # bring the zero-time pulse to 1
+        #     fact = abs(lrf).max() #[round(shift/dt)]
+        #     data = data/fact
+        RF.append(RFTrace(data))
+        RF[-1].stats.delta = dt
+        RF[-1].stats.starttime = UTCDateTime(0)
+        RF[-1].stats.onset = UTCDateTime(0) + shift
+        RF[-1].stats.type = 'time'
+        RF[-1].stats.phase = phase
+        RF[-1].stats.channel = phase + 'RF'
+        RF[-1].stats.network = 'RS'
+    RF = RFStream(RF)
     return RF, dt
 
 
@@ -518,7 +525,7 @@ def read_rfs_mat(filename, path='output/ccps',
     Yields
     ------
     rf : RFTrace
-        RFTracec object, one per receiver function.
+        RFTrace object, one per receiver function.
     i : int
         position in .mat.
 
@@ -547,3 +554,37 @@ def read_rfs_mat(filename, path='output/ccps',
         rf.stats.starttime = UTCDateTime(0)
         rf.stats.onset = UTCDateTime(30)
         rf.write(out+str(i)+'.sac', 'SAC')
+
+
+# def test_rot(NEZ_file:str, phase:str, rot:str, baz:float, rayp:float):
+#     NEZ, dt, M, N, shift = read_raysum(phase, NEZ_file=NEZ_file)
+#     if M>1:
+#         NEZ = NEZ[0]
+#     stream = []
+#     for tr in NEZ:
+#         stats = Stats()
+#         stats.npts = N
+#         stats.delta = dt
+#         stats.starttime = UTCDateTime(0)
+#         stats.channel = ch[j]
+#         stats.network = 'RS'
+#         stats.station = 'rot'
+#         stream.append(Trace(data=tr, header=stats))
+#     stream = Stream(stream)
+#     RTZ = stream.rotate
+#     if rot=='PSS'
+
+# def rot_PSS(avp, avs, rayp, RTZ):
+#     # Do the rotation as in Rondenay (2009)
+#     qa = np.sqrt(1 / avp ** 2 - rayp ** 2)
+#     qb = np.sqrt(1 / avs ** 2 - rayp ** 2)
+#     a = avs ** 2 * rayp ** 2 - .5
+#     rotmat = np.array([[-a / (avp * qa), rayp * avs ** 2 / avp, 0],
+#                        [-rayp * avs, -a / (avs * qb), 0],
+#                        [0, 0, 0.5]])
+#     A_in = np.array([RTZ[2],
+#                      RTZ[0],
+#                      RTZ[1]])
+#     PSS = np.dot(rotmat, A_in)
+
+#     return PSS, rotmat

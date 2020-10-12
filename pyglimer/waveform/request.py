@@ -50,9 +50,8 @@ class Request(object):
         :type phase: str
         :param rot: The coordinate system in that the seismogram should be rotated
             prior to deconvolution. Options are "RTZ" for radial, transverse,
-            vertical; "LQT" for an orthogonal coordinate system computed using
-            singular value decomposition, "LQT_min" for an orthogonal
-            coordinate system computed by minimising primary energy on the
+            vertical; "LQT" for an orthogonal coordinate system computed by
+            minimising primary energy on the
             converted component, or "PSS" for a rotation along the polarisation
             directions using the Litho1.0 surface wave tomography model.
         :type rot: str
@@ -140,7 +139,7 @@ class Request(object):
         # Set velocity model
         self.model = TauPyModel('iasp91')
 
-        self.phase = phase.upper()
+        self.phase = phase[:-1] + phase[-1].upper()
         self.pol = pol.lower()
         self.rot = rot.upper()
         self.deconmeth = deconmeth
@@ -185,14 +184,15 @@ class Request(object):
             self.max_epid = 80
             self.tz = 120
         # (see Yuan et al. 2006)
-        elif self.phase == 'SCS':
+        elif self.phase.upper() == 'SCS':
             self.maxdepth = 300
             self.min_epid = 50
             self.max_epid = 75
             self.tz = 120
-        elif self.phase == 'SKS':
+        elif self.phase.upper() == 'SKS':
+            # (see Zhang et. al. (2014))
             self.maxdepth = 300
-            self.min_epid = 85
+            self.min_epid = 90 
             self.max_epid = 120
             self.tz = 120
         else:
