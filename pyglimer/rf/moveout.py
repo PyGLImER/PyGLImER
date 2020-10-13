@@ -102,8 +102,8 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
     # Shorten RF
     data = data[tas:]
 
-    # Taper the first 4 seconds
-    i = round(4/st.delta)  # Find where rf is depth = 5
+    # Taper the first 2.5 seconds
+    i = round(2.5/st.delta)  # Find where rf is depth = 5
     tap = hann((i+1)*2)
     up, _ = np.split(tap, 2)
     if len(data) > len(up):  # That usually doesn't happen, only for extreme
@@ -180,8 +180,8 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         #     RFm1 = np.flip(RFm1)
         #     RFm2 = np.flip(RFm2)
         # lowpass filter see Tauzin et. al. (2016)
-        RFm1 = lowpass(RFm1, .2, st.sampling_rate, zerophase=True)
-        RFm2 = lowpass(RFm2, .2, st.sampling_rate, zerophase=True)
+        RFm1 = lowpass(RFm1, .25, st.sampling_rate, zerophase=True)
+        RFm2 = lowpass(RFm2, .25, st.sampling_rate, zerophase=True)
         try:
             tckm1 = interpolate.splrep(zm1, RFm1)
             tckm2 = interpolate.splrep(zm2, RFm2)

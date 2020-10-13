@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Wednesday, 9th September 2020 11:39:57 am
+Last Modified: Monday, 21st September 2020 01:50:08 pm
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,7 +39,9 @@ def set_mpl_params():
     matplotlib.rcParams.update(params)
 
 
-def plot_map(cl=0.0, lat=None, lon=None, profile=None, p_direct=True, geology=False):
+def plot_map(
+    cl=0.0, lat=None, lon=None, profile=None, p_direct=True, geology=False,
+    states=False):
     """plot a map"""
     ax = plt.gca()
     if lat and lon:
@@ -89,6 +91,8 @@ def plot_map(cl=0.0, lat=None, lon=None, profile=None, p_direct=True, geology=Fa
     if geology:
         ax.add_wms(
             wms='https://mrdata.usgs.gov/services/worldgeol?', layers=['geology'], zorder=-2)
+    if states:
+        ax.add_feature(feature=cartopy.feature.STATES, linewidth=0.25, zorder=-2)
     if profile:
         if type(profile) == tuple:
             if p_direct:
@@ -210,7 +214,7 @@ def plot_station_db(slat, slon, lat:tuple or None=None, lon:tuple or None=None,
     else:
         if format in ["pdf", "epsg", "svg", "ps"]:
             dpi = None
-        plt.savefig(outputfile, format=format, dpi=dpi)
+        plt.savefig(outputfile, format=format, dpi=dpi, bbox_inches='tight')
 
 
 def plot_map_ccp(
@@ -225,7 +229,7 @@ def plot_map_ccp(
     plt.subplot(projection=PlateCarree(central_longitude=cl))
     ax = plot_map(
         cl=cl, lat=lat, lon=lon, profile=profile, p_direct=p_direct,
-        geology=geology)
+        geology=geology, states=True)
     if bins:
         plot_bins(bincoords[0], bincoords[1], cl=cl)
     if illum:
@@ -244,7 +248,7 @@ def plot_map_ccp(
     else:
         if format in ["pdf", "epsg", "svg", "ps"]:
             dpi = None
-        plt.savefig(outputfile, format=format, dpi=dpi)
+        plt.savefig(outputfile, format=format, dpi=dpi, bbox_inches='tight')
 
 
 def plot_vel_grad(
@@ -280,7 +284,7 @@ def plot_vel_grad(
     fig = plt.figure(figsize=(9,4.5))
 
     plt.subplot(projection=PlateCarree(central_longitude=cl))
-    ax = plot_map(cl=cl, lat=lat, lon=lon, geology=geology)
+    ax = plot_map(cl=cl, lat=lat, lon=lon, geology=geology, states=True)
     # plot depth distribution or amplitude?
     if plot_amplitude:
         data = a
@@ -298,4 +302,4 @@ def plot_vel_grad(
     else:
         if format in ["pdf", "epsg", "svg", "ps"]:
             dpi = None
-        plt.savefig(outputfile, format=format, dpi=dpi)
+        plt.savefig(outputfile, format=format, dpi=dpi, bbox_inches='tight')

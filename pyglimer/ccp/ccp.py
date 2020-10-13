@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Wednesday, 9th September 2020 11:29:56 am
+Last Modified: Tuesday, 15th September 2020 03:54:20 pm
 '''
 
 #!/usr/bin/env python3
