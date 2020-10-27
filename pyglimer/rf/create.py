@@ -775,6 +775,34 @@ class RFStream(Stream):
         stream_dist(np.array(rayp), np.array(baz), nbins=nbins, v=v,
                     outputfile=outputfile, format=format,  dpi=dpi)
 
+    def __dirty_ccp_stacks(self, binlon, binlat, binz):
+        """This is the simplest way of creating quick not really accurate 
+        CCP stacks.
+
+        This function is still empty, but I'm leaving it here, because I think
+        it should be implemented. Sometime this week maybe
+
+        Parameters:
+        binlon:  `numpy.ndarray`
+        1D Array describing the longitude bins
+        binlon:  `numpy.ndarray`
+        1D Array describing the latitude bins
+        binlon:  `numpy.ndarray`
+        1D Array describing the depth bins
+
+        Returns:
+        V : 3D `numpy.ndarray`
+
+        """
+
+        # Check whether moveout and piercing points have been computed.
+        """Then, use a 3d histogram to create stacks, and create them quickly
+        
+        """
+
+        # If yes, use to populated a volume histogramdd 
+
+        # output volume data
 
 class RFTrace(Trace):
     """

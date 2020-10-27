@@ -139,7 +139,7 @@ def plot_stations(slat, slon, cl=0.0):
     #ax = plot_map()
     ax = plt.gca()
     ax.scatter(slon, slat, s=13, marker='v', c=((0.7, 0.2, 0.2),),
-                edgecolors='k', linewidths=0.25, zorder=-1, label='stations')
+               edgecolors='k', linewidths=0.25, zorder=-1, label='stations')
 
 
 def plot_bins(binlat, binlon, cl=0.0):

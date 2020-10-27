@@ -10,3 +10,4 @@ Last updated:
 """
 
 from .ccp import CCPStack
+from .ccp import init_ccp  # NOQA

@@ -489,7 +489,7 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
                 outputfile: None or str = None, format: str = "pdf", 
                 dpi: int = 300):
     """Uses backazimuth and rayparameter histogram plotting tools to create
-    combined overview over the Distribution ov incident waves.
+    combined overview over the Distribution of incident waves.
 
     Parameters:
     rayp: :class:`numpy.ndarray`
