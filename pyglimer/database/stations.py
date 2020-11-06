@@ -174,7 +174,7 @@ class StationDB(object):
                 o = 'S'
             elif self.phase == 'S':
                 o = 'P'
-            elif self.phase= 'SKS':
+            elif self.phase == 'SKS':
                 o = 'SKS'
             else:
                 raise ValueError('Phase '+self.phase+' not supported.')
