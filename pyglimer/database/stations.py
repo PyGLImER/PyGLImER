@@ -115,8 +115,8 @@ class StationDB(object):
         
         if phase:
             self.phase = phase.upper()           
-        else:
-            self.phase = phase
+        #else:
+        #   self.phase = phase
         
         # 1. Initiate logger
         self.logger = logging.Logger(
@@ -174,6 +174,8 @@ class StationDB(object):
                 o = 'S'
             elif self.phase == 'S':
                 o = 'P'
+            elif self.phase= 'SKS':
+                o = 'SKS'
             else:
                 raise ValueError('Phase '+self.phase+' not supported.')
             
@@ -242,7 +244,7 @@ class StationDB(object):
                                        info['network'] + '.' + info['station']])
 
         # Check data availability of SRFs
-        for root, _, files in os.walk(folderS):
+        for root,_ , files in os.walk(folderS):
             if 'info.dat' not in files:
                 continue  # Skip parent folders or empty folders
             infof = (os.path.join(root, 'info'))
