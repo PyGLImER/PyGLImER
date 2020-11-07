@@ -170,7 +170,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
             stat = read_inventory(os.path.join(statloc, file))
         except TypeError as e:
             print("Corrupt station xml, original error message: "+
-            e)
+            str(e))
         lats.append(stat[0][0].latitude)
         lons.append(stat[0][0].longitude)
     
