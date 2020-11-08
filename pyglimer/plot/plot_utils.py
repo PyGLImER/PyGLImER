@@ -24,7 +24,7 @@ from pyglimer.constants import maxz, res
 
 def set_mpl_params():
     params = {
-        'font.family': 'Avenir Next',
+        #'font.family': 'Avenir Next',
         'pdf.fonttype': 42,
         'font.weight': 'bold',
         'figure.dpi': 150,
