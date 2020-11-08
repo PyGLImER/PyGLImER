@@ -185,7 +185,6 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
 
     # Use times depending on phase and moveout correction
     ydata = rf.data
-    print(rf.stats.type)
     if rf.stats.type == 'time':
         # Get times
         times = rf.times() - (rf.stats.onset - rf.stats.starttime)
@@ -229,7 +228,11 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
         else:
             ax.set_xlabel("Conversion Depth [km]")
         ax.set_ylabel("A    ", rotation=0)
-        text = rf.stats.starttime.isoformat(sep=" ") + "\n" + rf.get_id()
+        # Start time in station stack does not make sense
+        if rf.stats.type == 'stastack':
+            text = rf.get_id()
+        else:
+            text = rf.stats.starttime.isoformat(sep=" ") + "\n" + rf.get_id()
         ax.text(0.995, 1.0-0.005*ratio, text, transform=ax.transAxes,
                 horizontalalignment="right", verticalalignment="top")
 
@@ -302,7 +305,9 @@ def plot_section(rfst, channel="PRF",
         ax = plt.gca(zorder=999999)
 
     # Grab one component only
-    rfst_chan = rfst.sort(channel=channel).sort(keys=['distance'])
+    # That doesn't work anymore. Was there an update in the obspy function?
+    # rfst_chan = rfst.sort(channel=channel).sort(keys=['distance'])
+    rfst_chan = rfst.sort(keys=['distance'])
 
     if not len(rfst_chan):
         raise ValueError('There are no receiver functions of channel ' +channel
