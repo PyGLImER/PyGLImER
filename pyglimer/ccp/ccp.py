@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 15th September 2020 03:54:20 pm
+Last Modified: Monday, 9th November 2020 11:17:32 am
 '''
 
 #!/usr/bin/env python3
@@ -1247,7 +1247,8 @@ class PhasePick(object):
 
     def plot(
         self, plot_amplitude:bool=False, outputfile:str or None=None,
-        format='pdf', dpi=300, cmap:str='gist_rainbow', geology=False):
+        format='pdf', dpi=300, cmap:str='gist_rainbow', geology=False,
+        title:str or None=None):
         """
         Plot heatmap containing depth or amplitude of picked phase.
 
@@ -1265,6 +1266,7 @@ class PhasePick(object):
             Colormap
         geology : bool, optional
             Plot geological map.
+        title
         """
         lat = (
             np.floor(min(self.coords[0][0]))-1, np.ceil(max(self.coords[0][0])+1))
@@ -1273,4 +1275,4 @@ class PhasePick(object):
         
         plot_vel_grad(
             self.coords, self.a, self.z, plot_amplitude, lat, lon, outputfile,
-            dpi=dpi, format=format, cmap=cmap, geology=geology)
+            dpi=dpi, format=format, cmap=cmap, geology=geology, title=title)

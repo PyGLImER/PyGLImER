@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Monday, 21st September 2020 01:50:08 pm
+Last Modified: Monday, 9th November 2020 11:28:58 am
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -254,7 +254,7 @@ def plot_map_ccp(
 def plot_vel_grad(
     coords, a, z, plot_amplitude:bool, lat:tuple or None, lon:tuple or None,
     outputfile=None, format='pdf', dpi=300, cmap:str='gist_rainbow',
-    geology=False):
+    geology=False,title=None):
     """
     Plot velocity gradient. Use method implemented into object!
 
@@ -294,6 +294,7 @@ def plot_vel_grad(
     plot_scattered_colormap(
         coords[0][0], coords[1][0], data, amplitude=plot_amplitude, cmap=cmap)
     plt.legend()
+    plt.title(title,fontdict={'fontweight': 'bold'})
     plt.tight_layout()
 
     # Write file
