@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 9th November 2020 11:17:32 am
+Last Modified: Tuesday, 10th November 2020 05:50:56 pm
 '''
 
 #!/usr/bin/env python3
@@ -196,7 +196,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
     return ccp
 
 
-def read_ccp(filename='ccp.pkl', folder='output/ccps', fmt=None):
+def read_ccp(filename:str, folder:str='.', fmt=None):
     """
     Read CCP-Stack class file from input folder.
 
@@ -835,7 +835,7 @@ misspelled or not yet implemented')
             except NameError:
                 pass
 
-    def write(self, filename=None, folder='output/ccps', fmt="pickle"):
+    def write(self, filename=None, folder='.', fmt="pickle"):
         """
         Saves the CCPStream file as pickle or matlab file. Only save
         as Matlab file for exporting, as not all information can be
@@ -1113,7 +1113,8 @@ misspelled or not yet implemented')
     def map_plot(
         self, plot_stations=False, plot_bins=False, plot_illum=False,
         profile: list or tuple or None=None, p_direct=True,
-        outputfile: str or None=None, format='pdf', dpi=300, geology=False):
+        outputfile: str or None=None, format='pdf', dpi=300, geology=False,
+        title:str or None=None):
         """
         Create a map plot of the CCP Stack containing user-defined information.
 
@@ -1141,7 +1142,9 @@ misspelled or not yet implemented')
         dpi : int, optional
             DPI for none vector format plots, by default 300
         geology : bool, optional
-            Plot a geological map.
+            Plot a geological map. Requires internet connection
+        title : str, optional
+            Set title for plot.
         """
         if hasattr(self, 'coords_new') and self.coords_new[0].size:
             bincoords = self.coords_new
@@ -1156,7 +1159,7 @@ misspelled or not yet implemented')
             lat, lon, plot_stations, self.bingrid.latitude,
             self.bingrid.longitude, plot_bins, bincoords, self.bingrid.edist,
             plot_illum, self.hits, profile, p_direct, outputfile=outputfile,
-            format=format, dpi=dpi, geology=geology)
+            format=format, dpi=dpi, geology=geology, title=title)
 
     def pick_phase(self, pol:str = '+', depth:list=[None, None]):
         """

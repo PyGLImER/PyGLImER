@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Monday, 9th November 2020 11:28:58 am
+Last Modified: Tuesday, 10th November 2020 06:01:52 pm
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -222,7 +222,8 @@ def plot_map_ccp(
     slon:list or np.ndarray,
     bins:bool, bincoords: tuple, dbin, illum:bool, illummatrix:np.ndarray,
     profile: list or None,
-    p_direct=True, outputfile=None, format='pdf', dpi=300, geology=False):
+    p_direct=True, outputfile=None, format='pdf', dpi=300, geology=False,
+    title=None):
     cl = 0.0
     set_mpl_params()
     plt.figure(figsize=(9,4.5))
@@ -242,6 +243,8 @@ def plot_map_ccp(
            ncol=4, mode="expand", borderaxespad=0.)
         #plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            #ncol=2, mode="expand", borderaxespad=0.)
+    if title:
+        plt.title(title,fontdict={'fontweight': 'bold'}, y=1.1)
     plt.tight_layout()
     if outputfile is None:
         plt.show()
@@ -294,7 +297,8 @@ def plot_vel_grad(
     plot_scattered_colormap(
         coords[0][0], coords[1][0], data, amplitude=plot_amplitude, cmap=cmap)
     plt.legend()
-    plt.title(title,fontdict={'fontweight': 'bold'})
+    if title:
+        plt.title(title,fontdict={'fontweight': 'bold'})
     plt.tight_layout()
 
     # Write file
