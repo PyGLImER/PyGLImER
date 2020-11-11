@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Wednesday, 9th September 2020 11:29:56 am
+Last Modified: Tuesday, 10th November 2020 05:50:56 pm
 '''
 
 #!/usr/bin/env python3
@@ -166,7 +166,11 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
 
     # read out station latitudes and longitudes
     for file in files:
-        stat = read_inventory(os.path.join(statloc, file))
+        try:
+            stat = read_inventory(os.path.join(statloc, file))
+        except TypeError as e:
+            print("Corrupt station xml, original error message: "+
+            str(e))
         lats.append(stat[0][0].latitude)
         lons.append(stat[0][0].longitude)
     
@@ -192,7 +196,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
     return ccp
 
 
-def read_ccp(filename='ccp.pkl', folder='output/ccps', fmt=None):
+def read_ccp(filename:str, folder:str='.', fmt=None):
     """
     Read CCP-Stack class file from input folder.
 
@@ -831,7 +835,7 @@ misspelled or not yet implemented')
             except NameError:
                 pass
 
-    def write(self, filename=None, folder='output/ccps', fmt="pickle"):
+    def write(self, filename=None, folder='.', fmt="pickle"):
         """
         Saves the CCPStream file as pickle or matlab file. Only save
         as Matlab file for exporting, as not all information can be
@@ -1109,7 +1113,8 @@ misspelled or not yet implemented')
     def map_plot(
         self, plot_stations=False, plot_bins=False, plot_illum=False,
         profile: list or tuple or None=None, p_direct=True,
-        outputfile: str or None=None, format='pdf', dpi=300, geology=False):
+        outputfile: str or None=None, format='pdf', dpi=300, geology=False,
+        title:str or None=None):
         """
         Create a map plot of the CCP Stack containing user-defined information.
 
@@ -1137,7 +1142,9 @@ misspelled or not yet implemented')
         dpi : int, optional
             DPI for none vector format plots, by default 300
         geology : bool, optional
-            Plot a geological map.
+            Plot a geological map. Requires internet connection
+        title : str, optional
+            Set title for plot.
         """
         if hasattr(self, 'coords_new') and self.coords_new[0].size:
             bincoords = self.coords_new
@@ -1152,7 +1159,7 @@ misspelled or not yet implemented')
             lat, lon, plot_stations, self.bingrid.latitude,
             self.bingrid.longitude, plot_bins, bincoords, self.bingrid.edist,
             plot_illum, self.hits, profile, p_direct, outputfile=outputfile,
-            format=format, dpi=dpi, geology=geology)
+            format=format, dpi=dpi, geology=geology, title=title)
 
     def pick_phase(self, pol:str = '+', depth:list=[None, None]):
         """
@@ -1243,7 +1250,8 @@ class PhasePick(object):
 
     def plot(
         self, plot_amplitude:bool=False, outputfile:str or None=None,
-        format='pdf', dpi=300, cmap:str='gist_rainbow', geology=False):
+        format='pdf', dpi=300, cmap:str='gist_rainbow', geology=False,
+        title:str or None=None):
         """
         Plot heatmap containing depth or amplitude of picked phase.
 
@@ -1261,6 +1269,7 @@ class PhasePick(object):
             Colormap
         geology : bool, optional
             Plot geological map.
+        title
         """
         lat = (
             np.floor(min(self.coords[0][0]))-1, np.ceil(max(self.coords[0][0])+1))
@@ -1269,4 +1278,4 @@ class PhasePick(object):
         
         plot_vel_grad(
             self.coords, self.a, self.z, plot_amplitude, lat, lon, outputfile,
-            dpi=dpi, format=format, cmap=cmap, geology=geology)
+            dpi=dpi, format=format, cmap=cmap, geology=geology, title=title)
