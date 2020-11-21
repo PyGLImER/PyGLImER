@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Tuesday, 10th November 2020 06:01:52 pm
+Last Modified: Saturday, 21st November 2020 02:59:48 pm
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -188,7 +188,7 @@ def plot_scattered_colormap(
     ax = plt.gca()
     
     pltfig = ax.scatter(
-    binlon, binlat, c=vals, cmap=cmap, s=10, edgecolors=None,
+    binlon, binlat, c=vals, cmap=cmap, s=5, edgecolors=None,
     label='bin centres', zorder=-1) #'viridris', 'gist_rainbow
     cb = plt.colorbar(pltfig, ax=ax)
     plt.tight_layout()
