@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 10th November 2020 05:50:56 pm
+Last Modified: Tuesday, 24th November 2020 05:16:18 pm
 '''
 
 #!/usr/bin/env python3
@@ -196,15 +196,13 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
     return ccp
 
 
-def read_ccp(filename:str, folder:str='.', fmt=None):
+def read_ccp(filename:str, fmt=None):
     """
     Read CCP-Stack class file from input folder.
 
     :param filename: Filename of the input file with file ending.
         The default is 'ccp.pkl'.
     :type filename: str, optional
-    :param folder: Input folder, defaults to 'output/ccps'
-    :type folder: str, optional
     :param fmt: File format, can be none if the filename has an ending,
         possible options are "pickle. The default is None.
     :type fmt: str, optional
@@ -227,7 +225,7 @@ def read_ccp(filename:str, folder:str='.', fmt=None):
 
     # Open provided file
     if fmt == "pickle":
-        with open(os.path.join(folder, filename), 'rb') as infile:
+        with open(filename, 'rb') as infile:
             ccp = pickle.load(infile)
     else:
         raise ValueError("Unknown format ", fmt)
