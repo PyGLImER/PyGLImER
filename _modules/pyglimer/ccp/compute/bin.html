@@ -1,0 +1,460 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyglimer.ccp.compute.bin &mdash; PyGLImER 0.01 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> PyGLImER
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">PyGLImER</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyglimer.ccp.compute.bin</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyglimer.ccp.compute.bin</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Module that covers the binning part of the CCP computation.</span>
+<span class="sd">Authors: Peter Makus (peter.makus@student.uib.no)</span>
+<span class="sd">        and</span>
+<span class="sd">        Lucas Sawade (lsawade@princeton.edu)</span>
+
+<span class="sd">Created: November 2019</span>
+<span class="sd">Last Modified: Friday, 3rd July 2020 05:03:45 pm</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">KDTree</span>
+
+<span class="kn">from</span> <span class="nn">...constants</span> <span class="kn">import</span> <span class="n">R_EARTH</span>
+<span class="c1"># Local imports</span>
+<span class="c1"># from ... import logger</span>
+<span class="kn">from</span> <span class="nn">...utils.geo_utils</span> <span class="kn">import</span> <span class="n">geo2cart</span><span class="p">,</span> <span class="n">cart2geo</span><span class="p">,</span> <span class="n">epi2euc</span>
+<span class="kn">from</span> <span class="nn">...utils.utils</span> <span class="kn">import</span> <span class="n">dt_string</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">(</span><span class="s2">&quot;binlogger&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">fibonacci_sphere</span><span class="p">(</span><span class="n">epi</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="c1"># Get number of samples from epicentral distance first get euclidean</span>
+    <span class="c1"># distance d</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">epi</span> <span class="o">/</span> <span class="mi">180</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">d</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="mf">2.</span> <span class="o">/</span> <span class="n">samples</span>
+    <span class="n">increment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mf">3.</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">5.</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span> <span class="o">*</span> <span class="n">offset</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">offset</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">samples</span><span class="p">)</span> <span class="o">*</span> <span class="n">increment</span>
+        <span class="c1"># print(phi)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span>
+        <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BinGrid"><a class="viewcode-back" href="../../../../chapters/API.html#pyglimer.ccp.compute.bin.BinGrid">[docs]</a><span class="k">class</span> <span class="nc">BinGrid</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates Bingrid object from parameters&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">edist</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        BinGrid object that can be used to find closest neighbours to</span>
+<span class="sd">        stations and CCP bins</span>
+
+<span class="sd">        :param latitude: Latitudes</span>
+<span class="sd">        :type latitude: 1-D `numpy.array`</span>
+<span class="sd">        :param longitude: Longitudes</span>
+<span class="sd">        :type longitude: 1-D `numpy.array`</span>
+<span class="sd">        :param edist: Distance (in degree) between bin centres.</span>
+<span class="sd">        :type edist: float</span>
+<span class="sd">        :param phase: Seismic phase either &quot;S&quot; or &quot;P&quot;. Phase &quot;S&quot; will lead to</span>
+<span class="sd">            more grid points being created due to flatter incidence angle.</span>
+<span class="sd">            Hence, phase can be &quot;S&quot; for PRFs but not the other way around.</span>
+<span class="sd">            However, &quot;P&quot; is computationally more efficient.</span>
+<span class="sd">        :type phase: str</span>
+<span class="sd">        :param verbose: consoel output?, defaults to True</span>
+<span class="sd">        :type verbose: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="c1"># Populate stuff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edist</span> <span class="o">=</span> <span class="n">edist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span>
+
+        <span class="c1"># Verbosity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+
+        <span class="c1"># number of stations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="c1"># Create Cartesian coordinates from lat/lons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zs</span> <span class="o">=</span> <span class="n">geo2cart</span><span class="p">(</span><span class="n">R_EARTH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span><span class="p">)</span>
+
+        <span class="c1"># Create CCP grid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">KDS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">station_tree</span><span class="p">()</span>
+
+        <span class="c1"># Create CCP Bin kdtree</span>
+        <span class="c1"># self.KDB =</span>
+
+<div class="viewcode-block" id="BinGrid.station_tree"><a class="viewcode-back" href="../../../../chapters/API.html#pyglimer.ccp.compute.bin.BinGrid.station_tree">[docs]</a>    <span class="k">def</span> <span class="nf">station_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Using the input&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;--- Creating KDTree for stations ---&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="n">K</span> <span class="o">=</span> <span class="n">KDTree</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ns</span><span class="p">,)),</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">ys</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ns</span><span class="p">,)),</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">zs</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ns</span><span class="p">,))))</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;   Finished station KDTree.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">dt_string</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">K</span></div>
+
+    <span class="k">def</span> <span class="nf">bin_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># if &#39;bins&#39; not in self:</span>
+        <span class="c1">#     raise Exception(&quot;Compute bins before computing the bin_tree.&quot;)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;--- Creating KDTree for bins ---&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xb</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yb</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zb</span> <span class="o">=</span> <span class="n">geo2cart</span><span class="p">(</span><span class="n">R_EARTH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">K</span> <span class="o">=</span> <span class="n">KDTree</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">xb</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Nb</span><span class="p">,)),</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">yb</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Nb</span><span class="p">,)),</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">zb</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Nb</span><span class="p">,))))</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;   Finished station KDTree.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">dt_string</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">KDB</span> <span class="o">=</span> <span class="n">K</span>
+
+<div class="viewcode-block" id="BinGrid.compute_bins"><a class="viewcode-back" href="../../../../chapters/API.html#pyglimer.ccp.compute.bin.BinGrid.compute_bins">[docs]</a>    <span class="k">def</span> <span class="nf">compute_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes bins close to all stations&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;--- Computing points on Fibonacci sphere ---&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># Create points on the sphere using edist</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">fibonacci_sphere</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edist</span><span class="p">)</span>
+
+        <span class="c1"># Number of points on fibonacci sphere</span>
+        <span class="n">Nf</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;   Finished computing points on Fibonacci sphere.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;   Total Number of possible bins: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">Nf</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">dt_string</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+        <span class="c1"># Query points that are close enough</span>
+        <span class="c1"># The upper bound of 4 degrees here is chosen because that&#39;s an upper</span>
+        <span class="c1"># bound where there are definitely no conversion anymore. Meaning if</span>
+        <span class="c1"># a recorded receiver function is converted that far away, there is a</span>
+        <span class="c1"># bin that captures it.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;--- Checking whether points are close to stations ---&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># maximal distance of bins to station depends upon phase</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+            <span class="n">maxepid</span> <span class="o">=</span> <span class="mi">12</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+            <span class="n">maxepid</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">KDS</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">R_EARTH</span> <span class="o">*</span> <span class="n">points</span><span class="p">,</span>
+                              <span class="n">distance_upper_bound</span><span class="o">=</span><span class="n">epi2euc</span><span class="p">(</span><span class="n">maxepid</span><span class="p">))</span>
+
+        <span class="c1"># pick out close enough stations only</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">ns</span><span class="p">)</span>
+
+        <span class="c1"># Get geolocations</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">binlat</span><span class="p">,</span> <span class="n">binlon</span> <span class="o">=</span> <span class="n">cart2geo</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                     <span class="n">points</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                     <span class="n">points</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bins</span> <span class="o">=</span> <span class="p">(</span><span class="n">binlat</span><span class="p">,</span> <span class="n">binlon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;   Finished sorting out bad bins.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;   Total number of accepted bins: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nb</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">dt_string</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span></div>
+
+<div class="viewcode-block" id="BinGrid.query_station_tree"><a class="viewcode-back" href="../../../../chapters/API.html#pyglimer.ccp.compute.bin.BinGrid.query_station_tree">[docs]</a>    <span class="k">def</span> <span class="nf">query_station_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">maxdist</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uses the query function of the KDTree but takes geolocations as</span>
+<span class="sd">        input.</span>
+
+<span class="sd">        :param latitude: latitudes to be queried</span>
+<span class="sd">        :type latitude: 1D `numpy.ndarray`</span>
+<span class="sd">        :param longitude: longitudes to be queried</span>
+<span class="sd">        :type longitude: 1D `numpy.ndarray`</span>
+<span class="sd">        :param maxdist: maximum  distance to be queried in degree</span>
+<span class="sd">        :type maxdist: float</span>
+<span class="sd">        :return: Euclidian distances to next point, indices of next neighbour.</span>
+<span class="sd">        :rtype: Tuple with 2 1D `numpy.ndarray`</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="c1"># Compute maxdist in euclidean space</span>
+        <span class="n">maxdist_euc</span> <span class="o">=</span> <span class="n">epi2euc</span><span class="p">(</span><span class="n">maxdist</span><span class="p">)</span>
+
+        <span class="c1"># Get cartesian coordinate points</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">geo2cart</span><span class="p">(</span><span class="n">R_EARTH</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">)</span>
+
+        <span class="c1"># Query the points and return the distances and closest neighbours</span>
+        <span class="n">eucd</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">KDS</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                  <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                  <span class="n">points</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span>
+                                 <span class="n">distance_upper_bound</span><span class="o">=</span><span class="n">maxdist_euc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">eucd</span><span class="p">,</span> <span class="n">i</span></div>
+
+<div class="viewcode-block" id="BinGrid.query_bin_tree"><a class="viewcode-back" href="../../../../chapters/API.html#pyglimer.ccp.compute.bin.BinGrid.query_bin_tree">[docs]</a>    <span class="k">def</span> <span class="nf">query_bin_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">binrad</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uses the query function of the KDTree but takes geolocations as</span>
+<span class="sd">        input.</span>
+
+<span class="sd">        :param latitude: latitudes to be queried</span>
+<span class="sd">        :type latitude: 1-D `numpy.ndarray`</span>
+<span class="sd">        :param longitude: longitudes to be queried</span>
+<span class="sd">        :type longitude: 1-D `numpy.ndarray`</span>
+<span class="sd">        :param binrad: maximum  distance to be queried in euclidean distance</span>
+<span class="sd">                Equals the radius of the bin, higher = more averaging -&gt;</span>
+<span class="sd">                --&gt; less noise, lower resolution</span>
+<span class="sd">        :type binrad: float</span>
+<span class="sd">        :param k: Number of neighbours to return. Note that this directly</span>
+<span class="sd">            depends on the ratio of deltabin/binrad.</span>
+<span class="sd">        :type k: int</span>
+<span class="sd">        :return: Indices of next neighbour.</span>
+<span class="sd">        :rtype: 1D np.array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get cartesian coordinate points</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">geo2cart</span><span class="p">(</span><span class="n">R_EARTH</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">)</span>
+
+        <span class="c1"># Create tree to be KDTree queried against</span>
+
+        <span class="c1"># Query the points and return the distances and closest neighbours</span>
+        <span class="c1"># Eps: approximate closest neighbour (big boost in computation time)</span>
+        <span class="c1"># Returned distance is not more than (1+eps)*real distance</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">KDB</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                               <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                               <span class="n">points</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
+                              <span class="n">distance_upper_bound</span><span class="o">=</span><span class="n">binrad</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">i</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Peter Makus
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

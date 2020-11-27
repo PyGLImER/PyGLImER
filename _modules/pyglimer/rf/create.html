@@ -1,0 +1,1239 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyglimer.rf.create &mdash; PyGLImER 0.01 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyGLImER
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyGLImER</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyglimer.rf.create</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyglimer.rf.create</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A toolset to create RFs and RF classes</span>
+
+<span class="sd">Created on Wed Feb 19 13:41:10 2020</span>
+
+<span class="sd">Author:</span>
+<span class="sd">    Peter Makus (peter.makus@student.uib.no)</span>
+
+<span class="sd">Some parts of this code are modified versions of the rf module by</span>
+<span class="sd">Tom Eulenfeld.</span>
+
+<span class="sd">Last updated:</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
+<span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="kn">import</span> <span class="n">resource_filename</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">geographiclib.geodesic</span> <span class="kn">import</span> <span class="n">Geodesic</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">ScalarFormatter</span><span class="p">,</span> <span class="n">AutoMinorLocator</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">read</span><span class="p">,</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">Trace</span><span class="p">,</span> <span class="n">UTCDateTime</span>
+<span class="kn">from</span> <span class="nn">obspy.core</span> <span class="kn">import</span> <span class="n">AttribDict</span>
+<span class="kn">from</span> <span class="nn">obspy.geodetics</span> <span class="kn">import</span> <span class="n">gps2dist_azimuth</span>
+<span class="kn">from</span> <span class="nn">obspy.taup</span> <span class="kn">import</span> <span class="n">TauPyModel</span>
+<span class="kn">from</span> <span class="nn">scipy.signal.windows</span> <span class="kn">import</span> <span class="n">hann</span>
+
+<span class="kn">from</span> <span class="nn">.deconvolve</span> <span class="kn">import</span> <span class="n">it</span><span class="p">,</span> <span class="n">spectraldivision</span><span class="p">,</span> <span class="n">multitaper</span>
+<span class="kn">from</span> <span class="nn">.moveout</span> <span class="kn">import</span> <span class="n">DEG2KM</span><span class="p">,</span> <span class="n">maxz</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">moveout</span><span class="p">,</span> <span class="n">dt_table</span><span class="p">,</span> <span class="n">dt_table_3D</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">(</span><span class="s2">&quot;rf&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="createRF"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.createRF">[docs]</a><span class="k">def</span> <span class="nf">createRF</span><span class="p">(</span><span class="n">st_in</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">pol</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">onset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">method</span><span class="o">=</span><span class="s1">&#39;it&#39;</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a receiver function with the defined method from an obspy</span>
+<span class="sd">    stream.</span>
+
+<span class="sd">    :param st_in: Stream of which components are to be deconvolved.</span>
+<span class="sd">    :type st_in: ~obspy.Stream</span>
+<span class="sd">    :param phase: Either &quot;P&quot; or &quot;S&quot;.</span>
+<span class="sd">    :type phase: str</span>
+<span class="sd">    :param pol: Polarisation to be deconvolved from. Only for phase = P,</span>
+<span class="sd">                defaults to &#39;v&#39;</span>
+<span class="sd">    :type pol: str, optional</span>
+<span class="sd">    :param onset: Is used to shift function rather than shift if provided.</span>
+<span class="sd">        If info is provided, it will be extracted from info file,</span>
+<span class="sd">        defaults to None</span>
+<span class="sd">    :type onset: ~obspy.UTCDateTime, optional</span>
+<span class="sd">    :param method: Deconvolution method, &quot;waterlevel&quot;, &#39;dampedf&#39; for constant</span>
+<span class="sd">        damping level, &#39;it&#39; for iterative time domain deconvoltuion, &#39;multit&#39;</span>
+<span class="sd">        for multitaper or &#39;fqd&#39; for frequency dependently damped spectral</span>
+<span class="sd">        division. The default is iterative time domain (&#39;it&#39;).</span>
+<span class="sd">    :type method: str, optional</span>
+<span class="sd">    :param trim: taper/truncate. Given as tuple (a, b) in s - left,right.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    :type trim: tuple, optional</span>
+<span class="sd">    :param event: Event File used to extract additional information about</span>
+<span class="sd">        arrival. Provide either event and station or info dict. The default is</span>
+<span class="sd">        None.</span>
+<span class="sd">    :type event: ~obspy.core.event, optional</span>
+<span class="sd">    :param station: Dictionary containing station information,</span>
+<span class="sd">        defaults to None</span>
+<span class="sd">    :type station: &#39;~obspy.core.station&#39;, optional</span>
+<span class="sd">    :param info: Dictionary containing information about the waveform, used to</span>
+<span class="sd">        extract additional information for header. The default is None.</span>
+<span class="sd">    :type info: dict, optional</span>
+<span class="sd">    :raises Exception: If deconvolution method is unknown.</span>
+<span class="sd">    :raises Exception: For wrong trim input.</span>
+<span class="sd">    :return: RFTrace object containing receiver function.</span>
+<span class="sd">    :rtype: :class:`~pyglimer.create.RFTrace`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">pol</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">info</span><span class="p">:</span>
+        <span class="n">ii</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;starttime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">st_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="p">)</span>
+        <span class="n">shift</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;onset&#39;</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span> <span class="o">-</span> <span class="n">st_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span>
+
+    <span class="k">elif</span> <span class="n">onset</span><span class="p">:</span>
+        <span class="n">shift</span> <span class="o">=</span> <span class="n">onset</span> <span class="o">-</span> <span class="n">st_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span>
+
+    <span class="c1"># sampling interval</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">st_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span>
+
+    <span class="c1"># deep copy stream</span>
+    <span class="n">st</span> <span class="o">=</span> <span class="n">st_in</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">RF</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Normalise stream</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+
+    <span class="c1"># Shorten RF stream</span>
+    <span class="k">while</span> <span class="n">RF</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">RF</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">RF</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">phase</span> <span class="o">+</span> <span class="s2">&quot;RF&quot;</span>
+
+    <span class="c1"># taper traces</span>
+    <span class="k">if</span> <span class="n">trim</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">trim</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">trim</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Trim has to be given as list with two elements</span>
+<span class="s2">                            [a, b]. Where a and b are the taper length in s</span>
+<span class="s2">                            on the left and right side, respectively.&quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="c1"># Hann taper with 7.5s taper window</span>
+        <span class="n">tap</span> <span class="o">=</span> <span class="n">hann</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">15</span> <span class="o">/</span> <span class="n">dt</span><span class="p">))</span>
+        <span class="n">taper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">npts</span><span class="p">)</span>
+        <span class="n">taper</span><span class="p">[:</span><span class="nb">int</span><span class="p">((</span><span class="n">trim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">7.5</span><span class="p">)</span> <span class="o">/</span> <span class="n">dt</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">taper</span><span class="p">[</span><span class="o">-</span><span class="nb">int</span><span class="p">((</span><span class="n">trim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">7.5</span><span class="p">)</span> <span class="o">/</span> <span class="n">dt</span><span class="p">):]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">taper</span><span class="p">[</span><span class="nb">int</span><span class="p">((</span><span class="n">trim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">7.5</span><span class="p">)</span> <span class="o">/</span> <span class="n">dt</span><span class="p">):</span><span class="nb">int</span><span class="p">(</span><span class="n">trim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">dt</span><span class="p">)]</span> <span class="o">=</span> \
+            <span class="n">tap</span><span class="p">[:</span><span class="nb">round</span><span class="p">(</span><span class="mf">7.5</span> <span class="o">/</span> <span class="n">dt</span><span class="p">)]</span>
+        <span class="n">taper</span><span class="p">[</span><span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="n">trim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">dt</span><span class="p">):</span><span class="o">-</span><span class="nb">int</span><span class="p">((</span><span class="n">trim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">7.5</span><span class="p">)</span> <span class="o">/</span> <span class="n">dt</span><span class="p">)]</span> <span class="o">=</span> \
+            <span class="n">tap</span><span class="p">[</span><span class="o">-</span><span class="nb">round</span><span class="p">(</span><span class="mf">7.5</span> <span class="o">/</span> <span class="n">dt</span><span class="p">):]</span>
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">taper</span><span class="p">)</span>
+
+    <span class="c1"># Identify components</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
+        <span class="n">stream</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="c1"># define denominator v and enumerator u</span>
+    <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span> <span class="ow">and</span> <span class="s2">&quot;R&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;Z&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="s2">&quot;3&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;h&#39;</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span> <span class="ow">and</span> <span class="s2">&quot;Q&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;L&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;h&#39;</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span> <span class="ow">and</span> <span class="s2">&quot;V&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;V&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;h&#39;</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span> <span class="ow">and</span> <span class="s2">&quot;R&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;Z&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="s2">&quot;3&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">]</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span> <span class="ow">and</span> <span class="s2">&quot;Q&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;L&quot;</span><span class="p">]</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span> <span class="ow">and</span> <span class="s2">&quot;V&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">]</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;V&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Deconvolution</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;it&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="mf">1.5</span>  <span class="c1"># change for Kind (2015) to 1</span>
+        <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="mf">2.5</span>
+        <span class="n">RF</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">it</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;dampedf&quot;</span><span class="p">:</span>
+        <span class="n">RF</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spectraldivision</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="s2">&quot;con&quot;</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="n">phase</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;waterlevel&quot;</span><span class="p">:</span>
+        <span class="n">RF</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spectraldivision</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="s2">&quot;wat&quot;</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="n">phase</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;fqd&#39;</span><span class="p">:</span>
+        <span class="n">RF</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spectraldivision</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="s2">&quot;fqd&quot;</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="n">phase</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;multit&#39;</span><span class="p">:</span>
+        <span class="n">RF</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">multitaper</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="s2">&quot;fqd&quot;</span><span class="p">)</span>
+        <span class="c1"># remove noise caused by multitaper</span>
+        <span class="n">RF</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;lowpass&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mf">2.50</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">corners</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="s2">&quot;is no valid deconvolution method.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># create RFTrace object</span>
+    <span class="c1"># create stats</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">rfstats</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">starttime</span><span class="o">=</span><span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span>
+                    <span class="n">station</span><span class="o">=</span><span class="n">station</span><span class="p">)</span>
+    <span class="n">stats</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">})</span>
+    <span class="n">RF</span> <span class="o">=</span> <span class="n">RFTrace</span><span class="p">(</span><span class="n">trace</span><span class="o">=</span><span class="n">RF</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">RF</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">RF</span></div>
+
+
+<span class="k">def</span> <span class="nf">__get_event_origin_prop</span><span class="p">(</span><span class="n">h</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="n">h</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No origin&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No origin &#39;</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">h</span> <span class="o">==</span> <span class="s1">&#39;depth&#39;</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">/</span> <span class="mi">1000</span>
+        <span class="k">return</span> <span class="n">r</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span>
+
+
+<span class="k">def</span> <span class="nf">__get_event_magnitude</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">preferred_magnitude</span><span class="p">()</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">magnitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="s1">&#39;mag&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No magnitude&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">__get_event_id</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+    <span class="n">evid</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resource_id&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">evid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">evid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">evid</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">evid</span>
+
+
+<span class="k">def</span> <span class="nf">__SAC2UTC</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">head</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">obspy.io.sac.util</span> <span class="kn">import</span> <span class="n">get_sac_reftime</span>
+    <span class="k">return</span> <span class="n">get_sac_reftime</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">sac</span><span class="p">)</span> <span class="o">+</span> <span class="n">stats</span><span class="p">[</span><span class="n">head</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">__UTC2SAC</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">head</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">obspy.io.sac.util</span> <span class="kn">import</span> <span class="n">get_sac_reftime</span>
+    <span class="k">return</span> <span class="n">stats</span><span class="p">[</span><span class="n">head</span><span class="p">]</span> <span class="o">-</span> <span class="n">get_sac_reftime</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">sac</span><span class="p">)</span>
+
+
+<span class="n">_STATION_GETTER</span> <span class="o">=</span> <span class="p">((</span><span class="s1">&#39;station_latitude&#39;</span><span class="p">,</span> <span class="n">itemgetter</span><span class="p">(</span><span class="s1">&#39;latitude&#39;</span><span class="p">)),</span>
+                   <span class="p">(</span><span class="s1">&#39;station_longitude&#39;</span><span class="p">,</span> <span class="n">itemgetter</span><span class="p">(</span><span class="s1">&#39;longitude&#39;</span><span class="p">)),</span>
+                   <span class="p">(</span><span class="s1">&#39;station_elevation&#39;</span><span class="p">,</span> <span class="n">itemgetter</span><span class="p">(</span><span class="s1">&#39;elevation&#39;</span><span class="p">)))</span>
+<span class="n">_EVENT_GETTER</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="p">(</span><span class="s1">&#39;event_latitude&#39;</span><span class="p">,</span> <span class="n">__get_event_origin_prop</span><span class="p">(</span><span class="s1">&#39;latitude&#39;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;event_longitude&#39;</span><span class="p">,</span> <span class="n">__get_event_origin_prop</span><span class="p">(</span><span class="s1">&#39;longitude&#39;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;event_depth&#39;</span><span class="p">,</span> <span class="n">__get_event_origin_prop</span><span class="p">(</span><span class="s1">&#39;depth&#39;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;event_magnitude&#39;</span><span class="p">,</span> <span class="n">__get_event_magnitude</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;event_time&#39;</span><span class="p">,</span> <span class="n">__get_event_origin_prop</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;event_id&#39;</span><span class="p">,</span> <span class="n">__get_event_id</span><span class="p">))</span>
+
+<span class="c1"># header values which will be written to waveform formats (SAC and Q)</span>
+<span class="c1"># H5 simply writes all stats entries</span>
+<span class="n">_HEADERS</span> <span class="o">=</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">_STATION_GETTER</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">_EVENT_GETTER</span><span class="p">))[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span>  <span class="c1"># do not write event_id</span>
+            <span class="s1">&#39;onset&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="s1">&#39;moveout&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;distance&#39;</span><span class="p">,</span> <span class="s1">&#39;back_azimuth&#39;</span><span class="p">,</span> <span class="s1">&#39;inclination&#39;</span><span class="p">,</span> <span class="s1">&#39;slowness&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;pp_latitude&#39;</span><span class="p">,</span> <span class="s1">&#39;pp_longitude&#39;</span><span class="p">,</span> <span class="s1">&#39;pp_depth&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;box_pos&#39;</span><span class="p">,</span> <span class="s1">&#39;box_length&#39;</span><span class="p">))</span>
+
+<span class="c1"># The corresponding header fields in the format</span>
+<span class="c1"># The following headers can at the moment only be stored for H5:</span>
+<span class="c1"># slowness_before_moveout, box_lonlat, event_id</span>
+<span class="n">_FORMATHEADERS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sac&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;stla&#39;</span><span class="p">,</span> <span class="s1">&#39;stlo&#39;</span><span class="p">,</span> <span class="s1">&#39;stel&#39;</span><span class="p">,</span> <span class="s1">&#39;evla&#39;</span><span class="p">,</span> <span class="s1">&#39;evlo&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;evdp&#39;</span><span class="p">,</span> <span class="s1">&#39;mag&#39;</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;kuser0&#39;</span><span class="p">,</span> <span class="s1">&#39;kuser1&#39;</span><span class="p">,</span> <span class="s1">&#39;kuser2&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;gcarc&#39;</span><span class="p">,</span> <span class="s1">&#39;baz&#39;</span><span class="p">,</span> <span class="s1">&#39;user0&#39;</span><span class="p">,</span> <span class="s1">&#39;user1&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;user2&#39;</span><span class="p">,</span> <span class="s1">&#39;user3&#39;</span><span class="p">,</span> <span class="s1">&#39;user4&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;user5&#39;</span><span class="p">,</span> <span class="s1">&#39;user6&#39;</span><span class="p">),</span>
+                  <span class="c1"># field &#39;COMMENT&#39; is violated for different information</span>
+                  <span class="s1">&#39;sh&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;COMMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;LAT&#39;</span><span class="p">,</span> <span class="s1">&#39;LON&#39;</span><span class="p">,</span> <span class="s1">&#39;DEPTH&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;MAGNITUDE&#39;</span><span class="p">,</span> <span class="s1">&#39;ORIGIN&#39;</span><span class="p">,</span> <span class="s1">&#39;P-ONSET&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;COMMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;DISTANCE&#39;</span><span class="p">,</span> <span class="s1">&#39;AZIMUTH&#39;</span><span class="p">,</span> <span class="s1">&#39;INCI&#39;</span><span class="p">,</span> <span class="s1">&#39;SLOWNESS&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;COMMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;COMMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">)}</span>
+<span class="n">_HEADER_CONVERSIONS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sac&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;onset&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">__SAC2UTC</span><span class="p">,</span> <span class="n">__UTC2SAC</span><span class="p">),</span>
+                               <span class="s1">&#39;event_time&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">__SAC2UTC</span><span class="p">,</span> <span class="n">__UTC2SAC</span><span class="p">)}}</span>
+
+<span class="n">_TF</span> <span class="o">=</span> <span class="s1">&#39;.datetime:%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span>
+
+<span class="n">_H5INDEX</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;rf&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;waveforms/</span><span class="si">{network}</span><span class="s1">.</span><span class="si">{station}</span><span class="s1">.</span><span class="si">{location}</span><span class="s1">/{event_time</span><span class="si">%s</span><span class="s1">}/&#39;</span> <span class="o">%</span> <span class="n">_TF</span> <span class="o">+</span>
+           <span class="s1">&#39;</span><span class="si">{channel}</span><span class="s1">_{starttime</span><span class="si">%s</span><span class="s1">}_{endtime</span><span class="si">%s</span><span class="s1">}&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_TF</span><span class="p">,</span> <span class="n">_TF</span><span class="p">)),</span>
+    <span class="s1">&#39;profile&#39;</span><span class="p">:</span> <span class="s1">&#39;waveforms/</span><span class="si">{channel[2]}</span><span class="s1">_</span><span class="si">{box_pos}</span><span class="s1">&#39;</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="read_rf"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.read_rf">[docs]</a><span class="k">def</span> <span class="nf">read_rf</span><span class="p">(</span><span class="n">pathname_or_url</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read waveform files into RFStream object.</span>
+<span class="sd">    See :func:`~obspy.core.stream.read` in ObsPy.</span>
+
+<span class="sd">    :param pathname_or_url: Path to file.</span>
+<span class="sd">    :type pathname_or_url: str</span>
+<span class="sd">    :param format: str, defaults to None</span>
+<span class="sd">    :type format: e.g. &quot;MSEED&quot; or &quot;SAC&quot;. Will attempt to determine from ending</span>
+<span class="sd">        if = None. The default is None.</span>
+<span class="sd">    :return: RFStream object from file.</span>
+<span class="sd">    :rtype: :class:`~pyglimer.createRF.RFStream`</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="n">stream</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">pathname_or_url</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="n">RFStream</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+    <span class="c1"># Calculate piercing points for depth migrated RF</span>
+    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;depth&quot;</span><span class="p">:</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">ppoint</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">stream</span></div>
+
+
+<div class="viewcode-block" id="RFStream"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFStream">[docs]</a><span class="k">class</span> <span class="nc">RFStream</span><span class="p">(</span><span class="n">Stream</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class providing the necessary functions for receiver function calculation.</span>
+<span class="sd">    :param traces: list of traces, single trace or stream object</span>
+<span class="sd">    To initialize a RFStream from a Stream object use</span>
+<span class="sd">    &gt;&gt;&gt; rfstream = RFStream(stream)</span>
+<span class="sd">    To initialize a RFStream from a file use</span>
+<span class="sd">    &gt;&gt;&gt; rfstream = read_rf(&#39;test.SAC&#39;)</span>
+<span class="sd">    Format specific headers are loaded into the stats object of all traces.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traces</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">traces</span><span class="p">,</span> <span class="n">Trace</span><span class="p">):</span>
+            <span class="n">traces</span> <span class="o">=</span> <span class="p">[</span><span class="n">traces</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">traces</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">traces</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tr</span><span class="p">,</span> <span class="n">RFTrace</span><span class="p">):</span>
+                    <span class="n">tr</span> <span class="o">=</span> <span class="n">RFTrace</span><span class="p">(</span><span class="n">trace</span><span class="o">=</span><span class="n">tr</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__is_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">header</span> <span class="ow">in</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span> <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__get_unique_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">):</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="n">header</span><span class="p">]</span> <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Header </span><span class="si">%s</span><span class="s1"> has different values in stream.&#39;</span> <span class="o">%</span> <span class="n">header</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">values</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Property for the type of stream, &#39;rf&#39;, &#39;profile&#39; or None&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_unique_header</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+
+    <span class="nd">@type</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Property for used rf method, &#39;P&#39; or &#39;S&#39;&quot;&quot;&quot;</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_unique_header</span><span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">phase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="nd">@method</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="RFStream.write"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFStream.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save stream to file including format specific headers.</span>
+<span class="sd">        See `Stream.write() &lt;obspy.core.stream.Stream.write&gt;` in ObsPy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;depth&#39;</span><span class="p">:</span>
+                <span class="c1"># Lists cannot be written in header</span>
+                <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">pp_depth</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">pp_longitude</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">pp_latitude</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="n">tr</span><span class="o">.</span><span class="n">_write_format_specific_header</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">format</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span>
+                <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">id</span>
+        <span class="k">if</span> <span class="nb">format</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;H5&#39;</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;event_time&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="s1">&#39;rf&#39;</span>
+            <span class="k">if</span> <span class="n">index</span><span class="p">:</span>
+                <span class="kn">import</span> <span class="nn">obspyh5</span>
+                <span class="n">old_index</span> <span class="o">=</span> <span class="n">obspyh5</span><span class="o">.</span><span class="n">_INDEX</span>
+                <span class="n">obspyh5</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">_H5INDEX</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RFStream</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">format</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;H5&#39;</span> <span class="ow">and</span> <span class="n">index</span><span class="p">:</span>
+            <span class="n">obspyh5</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">old_index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">format</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="RFStream.trim2"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFStream.trim2">[docs]</a>    <span class="k">def</span> <span class="nf">trim2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">starttime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">endtime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reftime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Alternative trim method accepting relative times.</span>
+<span class="sd">        See :meth:`~obspy.core.stream.Stream.trim`.</span>
+<span class="sd">        :param starttime,endtime: accept UTCDateTime or seconds relative to</span>
+<span class="sd">            reftime</span>
+<span class="sd">        :param reftime: reference time, can be an UTCDateTime object or a</span>
+<span class="sd">            string. The string will be looked up in the stats dictionary</span>
+<span class="sd">            (e.g. &#39;starttime&#39;, &#39;endtime&#39;, &#39;onset&#39;).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">:</span>
+            <span class="n">t1</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">_seconds2utc</span><span class="p">(</span><span class="n">starttime</span><span class="p">,</span> <span class="n">reftime</span><span class="o">=</span><span class="n">reftime</span><span class="p">)</span>
+            <span class="n">t2</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">_seconds2utc</span><span class="p">(</span><span class="n">endtime</span><span class="p">,</span> <span class="n">reftime</span><span class="o">=</span><span class="n">reftime</span><span class="p">)</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">trim</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">=</span> <span class="p">[</span><span class="n">_i</span> <span class="k">for</span> <span class="n">_i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="k">if</span> <span class="n">_i</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">npts</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="RFStream.slice2"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFStream.slice2">[docs]</a>    <span class="k">def</span> <span class="nf">slice2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">starttime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">endtime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reftime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">keep_empty_traces</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Alternative slice method accepting relative times.</span>
+<span class="sd">        See :meth:`~obspy.core.stream.Stream.slice` and `trim2()`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">traces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">t1</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">_seconds2utc</span><span class="p">(</span><span class="n">starttime</span><span class="p">,</span> <span class="n">reftime</span><span class="o">=</span><span class="n">reftime</span><span class="p">)</span>
+            <span class="n">t2</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">_seconds2utc</span><span class="p">(</span><span class="n">endtime</span><span class="p">,</span> <span class="n">reftime</span><span class="o">=</span><span class="n">reftime</span><span class="p">)</span>
+            <span class="n">sliced_trace</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_empty_traces</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">sliced_trace</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">npts</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">traces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sliced_trace</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">traces</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RFStream.moveout"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFStream.moveout">[docs]</a>    <span class="k">def</span> <span class="nf">moveout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vmodel</span><span class="p">,</span> <span class="n">latb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lonb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">taper</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Depth migration of all receiver functions given Stream.</span>
+<span class="sd">        Also calculates piercing points and adds them to RFTrace.stats.</span>
+
+<span class="sd">        :param vmodel: Velocity model located in /data/vmodel.</span>
+<span class="sd">            Standard options are iasp91.dat and 3D (GYPSuM).</span>
+<span class="sd">        :type vmodel: str</span>
+<span class="sd">        :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D</span>
+<span class="sd">            raytraycing. Will remain unused for 1D RT, defaults to None</span>
+<span class="sd">        :type latb: Tuple, optional</span>
+<span class="sd">        :param lonb: Tuple in Form (minlon, maxlon), defaults to None</span>
+<span class="sd">        :type lonb: Tuple, optional</span>
+<span class="sd">        :param taper: If True, the last 10km of the RF will be tapered, which</span>
+<span class="sd">            avoids jumps in station stacks. Should be False for CCP stacks,</span>
+<span class="sd">            defaults to True.</span>
+<span class="sd">        :type taper: bool, optional</span>
+<span class="sd">        :return: 1D np.ndarray containing depths and an</span>
+<span class="sd">             object of type depth.</span>
+<span class="sd">        :rtype: 1D np.ndarray, :class:`~pyglimer.rf.create.RFStream`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">RF_mo</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">z</span><span class="p">,</span> <span class="n">mo</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">moveout</span><span class="p">(</span><span class="n">vmodel</span><span class="p">,</span> <span class="n">latb</span><span class="o">=</span><span class="n">latb</span><span class="p">,</span> <span class="n">lonb</span><span class="o">=</span><span class="n">lonb</span><span class="p">,</span> <span class="n">taper</span><span class="o">=</span><span class="n">taper</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="c1"># This trace is already depth migrated</span>
+                <span class="n">RF_mo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">RF_mo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mo</span><span class="p">)</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">RFStream</span><span class="p">(</span><span class="n">traces</span><span class="o">=</span><span class="n">RF_mo</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;z&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">():</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">z</span><span class="p">,</span> <span class="n">st</span></div>
+
+<div class="viewcode-block" id="RFStream.ppoint"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFStream.ppoint">[docs]</a>    <span class="k">def</span> <span class="nf">ppoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vmodel_file</span><span class="o">=</span><span class="s1">&#39;iasp91.dat&#39;</span><span class="p">,</span> <span class="n">latb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lonb</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates piercing points for all receiver functions in given</span>
+<span class="sd">        RFStream and adds them to self.stats in form of lat, lon and depth.</span>
+
+<span class="sd">        :param vmodel_file: velocity model located in /data/vmodel.</span>
+<span class="sd">            The default is &#39;iasp91.dat&#39;.</span>
+<span class="sd">        :type vmodel_file: str, optional</span>
+<span class="sd">        :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D</span>
+<span class="sd">            raytraycing. Will remain unused for 1D RT, defaults to None.</span>
+<span class="sd">        :type latb: tuple, optional</span>
+<span class="sd">        :param lonb: Tuple in Form (minlon, maxlon), defaults to None</span>
+<span class="sd">        :type lonb: tuple, optional.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">ppoint</span><span class="p">(</span><span class="n">vmodel</span><span class="o">=</span><span class="n">vmodel_file</span><span class="p">,</span> <span class="n">latb</span><span class="o">=</span><span class="n">latb</span><span class="p">,</span> <span class="n">lonb</span><span class="o">=</span><span class="n">lonb</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RFStream.station_stack"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFStream.station_stack">[docs]</a>    <span class="k">def</span> <span class="nf">station_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vmodel_file</span><span class="o">=</span><span class="s1">&#39;iasp91.dat&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a moveout correction and stacks all receiver functions</span>
+<span class="sd">        in Stream. Make sure that Stream only contains RF from one station!</span>
+
+<span class="sd">        :param vmodel_file: 1D velocity model in data/vmodels.</span>
+<span class="sd">            The default is &#39;iasp91.dat&#39;.</span>
+<span class="sd">        :type vmodel_file: str, optional</span>
+<span class="sd">        :return: z : Depth Vector.</span>
+<span class="sd">            stack : Object containing station stack.</span>
+<span class="sd">            RF_mo : Object containing depth migrated traces.</span>
+<span class="sd">        :rtype: z : 1D np.ndarray</span>
+<span class="sd">            stack : :class:`~pyglimer.rf.create.RFTrace`</span>
+<span class="sd">            RF_mo : :class:`~pyglimer.rf.create.RFStream`</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="n">latb</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">station_latitude</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station_latitude</span><span class="o">+</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">lonb</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">statio_longitude</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station_longitude</span><span class="o">+</span><span class="mi">20</span><span class="p">)</span>
+
+        <span class="n">z</span><span class="p">,</span> <span class="n">RF_mo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moveout</span><span class="p">(</span><span class="n">vmodel_file</span><span class="o">=</span><span class="n">vmodel_file</span><span class="p">,</span> <span class="n">latb</span><span class="o">=</span><span class="n">latb</span><span class="p">,</span> <span class="n">lonb</span><span class="o">=</span><span class="n">lonb</span><span class="p">)</span>
+        <span class="n">RF_mo</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>  <span class="c1"># make sure traces are normalised</span>
+        <span class="n">traces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">RF_mo</span><span class="p">:</span>
+            <span class="n">traces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">traces</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">RFTrace</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">stack</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="p">)</span>
+        <span class="n">stack</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;stastack&quot;</span><span class="p">,</span> <span class="s2">&quot;starttime&quot;</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+                            <span class="s2">&quot;pp_depth&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;pp_latitude&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="s2">&quot;pp_longitude&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">z</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">RF_mo</span></div>
+
+<div class="viewcode-block" id="RFStream.plot"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFStream.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot receiver functions depending on epicentral distance</span>
+
+<span class="sd">        :param scale: Y-scaling, defaults to 2</span>
+<span class="sd">        :type scale: int, optional</span>
+<span class="sd">        :return: Figure and axis object</span>
+<span class="sd">        :rtype: [type]</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="c1"># deep copy stream</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span>
+
+        <span class="n">traces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">stats</span> <span class="o">=</span> <span class="n">AttribDict</span><span class="p">({})</span>
+            <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;coordinates&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;coordinates&quot;</span><span class="p">][</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;event_latitude&quot;</span><span class="p">]</span>
+            <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;coordinates&quot;</span><span class="p">][</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;event_longitude&quot;</span><span class="p">]</span>
+            <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span>
+            <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;station&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;station&quot;</span><span class="p">]</span>
+
+            <span class="c1"># Check type</span>
+            <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
+                <span class="n">stats</span><span class="o">.</span><span class="n">delta</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">data</span>
+                <span class="n">TAS</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span>
+                    <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">onset</span> <span class="o">-</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="p">)</span> <span class="o">/</span> <span class="n">stats</span><span class="o">.</span><span class="n">delta</span><span class="p">)</span>
+                <span class="n">TAS</span> <span class="o">=</span> <span class="mi">1201</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">TAS</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">TAS</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">TAS</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">/</span> <span class="n">stats</span><span class="o">.</span><span class="n">delta</span><span class="p">)]</span>
+                <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;npts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">Trace</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">stats</span><span class="p">)</span>
+                <span class="n">trace</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;depth&quot;</span><span class="p">:</span>
+                <span class="n">stats</span><span class="o">.</span><span class="n">delta</span> <span class="o">=</span> <span class="n">res</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">data</span>
+                <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;npts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">Trace</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">stats</span><span class="p">)</span>
+                <span class="n">trace</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;stastack&quot;</span><span class="p">:</span>
+                <span class="c1"># That should be a single plot</span>
+                <span class="n">tr</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+            <span class="n">traces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">statlat</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station_latitude</span>
+        <span class="n">statlon</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station_longitude</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">Stream</span><span class="p">(</span><span class="n">traces</span><span class="o">=</span><span class="n">traces</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;section&#39;</span><span class="p">,</span> <span class="n">dist_degree</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">ev_coord</span><span class="o">=</span><span class="p">(</span><span class="n">statlat</span><span class="p">,</span> <span class="n">statlon</span><span class="p">),</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">time_down</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">handle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fillcolors</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">))</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">([</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="p">])</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_axes</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># ax.set_ylim(0, 30)</span>
+        <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;depth&quot;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Depth [km]&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div></div>
+
+
+<div class="viewcode-block" id="RFTrace"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFTrace">[docs]</a><span class="k">class</span> <span class="nc">RFTrace</span><span class="p">(</span><span class="n">Trace</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class providing the Trace object for receiver function calculation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">trace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">stats</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RFTrace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;_format&#39;</span> <span class="ow">in</span> <span class="n">st</span> <span class="ow">and</span> <span class="n">st</span><span class="o">.</span><span class="n">_format</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Q&#39;</span> <span class="ow">and</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_read_format_specific_header</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;onset&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">RFTrace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="n">id_length</span><span class="o">=</span><span class="n">id_length</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">type_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">type_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">o1</span> <span class="o">=</span> <span class="n">m</span> <span class="o">+</span> <span class="s1">&#39;rf&#39;</span>
+            <span class="k">if</span> <span class="n">type_</span> <span class="o">!=</span> <span class="s1">&#39;rf&#39;</span><span class="p">:</span>
+                <span class="n">o1</span> <span class="o">=</span> <span class="n">o1</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">type_</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">):</span>
+                <span class="n">o1</span> <span class="o">=</span> <span class="n">o1</span> <span class="o">+</span> <span class="s1">&#39; (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">o1</span> <span class="o">=</span> <span class="n">o1</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">o1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o1</span><span class="p">)</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">onset</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">endtime</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">onset</span>
+        <span class="n">o2</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.1f</span><span class="s1">s - </span><span class="si">%.1f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">o2</span> <span class="o">=</span> <span class="n">o2</span> <span class="o">+</span> <span class="s1">&#39; onset:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">onset</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o2</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{sampling_rate}</span><span class="s1"> Hz, </span><span class="si">{npts}</span><span class="s1"> samples&#39;</span><span class="p">)</span>
+        <span class="n">o3</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="s1">&#39;event_magnitude&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">:</span>
+            <span class="n">o3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;mag:</span><span class="si">{event_magnitude:.1f}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;distance&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">:</span>
+            <span class="n">o3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;dist:</span><span class="si">{distance:.1f}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;back_azimuth&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">:</span>
+            <span class="n">o3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;baz:</span><span class="si">{back_azimuth:.1f}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;box_pos&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">:</span>
+            <span class="n">o3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;pos:</span><span class="si">{box_pos:.2f}</span><span class="s1">km&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;slowness&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">:</span>
+            <span class="n">o3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;slow:</span><span class="si">{slowness:.2f}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;moveout&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">:</span>
+            <span class="n">o3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;(</span><span class="si">{moveout}</span><span class="s1"> moveout)&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">count_masked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">o3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;(masked)&#39;</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">o3</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s1">&#39; | &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_format_specific_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;_format&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="nb">format</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">_format</span>
+        <span class="nb">format</span> <span class="o">=</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;q&#39;</span><span class="p">:</span>
+            <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;sh&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">header_map</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">_HEADERS</span><span class="p">,</span> <span class="n">_FORMATHEADERS</span><span class="p">[</span><span class="nb">format</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c1"># file format is H5 or not supported</span>
+            <span class="k">return</span>
+        <span class="n">read_comment</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">head</span><span class="p">,</span> <span class="n">head_format</span> <span class="ow">in</span> <span class="n">header_map</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;sh&#39;</span> <span class="ow">and</span> <span class="n">read_comment</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="nb">format</span><span class="p">][</span><span class="n">head_format</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;sac&#39;</span> <span class="ow">and</span> <span class="s1">&#39;-12345&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                    <span class="k">pass</span>
+                <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;sh&#39;</span> <span class="ow">and</span> <span class="n">head_format</span> <span class="o">==</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">:</span>
+                    <span class="n">st</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">st</span><span class="p">[</span><span class="n">head</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">_HEADER_CONVERSIONS</span><span class="p">[</span><span class="nb">format</span><span class="p">][</span><span class="n">head</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">st</span><span class="p">[</span><span class="n">head</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">head</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_write_format_specific_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="p">):</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span>
+        <span class="nb">format</span> <span class="o">=</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;q&#39;</span><span class="p">:</span>
+            <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;sh&#39;</span>
+        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;sac&#39;</span><span class="p">:</span>
+            <span class="c1"># make sure SAC reference time is set</span>
+            <span class="kn">from</span> <span class="nn">obspy.io.sac.util</span> <span class="kn">import</span> <span class="n">obspy_to_sac_header</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sac</span> <span class="o">=</span> <span class="n">obspy_to_sac_header</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">header_map</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">_HEADERS</span><span class="p">,</span> <span class="n">_FORMATHEADERS</span><span class="p">[</span><span class="nb">format</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c1"># file format is H5 or not supported</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
+            <span class="n">st</span><span class="p">[</span><span class="nb">format</span><span class="p">]</span> <span class="o">=</span> <span class="n">AttribDict</span><span class="p">({})</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;sh&#39;</span><span class="p">:</span>
+            <span class="n">comment</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">head</span><span class="p">,</span> <span class="n">head_format</span> <span class="ow">in</span> <span class="n">header_map</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;sh&#39;</span> <span class="ow">and</span> <span class="n">head_format</span> <span class="o">==</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">comment</span><span class="p">[</span><span class="n">head</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="n">head</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="n">head</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">_HEADER_CONVERSIONS</span><span class="p">[</span><span class="nb">format</span><span class="p">][</span><span class="n">head</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">head</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">st</span><span class="p">[</span><span class="nb">format</span><span class="p">][</span><span class="n">head_format</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;sh&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>  <span class="c1"># convert numpy types</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+            <span class="n">st</span><span class="p">[</span><span class="nb">format</span><span class="p">][</span><span class="s1">&#39;COMMENT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">comment</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">),</span>
+                                               <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_seconds2utc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="p">,</span> <span class="n">reftime</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return UTCDateTime given as seconds relative to reftime&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Iterable</span>
+        <span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">UTC</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_seconds2utc</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">reftime</span><span class="o">=</span><span class="n">reftime</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">seconds</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="n">UTC</span><span class="p">)</span> <span class="ow">or</span> <span class="n">reftime</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">seconds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">seconds</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reftime</span><span class="p">,</span> <span class="n">UTC</span><span class="p">):</span>
+            <span class="n">reftime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="n">reftime</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">reftime</span> <span class="o">+</span> <span class="n">seconds</span>
+
+<div class="viewcode-block" id="RFTrace.moveout"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFTrace.moveout">[docs]</a>    <span class="k">def</span> <span class="nf">moveout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vmodel</span><span class="p">,</span> <span class="n">latb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lonb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">taper</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Depth migration of the receiver function.</span>
+<span class="sd">        Also calculates piercing points and adds them to RFTrace.stats.</span>
+
+<span class="sd">        :param vmodel: Velocity model located in /data/vmodel.</span>
+<span class="sd">            Standard options are iasp91.dat and 3D (GYPSuM).</span>
+<span class="sd">        :type vmodel: str</span>
+<span class="sd">        :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D</span>
+<span class="sd">            raytraycing. Will remain unused for 1D RT, defaults to None</span>
+<span class="sd">        :type latb: Tuple, optional</span>
+<span class="sd">        :param lonb: Tuple in Form (minlon, maxlon), defaults to None</span>
+<span class="sd">        :type lonb: Tuple, optional</span>
+<span class="sd">        :param taper: If True, the last 10km of the RF will be tapered, which</span>
+<span class="sd">            avoids jumps in station stacks. Should be False for CCP stacks,</span>
+<span class="sd">            defaults to True.</span>
+<span class="sd">        :type taper: bool, optional</span>
+<span class="sd">        :return: 1D np.ndarray containing depths and an</span>
+<span class="sd">            RFTrace object of type depth.</span>
+<span class="sd">        :rtype: 1D np.ndarray, :class:`~pyglimer.rf.create.RFTrace`</span>
+<span class="sd">        &quot;&quot;&quot;</span>   
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;depth&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;stastack&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;RF is already depth migrated.&quot;</span><span class="p">)</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span>
+
+        <span class="n">z</span><span class="p">,</span> <span class="n">RF_mo</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">moveout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">vmodel</span><span class="p">,</span> <span class="n">latb</span><span class="o">=</span><span class="n">latb</span><span class="p">,</span> <span class="n">lonb</span><span class="o">=</span><span class="n">lonb</span><span class="p">,</span>
+                                  <span class="n">taper</span><span class="o">=</span><span class="n">taper</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">pp_latitude</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">pp_longitude</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">station_elevation</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">pp_depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">round</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">station_elevation</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">),</span>
+                 <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span> <span class="o">+</span> <span class="n">res</span><span class="p">)))[:</span><span class="nb">len</span><span class="p">(</span><span class="n">delta</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">pp_depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">round</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">station_elevation</span><span class="o">/</span><span class="mi">1000</span><span class="p">),</span>
+                                    <span class="n">maxz</span> <span class="o">+</span> <span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">delta</span><span class="p">)]</span>
+        <span class="c1"># np.arange(0, maxz + res, res)[0:len(delta)]</span>
+
+        <span class="c1"># Calculate ppoint position</span>
+        <span class="k">for</span> <span class="n">dis</span> <span class="ow">in</span> <span class="n">delta</span><span class="p">:</span>
+            <span class="n">lat</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">station_latitude</span>
+            <span class="n">lon</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">station_longitude</span>
+            <span class="n">az</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">back_azimuth</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="o">.</span><span class="n">WGS84</span><span class="o">.</span><span class="n">ArcDirect</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">dis</span><span class="p">)</span>
+            <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;lat2&#39;</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;lon2&#39;</span><span class="p">]</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">pp_latitude</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">pp_longitude</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lon2</span><span class="p">)</span>
+
+        <span class="c1"># Create trace object</span>
+        <span class="n">RF_mo</span> <span class="o">=</span> <span class="n">RFTrace</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">RF_mo</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">st</span><span class="p">)</span>
+        <span class="n">RF_mo</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;depth&quot;</span><span class="p">,</span> <span class="s2">&quot;npts&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">RF_mo</span><span class="o">.</span><span class="n">data</span><span class="p">)})</span>
+        <span class="k">return</span> <span class="n">z</span><span class="p">,</span> <span class="n">RF_mo</span></div>
+
+<div class="viewcode-block" id="RFTrace.ppoint"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFTrace.ppoint">[docs]</a>    <span class="k">def</span> <span class="nf">ppoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vmodel</span><span class="p">,</span> <span class="n">latb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lonb</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates piercing points for receiver function in and adds them</span>
+<span class="sd">        to self.stats in form of lat, lon and depth.</span>
+
+<span class="sd">        :param vmodel_file: velocity model located in /data/vmodel.</span>
+<span class="sd">            The default is &#39;iasp91.dat&#39;.</span>
+<span class="sd">        :type vmodel_file: str, optional</span>
+<span class="sd">        :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D</span>
+<span class="sd">            raytraycing. Will remain unused for 1D RT, defaults to None.</span>
+<span class="sd">        :type latb: tuple, optional</span>
+<span class="sd">        :param lonb: Tuple in Form (minlon, maxlon), defaults to None</span>
+<span class="sd">        :type lonb: tuple, optional.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">st</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span>
+
+        <span class="k">if</span> <span class="n">vmodel</span> <span class="o">==</span> <span class="s1">&#39;3D&#39;</span><span class="p">:</span>
+            <span class="n">htab</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">dt_table_3D</span><span class="p">(</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">slowness</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">station_latitude</span><span class="p">,</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">station_longitude</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">back_azimuth</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">station_elevation</span><span class="p">,</span>
+                <span class="n">latb</span><span class="p">,</span> <span class="n">lonb</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">htab</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">dt_table</span><span class="p">(</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">slowness</span><span class="p">,</span> <span class="n">vmodel</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">station_elevation</span><span class="p">)</span>
+
+        <span class="n">st</span><span class="o">.</span><span class="n">pp_depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)))</span>
+        <span class="c1"># if st.station_elevation &gt; 0:</span>
+        <span class="c1">#     st.pp_depth = np.hstack(</span>
+        <span class="c1">#         (np.arange(-round(st.station_elevation/1000, 1), 0, .1),</span>
+        <span class="c1">#          np.arange(0, maxz + res)))[:len(delta)]</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     st.pp_depth = np.arange(-round(st.station_elevation/1000),</span>
+        <span class="c1">#                             maxz + res, res)[0:len(delta)]</span>
+        <span class="c1"># st.pp_depth = np.hstack(</span>
+        <span class="c1">#     (np.arange(-10, 0, .1), np.arange(0, htab.max(), res)))</span>
+        <span class="n">delta2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">pp_depth</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">delta2</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+        <span class="c1"># Find first pp depth</span>
+        <span class="c1"># starti = np.nonzero(np.isclose(st.ppdepth, -st.station_elevation))</span>
+        <span class="n">starti</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">pp_depth</span><span class="p">,</span> <span class="n">htab</span><span class="p">[</span><span class="mi">0</span><span class="p">]))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># print(len(delta))</span>
+        <span class="c1"># Create full-length distance vector</span>
+        <span class="n">delta2</span><span class="p">[</span><span class="n">starti</span><span class="p">:</span><span class="n">starti</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">delta</span><span class="p">)]</span> <span class="o">=</span> <span class="n">delta</span>
+
+        <span class="n">st</span><span class="o">.</span><span class="n">pp_latitude</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">pp_longitude</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">dis</span> <span class="ow">in</span> <span class="n">delta2</span><span class="p">:</span>
+            <span class="n">lat</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">station_latitude</span>
+            <span class="n">lon</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">station_longitude</span>
+            <span class="n">az</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">back_azimuth</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="o">.</span><span class="n">WGS84</span><span class="o">.</span><span class="n">ArcDirect</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">dis</span><span class="p">)</span>
+            <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;lat2&#39;</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;lon2&#39;</span><span class="p">]</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">pp_latitude</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">pp_longitude</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lon2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">delta2</span></div>
+
+<div class="viewcode-block" id="RFTrace.plot"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFTrace.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots the Receiver function against either depth or time, depending on</span>
+<span class="sd">        information given in self.stats.type.</span>
+
+<span class="sd">        :param grid: Show a grid. The default is False.</span>
+<span class="sd">        :type grid: bool, optional</span>
+<span class="sd">        :return: Figure parameter if one wishes to edit figure and ax</span>
+<span class="sd">                If one wishes to edit axes.</span>
+<span class="sd">        :rtype: matplotlib.figure.Figure</span>
+<span class="sd">            matplotlib.axes._subplots.AxesSubplot</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="c1"># plt.style.use(&#39;data/plot_data/PaperDoubleFig.mplstyle&#39;)</span>
+        <span class="c1"># Make some style choices for plotting</span>
+        <span class="n">colourWheel</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;#329932&#39;</span><span class="p">,</span> <span class="s1">&#39;#ff6961&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;#6a3d9a&#39;</span><span class="p">,</span> <span class="s1">&#39;#fb9a99&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;#e31a1c&#39;</span><span class="p">,</span> <span class="s1">&#39;#fdbf6f&#39;</span><span class="p">,</span> <span class="s1">&#39;#ff7f00&#39;</span><span class="p">,</span> <span class="s1">&#39;#cab2d6&#39;</span><span class="p">,</span> <span class="s1">&#39;#6a3d9a&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;#ffff99&#39;</span><span class="p">,</span> <span class="s1">&#39;#b15928&#39;</span><span class="p">,</span> <span class="s1">&#39;#67001f&#39;</span><span class="p">,</span> <span class="s1">&#39;#b2182b&#39;</span><span class="p">,</span> <span class="s1">&#39;#d6604d&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;#f4a582&#39;</span><span class="p">,</span> <span class="s1">&#39;#fddbc7&#39;</span><span class="p">,</span> <span class="s1">&#39;#f7f7f7&#39;</span><span class="p">,</span> <span class="s1">&#39;#d1e5f0&#39;</span><span class="p">,</span> <span class="s1">&#39;#92c5de&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;#4393c3&#39;</span><span class="p">,</span> <span class="s1">&#39;#2166ac&#39;</span><span class="p">,</span> <span class="s1">&#39;#053061&#39;</span><span class="p">]</span>
+        <span class="n">dashesStyles</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Move y-axis and x-axis to centre, passing through (0,0)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_position</span><span class="p">(</span><span class="s2">&quot;zero&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Eliminate upper and right axes</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Show ticks in the left and lower axes only</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_ticks_position</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">ScalarFormatter</span><span class="p">())</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">major</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_useMathText</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">ScalarFormatter</span><span class="p">())</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">major</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_useMathText</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># ax.yaxis.set_minor_locator(AutoMinorLocator(5))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">AutoMinorLocator</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;normalised Amplitude&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">grid</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=.</span><span class="mi">25</span><span class="p">)</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="c1"># Determine type</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
+
+            <span class="c1"># theoretical arrival sample in seconds (plotted as 0)</span>
+            <span class="c1"># TAS = round((self.stats.onset-self.stats.starttime)</span>
+            <span class="c1">#             / self.stats.delta)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>  <span class="c1"># flip trace</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="n">y</span>  <span class="c1"># polarity</span>
+                <span class="c1"># TAS = -TAS</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">onset</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">endtime</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">onset</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="p">,</span>
+                                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">onset</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">endtime</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">onset</span><span class="p">,</span>
+                                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+
+            <span class="c1"># plot</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;conversion time in s&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Receiver Function &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">network</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span>
+                         <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span>
+                         <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">event_time</span><span class="p">))</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;stastack&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;depth&quot;</span><span class="p">:</span>
+            <span class="c1"># plot against depth</span>
+            <span class="c1"># z = np.linspace(0, maxz, len(self.data))</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
+                <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)))</span>
+
+            <span class="c1"># plot</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Depth in km&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">250</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;depth&quot;</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Receiver Function &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">network</span>
+                             <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span>
+                             <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">event_time</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;stastack&quot;</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Receiver Function stack &quot;</span> <span class="o">+</span>
+                             <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">network</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span>
+                             <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="RFTrace.write"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFTrace.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save current trace into a file  including format specific headers.</span>
+<span class="sd">        See `Trace.write() &lt;obspy.core.trace.Trace.write&gt;` in ObsPy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">RFStream</span><span class="p">([</span><span class="bp">self</span><span class="p">])</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="obj2stats"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.obj2stats">[docs]</a><span class="k">def</span> <span class="nf">obj2stats</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Map event and station object to stats with attributes.</span>
+
+<span class="sd">    :param event: Event File. The default is None.</span>
+<span class="sd">    :type event: :class:`~obspy.core.event.event.Event`, optional</span>
+<span class="sd">    :param station: Station file with attributes lat, lon, and elevation.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    :type station: :class:`~obspy.core.Station`, optional</span>
+<span class="sd">    :return: Stats object with station and event attributes.</span>
+<span class="sd">    :rtype: :class:`~obspy.core.AttribDict`</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">AttribDict</span><span class="p">({})</span>
+    <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">getter</span> <span class="ow">in</span> <span class="n">_EVENT_GETTER</span><span class="p">:</span>
+            <span class="n">stats</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">getter</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">station</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">getter</span> <span class="ow">in</span> <span class="n">_STATION_GETTER</span><span class="p">:</span>
+            <span class="n">stats</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">getter</span><span class="p">(</span><span class="n">station</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">stats</span></div>
+
+
+<div class="viewcode-block" id="rfstats"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.rfstats">[docs]</a><span class="k">def</span> <span class="nf">rfstats</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">starttime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">tt_model</span><span class="o">=</span><span class="s2">&quot;IASP91&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a stats object for a RFTrace object. Provide an info dic and</span>
+<span class="sd">    starttime or event and station object. Latter will take longer since</span>
+<span class="sd">    computations are redone.</span>
+
+<span class="sd">    :param phase: Either &quot;P&quot; or &quot;S&quot; for main phase.</span>
+<span class="sd">    :type phase: str</span>
+<span class="sd">    :param info: Dictionary containing information about waveform. Can be None</span>
+<span class="sd">        if event and station are provided. Has to be given in combination with</span>
+<span class="sd">        starttime, defaults to None.</span>
+<span class="sd">    :type info: dict</span>
+<span class="sd">    :param starttime: Starttime of first trace in stream, used as identifier in</span>
+<span class="sd">            info dict. The default is None.</span>
+<span class="sd">    :type starttime: :class:`~obspy.core.UTCDateTime`, optional</span>
+<span class="sd">    :param event: Event file, provide together with station file if info=None.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    :type event: :class:`~obspy.core.event.event.Event`, optional</span>
+<span class="sd">    :param station: Station inventory with attributes lat, lon, and elevation,</span>
+<span class="sd">        defaults to None</span>
+<span class="sd">    :type station: :class:`~obspy.core.Station`, optional</span>
+<span class="sd">    :param tt_model: TauPy model to calculate arrival, only used if no info</span>
+<span class="sd">        file is given. The default is &quot;IASP91&quot;.</span>
+<span class="sd">    :type tt_model: str, optional</span>
+<span class="sd">    :raises Exception: For unavailable phases</span>
+<span class="sd">    :return: Stats file for a RFTrace object with event and station</span>
+<span class="sd">        attributes, distance, back_azimuth, onset and</span>
+<span class="sd">        ray parameter.</span>
+<span class="sd">    :rtype: :class:`~obspy.core.AttribDict`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">AttribDict</span><span class="p">({})</span>
+
+    <span class="c1"># read info file if provided</span>
+    <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="n">starttime</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;starttime&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">starttime</span><span class="p">)</span>
+        <span class="n">stats</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;distance&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;rdelta&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                      <span class="s1">&#39;back_azimuth&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;rbaz&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                      <span class="s1">&#39;onset&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;onset&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                      <span class="s1">&#39;slowness&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;rayp_s_deg&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                      <span class="s1">&#39;phase&#39;</span><span class="p">:</span> <span class="n">phase</span><span class="p">,</span> <span class="s1">&#39;event_latitude&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;evtlat&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                      <span class="s1">&#39;event_longitude&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;evtlon&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                      <span class="s1">&#39;event_depth&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;evt_depth&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                      <span class="s1">&#39;event_magnitude&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;magnitude&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                      <span class="s1">&#39;event_time&#39;</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;ot_ret&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]),</span>
+                      <span class="s1">&#39;station_latitude&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;statlat&quot;</span><span class="p">],</span>
+                      <span class="s1">&#39;station_longitude&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;statlon&quot;</span><span class="p">],</span>
+                      <span class="s1">&#39;station_elevation&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;statel&quot;</span><span class="p">]})</span>
+        <span class="k">if</span> <span class="s2">&quot;evt_id&quot;</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
+            <span class="n">stats</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;event_id&quot;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;evt_id&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]})</span>
+    <span class="k">elif</span> <span class="n">event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">station</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stats</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">obj2stats</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">station</span><span class="p">))</span>
+        <span class="n">dist</span><span class="p">,</span> <span class="n">rbaz</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">gps2dist_azimuth</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">station_latitude</span><span class="p">,</span>
+                                         <span class="n">stats</span><span class="o">.</span><span class="n">station_longitude</span><span class="p">,</span>
+                                         <span class="n">stats</span><span class="o">.</span><span class="n">event_latitude</span><span class="p">,</span>
+                                         <span class="n">stats</span><span class="o">.</span><span class="n">event_longitude</span><span class="p">)</span>
+
+        <span class="c1"># Calculate arrival parameters</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">dist</span> <span class="o">/</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">DEG2KM</span>
+        <span class="n">tt_model</span> <span class="o">=</span> <span class="n">TauPyModel</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">tt_model</span><span class="p">)</span>
+
+        <span class="n">arrivals</span> <span class="o">=</span> <span class="n">tt_model</span><span class="o">.</span><span class="n">get_travel_times</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">event_depth</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="p">(</span><span class="n">phase</span><span class="p">,))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arrivals</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;TauPy does not return phase </span><span class="si">%s</span><span class="s1"> at distance </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                            <span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">dist</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arrivals</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;TauPy returns more than one arrival for phase </span><span class="si">%s</span><span class="s1"> at &#39;</span>
+                   <span class="s1">&#39;distance -&gt; take first arrival&#39;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span> <span class="o">%</span> <span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">dist</span><span class="p">))</span>
+        <span class="n">arrival</span> <span class="o">=</span> <span class="n">arrivals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">onset</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">event_time</span> <span class="o">+</span> <span class="n">arrival</span><span class="o">.</span><span class="n">time</span>
+        <span class="n">rayp</span> <span class="o">=</span> <span class="n">arrival</span><span class="o">.</span><span class="n">ray_param_sec_degree</span>
+        <span class="n">stats</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;rdelta&#39;</span><span class="p">:</span> <span class="n">dist</span><span class="p">,</span> <span class="s1">&#39;rbaz&#39;</span><span class="p">:</span> <span class="n">rbaz</span><span class="p">,</span> <span class="s1">&#39;onset&#39;</span><span class="p">:</span> <span class="n">onset</span><span class="p">,</span>
+                      <span class="s1">&#39;rayp_s_deg&#39;</span><span class="p">:</span> <span class="n">rayp</span><span class="p">,</span> <span class="s1">&#39;phase&#39;</span><span class="p">:</span> <span class="n">phase</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">stats</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Peter Makus
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

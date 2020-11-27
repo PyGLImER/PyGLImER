@@ -1,0 +1,824 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyglimer.rf.deconvolve &mdash; PyGLImER 0.01 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyGLImER
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyGLImER</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyglimer.rf.deconvolve</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyglimer.rf.deconvolve</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed Oct 16 14:23:30 2019</span>
+
+<span class="sd">Various Deconvolution approaches used for the RF technique.</span>
+<span class="sd">@author: pm</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.signal.windows</span> <span class="kn">import</span> <span class="n">dpss</span>
+
+<span class="kn">from</span> <span class="nn">..utils.nextpowof2</span> <span class="kn">import</span> <span class="n">nextPowerOf2</span>
+<span class="kn">import</span> <span class="nn">pyglimer.utils</span> <span class="k">as</span> <span class="nn">sptb</span>
+
+
+<div class="viewcode-block" id="gen_it"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.deconvolve.gen_it">[docs]</a><span class="k">def</span> <span class="nf">gen_it</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">e_min</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">omega_min</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+           <span class="n">it_max</span><span class="o">=</span><span class="mi">400</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Has a bug in the normalisation!</span>
+<span class="sd">    This function provides a generalised iterative deconvolution as given</span>
+<span class="sd">    by Wang &amp; Pavlis (2016)</span>
+<span class="sd">    Essentially, P will be deconvolved from H.</span>
+
+<span class="sd">    :param P: The source wavelet estimation (denominator).</span>
+<span class="sd">    :type P: np.ndarray</span>
+<span class="sd">    :param H: Impulse response convolved with source wavelet (enumerator).</span>
+<span class="sd">    :type H: np.ndarray</span>
+<span class="sd">    :param dt: Sampling interval [s]</span>
+<span class="sd">    :type dt: float</span>
+<span class="sd">    :param mu: Damping factor for least-square damping.</span>
+<span class="sd">    :type mu: float</span>
+<span class="sd">    :param shift: Time shift of theoretical arrival [s]. The default is 0.</span>
+<span class="sd">    :type shift: float, optional</span>
+<span class="sd">    :param width: Width parameter for Gaussian. The default is 2.5.</span>
+<span class="sd">    :type width: float, optional</span>
+<span class="sd">    :param e_min: Is the energy ratio of residual and original data</span>
+<span class="sd">        after the nth iteration; given in per cent. The default is 5.</span>
+<span class="sd">    :type e_min: float, optional</span>
+<span class="sd">    :param omega_min: secondary control parameter (percentage improvement per</span>
+<span class="sd">        iteration), given in per cent - used as criterion to test significance.</span>
+<span class="sd">        The default is 0.5.</span>
+<span class="sd">    :type omega_min: float, optional</span>
+<span class="sd">    :param it_max: Maximum number of iterations. defaults to 400</span>
+<span class="sd">    :type it_max: int, optional</span>
+<span class="sd">    :return: rf : The receiver function.</span>
+<span class="sd">        IR : The estimation of the medium&#39;s impulse response.</span>
+<span class="sd">        it : Number of iterations</span>
+<span class="sd">        rej : Number of peaks that did not meet the criterion of significance.</span>
+<span class="sd">    :rtype: rf : 1D np.ndarray</span>
+<span class="sd">        IR : 1D np.ndarray</span>
+<span class="sd">        it : int</span>
+<span class="sd">        rej : int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># From per cent to decimal</span>
+    <span class="n">e_min</span> <span class="o">=</span> <span class="n">e_min</span><span class="o">/</span><span class="mi">100</span>
+    <span class="n">omega_min</span> <span class="o">=</span> <span class="n">omega_min</span><span class="o">/</span><span class="mi">100</span>
+
+    <span class="c1"># create proper numpy arrays (allow functions on arrays as in Matlab)</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+    <span class="n">N2</span> <span class="o">=</span> <span class="n">nextPowerOf2</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+
+    <span class="c1"># Pad input with zeros to the next power of 2</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="p">(</span><span class="n">N2</span><span class="o">-</span><span class="n">N</span><span class="p">)</span><span class="o">*</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="p">(</span><span class="n">N2</span><span class="o">-</span><span class="n">N</span><span class="p">)</span><span class="o">*</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># cast source wavelet estimation into frequency domain</span>
+    <span class="n">P_ft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">N2</span><span class="p">)</span>
+
+    <span class="c1"># damp source wavelet</span>
+    <span class="n">P_ftd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">P_ft</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">P_ft</span><span class="p">)</span><span class="o">*</span><span class="n">P_ft</span><span class="o">*</span><span class="n">dt</span> <span class="o">+</span> <span class="n">mu</span><span class="p">)</span>  <span class="c1"># dt</span>
+    <span class="n">P_d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">P_ftd</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">N2</span><span class="p">))</span>  <span class="c1"># back to time domain</span>
+
+    <span class="c1"># PREPARING PARAMETERS FOR LOOP #####</span>
+    <span class="n">it</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># number of iteration</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># start value</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">H</span>  <span class="c1"># the first residual value</span>
+
+    <span class="c1"># Begin iterative process:</span>
+    <span class="n">IR_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N2</span><span class="p">)</span>
+    <span class="n">IR</span> <span class="o">=</span> <span class="n">IR_new</span>
+
+    <span class="n">rej</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Number of rejected peaks</span>
+
+    <span class="c1"># WHILE LOOP FOR ITERATIVE DECON #####</span>
+    <span class="k">while</span> <span class="n">e</span> <span class="o">&gt;</span> <span class="n">e_min</span> <span class="ow">and</span> <span class="n">it</span> <span class="o">&lt;</span> <span class="n">it_max</span><span class="p">:</span>
+        <span class="n">it</span> <span class="o">=</span> <span class="n">it</span><span class="o">+</span><span class="mi">1</span>
+        <span class="c1"># convolve eestimated source pulse &amp; residual</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">sptb</span><span class="o">.</span><span class="n">convf</span><span class="p">(</span><span class="n">P_d</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+
+        <span class="c1"># Find position of maximum correlation, with k*dt</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N2</span><span class="p">]))</span>
+
+        <span class="c1"># That&#39;s the scaling from the original paper,</span>
+        <span class="c1"># which doesn&#39;t make very much sense to me</span>
+        <span class="c1"># s2 = a[k]*P</span>
+        <span class="c1"># scale = np.sqrt(np.dot(s2,H))/np.linalg.norm(H)</span>
+
+        <span class="c1"># scale akin to the original by Ligorria</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="p">(</span><span class="n">mu</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">P_ft</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">P</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">ak</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">scale</span>
+
+        <span class="n">IR_new</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">IR</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="n">ak</span>  <span class="c1"># construct estimated impulse response</span>
+
+        <span class="c1"># convolve impulse response and source wavelet</span>
+        <span class="c1"># to estimation of horizontal component:</span>
+        <span class="n">est</span> <span class="o">=</span> <span class="n">sptb</span><span class="o">.</span><span class="n">convf</span><span class="p">(</span><span class="n">IR_new</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+
+        <span class="c1"># compute residual for ongoing iteration it</span>
+        <span class="n">r_new</span> <span class="o">=</span> <span class="n">H</span> <span class="o">-</span> <span class="n">est</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r_new</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># significance criterion</span>
+
+        <span class="c1"># Calculate criterion for convergence</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r_new</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">H</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="c1"># That&#39;s the original from the paper</span>
+        <span class="c1"># e = np.linalg.norm(r_new)/np.linalg.norm(H)</span>
+        <span class="c1"># If convergence criteria weren&#39;t met and sigificance criterion was met</span>
+        <span class="c1"># Else the significance criterion isn&#39;t met and the peak is most</span>
+        <span class="c1"># likely noise and thus discarded</span>
+        <span class="k">if</span> <span class="n">omega</span> <span class="o">&gt;</span> <span class="n">omega_min</span><span class="p">:</span>
+            <span class="n">IR</span> <span class="o">=</span> <span class="n">IR_new</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">r_new</span>  <span class="c1"># set new residual value</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># reject peak</span>
+            <span class="n">IR_new</span> <span class="o">=</span> <span class="n">IR</span>  <span class="c1"># discard insignifcant peak</span>
+            <span class="n">rej</span> <span class="o">=</span> <span class="n">rej</span><span class="o">+</span><span class="mi">1</span>
+
+    <span class="c1"># Create receiver function</span>
+    <span class="n">Gauss</span> <span class="o">=</span> <span class="n">sptb</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">sptb</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">IR</span><span class="p">,</span> <span class="n">Gauss</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">N2</span><span class="p">)</span>
+
+    <span class="c1"># shift and truncate RF</span>
+    <span class="k">if</span> <span class="n">shift</span><span class="p">:</span>  <span class="c1"># only if shift !=0</span>
+        <span class="n">rf</span> <span class="o">=</span> <span class="n">sptb</span><span class="o">.</span><span class="n">sshift</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">shift</span><span class="p">)</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">rf</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N</span><span class="p">]</span>  <span class="c1"># truncate</span>
+    <span class="k">return</span> <span class="n">rf</span><span class="p">,</span> <span class="n">IR</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">rej</span></div>
+
+
+<div class="viewcode-block" id="it"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.deconvolve.it">[docs]</a><span class="k">def</span> <span class="nf">it</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">omega_min</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">it_max</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Iterative deconvolution after Ligorria &amp; Ammon (1999)</span>
+<span class="sd">    Essentially, P will be deconvolved from H.</span>
+
+<span class="sd">    :param P: The source wavelet estimation / denominator.</span>
+<span class="sd">    :type P: 1D np.ndarray</span>
+<span class="sd">    :param H: The enumerator (impulse response * source wavelet estimation).</span>
+<span class="sd">    :type H: 1D np.ndarray</span>
+<span class="sd">    :param dt: Sampling interval [s].</span>
+<span class="sd">    :type dt: float</span>
+<span class="sd">    :param shift: Time shift of main arrival [s]. The default is 0.</span>
+<span class="sd">    :type shift: float, optional</span>
+<span class="sd">    :param width: Gaussian width parameter. The default is 2.5.</span>
+<span class="sd">    :type width: float, optional</span>
+<span class="sd">    :param omega_min: Convergence control parameter (percentage improvement</span>
+<span class="sd">        per iteration). The default is 0.5.</span>
+<span class="sd">    :type omega_min: float, optional</span>
+<span class="sd">    :param it_max: Maximal number of iterations before the algorithm</span>
+<span class="sd">        interrupts, defaults to 400</span>
+<span class="sd">    :type it_max: int, optional</span>
+<span class="sd">    :return: rf : The receiver function.</span>
+<span class="sd">        it : Number of iterations until algorithm converged.</span>
+<span class="sd">        IR : Estimation of the medium&#39;s impulse response.</span>
+<span class="sd">    :rtype: rf : np.ndarray</span>
+<span class="sd">        it : int</span>
+<span class="sd">        IR : np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">omega_min</span> <span class="o">=</span> <span class="n">omega_min</span><span class="o">/</span><span class="mi">100</span>  <span class="c1"># change from per cent to decimal</span>
+    <span class="c1"># create proper numpy arrays (allow functions on arrays as in Matlab)</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+    <span class="n">N2</span> <span class="o">=</span> <span class="n">nextPowerOf2</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+
+    <span class="c1"># Pad input with zeros to the next power of 2</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="p">(</span><span class="n">N2</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">))</span><span class="o">*</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="p">(</span><span class="n">N2</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">))</span><span class="o">*</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># PREPARING PARAMETERS FOR LOOP #</span>
+    <span class="n">it</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># number of iteration</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">H</span>  <span class="c1"># the first residual value</span>
+
+    <span class="c1"># Begin iterative process:</span>
+    <span class="n">IR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N2</span><span class="p">)</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># start value</span>
+
+    <span class="c1"># WHILE LOOP FOR ITERATIVE DECON #####</span>
+    <span class="k">while</span> <span class="n">omega</span> <span class="o">&gt;</span> <span class="n">omega_min</span> <span class="ow">and</span> <span class="n">it</span> <span class="o">&lt;</span> <span class="n">it_max</span><span class="p">:</span>
+        <span class="n">it</span> <span class="o">=</span> <span class="n">it</span><span class="o">+</span><span class="mi">1</span>
+
+        <span class="c1"># find cross-correlation</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">sptb</span><span class="o">.</span><span class="n">corrf</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">N2</span><span class="p">)</span>
+        <span class="c1"># Find position of maximum correlation, with k*dt</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N2</span><span class="p">]))</span>
+
+        <span class="c1"># Find amplitude of point with highest correlation</span>
+        <span class="c1"># That dt is here because I don&#39;t have it in the corrf function</span>
+        <span class="n">ak</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span>
+
+        <span class="n">IR</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">IR</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="n">ak</span>  <span class="c1"># construct estimated impulse response</span>
+
+        <span class="c1"># convolve impulse response and source wavelet:</span>
+        <span class="n">est</span> <span class="o">=</span> <span class="n">sptb</span><span class="o">.</span><span class="n">convf</span><span class="p">(</span><span class="n">IR</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+
+        <span class="c1"># compute residual for ongoing iteration it</span>
+        <span class="n">r_new</span> <span class="o">=</span> <span class="n">H</span> <span class="o">-</span> <span class="n">est</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r_new</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">r_new</span>
+
+    <span class="c1"># Create receiver function</span>
+    <span class="n">Gauss</span> <span class="o">=</span> <span class="n">sptb</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">sptb</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">IR</span><span class="p">,</span> <span class="n">Gauss</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">N2</span><span class="p">)</span>
+
+    <span class="c1"># shift and truncate RF</span>
+    <span class="k">if</span> <span class="n">shift</span><span class="p">:</span>  <span class="c1"># only if shift !=0</span>
+        <span class="n">rf</span> <span class="o">=</span> <span class="n">sptb</span><span class="o">.</span><span class="n">sshift</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">shift</span><span class="p">)</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">rf</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">rf</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">IR</span></div>
+
+
+<div class="viewcode-block" id="damped"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.deconvolve.damped">[docs]</a><span class="k">def</span> <span class="nf">damped</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Outdated use function spectraldivision instead!</span>
+<span class="sd">    A simple damped deconvolution. I just used it to benchmark</span>
+<span class="sd">    INPUT:</span>
+<span class="sd">        P: denominator (t-domain)</span>
+<span class="sd">        H: enumerator (t-domain)</span>
+<span class="sd">        mu: damping factor&quot;&quot;&quot;</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+    <span class="n">N2</span> <span class="o">=</span> <span class="n">nextPowerOf2</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="c1"># cast source wavelet estimation into frequency domain</span>
+    <span class="n">P_ft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">N2</span><span class="p">)</span>
+    <span class="n">H_ft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">N2</span><span class="p">)</span>
+
+    <span class="n">IR_ft</span> <span class="o">=</span> <span class="n">H_ft</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">P_ft</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">P_ft</span><span class="p">)</span><span class="o">*</span><span class="n">P_ft</span><span class="o">+</span><span class="n">mu</span><span class="p">)</span>
+    <span class="n">IR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">IR_ft</span><span class="p">))[</span><span class="mi">0</span><span class="p">:</span><span class="n">N</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">IR</span></div>
+
+
+<span class="c1"># def waterlevel(v, u, mu=.0025):</span>
+<span class="c1">#     N = len(v)</span>
+<span class="c1">#     N2 = nextPowerOf2(N)</span>
+<span class="c1">#     # fft</span>
+<span class="c1">#     v_ft = np.fft.fft(v)#, n=N2)</span>
+<span class="c1">#     u_ft = np.fft.fft(u)#, n=N2)</span>
+<span class="c1">#     denom = np.conj(v_ft)*v_ft</span>
+<span class="c1">#     # for ii, x in denom:</span>
+<span class="c1">#     #     if x &lt; mu:</span>
+<span class="c1">#     #         denom[ii] = mu</span>
+<span class="c1">#     RF_ft = np.conj(v_ft)*u_ft/denom</span>
+<span class="c1">#     RF = np.real(np.fft.ifft(RF_ft))[0:N]</span>
+<span class="c1">#     return RF</span>
+
+
+<span class="c1"># def multitaper_bak(P, H, mu, k=3, p=2.5):</span>
+<span class="c1">#     &quot;&quot;&quot;Suspended, use multitaper instead.</span>
+<span class="c1">#     Multitaper deconvolution (Park &amp; Levis (2000)).</span>
+<span class="c1">#     I should also implement the newer version from 2006</span>
+<span class="c1">#     INPUT:</span>
+<span class="c1">#         P: denominator (t-domain)</span>
+<span class="c1">#         H: enumerator (t-domain)</span>
+<span class="c1">#         p: time bandwidth product</span>
+<span class="c1">#         k: use kth Slepian sequence&quot;&quot;&quot;</span>
+<span class="c1">#     # create Slepian taper</span>
+<span class="c1">#     P = np.array(P, float)</span>
+<span class="c1">#     H = np.array(H, float)</span>
+<span class="c1">#     N = len(H)</span>
+<span class="c1">#     N2 = nextPowerOf2(N)</span>
+<span class="c1">#     # P_ft = np.fft.fft(P,n=N2)</span>
+<span class="c1">#     # H_ft = np.fft.fft(H,n=N2)</span>
+<span class="c1">#     # slep= np.array([],float)</span>
+<span class="c1">#     Y_H = np.array([0]*N2, float)</span>
+<span class="c1">#     Y_P = np.array([0]*N2, float)</span>
+<span class="c1">#</span>
+<span class="c1">#     slep = spectrum.dpss(N, p, k)  # create Slepian</span>
+<span class="c1">#</span>
+<span class="c1">#     for ii in range(k):</span>
+<span class="c1">#         Y_H = np.vstack((Y_H, np.fft.fft(slep[0][:, ii]*H, n=N2)))</span>
+<span class="c1">#         Y_P = np.vstack((Y_P, np.fft.fft(slep[0][:, ii]*P, n=N2)))</span>
+<span class="c1">#</span>
+<span class="c1">#     u = sum(np.conj(Y_H)*Y_P)  # enumerator</span>
+<span class="c1">#     v = np.sqrt(sum(np.conj(Y_H)*Y_H)*sum(np.conj(Y_P)*Y_P))  # denominator</span>
+<span class="c1">#     C = u/v  # coherence estimate in f-domain, used for variance</span>
+<span class="c1">#</span>
+<span class="c1">#     # receiver function</span>
+<span class="c1">#     # where mu is a spectrum damping factor and should be a function of g</span>
+<span class="c1">#     v = sum(np.conj(Y_P)*Y_P) + mu</span>
+<span class="c1">#     H = u/v</span>
+<span class="c1">#</span>
+<span class="c1">#     h = np.real(np.fft.ifft(H, n=N2))  # back to time domain</span>
+<span class="c1">#     # h should technically be truncated</span>
+<span class="c1">#</span>
+<span class="c1">#     # calculate variance</span>
+<span class="c1">#     var = (1-np.power(C, 2))/((k-1)*np.power(C, 2))*np.power(H, 2)</span>
+<span class="c1">#</span>
+<span class="c1">#     return h, var</span>
+
+
+<div class="viewcode-block" id="spectraldivision"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.deconvolve.spectraldivision">[docs]</a><span class="k">def</span> <span class="nf">spectraldivision</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">ndt</span><span class="p">,</span> <span class="n">tshift</span><span class="p">,</span> <span class="n">regul</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function spectraldivision(v,u,ndt,tshift,regul) is a standard spectral</span>
+<span class="sd">    division frequency domain deconvolution.</span>
+
+<span class="sd">    :param v: Source wavelet estimation (denominator).</span>
+<span class="sd">    :type v: 1D np.ndarray</span>
+<span class="sd">    :param u: Impulse response convolved by v (enumerator).</span>
+<span class="sd">    :type u: 1D np.ndarray</span>
+<span class="sd">    :param ndt: Sampling interval [s].</span>
+<span class="sd">    :type ndt: float</span>
+<span class="sd">    :param tshift: Time shift of primary arrival [s].</span>
+<span class="sd">    :type tshift: float</span>
+<span class="sd">    :param regul: Regularization, can be chosen by the variable &quot;regul&quot;, this</span>
+<span class="sd">        can be &#39;con&#39;, &#39;wat&#39;, or &#39;fqd&#39; for constant damping factor, waterlevel,</span>
+<span class="sd">        or frequency-dependent damping, respectively</span>
+<span class="sd">    :type regul: str</span>
+<span class="sd">    :param phase: Phase either &quot;P&quot; for Ps or &quot;S&quot; for Sp.</span>
+<span class="sd">    :type phase: str</span>
+<span class="sd">    :raises Exception: for uknown regulisations</span>
+<span class="sd">    :return: qrf : Receiver function.</span>
+<span class="sd">        lrf : Output of deoncolution of source wavelet estimation from</span>
+<span class="sd">        longitudinal component.</span>
+<span class="sd">    :rtype: 1D np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+    <span class="c1"># pre-event noise needed for regularisation parameter</span>
+    <span class="n">vn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+        <span class="n">vn</span><span class="p">[:</span><span class="nb">round</span><span class="p">((</span><span class="n">tshift</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">ndt</span><span class="p">)]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:</span><span class="nb">round</span><span class="p">((</span><span class="n">tshift</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">ndt</span><span class="p">)]</span>
+    <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+        <span class="n">vn</span><span class="p">[:</span><span class="nb">round</span><span class="p">((</span><span class="n">tshift</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">ndt</span><span class="p">)]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:</span><span class="nb">round</span><span class="p">((</span><span class="n">tshift</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">ndt</span><span class="p">)]</span>
+        <span class="c1"># vn[:round((tshift/6)/ndt)] = u[:round((tshift/6)/ndt)]</span>
+
+    <span class="c1"># number of points in fft</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">nextPowerOf2</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="c1"># nft = nf/2 + 1</span>
+
+    <span class="c1"># fourier transform</span>
+    <span class="n">uf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">)</span>
+    <span class="n">vf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">)</span>
+    <span class="n">vnf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">vn</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">)</span>
+
+    <span class="c1"># denominator and regularisation</span>
+    <span class="n">den</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">vf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">vf</span><span class="p">))</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">vnf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">vnf</span><span class="p">))</span>
+
+    <span class="c1"># den0 = den</span>
+
+    <span class="c1"># which regularization do you want?</span>
+    <span class="n">freqdep</span> <span class="o">=</span> <span class="n">regul</span> <span class="o">==</span> <span class="s1">&#39;fqd&#39;</span>
+    <span class="n">const</span> <span class="o">=</span> <span class="n">regul</span> <span class="o">==</span> <span class="s1">&#39;con&#39;</span>
+    <span class="n">water</span> <span class="o">=</span> <span class="n">regul</span> <span class="o">==</span> <span class="s1">&#39;wat&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">freqdep</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">const</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">water</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Regularization not defined (your input: regul=&quot;</span><span class="p">,</span>
+                        <span class="n">regul</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;). Use either &#39;fqd&#39; for frequency-dependent</span>
+<span class="s2">                        or &#39;con&#39; for constant value regularization or &#39;wat&#39;</span>
+<span class="s2">                        for water-level.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># constant damping factor regularization</span>
+    <span class="k">if</span> <span class="n">const</span><span class="p">:</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">noise</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+        <span class="n">den</span> <span class="o">=</span> <span class="n">den</span> <span class="o">+</span> <span class="n">eps</span>
+
+    <span class="c1"># frequency-dependent damping</span>
+    <span class="k">if</span> <span class="n">freqdep</span><span class="p">:</span>
+        <span class="n">den</span> <span class="o">=</span> <span class="n">den</span><span class="o">+</span><span class="n">noise</span>
+
+    <span class="c1"># waterlevel regularization</span>
+    <span class="k">if</span> <span class="n">water</span><span class="p">:</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">noise</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+        <span class="c1"># eps = 10</span>
+        <span class="c1"># eps = 100  # constant wl to reproduce Rychert et al</span>
+        <span class="n">den</span><span class="p">[</span><span class="n">den</span><span class="o">.</span><span class="n">real</span> <span class="o">&lt;</span> <span class="n">eps</span><span class="p">]</span> <span class="o">=</span> <span class="n">eps</span>
+
+    <span class="c1"># numerator</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">uf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">vf</span><span class="p">))</span>
+    <span class="n">numl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">vf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">vf</span><span class="p">))</span>
+
+    <span class="c1"># deconvolution, with scaling by 1/ndt to bring back</span>
+    <span class="c1"># rfl peak close to unity, for any value of ndt</span>
+    <span class="n">rfq</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">den</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">ndt</span><span class="p">)</span>
+    <span class="n">rfl</span> <span class="o">=</span> <span class="n">numl</span><span class="o">/</span><span class="n">den</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">ndt</span><span class="p">)</span>
+
+    <span class="c1"># SR: this is the cos^2 filter discussed in Park and Levin, 2000,</span>
+    <span class="c1"># on page 1509 (top of right column), with fc set to 1 Hz - probably</span>
+    <span class="c1"># comes from Helffrich&#39;s code.</span>
+    <span class="k">if</span> <span class="n">freqdep</span><span class="p">:</span>
+        <span class="n">N2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">rfq</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">N2</span><span class="p">)):</span>
+            <span class="n">fac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">N2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+            <span class="n">rfq</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rfq</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">fac</span>
+
+    <span class="c1"># back transformation</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nf</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">nf</span><span class="o">*</span><span class="n">ndt</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])))</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">tshift</span><span class="p">)</span>
+    <span class="n">rfq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rfq</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">rfl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rfl</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+    <span class="n">qrft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">rfq</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">)</span>
+    <span class="n">qrf</span> <span class="o">=</span> <span class="n">qrft</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="n">qrf</span> <span class="o">=</span> <span class="n">qrf</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span>
+    <span class="n">lrft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">rfl</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">)</span>
+    <span class="n">lrf</span> <span class="o">=</span> <span class="n">lrft</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
+    <span class="n">lrf</span> <span class="o">=</span> <span class="n">lrf</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">qrf</span><span class="p">,</span> <span class="n">lrf</span></div>
+
+
+<div class="viewcode-block" id="multitaper"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.deconvolve.multitaper">[docs]</a><span class="k">def</span> <span class="nf">multitaper</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tshift</span><span class="p">,</span> <span class="n">regul</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Output has to be filtered (Noise appears in high-frequency)!</span>
+<span class="sd">    multitaper: takes Ved-Kathrins code and changes inputs to</span>
+<span class="sd">    make it run like Helffrich algorithm, minus normalization and with</span>
+<span class="sd">    questionable calculation of pre-event noise (have to double check this</span>
+<span class="sd">    and compare it to the regular FFT based estimate without any tapers).</span>
+
+<span class="sd">    Findings: when P arrival is not in the center of the window, the</span>
+<span class="sd">    amplitudes are not unity at the beginning and decreasing from there on.</span>
+<span class="sd">    Instead they peak at the time shift which corresponds to the middle index</span>
+<span class="sd">    in the P time window.</span>
+
+<span class="sd">    TB  = time bandwidth product (usually between 2 and 4)</span>
+<span class="sd">    NT  = number of tapers to use, has to be &lt;= 2*TB-1</span>
+<span class="sd">    TB = 4; NT = 7; #choice of TB = 4, NT = 3 is supposed to be optimal</span>
+<span class="sd">    t0 = -5; t1 = max(time); # This defines the beginning and end of the lag</span>
+<span class="sd">    times for the receiver function</span>
+
+<span class="sd">    changed by KS June 2016, added coherence and variance estimate; output</span>
+<span class="sd">    RF in time domain (rf), RF in freq. domain (tmpp), and variance of RF</span>
+<span class="sd">    (var_rf); can be used as input for multitaper_weighting.m</span>
+<span class="sd">    the input &quot;regul&quot; defines which type of regularization is used,</span>
+<span class="sd">    regul=&#39;fqd&#39; defines frequency dependent regularisation from pre-event</span>
+<span class="sd">    noise, regul=&#39;con&#39; defines adding a constant value (here maximum of</span>
+<span class="sd">    pre-event noise) as regularisation</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    P : np.array</span>
+<span class="sd">        Source time function estimation.</span>
+<span class="sd">    D : np.array</span>
+<span class="sd">        Component containing the converted wave.</span>
+<span class="sd">    dt : float</span>
+<span class="sd">        Sampling interval [s].</span>
+<span class="sd">    tshift : float</span>
+<span class="sd">        Time shift of primary arrival [s].</span>
+<span class="sd">    regul : str</span>
+<span class="sd">        Regularization, either &#39;fqd&#39; for frequency dependentor &#39;con&#39; for</span>
+<span class="sd">        constant.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        For unknown input.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    rf : np.array</span>
+<span class="sd">        The receiver function.</span>
+<span class="sd">    lrf : np.array</span>
+<span class="sd">        The source-time wavelet convolved by itself.</span>
+<span class="sd">    var_rf : np.array</span>
+<span class="sd">        The receiver function&#39;s variance.</span>
+<span class="sd">    tmpp : np.array</span>
+<span class="sd">        Receiver function without variance weighting.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># wavelet always in the center of the window</span>
+    <span class="c1"># Original from Ved&#39;s</span>
+    <span class="c1"># win_len = tshift*2;</span>
+    <span class="c1"># Modification to get P&amp;L</span>
+    <span class="c1"># win_len = length(P)*dt;</span>
+    <span class="c1"># Modificaiton to get Helffrich</span>
+    <span class="n">win_len</span> <span class="o">=</span> <span class="mi">50</span>
+
+    <span class="n">Nwin</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">win_len</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+
+    <span class="c1"># Fraction of overlap overlap between moving time windows. As your TB</span>
+    <span class="c1"># increases, the frequency smearing gets worse, which means that the RFs</span>
+    <span class="c1"># degrate at shorter and shorter lag times. Therefore, as you increase TB,</span>
+    <span class="c1"># you should also increase Poverlap.</span>
+    <span class="n">Poverlap</span> <span class="o">=</span> <span class="mf">0.75</span>
+
+    <span class="c1"># Length of waveforms;</span>
+    <span class="n">nh</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+
+    <span class="c1"># tapernumber, bandwith</span>
+    <span class="c1"># is in general put to NT=3, and bandwidth to 2.5</span>
+    <span class="c1"># TB=2.5;</span>
+    <span class="c1"># #NT=2*TB-1; #4 tapers</span>
+    <span class="c1"># NT=3;</span>
+    <span class="n">TB</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="c1"># NT=2*TB-1; #4 tapers</span>
+    <span class="n">NT</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="c1"># Create moving time windowed slepians</span>
+    <span class="n">starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nh</span><span class="o">-</span><span class="n">Nwin</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">Poverlap</span><span class="p">)</span><span class="o">*</span><span class="n">Nwin</span><span class="p">))</span>
+
+    <span class="c1"># Construct Slepians</span>
+    <span class="n">Etmp</span><span class="p">,</span> <span class="n">lambdas</span> <span class="o">=</span> <span class="n">dpss</span><span class="p">(</span><span class="n">Nwin</span><span class="p">,</span> <span class="n">TB</span><span class="p">,</span> <span class="n">Kmax</span><span class="o">=</span><span class="n">NT</span><span class="p">,</span> <span class="n">return_ratios</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">starts</span><span class="p">)</span><span class="o">*</span><span class="n">NT</span><span class="p">,</span> <span class="n">nh</span><span class="p">])</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">NUM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">NT</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">)])</span>
+    <span class="n">DEN</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">NT</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="p">)])</span>
+    <span class="n">DUM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">NT</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="p">)])</span>
+
+    <span class="n">ESTP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">NT</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">)])</span>
+    <span class="n">ESTD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">NT</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="p">)])</span>
+
+    <span class="c1"># finding frequency dependent regularisation parameter DEN_noise</span>
+    <span class="c1"># added: KS 26.06.2016</span>
+    <span class="n">Pn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">P</span><span class="p">))</span>
+
+    <span class="c1"># Pn(3/dt:(tshift-5)/dt)=P(3/dt:(tshift-5)/dt)</span>
+    <span class="n">Pn</span><span class="p">[:</span><span class="nb">round</span><span class="p">((</span><span class="n">tshift</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[:</span><span class="nb">round</span><span class="p">((</span><span class="n">tshift</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)]</span>
+    <span class="c1"># pre-event noise: starting 3s after trace start</span>
+    <span class="c1"># stop 10s before theoretical start of P</span>
+    <span class="c1"># wave to aviod including it</span>
+
+    <span class="n">DEN_noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">NT</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">)])</span>
+
+    <span class="c1"># Multitaper</span>
+    <span class="c1"># SR: problem here is how the loop is done ... there&#39;s only a peak</span>
+    <span class="c1"># at the pulse because the two windows of the num and den are moving</span>
+    <span class="c1"># together. One should first comput the entire estimate of the wavelet</span>
+    <span class="c1"># and the data for each valie of k, and then do the sum of products for</span>
+    <span class="c1"># each k!!!</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NT</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">starts</span><span class="p">:</span>
+            <span class="n">E</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">j</span><span class="p">:(</span><span class="n">j</span><span class="o">+</span><span class="n">Nwin</span><span class="p">)]</span> <span class="o">=</span> <span class="n">Etmp</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+
+            <span class="n">tmp1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:],</span> <span class="n">P</span><span class="p">))</span>
+            <span class="n">tmp2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:],</span> <span class="n">D</span><span class="p">))</span>
+
+            <span class="n">NUM</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">NUM</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">lambdas</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">tmp1</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">tmp2</span><span class="p">)</span>
+            <span class="n">DEN</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">DEN</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">lambdas</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">tmp1</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">tmp1</span><span class="p">)</span>
+
+            <span class="n">ESTP</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">ESTP</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">lambdas</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">tmp1</span>
+            <span class="n">ESTD</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">ESTD</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">lambdas</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">tmp2</span>
+
+            <span class="c1"># DUM only from D trace (converted wave component) used in</span>
+            <span class="c1"># coherence estimate</span>
+            <span class="n">DUM</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">DUM</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">lambdas</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">tmp2</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">tmp2</span><span class="p">)</span>
+
+            <span class="c1"># pre-event noise</span>
+            <span class="c1"># always stick to first time window</span>
+            <span class="n">tmp1n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:],</span> <span class="n">Pn</span><span class="p">))</span>
+            <span class="n">DEN_noise</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">DEN_noise</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span>\
+                <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">lambdas</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">tmp1n</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">tmp1n</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="c1"># max_imag_ep = max(abs(np.imag(np.fft.ifft(sum(ESTP)))))</span>
+    <span class="c1"># max_imag_ed = max(abs(np.imag(np.fft.ifft(sum(ESTD)))))</span>
+    <span class="c1"># ep = np.real(np.fft.ifft(sum(ESTP)));</span>
+    <span class="c1"># ed = np.real(np.fft.ifft(sum(ESTD)));</span>
+
+    <span class="c1"># Calculate optimal RF with frequency-dependend regularisation</span>
+    <span class="n">freqdep</span> <span class="o">=</span> <span class="n">regul</span> <span class="o">==</span> <span class="s1">&#39;fqd&#39;</span>
+    <span class="n">const</span> <span class="o">=</span> <span class="n">regul</span> <span class="o">==</span> <span class="s1">&#39;con&#39;</span>
+
+    <span class="k">if</span> <span class="n">freqdep</span><span class="p">:</span>
+        <span class="n">tmpp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">ESTP</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">ESTD</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                         <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">ESTP</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">ESTP</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                         <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">DEN_noise</span><span class="p">))</span><span class="o">*</span><span class="mi">1</span><span class="o">/</span><span class="n">dt</span>
+        <span class="n">tmpp_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">ESTP</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">ESTP</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                           <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">ESTP</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">ESTP</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                           <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">DEN_noise</span><span class="p">))</span><span class="o">*</span><span class="mi">1</span><span class="o">/</span><span class="n">dt</span>
+
+        <span class="n">N2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">nh</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">N2</span><span class="p">)):</span>
+            <span class="n">fac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">/</span><span class="n">N2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+            <span class="n">tmpp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmpp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">fac</span>
+
+    <span class="k">elif</span> <span class="n">const</span><span class="p">:</span>
+        <span class="c1"># ordinary regularisation with adding only a constant value</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="n">DEN_noise</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">tmpp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">ESTP</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">ESTD</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                         <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">ESTP</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">ESTP</span><span class="p">)</span><span class="o">+</span><span class="n">eps</span><span class="p">,</span>
+                                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">*</span><span class="mi">1</span><span class="o">/</span><span class="n">dt</span>
+        <span class="n">tmpp_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">ESTP</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">ESTD</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                           <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">ESTP</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">ESTP</span><span class="p">)</span><span class="o">+</span><span class="n">eps</span><span class="p">,</span>
+                                  <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">*</span><span class="mi">1</span><span class="o">/</span><span class="n">dt</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Regularization not defined (your input: regul=&#39;</span><span class="p">,</span>
+                        <span class="n">regul</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;). Use either &quot;fqd&quot; for frequency-dependent</span>
+<span class="s2">                        or &quot;con&quot; for constant value regularization.&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># RF without variance weighting</span>
+    <span class="n">tmp1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">tmpp</span><span class="p">))</span>
+    <span class="n">tmp1_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">tmpp_l</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="c1"># Interpolate to desired</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">tmp1</span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="n">tshift</span><span class="o">/</span><span class="n">dt</span><span class="p">):</span><span class="n">N</span><span class="p">]</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">tmp1</span><span class="p">[:</span><span class="n">N</span><span class="o">-</span><span class="nb">round</span><span class="p">(</span><span class="n">tshift</span><span class="o">/</span><span class="n">dt</span><span class="p">)])</span>
+    <span class="c1"># rf[round(tshift/dt):N] = tmp1[:N-round(tshift/dt)]</span>
+
+    <span class="n">lrf</span> <span class="o">=</span> <span class="n">tmp1_l</span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="n">tshift</span><span class="o">/</span><span class="n">dt</span><span class="p">):</span><span class="n">N</span><span class="p">]</span>
+    <span class="n">lrf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lrf</span><span class="p">,</span> <span class="n">tmp1_l</span><span class="p">[:</span><span class="nb">round</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="n">tshift</span><span class="o">/</span><span class="n">dt</span><span class="p">)])</span>
+    <span class="c1"># lrf[tshift/dt:N] = tmp1_l[:N-tshift/dt]</span>
+
+    <span class="c1">####</span>
+    <span class="c1"># Coherence and Variance of RF</span>
+    <span class="c1"># added: KS 26.06.2016</span>
+    <span class="n">C_rf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">NUM</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">DUM</span><span class="p">,</span> <span class="n">DEN</span><span class="p">)))</span>
+    <span class="n">var_rf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C_rf</span><span class="p">))</span>
+    <span class="c1"># for ii in range(len(C_rf)):</span>
+    <span class="c1">#     var_rf[ii] = ((1-abs(C_rf[ii])**2)/((NT-1)*abs(C_rf[ii])**2))*(abs(tmpp[ii])**2)</span>
+    <span class="n">var_rf</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">rf</span><span class="p">,</span> <span class="n">lrf</span><span class="p">,</span> <span class="n">var_rf</span><span class="p">,</span> <span class="n">tmpp</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Peter Makus
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+xtick.labelsize: 9
+ytick.labelsize: 9
+font.size: 11
+figure.autolayout: True
+figure.figsize: 7.2,4.45
+axes.titlesize : 11
+axes.labelsize : 11
+lines.linewidth : 0.75
+lines.markersize : 5
+legend.fontsize: 11
+mathtext.fontset: stix
+font.family: STIXGeneral

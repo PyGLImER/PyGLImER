@@ -1,0 +1,299 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyglimer.waveform.errorhandler &mdash; PyGLImER 0.01 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyGLImER
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyGLImER</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyglimer.waveform.errorhandler</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyglimer.waveform.errorhandler</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Files contains all Errorhandler for the Glimer to obspy project</span>
+
+
+<span class="sd">Author: Peter Makus (peter.makus@student.uib.no)</span>
+
+<span class="sd">Created: Saturday, 21th March 2020 19:16:41</span>
+<span class="sd">Last Modified: Wednesday, 17th June 2020 02:33:01 pm</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">obspy.clients.fdsn</span> <span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">header</span>  <span class="c1"># web sevice</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">tmp</span>
+
+
+<div class="viewcode-block" id="redownload"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.errorhandler.redownload">[docs]</a><span class="k">def</span> <span class="nf">redownload</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">starttime</span><span class="p">,</span> <span class="n">endtime</span><span class="p">,</span> <span class="n">st</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Errorhandler that Redownloads the stream for the given input.</span>
+<span class="sd">    Used when the stream has less than three channels.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tmp</span><span class="o">.</span><span class="n">re_client</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">st</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_waveforms</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span>
+                                            <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span>
+                                            <span class="n">starttime</span><span class="p">,</span> <span class="n">endtime</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">FDSNNoDataException</span><span class="p">,</span><span class="n">header</span><span class="o">.</span><span class="n">FDSNException</span><span class="p">,</span>
+                    <span class="ne">ValueError</span><span class="p">):</span>
+                <span class="k">continue</span>  <span class="c1"># wrong client</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="k">return</span> <span class="n">st</span></div>
+
+
+<div class="viewcode-block" id="redownload_statxml"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.errorhandler.redownload_statxml">[docs]</a><span class="k">def</span> <span class="nf">redownload_statxml</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">statfile</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Errorhandler: Redownload station xml in case that it is not found.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tmp</span><span class="o">.</span><span class="n">re_client</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="n">station_inv</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_stations</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;response&quot;</span><span class="p">,</span>
+                                              <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">station</span><span class="p">)</span>
+            <span class="c1"># write the new, working stationxml file</span>
+            <span class="n">station_inv</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">statfile</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;STATIONXML&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">FDSNNoDataException</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">FDSNException</span><span class="p">):</span>
+            <span class="k">pass</span>  <span class="c1"># wrong client</span>
+    <span class="k">return</span> <span class="n">station_inv</span></div>
+
+
+<div class="viewcode-block" id="NoMatchingResponseHandler"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.errorhandler.NoMatchingResponseHandler">[docs]</a><span class="k">def</span> <span class="nf">NoMatchingResponseHandler</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">statloc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Error handler for when the No matching response found error occurs.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tmp</span><span class="o">.</span><span class="n">re_client</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="n">station_inv</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_stations</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;response&quot;</span><span class="p">,</span>
+                                              <span class="n">channel</span><span class="o">=</span><span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span>
+                                              <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
+                                              <span class="n">station</span><span class="o">=</span><span class="n">station</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">remove_response</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="n">station_inv</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;VEL&#39;</span><span class="p">,</span>
+                               <span class="n">water_level</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+            <span class="c1"># write the new, working stationxml file</span>
+            <span class="n">station_inv</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">statloc</span><span class="p">,</span> <span class="n">network</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">station</span> <span class="o">+</span> <span class="s2">&quot;.xml&quot;</span><span class="p">),</span>
+                              <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;STATIONXML&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">station_inv</span><span class="p">,</span> <span class="n">st</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">FDSNNoDataException</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">FDSNException</span><span class="p">):</span>
+            <span class="k">pass</span>  <span class="c1"># wrong client</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">break</span>  <span class="c1"># the response file doesn&#39;t seem to be available at all</span>
+    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div>
+
+
+<span class="k">def</span> <span class="nf">NotLinearlyIndependentHandler</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">starttime</span><span class="p">,</span> <span class="n">endtime</span><span class="p">,</span>
+                                  <span class="n">station_inv</span><span class="p">,</span> <span class="n">paz_sim</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tmp</span><span class="o">.</span><span class="n">re_client</span><span class="p">:</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">st</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_waveforms</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span>
+                                          <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span>
+                                          <span class="n">starttime</span><span class="p">,</span> <span class="n">endtime</span><span class="p">)</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">remove_response</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="n">station_inv</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;VEL&#39;</span><span class="p">,</span>
+                                   <span class="n">water_level</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">remove_sensitivity</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="n">station_inv</span><span class="p">)</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">paz_remove</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">paz_simulate</span><span class="o">=</span><span class="n">paz_sim</span><span class="p">,</span>
+                            <span class="n">simulate_sensitivity</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;-&gt;ZNE&#39;</span><span class="p">,</span> <span class="n">inventory</span><span class="o">=</span><span class="n">station_inv</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">FDSNNoDataException</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">FDSNException</span><span class="p">):</span>
+                <span class="k">continue</span>  <span class="c1"># wrong client chosen</span>
+        <span class="k">return</span> <span class="n">st</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Peter Makus
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

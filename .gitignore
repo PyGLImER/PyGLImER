@@ -1,0 +1,13 @@
+*.log
+figures*
+gypsum.pkl
+*.xml
+*.mseed
+*cache*
+*.png
+*info*
+output*
+*.csv
+tmp/*
+.vscode/settings.json
+ccps.py
