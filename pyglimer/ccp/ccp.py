@@ -115,7 +115,8 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
     :rtype: :class:`~pyglimer.ccp.ccp.CCPstack`
     """
     if phase[-1].upper() == 'S' and multiple:
-        raise NotImplementedError('Multiple mode is not supported for phase S.')
+        raise NotImplementedError(
+            'Multiple mode is not supported for phase S.')
     # create empty lists for station latitude and longitude
     lats = []
     lons = []
@@ -169,11 +170,11 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
         try:
             stat = read_inventory(os.path.join(statloc, file))
         except TypeError as e:
-            print("Corrupt station xml, original error message: "+
-            str(e))
+            print("Corrupt station xml, original error message: " +
+                  str(e))
         lats.append(stat[0][0].latitude)
         lons.append(stat[0][0].longitude)
-    
+
     logdir = os.path.join(os.path.dirname(os.path.abspath(statloc)), 'logs')
 
     ccp = CCPStack(
@@ -196,7 +197,7 @@ def init_ccp(spacing, vel_model, phase, statloc='output/stations',
     return ccp
 
 
-def read_ccp(filename:str, folder:str='.', fmt=None):
+def read_ccp(filename: str, folder: str = '.', fmt=None):
     """
     Read CCP-Stack class file from input folder.
 
@@ -240,7 +241,7 @@ class CCPStack(object):
     input."""
 
     def __init__(self, latitude, longitude, edist, phase,
-                 verbose=True, logdir: str or None=None):
+                 verbose=True, logdir: str or None = None):
         """
         Creates an empy object template for a CCP stack
 
@@ -255,7 +256,8 @@ class CCPStack(object):
             Hence, phase can be "S" for PRFs but not the other way around.
             However, "P" is computationally more efficient.
         :type phase: str
-        :param verbose: If true -> console output. The default is True., defaults to True
+        :param verbose: If true -> console output. The default is True.,
+                        defaults to True
         :type verbose: bool, optional
         :param logdir: Directory for log file
         :type logdr: str, optional
@@ -275,7 +277,8 @@ class CCPStack(object):
         self.logger.addHandler(fh)
 
         # Create Formatter
-        fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
+        fmt = logging.Formatter(
+            fmt='%(asctime)s - %(levelname)s - %(message)s')
         fh.setFormatter(fmt)
 
         # Create bingrid
@@ -317,7 +320,7 @@ class CCPStack(object):
         :type n_closest_points: int
         :return: bin index k and depth index j
         :rtype: int
-        """        
+        """
         i = self.bingrid.query_bin_tree(latitude, longitude, self.binrad_eucl,
                                         n_closest_points)
 
@@ -441,10 +444,10 @@ class CCPStack(object):
             fh.setLevel(logging.INFO)
             self.logger.addHandler(fh)
             self.logger.info('Stacking started')
-        
+
         if multiple:
             # Use multiples?
-            endi = np.where(self.z==maxzm)[0][0]+1
+            endi = np.where(self.z == maxzm)[0][0]+1
             self.bins_m1 = np.zeros(self.bins[:, :endi].shape)
             self.bins_m2 = np.zeros(self.bins[:, :endi].shape)
             self.illumm = np.zeros(self.bins[:, :endi].shape, dtype=int)
@@ -454,7 +457,7 @@ class CCPStack(object):
             folder = os.path.join(folder, network)
             if station and type(station) == str:
                 folder = os.path.join(folder, station)
-        
+
         elif geocoords and not pattern:
             # Stations by coordinates
             # create empty lists for station latitude and longitude
@@ -585,31 +588,33 @@ only show the progress per chunk.')
                     len_split = int(np.ceil(len_split/(len_split/10)))
             num_split = int(np.ceil(len(stream_chunk)/len_split))
 
-            out = Parallel(n_jobs=num_cores)( # prefer='processes'
-                            delayed(self.multicore_stack)(
-                                st, append_pp, n_closest_points, vel_model, latb,
-                                lonb, filt, i, multiple)
-                            for i, st in zip(
-                                tqdm(range(num_split)),
-                                chunks(stream_chunk, len_split)))
+            out = Parallel(n_jobs=num_cores)(  # prefer='processes'
+                delayed(self.multicore_stack)(
+                    st, append_pp, n_closest_points, vel_model, latb,
+                    lonb, filt, i, multiple)
+                for i, st in zip(
+                    tqdm(range(num_split)),
+                    chunks(stream_chunk, len_split)))
 
             # Awful way to solve it, but the best I could find
             if multiple:
                 for kk, jj, datal, datalm1, datalm2 in out:
                     for k, j, data, datam1, datam2 in zip(
-                        kk, jj, datal, datalm1, datalm2):
+                            kk, jj, datal, datalm1, datalm2):
                         self.bins[k, j] = self.bins[k, j] + data[j]
-                        
+
                         # hit counter + 1
                         self.illum[k, j] = self.illum[k, j] + 1
-                        
+
                         # multiples
-                        iii = np.where(j<=endi-1)[0]
+                        iii = np.where(j <= endi-1)[0]
                         jm = j[iii]
                         km = k[iii]
                         try:
-                            self.bins_m1[km, jm] = self.bins_m1[km, jm] + datam1[jm]
-                            self.bins_m2[km, jm] = self.bins_m1[km, jm] + datam1[jm]
+                            self.bins_m1[km, jm] = self.bins_m1[km,
+                                                                jm] + datam1[jm]
+                            self.bins_m2[km, jm] = self.bins_m1[km,
+                                                                jm] + datam1[jm]
                             self.illumm[km, jm] = self.illum[km, jm] + 1
                         except IndexError as e:
                             if not len(datam1) or not len(datam2):
@@ -620,7 +625,7 @@ only show the progress per chunk.')
             else:
                 for kk, jj, datal, _, _ in out:
                     for k, j, data in zip(
-                        kk, jj, datal):
+                            kk, jj, datal):
                         self.bins[k, j] = self.bins[k, j] + data[j]
 
                         # hit counter + 1
@@ -664,7 +669,7 @@ only show the progress per chunk.')
         :type idx: int
         :return: Three lists containing indices and rf-data.
         :rtype: list, list, list
-        """        
+        """
 
         kk = []
         jj = []
@@ -683,7 +688,7 @@ only show the progress per chunk.')
 
             if filt:
                 rft.filter('bandpass', freqmin=filt[0], freqmax=filt[1],
-                            zerophase=True, corners=2)
+                           zerophase=True, corners=2)
             try:
                 z, rf, rfm1, rfm2 = rft[0].moveout(
                     vmodel, latb=latb, lonb=lonb, taper=False,
@@ -702,9 +707,9 @@ only show the progress per chunk.')
             lon = np.array(rf.stats.pp_longitude)
             if append_pp:
                 plat = np.pad(lat, (0, len(self.z)-len(lat)),
-                                constant_values=np.nan)
+                              constant_values=np.nan)
                 plon = np.pad(lon, (0, len(self.z)-len(lon)),
-                                constant_values=np.nan)
+                              constant_values=np.nan)
                 self.pplat.append(plat)
                 self.pplon.append(plon)
             k, j = self.query_bin_tree(lat, lon, rf.data, n_closest_points)
@@ -712,9 +717,9 @@ only show the progress per chunk.')
             kk.append(k)
             jj.append(j)
             datal.append(rf.data)
-            
+
             if multiple:
-                depthi = np.where(z==maxzm)[0][0]
+                depthi = np.where(z == maxzm)[0][0]
                 try:
                     datalm1.append(rfm1.data[:depthi+1])
                     datalm2.append(rfm2.data[:depthi+1])
@@ -726,8 +731,8 @@ only show the progress per chunk.')
         return kk, jj, datal, datalm1, datalm2
 
     def conclude_ccp(
-        self, keep_empty=False, keep_water=False, r=0,
-        multiple=False, z_multiple:int = 200):
+            self, keep_empty=False, keep_water=False, r=0,
+            multiple=False, z_multiple: int = 200):
         """
         Averages the CCP-bin and populates empty cells with average of
         neighbouring cells. No matter which option is
@@ -757,35 +762,35 @@ only show the progress per chunk.')
         """
         if z_multiple > 200:
             raise ValueError('Maximal depth for multiples is 200 km.')
-        endi = np.where(self.z == z_multiple)[0][0]+1   
+        endi = np.where(self.z == z_multiple)[0][0]+1
         if multiple == 'linear':
-            
+
             # self.ccp = np.divide(self.bins, self.illum+1)
             self.ccp = np.hstack(((
                 np.divide(self.bins[:, :endi], self.illum[:, :endi]+1) +
                 np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
-                    np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1))/3,
-            np.zeros(self.bins[:,endi:].shape)))
+                np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1))/3,
+                np.zeros(self.bins[:, endi:].shape)))
         elif multiple == 'zk':
             # self.ccp = np.divide(self.bins, self.illum+1)
             self.ccp = np.hstack((
                 .7*np.divide(self.bins[:, :endi], self.illum[:, :endi]+1) +
                 .2*np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
-                    .1*np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1),
-                    np.zeros(self.bins[:,endi:].shape)))
+                .1*np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1),
+                np.zeros(self.bins[:, endi:].shape)))
         elif multiple == 'm1':
             self.ccp = np.hstack((
                 np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1),
-                np.zeros(self.bins[:,endi:].shape)))
+                np.zeros(self.bins[:, endi:].shape)))
         elif multiple == 'm2':
             self.ccp = np.hstack((
                 np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1),
-                np.zeros(self.bins[:,endi:].shape)))
+                np.zeros(self.bins[:, endi:].shape)))
         elif multiple == 'm':
             self.ccp = np.hstack((
                 np.divide(self.bins_m2[:, :endi]+self.bins_m1[:, :endi],
                           2*(self.illumm[:, :endi])+1),
-                np.zeros(self.bins[:,endi:].shape)))
+                np.zeros(self.bins[:, endi:].shape)))
         elif not multiple:
             self.ccp = np.divide(self.bins, self.illum+1)
         else:
@@ -827,7 +832,7 @@ misspelled or not yet implemented')
             self.hits = np.delete(self.hits, index, 0)
             self.coords_new = (np.delete(self.coords_new[0], index, 1),
                                np.delete(self.coords_new[1], index, 1))
-        
+
         # Else everything will always pick coords_new instead of coords
         if keep_water and keep_empty:
             try:
@@ -849,7 +854,7 @@ misspelled or not yet implemented')
         :param fmt: Either "pickle" or "matlab" for .mat, defaults to "pickle".
         :type fmt: str, optional
         :raises ValueError: For unknown formats.
-        """        
+        """
         # delete logger (cannot be pickled)
         try:
             del self.logger
@@ -965,12 +970,15 @@ misspelled or not yet implemented')
                               lat.ravel(), lon.ravel())
         xi, yi, zi = geo2cart((R_EARTH - mz.ravel())/R_EARTH,
                               mlat.ravel(), mlon.ravel())
-        
+
+        # REDO TO ONLY QUERY DEPTHS....
+
         # Create kdtree form source coordinates
         tree = cKDTree(np.c_[xs, ys, zs])
 
         # Inverse distance weighting
-        d, inds = tree.query(np.c_[xi, yi, zi], k=20)
+        # MULTITHREADING, CCPVOLUME COMPUTE MULTICORE STACK
+        d, inds = tree.query(np.c_[xi, yi, zi], k=10)
         w = (1-d / np.max(d, axis=1)[:, np.newaxis]) ** 2
 
         # Take things that are further than a certain distance
@@ -978,13 +986,14 @@ misspelled or not yet implemented')
 
         # Taking the Illumination into account is easy peasy with this
         # interpolation. Note that the all points above the minillumination
-        # value are multiplied by one and the rest are linearly decreased by 
+        # value are multiplied by one and the rest are linearly decreased by
         # division by the minillumination value. Then, the illumination
         # values below 1.0 are squared for a quadratic decrease
         if minillum is not None:
-            illum = np.sum(w * self.hits.ravel()[inds], axis=1) / np.sum(w, axis=1)
-            mpos = np.where(illum <= minillum)
-            pos1 = np.where(illum > minillum)
+            illum = np.sum(w * self.hits.ravel()
+                           [inds], axis=1) / np.sum(w, axis=1)
+            mpos = np.where(illum < minillum)
+            pos1 = np.where(illum >= minillum)
             illum[mpos] /= minillum
             illum[pos1] = 1
             V = V * illum ** 2
@@ -1001,8 +1010,9 @@ misspelled or not yet implemented')
 
         return V
 
-    def explore(self, factor: float = 0.5, maxz: float or None = None,
-                minillum: int or None = None):
+    def explore(self, factor: float = 1.0, maxz: float or None = None,
+                minillum: int or None = None,
+                extent: list or tuple or None = None):
         """Creates a volume exploration window set. One window is for all
         plots, and the other window is generated with sliders such that one
         can explore how future plots should be generated. It technically does
@@ -1015,16 +1025,16 @@ misspelled or not yet implemented')
         Parameters:
         -----------
 
-        factor: float, optional
+        factor : float, optional
             Bingrid epicentral distance multiplier to refine grid. 
             Defaults to 0.5.
-        maxz: float or None, optional
+        maxz : float or None, optional
             Maximum Depth if None, the max ccp bin depth is used. 
             Defaults to None.
-        minillum: int or None, optional
+        minillum : int or None, optional
             Minimum number of illumation points use in the interpolation, 
             everything below is downweighted by the square reciprocal
-
+        extent : list or tuple or Non, optional
         Returns
         -------
 
@@ -1108,13 +1118,11 @@ misspelled or not yet implemented')
 
         return VolumePlot(lon, lat, z, V, xl=lonsl, yl=latsl, zl=zsl)
 
-
-
     def map_plot(
-        self, plot_stations=False, plot_bins=False, plot_illum=False,
-        profile: list or tuple or None=None, p_direct=True,
-        outputfile: str or None=None, format='pdf', dpi=300, geology=False,
-        title:str or None=None):
+            self, plot_stations=False, plot_bins=False, plot_illum=False,
+            profile: list or tuple or None = None, p_direct=True,
+            outputfile: str or None = None, format='pdf', dpi=300, geology=False,
+            title: str or None = None):
         """
         Create a map plot of the CCP Stack containing user-defined information.
 
@@ -1161,7 +1169,7 @@ misspelled or not yet implemented')
             plot_illum, self.hits, profile, p_direct, outputfile=outputfile,
             format=format, dpi=dpi, geology=geology, title=title)
 
-    def pick_phase(self, pol:str = '+', depth:list=[None, None]):
+    def pick_phase(self, pol: str = '+', depth: list = [None, None]):
         """
         Pick the strongest negative or strongest positive gradient from a
         predefined depth-range.
@@ -1189,18 +1197,18 @@ misspelled or not yet implemented')
         self.conclude_ccp(r=3)
         # Find indices
         for ii, d in enumerate(depth):
-            if d or d==0:
+            if d or d == 0:
                 depth[ii] = np.abs(self.z-d).argmin()
         # Find minimum in vector
         ccp_short = self.ccp[:, depth[0]:depth[1]]
         # There should be a line here excluding insufficiently illuminated bins
         illum_flat = np.sum(self.hits[:, depth[0]:depth[1]], axis=1)
-        id = np.where(illum_flat<ccp_short.shape[1]*10)  # delete those bins
+        id = np.where(illum_flat < ccp_short.shape[1]*10)  # delete those bins
 
         ccp_short = np.delete(ccp_short, id, 0)
         coords = (np.delete(self.coords_new[0], id, 1),
-                   np.delete(self.coords_new[1], id, 1))
-        
+                  np.delete(self.coords_new[1], id, 1))
+
         if pol == '+':
             # Amplitudes
             a = ccp_short.max(axis=1)
@@ -1211,19 +1219,21 @@ misspelled or not yet implemented')
             z = self.z[depth[0]:depth[1]][ccp_short.argmin(axis=1)]
         else:
             raise ValueError('Choose either \'+\' to return the highest '
-                +'positive velocity gradient or \'-\' to return the '+
-                'highest negative velocity gradient.')
+                             + 'positive velocity gradient or \'-\' to return the ' +
+                             'highest negative velocity gradient.')
 
         p_phase = PhasePick(coords, a, pol, z, depth)
         return p_phase
+
 
 class PhasePick(object):
     """
     A phasepick object, just created for more convenient plotting.
     """
+
     def __init__(
-        self, coords:np.ndarray, amplitudes:np.ndarray, polarity:str,
-        z:np.ndarray, depthrange:list=[None, None]):
+            self, coords: np.ndarray, amplitudes: np.ndarray, polarity: str,
+            z: np.ndarray, depthrange: list = [None, None]):
         """
         Initialise object
 
@@ -1249,9 +1259,9 @@ class PhasePick(object):
         self.depthr = depthrange
 
     def plot(
-        self, plot_amplitude:bool=False, outputfile:str or None=None,
-        format='pdf', dpi=300, cmap:str='gist_rainbow', geology=False,
-        title:str or None=None):
+            self, plot_amplitude: bool = False, outputfile: str or None = None,
+            format='pdf', dpi=300, cmap: str = 'gist_rainbow', geology=False,
+            title: str or None = None):
         """
         Plot heatmap containing depth or amplitude of picked phase.
 
@@ -1275,7 +1285,7 @@ class PhasePick(object):
             np.floor(min(self.coords[0][0]))-1, np.ceil(max(self.coords[0][0])+1))
         lon = (np.floor(min(self.coords[1][0]))-1,
                np.ceil(max(self.coords[1][0])+1))
-        
+
         plot_vel_grad(
             self.coords, self.a, self.z, plot_amplitude, lat, lon, outputfile,
             dpi=dpi, format=format, cmap=cmap, geology=geology, title=title)

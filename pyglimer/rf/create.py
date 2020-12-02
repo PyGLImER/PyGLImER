@@ -798,10 +798,56 @@ class RFStream(Stream):
         # Check whether moveout and piercing points have been computed.
         """Then, use a 3d histogram to create stacks, and create them quickly
         
+        Area corrected binswith simple fix
+        WGS84 values:
+        f = 1/298.257223563
+        a = 6378137.0
+        e = 2*f-f**2
+
+        # Resolution
+        res = 1.0 # in deg
+
+        # Surface area
+        A = res**2 * (DEG2KM**2)
+
+        # Initial latitude vector
+        lon = np.arange(0, 90.0 + res, res)
+
+        # Get value of longitude
+        dlon = pi * a * cos(phi/180*pi) / (180 * sqrt(1 - e**2 * sin(phi/180*pi)**2))/1000
+
+        # Get value of approximate dlat
+        dlat = A/dlon
+
+        # Get cumulative latitude values
+        lat = cumsum(dlat/111.11)
+
+        # Filter out values larger than 90deg
+        lat = lat[np.where(lat <= 90)]
+
+        # Create meshgrid from new latittude vector and longitude vector
+        lon = np.arange(0, 180 + res, res)
+
+        # Create binedges
+        blat = np.hstack((-lat[::-1], 0, lat))
+        blon = np.hstack((-lon[::-1], 0, lon))
+        bz = np.arange(-10, maxz, res)
+
+        # Create
+        p = np.vstack((all_lat, all_lon, all_z)).T
+
+        # Simple stacking 
+        stack = np.histogramdd(p, bins=(blat, blon,bz))
+
+        # bin centers
+        latc = (blat[:-1] + blat[1:])/2
+        lonc = (blon[:-1] + blon[1:])/2
+        zc   = (  bz[:-1] +   bz[1:])/2
+
+        return latc, lonc, zc, stack
         """
 
-        # If yes, use to populated a volume histogramdd 
-
+        # If yes, use to populated a volume histogramdd
         # output volume data
 
 class RFTrace(Trace):

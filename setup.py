@@ -20,12 +20,15 @@ from setuptools.command.test import test as testcommand
 # string in below ...
 
 # Function to read and output README into long decription
+
+
 def read(fname):
     """From Wenjie Lei 2019"""
     try:
         return open(os.path.join(os.path.dirname(__file__), fname)).read()
     except Exception as e:
         return "Can't open %s" % fname
+
 
 long_description = "%s" % read("README.md")
 
@@ -46,6 +49,7 @@ class PyTest(testcommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
+
 setup(
     name="PyGLImER",
     description="A workflow to create a global database for Ps and Sp rece\
@@ -62,7 +66,9 @@ setup(
     packages=find_packages(),
     package_dir={"": "."},
     include_package_data=True,
-    install_requires=['numpy'],
+    install_requires=['numpy', 'geographiclib', 'h5py', 'joblib',
+                      'matplotlib', 'numpy', 'obspy', 'pandas', 'pathlib',
+                      'plotly', 'psutil', 'scipy', 'tqdm', 'flake8'],
     tests_require=['pytest'],
     cmdclass={'tests': PyTest},
     zip_safe=False,
