@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 24th November 2020 05:16:18 pm
+Last Modified: Thursday, 31st December 2020 02:32:05 pm
 '''
 
 #!/usr/bin/env python3
@@ -300,6 +300,16 @@ class CCPStack(object):
         self.pplon = []
         self.ppz = self.z
         self.binrad = None
+        
+    def __str__(self) -> str:
+        out = f"Teleseismic Phase:\t\t{self.bingrid.phase}\n"+\
+        f"Bin distance:\t\t\t{round(self.bingrid.edist,3)}\n"+\
+        f"Bin radius:\t\t\t{round(self.binrad,3)}\n"+\
+        f"Bounding Box:\tLatitude:\t{round(self.coords[0].min(),1)} {round(self.coords[0].max(),1)}\n"+\
+        f"\t\tLongitude:\t{round(self.coords[1].min(),1)} {round(self.coords[1].max(),1)}\n"+\
+        f"Number of Receiver Functions:\t{self.N}"
+        
+        return out
 
     def query_bin_tree(self, latitude, longitude, data, n_closest_points):
         """
