@@ -1,4 +1,6 @@
 name: PyGLImER
+channels:
+- conda-forge
 dependencies:
   - basemap
   - geographiclib
