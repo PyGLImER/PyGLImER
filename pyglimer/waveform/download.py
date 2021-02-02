@@ -1,7 +1,7 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 22nd July 2020 11:41:35 am
+Last Modified: Friday, 8th January 2021 01:51:59 pm
 '''
 
 #!/usr/bin/env python3
@@ -25,7 +25,7 @@ from ..utils.roundhalf import roundhalf
 
 def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
                 rawloc, clients, network=None, station=None,
-                logdir=None, debug=False):
+                logdir=None, debug=False, verbose:bool=False):
     """
     Downloads the waveforms for all events in the catalogue
      for a circular domain around the epicentre with defined epicentral
@@ -66,6 +66,9 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
         Set the directory to where the download log is saved
     debug : Bool, optional
         All loggers go to debug mode.
+    verbose: Bool, optional
+        Set True, when experiencing issues with download. Output of
+        obspy MassDownloader will be logged in download.log.
     
     Returns
     -------
@@ -103,7 +106,8 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
         fh.setLevel(logging.DEBUG)
     fdsn_mass_logger.addHandler(fh)
 
-    fdsn_mass_logger.propagate = False
+    if not verbose and not debug:
+        fdsn_mass_logger.propagate = False
 
     # Create Formatter
     fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
@@ -179,7 +183,8 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
                 mdl.download(
                     domain, restrictions,
                     mseed_storage=get_mseed_storage,
-                    stationxml_storage=statloc,
+                    stationxml_storage=get_stationxml_storage(
+                        network,station, statloc),
                     threads_per_client=3, download_chunk_size_in_mb=50)
                 incomplete = False
             except IncompleteRead:
@@ -200,6 +205,24 @@ def get_mseed_storage(network, station, location, channel, starttime, endtime):
 
     # If a string is returned the file will be saved in that location.
     return os.path.join(tmp.folder, "%s.%s.mseed" % (network, station))
+
+def get_stationxml_storage(network, station, statloc):
+
+    #available_channels = []
+
+    #missing_channels = []
+    
+    #path = Path(statloc, "%s.%s.xml" % (network, station))
+
+    filename = os.path.join(statloc, "%s.%s.xml" % (network, station))
+
+    return {
+
+        "available_channels": [],
+
+        "missing_channels": '*',
+
+        "filename": filename}
 
 
 def wav_in_db(network, station, location, channel, starttime, endtime):

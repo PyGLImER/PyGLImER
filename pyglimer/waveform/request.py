@@ -269,15 +269,20 @@ class Request(object):
                                        datetime.now().strftime("%Y%m%dT%H%M%S")),
                           format="QUAKEML")
 
-    def download_waveforms(self):
+    def download_waveforms(self, verbose:bool=False):
         """
         Start the download of waveforms and response files.
+        
+        Parameters
+        ----------
+        verbose : Bool, optional
+            Set True if you wish to log the output of the obspy MassDownloader.
         """
         downloadwav(
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
              network=self.network, station=self.station, 
-             logdir=self.logdir, debug=self.debug)
+             logdir=self.logdir, debug=self.debug, verbose=verbose)
 
     def preprocess(self, hc_filt:float or int or None = None):
         """
