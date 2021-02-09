@@ -1,7 +1,7 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 8th January 2021 01:51:59 pm
+Last Modified: Tuesday, 9th February 2021 10:22:29 am
 '''
 
 #!/usr/bin/env python3
@@ -183,8 +183,8 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
                 mdl.download(
                     domain, restrictions,
                     mseed_storage=get_mseed_storage,
-                    stationxml_storage=get_stationxml_storage(
-                        network,station, statloc),
+                    stationxml_storage=statloc, #get_stationxml_storage(
+                        #network,station, statloc),
                     threads_per_client=3, download_chunk_size_in_mb=50)
                 incomplete = False
             except IncompleteRead:
