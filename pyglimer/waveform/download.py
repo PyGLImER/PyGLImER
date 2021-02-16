@@ -271,6 +271,7 @@ def wav_in_asdf(network, station, location, channel, starttime, endtime):
 
     # Change precision of start and endtime
     # Pyasdf rounds with a precision of 1 for the starttime and 0 for endtime..
+    # ... I think
     starttime = UTCDateTime(starttime, precision=1).format_iris_web_service()[:-4]
     endtime = endtime.format_iris_web_service()[:-4]
 
@@ -282,5 +283,4 @@ def wav_in_asdf(network, station, location, channel, starttime, endtime):
         if nametag in ds.waveforms['%s.%s' %(network, station)]:
             return True
         else:
-            print(starttime, endtime)
             return False
