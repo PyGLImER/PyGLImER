@@ -18,6 +18,7 @@ import logging
 from http.client import IncompleteRead
 from datetime import datetime
 from pathlib import Path
+from warnings import warn
 
 from obspy import read_events, Catalog
 from obspy.clients.fdsn import Client as Webclient
@@ -204,11 +205,9 @@ class Request(object):
         self.station = station
 
         # Server settings
-        try:
-            self.webclient = Webclient('USGS')
-        except FDSNException:
-            self.webclient = Webclient('IRIS')
-            print('Falling back to IRIS\' event service.')
+        # 2021/02/16 Events only from IRIS as the USGS webserice tends to be
+        # unstable and mixing different services will lead to a messed db
+        self.webclient = Webclient('IRIS')
 
         self.waveform_client = waveform_client
         self.re_client = re_client
@@ -222,10 +221,6 @@ class Request(object):
     def download_eventcat(self):
         event_cat_done = False
 
-        # The USGS webservice does only allow requests of a maximum size of
-        # 20000, so I will have to do several requests and join the
-        # catalogue afterwards if it's too big for a single download
-
         while not event_cat_done:
             try:
                 self.evtcat = self.webclient.get_events(
@@ -235,32 +230,12 @@ class Request(object):
                     minmagnitude=self.minmag, maxmagnitude=10, maxdepth=self.maxdepth)
 
                 event_cat_done = True
-            except FDSNException:
-                # Request is too big, break it down ito several requests
-                a = 20*365.25*24*3600  # 20 years in seconds
-                starttimes = [self.starttime, self.starttime+a]
-                while self.endtime-starttimes[-1] > a:
-                    starttimes.append(starttimes[-1]+a)
-                endtimes = []
-                endtimes.extend(starttimes[1:])
-                endtimes.append(self.endtime)
-
-                # Query
-                self.evtcat = Catalog()
-                for st, et in zip(starttimes, endtimes):
-                    self.evtcat.extend(
-                        self.webclient.get_events(
-                            starttime=st, endtime=et,
-                            minlatitude=self.eMINLAT, maxlatitude=self.eMAXLAT,
-                            minlongitude=self.eMINLON,
-                            maxlongitude=self.eMAXLON, minmagnitude=self.minmag,
-                            maxmagnitude=10, maxdepth=self.maxdepth))
-                event_cat_done = True
 
             except IncompleteRead:
                 # Server interrupted connection, just try again
-                print("Warning: Server interrupted connection,\
-                      catalogue download is restarted.")
+                msg = "Server interrupted connection, restarting download..."
+                warn(msg, UserWarning)
+                print(msg)
                 continue
 
         os.makedirs(self.evtloc, exist_ok=True)

@@ -11,21 +11,24 @@ Last Modified: Tuesday, 9th February 2021 10:22:29 am
 from http.client import IncompleteRead
 import logging
 import os
-import subprocess
+import shutil
 
 from obspy import read
 from obspy import UTCDateTime
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
 from pathlib import Path
+from pyasdf import ASDFDataSet
 
-from .. import tmp
-from ..utils.roundhalf import roundhalf
+from pyglimer.database.asdf import writeraw
+from pyglimer import tmp
+from pyglimer.utils.roundhalf import roundhalf
 
 
 def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
-                rawloc, clients, network=None, station=None,
-                logdir=None, debug=False, verbose:bool=False):
+                rawloc, clients, network:str=None, station:str=None,
+                saveasdf:bool=True, logdir:str=None, debug:bool=False,
+                verbose:bool=False):
     """
     Downloads the waveforms for all events in the catalogue
      for a circular domain around the epicentre with defined epicentral
@@ -62,6 +65,9 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
         Only allowed if network != None. Station restrictions.
         Only download from these stations, wildcards are allowed.
         The default is None.
+    saveasdf : bool, optional
+        Save the dataset as Adaptable Seismic Data Format (asdf; recommended).
+        Else, one will be left with .mseeds.
     logdir : string, optional
         Set the directory to where the download log is saved
     debug : Bool, optional
@@ -75,6 +81,10 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
     None
 
     """
+
+    # needed to check whether data is already in the asdf
+    global asdfsave
+    asdfsave = saveasdf
 
     # Calculate the min and max theoretical arrival time after event time
     # according to minimum and maximum epicentral distance
@@ -191,6 +201,13 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
                 continue  # Just retry for poor connection
             except Exception:
                 incomplete = False  # Any other error: continue
+        
+        # 2021.02.15 Here, we write everything to asdf
+        if saveasdf:
+            writeraw(event, tmp.folder, statloc, verbose)
+
+            # If that works, we will be deleting the cached mseeds here
+            shutil.rmtree(tmp.folder)
 
     tmp.folder = "finished"  # removes the restriction for preprocess.py
 
@@ -200,8 +217,12 @@ def get_mseed_storage(network, station, location, channel, starttime, endtime):
     # Returning True means that neither the data nor the StationXML file
     # will be downloaded.
 
-    if wav_in_db(network, station, location, channel, starttime, endtime):
-        return True
+    if asdfsave:
+        if wav_in_asdf(network, station, location, channel, starttime, endtime):
+            return True
+    else:
+        if wav_in_db(network, station, location, channel, starttime, endtime):
+            return True
 
     # If a string is returned the file will be saved in that location.
     return os.path.join(tmp.folder, "%s.%s.mseed" % (network, station))
@@ -224,7 +245,6 @@ def get_stationxml_storage(network, station, statloc):
 
         "filename": filename}
 
-
 def wav_in_db(network, station, location, channel, starttime, endtime):
     """Checks if waveform is already downloaded."""
     path = Path(tmp.folder, "%s.%s.mseed" % (network, station))
@@ -244,3 +264,23 @@ def wav_in_db(network, station, location, channel, starttime, endtime):
         return True
     else:
         return False
+
+def wav_in_asdf(network, station, location, channel, starttime, endtime):
+    """Is the waveform already in the asdf database?"""
+    asdf_file = os.path.join(tmp.folder, os.pardir, 'raw.h5')
+
+    # Change precision of start and endtime
+    # Pyasdf rounds with a precision of 1 for the starttime and 0 for endtime..
+    starttime = UTCDateTime(starttime, precision=1).format_iris_web_service()[:-4]
+    endtime = endtime.format_iris_web_service()[:-4]
+
+    # Waveforms are saved in pyasdf with filenames akin to:
+    nametag = "%s.%s.%s.%s__%s__%s__raw_recording"\
+         %(network, station, location, channel, starttime, endtime)
+
+    with ASDFDataSet(asdf_file) as ds:
+        if nametag in ds.waveforms['%s.%s' %(network, station)]:
+            return True
+        else:
+            print(starttime, endtime)
+            return False
