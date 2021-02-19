@@ -304,6 +304,5 @@ class Request(object):
         preprocess(
             self.phase, self.rot, self.pol, 0.05, self.evtcat, self.model,
             'hann', self.tz, self.ta, self.statloc, self.rawloc, self.preproloc,
-            self.rfloc, self.deconmeth, hc_filt, self.wavdownload,
-            netrestr=self.network, statrestr=self.station, logdir=self.logdir,
-            debug=self.debug)
+            self.rfloc, self.deconmeth, hc_filt, netrestr=self.network,
+            statrestr=self.station, logdir=self.logdir, debug=self.debug)

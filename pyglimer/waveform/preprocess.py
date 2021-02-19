@@ -1,8 +1,8 @@
 '''
-Author: Peter Makus (peter.makus@student.uib.no)
+Author: Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 4th August 2020 06:44:54 pm
+Last Modified: Friday, 19th February 2021 09:40:28 am
 '''
 
 #!/usr/bin/env python3d
@@ -25,6 +25,7 @@ from obspy.clients.fdsn import Client as Webclient
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pathlib import Path
 
+from pyglimer.waveform.preprocessh5 import preprocessh5
 from .. import tmp
 from .errorhandler import redownload, redownload_statxml, \
     NoMatchingResponseHandler, NotLinearlyIndependentHandler
@@ -36,10 +37,11 @@ from ..utils.roundhalf import roundhalf
 from ..utils.utils import dt_string, chunks
 
 
-def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
-               ta, statloc, rawloc, preproloc, rfloc, deconmeth, hc_filt,
-               wavdownload, netrestr=None, statrestr=None, logdir=None,
-               debug=False):
+def preprocess(
+    phase:str, rot:str, pol:str, taper_perc, event_cat, model, taper_type, tz,
+    ta, statloc, rawloc, preproloc, rfloc, deconmeth, hc_filt,
+    saveasdf:bool=True, netrestr=None, statrestr=None,
+    logdir:str=None, debug:bool=False):
     """
      Preprocesses waveforms to create receiver functions
 
@@ -147,29 +149,35 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
     #########
 
     # needed for a station simulation - Harvard
-    webclient = Webclient('IRIS')
-    station_simulate = webclient.get_stations(level="response",
-                                              channel='BH*', network='IU',
-                                              station='HRV')
-    # instrument response of the channel downloaded above
-    paz_sim = station_simulate[0][0][0].response
+    # I guess this should be removed, no good reason to not just use
+    # st.attach_response() and, subsequently, st.remove_response
+    # webclient = Webclient('IRIS')
+    # station_simulate = webclient.get_stations(level="response",
+    #                                           channel='BH*', network='IU',
+    #                                           station='HRV')
+    # # instrument response of the channel downloaded above
+    # paz_sim = station_simulate[0][0][0].response
 
-    # create dictionary with necassary data
-    paz_sim = {"gain": paz_sim._get_overall_sensitivity_and_gain
-               (output="VEL")[0],
-               "sensitivity": paz_sim._get_overall_sensitivity_and_gain
-               (output="VEL")[1],
-               "poles": paz_sim.get_paz().poles,
-               "zeros": paz_sim.get_paz().zeros}
+    # # create dictionary with necassary data
+    # paz_sim = {"gain": paz_sim._get_overall_sensitivity_and_gain
+    #            (output="VEL")[0],
+    #            "sensitivity": paz_sim._get_overall_sensitivity_and_gain
+    #            (output="VEL")[1],
+    #            "poles": paz_sim.get_paz().poles,
+    #            "zeros": paz_sim.get_paz().zeros}
 
-    
-    if not wavdownload:
+    if saveasdf:
+        preprocessh5(
+            phase, rot, pol, taper_perc, event_cat, model, taper_type, tz, ta,
+            rawloc, preproloc, rfloc, deconmeth, hc_filt, netrestr,
+            statrestr, logger, rflogger, debug)
+    else:
         # Here, we work with all available cores to speed things up
-        # Split up event catalogue to mitigate danger of data loss
+        # Split up event catalogue to mitigate the danger of data loss
         # Now the infodicts will be written in an even way
         # i.e. every 100 events
         
-        # Number of cores is often a multiple of 8 (therefore 128)
+        # Number of cores is usally a power of 2 (therefore 128)
         n_split = int(np.ceil(event_cat.count()/128))
         
         # All error handlers rely on download via IRIS webservice.
@@ -191,7 +199,7 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
             out = Parallel(n_jobs=n_j)(
                     delayed(__event_loop)(
                         wavdownload, phase, rot, pol, event, taper_perc,
-                        taper_type, model, paz_sim, logger, rflogger, eh, tz,
+                        taper_type, model, logger, rflogger, eh, tz,
                         ta, statloc, rawloc, preproloc, rfloc, deconmeth,
                         hc_filt, netrestr, statrestr)
                     for event in evtcat)
@@ -235,24 +243,11 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
                     logger.exception([e, d])
                     continue
 
-    else:
-        # It won't be faster to use several cores, when the download is running
-        # So for stability's sake just one core and dicts are written at the
-        # same time.
-        eh = False  # Don't send additional requests to the FDSN servers!
-        # Else it'll overload and no data will arrive
-        Parallel(n_jobs=1)(
-            delayed(__event_loop)(wavdownload, phase, rot, pol, event, taper_perc, taper_type,
-                                model, paz_sim, logger, rflogger, eh, tz, ta,
-                                statloc, rawloc, preproloc, rfloc, deconmeth,
-                                hc_filt, netrestr, statrestr)
-            for event in event_cat)
-
     print("Download and preprocessing finished.")
 
 
 def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, model,
-                 paz_sim, logger, rflogger, eh, tz, ta, statloc, rawloc,
+                 logger, rflogger, eh, tz, ta, statloc, rawloc,
                  preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr):
     """
     Loops over each event in the event catalogue
@@ -314,7 +309,7 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
         try:
             info = __waveform_loop(
                 wavdownload, phase, rot, pol, filestr, taper_perc, taper_type,
-                model, paz_sim, origin_time, ot_fiss, evtlat, evtlon, depth,
+                model, origin_time, ot_fiss, evtlat, evtlon, depth,
                 prepro_folder, event, logger, rflogger, by_event, eh, tz, ta,
                 statloc, preproloc, rfloc, deconmeth, hc_filt)
             infolist.append(info)
@@ -328,7 +323,7 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
 
 
 def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
-                    taper_type, model, paz_sim, origin_time, ot_fiss, evtlat,
+                    taper_type, model, origin_time, ot_fiss, evtlat,
                     evtlon, depth, prepro_folder, event, logger, rflogger,
                     by_event, eh, tz, ta, statloc, preproloc, rfloc,
                     deconmeth, hc_filt):
@@ -411,7 +406,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
 
             # Finalise preprocessing
             st, crit, infodict = __rotate_qc(
-                phase, st, station_inv, network, station, paz_sim, baz,
+                phase, st, station_inv, network, station, baz,
                 distance, outf, ot_fiss, event, evtlat, evtlon, depth,
                 rayp_s_deg, first_arrival, infof, logger, infodict, by_event,
                 eh, tz, statloc)
@@ -622,7 +617,7 @@ def __cut_resample(st, logger, first_arrival, network, station,
     return st
 
 
-def __rotate_qc(phase, st, station_inv, network, station, paz_sim, baz,
+def __rotate_qc(phase, st, station_inv, network, station, baz,
                 distance, outf, ot_fiss, event, evtlat, evtlon, depth,
                 rayp_s_deg, first_arrival, infof, logger, infodict, by_event,
                 eh, tz, statloc):
@@ -633,8 +628,11 @@ def __rotate_qc(phase, st, station_inv, network, station, paz_sim, baz,
     redownloading the response file (alike to the 3 traces problem)"""
 
     try:
-        st.remove_response(inventory=station_inv, output='VEL',
-                           water_level=60)
+        # 19/02/2021
+        # Experience shows that it is generally more stable to first execute
+        # attach_response and, then, remove_response
+        st.attach_response(station_inv)
+        st.remove_response()
     except ValueError:
         # Occurs for "No matching response file found"
     
@@ -645,12 +643,15 @@ def __rotate_qc(phase, st, station_inv, network, station, paz_sim, baz,
         if not eh or not station_inv:
             raise ValueError(["No matching response file found for",
                                 network, station])
-
-    st.remove_sensitivity(inventory=station_inv)
+    
+    # This step is superfluous simulate/remvove_response does that as well
+    # st.remove_sensitivity(inventory=station_inv)
 
     # simulate for another instrument like harvard (a stable good one)
-    st.simulate(paz_remove=None, paz_simulate=paz_sim,
-                simulate_sensitivity=True)
+    # 19/02/21 Removing this and rather remove the response entirely
+    # st.simulate(paz_remove=None, paz_simulate=paz_sim,
+    #             simulate_sensitivity=True)
+
 
     #       ROTATION      #
     # try:
