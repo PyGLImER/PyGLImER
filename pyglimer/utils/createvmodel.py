@@ -18,14 +18,14 @@ import fnmatch
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.spatial import KDTree
-from obspy.geodetics import gps2dist_azimuth
-from pathlib import Path
+# from obspy.geodetics import gps2dist_azimuth
+# from pathlib import Path
 import plotly.graph_objs as go
-from plotly.offline import plot
+# from plotly.offline import plot
 
 from pyglimer.data import finddir
 from pyglimer.constants import R_EARTH, maxz, res, DEG2KM
-from pyglimer.utils.geo_utils import geo2cart, cart2geo
+from pyglimer.utils.geo_utils import geo2cart
 
 # location of lith1 file
 lith1 = os.path.join('/home', 'pm', 'LITHO1.0', 'bin', 'access_litho')
@@ -73,7 +73,9 @@ def load_gyps(save=False, latb=None, lonb=None):
         except KeyError:
             pass
         try:
-            with open(os.path.join('tmp', str(latb)+str(lonb)+'.pkl', 'rb')) as infile:
+            with open(
+                os.path.join(
+                    'tmp', str(latb)+str(lonb)+'.pkl', 'rb')) as infile:
                 model = pickle.load(infile)
 
             _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model
@@ -191,6 +193,7 @@ def load_gyps(save=False, latb=None, lonb=None):
             model.write(filename=str(latb)+str(lonb), folder='tmp')
 
     return model
+
 
 class ComplexModel(object):
     def __init__(self, z, vp, vs, lat, lon, flatten=True, zf=None):
@@ -394,8 +397,10 @@ class ComplexModel(object):
             value=self.vpf.flatten(),
             isomin=0,
             isomax=10,
-            opacity=0.3, # needs to be small to see through all surfaces
-            surface_count=21, # needs to be a large number for good volume rendering
+            opacity=0.3,  # needs to be small to see through all surfaces
+            surface_count=21,
+            # surface_count
+            # needs to be a large number for good volume rendering
             ))
 
         figvs = go.Figure(data=go.Volume(
@@ -405,8 +410,9 @@ class ComplexModel(object):
             value=self.vsf.flatten(),
             isomin=0,
             isomax=10,
-            opacity=0.3, # needs to be small to see through all surfaces
-            surface_count=21, # needs to be a large number for good volume rendering
+            opacity=0.3,  # needs to be small to see through all surfaces
+            surface_count=21,
+            # needs to be a large number for good volume rendering
             ))
         # plot(figvp)
         # plot(figvs)
