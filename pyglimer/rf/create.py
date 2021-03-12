@@ -19,13 +19,13 @@ from copy import deepcopy
 import json
 import logging
 from operator import itemgetter
-from pkg_resources import resource_filename
+# from pkg_resources import resource_filename
 import warnings
 import os
 
 from geographiclib.geodesic import Geodesic
 from matplotlib import pyplot as plt
-from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
+# from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
 import numpy as np
 from obspy import read, Stream, Trace, UTCDateTime
 from obspy.core import AttribDict
@@ -33,8 +33,9 @@ from obspy.geodetics import gps2dist_azimuth
 from obspy.taup import TauPyModel
 from scipy.signal.windows import hann
 
-from pyglimer.rf.deconvolve import it, spectraldivision, multitaper, gen_it
-from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table, dt_table_3D
+from pyglimer.rf.deconvolve import it, spectraldivision, multitaper
+from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table,\
+    dt_table_3D
 from pyglimer.plot.plot_utils import plot_section, plot_single_rf, stream_dist
 
 logger = logging.Logger("rf")
@@ -83,7 +84,7 @@ def createRF(st_in, phase, pol='v', onset=None,
     """
 
     pol = pol.lower()
-    
+
     if info:
         ii = info['starttime'].index(st_in[0].stats.starttime)
         shift = info['onset'][ii] - st_in[0].stats.starttime
@@ -100,10 +101,6 @@ def createRF(st_in, phase, pol='v', onset=None,
     # deep copy stream
     st = st_in.copy()
     RF = st.copy()
-
-    # Normalise stream
-    # Don't! Normalisation only for spectraldivision
-    #st.normalize()
 
     # Shorten RF stream
     while RF.count() > 1:
@@ -184,17 +181,21 @@ def createRF(st_in, phase, pol='v', onset=None,
         lrf = None
         RF[0].data = it(v, u, dt, shift=shift, width=width)[0]
     elif method == "dampedf":
-        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "con", phase=phase[-1])
+        RF[0].data, lrf = spectraldivision(
+            v, u, dt, shift, "con", phase=phase[-1])
     elif method == "waterlevel":
-        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "wat", phase=phase[-1])
+        RF[0].data, lrf = spectraldivision(
+            v, u, dt, shift, "wat", phase=phase[-1])
     elif method == 'fqd':
-        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "fqd", phase=phase[-1])
+        RF[0].data, lrf = spectraldivision(
+            v, u, dt, shift, "fqd", phase=phase[-1])
     elif method == 'multit':
         RF[0].data, lrf, _, _ = multitaper(v, u, dt, shift, "con")
         # remove noise caused by multitaper
         RF.filter('lowpass', freq=2.50, zerophase=True, corners=2)
     else:
-        raise ValueError(method+ " is no valid deconvolution method.")
+        raise ValueError("%s is no valid deconvolution method." % method)
+
     if lrf is not None:
         # Normalisation for spectral division and multitaper
         # In order to do that, we have to find the factor that is necassary to
@@ -206,7 +207,7 @@ def createRF(st_in, phase, pol='v', onset=None,
         if abs(fact) < abs(lrf).max()/2:
             raise ValueError('The noise level of the created receiver funciton\
                 is too high.')
-        
+
 
     # create RFTrace object
     # create stats
@@ -459,17 +460,17 @@ class RFStream(Stream):
             tr._write_format_specific_header(format)
             if format.upper() == 'Q':
                 tr.stats.station = tr.id
-        if format.upper() == 'H5':
-            index = self.type
-            if index is None and 'event_time' in self[0].stats:
-                index = 'rf'
-            if index:
-                import obspyh5
-                old_index = obspyh5._INDEX
-                obspyh5.set_index(_H5INDEX[index])
-        super(RFStream, self).write(filename, format, **kwargs)
-        if format.upper() == 'H5' and index:
-            obspyh5.set_index(old_index)
+        # if format.upper() == 'H5':
+        #     index = self.type
+        #     if index is None and 'event_time' in self[0].stats:
+        #         index = 'rf'
+        #     if index:
+        #         import obspyh5
+        #         old_index = obspyh5._INDEX
+        #         obspyh5.set_index(_H5INDEX[index])
+        # super(RFStream, self).write(filename, format, **kwargs)
+        # if format.upper() == 'H5' and index:
+        #     obspyh5.set_index(old_index)
         if format.upper() == 'Q':
             for tr in self:
                 tr.stats.station = tr.stats.station.split('.')[1]
@@ -979,7 +980,9 @@ class RFTrace(Trace):
             reftime = self.stats[reftime]
         return reftime + seconds
 
-    def moveout(self, vmodel, multiple=False, latb=None, lonb=None, taper=True):
+    def moveout(
+        self, vmodel: str, multiple: bool = False, latb: tuple or None = None,
+            lonb: tuple or None = None, taper: bool = True):
         """
         Depth migration of the receiver function.
         Also calculates piercing points and adds them to RFTrace.stats.
