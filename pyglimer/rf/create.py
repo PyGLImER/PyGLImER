@@ -823,22 +823,23 @@ class RFTrace(Trace):
 
     Copyright (c) 2013-2019 Tom Eulenfeld
 
-    Permission is hereby granted, free of charge, to any person obtaining a copy of
-    this software and associated documentation files (the "Software"), to deal in
-    the Software without restriction, including without limitation the rights to
-    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-    the Software, and to permit persons to whom the Software is furnished to do so,
-    subject to the following conditions:
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
 
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
     """
 
     def __init__(self, data=None, header=None, trace=None):
@@ -1012,7 +1013,7 @@ class RFTrace(Trace):
         :return: 1D np.ndarray containing depths and an
             RFTrace object of type depth.
         :rtype: 1D np.ndarray, :class:`~pyglimer.rf.create.RFTrace`
-        """   
+        """
         st = self.stats
 
         if st.type == "depth" or st.type == "stastack":
@@ -1023,7 +1024,7 @@ class RFTrace(Trace):
 
         z, RF_mo, delta, RFm1, RFm2 = moveout(
             self.data, st, vmodel, latb=latb, lonb=lonb, taper=taper,
-         multiple=multiple)
+            multiple=multiple)
         st.pp_latitude = []
         st.pp_longitude = []
 
@@ -1088,13 +1089,14 @@ class RFTrace(Trace):
             htab, _, delta = dt_table_3D(
                 st.slowness, st.phase, st.station_latitude,
                 st.station_longitude, st.back_azimuth, st.station_elevation,
-                latb, lonb)
+                latb, lonb, False)
 
         else:
             htab, _, delta = dt_table(
-                st.slowness, vmodel, st.phase, st.station_elevation)
+                st.slowness, vmodel, st.phase, st.station_elevation, False)
 
-        st.pp_depth = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
+        st.pp_depth = np.hstack(
+            (np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
 
         delta2 = np.empty(st.pp_depth.shape)
         delta2.fill(np.nan)
@@ -1124,7 +1126,7 @@ class RFTrace(Trace):
              ax: plt.Axes = None, outputdir: str = None,
              clean: bool = False):
         """Creates plot of a single receiver function
-        
+
         Parameters
         ----------
         lim: list or tuple or None
@@ -1142,7 +1144,7 @@ class RFTrace(Trace):
         clean: bool
             If True, clears out all axes and plots RF only.
             Defaults to False.
-        
+
         Returns
         -------
         ax : `matplotlib.pyplot.Axes`
@@ -1170,7 +1172,7 @@ def obj2stats(event=None, station=None):
     :type station: :class:`~obspy.core.Station`, optional
     :return: Stats object with station and event attributes.
     :rtype: :class:`~obspy.core.AttribDict`
-    """    
+    """
 
     stats = AttribDict({})
     if event is not None:

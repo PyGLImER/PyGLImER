@@ -5,7 +5,7 @@ Authors: Peter Makus (peter.makus@student.uib.no)
         Lucas Sawade (lsawade@princeton.edu)
 
 Created: November 2019
-Last Modified: Wednesday, 22nd July 2020 11:45:19 am
+Last Modified: Friday, 12th March 2021 04:10:49 pm
 '''
 
 import logging
@@ -64,7 +64,7 @@ class BinGrid(object):
         :type phase: str
         :param verbose: consoel output?, defaults to True
         :type verbose: bool, optional
-        """        
+        """
 
         # Populate stuff
         self.stations = np.unique(np.stack((latitude, longitude)).T, axis=0)
@@ -163,7 +163,8 @@ class BinGrid(object):
         # bin that captures it.
         if self.verbose:
             logger.info(" ")
-            logger.info("--- Checking whether points are close to stations ---")
+            logger.info(
+                "--- Checking whether points are close to stations ---")
             logger.info(" ")
             start = time.time()
 
@@ -208,7 +209,7 @@ class BinGrid(object):
         :type maxdist: float
         :return: Euclidian distances to next point, indices of next neighbour.
         :rtype: Tuple with 2 1D `numpy.ndarray`
-        """        
+        """
 
         # Compute maxdist in euclidean space
         maxdist_euc = epi2euc(maxdist)

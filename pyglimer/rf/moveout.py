@@ -6,26 +6,27 @@ Created on Tue Apr  7 10:08:42 2020
 Contains functions for moveout correction and station stacking.
 
 Author:
-    Peter Makus (peter.makus@student.uib.no)
-  
+    Peter Makus (makus@gfz-potsdam.de
+
 !The file is split and has a second copyright disclaimer!
 
 Last updated:
 """
 
 import os
-from pathlib import Path
-import shelve
+# from pathlib import Path
+# import shelve
 import warnings
 
 import numpy as np
-from obspy import read
+# from obspy import read
+import obspy
 from obspy.signal.filter import lowpass
 from geographiclib.geodesic import Geodesic
 from scipy import interpolate
 from scipy.signal.windows import hann
 
-from pyglimer.data  import finddir
+from pyglimer.data import finddir
 from pyglimer.constants import R_EARTH, DEG2KM, maxz, res, maxzm
 from pyglimer.utils.createvmodel import load_gyps
 
@@ -33,7 +34,9 @@ from pyglimer.utils.createvmodel import load_gyps
 _MODEL_CACHE = {}
 
 
-def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
+def moveout(
+    data: np.ndarray, st: obspy.core.trace.Stats, fname: str, latb: tuple,
+        lonb: tuple, taper: bool, multiple: bool = False):
     """
     Depth migration for RF.
     Corrects the for the moveout of a converted phase. Flips time axis
@@ -51,10 +54,9 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
     :type latb: tuple
     :param lonb: Tuple in Form (minlon, maxlon)
     :type lonb: tuple
-    :param taper: If True, the last 10km of the RF will be tapered, which avoids
-        jumps in station stacks. If False,
-        the upper 5 km will be tapered.
-        Should be False for CCP stacks.
+    :param taper: If True, the last 10km of the RF will be tapered,
+        which avoids jumps in station stacks. If False, the upper 5 km will be
+        tapered. Should be False for CCP stacks.
     :type taper: bool
     :param multiple: Either False (don't include multiples), 'linear' for
         linear stack, 'PWS' (phase weighted stack or "zk" for a zhu &
@@ -85,14 +87,14 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         # Multiple modes
 
     else:
-        # dtm1 is PPS for PRFs (SSP SRFs), dtm2 PSS (SPP SRFs) 
+        # dtm1 is PPS for PRFs (SSP SRFs), dtm2 PSS (SPP SRFs)
         htab, dt, delta, dtm1, dtm2 = dt_table(
             rayp, fname, phase, el, multiple)
 
     # queried times
     tq = np.arange(0, round(max(dt)+st.delta, 1), st.delta)
     z = np.interp(tq, dt, htab)  # Depth array for first RF (not evenly spaced)
-    
+
     # Flip SRF
     if phase.upper() == "S":
         data = np.flip(data)
@@ -119,9 +121,10 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         # that might be prevented here
         z = z[:len(data)]
         RF = data[:len(z)]
-        
+
     if round(min(z), int(-np.log10(res))) <= 0:
-        zq = np.hstack((np.arange(min(z), 0, .1), np.arange(0, max(z)+res, res)))
+        zq = np.hstack(
+            (np.arange(min(z), 0, .1), np.arange(0, max(z)+res, res)))
     else:
         zq = np.arange(round(min(z), int(-np.log10(res))), max(z)+res)
 
@@ -129,12 +132,13 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         # lowpass filter see Tauzin et. al. (2016)
         RF = lowpass(RF, 1, st.sampling_rate, zerophase=True)
     # interpolate RF
-    
+
     try:
         tck = interpolate.splrep(z, RF)
 
-    except TypeError as e:
-        # Happens almost never, the RF is empty? No data or some bug in the data
+    except TypeError:
+        # Happens almost never, the RF is empty?
+        # No data or some bug in the data
         # correction and RF is too short, just return everything 0
         mes = "The length of the Receiver Function is" + str(len(z)) + "and\
         therefore too short, setting = 0."
@@ -144,17 +148,17 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         delta2 = np.empty(z2.shape)
         delta2.fill(np.nan)
         return z2, RF2, delta2
-    
+
     RF = interpolate.splev(zq, tck)
 
     # for the multiple modes
     if multiple:
         # Multiples are only useful for the upper part of the lithosphere
-        # I will go with the upper ~constants.maxzm km for now (I might have to reduce that)
+        # I will go with the upper ~constants.maxzm km for now
         if htab[len(dtm1)-1] > maxzm:
-            dtm1 = dtm1[:np.where(htab>=maxzm)[0][0]]
+            dtm1 = dtm1[:np.where(htab >= maxzm)[0][0]]
         if htab[len(dtm2)-1] > maxzm:
-            dtm2 = dtm2[:np.where(htab>=maxzm)[0][0]]
+            dtm2 = dtm2[:np.where(htab >= maxzm)[0][0]]
         # if phase == 'P':
         tqm1 = np.arange(0, round(max(dtm1)+st.delta, 1), st.delta)
         tqm2 = np.arange(0, round(max(dtm2)+st.delta, 1), st.delta)
@@ -185,17 +189,17 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         try:
             tckm1 = interpolate.splrep(zm1, RFm1)
             tckm2 = interpolate.splrep(zm2, RFm2)
-        except TypeError as e:
+        except TypeError:
             multiple = False
             # u, c = np.unique(zm1, return_counts=True)
             # dup = u[c > 1]
             # u, c = np.unique(zm2, return_counts=True)
             # dup2 = u[c > 1]
-            mes = "Interpolation error in multiples. Only primary conversion"+\
-                " will be used."
+            mes = "Interpolation error in multiples. Only primary conversion\
+                 will be used."
             warnings.warn(mes, category=UserWarning, stacklevel=1)
             pass
-    
+
     if multiple:
         # query depths
         if round(min(zm1), int(-np.log10(res))) <= 0:
@@ -210,14 +214,16 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
                 round(min(zm2), int(-np.log10(res))), max(zm2)+res)
 
         RFm1 = interpolate.splev(zqm1, tckm1)
-        RFm2 = -interpolate.splev(zqm2, tckm2)  # negative due to polarity change
+        # negative due to polarity change
+        RFm2 = -1*interpolate.splev(zqm2, tckm2)
 
     if taper:
         # Taper the last 10 km
         tap = hann(20)
         _, down = np.split(tap, 2)
 
-        if len(RF) > len(down):  # That usually doesn't happen, only for extreme
+        if len(RF) > len(down):  # That usually doesn't happen,
+            # only for extreme
             # discontinuities in 3D model and errors in SRF data
             taper = np.ones(len(RF))
             taper[-len(down):] = down
@@ -242,7 +248,7 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
         RFm2_2 = np.zeros(RF2.shape)
         RFm1_2[starti:starti+len(RFm1)] = RFm1
         RFm2_2[starti:starti+len(RFm2)] = RFm2
-        
+
     else:
         RFm1_2 = None
         RFm2_2 = None
@@ -256,7 +262,8 @@ def moveout(data, st, fname, latb, lonb, taper, multiple:bool=False):
 
 
 def dt_table_3D(
-    rayp, phase, lat, lon, baz, el, latb, lonb, multiple:bool, test=False):    
+    rayp: float, phase: str, lat, lon, baz, el, latb, lonb, multiple: bool,
+        test=False):
     """
     Creates a phase delay table and calculates piercing points
     for a specific ray parameter,
@@ -334,7 +341,7 @@ def dt_table_3D(
     q_b[0] = np.sqrt(vsf**-2 - p**2)
 
     # Numerical integration
-    for kk, h in enumerate(htab_f[1:]):
+    for kk, _ in enumerate(htab_f[1:]):
         # ii = np.where(model.zf > h)[0][0] - 1  # >=
 
         # # When there is elevation (velocity model starts at depth 0!)
@@ -377,11 +384,11 @@ def dt_table_3D(
             # Supercritical, can really only happen for q_a
             delta = delta[:kk+1]
             break
-        
+
         # travel time for P and S, respectively through dz
         dt_a[kk+1] = q_a[kk]*res_f[kk]
         dt_b[kk+1] = q_b[kk]*res_f[kk]
-    
+
     dt_a = np.cumsum(dt_a)[:len(delta)]
     dt_b = np.cumsum(dt_b)[:len(delta)]
     dt = dt_b-dt_a  # Delay primary conversion
@@ -390,8 +397,8 @@ def dt_table_3D(
     # We will have to assume that the multiples don't cross into a different
     # bin of the velocity model. Else the computation would be blown up crazily
     if multiple:
-        # This assumes that the elevation is the same as at the station location
-        # possible weakspot! Maybe I should do a lookup?
+        # This assumes that the elevation is the same as at the station
+        # location possible weakspot! Maybe I should do a lookup?
         # mphase 1 is PPs for P and SSp for S
         # mphase 2 is PSs, and SPp, respectively
         if phase == 'P':
@@ -403,24 +410,24 @@ def dt_table_3D(
             # Truncate The travel time table for multiples
             # if dt_mphase1.max() > 100 or dt_mphase2.max() > 100:
             try:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1>=100)[0][0]]
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 >= 100)[0][0]]
             except IndexError:
                 pass
             try:
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=100)[0][0]]
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
             except IndexError:
                 pass
             # elif dt_mphase2.max() > 100:
-            #     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=100)[0][0]]               
+            #     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=100)[0][0]]
         else:
             # Reduce travel times for S since the data will be flipped
             dt_mphase1 = dt - 2*dt_b
             dt_mphase2 = dt - dt_b - dt_a
             if dt_mphase2.min() < -50:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1<=-50)[0][0]]
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2<=-50)[0][0]]
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 <= -50)[0][0]]
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 <= -50)[0][0]]
             elif dt_mphase1.min() < -50:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1<=-50)[0][0]]
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 <= -50)[0][0]]
     else:
         dt_mphase1 = None
         dt_mphase2 = None
@@ -428,7 +435,9 @@ def dt_table_3D(
     return htab[:len(delta)], dt, delta, dt_mphase1, dt_mphase2
 
 
-def dt_table(rayp, fname, phase, el, multiple:bool, debug=False):
+def dt_table(
+    rayp: float, fname: str, phase: str, el: float, multiple: bool,
+        debug: bool = False):
     """
     Creates a phase delay table and calculates piercing points
     for a specific ray parameter,
@@ -498,7 +507,6 @@ def dt_table(rayp, fname, phase, el, multiple:bool, debug=False):
         res_f = np.diff(htab)
 
     # delay times
-    #dt = np.zeros(np.shape(htab))
     dt_a = np.zeros(np.shape(htab))
     dt_b = np.zeros(np.shape(htab))
 
@@ -522,7 +530,6 @@ def dt_table(rayp, fname, phase, el, multiple:bool, debug=False):
     dt_a = np.cumsum(dt_a)
     dt_b = np.cumsum(dt_b)
     dt = dt_b-dt_a  # Travel time difference primary and converted phase
-    #dt = np.cumsum(dt)
 
     delta = np.cumsum(delta)
 
@@ -535,8 +542,8 @@ def dt_table(rayp, fname, phase, el, multiple:bool, debug=False):
     # Find travel times for multiples
     # In the 1D vel model ppoint don't play any role for multiples
     if multiple:
-        # This assumes that the elevation is the same as at the station location
-        # possible weakspot! Maybe I should do a lookup?
+        # This assumes that the elevation is the same as at the station
+        # location possible weakspot! Maybe I should do a lookup?
         # mphase 1 is PPs for P and SSp for S
         # mphase 2 is PSs, and SPp, respectively
         if phase == 'P':
@@ -545,25 +552,25 @@ def dt_table(rayp, fname, phase, el, multiple:bool, debug=False):
             # Truncate The travel time table for multiples
             # if dt_mphase1.max() > 100 or dt_mphase2.max() > 100:
             try:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1>=100)[0][0]]
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 >= 100)[0][0]]
             except IndexError:
                 pass
             try:
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=100)[0][0]]
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
             except IndexError:
                 pass
             # elif dt_mphase2.max() > 100:
             #     print('h2')
-            #     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=100)[0][0]]               
+            #     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=100)[0][0]]
         else:
             # Reduce travel times for S since the data will be flipped
             dt_mphase1 = dt - 2*dt_b
             dt_mphase2 = dt - dt_b - dt_a
             if dt_mphase2.min() < -50:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1<=-50)[0][0]]
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2<=-50)[0][0]]
+                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 <= -50)[0][0]]
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 <= -50)[0][0]]
             elif dt_mphase1.min() < -50:
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase1<=-50)[0][0]]
+                dt_mphase2 = dt_mphase2[:np.where(dt_mphase1 <= -50)[0][0]]
         dt_mphase1 = dt_mphase1[:index]
         dt_mphase2 = dt_mphase2[:index]
     else:
@@ -573,7 +580,7 @@ def dt_table(rayp, fname, phase, el, multiple:bool, debug=False):
     return htab[:index], dt[:index], delta[:index], dt_mphase1, dt_mphase2
 
 
-def ppoint(q_a, q_b, dz, p, phase):
+def ppoint(q_a: float, q_b: float, dz: float, p: float, phase: str):
     """
     Calculate spherical distance between piercing point and station.
     INPUT has to be in Cartesian/ flat Earth:
@@ -607,7 +614,9 @@ def ppoint(q_a, q_b, dz, p, phase):
     return x_delta
 
 
-def earth_flattening(maxz, z, dz, vp, vs):
+def earth_flattening(
+    maxz: int, z: np.ndarray, dz: np.ndarray, vp: np.ndarray,
+        vs: np.ndarray):
     """
     Creates a flat-earth approximated velocity model down to maxz as in
     Peter M. Shearer
@@ -666,7 +675,8 @@ Copyright (c) 2013-2019 Tom Eulenfeld
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
 
@@ -674,7 +684,8 @@ The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
