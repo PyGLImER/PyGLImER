@@ -2,46 +2,47 @@
 Author: Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Friday, 19th February 2021 10:17:52 am
+Last Modified: Friday, 12th March 2021 02:40:14 pm
 '''
 
-#!/usr/bin/env python3d
+# !/usr/bin/env python3d
 # -*- coding: utf-8 -*-
 
 import fnmatch
 import logging
 import os
 import shelve
-import subprocess
 import time
 import itertools
 import warnings
 
 import numpy as np
 from joblib import Parallel, delayed, cpu_count
+import obspy
 from obspy import read, read_inventory, Stream, UTCDateTime
-from obspy.clients.iris import Client
-from obspy.clients.fdsn import Client as Webclient
+# from obspy.clients.iris import Client
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pathlib import Path
 
-#from pyglimer.waveform.preprocessh5 import preprocessh5
+# from pyglimer.waveform.preprocessh5 import preprocessh5
 from pyglimer import tmp
 from .errorhandler import redownload, redownload_statxml, \
-    NoMatchingResponseHandler, NotLinearlyIndependentHandler
-from ..constants import DEG2KM
+    NoMatchingResponseHandler  # , NotLinearlyIndependentHandler
+# from ..constants import DEG2KM
 from .qc import qcp, qcs
-from .rotate import rotate_LQT_min, rotate_PSV, rotate_LQT
+from .rotate import rotate_LQT_min, rotate_PSV  # , rotate_LQT
 from ..rf.create import createRF
 from ..utils.roundhalf import roundhalf
 from ..utils.utils import dt_string, chunks
 
 
 def preprocess(
-    phase:str, rot:str, pol:str, taper_perc, event_cat, model, taper_type, tz,
-    ta, statloc, rawloc, preproloc, rfloc, deconmeth, hc_filt,
-    saveasdf:bool=True, netrestr=None, statrestr=None,
-    logdir:str=None, debug:bool=False):
+    phase: str, rot: str, pol: str, taper_perc: float,
+    event_cat: obspy.Catalog, model: obspy.taup.TauPyModel,
+    taper_type: str, tz: int, ta: int, statloc: str, rawloc: str,
+    preproloc: str, rfloc: str, deconmeth: str, hc_filt: float or None,
+    saveasdf: bool = True, netrestr=None, statrestr=None,
+        logdir: str = None, debug: bool = False):
     """
      Preprocesses waveforms to create receiver functions
 
@@ -108,7 +109,7 @@ def preprocess(
 
     # Create handler to the log
     if logdir is None:
-        fh = logging.FileHandler(os.path.join('logs','preprocess.log'))
+        fh = logging.FileHandler(os.path.join('logs', 'preprocess.log'))
     else:
         fh = logging.FileHandler(os.path.join(logdir, 'preprocess.log'))
     fh.setLevel(logging.WARNING)
@@ -158,10 +159,10 @@ def preprocess(
         # Split up event catalogue to mitigate the danger of data loss
         # Now the infodicts will be written in an even way
         # i.e. every 100 events
-        
+
         # Number of cores is usally a power of 2 (therefore 128)
         n_split = int(np.ceil(event_cat.count()/128))
-        
+
         # All error handlers rely on download via IRIS webservice.
         # However, there is a maximum number for connections (3).
         # So I don't really want to flood everything with exceptions.
@@ -169,7 +170,7 @@ def preprocess(
             eh = False
         else:
             eh = True
-        
+
         # Returns generator object with evtcats with each 100 events
         evtcats = chunks(event_cat, n_split)
         for evtcat in evtcats:
@@ -471,7 +472,7 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
             #                        to 1 with """ + str(b) + '.')
 
             elif rot == "PSS":
-                avp, avs, st = rotate_PSV(
+                _, _, st = rotate_PSV(
                     station_inv[0][0][0].latitude,
                     station_inv[0][0][0].longitude,
                     rayp, st, phase)

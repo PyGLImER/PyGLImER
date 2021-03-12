@@ -4,14 +4,13 @@ Tests the pyglimer.rf.deconvolve module
 Author: Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th March 2021 10:13:35 am
-Last Modified: Friday, 12th March 2021 12:57:19 pm
+Last Modified: Friday, 12th March 2021 02:15:29 pm
 '''
-import random
 import unittest
 
 import numpy as np
 from numpy import testing
-from scipy.signal.windows import boxcar,gaussian
+from scipy.signal.windows import gaussian
 
 from pyglimer.rf.deconvolve import it, spectraldivision, gen_it, multitaper
 from pyglimer.test.synthetic import create_R

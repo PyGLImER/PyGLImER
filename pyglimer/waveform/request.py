@@ -13,17 +13,14 @@ Author:
 Last updated:
 """
 import os
-import subprocess
-import logging
 from http.client import IncompleteRead
 from datetime import datetime
-from pathlib import Path
 from warnings import warn
 
 from obspy import read_events, Catalog
 from obspy.clients.fdsn import Client as Webclient
 from obspy.taup import TauPyModel
-from obspy.clients.fdsn.client import FDSNException
+# from obspy.clients.fdsn.client import FDSNException
 
 from pyglimer.waveform.download import downloadwav
 from pyglimer.waveform.preprocess import preprocess

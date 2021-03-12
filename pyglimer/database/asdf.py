@@ -5,7 +5,7 @@ Seismic Format (asdf).
 Author: Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2021 03:24:30 pm
-Last Modified: Friday, 12th February 2021 03:28:28 pm
+Last Modified: Friday, 12th March 2021 02:22:22 pm
 '''
 import os
 from warnings import warn
@@ -14,10 +14,12 @@ import obspy
 from obspy import read, read_inventory
 from pyasdf import ASDFDataSet
 
-#def rewrite(folder:str, outputfile:str):
+# def rewrite(folder:str, outputfile:str):
 
-def writeraw(event:obspy.core.event.event.Event,
-        rawfolder:str, statloc:str, verbose:bool):
+
+def writeraw(
+    event: obspy.core.event.event.Event, rawfolder: str, statloc: str,
+        verbose: bool):
     """
     Write the downloaded miniseed, event, and stationxmls to a single asdf
     file.
@@ -34,18 +36,18 @@ def writeraw(event:obspy.core.event.event.Event,
     # Folder to save asdf to
     outfolder = os.path.join(rawfolder, os.pardir)
 
-    # Start out by adding the event, which later will be associated to 
+    # Start out by adding the event, which later will be associated to
     # each of the waveforms
     with ASDFDataSet(os.path.join(outfolder, 'raw.h5')) as ds:
         # Retrieve eventid - not the most elgant way, but works
-        #evtid = str(event.resource_id).split('eventid=')[-1].split('&format')[0]
         evtid = event.resource_id
         try:
             ds.add_quakeml(event)
         except ValueError:
             if verbose:
-                warn('Event with event-id ' + str(evtid)
-                + ' already in DB, skipping...', UserWarning)
+                warn(
+                    'Event with event-id %s already in DB, skipping...'
+                    % str(evtid), UserWarning)
             else:
                 pass
 
@@ -55,18 +57,12 @@ def writeraw(event:obspy.core.event.event.Event,
         # Write the waveforms to the asdf
         with ASDFDataSet(os.path.join(outfolder, 'raw.h5')) as ds:
             ds.add_waveforms(st, tag='raw_recording', event_id=evtid)
-        
+
         # Lastly, we will want to save the stationxmls
-        statxml = read_inventory(os.path.join(statloc,'*.xml'))
+        statxml = read_inventory(os.path.join(statloc, '*.xml'))
         with ASDFDataSet(os.path.join(outfolder, 'raw.h5')) as ds:
             ds.add_stationxml(statxml)
     except Exception:
         # For some cases, there will be events without
         # waveforms associated to them
         pass
-  
-
-
-
-    
-
