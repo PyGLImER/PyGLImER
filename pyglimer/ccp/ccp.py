@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 31st December 2020 02:32:05 pm
+Last Modified: Thursday, 11th March 2021 03:38:04 pm
 '''
 
 #!/usr/bin/env python3
@@ -40,198 +40,68 @@ from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
 from pyglimer.constants import R_EARTH, DEG2KM
 from pyglimer.plot.plot_volume import VolumePlot, VolumeExploration
 
-
-def init_ccp(spacing, vel_model, phase, statloc='output/stations',
-             preproloc='output/waveforms/preprocessed',
-             rfloc='output/waveforms/RF', network=None,
-             station=None, geocoords=None,
-             compute_stack=False, filt=None, binrad=np.cos(np.radians(30)),
-             append_pp=False, multiple=False, save=False, verbose=True):
+class PhasePick(object):
     """
-    Computes a ccp stack in self.ccp using data from statloc and rfloc.
-    The stack can be limited to some networks and
-    stations.
-
-    :param spacing: Angular distance between each bingrid point.
-    :type spacing: float
-    :param vel_model: Velocity model located in data. Either iasp91 (1D
-        raytracing) or 3D for 3D raytracing using a model compiled from GyPSuM.
-    :type vel_model: str
-    :param phase: Either 'S' or 'P'. Use 'S' if dataset contains both SRFs and
-        PRFs.
-    :type phase: str
-    :param statloc: Directory in that the station xmls are saved,
-        defaults to 'output/stations'
-    :type statloc: str, optional
-    :param preproloc: Parental directory in that the preprocessed miniseeds are
-        saved, defaults to 'output/waveforms/preprocessed'
-    :type preproloc: str, optional
-    :param rfloc: Parental directory in that the RFs are saved,
-        defaults to 'output/waveforms/RF'
-    :type rfloc: str, optional
-    :param network: Network or networks that are to be included in the ccp stack.
-        Standard unix wildcards are allowed. If None, the whole database
-        will be used. The default is None., defaults to None
-    :type network: str or list, optional
-    :param station: Station or stations that are to be included in the ccp
-        stack. Standard unix wildcards are allowed. Can only be list if
-        type(network)=str. If None, the whole database will be used.
-        The default is None.
-    :type station: str or list, optional
-    :param geocoords: An alternative way of selecting networks and stations.
-        Given in the form (minlat, maxlat, minlon, maxlon), defaults to None
-    :type geocoords: Tuple, optional
-    :param compute_stack: If true it will compute the stack by calling
-        :func:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`.
-        That can take a long time! The default is False.
-    :type compute_stack: bool, optional
-    :param filt: Decides whether to filter the receiver function prior to
-            depth migration. Either a Tuple of form `(lowpassf, highpassf)` or
-            `None` / `False`.
-    :type filt: tuple, optional
-    :param binrad: Only used if compute_stack=True
-            Defines the bin radius with bin radius = binrad*distance_bins.
-            Full Overlap = cosd(30), Full coverage: 1.
-            The default is full overlap.
-    :type binrad: float, optional
-    :param append_pp: Only used if compute_stack=True.
-        Appends piercing point locations to object. Can be used to plot
-        pps on map. Not recommended for large datasets as it takes A LOT
-        longer and makes the file a lot larger.
-        The default is False., defaults to False
-    :type append_pp: bool, optional
-    :param multiple: Should the CCP Stack be prepared to work with multiples?
-        It can be chosen later, whether the RFs from multiples are to be
-        incorporated into the CCP Stack. By default False.
-    :type multiple: bool, optional
-    :param save: Either False if the ccp should not be saved or string with filename
-        will be saved. Will be saved as pickle file.
-        The default is False.
-    :type save: ool or str, optional
-    :param verbose: Display info in terminal., defaults to True
-    :type verbose: bool, optional
-    :raises TypeError: For wrong inputs.
-    :return: CCPStack object.
-    :rtype: :class:`~pyglimer.ccp.ccp.CCPstack`
+    A phasepick object, just created for more convenient plotting.
     """
-    if phase[-1].upper() == 'S' and multiple:
-        raise NotImplementedError('Multiple mode is not supported for phase S.')
-    # create empty lists for station latitude and longitude
-    lats = []
-    lons = []
+    def __init__(
+        self, coords:np.ndarray, amplitudes:np.ndarray, polarity:str,
+        z:np.ndarray, depthrange:list=[None, None]):
+        """
+        Initialise object
 
-    # Were network and stations provided?
-    # Possibility 1 as geo boundaries
-    if geocoords:
-        lat = (geocoords[0], geocoords[1])
-        lon = (geocoords[2], geocoords[3])
-        db = StationDB(preproloc, phase=phase, use_old=False)
-        net, stat = db.find_stations(lat, lon, phase=phase)
-        pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
-        files = []
-        for pat in pattern:
-            files.extend(
-                fnmatch.filter(os.listdir(statloc), pat+'.xml'))
+        Parameters
+        ----------
+        coords : np.ndarray
+            2-d array containing latitudes and longitudes.
+        amplitudes : np.ndarray
+            1-D array containg amplitude values of each bin
+        polarity : str
+            Either '+' for positive velocity gradients or '-' for negative
+        z : np.ndarray
+            1D array containing depth of maxima/minima per bin
+        depthrange : list, optional
+            list containing depth restrictions in form of [zmin, zmax],
+            by default [None, None]
+        """
+        # assign vars
+        self.coords = coords
+        self.a = amplitudes
+        self.z = z
+        self.pol = polarity
+        self.depthr = depthrange
 
-    # As strings
-    elif network and type(network) == list:
-        files = []
-        if station:
-            if type(station) != list:
-                raise TypeError(
-                    """Provide a list of stations, when using a list of
-                    networks as parameter.""")
-            for net in network:
-                for stat in station:
-                    pattern2 = net + '.' + stat + '.xml'
-                    files.extend(
-                        fnmatch.filter(os.listdir(statloc), pattern2))
-        else:
-            for net in network:
-                pattern2 = net + '.*.xml'
-                files.extend(
-                    fnmatch.filter(os.listdir(statloc), pattern2))
-    elif network and type(station) == list:
-        files = []
-        for stat in station:
-            pattern2 = network + '.' + stat + '.xml'
-            files.extend(fnmatch.filter(os.listdir(statloc), pattern2))
-    elif network:
-        pattern2 = network + '.' + (station or '*') + '.xml'
-        files = fnmatch.filter(os.listdir(statloc), pattern2)
+    def plot(
+        self, plot_amplitude:bool=False, outputfile:str or None=None,
+        format='pdf', dpi=300, cmap:str='gist_rainbow', geology=False,
+        title:str or None=None):
+        """
+        Plot heatmap containing depth or amplitude of picked phase.
 
-    # In this case, it will process all available data (for global ccps)
-    else:
-        files = os.listdir(statloc)
-
-    # read out station latitudes and longitudes
-    for file in files:
-        try:
-            stat = read_inventory(os.path.join(statloc, file))
-        except TypeError as e:
-            print("Corrupt station xml, original error message: "+
-            str(e))
-        lats.append(stat[0][0].latitude)
-        lons.append(stat[0][0].longitude)
-    
-    logdir = os.path.join(os.path.dirname(os.path.abspath(statloc)), 'logs')
-
-    ccp = CCPStack(
-        lats, lons, spacing, phase=phase, verbose=verbose, logdir=logdir)
-
-    # Clear Memory
-    del stat, lats, lons, files
-
-    if not geocoords:
-        pattern = None
-
-    if compute_stack:
-        ccp.compute_stack(
-            vel_model=vel_model, network=network, station=station, save=save,
-            filt=filt, multiple=multiple,
-            pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc)
-
-    # _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
-
-    return ccp
-
-
-def read_ccp(filename:str, fmt=None):
-    """
-    Read CCP-Stack class file from input folder.
-
-    :param filename: Filename of the input file with file ending.
-        The default is 'ccp.pkl'.
-    :type filename: str, optional
-    :param fmt: File format, can be none if the filename has an ending,
-        possible options are "pickle. The default is None.
-    :type fmt: str, optional
-    :raises ValueError: For unknown formats
-    :return: CCPStack object
-    :rtype: :class:`~pyglimer.ccp.ccp.CCPStack`
-    """
-
-    # Trying to identify filetype from ending:
-    if not fmt:
-        x = filename.split('.')
-        if len(x) == 1:
-            raise ValueError("""Could not determine format, please provide
-                             a valid format""")
-        if x[-1] == 'pkl':
-            fmt = 'pickle'
-        else:
-            raise ValueError("""Could not determine format, please provide
-                             a valid format""")
-
-    # Open provided file
-    if fmt == "pickle":
-        with open(filename, 'rb') as infile:
-            ccp = pickle.load(infile)
-    else:
-        raise ValueError("Unknown format ", fmt)
-
-    return ccp
-
+        Parameters
+        ----------
+        plot_amplitude : bool, optional
+            If True amplitude instead of depths is plotted, by default False
+        outputfile : str or None, optional
+            Write Figure to file, by default None
+        format : str, optional
+            File format, by default 'pdf'
+        dpi : int, optional
+            Resolution for non-vector graphics, by default 300
+        cmap : str, optional
+            Colormap
+        geology : bool, optional
+            Plot geological map.
+        title
+        """
+        lat = (
+            np.floor(min(self.coords[0][0]))-1, np.ceil(max(self.coords[0][0])+1))
+        lon = (np.floor(min(self.coords[1][0]))-1,
+               np.ceil(max(self.coords[1][0])+1))
+        
+        plot_vel_grad(
+            self.coords, self.a, self.z, plot_amplitude, lat, lon, outputfile,
+            dpi=dpi, format=format, cmap=cmap, geology=geology, title=title)
 
 class CCPStack(object):
     """Is a CCP Stack matrix. Its size depends upon stations that are used as
@@ -484,7 +354,7 @@ class CCPStack(object):
         streams = []  # List of files filtered for input criteria
         infiles = []  # List of all files in folder
 
-        for root, dirs, files in os.walk(folder):
+        for root, _, files in os.walk(folder):
             for name in files:
                 infiles.append(os.path.join(root, name))
 
@@ -1169,7 +1039,7 @@ misspelled or not yet implemented')
             plot_illum, self.hits, profile, p_direct, outputfile=outputfile,
             format=format, dpi=dpi, geology=geology, title=title)
 
-    def pick_phase(self, pol:str = '+', depth:list=[None, None]):
+    def pick_phase(self, pol:str = '+', depth:list=[None, None]) -> PhasePick:
         """
         Pick the strongest negative or strongest positive gradient from a
         predefined depth-range.
@@ -1225,65 +1095,194 @@ misspelled or not yet implemented')
         p_phase = PhasePick(coords, a, pol, z, depth)
         return p_phase
 
-class PhasePick(object):
+
+def read_ccp(filename:str, fmt=None) -> CCPStack:
     """
-    A phasepick object, just created for more convenient plotting.
+    Read CCP-Stack class file from input folder.
+
+    :param filename: Filename of the input file with file ending.
+        The default is 'ccp.pkl'.
+    :type filename: str, optional
+    :param fmt: File format, can be none if the filename has an ending,
+        possible options are "pickle. The default is None.
+    :type fmt: str, optional
+    :raises ValueError: For unknown formats
+    :return: CCPStack object
+    :rtype: :class:`~pyglimer.ccp.ccp.CCPStack`
     """
-    def __init__(
-        self, coords:np.ndarray, amplitudes:np.ndarray, polarity:str,
-        z:np.ndarray, depthrange:list=[None, None]):
-        """
-        Initialise object
 
-        Parameters
-        ----------
-        coords : np.ndarray
-            2-d array containing latitudes and longitudes.
-        amplitudes : np.ndarray
-            1-D array containg amplitude values of each bin
-        polarity : str
-            Either '+' for positive velocity gradients or '-' for negative
-        z : np.ndarray
-            1D array containing depth of maxima/minima per bin
-        depthrange : list, optional
-            list containing depth restrictions in form of [zmin, zmax],
-            by default [None, None]
-        """
-        # assign vars
-        self.coords = coords
-        self.a = amplitudes
-        self.z = z
-        self.pol = polarity
-        self.depthr = depthrange
+    # Trying to identify filetype from ending:
+    if not fmt:
+        x = filename.split('.')
+        if len(x) == 1:
+            raise ValueError("""Could not determine format, please provide
+                             a valid format""")
+        if x[-1] == 'pkl':
+            fmt = 'pickle'
+        else:
+            raise ValueError("""Could not determine format, please provide
+                             a valid format""")
 
-    def plot(
-        self, plot_amplitude:bool=False, outputfile:str or None=None,
-        format='pdf', dpi=300, cmap:str='gist_rainbow', geology=False,
-        title:str or None=None):
-        """
-        Plot heatmap containing depth or amplitude of picked phase.
+    # Open provided file
+    if fmt == "pickle":
+        with open(filename, 'rb') as infile:
+            ccp = pickle.load(infile)
+    else:
+        raise ValueError("Unknown format ", fmt)
 
-        Parameters
-        ----------
-        plot_amplitude : bool, optional
-            If True amplitude instead of depths is plotted, by default False
-        outputfile : str or None, optional
-            Write Figure to file, by default None
-        format : str, optional
-            File format, by default 'pdf'
-        dpi : int, optional
-            Resolution for non-vector graphics, by default 300
-        cmap : str, optional
-            Colormap
-        geology : bool, optional
-            Plot geological map.
-        title
-        """
-        lat = (
-            np.floor(min(self.coords[0][0]))-1, np.ceil(max(self.coords[0][0])+1))
-        lon = (np.floor(min(self.coords[1][0]))-1,
-               np.ceil(max(self.coords[1][0])+1))
-        
-        plot_vel_grad(
-            self.coords, self.a, self.z, plot_amplitude, lat, lon, outputfile,
-            dpi=dpi, format=format, cmap=cmap, geology=geology, title=title)
+    return ccp
+
+def init_ccp(spacing, vel_model, phase, statloc='output/stations',
+             preproloc='output/waveforms/preprocessed',
+             rfloc='output/waveforms/RF', network=None,
+             station=None, geocoords=None,
+             compute_stack=False, filt=None, binrad=np.cos(np.radians(30)),
+             append_pp=False, multiple=False, save=False, verbose=True
+             ) -> CCPStack:
+    """
+    Computes a ccp stack in self.ccp using data from statloc and rfloc.
+    The stack can be limited to some networks and
+    stations.
+
+    :param spacing: Angular distance between each bingrid point.
+    :type spacing: float
+    :param vel_model: Velocity model located in data. Either iasp91 (1D
+        raytracing) or 3D for 3D raytracing using a model compiled from GyPSuM.
+    :type vel_model: str
+    :param phase: Either 'S' or 'P'. Use 'S' if dataset contains both SRFs and
+        PRFs.
+    :type phase: str
+    :param statloc: Directory in that the station xmls are saved,
+        defaults to 'output/stations'
+    :type statloc: str, optional
+    :param preproloc: Parental directory in that the preprocessed miniseeds are
+        saved, defaults to 'output/waveforms/preprocessed'
+    :type preproloc: str, optional
+    :param rfloc: Parental directory in that the RFs are saved,
+        defaults to 'output/waveforms/RF'
+    :type rfloc: str, optional
+    :param network: Network or networks that are to be included in the ccp stack.
+        Standard unix wildcards are allowed. If None, the whole database
+        will be used. The default is None., defaults to None
+    :type network: str or list, optional
+    :param station: Station or stations that are to be included in the ccp
+        stack. Standard unix wildcards are allowed. Can only be list if
+        type(network)=str. If None, the whole database will be used.
+        The default is None.
+    :type station: str or list, optional
+    :param geocoords: An alternative way of selecting networks and stations.
+        Given in the form (minlat, maxlat, minlon, maxlon), defaults to None
+    :type geocoords: Tuple, optional
+    :param compute_stack: If true it will compute the stack by calling
+        :func:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`.
+        That can take a long time! The default is False.
+    :type compute_stack: bool, optional
+    :param filt: Decides whether to filter the receiver function prior to
+            depth migration. Either a Tuple of form `(lowpassf, highpassf)` or
+            `None` / `False`.
+    :type filt: tuple, optional
+    :param binrad: Only used if compute_stack=True
+            Defines the bin radius with bin radius = binrad*distance_bins.
+            Full Overlap = cosd(30), Full coverage: 1.
+            The default is full overlap.
+    :type binrad: float, optional
+    :param append_pp: Only used if compute_stack=True.
+        Appends piercing point locations to object. Can be used to plot
+        pps on map. Not recommended for large datasets as it takes A LOT
+        longer and makes the file a lot larger.
+        The default is False., defaults to False
+    :type append_pp: bool, optional
+    :param multiple: Should the CCP Stack be prepared to work with multiples?
+        It can be chosen later, whether the RFs from multiples are to be
+        incorporated into the CCP Stack. By default False.
+    :type multiple: bool, optional
+    :param save: Either False if the ccp should not be saved or string with filename
+        will be saved. Will be saved as pickle file.
+        The default is False.
+    :type save: ool or str, optional
+    :param verbose: Display info in terminal., defaults to True
+    :type verbose: bool, optional
+    :raises TypeError: For wrong inputs.
+    :return: CCPStack object.
+    :rtype: :class:`~pyglimer.ccp.ccp.CCPstack`
+    """
+    if phase[-1].upper() == 'S' and multiple:
+        raise NotImplementedError('Multiple mode is not supported for phase S.')
+    # create empty lists for station latitude and longitude
+    lats = []
+    lons = []
+
+    # Were network and stations provided?
+    # Possibility 1 as geo boundaries
+    if geocoords:
+        lat = (geocoords[0], geocoords[1])
+        lon = (geocoords[2], geocoords[3])
+        db = StationDB(preproloc, phase=phase, use_old=False)
+        net, stat = db.find_stations(lat, lon, phase=phase)
+        pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
+        files = []
+        for pat in pattern:
+            files.extend(
+                fnmatch.filter(os.listdir(statloc), pat+'.xml'))
+
+    # As strings
+    elif network and type(network) == list:
+        files = []
+        if station:
+            if type(station) != list:
+                raise TypeError(
+                    """Provide a list of stations, when using a list of
+                    networks as parameter.""")
+            for net in network:
+                for stat in station:
+                    pattern2 = net + '.' + stat + '.xml'
+                    files.extend(
+                        fnmatch.filter(os.listdir(statloc), pattern2))
+        else:
+            for net in network:
+                pattern2 = net + '.*.xml'
+                files.extend(
+                    fnmatch.filter(os.listdir(statloc), pattern2))
+    elif network and type(station) == list:
+        files = []
+        for stat in station:
+            pattern2 = network + '.' + stat + '.xml'
+            files.extend(fnmatch.filter(os.listdir(statloc), pattern2))
+    elif network:
+        pattern2 = network + '.' + (station or '*') + '.xml'
+        files = fnmatch.filter(os.listdir(statloc), pattern2)
+
+    # In this case, it will process all available data (for global ccps)
+    else:
+        files = os.listdir(statloc)
+
+    # read out station latitudes and longitudes
+    for file in files:
+        try:
+            stat = read_inventory(os.path.join(statloc, file))
+        except TypeError as e:
+            print("Corrupt station xml, original error message: "+
+            str(e))
+        lats.append(stat[0][0].latitude)
+        lons.append(stat[0][0].longitude)
+    
+    logdir = os.path.join(os.path.dirname(os.path.abspath(statloc)), 'logs')
+
+    ccp = CCPStack(
+        lats, lons, spacing, phase=phase, verbose=verbose, logdir=logdir)
+
+    # Clear Memory
+    del stat, lats, lons, files
+
+    if not geocoords:
+        pattern = None
+
+    if compute_stack:
+        ccp.compute_stack(
+            vel_model=vel_model, network=network, station=station, save=save,
+            filt=filt, multiple=multiple,
+            pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc)
+
+    # _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
+
+    return ccp

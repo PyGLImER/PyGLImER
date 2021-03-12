@@ -2,7 +2,7 @@
 Author: Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Friday, 19th February 2021 09:40:28 am
+Last Modified: Friday, 19th February 2021 10:17:52 am
 '''
 
 #!/usr/bin/env python3d
@@ -25,8 +25,8 @@ from obspy.clients.fdsn import Client as Webclient
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pathlib import Path
 
-from pyglimer.waveform.preprocessh5 import preprocessh5
-from .. import tmp
+#from pyglimer.waveform.preprocessh5 import preprocessh5
+from pyglimer import tmp
 from .errorhandler import redownload, redownload_statxml, \
     NoMatchingResponseHandler, NotLinearlyIndependentHandler
 from ..constants import DEG2KM
@@ -148,24 +148,6 @@ def preprocess(
 
     #########
 
-    # needed for a station simulation - Harvard
-    # I guess this should be removed, no good reason to not just use
-    # st.attach_response() and, subsequently, st.remove_response
-    # webclient = Webclient('IRIS')
-    # station_simulate = webclient.get_stations(level="response",
-    #                                           channel='BH*', network='IU',
-    #                                           station='HRV')
-    # # instrument response of the channel downloaded above
-    # paz_sim = station_simulate[0][0][0].response
-
-    # # create dictionary with necassary data
-    # paz_sim = {"gain": paz_sim._get_overall_sensitivity_and_gain
-    #            (output="VEL")[0],
-    #            "sensitivity": paz_sim._get_overall_sensitivity_and_gain
-    #            (output="VEL")[1],
-    #            "poles": paz_sim.get_paz().poles,
-    #            "zeros": paz_sim.get_paz().zeros}
-
     if saveasdf:
         preprocessh5(
             phase, rot, pol, taper_perc, event_cat, model, taper_type, tz, ta,
@@ -198,7 +180,7 @@ def preprocess(
                 n_j = -1
             out = Parallel(n_jobs=n_j)(
                     delayed(__event_loop)(
-                        wavdownload, phase, rot, pol, event, taper_perc,
+                        phase, rot, pol, event, taper_perc,
                         taper_type, model, logger, rflogger, eh, tz,
                         ta, statloc, rawloc, preproloc, rfloc, deconmeth,
                         hc_filt, netrestr, statrestr)
@@ -246,7 +228,7 @@ def preprocess(
     print("Download and preprocessing finished.")
 
 
-def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, model,
+def __event_loop(phase, rot, pol, event, taper_perc, taper_type, model,
                  logger, rflogger, eh, tz, ta, statloc, rawloc,
                  preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr):
     """
@@ -278,8 +260,7 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
     prepro_folder = os.path.join(
         rawloc, ot_loc + '_' + evtlat_loc + '_' + evtlon_loc)
 
-    while prepro_folder == tmp.folder or tmp.folder == "not_started" \
-        and wavdownload:
+    while prepro_folder == tmp.folder or tmp.folder == "not_started":
         print('preprocessing suspended, awaiting download')
         time.sleep(2.5)
 
@@ -291,9 +272,7 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
     except FileNotFoundError:
         # If we are not downloading that's entirely normal as
         # an earlier iteration just deletes empty directories
-        if wavdownload:
-            logger.info([ot_fiss,
-                             """Waveforms missing in database."""])
+        pass
         return infolist
 
     # Preprocessing just for some stations?
@@ -308,7 +287,7 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
     for filestr in files:
         try:
             info = __waveform_loop(
-                wavdownload, phase, rot, pol, filestr, taper_perc, taper_type,
+                phase, rot, pol, filestr, taper_perc, taper_type,
                 model, origin_time, ot_fiss, evtlat, evtlon, depth,
                 prepro_folder, event, logger, rflogger, by_event, eh, tz, ta,
                 statloc, preproloc, rfloc, deconmeth, hc_filt)
@@ -322,7 +301,7 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
     return infolist
 
 
-def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
+def __waveform_loop(phase, rot, pol, filestr, taper_perc,
                     taper_type, model, origin_time, ot_fiss, evtlat,
                     evtlon, depth, prepro_folder, event, logger, rflogger,
                     by_event, eh, tz, ta, statloc, preproloc, rfloc,
@@ -542,7 +521,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
             rflogger.exception([network, station, ot_loc, e])
 
         finally:
-            if wavdownload and infodict:
+            if infodict:
                 # Single-core case
                 write_info(network, station, infodict, preproloc)
 
