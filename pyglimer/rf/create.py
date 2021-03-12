@@ -208,7 +208,6 @@ def createRF(st_in, phase, pol='v', onset=None,
             raise ValueError('The noise level of the created receiver funciton\
                 is too high.')
 
-
     # create RFTrace object
     # create stats
     stats = rfstats(phase, info=info, starttime=st[0].stats.starttime,
@@ -264,20 +263,22 @@ Copyright (c) 2013-2019 Tom Eulenfeld
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+
 
 def __get_event_origin_prop(h):
     def wrapper(event):
@@ -379,7 +380,7 @@ def read_rf(pathname_or_url, format=None, **kwargs):
         if = None. The default is None.
     :return: RFStream object from file.
     :rtype: :class:`~pyglimer.createRF.RFStream`
-    """    
+    """
 
     stream = read(pathname_or_url, format=format, **kwargs)
     stream = RFStream(stream)
@@ -508,7 +509,9 @@ class RFStream(Stream):
             traces.append(sliced_trace)
         return self.__class__(traces)
 
-    def moveout(self, vmodel, multiple=False, latb=None, lonb=None, taper=True):
+    def moveout(
+        self, vmodel: str, multiple: bool = False, latb: tuple or None = None,
+            lonb: tuple or None = None, taper: bool = True):
         """
         Depth migration of all receiver functions given Stream.
         Also calculates piercing points and adds them to RFTrace.stats.
@@ -516,7 +519,8 @@ class RFStream(Stream):
         :param vmodel: Velocity model located in /data/vmodel.
             Standard options are iasp91.dat and 3D (GYPSuM).
         :type vmodel: str
-        :param multiple: Appends two multiple mode RFs to the returned RFStream.
+        :param multiple: Appends two multiple mode RFs to the returned
+            RFStream.
             False by default.
         :type multiple: bool, optional
         :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
@@ -537,7 +541,8 @@ class RFStream(Stream):
         for tr in self:
             try:
                 z, mo, RFm1, RFm2 = tr.moveout(
-                    vmodel, latb=latb, lonb=lonb, taper=taper, multiple=multiple)
+                    vmodel, latb=latb, lonb=lonb, taper=taper,
+                    multiple=multiple)
             except TypeError:
                 # This trace is already depth migrated
                 RF_mo.append(tr)
@@ -565,7 +570,7 @@ class RFStream(Stream):
         :type latb: tuple, optional
         :param lonb: Tuple in Form (minlon, maxlon), defaults to None
         :type lonb: tuple, optional.
-        """        
+        """
 
         for tr in self:
             tr.ppoint(vmodel=vmodel_file, latb=latb, lonb=lonb)
@@ -666,8 +671,8 @@ class RFStream(Stream):
                 if tr.stats.channel[0] == 'm':
                     traces.append(tr.data)
             stack = np.average(traces, axis=0)
-        elif multiple != False:
-            raise ValueError('Unknown multiple mode: '+multiple)
+        else:
+            raise ValueError('Unknown multiple mode: %s.' % multiple)
 
         stack = RFTrace(data=stack, header=self[0].stats)
         stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0),
@@ -697,7 +702,7 @@ class RFStream(Stream):
             If `None` from 30 to 90 degrees plotted.
             Default None.
         scalingfactor : float
-            sets the scale for the traces. Could be automated in 
+            sets the scale for the traces. Could be automated in
             future functions(Something like mean distance between
             traces)
             Defaults to 2.0
@@ -720,7 +725,7 @@ class RFStream(Stream):
         -------
         ax : `matplotlib.pyplot.Axes`
 
-        """     
+        """
         if self.count() == 1:
             # Do single plot
             ax = plot_single_rf(
@@ -768,16 +773,17 @@ class RFStream(Stream):
                 continue
             rayp.append(rf.stats.slowness / DEG2KM)
             baz.append(rf.stats.back_azimuth)
-        
+
         if not len(baz):
-            raise ValueError('No Receiver Functions of Phase '+phase+
-                             ' found, did you choose the right phase?')
+            raise ValueError(
+                'No Receiver Functions of Phase %s found,\
+                    did you choose the right phase?' % phase)
 
         stream_dist(np.array(rayp), np.array(baz), nbins=nbins, v=v,
                     outputfile=outputfile, format=format,  dpi=dpi)
 
     def __dirty_ccp_stacks(self, binlon, binlat, binz):
-        """This is the simplest way of creating quick not really accurate 
+        """This is the simplest way of creating quick not really accurate
         CCP stacks.
 
         This function is still empty, but I'm leaving it here, because I think
@@ -798,12 +804,13 @@ class RFStream(Stream):
 
         # Check whether moveout and piercing points have been computed.
         """Then, use a 3d histogram to create stacks, and create them quickly
-        
+
         """
 
-        # If yes, use to populated a volume histogramdd 
+        # If yes, use to populated a volume histogramdd
 
         # output volume data
+
 
 class RFTrace(Trace):
     """

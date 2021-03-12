@@ -17,5 +17,5 @@ install:
   - source activate PyGLImER-dev
   - pip install -e .
 
-# command to run tests
-script: pytest
+# command to run tests in tests/
+script: pytest tests
