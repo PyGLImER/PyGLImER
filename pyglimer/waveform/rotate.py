@@ -14,7 +14,7 @@ from ..utils.createvmodel import load_avvmodel
 def rotate_PSV(statlat, statlon, rayp, st, phase):
     """
     Finds the incidence angle of an incoming ray with the weighted average
-    of the lithosphere's P velocity with a velocity model compiled from 
+    of the lithosphere's P velocity with a velocity model compiled from
     Litho1.0.
 
     Parameters
@@ -117,9 +117,8 @@ def rotate_LQT(st, phase):
 
     dt = st[0].stats.delta  # sampling interval
 
-    # Deep copy stream & Normalise
+    # Deep copy stream
     LQT = st.copy()
-    #LQT.normalize()
     del st
 
     # only check around phase-arrival
@@ -149,7 +148,7 @@ def rotate_LQT(st, phase):
     A_in = np.square(A_in)
 
     # Conduct svd
-    u, s, vh = np.linalg.svd(A_in, full_matrices=False)
+    u, s, _ = np.linalg.svd(A_in, full_matrices=False)
 
     # 2. Now, find out which is L and which Q by finding out which one has
     # the maximum energy around theoretical S-wave arrival - that one would
@@ -236,7 +235,6 @@ def rotate_LQT_min(st, phase):
     pp1 = round((onset-2)/dt)
     pp2 = round((onset+10)/dt)
     LQT = st.copy()
-    #LQT.normalize()
     del st
 
     # identify components

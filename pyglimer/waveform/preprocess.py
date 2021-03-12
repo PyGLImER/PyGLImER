@@ -2,7 +2,7 @@
 Author: Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Friday, 12th March 2021 02:40:14 pm
+Last Modified: Friday, 12th March 2021 02:47:43 pm
 '''
 
 # !/usr/bin/env python3d
@@ -334,7 +334,7 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
     ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
 
     outf = os.path.join(outdir, network+'.'+station+'.'+ot_loc+'.mseed')
-    
+
     statfile = os.path.join(statloc, network + '.' + station + '.xml')
 
     # Create directory for preprocessed file
@@ -409,7 +409,7 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
             return infodict
 
         except StreamLengthError as e:
-            logger.debug([filestr, e])        
+            logger.debug([filestr, e])
         # Everything else that might have gone wrong
         except Exception as e:
             logger.exception([prepro_folder, filestr, e])
@@ -447,7 +447,8 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
         # if phase == "P":
         #     st.filter('lowpass', freq=1.5, zerophase=True, corners=2)
         # elif phase == 'S':
-        #     st.filter('lowpass', freq=0.25, zerophase=True, corners=2)  # change for Kind(2015) to frequ=.125 freq=0.175Hz
+        # change for Kind(2015) to frequ=.125 freq=0.175Hz
+        #     st.filter('lowpass', freq=0.25, zerophase=True, corners=2)
 
         start = time.time()
 
@@ -495,7 +496,8 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
 
             else:
                 RF = createRF(
-                    st, phase, pol=pol, info=infodict, trim=trim, method=deconmeth)
+                    st, phase, pol=pol, info=infodict, trim=trim,
+                    method=deconmeth)
 
         # Write RF
             rfdir = os.path.join(rfloc, network, station)
@@ -560,7 +562,7 @@ def __cut_resample(st, logger, first_arrival, network, station,
     for tr in st:
         np.require(tr.data, dtype=np.float64)
         tr.stats.mseed.encoding = 'FLOAT64'
-    
+
     # trim to according length
     # Anti-Alias
     st.filter(type="lowpass", freq=4.95, zerophase=True, corners=2)
@@ -586,9 +588,8 @@ def __cut_resample(st, logger, first_arrival, network, station,
         # Occurs for dtype=int32
         for tr in st:
             del tr.stats.mseed
-        st.write(os.path.join(prepro_folder, filestr),
-                  format="MSEED")
-
+        st.write(
+            os.path.join(prepro_folder, filestr), format="MSEED")
 
     end = time.time()
     logger.info("Unprocessed file rewritten")
@@ -615,15 +616,15 @@ def __rotate_qc(phase, st, station_inv, network, station, baz,
         st.remove_response()
     except ValueError:
         # Occurs for "No matching response file found"
-    
+
         if eh:
             station_inv, st = NoMatchingResponseHandler(
                 st, network, station, statloc)
-                
+
         if not eh or not station_inv:
-            raise ValueError(["No matching response file found for",
-                                network, station])
-    
+            raise ValueError(
+                ["No matching response file found for", network, station])
+
     # This step is superfluous simulate/remvove_response does that as well
     # st.remove_sensitivity(inventory=station_inv)
 
@@ -632,8 +633,7 @@ def __rotate_qc(phase, st, station_inv, network, station, baz,
     # st.simulate(paz_remove=None, paz_simulate=paz_sim,
     #             simulate_sensitivity=True)
 
-
-    #       ROTATION      #
+    # ROTATION
     # try:
     # If channeles weren't properly aligned
     st.rotate(method='->ZNE', inventory=station_inv)
@@ -770,7 +770,7 @@ def write_info(network, station, dictionary, preproloc):
     """
     loc = os.path.join(preproloc, 'by_station', network, station)
     infof = os.path.join(loc, 'info')
-    
+
     if not __file_in_db(loc, 'info.dat'):
         with shelve.open(os.path.join(loc, 'info'), writeback=True) as info:
             info.update(dictionary)
@@ -812,6 +812,7 @@ class SNRError(Exception):
 
     def __str__(self):
         return repr(self.value)
+
 
 class StreamLengthError(Exception):
     """raised when stream has fewer than 3 components"""
