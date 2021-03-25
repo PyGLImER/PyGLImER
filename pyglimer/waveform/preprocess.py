@@ -1,45 +1,48 @@
 '''
-Author: Peter Makus (peter.makus@student.uib.no)
+Author: Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 4th August 2020 06:44:54 pm
+Last Modified: Friday, 12th March 2021 02:47:43 pm
 '''
 
-#!/usr/bin/env python3d
+# !/usr/bin/env python3d
 # -*- coding: utf-8 -*-
 
 import fnmatch
 import logging
 import os
 import shelve
-import subprocess
 import time
 import itertools
 import warnings
 
 import numpy as np
 from joblib import Parallel, delayed, cpu_count
+import obspy
 from obspy import read, read_inventory, Stream, UTCDateTime
-from obspy.clients.iris import Client
-from obspy.clients.fdsn import Client as Webclient
+# from obspy.clients.iris import Client
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pathlib import Path
 
-from .. import tmp
+# from pyglimer.waveform.preprocessh5 import preprocessh5
+from pyglimer import tmp
 from .errorhandler import redownload, redownload_statxml, \
-    NoMatchingResponseHandler, NotLinearlyIndependentHandler
-from ..constants import DEG2KM
+    NoMatchingResponseHandler  # , NotLinearlyIndependentHandler
+# from ..constants import DEG2KM
 from .qc import qcp, qcs
-from .rotate import rotate_LQT_min, rotate_PSV, rotate_LQT
+from .rotate import rotate_LQT_min, rotate_PSV  # , rotate_LQT
 from ..rf.create import createRF
 from ..utils.roundhalf import roundhalf
 from ..utils.utils import dt_string, chunks
 
 
-def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
-               ta, statloc, rawloc, preproloc, rfloc, deconmeth, hc_filt,
-               wavdownload, netrestr=None, statrestr=None, logdir=None,
-               debug=False):
+def preprocess(
+    phase: str, rot: str, pol: str, taper_perc: float,
+    event_cat: obspy.Catalog, model: obspy.taup.TauPyModel,
+    taper_type: str, tz: int, ta: int, statloc: str, rawloc: str,
+    preproloc: str, rfloc: str, deconmeth: str, hc_filt: float or None,
+    saveasdf: bool = True, netrestr=None, statrestr=None,
+        logdir: str = None, debug: bool = False):
     """
      Preprocesses waveforms to create receiver functions
 
@@ -106,7 +109,7 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
 
     # Create handler to the log
     if logdir is None:
-        fh = logging.FileHandler(os.path.join('logs','preprocess.log'))
+        fh = logging.FileHandler(os.path.join('logs', 'preprocess.log'))
     else:
         fh = logging.FileHandler(os.path.join(logdir, 'preprocess.log'))
     fh.setLevel(logging.WARNING)
@@ -146,32 +149,20 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
 
     #########
 
-    # needed for a station simulation - Harvard
-    webclient = Webclient('IRIS')
-    station_simulate = webclient.get_stations(level="response",
-                                              channel='BH*', network='IU',
-                                              station='HRV')
-    # instrument response of the channel downloaded above
-    paz_sim = station_simulate[0][0][0].response
-
-    # create dictionary with necassary data
-    paz_sim = {"gain": paz_sim._get_overall_sensitivity_and_gain
-               (output="VEL")[0],
-               "sensitivity": paz_sim._get_overall_sensitivity_and_gain
-               (output="VEL")[1],
-               "poles": paz_sim.get_paz().poles,
-               "zeros": paz_sim.get_paz().zeros}
-
-    
-    if not wavdownload:
+    if saveasdf:
+        preprocessh5(
+            phase, rot, pol, taper_perc, event_cat, model, taper_type, tz, ta,
+            rawloc, preproloc, rfloc, deconmeth, hc_filt, netrestr,
+            statrestr, logger, rflogger, debug)
+    else:
         # Here, we work with all available cores to speed things up
-        # Split up event catalogue to mitigate danger of data loss
+        # Split up event catalogue to mitigate the danger of data loss
         # Now the infodicts will be written in an even way
         # i.e. every 100 events
-        
-        # Number of cores is often a multiple of 8 (therefore 128)
+
+        # Number of cores is usally a power of 2 (therefore 128)
         n_split = int(np.ceil(event_cat.count()/128))
-        
+
         # All error handlers rely on download via IRIS webservice.
         # However, there is a maximum number for connections (3).
         # So I don't really want to flood everything with exceptions.
@@ -179,7 +170,7 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
             eh = False
         else:
             eh = True
-        
+
         # Returns generator object with evtcats with each 100 events
         evtcats = chunks(event_cat, n_split)
         for evtcat in evtcats:
@@ -190,8 +181,8 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
                 n_j = -1
             out = Parallel(n_jobs=n_j)(
                     delayed(__event_loop)(
-                        wavdownload, phase, rot, pol, event, taper_perc,
-                        taper_type, model, paz_sim, logger, rflogger, eh, tz,
+                        phase, rot, pol, event, taper_perc,
+                        taper_type, model, logger, rflogger, eh, tz,
                         ta, statloc, rawloc, preproloc, rfloc, deconmeth,
                         hc_filt, netrestr, statrestr)
                     for event in evtcat)
@@ -235,24 +226,11 @@ def preprocess(phase, rot, pol, taper_perc, event_cat, model, taper_type, tz,
                     logger.exception([e, d])
                     continue
 
-    else:
-        # It won't be faster to use several cores, when the download is running
-        # So for stability's sake just one core and dicts are written at the
-        # same time.
-        eh = False  # Don't send additional requests to the FDSN servers!
-        # Else it'll overload and no data will arrive
-        Parallel(n_jobs=1)(
-            delayed(__event_loop)(wavdownload, phase, rot, pol, event, taper_perc, taper_type,
-                                model, paz_sim, logger, rflogger, eh, tz, ta,
-                                statloc, rawloc, preproloc, rfloc, deconmeth,
-                                hc_filt, netrestr, statrestr)
-            for event in event_cat)
-
     print("Download and preprocessing finished.")
 
 
-def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, model,
-                 paz_sim, logger, rflogger, eh, tz, ta, statloc, rawloc,
+def __event_loop(phase, rot, pol, event, taper_perc, taper_type, model,
+                 logger, rflogger, eh, tz, ta, statloc, rawloc,
                  preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr):
     """
     Loops over each event in the event catalogue
@@ -283,8 +261,7 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
     prepro_folder = os.path.join(
         rawloc, ot_loc + '_' + evtlat_loc + '_' + evtlon_loc)
 
-    while prepro_folder == tmp.folder or tmp.folder == "not_started" \
-        and wavdownload:
+    while prepro_folder == tmp.folder or tmp.folder == "not_started":
         print('preprocessing suspended, awaiting download')
         time.sleep(2.5)
 
@@ -296,9 +273,7 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
     except FileNotFoundError:
         # If we are not downloading that's entirely normal as
         # an earlier iteration just deletes empty directories
-        if wavdownload:
-            logger.info([ot_fiss,
-                             """Waveforms missing in database."""])
+        pass
         return infolist
 
     # Preprocessing just for some stations?
@@ -313,8 +288,8 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
     for filestr in files:
         try:
             info = __waveform_loop(
-                wavdownload, phase, rot, pol, filestr, taper_perc, taper_type,
-                model, paz_sim, origin_time, ot_fiss, evtlat, evtlon, depth,
+                phase, rot, pol, filestr, taper_perc, taper_type,
+                model, origin_time, ot_fiss, evtlat, evtlon, depth,
                 prepro_folder, event, logger, rflogger, by_event, eh, tz, ta,
                 statloc, preproloc, rfloc, deconmeth, hc_filt)
             infolist.append(info)
@@ -327,8 +302,8 @@ def __event_loop(wavdownload, phase, rot, pol, event, taper_perc, taper_type, mo
     return infolist
 
 
-def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
-                    taper_type, model, paz_sim, origin_time, ot_fiss, evtlat,
+def __waveform_loop(phase, rot, pol, filestr, taper_perc,
+                    taper_type, model, origin_time, ot_fiss, evtlat,
                     evtlon, depth, prepro_folder, event, logger, rflogger,
                     by_event, eh, tz, ta, statloc, preproloc, rfloc,
                     deconmeth, hc_filt):
@@ -359,7 +334,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
     ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
 
     outf = os.path.join(outdir, network+'.'+station+'.'+ot_loc+'.mseed')
-    
+
     statfile = os.path.join(statloc, network + '.' + station + '.xml')
 
     # Create directory for preprocessed file
@@ -411,7 +386,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
 
             # Finalise preprocessing
             st, crit, infodict = __rotate_qc(
-                phase, st, station_inv, network, station, paz_sim, baz,
+                phase, st, station_inv, network, station, baz,
                 distance, outf, ot_fiss, event, evtlat, evtlon, depth,
                 rayp_s_deg, first_arrival, infof, logger, infodict, by_event,
                 eh, tz, statloc)
@@ -434,7 +409,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
             return infodict
 
         except StreamLengthError as e:
-            logger.debug([filestr, e])        
+            logger.debug([filestr, e])
         # Everything else that might have gone wrong
         except Exception as e:
             logger.exception([prepro_folder, filestr, e])
@@ -472,7 +447,8 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
         # if phase == "P":
         #     st.filter('lowpass', freq=1.5, zerophase=True, corners=2)
         # elif phase == 'S':
-        #     st.filter('lowpass', freq=0.25, zerophase=True, corners=2)  # change for Kind(2015) to frequ=.125 freq=0.175Hz
+        # change for Kind(2015) to frequ=.125 freq=0.175Hz
+        #     st.filter('lowpass', freq=0.25, zerophase=True, corners=2)
 
         start = time.time()
 
@@ -497,7 +473,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
             #                        to 1 with """ + str(b) + '.')
 
             elif rot == "PSS":
-                avp, avs, st = rotate_PSV(
+                _, _, st = rotate_PSV(
                     station_inv[0][0][0].latitude,
                     station_inv[0][0][0].longitude,
                     rayp, st, phase)
@@ -520,7 +496,8 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
 
             else:
                 RF = createRF(
-                    st, phase, pol=pol, info=infodict, trim=trim, method=deconmeth)
+                    st, phase, pol=pol, info=infodict, trim=trim,
+                    method=deconmeth)
 
         # Write RF
             rfdir = os.path.join(rfloc, network, station)
@@ -547,7 +524,7 @@ def __waveform_loop(wavdownload, phase, rot, pol, filestr, taper_perc,
             rflogger.exception([network, station, ot_loc, e])
 
         finally:
-            if wavdownload and infodict:
+            if infodict:
                 # Single-core case
                 write_info(network, station, infodict, preproloc)
 
@@ -585,7 +562,7 @@ def __cut_resample(st, logger, first_arrival, network, station,
     for tr in st:
         np.require(tr.data, dtype=np.float64)
         tr.stats.mseed.encoding = 'FLOAT64'
-    
+
     # trim to according length
     # Anti-Alias
     st.filter(type="lowpass", freq=4.95, zerophase=True, corners=2)
@@ -611,9 +588,8 @@ def __cut_resample(st, logger, first_arrival, network, station,
         # Occurs for dtype=int32
         for tr in st:
             del tr.stats.mseed
-        st.write(os.path.join(prepro_folder, filestr),
-                  format="MSEED")
-
+        st.write(
+            os.path.join(prepro_folder, filestr), format="MSEED")
 
     end = time.time()
     logger.info("Unprocessed file rewritten")
@@ -622,7 +598,7 @@ def __cut_resample(st, logger, first_arrival, network, station,
     return st
 
 
-def __rotate_qc(phase, st, station_inv, network, station, paz_sim, baz,
+def __rotate_qc(phase, st, station_inv, network, station, baz,
                 distance, outf, ot_fiss, event, evtlat, evtlon, depth,
                 rayp_s_deg, first_arrival, infof, logger, infodict, by_event,
                 eh, tz, statloc):
@@ -633,26 +609,31 @@ def __rotate_qc(phase, st, station_inv, network, station, paz_sim, baz,
     redownloading the response file (alike to the 3 traces problem)"""
 
     try:
-        st.remove_response(inventory=station_inv, output='VEL',
-                           water_level=60)
+        # 19/02/2021
+        # Experience shows that it is generally more stable to first execute
+        # attach_response and, then, remove_response
+        st.attach_response(station_inv)
+        st.remove_response()
     except ValueError:
         # Occurs for "No matching response file found"
-    
+
         if eh:
             station_inv, st = NoMatchingResponseHandler(
                 st, network, station, statloc)
-                
-        if not eh or not station_inv:
-            raise ValueError(["No matching response file found for",
-                                network, station])
 
-    st.remove_sensitivity(inventory=station_inv)
+        if not eh or not station_inv:
+            raise ValueError(
+                ["No matching response file found for", network, station])
+
+    # This step is superfluous simulate/remvove_response does that as well
+    # st.remove_sensitivity(inventory=station_inv)
 
     # simulate for another instrument like harvard (a stable good one)
-    st.simulate(paz_remove=None, paz_simulate=paz_sim,
-                simulate_sensitivity=True)
+    # 19/02/21 Removing this and rather remove the response entirely
+    # st.simulate(paz_remove=None, paz_simulate=paz_sim,
+    #             simulate_sensitivity=True)
 
-    #       ROTATION      #
+    # ROTATION
     # try:
     # If channeles weren't properly aligned
     st.rotate(method='->ZNE', inventory=station_inv)
@@ -789,7 +770,7 @@ def write_info(network, station, dictionary, preproloc):
     """
     loc = os.path.join(preproloc, 'by_station', network, station)
     infof = os.path.join(loc, 'info')
-    
+
     if not __file_in_db(loc, 'info.dat'):
         with shelve.open(os.path.join(loc, 'info'), writeback=True) as info:
             info.update(dictionary)
@@ -831,6 +812,7 @@ class SNRError(Exception):
 
     def __str__(self):
         return repr(self.value)
+
 
 class StreamLengthError(Exception):
     """raised when stream has fewer than 3 components"""

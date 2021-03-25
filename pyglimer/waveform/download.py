@@ -1,31 +1,34 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
 Created: Tue May 26 2019 13:31:30
-Last Modified: Tuesday, 9th February 2021 10:22:29 am
+Last Modified: Thursday, 25th March 2021 03:20:03 pm
 '''
 
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 
 from http.client import IncompleteRead
 import logging
 import os
-import subprocess
+import shutil
 
 from obspy import read
 from obspy import UTCDateTime
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
 from pathlib import Path
+from pyasdf import ASDFDataSet
 
-from .. import tmp
-from ..utils.roundhalf import roundhalf
+from pyglimer.database.asdf import writeraw
+from pyglimer import tmp
+from pyglimer.utils.roundhalf import roundhalf
 
 
 def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
-                rawloc, clients, network=None, station=None,
-                logdir=None, debug=False, verbose:bool=False):
+                rawloc, clients, network: str = None, station: str = None,
+                saveasdf: bool = True, logdir: str = None, debug: bool = False,
+                verbose: bool = False):
     """
     Downloads the waveforms for all events in the catalogue
      for a circular domain around the epicentre with defined epicentral
@@ -62,6 +65,9 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
         Only allowed if network != None. Station restrictions.
         Only download from these stations, wildcards are allowed.
         The default is None.
+    saveasdf : bool, optional
+        Save the dataset as Adaptable Seismic Data Format (asdf; recommended).
+        Else, one will be left with .mseeds.
     logdir : string, optional
         Set the directory to where the download log is saved
     debug : Bool, optional
@@ -69,12 +75,18 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
     verbose: Bool, optional
         Set True, when experiencing issues with download. Output of
         obspy MassDownloader will be logged in download.log.
-    
+
     Returns
     -------
     None
 
     """
+
+    if saveasdf:
+        raise NotImplementedError("Will be implemented in a future version.")
+    # needed to check whether data is already in the asdf
+    global asdfsave
+    asdfsave = saveasdf
 
     # Calculate the min and max theoretical arrival time after event time
     # according to minimum and maximum epicentral distance
@@ -97,7 +109,7 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
 
     # Create handler to the log
     if logdir is None:
-        fh = logging.FileHandler(os.path.join('logs','download.log'))
+        fh = logging.FileHandler(os.path.join('logs', 'download.log'))
     else:
         fh = logging.FileHandler(os.path.join(logdir, 'download.log'))
 
@@ -127,15 +139,15 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
         ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
         evtlat_loc = str(roundhalf(evtlat))
         evtlon_loc = str(roundhalf(evtlon))
-        tmp.folder = os.path.join(rawloc, ot_loc + '_'
-                                     + evtlat_loc + "_" + evtlon_loc)
+        tmp.folder = os.path.join(
+            rawloc, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
 
         # create folder for each event
         os.makedirs(tmp.folder, exist_ok=True)
 
-            # Circular domain around the epicenter. This module also offers
-            # rectangular and global domains. More complex domains can be
-            # defined by inheriting from the Domain class.
+        # Circular domain around the epicenter. This module also offers
+        # rectangular and global domains. More complex domains can be
+        # defined by inheriting from the Domain class.
 
         domain = CircularDomain(latitude=evtlat, longitude=evtlon,
                                 minradius=min_epid, maxradius=max_epid)
@@ -152,19 +164,19 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
             # True, any trace with a gap/overlap will be discarded.
             # This will delete streams with several traces!
             reject_channels_with_gaps=False,
-            # And you might only want waveforms that have data for at least 95 % of
-            # the requested time span. Any trace that is shorter than 95 % of the
-            # desired total duration will be discarded.
+            # And you might only want waveforms that have data for at least 95%
+            # of the requested time span. Any trace that is shorter than 95% of
+            # the desired total duration will be discarded.
             minimum_length=0.95,  # For 1.00 it will always delete the waveform
             # No two stations should be closer than 1 km to each other. This is
-            # useful to for example filter out stations that are part of different
-            # networks but at the same physical station. Settings this option to
-            # zero or None will disable that filtering.
+            # useful to for example filter out stations that are part of
+            # different networks but at the same physical station. Settings
+            # this option to zero or None will disable that filtering.
             # Guard against the same station having different names.
             minimum_interstation_distance_in_m=100.0,
-            # Only HH or BH channels. If a station has BH channels, those will be
-            # downloaded, otherwise the HH. Nothing will be downloaded if it has
-            # neither.
+            # Only HH or BH channels. If a station has BH channels, those will
+            # be downloaded, otherwise the HH. Nothing will be downloaded if it
+            # has neither.
             channel_priorities=["BH[ZNE12]", "HH[ZNE12]"],
             # Location codes are arbitrary and there is no rule as to which
             # location is best. Same logic as for the previous setting.
@@ -175,22 +187,29 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
             # over and slow down the script
         )
 
-        # The data will be downloaded to the ``./waveforms/`` and ``./stations/``
-        # folders with automatically chosen file names.
+        # The data will be downloaded to the ``./waveforms/`` and
+        # ``./stations/`` folders with automatically chosen file names.
         incomplete = True
         while incomplete:
             try:
                 mdl.download(
                     domain, restrictions,
                     mseed_storage=get_mseed_storage,
-                    stationxml_storage=statloc, #get_stationxml_storage(
-                        #network,station, statloc),
+                    stationxml_storage=statloc,
+                    # get_stationxml_storage(network, station, statloc),
                     threads_per_client=3, download_chunk_size_in_mb=50)
                 incomplete = False
             except IncompleteRead:
                 continue  # Just retry for poor connection
             except Exception:
                 incomplete = False  # Any other error: continue
+
+        # 2021.02.15 Here, we write everything to asdf
+        if saveasdf:
+            writeraw(event, tmp.folder, statloc, verbose)
+
+            # If that works, we will be deleting the cached mseeds here
+            shutil.rmtree(tmp.folder)
 
     tmp.folder = "finished"  # removes the restriction for preprocess.py
 
@@ -200,19 +219,25 @@ def get_mseed_storage(network, station, location, channel, starttime, endtime):
     # Returning True means that neither the data nor the StationXML file
     # will be downloaded.
 
-    if wav_in_db(network, station, location, channel, starttime, endtime):
-        return True
+    if asdfsave:
+        if wav_in_asdf(
+                network, station, location, channel, starttime, endtime):
+            return True
+    else:
+        if wav_in_db(network, station, location, channel, starttime, endtime):
+            return True
 
     # If a string is returned the file will be saved in that location.
     return os.path.join(tmp.folder, "%s.%s.mseed" % (network, station))
 
+
 def get_stationxml_storage(network, station, statloc):
 
-    #available_channels = []
+    # available_channels = []
 
-    #missing_channels = []
-    
-    #path = Path(statloc, "%s.%s.xml" % (network, station))
+    # missing_channels = []
+
+    # path = Path(statloc, "%s.%s.xml" % (network, station))
 
     filename = os.path.join(statloc, "%s.%s.xml" % (network, station))
 
@@ -228,7 +253,7 @@ def get_stationxml_storage(network, station, statloc):
 def wav_in_db(network, station, location, channel, starttime, endtime):
     """Checks if waveform is already downloaded."""
     path = Path(tmp.folder, "%s.%s.mseed" % (network, station))
-                                                   #location))
+
     if path.is_file():
         st = read(os.path.join(tmp.folder, network + "." + station + '.mseed'))
         # '.' + location +
@@ -244,3 +269,25 @@ def wav_in_db(network, station, location, channel, starttime, endtime):
         return True
     else:
         return False
+
+
+def wav_in_asdf(network, station, location, channel, starttime, endtime):
+    """Is the waveform already in the asdf database?"""
+    asdf_file = os.path.join(tmp.folder, os.pardir, 'raw.h5')
+
+    # Change precision of start and endtime
+    # Pyasdf rounds with a precision of 1 for the starttime and 0 for endtime..
+    # ... I think
+    starttime = UTCDateTime(
+        starttime, precision=1).format_iris_web_service()[:-4]
+    endtime = endtime.format_iris_web_service()[:-4]
+
+    # Waveforms are saved in pyasdf with filenames akin to:
+    nametag = "%s.%s.%s.%s__%s__%s__raw_recording"\
+        % (network, station, location, channel, starttime, endtime)
+
+    with ASDFDataSet(asdf_file) as ds:
+        if nametag in ds.waveforms['%s.%s' % (network, station)]:
+            return True
+        else:
+            return False

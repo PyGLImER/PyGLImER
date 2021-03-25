@@ -5,10 +5,10 @@ Files contains all Errorhandler for the Glimer to obspy project
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Saturday, 21th March 2020 19:16:41
-Last Modified: Wednesday, 17th June 2020 02:33:01 pm
+Last Modified: Friday, 12th March 2021 02:49:51 pm
 '''
 
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
 
@@ -29,10 +29,10 @@ def redownload(network, station, starttime, endtime, st):
                 break
         except ValueError:
             try:
-                st = client.get_waveforms(network, station, '*',
-                                            st[0].stats.channel[0:2] + '*',
-                                            starttime, endtime)
-            except (header.FDSNNoDataException,header.FDSNException,
+                st = client.get_waveforms(
+                    network, station, '*', st[0].stats.channel[0:2] + '*',
+                    starttime, endtime)
+            except (header.FDSNNoDataException, header.FDSNException,
                     ValueError):
                 continue  # wrong client
         if len(st) == 3:
@@ -60,19 +60,19 @@ def NoMatchingResponseHandler(st, network, station, statloc):
     for c in tmp.re_client:
         try:
             client = Client(c)
-            station_inv = client.get_stations(level="response",
-                                              channel=st[0].stats.channel[0:2] + '*',
-                                              network=network,
-                                              station=station)
+            station_inv = client.get_stations(
+                level="response", channel=st[0].stats.channel[0:2] + '*',
+                network=network, station=station)
             st.remove_response(inventory=station_inv, output='VEL',
                                water_level=60)
             # write the new, working stationxml file
-            station_inv.write(os.path.join(statloc, network + "." + station + ".xml"),
-                              format="STATIONXML")
+            station_inv.write(
+                os.path.join(statloc, network + "." + station + ".xml"),
+                format="STATIONXML")
             return station_inv, st
         except (header.FDSNNoDataException, header.FDSNException):
             pass  # wrong client
-        except Exception as e:
+        except Exception:
             break  # the response file doesn't seem to be available at all
     return None, None
 

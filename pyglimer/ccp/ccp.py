@@ -2,17 +2,17 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 31st December 2020 02:32:05 pm
+Last Modified: Friday, 12th March 2021 03:23:11 pm
 '''
 
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import fnmatch
 import os
 import pickle
 import logging
-import shutil
+# import shutil
 import time
 
 from joblib import Parallel, delayed, cpu_count
@@ -23,9 +23,9 @@ from scipy.spatial import cKDTree
 from obspy import read_inventory
 import scipy.io as sio
 from mpl_toolkits.basemap import Basemap
-from pathlib import Path
+# from pathlib import Path
 from psutil import virtual_memory
-import subprocess
+# import subprocess
 from tqdm import tqdm
 
 from pyglimer.ccp.compute.bin import BinGrid
@@ -33,7 +33,7 @@ from pyglimer.database.stations import StationDB
 from pyglimer.rf.create import read_rf
 from pyglimer.rf.moveout import res, maxz, maxzm
 from pyglimer.utils.utils import dt_string, chunks
-from pyglimer.utils.createvmodel import _MODEL_CACHE, ComplexModel
+from pyglimer.utils.createvmodel import ComplexModel
 from pyglimer.utils.geo_utils import epi2euc, geo2cart
 from pyglimer.ccp.plot_utils.plot_bins import plot_bins
 from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
@@ -41,204 +41,78 @@ from pyglimer.constants import R_EARTH, DEG2KM
 from pyglimer.plot.plot_volume import VolumePlot, VolumeExploration
 
 
-def init_ccp(spacing, vel_model, phase, statloc='output/stations',
-             preproloc='output/waveforms/preprocessed',
-             rfloc='output/waveforms/RF', network=None,
-             station=None, geocoords=None,
-             compute_stack=False, filt=None, binrad=np.cos(np.radians(30)),
-             append_pp=False, multiple=False, save=False, verbose=True):
+class PhasePick(object):
     """
-    Computes a ccp stack in self.ccp using data from statloc and rfloc.
-    The stack can be limited to some networks and
-    stations.
-
-    :param spacing: Angular distance between each bingrid point.
-    :type spacing: float
-    :param vel_model: Velocity model located in data. Either iasp91 (1D
-        raytracing) or 3D for 3D raytracing using a model compiled from GyPSuM.
-    :type vel_model: str
-    :param phase: Either 'S' or 'P'. Use 'S' if dataset contains both SRFs and
-        PRFs.
-    :type phase: str
-    :param statloc: Directory in that the station xmls are saved,
-        defaults to 'output/stations'
-    :type statloc: str, optional
-    :param preproloc: Parental directory in that the preprocessed miniseeds are
-        saved, defaults to 'output/waveforms/preprocessed'
-    :type preproloc: str, optional
-    :param rfloc: Parental directory in that the RFs are saved,
-        defaults to 'output/waveforms/RF'
-    :type rfloc: str, optional
-    :param network: Network or networks that are to be included in the ccp stack.
-        Standard unix wildcards are allowed. If None, the whole database
-        will be used. The default is None., defaults to None
-    :type network: str or list, optional
-    :param station: Station or stations that are to be included in the ccp
-        stack. Standard unix wildcards are allowed. Can only be list if
-        type(network)=str. If None, the whole database will be used.
-        The default is None.
-    :type station: str or list, optional
-    :param geocoords: An alternative way of selecting networks and stations.
-        Given in the form (minlat, maxlat, minlon, maxlon), defaults to None
-    :type geocoords: Tuple, optional
-    :param compute_stack: If true it will compute the stack by calling
-        :func:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`.
-        That can take a long time! The default is False.
-    :type compute_stack: bool, optional
-    :param filt: Decides whether to filter the receiver function prior to
-            depth migration. Either a Tuple of form `(lowpassf, highpassf)` or
-            `None` / `False`.
-    :type filt: tuple, optional
-    :param binrad: Only used if compute_stack=True
-            Defines the bin radius with bin radius = binrad*distance_bins.
-            Full Overlap = cosd(30), Full coverage: 1.
-            The default is full overlap.
-    :type binrad: float, optional
-    :param append_pp: Only used if compute_stack=True.
-        Appends piercing point locations to object. Can be used to plot
-        pps on map. Not recommended for large datasets as it takes A LOT
-        longer and makes the file a lot larger.
-        The default is False., defaults to False
-    :type append_pp: bool, optional
-    :param multiple: Should the CCP Stack be prepared to work with multiples?
-        It can be chosen later, whether the RFs from multiples are to be
-        incorporated into the CCP Stack. By default False.
-    :type multiple: bool, optional
-    :param save: Either False if the ccp should not be saved or string with filename
-        will be saved. Will be saved as pickle file.
-        The default is False.
-    :type save: ool or str, optional
-    :param verbose: Display info in terminal., defaults to True
-    :type verbose: bool, optional
-    :raises TypeError: For wrong inputs.
-    :return: CCPStack object.
-    :rtype: :class:`~pyglimer.ccp.ccp.CCPstack`
+    A phasepick object, just created for more convenient plotting.
     """
-    if phase[-1].upper() == 'S' and multiple:
-        raise NotImplementedError('Multiple mode is not supported for phase S.')
-    # create empty lists for station latitude and longitude
-    lats = []
-    lons = []
+    def __init__(
+        self, coords: np.ndarray, amplitudes: np.ndarray, polarity: str,
+            z: np.ndarray, depthrange: list = [None, None]):
+        """
+        Initialise object
 
-    # Were network and stations provided?
-    # Possibility 1 as geo boundaries
-    if geocoords:
-        lat = (geocoords[0], geocoords[1])
-        lon = (geocoords[2], geocoords[3])
-        db = StationDB(preproloc, phase=phase, use_old=False)
-        net, stat = db.find_stations(lat, lon, phase=phase)
-        pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
-        files = []
-        for pat in pattern:
-            files.extend(
-                fnmatch.filter(os.listdir(statloc), pat+'.xml'))
+        Parameters
+        ----------
+        coords : np.ndarray
+            2-d array containing latitudes and longitudes.
+        amplitudes : np.ndarray
+            1-D array containg amplitude values of each bin
+        polarity : str
+            Either '+' for positive velocity gradients or '-' for negative
+        z : np.ndarray
+            1D array containing depth of maxima/minima per bin
+        depthrange : list, optional
+            list containing depth restrictions in form of [zmin, zmax],
+            by default [None, None]
+        """
+        # assign vars
+        self.coords = coords
+        self.a = amplitudes
+        self.z = z
+        self.pol = polarity
+        self.depthr = depthrange
 
-    # As strings
-    elif network and type(network) == list:
-        files = []
-        if station:
-            if type(station) != list:
-                raise TypeError(
-                    """Provide a list of stations, when using a list of
-                    networks as parameter.""")
-            for net in network:
-                for stat in station:
-                    pattern2 = net + '.' + stat + '.xml'
-                    files.extend(
-                        fnmatch.filter(os.listdir(statloc), pattern2))
-        else:
-            for net in network:
-                pattern2 = net + '.*.xml'
-                files.extend(
-                    fnmatch.filter(os.listdir(statloc), pattern2))
-    elif network and type(station) == list:
-        files = []
-        for stat in station:
-            pattern2 = network + '.' + stat + '.xml'
-            files.extend(fnmatch.filter(os.listdir(statloc), pattern2))
-    elif network:
-        pattern2 = network + '.' + (station or '*') + '.xml'
-        files = fnmatch.filter(os.listdir(statloc), pattern2)
+    def plot(
+        self, plot_amplitude: bool = False, outputfile: str or None = None,
+        format: str = 'pdf', dpi: int = 300, cmap: str = 'gist_rainbow',
+            geology: bool = False, title: str or None = None):
+        """
+        Plot heatmap containing depth or amplitude of picked phase.
 
-    # In this case, it will process all available data (for global ccps)
-    else:
-        files = os.listdir(statloc)
+        Parameters
+        ----------
+        plot_amplitude : bool, optional
+            If True amplitude instead of depths is plotted, by default False
+        outputfile : str or None, optional
+            Write Figure to file, by default None
+        format : str, optional
+            File format, by default 'pdf'
+        dpi : int, optional
+            Resolution for non-vector graphics, by default 300
+        cmap : str, optional
+            Colormap
+        geology : bool, optional
+            Plot geological map.
+        title
+        """
+        lat = (
+            np.floor(min(self.coords[0][0]))-1,
+            np.ceil(max(self.coords[0][0])+1))
+        lon = (np.floor(min(self.coords[1][0]))-1,
+               np.ceil(max(self.coords[1][0])+1))
 
-    # read out station latitudes and longitudes
-    for file in files:
-        try:
-            stat = read_inventory(os.path.join(statloc, file))
-        except TypeError as e:
-            print("Corrupt station xml, original error message: "+
-            str(e))
-        lats.append(stat[0][0].latitude)
-        lons.append(stat[0][0].longitude)
-    
-    logdir = os.path.join(os.path.dirname(os.path.abspath(statloc)), 'logs')
-
-    ccp = CCPStack(
-        lats, lons, spacing, phase=phase, verbose=verbose, logdir=logdir)
-
-    # Clear Memory
-    del stat, lats, lons, files
-
-    if not geocoords:
-        pattern = None
-
-    if compute_stack:
-        ccp.compute_stack(
-            vel_model=vel_model, network=network, station=station, save=save,
-            filt=filt, multiple=multiple,
-            pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc)
-
-    # _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
-
-    return ccp
-
-
-def read_ccp(filename:str, fmt=None):
-    """
-    Read CCP-Stack class file from input folder.
-
-    :param filename: Filename of the input file with file ending.
-        The default is 'ccp.pkl'.
-    :type filename: str, optional
-    :param fmt: File format, can be none if the filename has an ending,
-        possible options are "pickle. The default is None.
-    :type fmt: str, optional
-    :raises ValueError: For unknown formats
-    :return: CCPStack object
-    :rtype: :class:`~pyglimer.ccp.ccp.CCPStack`
-    """
-
-    # Trying to identify filetype from ending:
-    if not fmt:
-        x = filename.split('.')
-        if len(x) == 1:
-            raise ValueError("""Could not determine format, please provide
-                             a valid format""")
-        if x[-1] == 'pkl':
-            fmt = 'pickle'
-        else:
-            raise ValueError("""Could not determine format, please provide
-                             a valid format""")
-
-    # Open provided file
-    if fmt == "pickle":
-        with open(filename, 'rb') as infile:
-            ccp = pickle.load(infile)
-    else:
-        raise ValueError("Unknown format ", fmt)
-
-    return ccp
+        plot_vel_grad(
+            self.coords, self.a, self.z, plot_amplitude, lat, lon, outputfile,
+            dpi=dpi, format=format, cmap=cmap, geology=geology, title=title)
 
 
 class CCPStack(object):
     """Is a CCP Stack matrix. Its size depends upon stations that are used as
     input."""
 
-    def __init__(self, latitude, longitude, edist, phase,
-                 verbose=True, logdir: str or None=None):
+    def __init__(
+        self, latitude: float, longitude: float, edist: float, phase: str,
+            verbose: bool = True, logdir: str or None = None):
         """
         Creates an empy object template for a CCP stack
 
@@ -253,7 +127,7 @@ class CCPStack(object):
             Hence, phase can be "S" for PRFs but not the other way around.
             However, "P" is computationally more efficient.
         :type phase: str
-        :param verbose: If true -> console output. The default is True., defaults to True
+        :param verbose: If true -> console output. The default is True.
         :type verbose: bool, optional
         :param logdir: Directory for log file
         :type logdr: str, optional
@@ -273,7 +147,8 @@ class CCPStack(object):
         self.logger.addHandler(fh)
 
         # Create Formatter
-        fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
+        fmt = logging.Formatter(
+            fmt='%(asctime)s - %(levelname)s - %(message)s')
         fh.setFormatter(fmt)
 
         # Create bingrid
@@ -300,18 +175,21 @@ class CCPStack(object):
         self.pplon = []
         self.ppz = self.z
         self.binrad = None
-        
+
     def __str__(self) -> str:
-        out = f"Teleseismic Phase:\t\t{self.bingrid.phase}\n"+\
-        f"Bin distance:\t\t\t{round(self.bingrid.edist,3)}\n"+\
-        f"Bin radius:\t\t\t{round(self.binrad,3)}\n"+\
-        f"Bounding Box:\tLatitude:\t{round(self.coords[0].min(),1)} {round(self.coords[0].max(),1)}\n"+\
-        f"\t\tLongitude:\t{round(self.coords[1].min(),1)} {round(self.coords[1].max(),1)}\n"+\
-        f"Number of Receiver Functions:\t{self.N}"
-        
+        out = f"Teleseismic Phase: \t\t{self.bingrid.phase}\n" +\
+                f"Bin distance: \t\t\t{round(self.bingrid.edist, 3)}\n" +\
+                f"Bin radius: \t\t\t{round(self.binrad, 3)}\n" +\
+                f"Bounding Box: \tLatitude: \t{round(self.coords[0].min(), 1)}\
+                    {round(self.coords[0].max(), 1)}\n" +\
+                f"\t\tLongitude: \t{round(self.coords[1].min(), 1)}\
+                     {round(self.coords[1].max(),1)}\n" +\
+                f"Number of Receiver Functions: \t{self.N}"
         return out
 
-    def query_bin_tree(self, latitude, longitude, data, n_closest_points):
+    def query_bin_tree(
+        self, latitude: np.ndarray, longitude: np.ndarray, data: np.ndarray,
+            n_closest_points: int):
         """
         Find closest bins for provided latitude and longitude.
 
@@ -325,7 +203,7 @@ class CCPStack(object):
         :type n_closest_points: int
         :return: bin index k and depth index j
         :rtype: int
-        """        
+        """
         i = self.bingrid.query_bin_tree(latitude, longitude, self.binrad_eucl,
                                         n_closest_points)
 
@@ -340,13 +218,16 @@ class CCPStack(object):
 
         return k, j
 
-    def compute_stack(self, vel_model, rfloc='output/waveforms/RF',
-                      statloc='output/stations',
-                      preproloc='output/waveforms/preprocessed',
-                      network=None, station=None, geocoords=None, pattern=None,
-                      save=False, filt=None,
-                      binrad=1/(2*np.cos(np.radians(30))), append_pp=False,
-                      multiple=False):
+    def compute_stack(
+        self, vel_model: str, rfloc: str = 'output/waveforms/RF',
+        statloc: str = 'output/stations',
+        preproloc: str = 'output/waveforms/preprocessed',
+        network: str or list or None = None,
+        station: str or list or None = None, geocoords: tuple or None = None,
+        pattern: list or None = None, save: str or bool = False,
+        filt: tuple or None = None,
+        binrad: float = 1/(2*np.cos(np.radians(30))), append_pp: bool = False,
+            multiple: bool = False):
         """
         Computes a ccp stack in self.ccp, using the data from rfloc.
         The stack can be limited to some networks and
@@ -366,7 +247,7 @@ class CCPStack(object):
         :type statloc: str, optional
         :param preproloc: Parental folder containing the preprocessed mseeds.
             Only needed if option geocoords is used. The default is
-            'output/waveforms/preprocessed'. 
+            'output/waveforms/preprocessed'.
         :type preproloc: str, optional
         :param network: This parameter is ignored if the pattern is given.
             Network or networks that are to be included in the ccp stack.
@@ -449,10 +330,10 @@ class CCPStack(object):
             fh.setLevel(logging.INFO)
             self.logger.addHandler(fh)
             self.logger.info('Stacking started')
-        
+
         if multiple:
             # Use multiples?
-            endi = np.where(self.z==maxzm)[0][0]+1
+            endi = np.where(self.z == maxzm)[0][0] + 1
             self.bins_m1 = np.zeros(self.bins[:, :endi].shape)
             self.bins_m2 = np.zeros(self.bins[:, :endi].shape)
             self.illumm = np.zeros(self.bins[:, :endi].shape, dtype=int)
@@ -462,7 +343,7 @@ class CCPStack(object):
             folder = os.path.join(folder, network)
             if station and type(station) == str:
                 folder = os.path.join(folder, station)
-        
+
         elif geocoords and not pattern:
             # Stations by coordinates
             # create empty lists for station latitude and longitude
@@ -484,7 +365,7 @@ class CCPStack(object):
         streams = []  # List of files filtered for input criteria
         infiles = []  # List of all files in folder
 
-        for root, dirs, files in os.walk(folder):
+        for root, _, files in os.walk(folder):
             for name in files:
                 infiles.append(os.path.join(root, name))
 
@@ -593,10 +474,10 @@ only show the progress per chunk.')
                     len_split = int(np.ceil(len_split/(len_split/10)))
             num_split = int(np.ceil(len(stream_chunk)/len_split))
 
-            out = Parallel(n_jobs=num_cores)( # prefer='processes'
+            out = Parallel(n_jobs=num_cores)(  # prefer='processes'
                             delayed(self.multicore_stack)(
-                                st, append_pp, n_closest_points, vel_model, latb,
-                                lonb, filt, i, multiple)
+                                st, append_pp, n_closest_points, vel_model,
+                                latb, lonb, filt, i, multiple)
                             for i, st in zip(
                                 tqdm(range(num_split)),
                                 chunks(stream_chunk, len_split)))
@@ -605,19 +486,21 @@ only show the progress per chunk.')
             if multiple:
                 for kk, jj, datal, datalm1, datalm2 in out:
                     for k, j, data, datam1, datam2 in zip(
-                        kk, jj, datal, datalm1, datalm2):
+                            kk, jj, datal, datalm1, datalm2):
                         self.bins[k, j] = self.bins[k, j] + data[j]
-                        
+
                         # hit counter + 1
                         self.illum[k, j] = self.illum[k, j] + 1
-                        
+
                         # multiples
-                        iii = np.where(j<=endi-1)[0]
+                        iii = np.where(j <= endi-1)[0]
                         jm = j[iii]
                         km = k[iii]
                         try:
-                            self.bins_m1[km, jm] = self.bins_m1[km, jm] + datam1[jm]
-                            self.bins_m2[km, jm] = self.bins_m1[km, jm] + datam1[jm]
+                            self.bins_m1[
+                                km, jm] = self.bins_m1[km, jm] + datam1[jm]
+                            self.bins_m2[
+                                km, jm] = self.bins_m1[km, jm] + datam1[jm]
                             self.illumm[km, jm] = self.illum[km, jm] + 1
                         except IndexError as e:
                             if not len(datam1) or not len(datam2):
@@ -628,7 +511,7 @@ only show the progress per chunk.')
             else:
                 for kk, jj, datal, _, _ in out:
                     for k, j, data in zip(
-                        kk, jj, datal):
+                            kk, jj, datal):
                         self.bins[k, j] = self.bins[k, j] + data[j]
 
                         # hit counter + 1
@@ -672,7 +555,7 @@ only show the progress per chunk.')
         :type idx: int
         :return: Three lists containing indices and rf-data.
         :rtype: list, list, list
-        """        
+        """
 
         kk = []
         jj = []
@@ -690,8 +573,9 @@ only show the progress per chunk.')
                 continue
 
             if filt:
-                rft.filter('bandpass', freqmin=filt[0], freqmax=filt[1],
-                            zerophase=True, corners=2)
+                rft.filter(
+                    'bandpass', freqmin=filt[0], freqmax=filt[1],
+                    zerophase=True, corners=2)
             try:
                 z, rf, rfm1, rfm2 = rft[0].moveout(
                     vmodel, latb=latb, lonb=lonb, taper=False,
@@ -709,10 +593,10 @@ only show the progress per chunk.')
             lat = np.array(rf.stats.pp_latitude)
             lon = np.array(rf.stats.pp_longitude)
             if append_pp:
-                plat = np.pad(lat, (0, len(self.z)-len(lat)),
-                                constant_values=np.nan)
-                plon = np.pad(lon, (0, len(self.z)-len(lon)),
-                                constant_values=np.nan)
+                plat = np.pad(
+                    lat, (0, len(self.z)-len(lat)), constant_values=np.nan)
+                plon = np.pad(
+                    lon, (0, len(self.z)-len(lon)), constant_values=np.nan)
                 self.pplat.append(plat)
                 self.pplon.append(plon)
             k, j = self.query_bin_tree(lat, lon, rf.data, n_closest_points)
@@ -720,9 +604,9 @@ only show the progress per chunk.')
             kk.append(k)
             jj.append(j)
             datal.append(rf.data)
-            
+
             if multiple:
-                depthi = np.where(z==maxzm)[0][0]
+                depthi = np.where(z == maxzm)[0][0]
                 try:
                     datalm1.append(rfm1.data[:depthi+1])
                     datalm2.append(rfm2.data[:depthi+1])
@@ -734,8 +618,8 @@ only show the progress per chunk.')
         return kk, jj, datal, datalm1, datalm2
 
     def conclude_ccp(
-        self, keep_empty=False, keep_water=False, r=0,
-        multiple=False, z_multiple:int = 200):
+        self, keep_empty: bool = False, keep_water: bool = False, r: int = 0,
+            multiple: bool = False, z_multiple: int = 200):
         """
         Averages the CCP-bin and populates empty cells with average of
         neighbouring cells. No matter which option is
@@ -754,46 +638,50 @@ only show the progress per chunk.')
         :param multiple: Use multiples in stack. Either False or weigthing;
             i.e. 'linear' for linearly weighted stack between the three phases,
             'zk' for a Zhu & Kanamori approach, or 'pws' for a phase weighted
-            stack. Use 'm1' to use only first multiple mode (no stack), 'm2' for
+            stack. Use 'm1' to use only first multiple mode (no stack),
+            'm2' for
             RFs created only with 2nd multiple phase (PSS), and m for an
             equal-weight stack of m1 and m2. By default False.
         :type multiple: bool or str
-        :param z_multiple: Until which depth [km] should multiples be considered,
+        :param z_multiple: Until which depth [km] should multiples be
+            considered,
             maximal value is 200 [km]. Will only be used if multiple=True.
             By default 200 km.
         :type z_multiple: int, optional
         """
         if z_multiple > 200:
             raise ValueError('Maximal depth for multiples is 200 km.')
-        endi = np.where(self.z == z_multiple)[0][0]+1   
+        endi = np.where(self.z == z_multiple)[0][0] + 1
         if multiple == 'linear':
-            
+
             # self.ccp = np.divide(self.bins, self.illum+1)
             self.ccp = np.hstack(((
                 np.divide(self.bins[:, :endi], self.illum[:, :endi]+1) +
-                np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
-                    np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1))/3,
-            np.zeros(self.bins[:,endi:].shape)))
+                np.divide(
+                    self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
+                np.divide(
+                    self.bins_m2[:, :endi], self.illumm[:, :endi]+1))/3,
+                    np.zeros(self.bins[:, endi:].shape)))
         elif multiple == 'zk':
             # self.ccp = np.divide(self.bins, self.illum+1)
             self.ccp = np.hstack((
                 .7*np.divide(self.bins[:, :endi], self.illum[:, :endi]+1) +
                 .2*np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
-                    .1*np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1),
-                    np.zeros(self.bins[:,endi:].shape)))
+                .1*np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1),
+                np.zeros(self.bins[:, endi:].shape)))
         elif multiple == 'm1':
             self.ccp = np.hstack((
                 np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1),
-                np.zeros(self.bins[:,endi:].shape)))
+                np.zeros(self.bins[:, endi:].shape)))
         elif multiple == 'm2':
             self.ccp = np.hstack((
                 np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1),
-                np.zeros(self.bins[:,endi:].shape)))
+                np.zeros(self.bins[:, endi:].shape)))
         elif multiple == 'm':
             self.ccp = np.hstack((
                 np.divide(self.bins_m2[:, :endi]+self.bins_m1[:, :endi],
                           2*(self.illumm[:, :endi])+1),
-                np.zeros(self.bins[:,endi:].shape)))
+                np.zeros(self.bins[:, endi:].shape)))
         elif not multiple:
             self.ccp = np.divide(self.bins, self.illum+1)
         else:
@@ -835,7 +723,7 @@ misspelled or not yet implemented')
             self.hits = np.delete(self.hits, index, 0)
             self.coords_new = (np.delete(self.coords_new[0], index, 1),
                                np.delete(self.coords_new[1], index, 1))
-        
+
         # Else everything will always pick coords_new instead of coords
         if keep_water and keep_empty:
             try:
@@ -857,7 +745,7 @@ misspelled or not yet implemented')
         :param fmt: Either "pickle" or "matlab" for .mat, defaults to "pickle".
         :type fmt: str, optional
         :raises ValueError: For unknown formats.
-        """        
+        """
         # delete logger (cannot be pickled)
         try:
             del self.logger
@@ -936,7 +824,7 @@ misspelled or not yet implemented')
                               gz: np.array or list,
                               r: float or None,
                               minillum: int or None = None):
-        """Using the CCP kdtree, we get the closest few points and compute 
+        """Using the CCP kdtree, we get the closest few points and compute
         the weighting using a distance metric. if points are too far away,
         they aren't weighted
 
@@ -952,7 +840,7 @@ misspelled or not yet implemented')
         r : float or None
             outside r everything is nan
         minillum: int or None, optional
-            Minimum number of illumation points use in the interpolation, 
+            Minimum number of illumation points use in the interpolation,
             everything below is downweighted by the square reciprocal
 
         Returns
@@ -973,7 +861,7 @@ misspelled or not yet implemented')
                               lat.ravel(), lon.ravel())
         xi, yi, zi = geo2cart((R_EARTH - mz.ravel())/R_EARTH,
                               mlat.ravel(), mlon.ravel())
-        
+
         # Create kdtree form source coordinates
         tree = cKDTree(np.c_[xs, ys, zs])
 
@@ -986,11 +874,12 @@ misspelled or not yet implemented')
 
         # Taking the Illumination into account is easy peasy with this
         # interpolation. Note that the all points above the minillumination
-        # value are multiplied by one and the rest are linearly decreased by 
+        # value are multiplied by one and the rest are linearly decreased by
         # division by the minillumination value. Then, the illumination
         # values below 1.0 are squared for a quadratic decrease
         if minillum is not None:
-            illum = np.sum(w * self.hits.ravel()[inds], axis=1) / np.sum(w, axis=1)
+            illum = np.sum(
+                w * self.hits.ravel()[inds], axis=1) / np.sum(w, axis=1)
             mpos = np.where(illum <= minillum)
             pos1 = np.where(illum > minillum)
             illum[mpos] /= minillum
@@ -1024,13 +913,13 @@ misspelled or not yet implemented')
         -----------
 
         factor: float, optional
-            Bingrid epicentral distance multiplier to refine grid. 
+            Bingrid epicentral distance multiplier to refine grid.
             Defaults to 0.5.
         maxz: float or None, optional
-            Maximum Depth if None, the max ccp bin depth is used. 
+            Maximum Depth if None, the max ccp bin depth is used.
             Defaults to None.
         minillum: int or None, optional
-            Minimum number of illumation points use in the interpolation, 
+            Minimum number of illumation points use in the interpolation,
             everything below is downweighted by the square reciprocal
 
         Returns
@@ -1097,7 +986,7 @@ misspelled or not yet implemented')
             Max radius for interpolation values taken into account [km],
             if None bingrid.edist * DEG2KM * 2.0, by default None
         minillum: int or None, optional
-            Minimum number of illumation points use in the interpolation, 
+            Minimum number of illumation points use in the interpolation,
             everything below is downweighted by the square reciprocal
 
         Returns
@@ -1116,13 +1005,12 @@ misspelled or not yet implemented')
 
         return VolumePlot(lon, lat, z, V, xl=lonsl, yl=latsl, zl=zsl)
 
-
-
     def map_plot(
-        self, plot_stations=False, plot_bins=False, plot_illum=False,
-        profile: list or tuple or None=None, p_direct=True,
-        outputfile: str or None=None, format='pdf', dpi=300, geology=False,
-        title:str or None=None):
+        self, plot_stations: bool = False, plot_bins: bool = False,
+        plot_illum: bool = False, profile: list or tuple or None = None,
+        p_direct: bool = True, outputfile: str or None = None,
+        format: str = 'pdf', dpi: int = 300, geology: bool = False,
+            title: str or None = None):
         """
         Create a map plot of the CCP Stack containing user-defined information.
 
@@ -1169,7 +1057,8 @@ misspelled or not yet implemented')
             plot_illum, self.hits, profile, p_direct, outputfile=outputfile,
             format=format, dpi=dpi, geology=geology, title=title)
 
-    def pick_phase(self, pol:str = '+', depth:list=[None, None]):
+    def pick_phase(
+            self, pol: str = '+', depth: list = [None, None]) -> PhasePick:
         """
         Pick the strongest negative or strongest positive gradient from a
         predefined depth-range.
@@ -1197,18 +1086,19 @@ misspelled or not yet implemented')
         self.conclude_ccp(r=3)
         # Find indices
         for ii, d in enumerate(depth):
-            if d or d==0:
+            if d or d == 0:
                 depth[ii] = np.abs(self.z-d).argmin()
         # Find minimum in vector
         ccp_short = self.ccp[:, depth[0]:depth[1]]
         # There should be a line here excluding insufficiently illuminated bins
         illum_flat = np.sum(self.hits[:, depth[0]:depth[1]], axis=1)
-        id = np.where(illum_flat<ccp_short.shape[1]*10)  # delete those bins
+        id = np.where(illum_flat < ccp_short.shape[1]*10)  # delete those bins
 
         ccp_short = np.delete(ccp_short, id, 0)
-        coords = (np.delete(self.coords_new[0], id, 1),
-                   np.delete(self.coords_new[1], id, 1))
-        
+        coords = (
+            np.delete(self.coords_new[0], id, 1),
+            np.delete(self.coords_new[1], id, 1))
+
         if pol == '+':
             # Amplitudes
             a = ccp_short.max(axis=1)
@@ -1218,72 +1108,208 @@ misspelled or not yet implemented')
             a = ccp_short.min(axis=1)
             z = self.z[depth[0]:depth[1]][ccp_short.argmin(axis=1)]
         else:
-            raise ValueError('Choose either \'+\' to return the highest '
-                +'positive velocity gradient or \'-\' to return the '+
+            raise ValueError(
+                'Choose either \'+\' to return the highest ' +
+                'positive velocity gradient or \'-\' to return the ' +
                 'highest negative velocity gradient.')
 
         p_phase = PhasePick(coords, a, pol, z, depth)
         return p_phase
 
-class PhasePick(object):
+
+def read_ccp(filename: str, fmt: str or None = None) -> CCPStack:
     """
-    A phasepick object, just created for more convenient plotting.
+    Read CCP-Stack class file from input folder.
+
+    :param filename: Filename of the input file with file ending.
+        The default is 'ccp.pkl'.
+    :type filename: str, optional
+    :param fmt: File format, can be none if the filename has an ending,
+        possible options are "pickle. The default is None.
+    :type fmt: str, optional
+    :raises ValueError: For unknown formats
+    :return: CCPStack object
+    :rtype: :class:`~pyglimer.ccp.ccp.CCPStack`
     """
-    def __init__(
-        self, coords:np.ndarray, amplitudes:np.ndarray, polarity:str,
-        z:np.ndarray, depthrange:list=[None, None]):
-        """
-        Initialise object
 
-        Parameters
-        ----------
-        coords : np.ndarray
-            2-d array containing latitudes and longitudes.
-        amplitudes : np.ndarray
-            1-D array containg amplitude values of each bin
-        polarity : str
-            Either '+' for positive velocity gradients or '-' for negative
-        z : np.ndarray
-            1D array containing depth of maxima/minima per bin
-        depthrange : list, optional
-            list containing depth restrictions in form of [zmin, zmax],
-            by default [None, None]
-        """
-        # assign vars
-        self.coords = coords
-        self.a = amplitudes
-        self.z = z
-        self.pol = polarity
-        self.depthr = depthrange
+    # Trying to identify filetype from ending:
+    if not fmt:
+        x = filename.split('.')
+        if len(x) == 1:
+            raise ValueError("""Could not determine format, please provide
+                             a valid format""")
+        if x[-1] == 'pkl':
+            fmt = 'pickle'
+        else:
+            raise ValueError("""Could not determine format, please provide
+                             a valid format""")
 
-    def plot(
-        self, plot_amplitude:bool=False, outputfile:str or None=None,
-        format='pdf', dpi=300, cmap:str='gist_rainbow', geology=False,
-        title:str or None=None):
-        """
-        Plot heatmap containing depth or amplitude of picked phase.
+    # Open provided file
+    if fmt == "pickle":
+        with open(filename, 'rb') as infile:
+            ccp = pickle.load(infile)
+    else:
+        raise ValueError("Unknown format ", fmt)
 
-        Parameters
-        ----------
-        plot_amplitude : bool, optional
-            If True amplitude instead of depths is plotted, by default False
-        outputfile : str or None, optional
-            Write Figure to file, by default None
-        format : str, optional
-            File format, by default 'pdf'
-        dpi : int, optional
-            Resolution for non-vector graphics, by default 300
-        cmap : str, optional
-            Colormap
-        geology : bool, optional
-            Plot geological map.
-        title
-        """
-        lat = (
-            np.floor(min(self.coords[0][0]))-1, np.ceil(max(self.coords[0][0])+1))
-        lon = (np.floor(min(self.coords[1][0]))-1,
-               np.ceil(max(self.coords[1][0])+1))
-        
-        plot_vel_grad(
-            self.coords, self.a, self.z, plot_amplitude, lat, lon, outputfile,
-            dpi=dpi, format=format, cmap=cmap, geology=geology, title=title)
+    return ccp
+
+
+def init_ccp(
+    spacing: float, vel_model: str, phase: str,
+    statloc: str = 'output/stations',
+    preproloc: str = 'output/waveforms/preprocessed',
+    rfloc: str = 'output/waveforms/RF', network: str or list or None = None,
+    station: str or list or None = None, geocoords: tuple or None = None,
+    compute_stack: bool = False, filt: tuple or None = None,
+    binrad: float = np.cos(np.radians(30)), append_pp: bool = False,
+    multiple: bool = False, save: str or bool = False, verbose: bool = True
+             ) -> CCPStack:
+    """
+    Computes a ccp stack in self.ccp using data from statloc and rfloc.
+    The stack can be limited to some networks and
+    stations.
+
+    :param spacing: Angular distance between each bingrid point.
+    :type spacing: float
+    :param vel_model: Velocity model located in data. Either iasp91 (1D
+        raytracing) or 3D for 3D raytracing using a model compiled from GyPSuM.
+    :type vel_model: str
+    :param phase: Either 'S' or 'P'. Use 'S' if dataset contains both SRFs and
+        PRFs.
+    :type phase: str
+    :param statloc: Directory in that the station xmls are saved,
+        defaults to 'output/stations'
+    :type statloc: str, optional
+    :param preproloc: Parental directory in that the preprocessed miniseeds are
+        saved, defaults to 'output/waveforms/preprocessed'
+    :type preproloc: str, optional
+    :param rfloc: Parental directory in that the RFs are saved,
+        defaults to 'output/waveforms/RF'
+    :type rfloc: str, optional
+    :param network: Network or networks that are to be included in the ccp
+        stack.
+        Standard unix wildcards are allowed. If None, the whole database
+        will be used. The default is None., defaults to None
+    :type network: str or list, optional
+    :param station: Station or stations that are to be included in the ccp
+        stack. Standard unix wildcards are allowed. Can only be list if
+        type(network)=str. If None, the whole database will be used.
+        The default is None.
+    :type station: str or list, optional
+    :param geocoords: An alternative way of selecting networks and stations.
+        Given in the form (minlat, maxlat, minlon, maxlon), defaults to None
+    :type geocoords: Tuple, optional
+    :param compute_stack: If true it will compute the stack by calling
+        :func:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`.
+        That can take a long time! The default is False.
+    :type compute_stack: bool, optional
+    :param filt: Decides whether to filter the receiver function prior to
+            depth migration. Either a Tuple of form `(lowpassf, highpassf)` or
+            `None` / `False`.
+    :type filt: tuple, optional
+    :param binrad: Only used if compute_stack=True
+            Defines the bin radius with bin radius = binrad*distance_bins.
+            Full Overlap = cosd(30), Full coverage: 1.
+            The default is full overlap.
+    :type binrad: float, optional
+    :param append_pp: Only used if compute_stack=True.
+        Appends piercing point locations to object. Can be used to plot
+        pps on map. Not recommended for large datasets as it takes A LOT
+        longer and makes the file a lot larger.
+        The default is False., defaults to False
+    :type append_pp: bool, optional
+    :param multiple: Should the CCP Stack be prepared to work with multiples?
+        It can be chosen later, whether the RFs from multiples are to be
+        incorporated into the CCP Stack. By default False.
+    :type multiple: bool, optional
+    :param save: Either False if the ccp should not be saved or string with
+        filename will be saved. Will be saved as pickle file.
+        The default is False.
+    :type save: ool or str, optional
+    :param verbose: Display info in terminal., defaults to True
+    :type verbose: bool, optional
+    :raises TypeError: For wrong inputs.
+    :return: CCPStack object.
+    :rtype: :class:`~pyglimer.ccp.ccp.CCPstack`
+    """
+    if phase[-1].upper() == 'S' and multiple:
+        raise NotImplementedError(
+            'Multiple mode is not supported for phase S.')
+    # create empty lists for station latitude and longitude
+    lats = []
+    lons = []
+
+    # Were network and stations provided?
+    # Possibility 1 as geo boundaries
+    if geocoords:
+        lat = (geocoords[0], geocoords[1])
+        lon = (geocoords[2], geocoords[3])
+        db = StationDB(preproloc, phase=phase, use_old=False)
+        net, stat = db.find_stations(lat, lon, phase=phase)
+        pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
+        files = []
+        for pat in pattern:
+            files.extend(
+                fnmatch.filter(os.listdir(statloc), pat+'.xml'))
+
+    # As strings
+    elif network and type(network) == list:
+        files = []
+        if station:
+            if type(station) != list:
+                raise TypeError(
+                    """Provide a list of stations, when using a list of
+                    networks as parameter.""")
+            for net in network:
+                for stat in station:
+                    pattern2 = net + '.' + stat + '.xml'
+                    files.extend(
+                        fnmatch.filter(os.listdir(statloc), pattern2))
+        else:
+            for net in network:
+                pattern2 = net + '.*.xml'
+                files.extend(
+                    fnmatch.filter(os.listdir(statloc), pattern2))
+    elif network and type(station) == list:
+        files = []
+        for stat in station:
+            pattern2 = network + '.' + stat + '.xml'
+            files.extend(fnmatch.filter(os.listdir(statloc), pattern2))
+    elif network:
+        pattern2 = network + '.' + (station or '*') + '.xml'
+        files = fnmatch.filter(os.listdir(statloc), pattern2)
+
+    # In this case, it will process all available data (for global ccps)
+    else:
+        files = os.listdir(statloc)
+
+    # read out station latitudes and longitudes
+    for file in files:
+        try:
+            stat = read_inventory(os.path.join(statloc, file))
+        except TypeError as e:
+            print(
+                "Corrupt station xml, original error message: %s" % e)
+        lats.append(stat[0][0].latitude)
+        lons.append(stat[0][0].longitude)
+
+    logdir = os.path.join(os.path.dirname(os.path.abspath(statloc)), 'logs')
+
+    ccp = CCPStack(
+        lats, lons, spacing, phase=phase, verbose=verbose, logdir=logdir)
+
+    # Clear Memory
+    del stat, lats, lons, files
+
+    if not geocoords:
+        pattern = None
+
+    if compute_stack:
+        ccp.compute_stack(
+            vel_model=vel_model, network=network, station=station, save=save,
+            filt=filt, multiple=multiple,
+            pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc)
+
+    # _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
+
+    return ccp

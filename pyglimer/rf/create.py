@@ -19,13 +19,13 @@ from copy import deepcopy
 import json
 import logging
 from operator import itemgetter
-from pkg_resources import resource_filename
+# from pkg_resources import resource_filename
 import warnings
 import os
 
 from geographiclib.geodesic import Geodesic
 from matplotlib import pyplot as plt
-from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
+# from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
 import numpy as np
 from obspy import read, Stream, Trace, UTCDateTime
 from obspy.core import AttribDict
@@ -33,8 +33,9 @@ from obspy.geodetics import gps2dist_azimuth
 from obspy.taup import TauPyModel
 from scipy.signal.windows import hann
 
-from pyglimer.rf.deconvolve import it, spectraldivision, multitaper, gen_it
-from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table, dt_table_3D
+from pyglimer.rf.deconvolve import it, spectraldivision, multitaper
+from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table,\
+    dt_table_3D
 from pyglimer.plot.plot_utils import plot_section, plot_single_rf, stream_dist
 
 logger = logging.Logger("rf")
@@ -83,7 +84,7 @@ def createRF(st_in, phase, pol='v', onset=None,
     """
 
     pol = pol.lower()
-    
+
     if info:
         ii = info['starttime'].index(st_in[0].stats.starttime)
         shift = info['onset'][ii] - st_in[0].stats.starttime
@@ -100,10 +101,6 @@ def createRF(st_in, phase, pol='v', onset=None,
     # deep copy stream
     st = st_in.copy()
     RF = st.copy()
-
-    # Normalise stream
-    # Don't! Normalisation only for spectraldivision
-    #st.normalize()
 
     # Shorten RF stream
     while RF.count() > 1:
@@ -184,17 +181,21 @@ def createRF(st_in, phase, pol='v', onset=None,
         lrf = None
         RF[0].data = it(v, u, dt, shift=shift, width=width)[0]
     elif method == "dampedf":
-        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "con", phase=phase[-1])
+        RF[0].data, lrf = spectraldivision(
+            v, u, dt, shift, "con", phase=phase[-1])
     elif method == "waterlevel":
-        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "wat", phase=phase[-1])
+        RF[0].data, lrf = spectraldivision(
+            v, u, dt, shift, "wat", phase=phase[-1])
     elif method == 'fqd':
-        RF[0].data, lrf = spectraldivision(v, u, dt, shift, "fqd", phase=phase[-1])
+        RF[0].data, lrf = spectraldivision(
+            v, u, dt, shift, "fqd", phase=phase[-1])
     elif method == 'multit':
         RF[0].data, lrf, _, _ = multitaper(v, u, dt, shift, "con")
         # remove noise caused by multitaper
         RF.filter('lowpass', freq=2.50, zerophase=True, corners=2)
     else:
-        raise ValueError(method+ " is no valid deconvolution method.")
+        raise ValueError("%s is no valid deconvolution method." % method)
+
     if lrf is not None:
         # Normalisation for spectral division and multitaper
         # In order to do that, we have to find the factor that is necassary to
@@ -206,7 +207,6 @@ def createRF(st_in, phase, pol='v', onset=None,
         if abs(fact) < abs(lrf).max()/2:
             raise ValueError('The noise level of the created receiver funciton\
                 is too high.')
-        
 
     # create RFTrace object
     # create stats
@@ -263,20 +263,22 @@ Copyright (c) 2013-2019 Tom Eulenfeld
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+
 
 def __get_event_origin_prop(h):
     def wrapper(event):
@@ -378,7 +380,7 @@ def read_rf(pathname_or_url, format=None, **kwargs):
         if = None. The default is None.
     :return: RFStream object from file.
     :rtype: :class:`~pyglimer.createRF.RFStream`
-    """    
+    """
 
     stream = read(pathname_or_url, format=format, **kwargs)
     stream = RFStream(stream)
@@ -459,17 +461,17 @@ class RFStream(Stream):
             tr._write_format_specific_header(format)
             if format.upper() == 'Q':
                 tr.stats.station = tr.id
-        if format.upper() == 'H5':
-            index = self.type
-            if index is None and 'event_time' in self[0].stats:
-                index = 'rf'
-            if index:
-                import obspyh5
-                old_index = obspyh5._INDEX
-                obspyh5.set_index(_H5INDEX[index])
-        super(RFStream, self).write(filename, format, **kwargs)
-        if format.upper() == 'H5' and index:
-            obspyh5.set_index(old_index)
+        # if format.upper() == 'H5':
+        #     index = self.type
+        #     if index is None and 'event_time' in self[0].stats:
+        #         index = 'rf'
+        #     if index:
+        #         import obspyh5
+        #         old_index = obspyh5._INDEX
+        #         obspyh5.set_index(_H5INDEX[index])
+        # super(RFStream, self).write(filename, format, **kwargs)
+        # if format.upper() == 'H5' and index:
+        #     obspyh5.set_index(old_index)
         if format.upper() == 'Q':
             for tr in self:
                 tr.stats.station = tr.stats.station.split('.')[1]
@@ -507,7 +509,9 @@ class RFStream(Stream):
             traces.append(sliced_trace)
         return self.__class__(traces)
 
-    def moveout(self, vmodel, multiple=False, latb=None, lonb=None, taper=True):
+    def moveout(
+        self, vmodel: str, multiple: bool = False, latb: tuple or None = None,
+            lonb: tuple or None = None, taper: bool = True):
         """
         Depth migration of all receiver functions given Stream.
         Also calculates piercing points and adds them to RFTrace.stats.
@@ -515,7 +519,8 @@ class RFStream(Stream):
         :param vmodel: Velocity model located in /data/vmodel.
             Standard options are iasp91.dat and 3D (GYPSuM).
         :type vmodel: str
-        :param multiple: Appends two multiple mode RFs to the returned RFStream.
+        :param multiple: Appends two multiple mode RFs to the returned
+            RFStream.
             False by default.
         :type multiple: bool, optional
         :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
@@ -536,7 +541,8 @@ class RFStream(Stream):
         for tr in self:
             try:
                 z, mo, RFm1, RFm2 = tr.moveout(
-                    vmodel, latb=latb, lonb=lonb, taper=taper, multiple=multiple)
+                    vmodel, latb=latb, lonb=lonb, taper=taper,
+                    multiple=multiple)
             except TypeError:
                 # This trace is already depth migrated
                 RF_mo.append(tr)
@@ -564,7 +570,7 @@ class RFStream(Stream):
         :type latb: tuple, optional
         :param lonb: Tuple in Form (minlon, maxlon), defaults to None
         :type lonb: tuple, optional.
-        """        
+        """
 
         for tr in self:
             tr.ppoint(vmodel=vmodel_file, latb=latb, lonb=lonb)
@@ -665,8 +671,8 @@ class RFStream(Stream):
                 if tr.stats.channel[0] == 'm':
                     traces.append(tr.data)
             stack = np.average(traces, axis=0)
-        elif multiple != False:
-            raise ValueError('Unknown multiple mode: '+multiple)
+        else:
+            raise ValueError('Unknown multiple mode: %s.' % multiple)
 
         stack = RFTrace(data=stack, header=self[0].stats)
         stack.stats.update({"type": "stastack", "starttime": UTCDateTime(0),
@@ -696,7 +702,7 @@ class RFStream(Stream):
             If `None` from 30 to 90 degrees plotted.
             Default None.
         scalingfactor : float
-            sets the scale for the traces. Could be automated in 
+            sets the scale for the traces. Could be automated in
             future functions(Something like mean distance between
             traces)
             Defaults to 2.0
@@ -719,7 +725,7 @@ class RFStream(Stream):
         -------
         ax : `matplotlib.pyplot.Axes`
 
-        """     
+        """
         if self.count() == 1:
             # Do single plot
             ax = plot_single_rf(
@@ -767,16 +773,17 @@ class RFStream(Stream):
                 continue
             rayp.append(rf.stats.slowness / DEG2KM)
             baz.append(rf.stats.back_azimuth)
-        
+
         if not len(baz):
-            raise ValueError('No Receiver Functions of Phase '+phase+
-                             ' found, did you choose the right phase?')
+            raise ValueError(
+                'No Receiver Functions of Phase %s found,\
+                    did you choose the right phase?' % phase)
 
         stream_dist(np.array(rayp), np.array(baz), nbins=nbins, v=v,
                     outputfile=outputfile, format=format,  dpi=dpi)
 
     def __dirty_ccp_stacks(self, binlon, binlat, binz):
-        """This is the simplest way of creating quick not really accurate 
+        """This is the simplest way of creating quick not really accurate
         CCP stacks.
 
         This function is still empty, but I'm leaving it here, because I think
@@ -797,12 +804,13 @@ class RFStream(Stream):
 
         # Check whether moveout and piercing points have been computed.
         """Then, use a 3d histogram to create stacks, and create them quickly
-        
+
         """
 
-        # If yes, use to populated a volume histogramdd 
+        # If yes, use to populated a volume histogramdd
 
         # output volume data
+
 
 class RFTrace(Trace):
     """
@@ -815,22 +823,23 @@ class RFTrace(Trace):
 
     Copyright (c) 2013-2019 Tom Eulenfeld
 
-    Permission is hereby granted, free of charge, to any person obtaining a copy of
-    this software and associated documentation files (the "Software"), to deal in
-    the Software without restriction, including without limitation the rights to
-    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-    the Software, and to permit persons to whom the Software is furnished to do so,
-    subject to the following conditions:
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
 
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
     """
 
     def __init__(self, data=None, header=None, trace=None):
@@ -979,7 +988,9 @@ class RFTrace(Trace):
             reftime = self.stats[reftime]
         return reftime + seconds
 
-    def moveout(self, vmodel, multiple=False, latb=None, lonb=None, taper=True):
+    def moveout(
+        self, vmodel: str, multiple: bool = False, latb: tuple or None = None,
+            lonb: tuple or None = None, taper: bool = True):
         """
         Depth migration of the receiver function.
         Also calculates piercing points and adds them to RFTrace.stats.
@@ -1002,7 +1013,7 @@ class RFTrace(Trace):
         :return: 1D np.ndarray containing depths and an
             RFTrace object of type depth.
         :rtype: 1D np.ndarray, :class:`~pyglimer.rf.create.RFTrace`
-        """   
+        """
         st = self.stats
 
         if st.type == "depth" or st.type == "stastack":
@@ -1013,7 +1024,7 @@ class RFTrace(Trace):
 
         z, RF_mo, delta, RFm1, RFm2 = moveout(
             self.data, st, vmodel, latb=latb, lonb=lonb, taper=taper,
-         multiple=multiple)
+            multiple=multiple)
         st.pp_latitude = []
         st.pp_longitude = []
 
@@ -1078,13 +1089,14 @@ class RFTrace(Trace):
             htab, _, delta = dt_table_3D(
                 st.slowness, st.phase, st.station_latitude,
                 st.station_longitude, st.back_azimuth, st.station_elevation,
-                latb, lonb)
+                latb, lonb, False)
 
         else:
             htab, _, delta = dt_table(
-                st.slowness, vmodel, st.phase, st.station_elevation)
+                st.slowness, vmodel, st.phase, st.station_elevation, False)
 
-        st.pp_depth = np.hstack((np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
+        st.pp_depth = np.hstack(
+            (np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
 
         delta2 = np.empty(st.pp_depth.shape)
         delta2.fill(np.nan)
@@ -1114,7 +1126,7 @@ class RFTrace(Trace):
              ax: plt.Axes = None, outputdir: str = None,
              clean: bool = False):
         """Creates plot of a single receiver function
-        
+
         Parameters
         ----------
         lim: list or tuple or None
@@ -1132,7 +1144,7 @@ class RFTrace(Trace):
         clean: bool
             If True, clears out all axes and plots RF only.
             Defaults to False.
-        
+
         Returns
         -------
         ax : `matplotlib.pyplot.Axes`
@@ -1160,7 +1172,7 @@ def obj2stats(event=None, station=None):
     :type station: :class:`~obspy.core.Station`, optional
     :return: Stats object with station and event attributes.
     :rtype: :class:`~obspy.core.AttribDict`
-    """    
+    """
 
     stats = AttribDict({})
     if event is not None:

@@ -2,7 +2,7 @@
 Author: Peter Makus (peter.makus@student.uib.no)
 
 Created: Friday, 3rd July 2020 10:46:45 am
-Last Modified: Friday, 3rd July 2020 04:07:01 pm
+Last Modified: Friday, 12th March 2021 02:14:42 pm
 
 Setup.py file that governs the installation process of
 `how_to_make_a_python_package` it is used by
@@ -15,17 +15,19 @@ from setuptools import find_packages
 from setuptools.command.test import test as testcommand
 
 # Utility function to read the README.md file.
-# Used for the long_description.  It's nice, because now 1) we have a top levelx
-# README.md file and 2) it's easier to type in the README.md file than to put a raw
-# string in below ...
+# Used for the long_description.  It's nice, because now 1) we have a top
+# levelx README.md file and 2) it's easier to type in the README.md file than
+# to put a raw string in below ...
 
-# Function to read and output README into long decription
+
 def read(fname):
-    """From Wenjie Lei 2019"""
+    """From Wenjie Lei 2019
+    Function to read and output README into long decription"""
     try:
         return open(os.path.join(os.path.dirname(__file__), fname)).read()
-    except Exception as e:
+    except Exception:
         return "Can't open %s" % fname
+
 
 long_description = "%s" % read("README.md")
 
@@ -45,6 +47,7 @@ class PyTest(testcommand):
         import sys
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
+
 
 setup(
     name="PyGLImER",

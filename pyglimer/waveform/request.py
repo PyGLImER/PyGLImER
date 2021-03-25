@@ -13,16 +13,14 @@ Author:
 Last updated:
 """
 import os
-import subprocess
-import logging
 from http.client import IncompleteRead
 from datetime import datetime
-from pathlib import Path
+from warnings import warn
 
 from obspy import read_events, Catalog
 from obspy.clients.fdsn import Client as Webclient
 from obspy.taup import TauPyModel
-from obspy.clients.fdsn.client import FDSNException
+# from obspy.clients.fdsn.client import FDSNException
 
 from pyglimer.waveform.download import downloadwav
 from pyglimer.waveform.preprocess import preprocess
@@ -36,7 +34,7 @@ class Request(object):
 
     def __init__(self, phase, rot, evtloc, statloc, rawloc, preproloc,
                  rfloc, deconmeth, starttime, endtime, wavdownload=True,
-                 pol: str = 'v', minmag: float or int=5.5,
+                 pol: str = 'v', minmag: float or int = 5.5,
                  event_coords=None,  network=None, station=None,
                  waveform_client=None, re_client=['IRIS'], evtcat=None,
                  debug=False):
@@ -48,7 +46,8 @@ class Request(object):
             "S" to create S-Sp receiver functions and "P" for P-Ps receiver
             functions, "SKS" or "ScS" are allowed as well.
         :type phase: str
-        :param rot: The coordinate system in that the seismogram should be rotated
+        :param rot: The coordinate system in that the seismogram should be
+            rotated
             prior to deconvolution. Options are "RTZ" for radial, transverse,
             vertical; "LQT" for an orthogonal coordinate system computed by
             minimising primary energy on the
@@ -57,9 +56,10 @@ class Request(object):
         :type rot: str
         :param evtloc: Directory, in which to store the event catalogue (xml).
         :type evtloc: str
-        :param statloc: Directory, in which to store the station inventories (xml).
+        :param statloc: Directory, in which to store the station inventories
+                        (xml).
         :type statloc: str
-        :param rawloc: Directory, in which to store the raw waveform data (mseed).
+        :param rawloc: Directory, in which to store the raw waveform data.
         :type rawloc: str
         :param preproloc: Directory, in which to store
             the preprocessed waveform data (mseed).
@@ -129,8 +129,8 @@ class Request(object):
             by default False.
         :type debug: bool, optional
         :raises NameError: For invalid phases.
-        """     
-        
+        """
+
         # Allocate variables in self
         self.debug = debug
         self.wavdownload = wavdownload
@@ -143,7 +143,7 @@ class Request(object):
         self.pol = pol.lower()
         self.rot = rot.upper()
         self.deconmeth = deconmeth
-        
+
         # Directories
         self.logdir = os.path.join(
             os.path.dirname(os.path.abspath(statloc)), 'logs')
@@ -153,7 +153,7 @@ class Request(object):
         self.rawloc = os.path.join(rawloc, self.phase)
         self.preproloc = os.path.join(preproloc, self.phase)
         self.rfloc = os.path.join(rfloc, self.phase)
-        
+
         # minimum magnitude
         self.minmag = minmag
 
@@ -192,7 +192,7 @@ class Request(object):
         elif self.phase.upper() == 'SKS':
             # (see Zhang et. al. (2014))
             self.maxdepth = 300
-            self.min_epid = 90 
+            self.min_epid = 90
             self.max_epid = 120
             self.tz = 120
         else:
@@ -204,11 +204,9 @@ class Request(object):
         self.station = station
 
         # Server settings
-        try:
-            self.webclient = Webclient('USGS')
-        except FDSNException:
-            self.webclient = Webclient('IRIS')
-            print('Falling back to IRIS\' event service.')
+        # 2021/02/16 Events only from IRIS as the USGS webserice tends to be
+        # unstable and mixing different services will lead to a messed db
+        self.webclient = Webclient('IRIS')
 
         self.waveform_client = waveform_client
         self.re_client = re_client
@@ -222,57 +220,62 @@ class Request(object):
     def download_eventcat(self):
         event_cat_done = False
 
-        # The USGS webservice does only allow requests of a maximum size of
-        # 20000, so I will have to do several requests and join the
-        # catalogue afterwards if it's too big for a single download
-
         while not event_cat_done:
             try:
-                self.evtcat = self.webclient.get_events(
-                    starttime=self.starttime, endtime=self.endtime,
-                    minlatitude=self.eMINLAT, maxlatitude=self.eMAXLAT,
-                    minlongitude=self.eMINLON, maxlongitude=self.eMAXLON,
-                    minmagnitude=self.minmag, maxmagnitude=10, maxdepth=self.maxdepth)
-
-                event_cat_done = True
-            except FDSNException:
-                # Request is too big, break it down ito several requests
+                # Check length of request and split if longer than 20yrs.
                 a = 20*365.25*24*3600  # 20 years in seconds
-                starttimes = [self.starttime, self.starttime+a]
-                while self.endtime-starttimes[-1] > a:
-                    starttimes.append(starttimes[-1]+a)
-                endtimes = []
-                endtimes.extend(starttimes[1:])
-                endtimes.append(self.endtime)
+                if self.endtime-self.starttime > a:
+                    # Request is too big, break it down ito several requests
 
-                # Query
-                self.evtcat = Catalog()
-                for st, et in zip(starttimes, endtimes):
-                    self.evtcat.extend(
-                        self.webclient.get_events(
-                            starttime=st, endtime=et,
-                            minlatitude=self.eMINLAT, maxlatitude=self.eMAXLAT,
-                            minlongitude=self.eMINLON,
-                            maxlongitude=self.eMAXLON, minmagnitude=self.minmag,
-                            maxmagnitude=10, maxdepth=self.maxdepth))
-                event_cat_done = True
+                    starttimes = [self.starttime, self.starttime+a]
+                    while self.endtime-starttimes[-1] > a:
+                        starttimes.append(starttimes[-1]+a)
+                    endtimes = []
+                    endtimes.extend(starttimes[1:])
+                    endtimes.append(self.endtime)
+
+                    # Query
+                    self.evtcat = Catalog()
+                    for st, et in zip(starttimes, endtimes):
+                        self.evtcat.extend(
+                            self.webclient.get_events(
+                                starttime=st, endtime=et,
+                                minlatitude=self.eMINLAT,
+                                maxlatitude=self.eMAXLAT,
+                                minlongitude=self.eMINLON,
+                                maxlongitude=self.eMAXLON,
+                                minmagnitude=self.minmag,
+                                maxmagnitude=10, maxdepth=self.maxdepth))
+                    event_cat_done = True
+
+                else:
+                    self.evtcat = self.webclient.get_events(
+                        starttime=self.starttime, endtime=self.endtime,
+                        minlatitude=self.eMINLAT, maxlatitude=self.eMAXLAT,
+                        minlongitude=self.eMINLON, maxlongitude=self.eMAXLON,
+                        minmagnitude=self.minmag, maxmagnitude=10,
+                        maxdepth=self.maxdepth)
+
+                    event_cat_done = True
 
             except IncompleteRead:
                 # Server interrupted connection, just try again
-                print("Warning: Server interrupted connection,\
-                      catalogue download is restarted.")
+                msg = "Server interrupted connection, restarting download..."
+                warn(msg, UserWarning)
+                print(msg)
                 continue
 
         os.makedirs(self.evtloc, exist_ok=True)
-            # check if there is a better format for event catalog
-        self.evtcat.write(os.path.join(self.evtloc,
-                                       datetime.now().strftime("%Y%m%dT%H%M%S")),
-                          format="QUAKEML")
+        # check if there is a better format for event catalog
+        self.evtcat.write(
+            os.path.join(
+                self.evtloc,
+                datetime.now().strftime("%Y%m%dT%H%M%S")), format="QUAKEML")
 
-    def download_waveforms(self, verbose:bool=False):
+    def download_waveforms(self, verbose: bool = False):
         """
         Start the download of waveforms and response files.
-        
+
         Parameters
         ----------
         verbose : Bool, optional
@@ -281,10 +284,10 @@ class Request(object):
         downloadwav(
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
-             network=self.network, station=self.station, 
-             logdir=self.logdir, debug=self.debug, verbose=verbose)
+            network=self.network, station=self.station, logdir=self.logdir,
+            debug=self.debug, verbose=verbose, saveasdf=False)
 
-    def preprocess(self, hc_filt:float or int or None = None):
+    def preprocess(self, hc_filt: float or int or None = None):
         """
         Preprocess an existing database. With parameters defined in self.
 
@@ -300,7 +303,7 @@ class Request(object):
         """
         preprocess(
             self.phase, self.rot, self.pol, 0.05, self.evtcat, self.model,
-            'hann', self.tz, self.ta, self.statloc, self.rawloc, self.preproloc,
-            self.rfloc, self.deconmeth, hc_filt, self.wavdownload,
+            'hann', self.tz, self.ta, self.statloc, self.rawloc,
+            self.preproloc, self.rfloc, self.deconmeth, hc_filt,
             netrestr=self.network, statrestr=self.station, logdir=self.logdir,
             debug=self.debug)

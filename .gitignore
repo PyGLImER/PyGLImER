@@ -19,3 +19,4 @@ examples/database
 .vscode
 *.pdf
 .DS_Store
+PyGLImER.egg-info/

@@ -14,155 +14,158 @@ from ..utils.nextpowof2 import nextPowerOf2
 import pyglimer.utils.signalproc as sptb
 
 
-def gen_it(P, H, dt, phase, shift=0, width=2.5, e_min=5, omega_min=0,
-           it_max=200):
-    """
-    Has a bug in the normalisation!
-    This function provides a generalised iterative deconvolution as given
-    by Wang & Pavlis (2016)
-    Essentially, P will be deconvolved from H.
+# def gen_it(P, H, dt, phase, shift=0, width=2.5, e_min=5, omega_min=0,
+#            it_max=200):
+#     """
+#     Has a bug in the normalisation!
+#     This function provides a generalised iterative deconvolution as given
+#     by Wang & Pavlis (2016)
+#     Essentially, P will be deconvolved from H.
 
-    :param P: The source wavelet estimation (denominator).
-    :type P: np.ndarray
-    :param H: Impulse response convolved with source wavelet (enumerator).
-    :type H: np.ndarray
-    :param dt: Sampling interval [s]
-    :type dt: float
-    :type mu: float
-    :param shift: Time shift of theoretical arrival [s]. The default is 0.
-    :type shift: float, optional
-    :param width: Width parameter for Gaussian. The default is 2.5.
-    :type width: float, optional
-    :param e_min: Is the energy ratio of residual and original data
-        after the nth iteration; given in per cent. The default is 5.
-    :type e_min: float, optional
-    :param omega_min: secondary control parameter (percentage improvement per
-        iteration), given in per cent - used as criterion to test significance.
-        The default is 0.5.
-    :type omega_min: float, optional
-    :param it_max: Maximum number of iterations. defaults to 400
-    :type it_max: int, optional
-    :return: rf : The receiver function.
-        IR : The estimation of the medium's impulse response.
-        it : Number of iterations
-        rej : Number of peaks that did not meet the criterion of significance.
-    :rtype: rf : 1D np.ndarray
-        IR : 1D np.ndarray
-        it : int
-        rej : int
-    """
-    phase = phase[-1]
+#     :param P: The source wavelet estimation (denominator).
+#     :type P: np.ndarray
+#     :param H: Impulse response convolved with source wavelet (enumerator).
+#     :type H: np.ndarray
+#     :param dt: Sampling interval [s]
+#     :type dt: float
+#     :type mu: float
+#     :param shift: Time shift of theoretical arrival [s]. The default is 0.
+#     :type shift: float, optional
+#     :param width: Width parameter for Gaussian. The default is 2.5.
+#     :type width: float, optional
+#     :param e_min: Is the energy ratio of residual and original data
+#         after the nth iteration; given in per cent. The default is 5.
+#     :type e_min: float, optional
+#     :param omega_min: secondary control parameter (percentage improvement per
+#         iteration), given in per cent - used as criterion to test
+#           significance.
+#         The default is 0.5.
+#     :type omega_min: float, optional
+#     :param it_max: Maximum number of iterations. defaults to 400
+#     :type it_max: int, optional
+#     :return: rf : The receiver function.
+#         IR : The estimation of the medium's impulse response.
+#         it : Number of iterations
+#         rej : Number of peaks that did not meet the criterion of
+#               significance.
+#     :rtype: rf : 1D np.ndarray
+#         IR : 1D np.ndarray
+#         it : int
+#         rej : int
+#     """
+#     phase = phase[-1]
 
-    # From per cent to decimal
-    e_min = e_min/100
-    omega_min = omega_min/100
+#     # From per cent to decimal
+#     e_min = e_min/100
+#     omega_min = omega_min/100
 
-    # create proper numpy arrays (allow functions on arrays as in Matlab)
-    P = np.array(P, dtype=float)
-    H = np.array(H, dtype=float)
-    N = len(H)
-    N2 = nextPowerOf2(N)
+#     # create proper numpy arrays (allow functions on arrays as in Matlab)
+#     P = np.array(P, dtype=float)
+#     H = np.array(H, dtype=float)
+#     N = len(H)
+#     N2 = nextPowerOf2(N)
 
-    # Pad input with zeros to the next power of 2
-    P = np.append(P, (N2-N)*[0])
-    H = np.append(H, (N2-N)*[0])
+#     # Pad input with zeros to the next power of 2
+#     P = np.append(P, (N2-N)*[0])
+#     H = np.append(H, (N2-N)*[0])
 
-    # pre-event noise needed for regularisation parameter
-    vn = np.zeros(N)
-    if phase == "P":
-        vn[:round((shift-2)/N)] = P[:round((shift-2)/N)]
-    elif phase == "S":
-        vn[:round((shift/2)/N)] = P[:round((shift/2)/N)]
+#     # pre-event noise needed for regularisation parameter
+#     vn = np.zeros(N)
+#     if phase == "P":
+#         vn[:round((shift-2)/N)] = P[:round((shift-2)/N)]
+#     elif phase == "S":
+#         vn[:round((shift/2)/N)] = P[:round((shift/2)/N)]
 
-    # fourier transform
-    vnf = np.fft.fft(vn, n=N2)
+#     # fourier transform
+#     vnf = np.fft.fft(vn, n=N2)
 
-    # denominator and regularisation
-    noise = np.multiply(vnf, np.conj(vnf))
-    mu = noise.real.max()
+#     # denominator and regularisation
+#     noise = np.multiply(vnf, np.conj(vnf))
+#     mu = noise.real.max()
 
-    # cast source wavelet estimation into frequency domain
-    P_ft = np.fft.fft(P, n=N2)
+#     # cast source wavelet estimation into frequency domain
+#     P_ft = np.fft.fft(P, n=N2)
 
-    # damp source wavelet
-    P_ftd = np.conj(P_ft)/(np.conj(P_ft)*P_ft*dt + mu)  # dt
-    P_d = np.real(np.fft.ifft(P_ftd, n=N2))  # back to time domain
+#     # damp source wavelet
+#     P_ftd = np.conj(P_ft)/(np.conj(P_ft)*P_ft*dt + mu)  # dt
+#     P_d = np.real(np.fft.ifft(P_ftd, n=N2))  # back to time domain
 
-    # PREPARING PARAMETERS FOR LOOP #####
-    it = 0  # number of iteration
-    e = 100  # start value
-    r = H  # the first residual value
+#     # PREPARING PARAMETERS FOR LOOP #####
+#     it = 0  # number of iteration
+#     e = 100  # start value
+#     r = H  # the first residual value
 
-    # Begin iterative process:
-    IR_new = np.zeros(N2)
-    IR = IR_new
+#     # Begin iterative process:
+#     IR_new = np.zeros(N2)
+#     IR = IR_new
 
-    rej = 0  # Number of rejected peaks
+#     rej = 0  # Number of rejected peaks
 
-    # WHILE LOOP FOR ITERATIVE DECON #####
-    while e > e_min and it < it_max:
-        it = it+1
+#     # WHILE LOOP FOR ITERATIVE DECON #####
+#     while e > e_min and it < it_max:
+#         it = it+1
 
-        # convolve estimated source pulse & residual
-        a = sptb.convf(P_d, r, N2, dt)
+#         # convolve estimated source pulse & residual
+#         a = sptb.convf(P_d, r, N2, dt)
 
-        # Find position of maximum correlation, with k*dt
-        k = np.argmax(abs(a[0:N2]))
+#         # Find position of maximum correlation, with k*dt
+#         k = np.argmax(abs(a[0:N2]))
 
-        # That's the scaling from the original paper,
-        # which doesn't make very much sense to me
-        #s2 = a[k]*P[round(shift/dt)] # estimated source wavelet only for a[k]
-        s2 = a[k]*P
-        l = np.argmax(abs(s2))
-        print(a[k])
-        #scale = H[l]/s2[l]
-        # scale = H[k+round(shift/dt)]/s2
-        
-        scale = 1/(P_d.max()/P.max())
-        #np.dot(s2,H)/np.linalg.norm(H[k])
-        #print(scale)
+#         # That's the scaling from the original paper,
+#         # which doesn't make very much sense to me
+#         # s2 = a[k]*P[round(shift/dt)] # estimated source wavelet only for a
+#         # s2 = a[k]*P
+#         # l = np.argmax(abs(s2))
+#         print(a[k])
+#         # scale = H[l]/s2[l]
+#         # scale = H[k+round(shift/dt)]/s2
 
-        # scale akin to the original by Ligorria
-        #scale = (mu + np.linalg.norm(P_ft))/(np.sum(P**2))
-        # scale = H[k]/a[k]
-        # scale = H[k]/sptb.convf(a, P, N2, dt)[k]
-        ak = scale*a[k]
+#         scale = 1/(P_d.max()/P.max())
+#         #np.dot(s2,H)/np.linalg.norm(H[k])
+#         #print(scale)
 
-        IR_new[k] = IR[k] + ak  # construct estimated impulse response
+#         # scale akin to the original by Ligorria
+#         #scale = (mu + np.linalg.norm(P_ft))/(np.sum(P**2))
+#         # scale = H[k]/a[k]
+#         # scale = H[k]/sptb.convf(a, P, N2, dt)[k]
+#         ak = scale*a[k]
 
-        # convolve impulse response and source wavelet
-        # to estimation of horizontal component:
-        est = sptb.convf(IR_new, P, N2, dt)
+#         IR_new[k] = IR[k] + ak  # construct estimated impulse response
 
-        # compute residual for ongoing iteration it
-        r_new = H - est
-        omega = abs((np.linalg.norm(r)**2-np.linalg.norm(r_new)**2)
-                    / np.linalg.norm(r)**2)  # significance criterion
-        r = r_new  # set new residual value
+#         # convolve impulse response and source wavelet
+#         # to estimation of horizontal component:
+#         est = sptb.convf(IR_new, P, N2, dt)
 
-        # Calculate criterion for convergence
-        e = np.linalg.norm(r_new)**2/np.linalg.norm(H)**2
-        # That's the original from the paper
-        # e = np.linalg.norm(r_new)/np.linalg.norm(H)
-        # If convergence criteria weren't met and sigificance criterion was met
-        # Else the significance criterion isn't met and the peak is most
-        # likely noise and thus discarded
-        
-        if omega > omega_min:
-            IR = IR_new
-        else:  # reject peak
-            IR_new = IR  # discard insignificant peak
-            rej = rej+1
+#         # compute residual for ongoing iteration it
+#         r_new = H - est
+#         omega = abs((np.linalg.norm(r)**2-np.linalg.norm(r_new)**2)
+#                     / np.linalg.norm(r)**2)  # significance criterion
+#         r = r_new  # set new residual value
 
-    # Create receiver function
-    Gauss = sptb.gaussian(N2, dt, width)
-    rf = sptb.filter(IR, Gauss, dt, N2)
+#         # Calculate criterion for convergence
+#         e = np.linalg.norm(r_new)**2/np.linalg.norm(H)**2
+#         # That's the original from the paper
+#         # e = np.linalg.norm(r_new)/np.linalg.norm(H)
+#         # If convergence criteria weren't met and sigificance criterion was
+#         # met
+#         # Else the significance criterion isn't met and the peak is most
+#         # likely noise and thus discarded
 
-    # shift and truncate RF
-    if shift:  # only if shift !=0
-        rf = sptb.sshift(rf, N2, dt, shift)
-    rf = rf[0:N]  # truncate
-    return rf, IR, it, rej
+#         if omega > omega_min:
+#             IR = IR_new
+#         else:  # reject peak
+#             IR_new = IR  # discard insignificant peak
+#             rej = rej+1
+
+#     # Create receiver function
+#     Gauss = sptb.gaussian(N2, dt, width)
+#     rf = sptb.filter(IR, Gauss, dt, N2)
+
+#     # shift and truncate RF
+#     if shift:  # only if shift !=0
+#         rf = sptb.sshift(rf, N2, dt, shift)
+#     rf = rf[0:N]  # truncate
+#     return rf, IR, it, rej
 
 
 def it(P, H, dt, shift=0, width=2.5, omega_min=0.5, it_max=200):
@@ -352,7 +355,7 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
         lrf : Output of deoncolution of source wavelet estimation from
         longitudinal component.
     :rtype: 1D np.ndarray
-    """    
+    """
     phase = phase[-1]
 
     N = len(v)
@@ -447,7 +450,8 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
 
 
 def multitaper(
-    P:np.ndarray, D:np.ndarray, dt:float, tshift:int or float, regul:str):
+        P: np.ndarray, D: np.ndarray, dt: float, tshift: int or float,
+        regul: str):
     """
     Output has to be filtered (Noise appears in high-frequency)!
     multitaper: takes Ved-Kathrins code and changes inputs to
@@ -541,7 +545,7 @@ def multitaper(
     Etmp, lambdas = dpss(Nwin, TB, Kmax=NT, return_ratios=True)
     Etmp = Etmp.T  # 05.08.2020 tranpose slepian windows
     E = np.zeros((len(starts)*NT, nh))
-    
+
     # Start Index
     n = 0
 
@@ -641,7 +645,7 @@ def multitaper(
     rf = tmp1[N-round(tshift/dt):N]
     rf = np.append(rf, tmp1[:N-round(tshift/dt)])
     # Python has to append, whereas in Matlab this here worked:
-    #rf[round(tshift/dt):] = tmp1[:N-round(tshift/dt)]
+    # rf[round(tshift/dt):] = tmp1[:N-round(tshift/dt)]
 
     lrf = tmp1_l[round(N-tshift/dt):N]
     lrf = np.append(lrf, tmp1_l[:round(N-tshift/dt)])
@@ -653,6 +657,7 @@ def multitaper(
     C_rf = np.divide(NUM, np.sqrt(np.multiply(DUM, DEN)))
     var_rf = np.zeros(len(C_rf))
     # for ii in range(len(C_rf)):
-    #     var_rf[ii] = ((1-abs(C_rf[ii])**2)/((NT-1)*abs(C_rf[ii])**2))*(abs(tmpp[ii])**2)
+    #     var_rf[ii] = (
+    # (1-abs(C_rf[ii])**2)/((NT-1)*abs(C_rf[ii])**2))*(abs(tmpp[ii])**2)
     var_rf = None
     return rf, lrf, var_rf, tmpp
