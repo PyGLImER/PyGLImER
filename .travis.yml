@@ -14,7 +14,7 @@ install:
   - conda update -q conda
   - conda info -a
   - conda env create -f environment.yml
-  - source activate PyGLImER-dev
+  - source activate PyGLImER
   - pip install -e .
 
 # command to run tests in tests/
