@@ -26,4 +26,3 @@ dependencies:
   - pip:
     - sphinx
     - sphinx-rtd-theme
-    - -e .

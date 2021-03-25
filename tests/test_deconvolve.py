@@ -1,10 +1,16 @@
 '''
 Tests the pyglimer.rf.deconvolve module
 
-Author: Peter Makus (makus@gfz-potsdam.de)
+:copyright:
+   The PyGLImER development team (makus@gfz-potsdam.de).
+:license:
+   GNU Lesser General Public License, Version 3
+   (https://www.gnu.org/copyleft/lesser.html)
+:author:
+    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th March 2021 10:13:35 am
-Last Modified: Friday, 12th March 2021 03:39:22 pm
+Last Modified: Thursday, 25th March 2021 04:06:22 pm
 '''
 import unittest
 
