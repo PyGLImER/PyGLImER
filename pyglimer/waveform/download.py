@@ -1,7 +1,7 @@
 '''
 Author: Peter Makus (peter.makus@student.uib.no
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 12th March 2021 02:31:48 pm
+Last Modified: Thursday, 25th March 2021 03:20:03 pm
 '''
 
 # !/usr/bin/env python3
@@ -82,6 +82,8 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
 
     """
 
+    if saveasdf:
+        raise NotImplementedError("Will be implemented in a future version.")
     # needed to check whether data is already in the asdf
     global asdfsave
     asdfsave = saveasdf

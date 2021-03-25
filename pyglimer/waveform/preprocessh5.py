@@ -6,9 +6,10 @@ and process files station wise rather than event wise.
 Author: Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Friday, 19th February 2021 10:08:24 am
+Last Modified: Thursday, 25th March 2021 03:18:28 pm
 '''
 
+'''
 import fnmatch
 import logging
 import os
@@ -141,3 +142,4 @@ def __cut_resample__(st, logger, first_arrival, network, station,
     logger.info(dt_string(end - start))
 
     return st
+'''

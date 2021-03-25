@@ -5,8 +5,10 @@ Seismic Format (asdf).
 Author: Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2021 03:24:30 pm
-Last Modified: Friday, 12th March 2021 02:22:22 pm
+Last Modified: Thursday, 25th March 2021 03:17:08 pm
 '''
+
+
 import os
 from warnings import warn
 

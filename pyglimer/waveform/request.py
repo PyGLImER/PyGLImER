@@ -285,7 +285,7 @@ class Request(object):
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
             network=self.network, station=self.station, logdir=self.logdir,
-            debug=self.debug, verbose=verbose)
+            debug=self.debug, verbose=verbose, saveasdf=False)
 
     def preprocess(self, hc_filt: float or int or None = None):
         """
