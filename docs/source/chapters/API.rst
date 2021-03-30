@@ -181,7 +181,7 @@ pyglimer.ccp.compute.bin
     :show-inheritance:
 
 pyglimer.plot
-++++++++++++
++++++++++++++
 pyglimer.plot.plot_map
 ======================
 .. automodule:: pyglimer.plot.plot_map
