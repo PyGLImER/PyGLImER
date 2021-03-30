@@ -24,8 +24,10 @@ conda activate PyGLImER
 pip install  $InstallationDirectory$
 ```
 
-## Documentation
+## Getting started
 Access PyGLImER's documentation [here](https://pyglimer.readthedocs.io/en/latest/).
+
+PyGLImER comes with a few tutorials (Jupyter notebooks). You can find those in the `examples/` directory.
 
 ## Reporting Bugs / Contact the developers
 This version is an early release. If you encounter any issues or unexpected behaviour, please open an issue here on GitHub or contact the developers.
