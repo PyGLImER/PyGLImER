@@ -1,4 +1,4 @@
-# PyGLImER  [![Build Status](https://travis-ci.com/PeterMakus/PyGLImER.svg?token=SDZj9ZcVZQ7jQ6YJZabv&branch=master)](https://travis-ci.com/PeterMakus/PyGLImER) [![Documentation Status](https://readthedocs.org/projects/pyglimer/badge/?version=latest)](https://pyglimer.readthedocs.io/en/latest/?badge=latest)
+# PyGLImER  [![Build Status](https://travis-ci.com/PeterMakus/PyGLImER.svg?branch=master)](https://travis-ci.com/PeterMakus/PyGLImER) [![Documentation Status](https://readthedocs.org/projects/pyglimer/badge/?version=latest)](https://pyglimer.readthedocs.io/en/latest/?badge=latest)
 
 ## A workflow to create a global database for Ps and Sp receiver function imaging of crustal and upper mantle discontinuties 
 
