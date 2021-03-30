@@ -7,7 +7,7 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = _build
-GH_PAGES_SOURCES = source ../src/pyglimer ../setup.py ./Makefile
+GH_PAGES_SOURCES = source ../src/pyglimer ../setup.py ./Makefile ../setup.cfg
 
 # Put it first so that "make" without argument is like "make help".
 help:
