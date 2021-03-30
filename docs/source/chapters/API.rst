@@ -18,7 +18,7 @@ pyglimer.waveform.request
 pyglimer.waveform.download
 ==========================
 
-.. automodule:: pyglimer.waveform.request
+.. automodule:: pyglimer.waveform.download
     :members:
     :show-inheritance:
 
@@ -26,6 +26,13 @@ pyglimer.waveform.preprocess
 ============================
 
 .. automodule:: pyglimer.waveform.preprocess
+    :members:
+    :show-inheritance:
+
+pyglimer.waveform.preprocessh5
+==============================
+
+.. automodule:: pyglimer.waveform.preprocessh5
     :members:
     :show-inheritance:
 
@@ -74,6 +81,12 @@ pyglimer.database
 pyglimer.database.stations
 ==========================
 .. automodule:: pyglimer.database.stations
+    :members:
+    :show-inheritance:
+
+pyglimer.database.asdf
+======================
+.. automodule:: pyglimer.database.asdf
     :members:
     :show-inheritance:
 
@@ -155,8 +168,40 @@ pyglimer.ccp.ccp
     :members:
     :show-inheritance:
 
+pyglimer.ccp.io
+===============
+.. automodule:: pyglimer.ccp.io
+    :members:
+    :show-inheritance:
+
 pyglimer.ccp.compute.bin
 ========================
 .. automodule:: pyglimer.ccp.compute.bin
+    :members:
+    :show-inheritance:
+
+pyglimer.plot
+++++++++++++
+pyglimer.plot.plot_map
+======================
+.. automodule:: pyglimer.plot.plot_map
+    :members:
+    :show-inheritance:
+
+pyglimer.plot.plot_utils
+========================
+.. automodule:: pyglimer.plot.plot_utils
+    :members:
+    :show-inheritance:
+
+pyglimer.plot.plot_volume
+=========================
+.. automodule:: pyglimer.plot.plot_volume
+    :members:
+    :show-inheritance:
+
+pyglimer.plot.ui_utils
+======================
+.. automodule:: pyglimer.plot.ui_utils
     :members:
     :show-inheritance:
