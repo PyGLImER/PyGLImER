@@ -33,4 +33,4 @@ PyGLImER comes with a few tutorials (Jupyter notebooks). You can find those in t
 This version is an early release. If you encounter any issues or unexpected behaviour, please open an issue here on GitHub or contact the developers.
 
 ## Citing PyGLImER
-If you use PyGLImER to produce content for your publication, please consider citing us. For the time being, please cite our [AGU abstract](https://www.essoar.org/doi/10.1002/essoar.10506417.1): 
+If you use PyGLImER to produce content for your publication, please consider citing us. For the time being, please cite our [AGU abstract](https://www.essoar.org/doi/10.1002/essoar.10506417.1).
