@@ -15,6 +15,7 @@ import logging
 import shutil
 import time
 
+from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 import numpy as np
 from scipy.spatial import cKDTree
@@ -27,6 +28,9 @@ from pathlib import Path
 from psutil import virtual_memory
 import subprocess
 from tqdm import tqdm
+import pyvista as pv
+import vtk
+
 
 from pyglimer.ccp.compute.bin import BinGrid
 from pyglimer.database.stations import StationDB
@@ -37,7 +41,7 @@ from pyglimer.utils.createvmodel import _MODEL_CACHE, ComplexModel
 from pyglimer.utils.geo_utils import epi2euc, geo2cart
 from pyglimer.ccp.plot_utils.plot_bins import plot_bins
 from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
-from pyglimer.constants import R_EARTH, DEG2KM
+from pyglimer.constants import R_EARTH, DEG2KM, KM2DEG
 from pyglimer.plot.plot_volume import VolumePlot, VolumeExploration
 
 
@@ -361,7 +365,7 @@ class CCPStack(object):
         :type statloc: str, optional
         :param preproloc: Parental folder containing the preprocessed mseeds.
             Only needed if option geocoords is used. The default is
-            'output/waveforms/preprocessed'. 
+            'output/waveforms/preprocessed'.
         :type preproloc: str, optional
         :param network: This parameter is ignored if the pattern is given.
             Network or networks that are to be included in the ccp stack.
@@ -933,7 +937,7 @@ misspelled or not yet implemented')
                               gz: np.array or list,
                               r: float or None,
                               minillum: int or None = None):
-        """Using the CCP kdtree, we get the closest few points and compute 
+        """Using the CCP kdtree, we get the closest few points and compute
         the weighting using a distance metric. if points are too far away,
         they aren't weighted
 
@@ -949,7 +953,7 @@ misspelled or not yet implemented')
         r : float or None
             outside r everything is nan
         minillum: int or None, optional
-            Minimum number of illumation points use in the interpolation, 
+            Minimum number of illumation points use in the interpolation,
             everything below is downweighted by the square reciprocal
 
         Returns
@@ -1010,6 +1014,113 @@ misspelled or not yet implemented')
 
         return V
 
+    def _create_vtk_mesh(self, geo=True,
+                         bbox: list or None = None,
+                         filename: str or None = None):
+        """Creates a mesh with given bounding box s
+
+        Parameters
+        ----------
+        geo : bool, optional
+            flag whether the output mesh is in geographical coordinates or
+            meters, by default True
+        bbox : list or None, optional
+            bounding box [minlon, maxlon, minlat, maxlat]. If None
+            No boundaries are taken, by default None
+        filename : str or None, optional
+            If set, the computed grid will be output as VTK file under the given 
+            filename. This file can then later be opened using either the 
+            plotting tool or, e.g., Paraview. If None, no file is written.
+            By default, None.            
+
+        Returns
+        -------
+        VTK.UnstructuredGrid
+            outputs a vtik mesh that can be opened in, e.g., Paraview.
+        """
+
+        # Get coordinates
+        lat = np.squeeze(self.coords_new[0])
+        lon = np.squeeze(self.coords_new[1])
+
+        print(len(lat))
+
+        # Filter ccpstacks if not none
+        if bbox is None:
+            bbox = [-180, 180, -90, 90]
+        pos = np.where(((bbox[0] <= lon) & (lon <= bbox[1]) &
+                        (bbox[2] <= lat) & (lat <= bbox[3])))[0]
+        lat = lat[pos]
+        lon = lon[pos]
+        print(len(lat))
+        # Create VTK point cloud at the surface to triangulate.
+        r = R_EARTH * np.ones_like(lat)
+        points = np.vstack((deepcopy(lon*DEG2KM).flatten(),
+                            deepcopy(lat*DEG2KM).flatten(),
+                            deepcopy(r).flatten())).T
+        pc = pv.PolyData(points)
+
+        # Triangulate 2D surface
+        mesh = pc.delaunay_2d(alpha=self.binrad*1.5*DEG2KM)
+
+        # Use triangles and their connectivity to create 3D Mesh of wedges
+        points = deepcopy(mesh.points)
+        n_points = mesh.n_points
+
+        # Get cells and create first layer of wedges at the surface
+        cells = mesh.faces.reshape(mesh.n_cells, 4)
+        cells[:, 0] = 6
+        cells = np.hstack((cells, n_points + cells[:, 1:]))
+        newcells = deepcopy(cells)
+
+        # Give second layer of points in the wedge the right depth!
+        zpoints = deepcopy(np.array(points))
+        zpoints[:, 2] = R_EARTH - self.z[1]
+        newpoints = np.vstack((points, zpoints))
+
+        # Loop over remaining depths to populated the mesh.
+        for _z in self.z[2:]:
+
+            # Add cells
+            extra_cells = cells
+            extra_cells[:, 1:] += n_points
+            newcells = np.vstack((newcells, extra_cells))
+
+            # Add points
+            zpoints = deepcopy(np.array(points))
+            zpoints[:, 2] = R_EARTH - _z
+            newpoints = np.vstack((newpoints, zpoints))
+
+        # Define Cell types
+        newcelltypes = np.array(
+            [vtk.VTK_WEDGE] * newcells.shape[0], dtype=np.uint8)
+
+        # Redefine location of the points if! Geo location is wanted instead of
+        # Cartesian(-ish)
+        if geo:
+            x, y, z = geo2cart(
+                newpoints[:, 2],
+                newpoints[:, 1] * KM2DEG,
+                newpoints[:, 0] * KM2DEG)
+
+            newpoints = np.vstack((x, y, z)).T
+
+        # Create Unstructured Grid
+        grid = pv.UnstructuredGrid(newcells, newcelltypes, newpoints)
+
+        # Populate with RF and illumination values
+        grid['RF'] = deepcopy(self.ccp[pos, :].T.ravel())
+        grid['illumination'] = deepcopy(self.hits[pos, :].T.ravel())
+
+        # If file name is set write unstructured grid to file!
+        if filename is not None:
+            writer = vtk.vtkUnstructuredGridWriter()
+            writer.SetInputData(grid)
+            writer.SetFileName(filename)
+            writer.Write()
+
+        return grid
+
     def explore(self, factor: float = 1.0, maxz: float or None = None,
                 minillum: int or None = None,
                 extent: list or tuple or None = None):
@@ -1026,13 +1137,13 @@ misspelled or not yet implemented')
         -----------
 
         factor : float, optional
-            Bingrid epicentral distance multiplier to refine grid. 
+            Bingrid epicentral distance multiplier to refine grid.
             Defaults to 0.5.
         maxz : float or None, optional
-            Maximum Depth if None, the max ccp bin depth is used. 
+            Maximum Depth if None, the max ccp bin depth is used.
             Defaults to None.
         minillum : int or None, optional
-            Minimum number of illumation points use in the interpolation, 
+            Minimum number of illumation points use in the interpolation,
             everything below is downweighted by the square reciprocal
         extent : list or tuple or Non, optional
         Returns
