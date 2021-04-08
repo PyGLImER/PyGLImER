@@ -192,13 +192,13 @@ class CCPStack(object):
 
     def __str__(self) -> str:
         out = f"Teleseismic Phase: \t\t{self.bingrid.phase}\n" +\
-                f"Bin distance: \t\t\t{round(self.bingrid.edist, 3)}\n" +\
-                f"Bin radius: \t\t\t{round(self.binrad, 3)}\n" +\
-                f"Bounding Box: \tLatitude: \t{round(self.coords[0].min(), 1)}\
+            f"Bin distance: \t\t\t{round(self.bingrid.edist, 3)}\n" +\
+            f"Bin radius: \t\t\t{round(self.binrad, 3)}\n" +\
+            f"Bounding Box: \tLatitude: \t{round(self.coords[0].min(), 1)}\
                     {round(self.coords[0].max(), 1)}\n" +\
-                f"\t\tLongitude: \t{round(self.coords[1].min(), 1)}\
+            f"\t\tLongitude: \t{round(self.coords[1].min(), 1)}\
                      {round(self.coords[1].max(),1)}\n" +\
-                f"Number of Receiver Functions: \t{self.N}"
+            f"Number of Receiver Functions: \t{self.N}"
         return out
 
     def query_bin_tree(
@@ -489,12 +489,12 @@ only show the progress per chunk.')
             num_split = int(np.ceil(len(stream_chunk)/len_split))
 
             out = Parallel(n_jobs=num_cores)(  # prefer='processes'
-                            delayed(self.multicore_stack)(
-                                st, append_pp, n_closest_points, vel_model,
-                                latb, lonb, filt, i, multiple)
-                            for i, st in zip(
-                                tqdm(range(num_split)),
-                                chunks(stream_chunk, len_split)))
+                delayed(self.multicore_stack)(
+                    st, append_pp, n_closest_points, vel_model,
+                    latb, lonb, filt, i, multiple)
+                for i, st in zip(
+                    tqdm(range(num_split)),
+                    chunks(stream_chunk, len_split)))
 
             # Awful way to solve it, but the best I could find
             if multiple:
@@ -675,7 +675,7 @@ only show the progress per chunk.')
                     self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
                 np.divide(
                     self.bins_m2[:, :endi], self.illumm[:, :endi]+1))/3,
-                    np.zeros(self.bins[:, endi:].shape)))
+                np.zeros(self.bins[:, endi:].shape)))
         elif multiple == 'zk':
             # self.ccp = np.divide(self.bins, self.illum+1)
             self.ccp = np.hstack((
@@ -876,12 +876,6 @@ misspelled or not yet implemented')
         xi, yi, zi = geo2cart((R_EARTH - mz.ravel())/R_EARTH,
                               mlat.ravel(), mlon.ravel())
 
-
-<< << << < HEAD: pyglimer/ccp/ccp.py
-        # REDO TO ONLY QUERY DEPTHS....
-
-== == == =
->>>>>> > 52513906183d5094c448384313dacb8a4608170f: src/pyglimer/ccp/ccp.py
         # Create kdtree form source coordinates
         tree = cKDTree(np.c_[xs, ys, zs])
 
@@ -920,8 +914,8 @@ misspelled or not yet implemented')
         return V
 
     def create_vtk_mesh(self, geo=True,
-                         bbox: list or None = None,
-                         filename: str or None = None):
+                        bbox: list or None = None,
+                        filename: str or None = None):
         """Creates a mesh with given bounding box s
 
         Parameters
@@ -941,14 +935,12 @@ misspelled or not yet implemented')
         Returns
         -------
         VTK.UnstructuredGrid
-            outputs a vtik mesh that can be opened in, e.g., Paraview.
+            outputs a vtk mesh that can be opened in, e.g., Paraview.
         """
 
         # Get coordinates
         lat = np.squeeze(self.coords_new[0])
         lon = np.squeeze(self.coords_new[1])
-
-        print(len(lat))
 
         # Filter ccpstacks if not none
         if bbox is None:
@@ -957,7 +949,7 @@ misspelled or not yet implemented')
                         (bbox[2] <= lat) & (lat <= bbox[3])))[0]
         lat = lat[pos]
         lon = lon[pos]
-        print(len(lat))
+
         # Create VTK point cloud at the surface to triangulate.
         r = R_EARTH * np.ones_like(lat)
         points = np.vstack((deepcopy(lon*DEG2KM).flatten(),
@@ -1019,7 +1011,7 @@ misspelled or not yet implemented')
 
         # If file name is set write unstructured grid to file!
         if filename is not None:
-            writer = vtk.vtkUnstructuredGridWriter()
+            writer = vtk.vtkXMLUnstructuredGridWriter()
             writer.SetInputData(grid)
             writer.SetFileName(filename)
             writer.Write()
@@ -1292,7 +1284,7 @@ def init_ccp(
     compute_stack: bool = False, filt: tuple or None = None,
     binrad: float = np.cos(np.radians(30)), append_pp: bool = False,
     multiple: bool = False, save: str or bool = False, verbose: bool = True
-             ) -> CCPStack:
+) -> CCPStack:
     """
     Computes a ccp stack in self.ccp using data from statloc and rfloc.
     The stack can be limited to some networks and
