@@ -1,5 +1,6 @@
-# PyGLImER
-## A worflow to create a global database for Ps and Sp receiver function imaging of crustal and upper mantle discontinuties 
+# PyGLImER  [![Build Status](https://travis-ci.com/PeterMakus/PyGLImER.svg?branch=master)](https://travis-ci.com/PeterMakus/PyGLImER) [![Documentation Status](https://readthedocs.org/projects/pyglimer/badge/?version=latest)](https://pyglimer.readthedocs.io/en/latest/?badge=latest)
+
+## A workflow to create a global database for Ps and Sp receiver function imaging of crustal and upper mantle discontinuties 
 
 This project was created in the framework of a Master's thesis by Peter Makus.
 It aims to **automate receiver function (RF) processing from download of raw waveform data to common conversion point (CCP) imaging with a minimum amount
@@ -23,6 +24,13 @@ conda activate PyGLImER
 pip install  $InstallationDirectory$
 ```
 
-## Documentation
-Documentation will be available on github pages, as soon as this project goes public. Right now,
-the documentation is located in `./docs/_build/hmtl/`.
+## Getting started
+Access PyGLImER's documentation [here](https://pyglimer.readthedocs.io/en/latest/).
+
+PyGLImER comes with a few tutorials (Jupyter notebooks). You can find those in the `examples/` directory.
+
+## Reporting Bugs / Contact the developers
+This version is an early release. If you encounter any issues or unexpected behaviour, please [open an issue](https://github.com/PeterMakus/PyGLImER/issues/new) here on GitHub or [contact the developers](mailto:makus@gfz-potsdam.de).
+
+## Citing PyGLImER
+If you use PyGLImER to produce content for your publication, please consider citing us. For the time being, please cite our [AGU abstract](https://www.essoar.org/doi/10.1002/essoar.10506417.1).

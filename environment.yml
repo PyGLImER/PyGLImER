@@ -1,23 +1,28 @@
 name: PyGLImER
+channels:
+  - conda-forge
 dependencies:
   - basemap
+  - cartopy
+  - colorama
+  - dill
   - geographiclib
-  - h5py
   - joblib
   - matplotlib
   - numpy
   - obspy
   - pandas
   - pathlib
+  - pip
   - plotly
+  - prov
   - psutil
+  - pyasdf
+  - pytest
   - python=3.8
   - scipy
-  - pip
   - tqdm
   - flake8
   - pip:
     - sphinx
     - sphinx-rtd-theme
-    - pytest
-    - -e .

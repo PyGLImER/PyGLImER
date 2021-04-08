@@ -1,19 +1,18 @@
 '''
-Author: Peter Makus (peter.makus@student.uib.no)
+Author: Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 3rd July 2020 10:46:45 am
-Last Modified: Friday, 3rd July 2020 04:07:01 pm
+Last Modified: Thursday, 25th March 2021 04:20:35 pm
 
 Setup.py file that governs the installation process of
-`how_to_make_a_python_package` it is used by
+`PyGLImER it is used by
 `conda install -f environment.yml` which will install the package in an
 environment specified in that file.
 '''
-import os
 from setuptools import setup
-from setuptools import find_packages
 from setuptools.command.test import test as testcommand
 
+<<<<<<< HEAD
 # Utility function to read the README.md file.
 # Used for the long_description.  It's nice, because now 1) we have a top levelx
 # README.md file and 2) it's easier to type in the README.md file than to put a raw
@@ -32,6 +31,8 @@ def read(fname):
 
 long_description = "%s" % read("README.md")
 
+=======
+>>>>>>> 52513906183d5094c448384313dacb8a4608170f
 
 # This installs the pytest command. Meaning that you can simply type pytest
 # anywhere and "pytest" will look for all available tests in the current
@@ -50,6 +51,7 @@ class PyTest(testcommand):
         sys.exit(errno)
 
 
+<<<<<<< HEAD
 setup(
     name="PyGLImER",
     description="A workflow to create a global database for Ps and Sp rece\
@@ -88,3 +90,6 @@ setup(
         ]
     }
 )
+=======
+setup(cmdclass={'tests': PyTest})
+>>>>>>> 52513906183d5094c448384313dacb8a4608170f
