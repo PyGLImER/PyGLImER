@@ -23,6 +23,7 @@ dependencies:
   - scipy
   - tqdm
   - flake8
+  - pyvista
   - pip:
     - sphinx
     - sphinx-rtd-theme
