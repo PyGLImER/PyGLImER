@@ -1,4 +1,4 @@
-# PyGLImER  [![Build Status](https://travis-ci.com/PeterMakus/PyGLImER.svg?branch=master)](https://travis-ci.com/PeterMakus/PyGLImER) [![Documentation Status](https://readthedocs.org/projects/pyglimer/badge/?version=latest)](https://pyglimer.readthedocs.io/en/latest/?badge=latest)
+# PyGLImER  [![Build Status](https://travis-ci.com/PeterMakus/PyGLImER.svg?branch=master)](https://travis-ci.com/PeterMakus/PyGLImER) [![Documentation Status](https://readthedocs.org/projects/pyglimer/badge/?version=latest)](https://pyglimer.readthedocs.io/en/latest/?badge=latest) [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
 ## A workflow to create a global database for Ps and Sp receiver function imaging of crustal and upper mantle discontinuties 
 
