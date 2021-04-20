@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Monday, 19th April 2021 03:02:39 pm
+Last Modified: Tuesday, 20th April 2021 08:39:48 am
 
 
 !The file is split and has a second copyright disclaimer!
@@ -412,7 +412,7 @@ class RFStream(Stream):
     def __init__(self, traces=None):
         self.traces = []
         if isinstance(traces, Trace):
-            self.traces = [traces]
+            traces = [traces]
         if traces:
             for tr in traces:
                 if not isinstance(tr, RFTrace):
