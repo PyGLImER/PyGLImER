@@ -28,6 +28,7 @@ from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 import numpy as np
 from scipy.spatial import cKDTree
+from scipy.interpolate import RegularGridInterpolator
 
 
 from obspy import read_inventory
@@ -46,12 +47,15 @@ from pyglimer.database.stations import StationDB
 from pyglimer.rf.create import read_rf
 from pyglimer.rf.moveout import res, maxz, maxzm
 from pyglimer.utils.utils import dt_string, chunks
+from pyglimer.utils.SphericalNN import SphericalNN
 from pyglimer.utils.createvmodel import ComplexModel
 from pyglimer.utils.geo_utils import epi2euc, geo2cart
 from pyglimer.ccp.plot_utils.plot_bins import plot_bins
 from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
 from pyglimer.constants import R_EARTH, DEG2KM, KM2DEG
 from pyglimer.plot.plot_volume import VolumePlot, VolumeExploration
+from pyglimer.utils.geo_utils import gctrack
+from pyglimer.utils.geo_utils import fix_map_extent
 
 
 class PhasePick(object):
@@ -231,6 +235,96 @@ class CCPStack(object):
         k = i[pos]
 
         return k, j
+
+    def get_depth_slice(self, z0: float = 410):
+
+        # Area considered around profile points
+        area = 2 * self.binrad
+
+        # Resolution
+        res = self.binrad/4
+
+        # Depth
+        z = self.z.flatten()
+        zpos = np.argmin(np.abs(z-z0))
+        z0 = z[zpos]
+
+        # Coordinates
+        lat = self.coords_new[0].flatten()
+        lon = self.coords_new[1].flatten()
+
+        # Map extent with buffer
+        extent = fix_map_extent(
+            [np.min(lon), np.max(lon), np.min(lat), np.max(lat)],
+            fraction=0.05)
+
+        # Create query points
+        qlon, qlat = np.meshgrid(
+            np.arange(extent[0], extent[1], res),
+            np.arange(extent[2], extent[3], res)
+        )
+
+        # Create interpolators
+        snn = SphericalNN(lat, lon)
+        ccp_interpolator = snn.interpolator(
+            qlat, qlon, maximum_distance=area, k=10, p=2.0, no_weighting=False)
+        ill_interpolator = snn.interpolator(
+            qlat, qlon, maximum_distance=area, no_weighting=True)
+
+        # Interpolate
+        qccp = ccp_interpolator(self.ccp[:, zpos])
+        qill = ill_interpolator(self.hits[:, zpos])
+
+        return qlat, qlon, qill, qccp, extent, z0
+
+    def get_profile(self, slat, slon):
+
+        # Area considered around profile points
+        area = 2 * self.binrad
+
+        # Get evenly distributed points
+        qlat, qlon, qdists, sdists = gctrack(slat, slon, self.bingrid.edist/2)
+
+        # Get interpolation weights and rows.
+        # Create SphericalNN kdtree
+        snn = SphericalNN(self.coords_new[0], self.coords_new[1])
+        ccp_interpolator = snn.interpolator(
+            qlat, qlon, maximum_distance=area, k=10, p=2.0, no_weighting=False)
+        ill_interpolator = snn.interpolator(
+            qlat, qlon, maximum_distance=area, no_weighting=True)
+
+        # Get coordinates array from CCPStack
+        qz = deepcopy(self.z)
+
+        # Get data arrays
+        Np, Nz = self.ccp.shape
+        Nq = len(qlat)
+
+        # Interpolate
+        qccp = np.zeros((Nq, Nz))
+        qill = np.zeros((Nq, Nz))
+
+        # Interpolate each depth
+        for _i, (_ccpcol, _illumcol) in enumerate(zip(self.ccp.T, self.hits.T)):
+            qccp[:, _i] = ccp_interpolator(_ccpcol)
+            qill[:, _i] = ill_interpolator(_illumcol)
+
+        # Interpolate onto regular depth grid for easy representation with
+        # imshow
+        ccp2D_interpolator = RegularGridInterpolator(
+            (qdists, qz), np.where(np.isnan(qccp), 0, qccp))
+        ill2D_interpolator = RegularGridInterpolator(
+            (qdists, qz), qill)
+
+        # Where to sample
+        qqz = np.arange(np.min(qz), np.max(qz), 1)
+        xqdists, xqz = np.meshgrid(qdists, qqz)
+
+        # Interpolate
+        qccp = ccp2D_interpolator((xqdists, xqz))
+        qill = ill2D_interpolator((xqdists, xqz))
+
+        return slat, slon, sdists, qlat, qlon, qdists, qz, qill, qccp, area
 
     def compute_stack(
         self, vel_model: str, rfloc: str = 'output/waveforms/RF',
@@ -927,10 +1021,10 @@ misspelled or not yet implemented')
             bounding box [minlon, maxlon, minlat, maxlat]. If None
             No boundaries are taken, by default None
         filename : str or None, optional
-            If set, the computed grid will be output as VTK file under the given 
-            filename. This file can then later be opened using either the 
+            If set, the computed grid will be output as VTK file under the given
+            filename. This file can then later be opened using either the
             plotting tool or, e.g., Paraview. If None, no file is written.
-            By default, None.            
+            By default, None.
 
         Returns
         -------

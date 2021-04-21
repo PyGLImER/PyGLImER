@@ -16,6 +16,7 @@ Last Update: June 19, 2020
 
 """
 
+import matplotlib.path as mpath
 import os
 import numpy as np
 import matplotlib
@@ -538,3 +539,6 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
         if format in ["pdf", "epsg", "svg", "ps"]:
             dpi = None
         plt.savefig(outputfile, format=format, dpi=dpi)
+
+
+

@@ -16,8 +16,10 @@ Last Update: November 2019
 
 """
 
+from typing import Tuple
 import numpy as np
-
+from scipy.interpolate import interp1d
+from cartopy.geodesic import Geodesic
 from ..constants import R_EARTH
 
 
@@ -65,6 +67,99 @@ def reckon(lat, lon, distance, bearing):
     return lat2, lon2
 
 
+def gctrack(lat, lon, dist: float = 1.0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Given waypoints and a point distance, this function computes evenly
+    spaced points along the great circle and the given waypoints.
+
+    Parameters
+    ----------
+    lat : np.ndarray
+        waypoint latitudes
+    lon : np.ndarray
+        waypoint longitudes
+    dist : float
+        distance in degrees
+
+
+    Returns
+    -------
+    tuple(np.ndarray, np.ndarray)
+
+
+    Notes
+    -----
+
+    :Authors:
+        Lucas Sawade (lsawade@princeton.edu)
+
+    :Last Modified:
+        2020.04.20 00.30
+
+    """
+
+    # First get distances between points
+    N = len(lon)
+    dists = np.zeros(N-1)
+    az = np.zeros(N-1)
+
+    # Create Geodesic class
+    G = Geodesic()
+
+    # Get distances along the waypoints
+    mat = np.asarray(G.inverse(np.array((lon[0:-1], lat[0:-1])).T,
+                               np.array((lon[1:], lat[1:])).T))
+    dists = mat[:, 0]/1000.0/111.11
+    az = mat[:, 1]
+
+    # Cumulative station distances
+    sdists = np.zeros(N)
+    sdists[1:] = np.cumsum(dists)
+
+    # Get tracks between segments that are far apart
+    tracks = []
+    for _i in range(N-1):
+
+        if dists[_i] > dist:
+            # Create vector between two poitns
+            trackdists = np.arange(0, dists[_i], dist)
+            track = np.array(reckon(lat[_i], lon[_i], trackdists, az[_i]))
+
+        else:
+            track = np.array((lat[_i:_i+1], lon[_i:_i+1]))
+
+        tracks.append(track)
+
+    # Add last point because usually not added
+    tracks.append(np.array(((lat[-1], lon[-1]),)).T)
+
+    # Get tracks
+    utrack = np.hstack(tracks).T
+
+    # Remove duplicates if there are any
+    _, idx = np.unique(utrack, return_index=True, axis=0)
+    utrack = utrack[np.sort(idx), :]
+
+    # Get distances along the new track
+    mat = np.asarray(G.inverse(
+        np.array((utrack[0:-1, 1], utrack[0:-1, 0])).T,
+        np.array((utrack[1:, 1],   utrack[1:, 0])).T))
+    udists = mat[:, 0]/1000.0/111.11
+
+    # Compute cumulative distance
+    M = len(utrack[:, 0])
+    cdists = np.zeros(M)
+    cdists[1:] = np.cumsum(udists)
+
+    # Interpolate to the final vectors
+    maxdist = np.max(cdists)
+    qdists = np.linspace(0, maxdist, int(maxdist/dist))
+    ilat = interp1d(cdists, utrack[:, 0])
+    ilon = interp1d(cdists, utrack[:, 1])
+    qlat, qlon = ilat(qdists), ilon(qdists)
+
+    return qlat, qlon, qdists, sdists
+
+
 def geo2cart(r, latitude, longitude):
     """Computes cartesian coordinates from geographical coordinates
 
@@ -83,7 +178,7 @@ def geo2cart(r, latitude, longitude):
     """
 
     # Convert to radians
-    latrad = latitude/180*np.pi
+    latrad = latitude / 180*np.pi
     lonrad = longitude / 180 * np.pi
 
     # Convert to geolocations
@@ -131,3 +226,38 @@ def epi2euc(epi):
 def euc2epi(euc):
     """Converts euclidean distance to epicentral distance"""
     return 360 * np.arcsin(euc/(2*R_EARTH)) / np.pi
+
+
+def fix_map_extent(extent, fraction=0.05):
+
+    # Get extent values and fix them
+    minlon, maxlon, minlat, maxlat = extent
+
+    latb = (maxlat - minlat) * fraction
+    lonb = (maxlon - minlon) * fraction
+
+    # Max lat
+    if maxlat + latb > 90.0:
+        maxlat = 90.0
+    else:
+        maxlat = maxlat + latb
+
+    # Min lat
+    if minlat - latb < -90.0:
+        minlat = -90.0
+    else:
+        minlat = minlat - latb
+
+    # Max lon
+    if maxlon + lonb > 180.0:
+        maxlon = 180.0
+    else:
+        maxlon = maxlon + lonb
+
+    # Minlon
+    if minlon - lonb < -180.0:
+        minlon = -180.0
+    else:
+        minlon = minlon - lonb
+
+    return [minlon, maxlon, minlat, maxlat]
