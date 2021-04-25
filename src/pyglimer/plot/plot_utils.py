@@ -25,9 +25,10 @@ from cartopy.crs import PlateCarree
 
 from pyglimer.constants import maxz, res
 
+
 def set_mpl_params():
     params = {
-        #'font.family': 'Avenir Next',
+        # 'font.family': 'Avenir Next',
         'pdf.fonttype': 42,
         'font.weight': 'bold',
         'figure.dpi': 150,
@@ -64,7 +65,8 @@ def set_mpl_params():
         'legend.edgecolor': 'inherit'
     }
     matplotlib.rcParams.update(params)
-    matplotlib.font_manager._rebuild()
+    # 25/04/21 this function was depricated? Don't know what it did
+    # matplotlib.font_manager._rebuild()
 
 
 def remove_all(ax=None, top=False, bottom=False, left=False, right=False,
@@ -106,35 +108,36 @@ def remove_topright(ax=None):
 
 
 def plot_catalog(catalog):
-    """ Takes in event catalog and plots events as a function of location and moment
-    magnitude."""
-    
-    plt.figure(figsize=(20,7.5))
+    """ Takes in event catalog and plots events as a function of location and
+    moment magnitude."""
+
+    plt.figure(figsize=(20, 7.5))
     ax = plt.subplot(111, projection=PlateCarree())
-    
+
     size = 1
     mags = []
     lats = []
     lons = []
-    
+
     for event in catalog:
         # Get mag
         mags.append(event.preferred_magnitude().mag)
-        
+
         # Get location
         origin = event.preferred_origin()
         lats.append(origin.latitude)
         lons.append(origin.longitude)
-    
+
     # Add coastline
     ax.add_feature(cartopy.feature.LAND, zorder=-2, edgecolor='black',
                    linewidth=0.5, facecolor=(0.9, 0.9, 0.9))
 
     # Plot events
-    c = ax.scatter(np.array(lons), np.array(lats),  c=np.array(mags), s=size*np.array(mags)**3,
-               marker="o", cmap="magma", vmin=3, vmax=7.5,
-               edgecolor="k", linewidth=0.75, zorder=201)
-    cbar = plt.colorbar(c, pad=0.005, shrink=1)    
+    c = ax.scatter(
+        np.array(lons), np.array(lats),  c=np.array(mags),
+        s=size*np.array(mags)**3, marker="o", cmap="magma", vmin=3, vmax=7.5,
+        edgecolor="k", linewidth=0.75, zorder=201)
+    cbar = plt.colorbar(c, pad=0.005, shrink=1)
     cbar.ax.set_ylabel(r"       $M_w$", rotation=0)
 
 
