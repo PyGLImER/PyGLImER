@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 25th March 2021 04:02:24 pm
+Last Modified: Sunday, 25th April 2021 11:37:16 am
 '''
 
 # !/usr/bin/env python3d
@@ -106,6 +106,7 @@ def preprocess(
     None.
 
     """
+    print('should always be printed')
     ###########
     # logging
     logger = logging.Logger("pyglimer.waveform.preprocess")
@@ -155,37 +156,37 @@ def preprocess(
 
     #########
 
-    if saveasdf:
-        preprocessh5(
-            phase, rot, pol, taper_perc, event_cat, model, taper_type, tz, ta,
-            rawloc, preproloc, rfloc, deconmeth, hc_filt, netrestr,
-            statrestr, logger, rflogger, debug)
+    # if saveasdf:
+    #     preprocessh5(
+    #         phase, rot, pol, taper_perc, event_cat, model, taper_type, tz, ta,
+    #         rawloc, preproloc, rfloc, deconmeth, hc_filt, netrestr,
+    #         statrestr, logger, rflogger, debug)
+    # else:
+    # Here, we work with all available cores to speed things up
+    # Split up event catalogue to mitigate the danger of data loss
+    # Now the infodicts will be written in an even way
+    # i.e. every 100 events
+
+    # Number of cores is usally a power of 2 (therefore 128)
+    n_split = int(np.ceil(event_cat.count()/128))
+
+    # All error handlers rely on download via IRIS webservice.
+    # However, there is a maximum number for connections (3).
+    # So I don't really want to flood everything with exceptions.
+    if cpu_count() > 12:
+        eh = False
     else:
-        # Here, we work with all available cores to speed things up
-        # Split up event catalogue to mitigate the danger of data loss
-        # Now the infodicts will be written in an even way
-        # i.e. every 100 events
+        eh = True
 
-        # Number of cores is usally a power of 2 (therefore 128)
-        n_split = int(np.ceil(event_cat.count()/128))
-
-        # All error handlers rely on download via IRIS webservice.
-        # However, there is a maximum number for connections (3).
-        # So I don't really want to flood everything with exceptions.
-        if cpu_count() > 12:
-            eh = False
-        else:
+    # Returns generator object with evtcats with each 100 events
+    evtcats = chunks(event_cat, n_split)
+    for evtcat in evtcats:
+        if debug:
+            n_j = 1  # Only way to allow for redownload, maximum 3 requests
             eh = True
-
-        # Returns generator object with evtcats with each 100 events
-        evtcats = chunks(event_cat, n_split)
-        for evtcat in evtcats:
-            if debug:
-                n_j = 3  # Only way to allow for redownload, maximum 3 requests
-                eh = True
-            else:
-                n_j = -1
-            out = Parallel(n_jobs=n_j)(
+        else:
+            n_j = -1
+        out = Parallel(n_jobs=n_j)(
                 delayed(__event_loop)(
                     phase, rot, pol, event, taper_perc,
                     taper_type, model, logger, rflogger, eh, tz,
@@ -193,44 +194,44 @@ def preprocess(
                     hc_filt, netrestr, statrestr)
                 for event in evtcat)
 
-            # For simultaneous download, dicts are written
-            #  while the processing is happening
-            # (Not robust for multicore)
+        # For simultaneous download, dicts are written
+        #  while the processing is happening
+        # (Not robust for multicore)
 
-            # The multicore process returns a list of lists of dictionaries
-            dictlist = list(itertools.chain.from_iterable(out))
+        # The multicore process returns a list of lists of dictionaries
+        dictlist = list(itertools.chain.from_iterable(out))
 
-            # 1. Write all dictionaries in a "masterdictionary", where the keys
-            # are Network and station code. Then, extent these subdictionaries
-            # with the new information from new dictionaries for the same
-            # station.
-            masterdict = {}
+        # 1. Write all dictionaries in a "masterdictionary", where the keys
+        # are Network and station code. Then, extent these subdictionaries
+        # with the new information from new dictionaries for the same
+        # station.
+        masterdict = {}
 
-            for d in dictlist:
-                if not d:  # Some of the dictionaries might be empty
-                    continue
-                try:
-                    net = d['network']
-                    stat = d['station']
-                    key = net + '.' + stat
-                except (ValueError, KeyError) as e:
-                    logger.exception([e, d])
-                    continue
-                if key in masterdict:
-                    for k in d:
-                        if type(d[k]) == list:
-                            masterdict[key].setdefault(k, []).extend(d[k])
-                else:
-                    masterdict[key] = d
+        for d in dictlist:
+            if not d:  # Some of the dictionaries might be empty
+                continue
+            try:
+                net = d['network']
+                stat = d['station']
+                key = net + '.' + stat
+            except (ValueError, KeyError) as e:
+                logger.exception([e, d])
+                continue
+            if key in masterdict:
+                for k in d:
+                    if type(d[k]) == list:
+                        masterdict[key].setdefault(k, []).extend(d[k])
+            else:
+                masterdict[key] = d
 
-            # Write dictionaries in the folder
-            for d in masterdict:
-                try:
-                    net, stat = d.split('.')
-                    write_info(net, stat, masterdict[d], preproloc)
-                except (ValueError, KeyError) as e:
-                    logger.exception([e, d])
-                    continue
+        # Write dictionaries in the folder
+        for d in masterdict:
+            try:
+                net, stat = d.split('.')
+                write_info(net, stat, masterdict[d], preproloc)
+            except (ValueError, KeyError) as e:
+                logger.exception([e, d])
+                continue
 
     print("Download and preprocessing finished.")
 
@@ -242,6 +243,7 @@ def __event_loop(phase, rot, pol, event, taper_perc, taper_type, model,
     Loops over each event in the event catalogue
     """
     # create list for what will later be the info files
+    print('eventloop')
     infolist = []
 
     # fetch event-data
@@ -442,9 +444,11 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
 
     # Check if RF was already computed and if it should be
     # computed at all, and if the waveform was retained (SNR)
+    print('here we are trying to create RFs')
     if deconmeth and not\
         __file_in_db(os.path.join(rfloc, network, station), network +
                      '.' + station + '.' + ot_loc + '.sac') and crit:
+        print('this condition works')
 
         # 21.04.2020 Second highcut filter
         if hc_filt:
@@ -512,7 +516,8 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
             os.makedirs(rfdir, exist_ok=True)
 
             RF.write(os.path.join(rfdir, network + '.' + station + '.' + ot_loc
-                                  + '.sac'), format='SAC')
+                     + '.sac'), format='SAC')
+            print(RF, rfdir)
 
             end = time.time()
             rflogger.info("RF created")

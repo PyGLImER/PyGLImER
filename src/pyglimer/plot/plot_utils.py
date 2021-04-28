@@ -66,6 +66,7 @@ def set_mpl_params():
         'legend.edgecolor': 'inherit'
     }
     matplotlib.rcParams.update(params)
+    # 25/04/21 this function was depricated? Don't know what it did
     # matplotlib.font_manager._rebuild()
 
 
@@ -108,8 +109,13 @@ def remove_topright(ax=None):
 
 
 def plot_catalog(catalog):
+<<<<<<< HEAD
     """ Takes in event catalog and plots events as a function of location and moment
     magnitude."""
+=======
+    """ Takes in event catalog and plots events as a function of location and
+    moment magnitude."""
+>>>>>>> 4adc36a2305f75c1f25cdadfa084e86e1c5e1762
 
     plt.figure(figsize=(20, 7.5))
     ax = plt.subplot(111, projection=PlateCarree())
@@ -133,9 +139,16 @@ def plot_catalog(catalog):
                    linewidth=0.5, facecolor=(0.9, 0.9, 0.9))
 
     # Plot events
+<<<<<<< HEAD
     c = ax.scatter(np.array(lons), np.array(lats),  c=np.array(mags), s=size*np.array(mags)**3,
                    marker="o", cmap="magma", vmin=3, vmax=7.5,
                    edgecolor="k", linewidth=0.75, zorder=201)
+=======
+    c = ax.scatter(
+        np.array(lons), np.array(lats),  c=np.array(mags),
+        s=size*np.array(mags)**3, marker="o", cmap="magma", vmin=3, vmax=7.5,
+        edgecolor="k", linewidth=0.75, zorder=201)
+>>>>>>> 4adc36a2305f75c1f25cdadfa084e86e1c5e1762
     cbar = plt.colorbar(c, pad=0.005, shrink=1)
     cbar.ax.set_ylabel(r"       $M_w$", rotation=0)
 

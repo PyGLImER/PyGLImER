@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Tuesday, 20th April 2021 08:39:48 am
+Last Modified: Sunday, 25th April 2021 12:08:38 pm
 
 
 !The file is split and has a second copyright disclaimer!
@@ -418,7 +418,7 @@ class RFStream(Stream):
                 if not isinstance(tr, RFTrace):
                     tr = RFTrace(trace=tr)
                 self.traces.append(tr)
-        super(RFStream, self).__init__(traces=traces)
+        super(RFStream, self).__init__(traces=self.traces)
 
     def __is_set(self, header):
         return all(header in tr.stats for tr in self)
@@ -477,7 +477,7 @@ class RFStream(Stream):
         #         import obspyh5
         #         old_index = obspyh5._INDEX
         #         obspyh5.set_index(_H5INDEX[index])
-        # super(RFStream, self).write(filename, format, **kwargs)
+        super(RFStream, self).write(filename, format, **kwargs)
         # if format.upper() == 'H5' and index:
         #     obspyh5.set_index(old_index)
         if format.upper() == 'Q':

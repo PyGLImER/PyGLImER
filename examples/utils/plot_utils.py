@@ -61,7 +61,7 @@ def set_mpl_params():
         'legend.edgecolor': 'inherit'
     }
     matplotlib.rcParams.update(params)
-#     matplotlib.font_manager._rebuild()
+    # matplotlib.font_manager._rebuild()
 
 
 def remove_all(ax=None, top=False, bottom=False, left=False, right=False,
