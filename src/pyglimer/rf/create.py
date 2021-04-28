@@ -562,7 +562,7 @@ class RFStream(Stream):
         st = RFStream(traces=RF_mo)
         if 'z' not in locals():
             z = np.hstack(
-                 ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+                ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
         return z, st
 
     def ppoint(self, vmodel_file='iasp91.dat', latb=None, lonb=None):
@@ -790,7 +790,9 @@ class RFStream(Stream):
         stream_dist(np.array(rayp), np.array(baz), nbins=nbins, v=v,
                     outputfile=outputfile, format=format,  dpi=dpi)
 
-    def __dirty_ccp_stacks(self, binlon, binlat, binz):
+    def __dirty_ccp_stacks(
+            self, dlon: float = 1.0, z_res: float = 1.0,
+            extent=[-180.0, 180.0, -90.0, 90.0], maxz=750):
         """This is the simplest way of creating quick not really accurate
         CCP stacks.
 
@@ -811,59 +813,107 @@ class RFStream(Stream):
         """
 
         # Check whether moveout and piercing points have been computed.
-        """Then, use a 3d histogram to create stacks, and create them quickly
-        
-        Area corrected binswith simple fix
-        WGS84 values:
-        f = 1/298.257223563
-        a = 6378137.0
-        e = 2*f-f**2
-
-        # Resolution
-        res = 1.0 # in deg
-
-        # Surface area
-        A = res**2 * (DEG2KM**2)
-
-        # Initial latitude vector
-        lon = np.arange(0, 90.0 + res, res)
-
-        # Get value of longitude
-        dlon = pi * a * cos(phi/180*pi) / (180 * sqrt(1 - e**2 * sin(phi/180*pi)**2))/1000
-
-        # Get value of approximate dlat
-        dlat = A/dlon
-
-        # Get cumulative latitude values
-        lat = cumsum(dlat/111.11)
-
-        # Filter out values larger than 90deg
-        lat = lat[np.where(lat <= 90)]
-
-        # Create meshgrid from new latittude vector and longitude vector
-        lon = np.arange(0, 180 + res, res)
-
-        # Create binedges
-        blat = np.hstack((-lat[::-1], 0, lat))
-        blon = np.hstack((-lon[::-1], 0, lon))
-        bz = np.arange(-10, maxz, res)
-
+        # Then, use a 3d histogram to create stacks, and create them quickly
         # Create
-        p = np.vstack((all_lat, all_lon, all_z)).T
+        self.moveout()
+        lat, lon, depth, rf = [], [], [], []
 
-        # Simple stacking 
-        stack = np.histogramdd(p, bins=(blat, blon,bz))
+        # @@@@ NEEDS WORK @@@@@@@@@@@ ###
+        for _tr in self:
+            latitude.append(_tr.stats.pp_latitude)
+            longitude.append(_tr.stats.pp_longitude)
+            depth.append(_tr.stats.pp_depth)  # Doubt that it's saved like this
+            rf.append(_tr.stats.data)
 
-        # bin centers
-        latc = (blat[:-1] + blat[1:])/2
-        lonc = (blon[:-1] + blon[1:])/2
-        zc   = (  bz[:-1] +   bz[1:])/2
+    # WGS84 values:
+    f = 1/298.257223563
+    a = 6378.137  # in meters
+    e = 2*f-f**2
 
-        return latc, lonc, zc, stack
-        """
+    # Surface area
+    A = dlon**2 * (DEG2KM**2)
 
-        # If yes, use to populated a volume histogramdd
-        # output volume data
+    # Get value of degree resolution in kilometers for a given latitude
+    def Dlon(theta): return dlon * pi * a * np.cos(theta/180*pi) / \
+        (180 * np.sqrt(1 - e**2 * np.sin(theta/180*pi)**2))
+
+    # Correct the latitudinal spacing by iteratively walk to the pole
+    lat = [0.0]
+    i = 0
+    while lat[-1] < 90.0:
+        dlat = A/Dlon(lat[-1])/DEG2KM
+        lat.append(lat[-1] + dlat)
+        i += 1
+    lat = np.array(lat)
+
+    # Filter out values larger than 90deg
+    lat = lat[np.where(lat <= 90)]
+
+    # Add 90.0 to at least include every value,
+    lat = np.append(lat, 90.0)
+
+    # Get how many "rings"
+    fdlat = lat[-1] - lat[-2]
+
+    # Compute cap area
+    area_per_dlon = 2*np.pi * a**2 * (1-np.cos(6/180*np.pi)) / (360/dlon)
+
+    # Number of longitude bins at the pol that correspond to one equatorial bin
+    ndlon = int(np.round(A/area_per_dlon))
+
+    # Create binedges
+    blat = np.hstack((-lat[::-1], 0, lat))
+    blon = np.arange(-180.0, 181.0 + dlon, dlon)
+    bz = np.arange(-10, maxz, dz)
+
+    # Create Volumes
+    points = np.vstack(
+        (np.array(longitude), np.array(latitude), np.array(depth))).T
+    bins = (blon, blat, bz)
+    ccp, _ = np.histogramdd(points, bins=bins, weights=rf)
+    illum, _ = np.histogramdd(points, bins=bins)
+
+    # Cut up range into chunks to fix the pol bins.
+
+    # Number of chunks at the pole
+    nchunks = len(blon) // ndlon
+
+    # Number of chunks at the Poles
+    slicerange = np.arange(0, len(blon))
+    chunks = [slicerange[_i*ndlon:_i*ndlon+ndlon]
+              for _i in range(nchunks)]
+    # Fix omitted chunks
+    chunks.append(slicerange[-(len(blon) - chunks[-1][-1] - 1):])
+
+    # Loop over chunks at the poles
+    for _chunk in chunks:
+        # South Pole (looks like a dimension mismatch, but should work)
+        ccpvals = np.sum(ccp[_chunk, 0, :], axis=0)
+        ccp[_chunk, 0, :] = ccpvals
+        illumvals = np.sum(illum[_chunk, 0, :], axis=0)
+        illum[_chunk, 0, :] = illumvals
+
+        # North Pole
+        ccpvals = np.sum(ccp[_chunk, -1, :], axis=0)
+        ccp[_chunk, -1, :] = ccpvals
+        illumvals = np.sum(illum[_chunk, -1, :], axis=0)
+        illum[_chunk, -1, :] = illumvals
+
+    # Normalize histograms
+    # Workaround for zero count values tto not get an error.
+    # Where counts == 0, zi = 0, else zi = zz/counts
+    zi = np.zeros_like(ccp)
+    zi[illum.astype(bool)] = ccp[illum.astype(bool)] / \
+        illum[illum.astype(bool)]
+
+    # bin centers
+    latc = (blat[:-1] + blat[1:])/2
+    lonc = (blon[:-1] + blon[1:])/2
+    zc = bz[:-1]
+
+    # Create Object from bincenters, and stacks?
+
+    return latc, lonc, zc, stack
 
 
 class RFTrace(Trace):

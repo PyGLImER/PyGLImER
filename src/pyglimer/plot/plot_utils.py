@@ -26,9 +26,10 @@ from cartopy.crs import PlateCarree
 
 from pyglimer.constants import maxz, res
 
+
 def set_mpl_params():
     params = {
-        #'font.family': 'Avenir Next',
+        # 'font.family': 'Avenir Next',
         'pdf.fonttype': 42,
         'font.weight': 'bold',
         'figure.dpi': 150,
@@ -65,7 +66,7 @@ def set_mpl_params():
         'legend.edgecolor': 'inherit'
     }
     matplotlib.rcParams.update(params)
-    matplotlib.font_manager._rebuild()
+    # matplotlib.font_manager._rebuild()
 
 
 def remove_all(ax=None, top=False, bottom=False, left=False, right=False,
@@ -109,33 +110,33 @@ def remove_topright(ax=None):
 def plot_catalog(catalog):
     """ Takes in event catalog and plots events as a function of location and moment
     magnitude."""
-    
-    plt.figure(figsize=(20,7.5))
+
+    plt.figure(figsize=(20, 7.5))
     ax = plt.subplot(111, projection=PlateCarree())
-    
+
     size = 1
     mags = []
     lats = []
     lons = []
-    
+
     for event in catalog:
         # Get mag
         mags.append(event.preferred_magnitude().mag)
-        
+
         # Get location
         origin = event.preferred_origin()
         lats.append(origin.latitude)
         lons.append(origin.longitude)
-    
+
     # Add coastline
     ax.add_feature(cartopy.feature.LAND, zorder=-2, edgecolor='black',
                    linewidth=0.5, facecolor=(0.9, 0.9, 0.9))
 
     # Plot events
     c = ax.scatter(np.array(lons), np.array(lats),  c=np.array(mags), s=size*np.array(mags)**3,
-               marker="o", cmap="magma", vmin=3, vmax=7.5,
-               edgecolor="k", linewidth=0.75, zorder=201)
-    cbar = plt.colorbar(c, pad=0.005, shrink=1)    
+                   marker="o", cmap="magma", vmin=3, vmax=7.5,
+                   edgecolor="k", linewidth=0.75, zorder=201)
+    cbar = plt.colorbar(c, pad=0.005, shrink=1)
     cbar.ax.set_ylabel(r"       $M_w$", rotation=0)
 
 
@@ -202,20 +203,20 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     #     times = depth
     else:
         z = np.hstack(
-                 ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+            ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
         times = z
 
     # Plot stuff into axes
-    ax.fill_between(times, 0, ydata, where=ydata > 0, 
+    ax.fill_between(times, 0, ydata, where=ydata > 0,
                     interpolate=True, color=(0.9, 0.2, 0.2))
-    ax.fill_between(times, 0, ydata, where=ydata < 0, 
+    ax.fill_between(times, 0, ydata, where=ydata < 0,
                     interpolate=True, color=(0.2, 0.2, 0.7))
     ax.plot(times, ydata, 'k', lw=0.75)
 
     # Set limits
     if tlim is None:
         # ax.set_xlim(times[0], times[-1])
-        ax.set_xlim(0, times[-1])  # don't really wanna see the stuff before  
+        ax.set_xlim(0, times[-1])  # don't really wanna see the stuff before
     else:
         ax.set_xlim(tlim)
 
@@ -244,26 +245,27 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     if axtmp is None:
         plt.tight_layout()
 
-    # Outout the receiver function as pdf using 
+    # Outout the receiver function as pdf using
     # its station name and starttime
     if outputdir is not None:
-        filename = os.path.join(outputdir, 
-                                rf.get_id() + "_" 
+        filename = os.path.join(outputdir,
+                                rf.get_id() + "_"
                                 + rf.stats.starttime._strftime_replacement('%Y%m%dT%H%M%S')
                                 + ".pdf")
         plt.savefig(filename, format="pdf")
     return ax
 
+
 def plot_section(rfst, channel="PRF",
-                 timelimits: list or tuple or None = None, 
+                 timelimits: list or tuple or None = None,
                  epilimits: list or tuple or None = None,
                  scalingfactor: float = 2.0, ax: plt.Axes = None,
                  line: bool = True,
-                 linewidth: float = 0.25, outputdir: str or None = None, 
+                 linewidth: float = 0.25, outputdir: str or None = None,
                  title: str or None = None, show: bool = True):
     """Creates plot of a receiver function section as a function
     of epicentral distance.
-    
+
     Parameters
     ----------
     rfst : :class:`pyglimer.RFStream`
@@ -295,14 +297,14 @@ def plot_section(rfst, channel="PRF",
     clean: bool
         If True, clears out all axes and plots RF only.
         Defaults to False.
-    
+
      Returns
     -------
     ax : `matplotlib.pyplot.Axes`
-    
+
     """
-    #set_mpl_params()
-        
+    # set_mpl_params()
+
     # Create figure if no axes is specified
     if ax is None:
         plt.figure(figsize=(10, 15))
@@ -314,8 +316,8 @@ def plot_section(rfst, channel="PRF",
     rfst_chan = rfst.sort(keys=['distance'])
 
     if not len(rfst_chan):
-        raise ValueError('There are no receiver functions of channel ' +channel
-    +' in the RFStream.')
+        raise ValueError('There are no receiver functions of channel ' + channel
+                         + ' in the RFStream.')
 
     # Plot traces
     for _i, rf in enumerate(rfst_chan):
@@ -327,7 +329,7 @@ def plot_section(rfst, channel="PRF",
                 times = np.flip(times)
         else:
             z = np.hstack(
-                 ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+                ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
             times = z
 
         rftmp = rf.data * scalingfactor \
@@ -360,7 +362,7 @@ def plot_section(rfst, channel="PRF",
     else:
         plt.ylim(timelimits)
     ax.invert_yaxis()
-    
+
     # Set labels
     plt.xlabel(r"$\Delta$ [$^{\circ}$]")
     if rfst[0].stats.type == 'time':
@@ -373,7 +375,7 @@ def plot_section(rfst, channel="PRF",
         plt.title(title + " - %s" % channel)
     else:
         plt.title("%s component" % channel)
-    
+
     # Set output directory
     if outputdir is None:
         plt.show()
@@ -495,7 +497,7 @@ def rayp_hist(rayp, nbins, v=5.8):
 
 def stream_dist(rayp: list or np.array, baz: list or np.array,
                 nbins: float = 50, v: float = 5.8, phase: str = 'P',
-                outputfile: None or str = None, format: str = "pdf", 
+                outputfile: None or str = None, format: str = "pdf",
                 dpi: int = 300):
     """Uses backazimuth and rayparameter histogram plotting tools to create
     combined overview over the Distribution of incident waves.
@@ -539,6 +541,3 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
         if format in ["pdf", "epsg", "svg", "ps"]:
             dpi = None
         plt.savefig(outputfile, format=format, dpi=dpi)
-
-
-

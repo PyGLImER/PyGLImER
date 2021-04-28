@@ -47,7 +47,7 @@ class SphericalNN(object):
         Lucas Sawade (lsawade@princeton.edu)
 
     :Last Modified:
-        2020.01.07 19.00
+        2021.04.21 20.00
 
     """
 

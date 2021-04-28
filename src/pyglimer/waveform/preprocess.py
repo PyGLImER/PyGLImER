@@ -47,7 +47,7 @@ def preprocess(
     event_cat: obspy.Catalog, model: obspy.taup.TauPyModel,
     taper_type: str, tz: int, ta: int, statloc: str, rawloc: str,
     preproloc: str, rfloc: str, deconmeth: str, hc_filt: float or None,
-    saveasdf: bool = True, netrestr=None, statrestr=None,
+    saveasdf: bool = False, netrestr=None, statrestr=None,
         logdir: str = None, debug: bool = False):
     """
      Preprocesses waveforms to create receiver functions
@@ -186,12 +186,12 @@ def preprocess(
             else:
                 n_j = -1
             out = Parallel(n_jobs=n_j)(
-                    delayed(__event_loop)(
-                        phase, rot, pol, event, taper_perc,
-                        taper_type, model, logger, rflogger, eh, tz,
-                        ta, statloc, rawloc, preproloc, rfloc, deconmeth,
-                        hc_filt, netrestr, statrestr)
-                    for event in evtcat)
+                delayed(__event_loop)(
+                    phase, rot, pol, event, taper_perc,
+                    taper_type, model, logger, rflogger, eh, tz,
+                    ta, statloc, rawloc, preproloc, rfloc, deconmeth,
+                    hc_filt, netrestr, statrestr)
+                for event in evtcat)
 
             # For simultaneous download, dicts are written
             #  while the processing is happening
@@ -284,7 +284,6 @@ def __event_loop(phase, rot, pol, event, taper_perc, taper_type, model,
 
     # Preprocessing just for some stations?
     # Then skip files that should not be preprocessed
-
     if netrestr:
         pattern = netrestr + '.' + (statrestr or '') + '*'
         files = fnmatch.filter(os.listdir(prepro_folder), pattern)
@@ -363,7 +362,7 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
                 else:
                     raise FileNotFoundError(
                         ["Station XML not available for station",
-                          network, station])
+                         network, station])
 
             # compute theoretical arrival
 
@@ -401,7 +400,7 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
 
         except SNRError as e:  # QR rejections
             logger.debug([filestr, "QC was not met, SNR ratios are",
-                         e])
+                          e])
 
             if __file_in_db(outdir, 'info.dat'):
                 with shelve.open(infof, flag='r') as info:
@@ -513,7 +512,7 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
             os.makedirs(rfdir, exist_ok=True)
 
             RF.write(os.path.join(rfdir, network + '.' + station + '.' + ot_loc
-                     + '.sac'), format='SAC')
+                                  + '.sac'), format='SAC')
 
             end = time.time()
             rflogger.info("RF created")

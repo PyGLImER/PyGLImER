@@ -41,21 +41,22 @@ from tqdm import tqdm
 import pyvista as pv
 import vtk
 
-
+import pyglimer
 from pyglimer.ccp.compute.bin import BinGrid
+from pyglimer.ccp.plot_utils.plot_bins import plot_bins
+from pyglimer.ccp.plot_utils.plot_cross_section import plot_cross_section
+from pyglimer.constants import R_EARTH, DEG2KM, KM2DEG
 from pyglimer.database.stations import StationDB
+from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
+from pyglimer.plot.plot_volume import VolumePlot, VolumeExploration
 from pyglimer.rf.create import read_rf
 from pyglimer.rf.moveout import res, maxz, maxzm
-from pyglimer.utils.utils import dt_string, chunks
-from pyglimer.utils.SphericalNN import SphericalNN
 from pyglimer.utils.createvmodel import ComplexModel
 from pyglimer.utils.geo_utils import epi2euc, geo2cart
-from pyglimer.ccp.plot_utils.plot_bins import plot_bins
-from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
-from pyglimer.constants import R_EARTH, DEG2KM, KM2DEG
-from pyglimer.plot.plot_volume import VolumePlot, VolumeExploration
 from pyglimer.utils.geo_utils import gctrack
 from pyglimer.utils.geo_utils import fix_map_extent
+from pyglimer.utils.SphericalNN import SphericalNN
+from pyglimer.utils.utils import dt_string, chunks
 
 
 class PhasePick(object):
@@ -283,7 +284,7 @@ class CCPStack(object):
         area = 2 * self.binrad
 
         # Get evenly distributed points
-        qlat, qlon, qdists, sdists = gctrack(slat, slon, self.bingrid.edist/2)
+        qlat, qlon, qdists, sdists = gctrack(slat, slon, self.bingrid.edist/4)
 
         # Get interpolation weights and rows.
         # Create SphericalNN kdtree
@@ -325,6 +326,9 @@ class CCPStack(object):
         qill = ill2D_interpolator((xqdists, xqz))
 
         return slat, slon, sdists, qlat, qlon, qdists, qz, qill, qccp, area
+
+    def plot_cross_section(self, *args, **kwargs):
+        return plot_cross_section(self, *args, **kwargs)
 
     def compute_stack(
         self, vel_model: str, rfloc: str = 'output/waveforms/RF',
