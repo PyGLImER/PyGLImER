@@ -1,0 +1,457 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyglimer.waveform.qc &mdash; PyGLImER 0.01 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyGLImER</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyglimer.waveform.qc</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyglimer.waveform.qc</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Contains quality control for waveforms used for receiver function creation.</span>
+
+<span class="sd">:copyright:</span>
+<span class="sd">   The PyGLImER development team (makus@gfz-potsdam.de).</span>
+<span class="sd">:license:</span>
+<span class="sd">   GNU Lesser General Public License, Version 3</span>
+<span class="sd">   (https://www.gnu.org/copyleft/lesser.html)</span>
+<span class="sd">:author:</span>
+<span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
+
+<span class="sd">Created: Friday, 10th April 2020 11:38:40 am</span>
+<span class="sd">Last Modified: Thursday, 25th March 2021 04:03:31 pm</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">obspy.signal</span> <span class="kn">import</span> <span class="nb">filter</span>
+
+<span class="c1"># QC parameters</span>
+
+<span class="c1"># filter frequencies for SNR check, all in Hz</span>
+<span class="n">lowco</span> <span class="o">=</span> <span class="p">[</span><span class="o">.</span><span class="mi">03</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">]</span>  <span class="c1"># only for PRF</span>
+
+<span class="n">lowcoS</span> <span class="o">=</span> <span class="o">.</span><span class="mi">01</span>  <span class="c1"># Changed 18.05 to compare with Hopper et. al. 2018</span>
+<span class="n">highco</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">.</span><span class="mi">33</span><span class="p">,</span> <span class="o">.</span><span class="mi">175</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># For SRFs, 16.06.2020 from .175 to .25 Hz</span>
+
+<span class="c1"># SNR criteria for QC</span>
+<span class="n">SNR_criteriaP</span> <span class="o">=</span> <span class="p">[</span><span class="mf">7.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>  <span class="c1"># [snrr, snrr2/snrr, snrz]</span>
+
+<span class="n">SNR_criteriaS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="o">.</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># QC4</span>
+<span class="c1"># 11.08 Test with a criterion that lets more waveforms pass:</span>
+<span class="c1"># qc_low: [7, .5, 1]</span>
+<span class="c1"># normal: [24, .4, 1]</span>
+<span class="c1"># [primary/noise, sidelobe/primary, r/z conversions]</span>
+
+
+<div class="viewcode-block" id="qcp"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.qc.qcp">[docs]</a><span class="k">def</span> <span class="nf">qcp</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">sampling_f</span><span class="p">,</span> <span class="n">onset</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Quality control for the downloaded waveforms that are used to create</span>
+<span class="sd">    PRFS. Works with various filters and SNR criteria</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    st : &#39;~obspy.Stream&#39;</span>
+<span class="sd">        Input stream.</span>
+<span class="sd">    dt : FLOAT</span>
+<span class="sd">        Sampling interval [s].</span>
+<span class="sd">    sampling_f : FLOAT</span>
+<span class="sd">        Sampling frequency (Hz).</span>
+<span class="sd">    onset : float</span>
+<span class="sd">        Onset in seconds after trace&#39;s start.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    st : &#39;~obspy.Stream&#39;</span>
+<span class="sd">        Output stream. If stream was accepted, then this will contain the</span>
+<span class="sd">        filtered stream, filtered with the broadest accepted filter.</span>
+<span class="sd">    crit : BOOL</span>
+<span class="sd">        True if stream was accepted, false if it wasn&#39;t.</span>
+<span class="sd">    f : FLOAT</span>
+<span class="sd">        Last used low-cut frequency. If crit=True, this will be the frequency</span>
+<span class="sd">        for which the stream was accepted.</span>
+<span class="sd">    noisemat : np.array</span>
+<span class="sd">        SNR values in form of a matrix. Rows represent the different filters</span>
+<span class="sd">        and columns the different criteria.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create stream dict to identify channels</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
+        <span class="n">stream</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">ptn1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mi">5</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">ptn2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">nptn</span> <span class="o">=</span> <span class="n">ptn2</span><span class="o">-</span><span class="n">ptn1</span><span class="o">+</span><span class="mi">1</span>
+    <span class="c1"># First part of the signal</span>
+    <span class="n">pts1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">onset</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">pts2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">+</span><span class="mf">7.5</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">npts</span> <span class="o">=</span> <span class="n">pts2</span><span class="o">-</span><span class="n">pts1</span><span class="o">+</span><span class="mi">1</span>
+    <span class="c1"># Second part of the signal</span>
+    <span class="n">ptp1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">+</span><span class="mi">15</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">ptp2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">+</span><span class="mf">22.5</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">nptp</span> <span class="o">=</span> <span class="n">ptp2</span><span class="o">-</span><span class="n">ptp1</span><span class="o">+</span><span class="mi">1</span>
+
+    <span class="c1"># Then, I&#39;ll have to filter in the for-loop</span>
+    <span class="c1"># and calculate the SNR</span>
+
+    <span class="c1"># matrix to save SNR</span>
+    <span class="n">noisemat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">lowco</span><span class="p">),</span>
+                         <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lowco</span><span class="p">):</span>
+        <span class="n">ftcomp</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">bandpass</span><span class="p">(</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">],</span> <span class="n">f</span><span class="p">,</span>
+                                 <span class="mf">4.99</span><span class="p">,</span> <span class="n">sampling_f</span><span class="p">,</span> <span class="n">corners</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">frcomp</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">bandpass</span><span class="p">(</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">],</span> <span class="n">f</span><span class="p">,</span>
+                                 <span class="mf">4.99</span><span class="p">,</span> <span class="n">sampling_f</span><span class="p">,</span> <span class="n">corners</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;Z&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">fzcomp</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">bandpass</span><span class="p">(</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">],</span> <span class="n">f</span><span class="p">,</span> <span class="mf">4.99</span><span class="p">,</span>
+                                     <span class="n">sampling_f</span><span class="p">,</span> <span class="n">corners</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">&quot;3&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">fzcomp</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">bandpass</span><span class="p">(</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">],</span> <span class="n">f</span><span class="p">,</span> <span class="mf">4.99</span><span class="p">,</span>
+                                     <span class="n">sampling_f</span><span class="p">,</span> <span class="n">corners</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Compute the SNR for given frequency bands</span>
+        <span class="n">snrr</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">frcomp</span><span class="p">[</span><span class="n">pts1</span><span class="p">:</span><span class="n">pts2</span><span class="p">]))</span><span class="o">/</span><span class="n">npts</span><span class="p">)</span>\
+            <span class="o">/</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">frcomp</span><span class="p">[</span><span class="n">ptn1</span><span class="p">:</span><span class="n">ptn2</span><span class="p">]))</span><span class="o">/</span><span class="n">nptn</span><span class="p">)</span>
+        <span class="n">snrr2</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">frcomp</span><span class="p">[</span><span class="n">ptp1</span><span class="p">:</span><span class="n">ptp2</span><span class="p">]))</span><span class="o">/</span><span class="n">nptp</span><span class="p">)</span>\
+            <span class="o">/</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">frcomp</span><span class="p">[</span><span class="n">ptn1</span><span class="p">:</span><span class="n">ptn2</span><span class="p">]))</span><span class="o">/</span><span class="n">nptn</span><span class="p">)</span>
+        <span class="n">snrz</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">fzcomp</span><span class="p">[</span><span class="n">pts1</span><span class="p">:</span><span class="n">pts2</span><span class="p">]))</span><span class="o">/</span><span class="n">npts</span><span class="p">)</span>\
+            <span class="o">/</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">fzcomp</span><span class="p">[</span><span class="n">ptn1</span><span class="p">:</span><span class="n">ptn2</span><span class="p">]))</span><span class="o">/</span><span class="n">nptn</span><span class="p">)</span>
+
+        <span class="c1"># Reject or accept traces depending on their SNR</span>
+        <span class="c1"># #1: snr1 &gt; 10 (30-37.5s, near P)</span>
+        <span class="c1"># snr2/snr1 &lt; 1 (where snr2 is 45-52.5 s, in the coda of P)</span>
+        <span class="c1"># note: - next possibility might be to remove those events that</span>
+        <span class="c1"># generate high snr between 200-250 s</span>
+
+        <span class="n">noisemat</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">snrr</span>
+        <span class="n">noisemat</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">snrr2</span><span class="o">/</span><span class="n">snrr</span>
+        <span class="n">noisemat</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">snrz</span>
+
+        <span class="k">if</span> <span class="n">snrr</span> <span class="o">&gt;</span> <span class="n">SNR_criteriaP</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span>\
+            <span class="n">snrr2</span><span class="o">/</span><span class="n">snrr</span> <span class="o">&lt;</span> <span class="n">SNR_criteriaP</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span>\
+                <span class="n">snrz</span> <span class="o">&gt;</span> <span class="n">SNR_criteriaP</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>  <span class="c1"># accept</span>
+            <span class="n">crit</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1"># overwrite the old traces with the sucessfully filtered ones</span>
+            <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;R&quot;</span><span class="p">:</span>
+                    <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">frcomp</span>
+                <span class="k">elif</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Z&quot;</span>\
+                    <span class="ow">or</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;3&quot;</span> <span class="ow">or</span>\
+                        <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span>
+                    <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">fzcomp</span>
+                <span class="k">elif</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span>
+                    <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ftcomp</span>
+            <span class="k">break</span>  <span class="c1"># waveform is accepted</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">crit</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">st</span><span class="p">,</span> <span class="n">crit</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">noisemat</span></div>
+
+
+<div class="viewcode-block" id="qcs"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.qc.qcs">[docs]</a><span class="k">def</span> <span class="nf">qcs</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">sampling_f</span><span class="p">,</span> <span class="n">onset</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Quality control for waveforms that are used to produce SRF. In contrast</span>
+<span class="sd">    to the ones used for PRF this is a very rigid criterion and will reject</span>
+<span class="sd">    &gt;95% of the waveforms.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    st : &#39;~obspy.Stream&#39;</span>
+<span class="sd">        Input stream.</span>
+<span class="sd">    dt : FLOAT</span>
+<span class="sd">        Sampling interval [s].</span>
+<span class="sd">    sampling_f : FLOAT</span>
+<span class="sd">        Sampling frequency (Hz).</span>
+<span class="sd">    onset : float</span>
+<span class="sd">        Onset in seconds after trace&#39;s start.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    st : &#39;~obspy.Stream&#39;</span>
+<span class="sd">        Output stream. If stream was accepted, then this will contain the</span>
+<span class="sd">        filtered stream, filtered with the broadest accepted filter.</span>
+<span class="sd">    crit : BOOL</span>
+<span class="sd">        True if stream was accepted, false if it wasn&#39;t.</span>
+<span class="sd">    f : FLOAT</span>
+<span class="sd">        Last used high-cut frequency. If crit=True, this will be the frequency</span>
+<span class="sd">        for which the stream was accepted.</span>
+<span class="sd">    noisemat : np.array</span>
+<span class="sd">        SNR values in form of a matrix. Rows represent the different filters</span>
+<span class="sd">        and columns the different criteria.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create stream dict to identify channels</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
+        <span class="n">stream</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="n">ptn1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mi">5</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>  <span class="c1"># Hopefully relatively silent time</span>
+    <span class="n">ptn2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">nptn</span> <span class="o">=</span> <span class="n">ptn2</span><span class="o">-</span><span class="n">ptn1</span>
+    <span class="c1"># First part of the signal</span>
+    <span class="n">pts1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">onset</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>  <span class="c1"># theoretical arrival time</span>
+    <span class="n">pts2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">+</span><span class="mi">10</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">npts</span> <span class="o">=</span> <span class="n">pts2</span><span class="o">-</span><span class="n">pts1</span>
+    <span class="c1"># Second part of the signal</span>
+    <span class="n">ptp1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">+</span><span class="mi">10</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">ptp2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">+</span><span class="mi">35</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">nptp</span> <span class="o">=</span> <span class="n">ptp2</span><span class="o">-</span><span class="n">ptp1</span>
+    <span class="c1"># part where the Sp converted arrival should be strong</span>
+    <span class="n">ptc1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">-</span><span class="mi">50</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">ptc2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">-</span><span class="mi">10</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">nptc</span> <span class="o">=</span> <span class="n">ptc2</span><span class="o">-</span><span class="n">ptc1</span>
+
+    <span class="c1"># filter</span>
+    <span class="c1"># matrix to save SNR</span>
+    <span class="n">noisemat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">highco</span><span class="p">),</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># Filter</span>
+    <span class="c1"># At some point, I might also want to consider to change the lowcof</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">hf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">highco</span><span class="p">):</span>
+        <span class="n">ftcomp</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">bandpass</span><span class="p">(</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">],</span> <span class="n">lowcoS</span><span class="p">,</span>
+                                 <span class="n">hf</span><span class="p">,</span> <span class="n">sampling_f</span><span class="p">,</span> <span class="n">corners</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">frcomp</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">bandpass</span><span class="p">(</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">],</span> <span class="n">lowcoS</span><span class="p">,</span>
+                                 <span class="n">hf</span><span class="p">,</span> <span class="n">sampling_f</span><span class="p">,</span> <span class="n">corners</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;Z&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">fzcomp</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">bandpass</span><span class="p">(</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">],</span> <span class="n">lowcoS</span><span class="p">,</span> <span class="n">hf</span><span class="p">,</span>
+                                     <span class="n">sampling_f</span><span class="p">,</span> <span class="n">corners</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">&quot;3&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">fzcomp</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">bandpass</span><span class="p">(</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">],</span> <span class="n">lowcoS</span><span class="p">,</span> <span class="n">hf</span><span class="p">,</span>
+                                     <span class="n">sampling_f</span><span class="p">,</span> <span class="n">corners</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Compute the SNR for given frequency bands</span>
+        <span class="c1"># strength of primary arrival</span>
+        <span class="n">snrr</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">frcomp</span><span class="p">[</span><span class="n">pts1</span><span class="p">:</span><span class="n">pts2</span><span class="p">]))</span><span class="o">/</span><span class="n">npts</span><span class="p">)</span>\
+            <span class="o">/</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">frcomp</span><span class="p">[</span><span class="n">ptn1</span><span class="p">:</span><span class="n">ptn2</span><span class="p">]))</span><span class="o">/</span><span class="n">nptn</span><span class="p">)</span>
+        <span class="c1"># how spiky is the arrival?</span>
+        <span class="n">snrr2</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">frcomp</span><span class="p">[</span><span class="n">ptp1</span><span class="p">:</span><span class="n">ptp2</span><span class="p">]))</span><span class="o">/</span><span class="n">nptp</span><span class="p">)</span>\
+            <span class="o">/</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">frcomp</span><span class="p">[</span><span class="n">ptn1</span><span class="p">:</span><span class="n">ptn2</span><span class="p">]))</span><span class="o">/</span><span class="n">nptn</span><span class="p">)</span>
+        <span class="c1"># horizontal vs vertical</span>
+        <span class="c1"># snrz = (sum(np.square(frcomp[pts1:pts2]))/npts)\</span>
+        <span class="c1">#     / (sum(np.square(fzcomp[pts1:pts2]))/npts)</span>
+        <span class="n">snrc</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">frcomp</span><span class="p">[</span><span class="n">ptc1</span><span class="p">:</span><span class="n">ptc2</span><span class="p">]))</span><span class="o">/</span><span class="n">nptc</span><span class="p">)</span>\
+            <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">fzcomp</span><span class="p">[</span><span class="n">ptc1</span><span class="p">:</span><span class="n">ptc2</span><span class="p">])</span><span class="o">/</span><span class="n">nptc</span><span class="p">)</span>
+
+        <span class="n">noisemat</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">snrr</span>
+        <span class="n">noisemat</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">snrr2</span><span class="o">/</span><span class="n">snrr</span>
+        <span class="n">noisemat</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">snrc</span>
+
+        <span class="c1"># accept if</span>
+        <span class="k">if</span> <span class="n">snrr</span> <span class="o">&gt;</span> <span class="n">SNR_criteriaS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span>\
+            <span class="n">snrr2</span><span class="o">/</span><span class="n">snrr</span> <span class="o">&lt;</span> <span class="n">SNR_criteriaS</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span>\
+                <span class="n">snrc</span> <span class="o">&lt;</span> <span class="n">SNR_criteriaS</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="c1"># This bit didn&#39;t give good results</span>
+            <span class="c1"># max(frcomp) == max(frcomp[round((onset-2)/dt):</span>
+            <span class="c1">#                           round((onset+10)/dt)]):</span>
+            <span class="n">crit</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1"># overwrite the old traces with the sucessfully filtered ones</span>
+            <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;R&quot;</span><span class="p">:</span>
+                    <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">frcomp</span>
+                <span class="k">elif</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Z&quot;</span>\
+                    <span class="ow">or</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;3&quot;</span> <span class="ow">or</span>\
+                        <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span>
+                    <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">fzcomp</span>
+                <span class="k">elif</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span>
+                    <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ftcomp</span>
+            <span class="k">break</span>  <span class="c1"># waveform is accepted</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">crit</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">st</span><span class="p">,</span> <span class="n">crit</span><span class="p">,</span> <span class="n">hf</span><span class="p">,</span> <span class="n">noisemat</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, the PyGLImER development team.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
