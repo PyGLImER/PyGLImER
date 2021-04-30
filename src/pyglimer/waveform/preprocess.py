@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Sunday, 25th April 2021 11:37:16 am
+Last Modified: Friday, 30th April 2021 01:24:43 pm
 '''
 
 # !/usr/bin/env python3d
@@ -32,6 +32,7 @@ from pathlib import Path
 
 # from pyglimer.waveform.preprocessh5 import preprocessh5
 from pyglimer import tmp
+from pyglimer.utils.signalproc import resample_or_decimate
 from .errorhandler import redownload, redownload_statxml, \
     NoMatchingResponseHandler  # , NotLinearlyIndependentHandler
 # from ..constants import DEG2KM
@@ -577,7 +578,8 @@ def __cut_resample(st, logger, first_arrival, network, station,
     # trim to according length
     # Anti-Alias
     st.filter(type="lowpass", freq=4.95, zerophase=True, corners=2)
-    st.resample(10)  # resample streams with 10Hz sampling rate
+    # st.resample(10)  # resample streams with 10Hz sampling rate
+    st = resample_or_decimate(st, 10)
     st.trim(starttime=starttime, endtime=endtime)
     # After trimming length has to be checked again (recording may
     # be empty now)

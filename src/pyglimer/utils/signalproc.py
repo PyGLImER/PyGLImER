@@ -12,10 +12,33 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Sunday, 20th October 2019 10:31:03 am
-Last Modified: Thursday, 25th March 2021 04:01:06 pm
+Last Modified: Friday, 30th April 2021 01:23:28 pm
 '''
 
 import numpy as np
+from obspy import Stream
+
+
+def resample_or_decimate(data: Stream, sampling_rate_new: int) -> Stream:
+    """
+    Decimates the data if the desired new sampling rate allows to do so.
+    Else the signal will be interpolated (a lot slower).
+
+    :note: The stream has to be filtered a priori to avoid aliasing.
+
+    :param data: Stream to be resampled.
+    :type data: Stream
+    :param sampling_rate_new: The desired new sampling rate
+    :type sampling_rate_new: int
+    :return: The resampled stream
+    :rtype: Stream
+    """
+    sr = data[0].stats.sampling_rate
+    srn = sampling_rate_new
+    if sr/srn == sr//srn:
+        return data.decimate(int(sr//srn), no_filter=True)
+    else:
+        return data.resample(srn)
 
 
 def convf(u, v, nf, dt):
