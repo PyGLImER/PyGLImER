@@ -12,7 +12,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Sunday, 20th October 2019 10:31:03 am
-Last Modified: Friday, 30th April 2021 01:23:28 pm
+Last Modified: Friday, 30th April 2021 03:56:23 pm
 '''
 
 import numpy as np
@@ -24,7 +24,7 @@ def resample_or_decimate(data: Stream, sampling_rate_new: int) -> Stream:
     Decimates the data if the desired new sampling rate allows to do so.
     Else the signal will be interpolated (a lot slower).
 
-    :note: The stream has to be filtered a priori to avoid aliasing.
+    :note: The stream has to be filtered before to avoid aliasing.
 
     :param data: Stream to be resampled.
     :type data: Stream
