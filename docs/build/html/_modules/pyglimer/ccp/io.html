@@ -1,0 +1,304 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyglimer.ccp.io &mdash; PyGLImER 0.01 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyGLImER</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyglimer.ccp.io</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyglimer.ccp.io</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module will handle file IO. The problematic functions here are the</span>
+<span class="sd">incoming `.mat` files that are produced by the GLImER database.</span>
+
+<span class="sd">:copyright:</span>
+<span class="sd">   The PyGLImER development team (makus@gfz-potsdam.de).</span>
+<span class="sd">:license:</span>
+<span class="sd">   GNU Lesser General Public License, Version 3</span>
+<span class="sd">   (https://www.gnu.org/copyleft/lesser.html)</span>
+<span class="sd">:author:</span>
+<span class="sd">   Lucas Sawade (lsawade@princeton.edu)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="load_rawrf"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.ccp.io.load_rawrf">[docs]</a><span class="k">def</span> <span class="nf">load_rawrf</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename (str): filename of the receiver function `.mat`-file to be loaded.</span>
+<span class="sd">                    The `.mat`-file is expected to contain following parameters:</span>
+
+<span class="sd">                        crfs: MxN matrix of M Receiver Functions and N elements</span>
+<span class="sd">                        cbaz: M elements long vector with back azimuth values</span>
+<span class="sd">                              corresponding to Receiver functions</span>
+<span class="sd">                        crayp: M elements long vector with ray parameter values</span>
+<span class="sd">                               corresponding to Receiver functions</span>
+<span class="sd">                        cslat: M elements long vector with station latitude</span>
+<span class="sd">                               corresponding to Receiver functions</span>
+<span class="sd">                        cslon: M elements long vector with station longitude</span>
+<span class="sd">                               corresponding to Receiver functions</span>
+<span class="sd">                        celev: M elements long vector with station elevation</span>
+<span class="sd">                        dt: sampling interval</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    rfs, baz, rayp, lat, lon, elev, dt</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">baz</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;cbaz&#39;</span><span class="p">][()]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">elev</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;celev&#39;</span><span class="p">][()]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">rayp</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;crayp&#39;</span><span class="p">][()]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">rfs</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;crfs&#39;</span><span class="p">][()]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;cslat&#39;</span><span class="p">][()]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;cslon&#39;</span><span class="p">][()]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">][()]</span>
+
+    <span class="k">return</span> <span class="n">rfs</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">rayp</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">elev</span><span class="p">,</span> <span class="n">dt</span></div>
+
+
+<div class="viewcode-block" id="load_velocity_model"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.ccp.io.load_velocity_model">[docs]</a><span class="k">def</span> <span class="nf">load_velocity_model</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Loads velocity model and outputs velocities and corresponding</span>
+<span class="sd">    parameters.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    vlat, vlon, vdep, vp, vs</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">vlat</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">][()]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">vlon</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">][()]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">vdep</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;dep&#39;</span><span class="p">][()]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">vp</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;vp&#39;</span><span class="p">][()]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+            <span class="n">vs</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;vs&#39;</span><span class="p">][()]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">vlat</span><span class="p">,</span> <span class="n">vlon</span><span class="p">,</span> <span class="n">vdep</span><span class="p">,</span> <span class="n">vp</span><span class="p">,</span> <span class="n">vs</span></div>
+
+
+<div class="viewcode-block" id="load_tracefile"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.ccp.io.load_tracefile">[docs]</a><span class="k">def</span> <span class="nf">load_tracefile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loading an RF file that has been raytraced.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Load file</span>
+    <span class="n">npzfile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="c1"># Allocate variables</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">npzfile</span><span class="p">[</span><span class="s1">&#39;rf&#39;</span><span class="p">]</span>
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">npzfile</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">]</span>
+    <span class="n">lon</span> <span class="o">=</span> <span class="n">npzfile</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">]</span>
+    <span class="n">baz</span> <span class="o">=</span> <span class="n">npzfile</span><span class="p">[</span><span class="s1">&#39;baz&#39;</span><span class="p">]</span>
+    <span class="n">rayp</span> <span class="o">=</span> <span class="n">npzfile</span><span class="p">[</span><span class="s1">&#39;rayp&#39;</span><span class="p">]</span>
+    <span class="n">elev</span> <span class="o">=</span> <span class="n">npzfile</span><span class="p">[</span><span class="s1">&#39;elev&#39;</span><span class="p">]</span>
+    <span class="n">clat</span> <span class="o">=</span> <span class="n">npzfile</span><span class="p">[</span><span class="s1">&#39;clat&#39;</span><span class="p">]</span>
+    <span class="n">clon</span> <span class="o">=</span> <span class="n">npzfile</span><span class="p">[</span><span class="s1">&#39;clon&#39;</span><span class="p">]</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">npzfile</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">]</span>
+    <span class="n">dtimes</span> <span class="o">=</span> <span class="n">npzfile</span><span class="p">[</span><span class="s1">&#39;dtimes&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">rf</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">rayp</span><span class="p">,</span> <span class="n">elev</span><span class="p">,</span> <span class="n">clat</span><span class="p">,</span> <span class="n">clon</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">dtimes</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, the PyGLImER development team.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

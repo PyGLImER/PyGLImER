@@ -1,0 +1,489 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyglimer.waveform.rotate &mdash; PyGLImER 0.01 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyGLImER</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyglimer.waveform.rotate</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyglimer.waveform.rotate</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Contains functions to rotate a stream into different domains</span>
+
+<span class="sd">:copyright:</span>
+<span class="sd">   The PyGLImER development team (makus@gfz-potsdam.de).</span>
+<span class="sd">:license:</span>
+<span class="sd">   GNU Lesser General Public License, Version 3</span>
+<span class="sd">   (https://www.gnu.org/copyleft/lesser.html)</span>
+<span class="sd">:author:</span>
+<span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
+
+<span class="sd">Created: Saturday, 21st March 2020 07:26:03 pm</span>
+<span class="sd">Last Modified: Thursday, 25th March 2021 04:05:35 pm</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">..utils.createvmodel</span> <span class="kn">import</span> <span class="n">load_avvmodel</span>
+
+
+<div class="viewcode-block" id="rotate_PSV"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.rotate.rotate_PSV">[docs]</a><span class="k">def</span> <span class="nf">rotate_PSV</span><span class="p">(</span><span class="n">statlat</span><span class="p">,</span> <span class="n">statlon</span><span class="p">,</span> <span class="n">rayp</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds the incidence angle of an incoming ray with the weighted average</span>
+<span class="sd">    of the lithosphere&#39;s P velocity with a velocity model compiled from</span>
+<span class="sd">    Litho1.0.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    statlat : FLOAT</span>
+<span class="sd">        station latitude.</span>
+<span class="sd">    statlon : FLOAT</span>
+<span class="sd">        station longitude.</span>
+<span class="sd">    rayp : FLOAT</span>
+<span class="sd">        ray parameter / slownesss in s/m.</span>
+<span class="sd">    st : obspy.Stream</span>
+<span class="sd">        Input stream given in RTZ.</span>
+<span class="sd">    phase : str</span>
+<span class="sd">        Primary phase, either P or S.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    avp : FLOAT</span>
+<span class="sd">        Average P-wave velocity.</span>
+<span class="sd">    avs : FLOAT</span>
+<span class="sd">        Average S-wave velocity.</span>
+<span class="sd">    PSvSh : obspy.Stream</span>
+<span class="sd">        Stream in P-Sv-Sh.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">load_avvmodel</span><span class="p">()</span>
+    <span class="n">avp</span><span class="p">,</span> <span class="n">avs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">statlat</span><span class="p">,</span> <span class="n">statlon</span><span class="p">,</span> <span class="n">phase</span><span class="p">)</span>
+
+    <span class="c1"># Do the rotation as in Rondenay (2009)</span>
+    <span class="c1"># Note that in contrast to the paper the z-components have to be</span>
+    <span class="c1"># negated as it uses a definition, where depth is positive</span>
+    <span class="n">qa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">avp</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">rayp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">qb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">avs</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">rayp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">avs</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">rayp</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="o">.</span><span class="mi">5</span>
+    <span class="n">rotmat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">a</span><span class="o">/</span><span class="p">(</span><span class="n">avp</span><span class="o">*</span><span class="n">qa</span><span class="p">),</span> <span class="n">rayp</span><span class="o">*</span><span class="n">avs</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">avp</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="o">-</span><span class="n">rayp</span><span class="o">*</span><span class="n">avs</span><span class="p">,</span> <span class="o">-</span><span class="n">a</span><span class="o">/</span><span class="p">(</span><span class="n">avs</span><span class="o">*</span><span class="n">qb</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]])</span>
+
+    <span class="c1"># 1. Find which component is which one and put them in a dict</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="n">st</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">st</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="n">st</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">st</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">}</span>
+
+    <span class="c1"># deep copy</span>
+    <span class="n">PSvSh</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">del</span> <span class="n">st</span>
+    <span class="c1"># create input matrix, Z component is sometimes called 3</span>
+    <span class="k">if</span> <span class="s2">&quot;Z&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">A_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">],</span>
+                        <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">],</span>
+                        <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">]])</span>
+    <span class="k">elif</span> <span class="s2">&quot;3&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">A_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">],</span>
+                         <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">],</span>
+                         <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">]])</span>
+    <span class="n">PSS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rotmat</span><span class="p">,</span> <span class="n">A_in</span><span class="p">)</span>
+
+    <span class="c1"># 3. save P, Sv and Sh trace and change the label of the stream</span>
+    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">PSvSh</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;R&quot;</span><span class="p">:</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;V&quot;</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">PSS</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Z&quot;</span> <span class="ow">or</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;3&quot;</span><span class="p">:</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;P&quot;</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">PSS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;H&quot;</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">PSS</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="c1"># PSvSh.normalize()</span>
+    <span class="k">return</span> <span class="n">avp</span><span class="p">,</span> <span class="n">avs</span><span class="p">,</span> <span class="n">PSvSh</span></div>
+
+
+<div class="viewcode-block" id="rotate_LQT"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.rotate.rotate_LQT">[docs]</a><span class="k">def</span> <span class="nf">rotate_LQT</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rotates a stream given in RTZ to LQT using Singular Value Decomposition</span>
+<span class="sd">    Use rotate_LQT_min as it tends to deliver better results.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    st : obspy.Stream</span>
+<span class="sd">        Input Stream in RTZ.</span>
+<span class="sd">    phase : STRING, optional</span>
+<span class="sd">        &quot;S&quot; for Sp or &quot;P&quot; for Ps.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    LQT : obspy.Stream</span>
+<span class="sd">        Output Stream in LQT.</span>
+<span class="sd">    QC : FLOAT</span>
+<span class="sd">        Quality control criterion. Energy balance at first arrival for L and Q.</span>
+<span class="sd">        Should deviate from 1 as far as possible.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
+        <span class="n">onset</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="k">elif</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
+        <span class="n">onset</span> <span class="o">=</span> <span class="mi">120</span>
+
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span>  <span class="c1"># sampling interval</span>
+
+    <span class="c1"># Deep copy stream</span>
+    <span class="n">LQT</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">del</span> <span class="n">st</span>
+
+    <span class="c1"># only check around phase-arrival</span>
+    <span class="c1"># window</span>
+    <span class="k">if</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+        <span class="n">ws</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+        <span class="n">we</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+        <span class="n">ws</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+        <span class="n">we</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+
+    <span class="c1"># 1. Find which component is which one and put them in a dict</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">LQT</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">LQT</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="n">LQT</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">LQT</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="n">LQT</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">LQT</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">}</span>
+
+    <span class="c1"># create input matrix, Z component is sometimes called 3</span>
+    <span class="k">if</span> <span class="s2">&quot;Z&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">A_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">][</span><span class="n">ws</span><span class="p">:</span><span class="n">we</span><span class="p">],</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">][</span><span class="n">ws</span><span class="p">:</span><span class="n">we</span><span class="p">]])</span>
+        <span class="n">ZR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">]])</span>
+    <span class="k">elif</span> <span class="s2">&quot;3&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">A_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">][</span><span class="n">ws</span><span class="p">:</span><span class="n">we</span><span class="p">],</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">][</span><span class="n">ws</span><span class="p">:</span><span class="n">we</span><span class="p">]])</span>
+        <span class="n">ZR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">]])</span>
+
+    <span class="c1"># Work with energies instead of amplitudes</span>
+    <span class="n">A_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">A_in</span><span class="p">)</span>
+
+    <span class="c1"># Conduct svd</span>
+    <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">A_in</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># 2. Now, find out which is L and which Q by finding out which one has</span>
+    <span class="c1"># the maximum energy around theoretical S-wave arrival - that one would</span>
+    <span class="c1"># be Q. Or for Ps: maximum energy around P-wave arrival on L</span>
+
+    <span class="n">A_rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">s</span><span class="p">)))</span>
+
+    <span class="c1"># When working with energies A_rot is ambiguous for 180 deg, so I will</span>
+    <span class="c1"># have to test here: element (2,1) is always negative, all others positive.</span>
+    <span class="k">if</span> <span class="n">A_rot</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">A_rot</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="n">A_rot</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">if</span> <span class="n">A_rot</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">A_rot</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="n">A_rot</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="n">LQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A_rot</span><span class="p">,</span> <span class="n">ZR</span><span class="p">)</span>
+    <span class="c1"># point of primary arrival</span>
+    <span class="n">pp1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">pp2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">+</span><span class="mi">10</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">npp</span> <span class="o">=</span> <span class="n">pp2</span> <span class="o">-</span> <span class="n">pp1</span>
+    <span class="c1"># point where converted Sp arrive</span>
+    <span class="k">if</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+        <span class="n">pc1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">-</span><span class="mi">40</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+        <span class="n">pc2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">-</span><span class="mi">15</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+        <span class="c1"># Point where PS arrives</span>
+        <span class="n">pc1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">+</span><span class="mi">20</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+        <span class="n">pc2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">+</span><span class="mi">40</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+
+    <span class="n">npc</span> <span class="o">=</span> <span class="n">pc2</span> <span class="o">-</span> <span class="n">pc1</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">LQ</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">pp1</span><span class="p">:</span><span class="n">pp2</span><span class="p">])</span><span class="o">/</span><span class="n">npp</span><span class="p">)</span> <span class="o">/</span>\
+        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">LQ</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">pc1</span><span class="p">:</span><span class="n">pc2</span><span class="p">])</span><span class="o">/</span><span class="n">npc</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">LQ</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">pp1</span><span class="p">:</span><span class="n">pp2</span><span class="p">])</span><span class="o">/</span><span class="n">npp</span><span class="p">)</span> <span class="o">/</span>\
+        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">LQ</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">pc1</span><span class="p">:</span><span class="n">pc2</span><span class="p">])</span><span class="o">/</span><span class="n">npc</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span> <span class="ow">or</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">LQ</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">LQ</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span> <span class="ow">or</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">LQ</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">LQ</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># 3. save L and Q trace and change the label of the stream</span>
+    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">LQT</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;R&quot;</span><span class="p">:</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;Q&quot;</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Q</span>
+        <span class="k">elif</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Z&quot;</span> <span class="ow">or</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;3&quot;</span><span class="p">:</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;L&quot;</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">L</span>
+
+    <span class="n">QC</span> <span class="o">=</span> <span class="n">a</span><span class="o">/</span><span class="n">b</span>
+    <span class="k">return</span> <span class="n">LQT</span><span class="p">,</span> <span class="n">QC</span></div>
+
+
+<div class="viewcode-block" id="rotate_LQT_min"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.rotate.rotate_LQT_min">[docs]</a><span class="k">def</span> <span class="nf">rotate_LQT_min</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rotates stream to LQT by minimising the energy of the S-wave primary</span>
+<span class="sd">    arrival on the L component (SRF) or maximising the primary arrival</span>
+<span class="sd">    energy on L (PRF).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    st : obspy.Stream</span>
+<span class="sd">        Input stream in RTZ.</span>
+<span class="sd">    phase : STRING, optional</span>
+<span class="sd">        &quot;P&quot; for Ps or &quot;S&quot; for Sp.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    LQT : obspy.Stream</span>
+<span class="sd">        Output stream in LQT.</span>
+<span class="sd">    ia : float</span>
+<span class="sd">        Computed incidence angle in degree. Can serve as QC criterion.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
+        <span class="n">onset</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
+        <span class="n">onset</span> <span class="o">=</span> <span class="mi">120</span>
+
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span>
+
+    <span class="c1"># point of primary arrival</span>
+    <span class="n">pp1</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">pp2</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">onset</span><span class="o">+</span><span class="mi">10</span><span class="p">)</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">LQT</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">del</span> <span class="n">st</span>
+
+    <span class="c1"># identify components</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">LQT</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">LQT</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="n">LQT</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">LQT</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="n">LQT</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">LQT</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">}</span>
+    <span class="k">if</span> <span class="s2">&quot;Z&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">ZR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">]])</span>
+    <span class="k">elif</span> <span class="s2">&quot;3&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">ZR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">]])</span>
+
+    <span class="c1"># calculate energy of the two components around zero</span>
+    <span class="n">ia</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>  <span class="c1"># incidence angle</span>
+    <span class="n">E_L</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">ia</span><span class="p">:</span>
+        <span class="n">A_rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ii</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ii</span><span class="p">)],</span>
+                          <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ii</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ii</span><span class="p">)]])</span>
+        <span class="n">LQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A_rot</span><span class="p">,</span> <span class="n">ZR</span><span class="p">[:,</span> <span class="n">pp1</span><span class="p">:</span><span class="n">pp2</span><span class="p">])</span>
+        <span class="c1"># E_LQ = np.dot(A_rot, E_ZR)</span>
+        <span class="n">E_LQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">LQ</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">E_L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E_LQ</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">E_LQ</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+        <span class="n">ii</span> <span class="o">=</span> <span class="n">E_L</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">E_L</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+        <span class="n">ii</span> <span class="o">=</span> <span class="n">E_L</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">E_L</span><span class="p">))</span>
+    <span class="n">ia</span> <span class="o">=</span> <span class="n">ia</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+    <span class="n">A_rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ia</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ia</span><span class="p">)],</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ia</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ia</span><span class="p">)]])</span>
+    <span class="n">LQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A_rot</span><span class="p">,</span> <span class="n">ZR</span><span class="p">)</span>
+
+    <span class="c1"># 3. save L and Q trace and change the label of the stream</span>
+    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">LQT</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;R&quot;</span><span class="p">:</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;Q&quot;</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">LQ</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Z&quot;</span> <span class="ow">or</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;3&quot;</span><span class="p">:</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;L&quot;</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">LQ</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ia</span> <span class="o">=</span> <span class="n">ia</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="k">return</span> <span class="n">LQT</span><span class="p">,</span> <span class="n">ia</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, the PyGLImER development team.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

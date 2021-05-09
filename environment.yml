@@ -11,6 +11,7 @@ dependencies:
   - matplotlib
   - numpy
   - obspy
+  - OWSLib
   - pandas
   - pathlib
   - pip
@@ -25,5 +26,6 @@ dependencies:
   - flake8
   - pyvista
   - pip:
+    - global-land-mask
     - sphinx
     - sphinx-rtd-theme

@@ -1,0 +1,383 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyglimer.utils.signalproc &mdash; PyGLImER 0.01 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyGLImER</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyglimer.utils.signalproc</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyglimer.utils.signalproc</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">:copyright:</span>
+<span class="sd">   The PyGLImER development team (makus@gfz-potsdam.de).</span>
+<span class="sd">:license:</span>
+<span class="sd">   GNU Lesser General Public License, Version 3</span>
+<span class="sd">   (https://www.gnu.org/copyleft/lesser.html)</span>
+<span class="sd">:author:</span>
+<span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
+
+<span class="sd">Created: Sunday, 20th October 2019 10:31:03 am</span>
+<span class="sd">Last Modified: Thursday, 25th March 2021 04:01:06 pm</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="convf"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.signalproc.convf">[docs]</a><span class="k">def</span> <span class="nf">convf</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convolution conducted in the frequency domain.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    u : np.array</span>
+<span class="sd">        Array 1.</span>
+<span class="sd">    v : np.array</span>
+<span class="sd">        Array 2.</span>
+<span class="sd">    nf : INTEGER</span>
+<span class="sd">        Array length in frequency domain (use next power of 2).</span>
+<span class="sd">    dt : FLOAT</span>
+<span class="sd">        Sampling Interval [s].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    c : np.array</span>
+<span class="sd">        Convolution of u with v.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">)</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">U</span><span class="o">*</span><span class="n">V</span><span class="o">*</span><span class="n">dt</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">c</span></div>
+
+
+<div class="viewcode-block" id="corrf"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.signalproc.corrf">[docs]</a><span class="k">def</span> <span class="nf">corrf</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">nf</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cross-correlation in frequency domain,</span>
+<span class="sd">    calculates the x=crosscorr(u,v). Hence, v is the flipped vector.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    u : np.array</span>
+<span class="sd">        flipped vector.</span>
+<span class="sd">    v : np.array</span>
+<span class="sd">        Vector that the correlation is measured to.</span>
+<span class="sd">    nf : INTEGER</span>
+<span class="sd">        Array length in frequency domain (use next power of 2).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    x : np.array</span>
+<span class="sd">        Correlation vector.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">))</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">U</span><span class="o">*</span><span class="n">V</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="gaussian"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.signalproc.gaussian">[docs]</a><span class="k">def</span> <span class="nf">gaussian</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a zero-phase Gaussian function. In particular meant to be</span>
+<span class="sd">    convolved with the impulse</span>
+<span class="sd">    response that is the output of an iterative deconvolution</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    N : INTEGER</span>
+<span class="sd">        Length of the desired array.</span>
+<span class="sd">    dt : FLOAT</span>
+<span class="sd">        Sampling interval [s].</span>
+<span class="sd">    width : FLOAT</span>
+<span class="sd">        Width parameter of the Gaussian function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    G : np.array</span>
+<span class="sd">        Gaussian window.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">N</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span>  <span class="c1"># frequency step</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">N</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">*</span><span class="n">df</span>  <span class="c1"># frequency array</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">f</span>  <span class="c1"># angular frequency</span>
+
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">G</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">w</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">width</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="n">dt</span>
+    <span class="n">G_lr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+    <span class="n">G</span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">G_lr</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">G</span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:]):]</span>
+    <span class="k">return</span> <span class="n">G</span></div>
+
+
+<div class="viewcode-block" id="filter"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.signalproc.filter">[docs]</a><span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">nf</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convolves a filter with a signal (given in time domain).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    s : np.array</span>
+<span class="sd">        Signal given in time domain.</span>
+<span class="sd">    F : np.array</span>
+<span class="sd">        Filter&#39;s amplitude response.</span>
+<span class="sd">    dt : FLOAT</span>
+<span class="sd">        Sampling interval [s].</span>
+<span class="sd">    nf : INTEGER</span>
+<span class="sd">        Array length in frequency domain (use next power of 2).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    s_f : np.array</span>
+<span class="sd">        Filtered signal.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    INPUT</span>
+<span class="sd">    s: signal in time domain</span>
+<span class="sd">    F: Filter&#39;s amplitude response</span>
+<span class="sd">    dt: sampling interval</span>
+<span class="sd">    nf: length of the signal/filter in f-domain&quot;&quot;&quot;</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">)</span>
+    <span class="n">S_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">F</span><span class="p">)</span><span class="o">*</span><span class="n">dt</span>
+    <span class="n">s_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">S_f</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">s_f</span></div>
+
+
+<div class="viewcode-block" id="ricker"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.signalproc.ricker">[docs]</a><span class="k">def</span> <span class="nf">ricker</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; create a zero-phase Ricker / Mexican hat wavelet</span>
+<span class="sd">INPUT:</span>
+<span class="sd">    sigma - standard deviation</span>
+<span class="sd">    dt - sampling Interval</span>
+<span class="sd">    N2 - number of samples/2 (halflength). Full length = 2*N2+1&quot;&quot;&quot;</span>
+    <span class="n">rick_tt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">N2</span><span class="p">,</span> <span class="n">N2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">*</span><span class="n">dt</span>  <span class="c1"># time vector</span>
+    <span class="n">rick</span> <span class="o">=</span> <span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">sigma</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">rick_tt</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>\
+        <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">rick_tt</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">rick_tt</span><span class="p">,</span> <span class="n">rick</span></div>
+
+
+<div class="viewcode-block" id="noise"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.signalproc.noise">[docs]</a><span class="k">def</span> <span class="nf">noise</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; create random noise</span>
+<span class="sd">    INPUT:</span>
+<span class="sd">        N: signal length</span>
+<span class="sd">        A: maximal amplitude&quot;&quot;&quot;</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">*</span><span class="n">A</span>
+    <span class="k">return</span> <span class="n">noise</span></div>
+
+
+<div class="viewcode-block" id="sshift"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.signalproc.sshift">[docs]</a><span class="k">def</span> <span class="nf">sshift</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">shift</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; shift a signal by a given time-shift in the frequency domain</span>
+<span class="sd">    INPUT:</span>
+<span class="sd">        s: signal</span>
+<span class="sd">        N2: length of the signal in f-domain (usually equals the next pof 2)</span>
+<span class="sd">        dt: sampling interval</span>
+<span class="sd">        shift: the time shift in seconds&quot;&quot;&quot;</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">N2</span><span class="p">)</span>
+
+    <span class="n">k</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">shift</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>  <span class="c1"># discrete shift</span>
+    <span class="c1"># p = 2*np.pi*np.arange(0, N2, 1, dtype=float)*k/N2  # phase shift</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="o">/</span><span class="n">N2</span>  <span class="c1"># phase shift</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">S</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+
+    <span class="n">s_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">N2</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">k</span><span class="o">/</span><span class="n">N2</span><span class="p">)</span>  <span class="c1"># correct scaling</span>
+    <span class="k">return</span> <span class="n">s_out</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, the PyGLImER development team.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

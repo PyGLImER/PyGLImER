@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Sunday, 25th April 2021 12:08:38 pm
+Last Modified: Sunday, 9th May 2021 10:38:53 am
 
 
 !The file is split and has a second copyright disclaimer!
@@ -1146,13 +1146,15 @@ class RFTrace(Trace):
         st.pp_latitude = []
         st.pp_longitude = []
 
-        if st.station_elevation > 0:
-            st.pp_depth = np.hstack(
-                (np.arange(-round(st.station_elevation/1000, 1), 0, .1),
-                 np.arange(0, maxz + res)))[:len(delta)]
-        else:
-            st.pp_depth = np.arange(-round(st.station_elevation/1000),
-                                    maxz + res, res)[0:len(delta)]
+        # if st.station_elevation > 0:
+        #     st.pp_depth = np.hstack(
+        #         (np.arange(-round(st.station_elevation/1000, 1), 0, .1),
+        #          np.arange(0, maxz + res)))[:len(delta)]
+        # else:
+        #     st.pp_depth = np.arange(-round(st.station_elevation/1000),
+        #                             maxz + res, res)[0:len(delta)]
+        # as the other ones are filled with nans we can start here
+        st.pp_depth = z
 
         # Calculate ppoint position
         for dis in delta:

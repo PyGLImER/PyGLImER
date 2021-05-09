@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 25th March 2021 03:34:58 pm
+Last Modified: Wednesday, 28th April 2021 05:04:08 pm
 '''
 
 # !/usr/bin/env python3
@@ -33,7 +33,8 @@ from scipy.interpolate import RegularGridInterpolator
 
 from obspy import read_inventory
 import scipy.io as sio
-from mpl_toolkits.basemap import Basemap
+# from mpl_toolkits.basemap import Basemap
+from global_land_mask import globe
 # from pathlib import Path
 from psutil import virtual_memory
 # import subprocess
@@ -816,21 +817,25 @@ only show the progress per chunk.')
 
         # Check if bins are on land
         if not keep_water:
-            bm = Basemap(
-                resolution='c', projection='cyl',
-                llcrnrlat=self.coords[0][0].min(),
-                llcrnrlon=self.coords[1][0].min(),
-                urcrnrlat=self.coords[0][0].max(),
-                urcrnrlon=self.coords[1][0].max())
+            # bm = Basemap(
+            #     resolution='c', projection='cyl',
+            #     llcrnrlat=self.coords[0][0].min(),
+            #     llcrnrlon=self.coords[1][0].min(),
+            #     urcrnrlat=self.coords[0][0].max(),
+            #     urcrnrlon=self.coords[1][0].max())
+
             if keep_empty:
                 self.coords_new = self.coords.copy()
 
             lats, lons = self.coords_new
-            index = []  # list of indices that contain water
+            # index = []  # list of indices that contain water
+            index = globe.is_ocean(lats, lons)[0, :] # list of indices that contain water
+            print(index.shape)
 
-            for i, (lat, lon) in enumerate(zip(lats[0], lons[0])):
-                if not bm.is_land(lon, lat):
-                    index.append(i)
+            # for i, (lat, lon) in enumerate(zip(lats[0], lons[0])):
+            #     # if not bm.is_land(lon, lat):
+            #     if not globe.is_land(lat, lon):
+            #         index.append(i)
             self.ccp = np.delete(self.ccp, index, 0)
             self.hits = np.delete(self.hits, index, 0)
             self.coords_new = (np.delete(self.coords_new[0], index, 1),
