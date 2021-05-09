@@ -829,7 +829,8 @@ only show the progress per chunk.')
 
             lats, lons = self.coords_new
             # index = []  # list of indices that contain water
-            index = globe.is_ocean(lats, lons)[0, :] # list of indices that contain water
+            # list of indices that contain water
+            index = globe.is_ocean(lats, lons)[0, :]
             print(index.shape)
 
             # for i, (lat, lon) in enumerate(zip(lats[0], lons[0])):

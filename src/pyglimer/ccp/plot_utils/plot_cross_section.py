@@ -1,5 +1,5 @@
 # Basic
-from typing import Optional, Union
+from typing import Optional, Union, Iterable
 
 # External
 import numpy as np
@@ -34,6 +34,7 @@ def get_ax_coor(ax, lat, lon):
 
 def plot_cross_section(
         ccp, lat, lon,
+        z0: Optional[float] = None,
         ax: Optional[Axes] = None,
         geoax: Optional[Union[GeoAxes, GeoAxesSubplot]] = None,
         mapplot: bool = True,
@@ -41,15 +42,66 @@ def plot_cross_section(
         vmin: Optional[float] = None,
         vmax: Optional[float] = None,
         label: Optional[str] = None,
-        rfcmap: str = "seismic"):
+        rfcmap: str = "seismic",
+        depthextent: Optional[Iterable] = None,
+        mapextent: Optional[Iterable] = None):
+    """Plots a cross section for given waypoints. If no axes are given, the 
+    function will also create figures for the map and the cross section.
+
+    Parameters
+    ----------
+    ccp : CCPStack
+        CCPStack as computed using the cpp module
+    lat : Arraylike
+        Latitudes of the waypoints defining the cross section
+    lon : Arraylike
+        Longitudes of the waypoints defining the cross section
+    z0 : Optional[float], optional
+        if given the map will be plotted with an illumination map at the given 
+        depth, by default None
+    ax : Optional[Axes], optional
+        Axes to plot the cross section in, by default None
+    geoax : Optional[Union[GeoAxes, GeoAxesSubplot]], optional
+        Axes to plot the waypoins in, by default None
+    mapplot : bool, optional
+        plot the map or not, by default True
+    minillum : int, optional
+        minimum illumination count to not be grayed out, by default 50
+    vmin : Optional[float], optional
+        minimum value of the cross section, by default None
+    vmax : Optional[float], optional
+        maximum value of the cross section, by default None
+    label : Optional[str], optional
+        label to put in the corner of the cross section plot and the 
+        cross section waypoints on the map, by default None
+    rfcmap : str, optional
+        cmap name for the plotting of the cross section, by default "seismic"
+    depthextent : Optional[Iterable], optional
+        List containing two entries defining min and max depth, by default None
+    mapextent : Optional[Iterable], optional
+        List of 4 entries defining [minlon,maxlon, minlat, maxlat], 
+        by default None
+
+    Returns
+    -------
+    Tuple
+        ax, geoax
+
+
+    Notes
+    -----
+
+    :Authors:
+        Lucas Sawade (lsawade@princeton.edu)
+
+    :Last Modified:
+        2021.04.21 20.00 (Lucas Sawade)
+
+    """
 
     # Get Cross section
     slat, slon, sdists, qlat, qlon, qdists, qz, qillum, qccp, epi_area = \
         ccp.get_profile(lat, lon)
-
-    # Get depth slice (mainly for the illumination)
-    zqlat, zqlon, zqill, zqccp, zextent, z0 = ccp.get_depth_slice(z0=410)
-    zalpha = np.where(zqill == 0, 0, 0.5)
 
     # Define norms
     if vmin is None:
@@ -57,11 +109,8 @@ def plot_cross_section(
     if vmax is None:
         vmax = np.quantile(qccp[qccp > 0], 0.98)
 
-    # RF and Illumination norm
-    rfnorm = MidpointNormalize(vmin=vmin, vmax=vmax, midpoint=0.0)
-    illumnorm = mcolors.LogNorm(vmin=1, vmax=zqill.max())
-    illumcmap = 'magma_r'
     # Norm for the cross section
+    rfnorm = MidpointNormalize(vmin=vmin, vmax=vmax, midpoint=0.0)
     snorm = mcolors.Normalize(vmin=0, vmax=sdists[-1])
 
     # Set illumination boundaries for section plotting
@@ -73,26 +122,40 @@ def plot_cross_section(
 
         # Create a map figure if None present
         if geoax is None:
+
             plt.figure()
             geoax = plt.axes(projection=ccrs.PlateCarree())
+            if mapextent is not None:
+                geoax.set_extent(mapextent)
             plot_map(geoax)
             geoax.tick_params(labelright=False, labeltop=False)
 
             # Plot illumination
-            geoax.imshow(
-                zqill, alpha=zalpha,
-                extent=zextent, origin='lower',
-                transform=ccrs.PlateCarree(),
-                cmap=illumcmap, norm=illumnorm)
+            if z0 is not None:
+                # Get depth slice (mainly for the illumination)
+                zqlat, zqlon, zqill, zqccp, zextent, z0 = ccp.get_depth_slice(
+                    z0=z0)
+                zalpha = np.where(zqill == 0, 0, 0.5)
 
-            # Create colorbar from artifical scalarmappable (alpha is problematic)
-            c = plt.colorbar(
-                ScalarMappable(cmap=plt.get_cmap(illumcmap), norm=illumnorm),
-                orientation='vertical', aspect=40)
-            c.set_label("Hitcount")
+                # Get norm and cmap for the illumination map
+                illumnorm = mcolors.LogNorm(vmin=1, vmax=zqill.max())
+                illumcmap = 'magma_r'
 
-            # Set colormap alpha manually
-            c.solids.set(alpha=0.5)
+                geoax.imshow(
+                    zqill, alpha=zalpha,
+                    extent=zextent, origin='lower',
+                    transform=ccrs.PlateCarree(),
+                    cmap=illumcmap, norm=illumnorm)
+
+                # Create colorbar from artifical scalarmappable (alpha is problematic)
+                c = plt.colorbar(
+                    ScalarMappable(cmap=plt.get_cmap(
+                        illumcmap), norm=illumnorm),
+                    orientation='vertical', aspect=40)
+                c.set_label("Hitcount")
+
+                # Set colormap alpha manually
+                c.solids.set(alpha=0.5)
 
         # Plot cross section
         geoax.plot(qlon, qlat, 'k', zorder=10, transform=ccrs.PlateCarree())
@@ -137,6 +200,12 @@ def plot_cross_section(
     else:
         ax.set_facecolor((0.8, 0.8, 0.8))
 
+    if depthextent is not None:
+        ax.set_ylim(depthextent[::-1])
+        minz = depthextent[0]
+    else:
+        minz = np.min(qz)
+
     # Plot section
     plt.imshow(
         qccp,
@@ -145,8 +214,9 @@ def plot_cross_section(
         aspect='auto', alpha=alpha, rasterized=True)
 
     # Plot waypoints
+
     ax.scatter(
-        sdists, np.min(qz) * np.ones_like(sdists), c=sdists, s=50,
+        sdists, minz * np.ones_like(sdists), c=sdists, s=50,
         cmap='Greys', norm=snorm,
         marker='o', edgecolor='k',
         zorder=10, clip_on=False)

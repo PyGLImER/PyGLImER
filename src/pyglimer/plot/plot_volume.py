@@ -38,22 +38,32 @@ class VolumePlot:
         Parameters:
         -----------
         X : `numpy.ndarray`
-        1d vector with x data
+            1d vector with x data
         Y : `numpy.ndarray`
-        1d vector with y data
+            1d vector with y data
         Z : `numpy.ndarray`
-        1d vector with z data
+            1d vector with z data
         V : `numpy.ndarray`
-        3D array with volumetric data
+            3D array with volumetric data
         xl : float
-        X slice location. No slice is plotted if None.
-        Default None.
+            X slice location. No slice is plotted if None.
+            Default None.
         yl : float
-        Y slice location. No slice is plotted if None.
-        Default None.
+            Y slice location. No slice is plotted if None.
+            Default None.
         zl : float
-        Z slice location. No slice is plotted if None.
-        Default None.
+            Z slice location. No slice is plotted if None.
+            Default None.
+
+        Notes
+        -----
+
+        :Authors:
+            Lucas Sawade (lsawade@princeton.edu)
+
+        :Last Modified:
+            2021.04.21 20.00 (Lucas Sawade)
+
         """
 
         # Input allocation
@@ -341,16 +351,34 @@ class VolumePlot:
 class VolumeExploration:
 
     def __init__(self, X, Y, Z, V, xl=None, yl=None, zl=None):
-        """ Control Panel that controls a volume plot.
+        """ Control Panel that controls a volume plot defined above.
 
-        Args:
-            X (`numpy.ndarray`): X (Longitude) Offset
-            Y ([type]): Y (Latitude) Offset
-            Z ([type]): Depth
-            V ([type]): Input Volume
-            xl (int, optional): [description]. Defaults to 135.
-            yl (float, optional): [description]. Defaults to 37.5.
-            zl (int, optional): [description]. Defaults to -50.
+        Parameters
+        ----------
+        X : Arraylike
+            X (Longitude) Offset
+        Y : Arraylike
+            Y (Latitude) Offset
+        Z : Arraylike
+            Depth
+        V : Arraylike
+            Input Volume
+        xl : float, optional
+            Slice location. Defaults to 135.
+        yl :float, optional
+            slice location in y direction. Defaults to 37.5.
+        zl : float, optional 
+            zslice location. Defaults to -50.
+
+        Notes
+        -----
+
+        :Authors:
+            Lucas Sawade (lsawade@princeton.edu)
+
+        :Last Modified:
+            2021.04.21 20.00 (Lucas Sawade)
+
         """
         plt.ion()
 

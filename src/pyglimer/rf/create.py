@@ -44,6 +44,7 @@ from pyglimer.rf.deconvolve import it, spectraldivision, multitaper
 from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table,\
     dt_table_3D
 from pyglimer.plot.plot_utils import plot_section, plot_single_rf, stream_dist
+from pyglimer.utils.geo_utils import fix_map_extent
 
 logger = logging.Logger("rf")
 
@@ -798,6 +799,18 @@ class RFStream(Stream):
         CCP stacks.
 
 
+        .. warning::
+            There are some things that the user should be aware of. The bins
+            right at the poles may or may not have very different areas 
+            compared to the other bins, which is a side effect of the iterative 
+            computation of bin area correction. I have an idea on how to fix
+            it, but it is not really necessary right now. If you are working 
+            with stations at the pole, and you want to CCP stack, I'd strongly
+            advise against using this function anyways. The bins are just 
+            too narrow. This really is just a 'dirty' CCP stack and should only 
+            be used as a first order check if thing are ok.
+
+
         Parameters
         ----------
         dlon : float, optional
@@ -826,14 +839,10 @@ class RFStream(Stream):
         logger.info("Computing Move-out correction")
         self.moveout(vmodel=vmodel_file)
 
-        # @@@@ NEEDS WORK @@@@@@@@@@@ ###
+        #
         logger.info("Getting locations corresponding to the traces")
         latitude, longitude, depth, rf = [], [], [], []
-        for _tr in self[:4]:
-            print("lat:", len(_tr.stats.pp_latitude))
-            print("lon:", len(_tr.stats.pp_longitude))
-            print("dep:", len(_tr.stats.pp_depth))
-            print("rfs:", len(_tr.data))
+        for _tr in self:
             latitude.extend(_tr.stats.pp_latitude)
             longitude.extend(_tr.stats.pp_longitude)
             depth.extend(_tr.stats.pp_depth)  # Doubt that it's saved like this
@@ -870,15 +879,25 @@ class RFStream(Stream):
         fdlat = lat[-1] - lat[-2]
 
         # Compute cap area
-        area_per_dlon = 2*np.pi * a**2 * (1-np.cos(6/180*np.pi)) / (360/dlon)
+        cap_theta = lat[-2]
+        area_per_dlon = 2*np.pi * a**2 * \
+            (1-np.cos(cap_theta/180*np.pi)) / (360/dlon)
 
         # Number of longitude bins at the pol that correspond to one equatorial bin
-        ndlon = int(np.round(A/area_per_dlon))
+        # Not used anymore
+        ndlon = int(np.ceil(A/area_per_dlon))
 
         # Create binedges
         blat = np.hstack((-lat[::-1], 0, lat))
-        blon = np.arange(-180.0, 181.0 + dlon, dlon)
+        blon = np.arange(-180.0, 180.0 + dlon, dlon)
         bz = np.arange(-10, maxz, z_res)
+
+        # Get buffered extent
+        fextent = fix_map_extent(extent)
+
+        # Fix the geographical bin edges depending on the extent
+        blon = blon[np.where((fextent[0] <= blon) & (blon <= fextent[1]))]
+        blat = blat[np.where((fextent[2] <= blat) & (blat <= fextent[3]))]
 
         # Create Volumes
         points = np.vstack(
@@ -887,37 +906,41 @@ class RFStream(Stream):
         ccp, _ = np.histogramdd(points, bins=bins, weights=rf)
         illum, _ = np.histogramdd(points, bins=bins)
 
+        # #### This is unused at the moment because it is not required for the
+        # #### code to work and only a correction for bins at the very pole.
+
         # Cut up range into chunks to fix the pol bins.
-
         # Number of chunks at the pole
-        nchunks = len(blon) // ndlon
+        # print(len(blon))
+        # print(ndlon)
+        # nchunks = len(blon) // ndlon
 
-        # Number of chunks at the Poles
-        slicerange = np.arange(0, len(blon))
-        chunks = [slicerange[_i*ndlon:_i*ndlon+ndlon]
-                  for _i in range(nchunks)]
-        # Fix omitted chunks
-        chunks.append(slicerange[-(len(blon) - chunks[-1][-1] - 1):])
+        # # Number of chunks at the Poles
+        # slicerange = np.arange(0, len(blon)-1)
+        # chunks = [slicerange[_i*ndlon:_i*ndlon+ndlon]
+        #           for _i in range(nchunks)]
+        # # Fix omitted chunks
+        # chunks.append(slicerange[-(len(blon) - chunks[-1][-1] - 1):])
 
-        # Loop over chunks at the poles
-        for _chunk in chunks:
-            # South Pole (looks like a dimension mismatch, but should work)
-            ccpvals = np.sum(ccp[_chunk, 0, :], axis=0)
-            ccp[_chunk, 0, :] = ccpvals
-            illumvals = np.sum(illum[_chunk, 0, :], axis=0)
-            illum[_chunk, 0, :] = illumvals
+        # # Loop over chunks at the poles
+        # for _chunk in chunks:
+        #     # South Pole (looks like a dimension mismatch, but should work)
+        #     ccpvals = np.sum(ccp[_chunk, 0, :], axis=0)
+        #     ccp[_chunk, 0, :] = ccpvals
+        #     illumvals = np.sum(illum[_chunk, 0, :], axis=0)
+        #     illum[_chunk, 0, :] = illumvals
 
-            # North Pole
-            ccpvals = np.sum(ccp[_chunk, -1, :], axis=0)
-            ccp[_chunk, -1, :] = ccpvals
-            illumvals = np.sum(illum[_chunk, -1, :], axis=0)
-            illum[_chunk, -1, :] = illumvals
+        #     # North Pole
+        #     ccpvals = np.sum(ccp[_chunk, -1, :], axis=0)
+        #     ccp[_chunk, -1, :] = ccpvals
+        #     illumvals = np.sum(illum[_chunk, -1, :], axis=0)
+        #     illum[_chunk, -1, :] = illumvals
 
         # Normalize histograms
         # Workaround for zero count values tto not get an error.
         # Where counts == 0, zi = 0, else zi = zz/counts
-        zi = np.zeros_like(ccp)
-        zi[illum.astype(bool)] = ccp[illum.astype(bool)] / \
+        ccpi = np.zeros_like(ccp)
+        ccpi[illum.astype(bool)] = ccp[illum.astype(bool)] / \
             illum[illum.astype(bool)]
 
         # bin centers
@@ -926,8 +949,7 @@ class RFStream(Stream):
         zc = bz[:-1]
 
         # Create Object from bincenters, and stacks?
-
-        return latc, lonc, zc, stack
+        return latc, lonc, zc, ccpi, illum
 
 
 class RFTrace(Trace):
