@@ -790,130 +790,144 @@ class RFStream(Stream):
         stream_dist(np.array(rayp), np.array(baz), nbins=nbins, v=v,
                     outputfile=outputfile, format=format,  dpi=dpi)
 
-    def __dirty_ccp_stacks(
+    def dirty_ccp_stack(
             self, dlon: float = 1.0, z_res: float = 1.0,
-            extent=[-180.0, 180.0, -90.0, 90.0], maxz=750):
+            extent=[-180.0, 180.0, -90.0, 90.0], maxz=750,
+            vmodel_file='iasp91.dat'):
         """This is the simplest way of creating quick not really accurate
         CCP stacks.
 
-        This function is still empty, but I'm leaving it here, because I think
-        it should be implemented. Sometime this week maybe
 
-        Parameters:
-        binlon:  `numpy.ndarray`
-        1D Array describing the longitude bins
-        binlon:  `numpy.ndarray`
-        1D Array describing the latitude bins
-        binlon:  `numpy.ndarray`
-        1D Array describing the depth bins
+        Parameters
+        ----------
+        dlon : float, optional
+            stetp size in longitude, by default 1.0
+        z_res : float, optional
+            depth resolution, by default 1.0
+        extent : list, optional
+            list of bounds [minlon, maxlon, minlat, maxlat], 
+            by default [-180.0, 180.0, -90.0, 90.0]
+        maxz : int, optional
+            maxz, by default 750
+        vmodel_file : str, optional
+            velocity model file. IASP91 1-D model used as standard  since 
+            the assumption of rectangular bins is already a bit rough, 
+            by default 'iasp91.dat'
 
-        Returns:
-        V : 3D `numpy.ndarray`
-
+        Returns
+        -------
+        tuple   
+            containing, vectors outlining the mesh illumination etc.
         """
 
         # Check whether moveout and piercing points have been computed.
         # Then, use a 3d histogram to create stacks, and create them quickly
         # Create
-        self.moveout()
-        lat, lon, depth, rf = [], [], [], []
+        logger.info("Computing Move-out correction")
+        self.moveout(vmodel=vmodel_file)
 
         # @@@@ NEEDS WORK @@@@@@@@@@@ ###
-        for _tr in self:
-            latitude.append(_tr.stats.pp_latitude)
-            longitude.append(_tr.stats.pp_longitude)
-            depth.append(_tr.stats.pp_depth)  # Doubt that it's saved like this
-            rf.append(_tr.stats.data)
+        logger.info("Getting locations corresponding to the traces")
+        latitude, longitude, depth, rf = [], [], [], []
+        for _tr in self[:4]:
+            print("lat:", len(_tr.stats.pp_latitude))
+            print("lon:", len(_tr.stats.pp_longitude))
+            print("dep:", len(_tr.stats.pp_depth))
+            print("rfs:", len(_tr.data))
+            latitude.extend(_tr.stats.pp_latitude)
+            longitude.extend(_tr.stats.pp_longitude)
+            depth.extend(_tr.stats.pp_depth)  # Doubt that it's saved like this
+            rf.extend(_tr.data)
 
-    # WGS84 values:
-    f = 1/298.257223563
-    a = 6378.137  # in meters
-    e = 2*f-f**2
+        # WGS84 values:
+        f = 1/298.257223563
+        a = 6378.137  # in meters
+        e = 2*f-f**2
 
-    # Surface area
-    A = dlon**2 * (DEG2KM**2)
+        # Surface area
+        A = dlon**2 * (DEG2KM**2)
 
-    # Get value of degree resolution in kilometers for a given latitude
-    def Dlon(theta): return dlon * pi * a * np.cos(theta/180*pi) / \
-        (180 * np.sqrt(1 - e**2 * np.sin(theta/180*pi)**2))
+        # Get value of degree resolution in kilometers for a given latitude
+        def Dlon(theta): return dlon * np.pi * a * np.cos(theta/180*np.pi) / \
+            (180 * np.sqrt(1 - e**2 * np.sin(theta/180*np.pi)**2))
 
-    # Correct the latitudinal spacing by iteratively walk to the pole
-    lat = [0.0]
-    i = 0
-    while lat[-1] < 90.0:
-        dlat = A/Dlon(lat[-1])/DEG2KM
-        lat.append(lat[-1] + dlat)
-        i += 1
-    lat = np.array(lat)
+        # Correct the latitudinal spacing by iteratively walk to the pole
+        lat = [0.0]
+        i = 0
+        while lat[-1] < 90.0:
+            dlat = A/Dlon(lat[-1])/DEG2KM
+            lat.append(lat[-1] + dlat)
+            i += 1
+        lat = np.array(lat)
 
-    # Filter out values larger than 90deg
-    lat = lat[np.where(lat <= 90)]
+        # Filter out values larger than 90deg
+        lat = lat[np.where(lat <= 90)]
 
-    # Add 90.0 to at least include every value,
-    lat = np.append(lat, 90.0)
+        # Add 90.0 to at least include every value,
+        lat = np.append(lat, 90.0)
 
-    # Get how many "rings"
-    fdlat = lat[-1] - lat[-2]
+        # Get how many "rings"
+        fdlat = lat[-1] - lat[-2]
 
-    # Compute cap area
-    area_per_dlon = 2*np.pi * a**2 * (1-np.cos(6/180*np.pi)) / (360/dlon)
+        # Compute cap area
+        area_per_dlon = 2*np.pi * a**2 * (1-np.cos(6/180*np.pi)) / (360/dlon)
 
-    # Number of longitude bins at the pol that correspond to one equatorial bin
-    ndlon = int(np.round(A/area_per_dlon))
+        # Number of longitude bins at the pol that correspond to one equatorial bin
+        ndlon = int(np.round(A/area_per_dlon))
 
-    # Create binedges
-    blat = np.hstack((-lat[::-1], 0, lat))
-    blon = np.arange(-180.0, 181.0 + dlon, dlon)
-    bz = np.arange(-10, maxz, dz)
+        # Create binedges
+        blat = np.hstack((-lat[::-1], 0, lat))
+        blon = np.arange(-180.0, 181.0 + dlon, dlon)
+        bz = np.arange(-10, maxz, z_res)
 
-    # Create Volumes
-    points = np.vstack(
-        (np.array(longitude), np.array(latitude), np.array(depth))).T
-    bins = (blon, blat, bz)
-    ccp, _ = np.histogramdd(points, bins=bins, weights=rf)
-    illum, _ = np.histogramdd(points, bins=bins)
+        # Create Volumes
+        points = np.vstack(
+            (np.array(longitude), np.array(latitude), np.array(depth))).T
+        bins = (blon, blat, bz)
+        ccp, _ = np.histogramdd(points, bins=bins, weights=rf)
+        illum, _ = np.histogramdd(points, bins=bins)
 
-    # Cut up range into chunks to fix the pol bins.
+        # Cut up range into chunks to fix the pol bins.
 
-    # Number of chunks at the pole
-    nchunks = len(blon) // ndlon
+        # Number of chunks at the pole
+        nchunks = len(blon) // ndlon
 
-    # Number of chunks at the Poles
-    slicerange = np.arange(0, len(blon))
-    chunks = [slicerange[_i*ndlon:_i*ndlon+ndlon]
-              for _i in range(nchunks)]
-    # Fix omitted chunks
-    chunks.append(slicerange[-(len(blon) - chunks[-1][-1] - 1):])
+        # Number of chunks at the Poles
+        slicerange = np.arange(0, len(blon))
+        chunks = [slicerange[_i*ndlon:_i*ndlon+ndlon]
+                  for _i in range(nchunks)]
+        # Fix omitted chunks
+        chunks.append(slicerange[-(len(blon) - chunks[-1][-1] - 1):])
 
-    # Loop over chunks at the poles
-    for _chunk in chunks:
-        # South Pole (looks like a dimension mismatch, but should work)
-        ccpvals = np.sum(ccp[_chunk, 0, :], axis=0)
-        ccp[_chunk, 0, :] = ccpvals
-        illumvals = np.sum(illum[_chunk, 0, :], axis=0)
-        illum[_chunk, 0, :] = illumvals
+        # Loop over chunks at the poles
+        for _chunk in chunks:
+            # South Pole (looks like a dimension mismatch, but should work)
+            ccpvals = np.sum(ccp[_chunk, 0, :], axis=0)
+            ccp[_chunk, 0, :] = ccpvals
+            illumvals = np.sum(illum[_chunk, 0, :], axis=0)
+            illum[_chunk, 0, :] = illumvals
 
-        # North Pole
-        ccpvals = np.sum(ccp[_chunk, -1, :], axis=0)
-        ccp[_chunk, -1, :] = ccpvals
-        illumvals = np.sum(illum[_chunk, -1, :], axis=0)
-        illum[_chunk, -1, :] = illumvals
+            # North Pole
+            ccpvals = np.sum(ccp[_chunk, -1, :], axis=0)
+            ccp[_chunk, -1, :] = ccpvals
+            illumvals = np.sum(illum[_chunk, -1, :], axis=0)
+            illum[_chunk, -1, :] = illumvals
 
-    # Normalize histograms
-    # Workaround for zero count values tto not get an error.
-    # Where counts == 0, zi = 0, else zi = zz/counts
-    zi = np.zeros_like(ccp)
-    zi[illum.astype(bool)] = ccp[illum.astype(bool)] / \
-        illum[illum.astype(bool)]
+        # Normalize histograms
+        # Workaround for zero count values tto not get an error.
+        # Where counts == 0, zi = 0, else zi = zz/counts
+        zi = np.zeros_like(ccp)
+        zi[illum.astype(bool)] = ccp[illum.astype(bool)] / \
+            illum[illum.astype(bool)]
 
-    # bin centers
-    latc = (blat[:-1] + blat[1:])/2
-    lonc = (blon[:-1] + blon[1:])/2
-    zc = bz[:-1]
+        # bin centers
+        latc = (blat[:-1] + blat[1:])/2
+        lonc = (blon[:-1] + blon[1:])/2
+        zc = bz[:-1]
 
-    # Create Object from bincenters, and stacks?
+        # Create Object from bincenters, and stacks?
 
-    return latc, lonc, zc, stack
+        return latc, lonc, zc, stack
 
 
 class RFTrace(Trace):

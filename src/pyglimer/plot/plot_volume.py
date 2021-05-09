@@ -24,6 +24,7 @@ from cartopy.crs import PlateCarree
 import cartopy.feature as cfeature
 from .ui_utils import set_sliderval_no_callback
 
+
 class VolumePlot:
 
     def __init__(self, X, Y, Z, V,
@@ -159,7 +160,7 @@ class VolumePlot:
 
     def init_plot(self):
 
-        self.fig = plt.figure(figsize=(10, 10))
+        self.fig = plt.figure(figsize=(8, 6))
         self.ax["x"] = plt.subplot(224)
         self.ax["y"] = plt.subplot(223)  # , sharey=self.ax['x'])
         self.ax["z"] = plt.subplot(221)  # , sharex=self.ax['y'])
@@ -177,7 +178,7 @@ class VolumePlot:
         self.fig.subplots_adjust(hspace=0.0, wspace=0.0)
         self.cbar = self.fig.colorbar(
             self.mappable, shrink=1., aspect=50, orientation="horizontal",
-            ax=[self.ax['z'], self.ax['m']['main'], 
+            ax=[self.ax['z'], self.ax['m']['main'],
                 self.ax['y'], self.ax['x']])
 
         plt.show()
@@ -186,7 +187,7 @@ class VolumePlot:
         self.slice['x'] = self.ax['x'].imshow(
             self.V[self.xli, :, :].T,
             extent=[self.minY, self.maxY, self.minZ, self.maxZ],
-            interpolation='nearest', origin='bottom', aspect='auto',
+            interpolation='nearest', origin='lower', aspect='auto',
             cmap=self.cmap, norm=self.norm)
         self.ax['x'].set_xlabel("y")
         plt.setp(self.ax['x'].get_yticklabels(), visible=False)
@@ -196,7 +197,7 @@ class VolumePlot:
         self.slice['y'] = self.ax['y'].imshow(
             self.V[:, self.yli, :].T,
             extent=[self.minX, self.maxX, self.minZ, self.maxZ],
-            interpolation='nearest', origin='bottom', aspect='auto',
+            interpolation='nearest', origin='lower', aspect='auto',
             cmap=self.cmap, norm=self.norm)
         self.ax['y'].set_xlabel("x")
         self.ax['y'].set_ylabel("z")
@@ -206,7 +207,7 @@ class VolumePlot:
         self.slice['z'] = self.ax['z'].imshow(
             self.V[:, :, self.zli].T,
             extent=[self.minX, self.maxX, self.minY, self.maxY],
-            interpolation='nearest', origin='bottom', aspect='auto',
+            interpolation='nearest', origin='lower', aspect='auto',
             cmap=self.cmap, norm=self.norm)
         self.ax['z'].set_ylabel("y")
         plt.setp(self.ax['z'].get_xticklabels(), visible=False)
@@ -232,13 +233,13 @@ class VolumePlot:
 
     def plot_xlines(self):
         self.lines['y']['x'] = self.ax['y'].plot(
-            [self.xlp, self.xlp], [self.minZ, self.maxZ], "k", 
+            [self.xlp, self.xlp], [self.minZ, self.maxZ], "k",
             lw=self.linewidth)[0]
         self.lines['z']['x'] = self.ax['z'].plot(
             [self.xlp, self.xlp], [self.minY, self.maxY], "k",
             lw=self.linewidth)[0]
         self.lines['m']['x'] = self.ax['m']['inset'].plot(
-            [self.xlp, self.xlp], [self.minY, self.maxY], "k", 
+            [self.xlp, self.xlp], [self.minY, self.maxY], "k",
             lw=self.linewidth)[0]
 
     def plot_ylines(self):
@@ -249,7 +250,7 @@ class VolumePlot:
             [self.minX, self.maxX], [self.ylp, self.ylp], "k",
             lw=self.linewidth)[0]
         self.lines['m']['y'] = self.ax['m']['inset'].plot(
-            [self.minX, self.maxX], [self.ylp, self.ylp], "k", 
+            [self.minX, self.maxX], [self.ylp, self.ylp], "k",
             lw=self.linewidth)[0]
 
     def plot_zlines(self):
@@ -272,7 +273,7 @@ class VolumePlot:
         self.lines['y']['x'].set_xdata([self.xlp, self.xlp])
         self.lines['z']['x'].set_xdata([self.xlp, self.xlp])
         self.lines['m']['x'].set_xdata([self.xlp, self.xlp])
-        
+
         # Set lines on the other slices and the map.
         self.fig.canvas.draw_idle()
 
@@ -338,7 +339,7 @@ class VolumePlot:
 
 
 class VolumeExploration:
-    
+
     def __init__(self, X, Y, Z, V, xl=None, yl=None, zl=None):
         """ Control Panel that controls a volume plot.
 
@@ -357,15 +358,15 @@ class VolumeExploration:
         self.max = np.max(abs(V))
 
         self.slices = {
-            'x': {'slider': None, 'ax': None}, 
-            'y': {'slider': None, 'ax': None}, 
+            'x': {'slider': None, 'ax': None},
+            'y': {'slider': None, 'ax': None},
             'z': {'slider': None, 'ax': None}
         }
 
         self.cmap = {
-            'pos': {'slider': None, 'ax': None}, 
-            'neg': {'slider': None, 'ax': None}, 
-            'checkbox': {'box': None, 'ax': None}, 
+            'pos': {'slider': None, 'ax': None},
+            'neg': {'slider': None, 'ax': None},
+            'checkbox': {'box': None, 'ax': None},
         }
 
         self.controlpanel()
@@ -400,17 +401,17 @@ class VolumeExploration:
 
         self.cmap['checkbox']['ax'] = self.cp.add_subplot(self.gs[3, :])
         self.cmap['checkbox']['box'] = CheckButtons(
-        self.cmap['checkbox']['ax'], ["Symmetric"], [False])
+            self.cmap['checkbox']['ax'], ["Symmetric"], [False])
         self.cmap['pos']['ax'] = self.cp.add_subplot(self.gs[4, :])
         self.cmap['pos']['slider'] = Slider(self.cmap['pos']['ax'], r'+',
                                             1e-10, self.vp.maxV,
                                             valinit=self.vp.maxV)
         self.cmap['neg']['ax'] = self.cp.add_subplot(self.gs[5, :])
         self.cmap['neg']['slider'] = Slider(self.cmap['neg']['ax'], r'-',
-                                            self.vp.minV, -1e-10, 
+                                            self.vp.minV, -1e-10,
                                             valinit=self.vp.minV)
         plt.subplots_adjust(hspace=2)
-        
+
         # Slider(slidercmin, 'ColorMin', -3 * np.max(np.abs(RF_PLOT)), 0, valinit=vmin, valfmt='%1.2E')
         # Slider(slidercmin, 'ColorMin', -3 * np.max(np.abs(RF_PLOT)), 0, valinit=vmin, valfmt='%1.2E')
         # self.cmap['z']['ax'] = self.cp.add_subplot(self.gs[6, :])
@@ -442,7 +443,6 @@ class VolumeExploration:
         vmin = val
         vcenter = 0
         self.vp.update_cmap(vmin, vcenter, vmax)
-        
 
     def update_sym(self, val):
         if val[0]:
@@ -452,7 +452,7 @@ class VolumeExploration:
             self.cmap['pos']['slider'].set_val(vmax)
             self.cmap['neg']['slider'].set_val(vmin)
 
-# Sample volume                
+# Sample volume
 # X = np.linspace(126.588, 152.46, 100)
 # Y = np.linspace(30.063, 46.862, 100)
 # Z = np.linspace(0, -100, 200)

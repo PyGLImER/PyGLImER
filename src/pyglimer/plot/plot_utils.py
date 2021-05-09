@@ -28,42 +28,100 @@ from pyglimer.constants import maxz, res
 
 
 def set_mpl_params():
+    # params = {
+    #     # 'font.family': 'Avenir Next',
+    #     'pdf.fonttype': 42,
+    #     'font.weight': 'bold',
+    #     'figure.dpi': 150,
+    #     'axes.labelweight': 'bold',
+    #     'axes.linewidth': 1.5,
+    #     'axes.labelsize': 14,
+    #     'axes.titlesize': 18,
+    #     'axes.titleweight': 'bold',
+    #     'xtick.labelsize': 13,
+    #     'xtick.direction': 'in',
+    #     'xtick.top': True,  # draw label on the top
+    #     'xtick.bottom': True,  # draw label on the bottom
+    #     'xtick.minor.visible': True,
+    #     'xtick.major.top': True,  # draw x axis top major ticks
+    #     'xtick.major.bottom': True,  # draw x axis bottom major ticks
+    #     'xtick.minor.top': True,  # draw x axis top minor ticks
+    #     'xtick.minor.bottom': True,  # draw x axis bottom minor ticks
+    #     'ytick.labelsize': 13,
+    #     'ytick.direction': 'in',
+    #     'ytick.left': True,  # draw label on the top
+    #     'ytick.right': True,  # draw label on the bottom
+    #     'ytick.minor.visible': True,
+    #     'ytick.major.left': True,  # draw x axis top major ticks
+    #     'ytick.major.right': True,  # draw x axis bottom major ticks
+    #     'ytick.minor.left': True,  # draw x axis top minor ticks
+    #     'ytick.minor.right': True,  # draw x axis bottom minor ticks
+    #     'legend.fancybox': False,
+    #     'legend.frameon': False,
+    #     'legend.loc': 'upper left',
+    #     'legend.numpoints': 2,
+    #     'legend.fontsize': 'large',
+    #     'legend.framealpha': 1,
+    #     'legend.scatterpoints': 3,
+    #     'legend.edgecolor': 'inherit'
+    # }
     params = {
-        # 'font.family': 'Avenir Next',
-        'pdf.fonttype': 42,
-        'font.weight': 'bold',
-        'figure.dpi': 150,
-        'axes.labelweight': 'bold',
-        'axes.linewidth': 1.5,
-        'axes.labelsize': 14,
-        'axes.titlesize': 18,
-        'axes.titleweight': 'bold',
-        'xtick.labelsize': 13,
-        'xtick.direction': 'in',
+        'font.family': "Arial",
+        'font.size': 12,
+        # 'pdf.fonttype': 3,
+        'font.weight': 'normal',
+        # 'pdf.fonttype': 42,
+        # 'ps.fonttype': 42,
+        # 'ps.useafm': True,
+        # 'pdf.use14corefonts': True,
+        'axes.unicode_minus': False,
+        'axes.labelweight': 'normal',
+        'axes.labelsize': 'small',
+        'axes.titlesize': 'medium',
+        'axes.linewidth': 1,
+        'axes.grid': False,
+        'grid.color': "k",
+        'grid.linestyle': ":",
+        'grid.alpha': 0.7,
+        'xtick.labelsize': 'small',
+        'xtick.direction': 'out',
         'xtick.top': True,  # draw label on the top
         'xtick.bottom': True,  # draw label on the bottom
         'xtick.minor.visible': True,
         'xtick.major.top': True,  # draw x axis top major ticks
         'xtick.major.bottom': True,  # draw x axis bottom major ticks
+        'xtick.major.size': 4,  # draw x axis top major ticks
+        'xtick.major.width': 1,  # draw x axis top major ticks
         'xtick.minor.top': True,  # draw x axis top minor ticks
         'xtick.minor.bottom': True,  # draw x axis bottom minor ticks
-        'ytick.labelsize': 13,
-        'ytick.direction': 'in',
+        'xtick.minor.width': 1,  # draw x axis top major ticks
+        'xtick.minor.size': 2,  # draw x axis top major ticks
+        'ytick.labelsize': 'small',
+        'ytick.direction': 'out',
         'ytick.left': True,  # draw label on the top
         'ytick.right': True,  # draw label on the bottom
         'ytick.minor.visible': True,
         'ytick.major.left': True,  # draw x axis top major ticks
         'ytick.major.right': True,  # draw x axis bottom major ticks
+        'ytick.major.size': 4,  # draw x axis top major ticks
+        'ytick.major.width': 1,  # draw x axis top major ticks
         'ytick.minor.left': True,  # draw x axis top minor ticks
         'ytick.minor.right': True,  # draw x axis bottom minor ticks
+        'ytick.minor.size': 2,  # draw x axis top major ticks
+        'ytick.minor.width': 1,  # draw x axis top major ticks
         'legend.fancybox': False,
-        'legend.frameon': False,
-        'legend.loc': 'upper left',
-        'legend.numpoints': 2,
-        'legend.fontsize': 'large',
+        'legend.frameon': True,
+        'legend.loc': 'best',
+        'legend.numpoints': 1,
+        'legend.fontsize': 'small',
         'legend.framealpha': 1,
         'legend.scatterpoints': 3,
-        'legend.edgecolor': 'inherit'
+        'legend.edgecolor': 'inherit',
+        'legend.facecolor': 'w',
+        'mathtext.fontset': 'custom',
+        'mathtext.rm': 'Arial',
+        'mathtext.it': 'Arial:italic',
+        'mathtext.bf': 'Arial:bold'
     }
     matplotlib.rcParams.update(params)
     # 25/04/21 this function was depricated? Don't know what it did
@@ -109,13 +167,8 @@ def remove_topright(ax=None):
 
 
 def plot_catalog(catalog):
-<<<<<<< HEAD
-    """ Takes in event catalog and plots events as a function of location and moment
-    magnitude."""
-=======
     """ Takes in event catalog and plots events as a function of location and
     moment magnitude."""
->>>>>>> 4adc36a2305f75c1f25cdadfa084e86e1c5e1762
 
     plt.figure(figsize=(20, 7.5))
     ax = plt.subplot(111, projection=PlateCarree())
@@ -139,21 +192,16 @@ def plot_catalog(catalog):
                    linewidth=0.5, facecolor=(0.9, 0.9, 0.9))
 
     # Plot events
-<<<<<<< HEAD
-    c = ax.scatter(np.array(lons), np.array(lats),  c=np.array(mags), s=size*np.array(mags)**3,
-                   marker="o", cmap="magma", vmin=3, vmax=7.5,
-                   edgecolor="k", linewidth=0.75, zorder=201)
-=======
     c = ax.scatter(
         np.array(lons), np.array(lats),  c=np.array(mags),
         s=size*np.array(mags)**3, marker="o", cmap="magma", vmin=3, vmax=7.5,
         edgecolor="k", linewidth=0.75, zorder=201)
->>>>>>> 4adc36a2305f75c1f25cdadfa084e86e1c5e1762
     cbar = plt.colorbar(c, pad=0.005, shrink=1)
     cbar.ax.set_ylabel(r"       $M_w$", rotation=0)
 
 
 def plot_single_rf(rf, tlim: list or tuple or None = None,
+                   ylim: list or tuple or None = None,
                    depth: np.ndarray or None = None,
                    ax: plt.Axes = None, outputdir: str = None,
                    clean: bool = False):
@@ -168,6 +216,8 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
         type==depth (len(list)==2).
         If `None` full trace is plotted.
         Default None.
+    ylim: list or tuple or None
+        y axis amplitude limits in. If `None` ± 1.05 absmax. Default None.
     depth: :class:`numpy.ndarray`
         1D array of depths
     ax : `matplotlib.pyplot.Axes`, optional
@@ -190,7 +240,7 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     if ax is None:
         width, height = 10, 2.5
         fig = plt.figure(figsize=(width, height))
-        ax = plt.gca(zorder=9999999)
+        ax = plt.axes(zorder=9999999)
         axtmp = None
     else:
         bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
@@ -232,6 +282,12 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
         ax.set_xlim(0, times[-1])  # don't really wanna see the stuff before
     else:
         ax.set_xlim(tlim)
+
+    if ylim is None:
+        absmax = 1.1 * np.max(np.abs(ydata))
+        ax.set_ylim([-absmax, absmax])
+    else:
+        ax.set_ylim(ylim)
 
     # Removes top/right axes spines. If you want the whole thing, comment
     # or remove
@@ -320,8 +376,8 @@ def plot_section(rfst, channel="PRF",
 
     # Create figure if no axes is specified
     if ax is None:
-        plt.figure(figsize=(10, 15))
-        ax = plt.gca(zorder=999999)
+        plt.figure(figsize=(8, 6))
+        ax = plt.axes(zorder=9999999)
 
     # Grab one component only
     # That doesn't work anymore. Was there an update in the obspy function?
@@ -436,7 +492,8 @@ def baz_hist(az, nbins):
     ax.set_theta_zero_location('N')
     ax.set_theta_direction(-1)
     ax.invert_yaxis()
-    ax.set_xticklabels(['N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE'])
+    ax.set_xticks(np.arange(0, 2*np.pi, 2*np.pi/8))
+    ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
     labels = ax.get_xticklabels()
     for label in labels:
         pos = label.get_position()
@@ -539,14 +596,12 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
 
     """
 
-    plt.figure(figsize=(15, 9))
+    plt.figure(figsize=(10, 4.5))
+    plt.subplots_adjust(wspace=0.05)
     plt.subplot(121, projection="polar")
     baz_hist(baz, nbins)
-    plt.title("Backazimuth distribution")
     plt.subplot(122, projection="polar")
     rayp_hist(rayp, nbins, v=v)
-    plt.title("Incident angle distribution")
-    plt.tight_layout()
 
     if outputfile is None:
         plt.show()

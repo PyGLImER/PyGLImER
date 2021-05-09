@@ -22,6 +22,7 @@ from cartopy.crs import PlateCarree
 
 from pyglimer.constants import maxz, res
 
+
 def set_mpl_params():
     params = {
         'font.family': 'Avenir Next',
@@ -103,43 +104,44 @@ def remove_topright(ax=None):
 
 
 def plot_catalog(catalog):
-    """ Takes in event catalog and plots events as a function of location and moment
-    magnitude."""
-    
-    plt.figure(figsize=(20,7.5))
+    """ Takes in event catalog and plots events as a function of location 
+    and moment magnitude."""
+
+    plt.figure(figsize=(20, 7.5))
     ax = plt.subplot(111, projection=PlateCarree())
-    
+
     size = 1
     mags = []
     lats = []
     lons = []
-    
+
     for event in catalog:
         # Get mag
         mags.append(event.preferred_magnitude().mag)
-        
+
         # Get location
         origin = event.preferred_origin()
         lats.append(origin.latitude)
         lons.append(origin.longitude)
-    
+
     # Add coastline
     ax.add_feature(cartopy.feature.LAND, zorder=-2, edgecolor='black',
                    linewidth=0.5, facecolor=(0.9, 0.9, 0.9))
 
     # Plot events
-    c = ax.scatter(np.array(lons), np.array(lats),  c=np.array(mags), s=size*np.array(mags)**3,
-               marker="o", cmap="magma", vmin=3, vmax=7.5,
-               edgecolor="k", linewidth=0.75, zorder=201)
-    cbar = plt.colorbar(c, pad=0.005, shrink=1)    
+    c = ax.scatter(np.array(lons), np.array(lats),  c=np.array(mags),
+                   s=size*np.array(mags)**3,
+                   marker="o", cmap="magma", vmin=3, vmax=7.5,
+                   edgecolor="k", linewidth=0.75, zorder=201)
+    cbar = plt.colorbar(c, pad=0.005, shrink=1)
     cbar.ax.set_ylabel(r"       $M_w$", rotation=0)
-    
-    
-def plot_single_rf(rf, tlim: list or tuple or None = None, 
-                   ax: plt.Axes = None, outputdir: str = None, 
+
+
+def plot_single_rf(rf, tlim: list or tuple or None = None,
+                   ax: plt.Axes = None, outputdir: str = None,
                    clean: bool = False):
     """Creates plot of a single receiver function
-    
+
     Parameters
     ----------
     rf : :class:`pyglimer.RFTrace`
@@ -158,13 +160,13 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     clean: bool
         If True, clears out all axes and plots RF only.
         Defaults to False.
-    
+
      Returns
     -------
     ax : `matplotlib.pyplot.Axes`
     """
     set_mpl_params()
-    
+
     # Get figure/axes dimensions
     if ax is None:
         width, height = 10, 2.5
@@ -176,10 +178,10 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
         width, height = bbox.width, bbox.height
         axtmp = ax
 
-    # The ratio ensures that the text 
+    # The ratio ensures that the text
     # is perfectly distanced from top left/right corner
     ratio = width/height
-    
+
     ydata = rf.data
     if rf.stats.type == 'time':
         # Get times
@@ -189,27 +191,26 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
             ydata = np.flip(-rf.data)
     else:
         z = np.hstack(
-                 ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+            ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
         times = z
-    
-    
+
     # Plot stuff into axes
-    ax.fill_between(times, 0, ydata, where=ydata>0, 
+    ax.fill_between(times, 0, ydata, where=ydata > 0,
                     interpolate=True, color=(0.9, 0.2, 0.2))
-    ax.fill_between(times, 0, ydata, where=ydata<0, 
+    ax.fill_between(times, 0, ydata, where=ydata < 0,
                     interpolate=True, color=(0.2, 0.2, 0.7))
     ax.plot(times, ydata, 'k', lw=0.75)
-    
+
     # Set limits
     if tlim is None:
         # ax.set_xlim(times[0], times[-1])
-        ax.set_xlim(0, times[-1]) # don't really wanna see the stuff before 
+        ax.set_xlim(0, times[-1])  # don't really wanna see the stuff before
     else:
         ax.set_xlim(tlim)
-    
+
     # Removes top/right axes spines. If you want the whole thing, comment or remove
     remove_topright()
-    
+
     # Plot RF only
     if clean:
         remove_all()
@@ -226,27 +227,28 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     # Only use tight layout if not part of plot.
     if axtmp is None:
         plt.tight_layout()
-    
-    # Outout the receiver function as pdf using 
+
+    # Outout the receiver function as pdf using
     # its station name and starttime
     if outputdir is not None:
-        filename = os.path.join(outputdir, 
-                                rf.get_id() + "_" 
+        filename = os.path.join(outputdir,
+                                rf.get_id() + "_"
                                 + rf.stats.starttime._strftime_replacement('%Y%m%dT%H%M%S')
                                 + ".pdf")
         plt.savefig(filename, format="pdf")
     return ax
-    
-def plot_section(rfst, channel = "PRF",
-                 timelimits: list or tuple or None = None, 
+
+
+def plot_section(rfst, channel="PRF",
+                 timelimits: list or tuple or None = None,
                  epilimits: list or tuple or None = None,
                  scalingfactor: float = 2.0, ax: plt.Axes = None,
                  line: bool = True,
-                 linewidth: float = 0.25, outputdir: str or None = None, 
+                 linewidth: float = 0.25, outputdir: str or None = None,
                  title: str or None = None, show: bool = True):
     """Creates plot of a receiver function section as a function
     of epicentral distance.
-    
+
     Parameters
     ----------
     rfst : :class:`pyglimer.RFStream`
@@ -278,17 +280,17 @@ def plot_section(rfst, channel = "PRF",
     clean: bool
         If True, clears out all axes and plots RF only.
         Defaults to False.
-    
+
      Returns
     -------
     ax : `matplotlib.pyplot.Axes`
-    
+
     """
-    #set_mpl_params()
-        
+    # set_mpl_params()
+
     # Create figure if no axes is specified
     if ax is None:
-        plt.figure(figsize=(10,15))
+        plt.figure(figsize=(10, 15))
         ax = plt.gca(zorder=999999)
 
     # Grab one component only
@@ -305,16 +307,16 @@ def plot_section(rfst, channel = "PRF",
                 times = np.flip(times)
         else:
             z = np.hstack(
-                 ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+                ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
             times = z
         rftmp = rf.data * scalingfactor \
             + rf.stats.distance
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
-                         where=rftmp<rf.stats.distance, 
+                         where=rftmp < rf.stats.distance,
                          interpolate=True, color=(0.2, 0.2, 0.7),
                          zorder=-_i)
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
-                         where=rftmp>rf.stats.distance, 
+                         where=rftmp > rf.stats.distance,
                          interpolate=True, color=(0.9, 0.2, 0.2),
                          zorder=-_i - 0.1)
         if line:
@@ -325,7 +327,7 @@ def plot_section(rfst, channel = "PRF",
         plt.xlim(epilimits)
     else:
         plt.xlim(epilimits)
-    
+
     if timelimits is None:
         if rfst[0].stats.type == 'time':
             ylim0 = 0
@@ -337,7 +339,7 @@ def plot_section(rfst, channel = "PRF",
     else:
         plt.ylim(timelimits)
     ax.invert_yaxis()
-    
+
     # Set labels
     plt.xlabel(r"$\Delta$ [$^{\circ}$]")
     if rfst[0].stats.type == 'time':
@@ -350,7 +352,7 @@ def plot_section(rfst, channel = "PRF",
         plt.title(title + " - %s" % channel)
     else:
         plt.title("%s component" % channel)
-    
+
     # Set output directory
     if outputdir is None:
         plt.show()
@@ -360,14 +362,13 @@ def plot_section(rfst, channel = "PRF",
     return ax
 
 
-        
 ### --- Will work on these tomorrow. Helpful for array analysis. --- ###
 def baz_hist(baz, nbins):
     ax = plt.gca()
-    bin_edges = np.linspace(0,360, nbins+1)
+    bin_edges = np.linspace(0, 360, nbins+1)
     cts, edges = np.histogram(baz, bins=bin_edges)
     xbaz = edges[:-1] + 0.5 * np.diff(edges)
-    wbaz = np.diff(edges)# * 0.8
+    wbaz = np.diff(edges)  # * 0.8
     bars = plt.bar(xbaz/180*np.pi, cts, wbaz/180*np.pi, bottom=0.0)
     for r, bar in zip(cts, bars):
         bar.set_facecolor(plt.cm.magma_r(r / np.max(cts)))
