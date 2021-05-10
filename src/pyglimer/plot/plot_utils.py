@@ -204,6 +204,8 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
                    ylim: list or tuple or None = None,
                    depth: np.ndarray or None = None,
                    ax: plt.Axes = None, outputdir: str = None,
+                   pre_fix: str = None, post_fix: str = None,
+                   format: str = None,
                    clean: bool = False):
     """Creates plot of a single receiver function
 
@@ -226,6 +228,10 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     outputdir : str, optional
         If set, saves a pdf of the plot to the directory.
         If None, plot will be shown instantly. Defaults to None.
+    pre_fix : str, optional
+        prepend filename
+    post_fix : str, optional
+        append to filename
     clean: bool
         If True, clears out all axes and plots RF only.
         Defaults to False.
@@ -316,12 +322,28 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
 
     # Outout the receiver function as pdf using
     # its station name and starttime
+
     if outputdir is not None:
-        filename = os.path.join(outputdir,
-                                rf.get_id() + "_"
-                                + rf.stats.starttime._strftime_replacement('%Y%m%dT%H%M%S')
-                                + ".pdf")
-        plt.savefig(filename, format="pdf")
+        # Set pre and post fix
+        if pre_fix is not None:
+            pre_fix = pre_fix + "_"
+        else:
+            pre_fix = ""
+        if post_fix is not None:
+            post_fix = "_" + post_fix
+        else:
+            post_fix = ""
+
+        # Get filename
+        filename = os.path.join(
+            outputdir,
+            pre_fix
+            + rf.get_id() + "_"
+            + rf.stats.starttime._strftime_replacement('%Y%m%dT%H%M%S')
+            + post_fix
+            + f".{format}")
+        plt.savefig(filename, format=format, transparent=True)
+
     return ax
 
 
@@ -330,7 +352,7 @@ def plot_section(rfst, channel="PRF",
                  epilimits: list or tuple or None = None,
                  scalingfactor: float = 2.0, ax: plt.Axes = None,
                  line: bool = True,
-                 linewidth: float = 0.25, outputdir: str or None = None,
+                 linewidth: float = 0.25, outputfile: str or None = None,
                  title: str or None = None, show: bool = True):
     """Creates plot of a receiver function section as a function
     of epicentral distance.
@@ -446,11 +468,10 @@ def plot_section(rfst, channel="PRF",
         plt.title("%s component" % channel)
 
     # Set output directory
-    if outputdir is None:
+    if outputfile is None:
         plt.show()
     else:
-        outputfilename = os.path.join(outputdir, "channel_%s.pdf" % channel)
-        plt.savefig(outputfilename, format="pdf")
+        plt.savefig(outputfile, dpi=300, transparent=True)
     return ax
 
 

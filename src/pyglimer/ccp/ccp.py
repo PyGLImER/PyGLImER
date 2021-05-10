@@ -1197,7 +1197,8 @@ only show the progress per chunk.')
                              latsl: float or None = None,
                              zsl: float or None = None,
                              r: float or None = None,
-                             minillum: int or None = None):
+                             minillum: int or None = None,
+                             show: bool = True):
         """Creates the same plot as the `explore` tool, but(!) statically and
         with more options left to the user.
 
@@ -1227,6 +1228,8 @@ only show the progress per chunk.')
         minillum: int or None, optional
             Minimum number of illumation points use in the interpolation,
             everything below is downweighted by the square reciprocal
+        show : bool, optional
+            whether to make figure window visible, default True
 
         Returns
         -------
@@ -1242,7 +1245,8 @@ only show the progress per chunk.')
         qlat, qlon, qz, qill, qccp, area = \
             self.compute_kdtree_volume(qlon, qlat, zmax=zmax)
 
-        return VolumePlot(qlon, qlat, qz, qccp, xl=lonsl, yl=latsl, zl=zsl)
+        return VolumePlot(qlon, qlat, qz, qccp, xl=lonsl, yl=latsl, zl=zsl,
+                          show=show)
 
     def map_plot(
         self, plot_stations: bool = False, plot_bins: bool = False,

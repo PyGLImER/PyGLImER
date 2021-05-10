@@ -31,7 +31,7 @@ class VolumePlot:
                  xl: float or None = None,
                  yl: float or None = None,
                  zl: float or None = None,
-                 nancolor='w',
+                 nancolor='w', show=True,
                  cmap='seismic'):
         """
 
@@ -152,6 +152,7 @@ class VolumePlot:
         self.cbar = None
 
         # First initialization
+        self.show = show
         self.get_locations()
         self.init_plot()
 
@@ -190,15 +191,15 @@ class VolumePlot:
             self.mappable, shrink=1., aspect=50, orientation="horizontal",
             ax=[self.ax['z'], self.ax['m']['main'],
                 self.ax['y'], self.ax['x']])
-
-        plt.show()
+        if self.show:
+            plt.show()
 
     def plot_xsl(self):
         self.slice['x'] = self.ax['x'].imshow(
             self.V[self.xli, :, :].T,
             extent=[self.minY, self.maxY, self.minZ, self.maxZ],
             interpolation='nearest', origin='lower', aspect='auto',
-            cmap=self.cmap, norm=self.norm)
+            cmap=self.cmap, norm=self.norm, rasterized=True)
         self.ax['x'].set_xlabel("y")
         plt.setp(self.ax['x'].get_yticklabels(), visible=False)
         self.ax['x'].invert_yaxis()
@@ -208,7 +209,7 @@ class VolumePlot:
             self.V[:, self.yli, :].T,
             extent=[self.minX, self.maxX, self.minZ, self.maxZ],
             interpolation='nearest', origin='lower', aspect='auto',
-            cmap=self.cmap, norm=self.norm)
+            cmap=self.cmap, norm=self.norm, rasterized=True)
         self.ax['y'].set_xlabel("x")
         self.ax['y'].set_ylabel("z")
         self.ax['y'].invert_yaxis()
@@ -218,7 +219,7 @@ class VolumePlot:
             self.V[:, :, self.zli].T,
             extent=[self.minX, self.maxX, self.minY, self.maxY],
             interpolation='nearest', origin='lower', aspect='auto',
-            cmap=self.cmap, norm=self.norm)
+            cmap=self.cmap, norm=self.norm, rasterized=True)
         self.ax['z'].set_ylabel("y")
         plt.setp(self.ax['z'].get_xticklabels(), visible=False)
 
