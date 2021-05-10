@@ -228,7 +228,7 @@ def rate(network, phase, preproloc, station=None,
                 ph_time.append(model.get_travel_times(
                     evt_depth, dis, phase_list=phase)[0].time)
             ph_name = ['taup', 'iris', 'geodetics']
-            ph_time = np.array(ph_time) - (st[0].stats.starttime + onset - \
+            ph_time = np.array(ph_time) - (st[0].stats.starttime + onset -
                                            UTCDateTime(ot))
 
         # waveform data
@@ -296,7 +296,7 @@ def __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old,
         # x.grid(color='c', which='both', linewidth=.25)
         x.set_ylabel('Amplitude')
         if test_tt_calculation:
-            x.set_xlim(-10,10)
+            x.set_xlim(-10, 10)
     # if old:
     #     ax[2].text(0, 1, old,
     #                bbox=dict(facecolor='green', alpha=0.5))
@@ -374,7 +374,7 @@ def __w_file(network, station, starttime):
 
 def __r_file(network, station, starttime):
     with shelve.open(os.path.join(finddir, 'ratings')
-                      + network + "." + station + "rating") as f:
+                     + network + "." + station + "rating") as f:
         if starttime in f:
             old = f[starttime]
         else:
@@ -420,7 +420,7 @@ def sort_rated(network, station, phase, preproloc):
         starttime = str(st[0].stats.starttime)
         if starttime in dic:
             shutil.copy(inloc + file, os.path.join(inloc + dic[starttime],
-                             + file))
+                                                   + file))
 
 
 def automatic_rate(network, station, phase, preproloc):

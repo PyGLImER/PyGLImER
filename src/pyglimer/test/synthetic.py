@@ -51,7 +51,9 @@ def synthetic(N2, dt, R, SNR, stdv):
     # Full-length
     N = N2 * 2 + 1
     if len(R) != N:
-        print("Error: The given impulse response has the wrong length. Give an array with length=", N)
+        print(
+            "Error: The given impulse response has the wrong length. "
+            "Give an array with length=", N)
         quit()
 
     # create source wavelet
