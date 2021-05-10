@@ -19,6 +19,7 @@ from http.client import IncompleteRead
 import logging
 import os
 import shutil
+from tqdm import tqdm
 
 from obspy import read
 from obspy import UTCDateTime
@@ -34,7 +35,7 @@ from pyglimer.utils.roundhalf import roundhalf
 
 def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
                 rawloc, clients, network: str = None, station: str = None,
-                saveasdf: bool = True, logdir: str = None, debug: bool = False,
+                saveasdf: bool = False, logdir: str = None, debug: bool = False,
                 verbose: bool = False):
     """
     Downloads the waveforms for all events in the catalogue
@@ -134,7 +135,7 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
 
     ####
     # Loop over each event
-    for event in event_cat:
+    for event in tqdm(event_cat):
         # fetch event-data
         origin_time = event.origins[0].time
         ot_fiss = UTCDateTime(origin_time).format_fissures()

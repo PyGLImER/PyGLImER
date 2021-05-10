@@ -28,6 +28,7 @@ from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 import numpy as np
 from scipy.spatial import cKDTree
+from scipy.interpolate import RegularGridInterpolator
 
 
 from obspy import read_inventory
@@ -41,18 +42,22 @@ from tqdm import tqdm
 import pyvista as pv
 import vtk
 
-
+import pyglimer
 from pyglimer.ccp.compute.bin import BinGrid
+from pyglimer.ccp.plot_utils.plot_bins import plot_bins
+from pyglimer.ccp.plot_utils.plot_cross_section import plot_cross_section
+from pyglimer.constants import R_EARTH, DEG2KM, KM2DEG
 from pyglimer.database.stations import StationDB
+from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
+from pyglimer.plot.plot_volume import VolumePlot, VolumeExploration
 from pyglimer.rf.create import read_rf
 from pyglimer.rf.moveout import res, maxz, maxzm
-from pyglimer.utils.utils import dt_string, chunks
 from pyglimer.utils.createvmodel import ComplexModel
 from pyglimer.utils.geo_utils import epi2euc, geo2cart
-from pyglimer.ccp.plot_utils.plot_bins import plot_bins
-from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
-from pyglimer.constants import R_EARTH, DEG2KM, KM2DEG
-from pyglimer.plot.plot_volume import VolumePlot, VolumeExploration
+from pyglimer.utils.geo_utils import gctrack
+from pyglimer.utils.geo_utils import fix_map_extent
+from pyglimer.utils.SphericalNN import SphericalNN
+from pyglimer.utils.utils import dt_string, chunks
 
 
 class PhasePick(object):
@@ -232,6 +237,99 @@ class CCPStack(object):
         k = i[pos]
 
         return k, j
+
+    def get_depth_slice(self, z0: float = 410):
+
+        # Area considered around profile points
+        area = 2 * self.binrad
+
+        # Resolution
+        res = self.binrad/4
+
+        # Depth
+        z = self.z.flatten()
+        zpos = np.argmin(np.abs(z-z0))
+        z0 = z[zpos]
+
+        # Coordinates
+        lat = self.coords_new[0].flatten()
+        lon = self.coords_new[1].flatten()
+
+        # Map extent with buffer
+        extent = fix_map_extent(
+            [np.min(lon), np.max(lon), np.min(lat), np.max(lat)],
+            fraction=0.05)
+
+        # Create query points
+        qlon, qlat = np.meshgrid(
+            np.arange(extent[0], extent[1], res),
+            np.arange(extent[2], extent[3], res)
+        )
+
+        # Create interpolators
+        snn = SphericalNN(lat, lon)
+        ccp_interpolator = snn.interpolator(
+            qlat, qlon, maximum_distance=area, k=10, p=2.0, no_weighting=False)
+        ill_interpolator = snn.interpolator(
+            qlat, qlon, maximum_distance=area, no_weighting=True)
+
+        # Interpolate
+        qccp = ccp_interpolator(self.ccp[:, zpos])
+        qill = ill_interpolator(self.hits[:, zpos])
+
+        return qlat, qlon, qill, qccp, extent, z0
+
+    def get_profile(self, slat, slon):
+
+        # Area considered around profile points
+        area = 2 * self.binrad
+
+        # Get evenly distributed points
+        qlat, qlon, qdists, sdists = gctrack(slat, slon, self.bingrid.edist/4)
+
+        # Get interpolation weights and rows.
+        # Create SphericalNN kdtree
+        snn = SphericalNN(self.coords_new[0], self.coords_new[1])
+        ccp_interpolator = snn.interpolator(
+            qlat, qlon, maximum_distance=area, k=10, p=2.0, no_weighting=False)
+        ill_interpolator = snn.interpolator(
+            qlat, qlon, maximum_distance=area, no_weighting=True)
+
+        # Get coordinates array from CCPStack
+        qz = deepcopy(self.z)
+
+        # Get data arrays
+        Np, Nz = self.ccp.shape
+        Nq = len(qlat)
+
+        # Interpolate
+        qccp = np.zeros((Nq, Nz))
+        qill = np.zeros((Nq, Nz))
+
+        # Interpolate each depth
+        for _i, (_ccpcol, _illumcol) in enumerate(zip(self.ccp.T, self.hits.T)):
+            qccp[:, _i] = ccp_interpolator(_ccpcol)
+            qill[:, _i] = ill_interpolator(_illumcol)
+
+        # Interpolate onto regular depth grid for easy representation with
+        # imshow
+        ccp2D_interpolator = RegularGridInterpolator(
+            (qdists, qz), np.where(np.isnan(qccp), 0, qccp))
+        ill2D_interpolator = RegularGridInterpolator(
+            (qdists, qz), qill)
+
+        # Where to sample
+        qqz = np.arange(np.min(qz), np.max(qz), 1)
+        xqdists, xqz = np.meshgrid(qdists, qqz)
+
+        # Interpolate
+        qccp = ccp2D_interpolator((xqdists, xqz))
+        qill = ill2D_interpolator((xqdists, xqz))
+
+        return slat, slon, sdists, qlat, qlon, qdists, qz, qill, qccp, area
+
+    def plot_cross_section(self, *args, **kwargs):
+        return plot_cross_section(self, *args, **kwargs)
 
     def compute_stack(
         self, vel_model: str, rfloc: str = 'output/waveforms/RF',
@@ -701,7 +799,7 @@ only show the progress per chunk.')
             self.ccp = np.divide(self.bins, self.illum+1)
         else:
             raise ValueError('The requested multiple stacking mode is \
-misspelled or not yet implemented')
+                              misspelled or not yet implemented')
 
         self.hits = self.illum.copy()
 
@@ -731,7 +829,8 @@ misspelled or not yet implemented')
 
             lats, lons = self.coords_new
             # index = []  # list of indices that contain water
-            index = globe.is_ocean(lats, lons)[0, :] # list of indices that contain water
+            # list of indices that contain water
+            index = globe.is_ocean(lats, lons)[0, :]
             print(index.shape)
 
             # for i, (lat, lon) in enumerate(zip(lats[0], lons[0])):
@@ -838,11 +937,9 @@ misspelled or not yet implemented')
         plot_bins(self.bingrid.stations, coords)
 
     def compute_kdtree_volume(self,
-                              glon: np.ndarray or list,
-                              glat: np.ndarray or list,
-                              gz: np.array or list,
-                              r: float or None,
-                              minillum: int or None = None):
+                              qlon: np.ndarray or list = None,
+                              qlat: np.ndarray or list = None,
+                              zmax: float = None):
         """Using the CCP kdtree, we get the closest few points and compute
         the weighting using a distance metric. if points are too far away,
         they aren't weighted
@@ -850,9 +947,9 @@ misspelled or not yet implemented')
 
         Parameters
         ----------
-        glon : np.ndarray or list
+        qlon : np.ndarray or list
             grid defining array for longitude
-        glat : np.ndarray or list
+        qlat : np.ndarray or list
             grid defining array for latitude
         gz : np.array or list
             grid defining array for z
@@ -868,55 +965,88 @@ misspelled or not yet implemented')
             [description]
         """
 
-        # Get points array from CCPStack
-        z, lon = np.meshgrid(self.z, self.coords_new[1])
-        _, lat = np.meshgrid(self.z, self.coords_new[0])
+        # Area considered around profile points
+        area = 2 * self.binrad
 
-        # Create Goal Meshgrid
-        mlat, mlon, mz = np.meshgrid(glat, glon, gz)
+        # Get global bounds
+        if qlat is None or qlon is None:
 
-        # Convert
-        xs, ys, zs = geo2cart((R_EARTH - z.ravel())/R_EARTH,
-                              lat.ravel(), lon.ravel())
-        xi, yi, zi = geo2cart((R_EARTH - mz.ravel())/R_EARTH,
-                              mlat.ravel(), mlon.ravel())
+            minlat = np.min(self.coords_new[0])
+            maxlat = np.max(self.coords_new[0])
+            minlon = np.min(self.coords_new[1])
+            maxlon = np.max(self.coords_new[1])
+            minlon, maxlon, minlat, maxlat = fix_map_extent(
+                [minlon, maxlon, minlat, maxlat, ])
 
-        # Create kdtree form source coordinates
-        tree = cKDTree(np.c_[xs, ys, zs])
+            # Create mesh vectors
+            qlat = np.arange(minlat, maxlat + self.binrad/2, self.binrad/2)
+            qlon = np.arange(minlon, maxlon + self.binrad/2, self.binrad/2)
 
-        # Inverse distance weighting
-        # MULTITHREADING, CCPVOLUME COMPUTE MULTICORE STACK
-        d, inds = tree.query(np.c_[xi, yi, zi], k=10)
-        w = (1-d / np.max(d, axis=1)[:, np.newaxis]) ** 2
+        else:
 
-        # Take things that are further than a certain distance
-        V = np.sum(w * self.ccp.ravel()[inds], axis=1) / np.sum(w, axis=1)
+            minlat, maxlat = np.min(qlat), np.max(qlat)
+            minlon, maxlon = np.min(qlon), np.max(qlon)
+            minlon, maxlon, minlat, maxlat = fix_map_extent(
+                [minlon, maxlon, minlat, maxlat])
 
-        # Taking the Illumination into account is easy peasy with this
-        # interpolation. Note that the all points above the minillumination
-        # value are multiplied by one and the rest are linearly decreased by
-        # division by the minillumination value. Then, the illumination
-        # values below 1.0 are squared for a quadratic decrease
-        if minillum is not None:
-            illum = np.sum(
-                w * self.hits.ravel()[inds], axis=1) / np.sum(w, axis=1)
-            mpos = np.where(illum <= minillum)
-            pos1 = np.where(illum > minillum)
-            illum[mpos] /= minillum
-            illum[pos1] = 1
-            V = V * illum ** 2
+        # Create mesh
+        mlat, mlon = np.meshgrid(qlat, qlon)
 
-        # Removes things that are too far from the samples.
-        if r is not None:
-            pos = np.where(d > r/R_EARTH)
-            w[pos] = 0
-            nanpos = np.where(np.sum(w, axis=1) == 0)[0]
-            V[nanpos] = np.nan
+        # smaller/larger is fine as the extent was fixed.
+        cpos = np.where(
+            (self.coords_new[0] > minlat) &
+            (self.coords_new[0] < maxlat) &
+            (self.coords_new[1] > minlon) &
+            (self.coords_new[1] < maxlon)
+        )[1]
 
-        # Reshape!
-        V.shape = mlat.shape
+        # Get interpolation weights and rows.
+        snn = SphericalNN(
+            self.coords_new[0][:, cpos], self.coords_new[1][:, cpos])
+        ccp_interpolator = snn.interpolator(
+            mlat, mlon, maximum_distance=area, k=10, p=2.0, no_weighting=False)
+        ill_interpolator = snn.interpolator(
+            mlat, mlon, maximum_distance=area, no_weighting=True)
 
-        return V
+        # Get coordinates array from CCPStack
+        qz = deepcopy(self.z)
+
+        if zmax is not None:
+            pos = np.argmin(np.abs(qz-zmax))
+            qz = qz[:pos]
+        else:
+            pos = len(qz)
+
+        # Get data arrays
+        Nz = pos
+        Nlat, Nlon = len(qlat), len(qlon)
+
+        # Interpolate
+        qccp = np.zeros((Nlat, Nlon, Nz))
+        qill = np.zeros((Nlat, Nlon, Nz))
+
+        # Interpolate each depth
+        for _i, (_ccpcol, _illumcol) in enumerate(
+                zip(self.ccp[cpos, :pos].T, self.hits[cpos, :pos].T)):
+            qccp[:, :, _i] = ccp_interpolator(_ccpcol).T
+            qill[:, :, _i] = ill_interpolator(_illumcol).T
+
+        # Interpolate onto regular depth grid for easy representation with
+        # imshow
+        ccp3D_interpolator = RegularGridInterpolator(
+            (qlat, qlon, qz), np.where(np.isnan(qccp), 0, qccp))
+        ill3D_interpolator = RegularGridInterpolator(
+            (qlat, qlon, qz), qill)
+
+        # Where to sample
+        qqz = np.arange(np.min(qz), np.max(qz), 1)
+        xqlat, xqlon, xqz = np.meshgrid(qlat, qlon, qqz)
+
+        # Interpolate
+        qccp = ccp3D_interpolator((xqlat, xqlon, xqz))
+        qill = ill3D_interpolator((xqlat, xqlon, xqz))
+
+        return qlat, qlon, qz, qill, qccp, area
 
     def create_vtk_mesh(self, geo=True,
                         bbox: list or None = None,
@@ -932,10 +1062,10 @@ misspelled or not yet implemented')
             bounding box [minlon, maxlon, minlat, maxlat]. If None
             No boundaries are taken, by default None
         filename : str or None, optional
-            If set, the computed grid will be output as VTK file under the given 
-            filename. This file can then later be opened using either the 
+            If set, the computed grid will be output as VTK file under the given
+            filename. This file can then later be opened using either the
             plotting tool or, e.g., Paraview. If None, no file is written.
-            By default, None.            
+            By default, None.
 
         Returns
         -------
@@ -1023,9 +1153,9 @@ misspelled or not yet implemented')
 
         return grid
 
-    def explore(self, factor: float = 1.0, maxz: float or None = None,
-                minillum: int or None = None,
-                extent: list or tuple or None = None):
+    def explore(self, qlon: np.ndarray or list = None,
+                qlat: np.ndarray or list = None,
+                zmax: float = None):
         """Creates a volume exploration window set. One window is for all
         plots, and the other window is generated with sliders such that one
         can explore how future plots should be generated. It technically does
@@ -1035,8 +1165,8 @@ misspelled or not yet implemented')
         finer grid.
 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         factor: float, optional
             Bingrid epicentral distance multiplier to refine grid.
@@ -1048,43 +1178,28 @@ misspelled or not yet implemented')
             Minimum number of illumation points use in the interpolation,
             everything below is downweighted by the square reciprocal
         extent : list or tuple or Non, optional
+        
         Returns
         -------
 
         VolumeExploration
 
         """
-
-        # Get extent of the CCP Stack
-        minlon, maxlon = np.min(self.coords_new[1]), np.max(self.coords_new[1])
-        minlat, maxlat = np.min(self.coords_new[0]), np.max(self.coords_new[0])
-
-        # Create grid vectors
-        self.bingrid.edist * DEG2KM * factor
-        lats = np.arange(minlat, maxlat, self.bingrid.edist * factor)
-        lons = np.arange(minlon, maxlon, self.bingrid.edist * factor)
-
-        # This is necessary because imshow require equally spaced dimensions
-        if maxz is None:
-            z = np.arange(np.min(self.z), np.max(self.z), res)
-        else:
-            z = np.arange(np.min(self.z), maxz, res)
-
         # Compute the volume max radius at depth is z*0.33
-        V = self.compute_kdtree_volume(glon=lons, glat=lats, gz=z,
-                                       r=self.bingrid.edist * DEG2KM * 2.0,
-                                       minillum=minillum)
+        qlat, qlon, qz, qill, qccp, area = \
+            self.compute_kdtree_volume(qlon, qlat, zmax=zmax)
 
         # Launch plotting tool
-        return VolumeExploration(lons, lats, z, V)
+        return VolumeExploration(qlon, qlat, qz, qccp)
 
-    def plot_volume_sections(self, lon: np.ndarray, lat: np.ndarray,
-                             z: np.ndarray,
+    def plot_volume_sections(self, qlon: np.ndarray, qlat: np.ndarray,
+                             zmax: float or None = None,
                              lonsl: float or None = None,
                              latsl: float or None = None,
                              zsl: float or None = None,
                              r: float or None = None,
-                             minillum: int or None = None):
+                             minillum: int or None = None,
+                             show: bool = True):
         """Creates the same plot as the `explore` tool, but(!) statically and
         with more options left to the user.
 
@@ -1093,9 +1208,9 @@ misspelled or not yet implemented')
 
         Parameters
         ----------
-        lons : np.ndarray
+        qlon : np.ndarray
             Monotonically increasing ndarray. No failsafes implemented.
-        lats : np.ndarray
+        qlat : np.ndarray
             Monotonically increasing ndarray. No failsafes implemented.
         z : np.ndarray
             Monotonically increasing ndarray. No failsafes implemented.
@@ -1114,6 +1229,8 @@ misspelled or not yet implemented')
         minillum: int or None, optional
             Minimum number of illumation points use in the interpolation,
             everything below is downweighted by the square reciprocal
+        show : bool, optional
+            whether to make figure window visible, default True
 
         Returns
         -------
@@ -1126,10 +1243,11 @@ misspelled or not yet implemented')
             r = self.bingrid.edist * DEG2KM * 2.0
 
         # Compute the volume max radius at depth is z*0.33
-        V = self.compute_kdtree_volume(glon=lon, glat=lat, gz=z,
-                                       r=r, minillum=minillum)
+        qlat, qlon, qz, qill, qccp, area = \
+            self.compute_kdtree_volume(qlon, qlat, zmax=zmax)
 
-        return VolumePlot(lon, lat, z, V, xl=lonsl, yl=latsl, zl=zsl)
+        return VolumePlot(qlon, qlat, qz, qccp, xl=lonsl, yl=latsl, zl=zsl,
+                          show=show)
 
     def map_plot(
         self, plot_stations: bool = False, plot_bins: bool = False,

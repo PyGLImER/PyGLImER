@@ -180,13 +180,36 @@ pyglimer.ccp.compute.bin
     :members:
     :show-inheritance:
 
+pyglimer.ccp.plot_utils.plot_cross_section
+==========================================
+.. automodule:: pyglimer.ccp.plot_utils.plot_cross_section
+    :members:
+    :show-inheritance:
+
+pyglimer.ccp.plot_utils.plot_line_buffer
+========================================
+.. automodule:: pyglimer.ccp.plot_utils.plot_line_buffer
+    :members:
+    :show-inheritance:
+
+pyglimer.ccp.plot_utils.line_buffer
+===================================
+.. automodule:: pyglimer.ccp.plot_utils.line_buffer
+    :members:
+    :show-inheritance:
+
+    
+    
+
 pyglimer.plot
 +++++++++++++
+
 pyglimer.plot.plot_map
 ======================
 .. automodule:: pyglimer.plot.plot_map
     :members:
     :show-inheritance:
+
 
 pyglimer.plot.plot_utils
 ========================
@@ -194,14 +217,17 @@ pyglimer.plot.plot_utils
     :members:
     :show-inheritance:
 
+
 pyglimer.plot.plot_volume
 =========================
 .. automodule:: pyglimer.plot.plot_volume
     :members:
     :show-inheritance:
 
+
 pyglimer.plot.ui_utils
 ======================
 .. automodule:: pyglimer.plot.ui_utils
     :members:
     :show-inheritance:
+

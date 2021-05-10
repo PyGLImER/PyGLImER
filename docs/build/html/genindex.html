@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Index &mdash; PyGLImER 0.01 documentation</title>
   
@@ -16,10 +16,7 @@
 
   
   
-
   
-  
-
   
 
   
@@ -32,6 +29,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -51,7 +49,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PyGLImER
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyGLImER
           
 
           
@@ -88,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapters/receiver_function.html">Handling Receiver Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapters/plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
 </ul>
 
@@ -129,8 +128,6 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -142,7 +139,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
     
@@ -237,12 +234,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chapters/API.html#pyglimer.rf.deconvolve.damped">damped() (in module pyglimer.rf.deconvolve)</a>
 </li>
-      <li><a href="chapters/API.html#pyglimer.waveform.request.Request.download_waveforms">download_waveforms() (pyglimer.waveform.request.Request method)</a>
+      <li><a href="chapters/API.html#pyglimer.test.tests.decon_test">decon_test() (in module pyglimer.test.tests)</a>
 </li>
-      <li><a href="chapters/API.html#pyglimer.waveform.download.downloadwav">downloadwav() (in module pyglimer.waveform.download)</a>
+      <li><a href="chapters/API.html#pyglimer.rf.create.RFStream.dirty_ccp_stack">dirty_ccp_stack() (pyglimer.rf.create.RFStream method)</a>
+</li>
+      <li><a href="chapters/API.html#pyglimer.waveform.request.Request.download_waveforms">download_waveforms() (pyglimer.waveform.request.Request method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chapters/API.html#pyglimer.waveform.download.downloadwav">downloadwav() (in module pyglimer.waveform.download)</a>
+</li>
       <li><a href="chapters/API.html#pyglimer.utils.utils.dt_string">dt_string() (in module pyglimer.utils.utils)</a>
 </li>
       <li><a href="chapters/API.html#pyglimer.rf.moveout.dt_table">dt_table() (in module pyglimer.rf.moveout)</a>
@@ -281,6 +282,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chapters/API.html#pyglimer.utils.signalproc.gaussian">gaussian() (in module pyglimer.utils.signalproc)</a>
 </li>
+      <li><a href="chapters/API.html#pyglimer.utils.geo_utils.gctrack">gctrack() (in module pyglimer.utils.geo_utils)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chapters/API.html#pyglimer.utils.geo_utils.geo2cart">geo2cart() (in module pyglimer.utils.geo_utils)</a>
@@ -305,14 +308,16 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chapters/API.html#pyglimer.ccp.plot_utils.line_buffer.line_buffer">line_buffer() (in module pyglimer.ccp.plot_utils.line_buffer)</a>
+</li>
       <li><a href="chapters/API.html#pyglimer.utils.createvmodel.load_avvmodel">load_avvmodel() (in module pyglimer.utils.createvmodel)</a>
 </li>
       <li><a href="chapters/API.html#pyglimer.utils.createvmodel.load_gyps">load_gyps() (in module pyglimer.utils.createvmodel)</a>
 </li>
-      <li><a href="chapters/API.html#pyglimer.rf.moveout.load_model">load_model() (in module pyglimer.rf.moveout)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chapters/API.html#pyglimer.rf.moveout.load_model">load_model() (in module pyglimer.rf.moveout)</a>
+</li>
       <li><a href="chapters/API.html#pyglimer.ccp.io.load_rawrf">load_rawrf() (in module pyglimer.ccp.io)</a>
 </li>
       <li><a href="chapters/API.html#pyglimer.ccp.io.load_tracefile">load_tracefile() (in module pyglimer.ccp.io)</a>
@@ -339,6 +344,12 @@
 </li>
         <li><a href="chapters/API.html#module-pyglimer.ccp.io">pyglimer.ccp.io</a>
 </li>
+        <li><a href="chapters/API.html#module-pyglimer.ccp.plot_utils.line_buffer">pyglimer.ccp.plot_utils.line_buffer</a>
+</li>
+        <li><a href="chapters/API.html#module-pyglimer.ccp.plot_utils.plot_cross_section">pyglimer.ccp.plot_utils.plot_cross_section</a>
+</li>
+        <li><a href="chapters/API.html#module-pyglimer.ccp.plot_utils.plot_line_buffer">pyglimer.ccp.plot_utils.plot_line_buffer</a>
+</li>
         <li><a href="chapters/API.html#module-pyglimer.database.asdf">pyglimer.database.asdf</a>
 </li>
         <li><a href="chapters/API.html#module-pyglimer.database.stations">pyglimer.database.stations</a>
@@ -360,6 +371,8 @@
         <li><a href="chapters/API.html#module-pyglimer.test.rate">pyglimer.test.rate</a>
 </li>
         <li><a href="chapters/API.html#module-pyglimer.test.synthetic">pyglimer.test.synthetic</a>
+</li>
+        <li><a href="chapters/API.html#module-pyglimer.test.tests">pyglimer.test.tests</a>
 </li>
         <li><a href="chapters/API.html#module-pyglimer.utils.changedb">pyglimer.utils.changedb</a>
 </li>
@@ -402,6 +415,8 @@
         <li><a href="chapters/API.html#pyglimer.rf.create.RFTrace.moveout">(pyglimer.rf.create.RFTrace method)</a>
 </li>
       </ul></li>
+      <li><a href="chapters/API.html#pyglimer.test.tests.moveout_test">moveout_test() (in module pyglimer.test.tests)</a>
+</li>
       <li><a href="chapters/API.html#pyglimer.ccp.ccp.CCPStack.multicore_stack">multicore_stack() (pyglimer.ccp.ccp.CCPStack method)</a>
 </li>
       <li><a href="chapters/API.html#pyglimer.rf.deconvolve.multitaper">multitaper() (in module pyglimer.rf.deconvolve)</a>
@@ -454,7 +469,11 @@
       </ul></li>
       <li><a href="chapters/API.html#pyglimer.plot.plot_utils.plot_catalog">plot_catalog() (in module pyglimer.plot.plot_utils)</a>
 </li>
+      <li><a href="chapters/API.html#pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section">plot_cross_section() (in module pyglimer.ccp.plot_utils.plot_cross_section)</a>
+</li>
       <li><a href="chapters/API.html#pyglimer.rf.create.RFStream.plot_distribution">plot_distribution() (pyglimer.rf.create.RFStream method)</a>
+</li>
+      <li><a href="chapters/API.html#pyglimer.ccp.plot_utils.plot_line_buffer.plot_line_buffer">plot_line_buffer() (in module pyglimer.ccp.plot_utils.plot_line_buffer)</a>
 </li>
       <li><a href="chapters/API.html#pyglimer.plot.plot_map.plot_map">plot_map() (in module pyglimer.plot.plot_map)</a>
 </li>
@@ -504,6 +523,27 @@
 </li>
       </ul></li>
       <li>
+    pyglimer.ccp.plot_utils.line_buffer
+
+      <ul>
+        <li><a href="chapters/API.html#module-pyglimer.ccp.plot_utils.line_buffer">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyglimer.ccp.plot_utils.plot_cross_section
+
+      <ul>
+        <li><a href="chapters/API.html#module-pyglimer.ccp.plot_utils.plot_cross_section">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyglimer.ccp.plot_utils.plot_line_buffer
+
+      <ul>
+        <li><a href="chapters/API.html#module-pyglimer.ccp.plot_utils.plot_line_buffer">module</a>
+</li>
+      </ul></li>
+      <li>
     pyglimer.database.asdf
 
       <ul>
@@ -538,6 +578,8 @@
         <li><a href="chapters/API.html#module-pyglimer.plot.plot_volume">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     pyglimer.plot.ui_utils
 
@@ -552,8 +594,6 @@
         <li><a href="chapters/API.html#module-pyglimer.rf.create">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     pyglimer.rf.deconvolve
 
@@ -580,6 +620,13 @@
 
       <ul>
         <li><a href="chapters/API.html#module-pyglimer.test.synthetic">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyglimer.test.tests
+
+      <ul>
+        <li><a href="chapters/API.html#module-pyglimer.test.tests">module</a>
 </li>
       </ul></li>
       <li>
@@ -721,7 +768,13 @@
 </li>
       <li><a href="chapters/API.html#pyglimer.ccp.ccp.read_ccp">read_ccp() (in module pyglimer.ccp.ccp)</a>
 </li>
+      <li><a href="chapters/API.html#pyglimer.test.tests.read_geom">read_geom() (in module pyglimer.test.tests)</a>
+</li>
+      <li><a href="chapters/API.html#pyglimer.test.tests.read_raysum">read_raysum() (in module pyglimer.test.tests)</a>
+</li>
       <li><a href="chapters/API.html#pyglimer.rf.create.read_rf">read_rf() (in module pyglimer.rf.create)</a>
+</li>
+      <li><a href="chapters/API.html#pyglimer.test.tests.read_rfs_mat">read_rfs_mat() (in module pyglimer.test.tests)</a>
 </li>
       <li><a href="chapters/API.html#pyglimer.utils.geo_utils.reckon">reckon() (in module pyglimer.utils.geo_utils)</a>
 </li>
@@ -731,13 +784,17 @@
 </li>
       <li><a href="chapters/API.html#pyglimer.waveform.errorhandler.redownload_statxml">redownload_statxml() (in module pyglimer.waveform.errorhandler)</a>
 </li>
-      <li><a href="chapters/API.html#pyglimer.plot.plot_utils.remove_all">remove_all() (in module pyglimer.plot.plot_utils)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chapters/API.html#pyglimer.plot.plot_utils.remove_all">remove_all() (in module pyglimer.plot.plot_utils)</a>
+</li>
       <li><a href="chapters/API.html#pyglimer.plot.plot_utils.remove_topright">remove_topright() (in module pyglimer.plot.plot_utils)</a>
 </li>
       <li><a href="chapters/API.html#pyglimer.waveform.request.Request">Request (class in pyglimer.waveform.request)</a>
+</li>
+      <li><a href="chapters/API.html#pyglimer.utils.signalproc.resample_or_decimate">resample_or_decimate() (in module pyglimer.utils.signalproc)</a>
+</li>
+      <li><a href="chapters/API.html#pyglimer.test.tests.rf_test">rf_test() (in module pyglimer.test.tests)</a>
 </li>
       <li><a href="chapters/API.html#pyglimer.rf.create.rfstats">rfstats() (in module pyglimer.rf.create)</a>
 </li>
@@ -795,10 +852,12 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="chapters/API.html#pyglimer.rf.create.RFStream.trim2">trim2() (pyglimer.rf.create.RFStream method)</a>
+      <li><a href="chapters/API.html#pyglimer.test.tests.test_SNR">test_SNR() (in module pyglimer.test.tests)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chapters/API.html#pyglimer.rf.create.RFStream.trim2">trim2() (pyglimer.rf.create.RFStream method)</a>
+</li>
       <li><a href="chapters/API.html#pyglimer.rf.create.RFStream.type">type() (pyglimer.rf.create.RFStream property)</a>
 </li>
   </ul></td>
@@ -834,25 +893,28 @@
            
           </div>
           <footer>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, the PyGLImER development team.
+        
+        &copy; Copyright 2021, the PyGLImER development team
 
     </p>
   </div>
     
     
     
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 

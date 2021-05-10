@@ -23,23 +23,37 @@ from ..utils import signalproc as sptb
 
 def synthetic(N2, dt, R, SNR, stdv):
     """
-Function to create synthetic seismograms (given Impulse response convolved with a Ricker wavelet)
-INPUT:
-    N2: half-length of the Input traces, (full length N= N2*2+1)
-    dt: sampling rate
-    R: Impulse response / reflectivity series with length N
-    SNR: ratio of maximal amplitude of the source wavelet to max noise amplitude
-    stdv : standard deviation of the source pulse (controls width)
-Output:
-    v_noise: the theorethical source wavelet with noise independent from the noise on the horizontal compoennt
-            (equal to the hoizontal component of a seismogram in RF)
-    h_noise: The horizontal component of the seismogram with noise
+    Function to create synthetic seismograms (given Impulse response 
+    convolved with a Ricker wavelet)
+
+    Parameters
+    ----------
+    N2 : int 
+        half-length of the Input traces, (full length N= N2*2+1)
+    dt : float 
+        sampling rate
+    R : Arraylike
+        Impulse response / reflectivity series with length N
+    SNR : float
+        ratio of maximal amplitude of the source wavelet to max noise amplitude
+    stdv : float
+        standard deviation of the source pulse (controls width)
+
+    Returns
+    -------
+    Tuple
+        v_noise : the theorethical source wavelet with noise independent
+        from the noise on the horizontal component(equal to the hoizontal
+        component of a seismogram in RF)
+        h_noise : The horizontal component of the seismogram with noise
 """
 
     # Full-length
     N = N2 * 2 + 1
     if len(R) != N:
-        print("Error: The given impulse response has the wrong length. Give an array with length=", N)
+        print(
+            "Error: The given impulse response has the wrong length. "
+            "Give an array with length=", N)
         quit()
 
     # create source wavelet

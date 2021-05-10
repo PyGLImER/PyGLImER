@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>pyglimer.utils.geo_utils &mdash; PyGLImER 0.01 documentation</title>
   
@@ -16,10 +16,7 @@
 
   
   
-
   
-  
-
   
 
   
@@ -32,6 +29,7 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -51,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyGLImER
           
 
           
@@ -88,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
 </ul>
 
@@ -114,8 +113,6 @@
         <div class="rst-content">
         
           
-
-
 
 
 
@@ -173,8 +170,10 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">cartopy.geodesic</span> <span class="kn">import</span> <span class="n">Geodesic</span>
 <span class="kn">from</span> <span class="nn">..constants</span> <span class="kn">import</span> <span class="n">R_EARTH</span>
 
 
@@ -222,6 +221,99 @@
     <span class="k">return</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span></div>
 
 
+<div class="viewcode-block" id="gctrack"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.geo_utils.gctrack">[docs]</a><span class="k">def</span> <span class="nf">gctrack</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Given waypoints and a point distance, this function computes evenly</span>
+<span class="sd">    spaced points along the great circle and the given waypoints.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lat : np.ndarray</span>
+<span class="sd">        waypoint latitudes</span>
+<span class="sd">    lon : np.ndarray</span>
+<span class="sd">        waypoint longitudes</span>
+<span class="sd">    dist : float</span>
+<span class="sd">        distance in degrees</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple(np.ndarray, np.ndarray)</span>
+
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+
+<span class="sd">    :Authors:</span>
+<span class="sd">        Lucas Sawade (lsawade@princeton.edu)</span>
+
+<span class="sd">    :Last Modified:</span>
+<span class="sd">        2020.04.20 00.30</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># First get distances between points</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">az</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Create Geodesic class</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">()</span>
+
+    <span class="c1"># Get distances along the waypoints</span>
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">lon</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">lat</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+                               <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">lon</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">lat</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+    <span class="n">dists</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mf">1000.0</span><span class="o">/</span><span class="mf">111.11</span>
+    <span class="n">az</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Cumulative station distances</span>
+    <span class="n">sdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">sdists</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
+
+    <span class="c1"># Get tracks between segments that are far apart</span>
+    <span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">dist</span><span class="p">:</span>
+            <span class="c1"># Create vector between two poitns</span>
+            <span class="n">trackdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="n">dist</span><span class="p">)</span>
+            <span class="n">track</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reckon</span><span class="p">(</span><span class="n">lat</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="n">lon</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="n">trackdists</span><span class="p">,</span> <span class="n">az</span><span class="p">[</span><span class="n">_i</span><span class="p">]))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">track</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">lat</span><span class="p">[</span><span class="n">_i</span><span class="p">:</span><span class="n">_i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">lon</span><span class="p">[</span><span class="n">_i</span><span class="p">:</span><span class="n">_i</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
+
+    <span class="c1"># Add last point because usually not added</span>
+    <span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(((</span><span class="n">lat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">lon</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),))</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="c1"># Get tracks</span>
+    <span class="n">utrack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">tracks</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># Remove duplicates if there are any</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">utrack</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">utrack</span> <span class="o">=</span> <span class="n">utrack</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="p">:]</span>
+
+    <span class="c1"># Get distances along the new track</span>
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">utrack</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">utrack</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">utrack</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">],</span>   <span class="n">utrack</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+    <span class="n">udists</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mf">1000.0</span><span class="o">/</span><span class="mf">111.11</span>
+
+    <span class="c1"># Compute cumulative distance</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">utrack</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">cdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+    <span class="n">cdists</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">udists</span><span class="p">)</span>
+
+    <span class="c1"># Interpolate to the final vectors</span>
+    <span class="n">maxdist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">cdists</span><span class="p">)</span>
+    <span class="n">qdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxdist</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">maxdist</span><span class="o">/</span><span class="n">dist</span><span class="p">))</span>
+    <span class="n">ilat</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">cdists</span><span class="p">,</span> <span class="n">utrack</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">ilon</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">cdists</span><span class="p">,</span> <span class="n">utrack</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">qlat</span><span class="p">,</span> <span class="n">qlon</span> <span class="o">=</span> <span class="n">ilat</span><span class="p">(</span><span class="n">qdists</span><span class="p">),</span> <span class="n">ilon</span><span class="p">(</span><span class="n">qdists</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">qlat</span><span class="p">,</span> <span class="n">qlon</span><span class="p">,</span> <span class="n">qdists</span><span class="p">,</span> <span class="n">sdists</span></div>
+
+
 <div class="viewcode-block" id="geo2cart"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.geo_utils.geo2cart">[docs]</a><span class="k">def</span> <span class="nf">geo2cart</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Computes cartesian coordinates from geographical coordinates</span>
 
@@ -240,7 +332,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Convert to radians</span>
-    <span class="n">latrad</span> <span class="o">=</span> <span class="n">latitude</span><span class="o">/</span><span class="mi">180</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="n">latrad</span> <span class="o">=</span> <span class="n">latitude</span> <span class="o">/</span> <span class="mi">180</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
     <span class="n">lonrad</span> <span class="o">=</span> <span class="n">longitude</span> <span class="o">/</span> <span class="mi">180</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
 
     <span class="c1"># Convert to geolocations</span>
@@ -288,31 +380,69 @@
 <div class="viewcode-block" id="euc2epi"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.geo_utils.euc2epi">[docs]</a><span class="k">def</span> <span class="nf">euc2epi</span><span class="p">(</span><span class="n">euc</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Converts euclidean distance to epicentral distance&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="mi">360</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">euc</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">R_EARTH</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span></div>
+
+
+<span class="k">def</span> <span class="nf">fix_map_extent</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+
+    <span class="c1"># Get extent values and fix them</span>
+    <span class="n">minlon</span><span class="p">,</span> <span class="n">maxlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">,</span> <span class="n">maxlat</span> <span class="o">=</span> <span class="n">extent</span>
+
+    <span class="n">latb</span> <span class="o">=</span> <span class="p">(</span><span class="n">maxlat</span> <span class="o">-</span> <span class="n">minlat</span><span class="p">)</span> <span class="o">*</span> <span class="n">fraction</span>
+    <span class="n">lonb</span> <span class="o">=</span> <span class="p">(</span><span class="n">maxlon</span> <span class="o">-</span> <span class="n">minlon</span><span class="p">)</span> <span class="o">*</span> <span class="n">fraction</span>
+
+    <span class="c1"># Max lat</span>
+    <span class="k">if</span> <span class="n">maxlat</span> <span class="o">+</span> <span class="n">latb</span> <span class="o">&gt;</span> <span class="mf">90.0</span><span class="p">:</span>
+        <span class="n">maxlat</span> <span class="o">=</span> <span class="mf">90.0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">maxlat</span> <span class="o">=</span> <span class="n">maxlat</span> <span class="o">+</span> <span class="n">latb</span>
+
+    <span class="c1"># Min lat</span>
+    <span class="k">if</span> <span class="n">minlat</span> <span class="o">-</span> <span class="n">latb</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">90.0</span><span class="p">:</span>
+        <span class="n">minlat</span> <span class="o">=</span> <span class="o">-</span><span class="mf">90.0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">minlat</span> <span class="o">=</span> <span class="n">minlat</span> <span class="o">-</span> <span class="n">latb</span>
+
+    <span class="c1"># Max lon</span>
+    <span class="k">if</span> <span class="n">maxlon</span> <span class="o">+</span> <span class="n">lonb</span> <span class="o">&gt;</span> <span class="mf">180.0</span><span class="p">:</span>
+        <span class="n">maxlon</span> <span class="o">=</span> <span class="mf">180.0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">maxlon</span> <span class="o">=</span> <span class="n">maxlon</span> <span class="o">+</span> <span class="n">lonb</span>
+
+    <span class="c1"># Minlon</span>
+    <span class="k">if</span> <span class="n">minlon</span> <span class="o">-</span> <span class="n">lonb</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">180.0</span><span class="p">:</span>
+        <span class="n">minlon</span> <span class="o">=</span> <span class="o">-</span><span class="mf">180.0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">minlon</span> <span class="o">=</span> <span class="n">minlon</span> <span class="o">-</span> <span class="n">lonb</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">minlon</span><span class="p">,</span> <span class="n">maxlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">,</span> <span class="n">maxlat</span><span class="p">]</span>
 </pre></div>
 
            </div>
            
           </div>
           <footer>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, the PyGLImER development team.
+        
+        &copy; Copyright 2021, the PyGLImER development team
 
     </p>
   </div>
     
     
     
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 

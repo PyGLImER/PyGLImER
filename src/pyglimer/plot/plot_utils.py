@@ -16,6 +16,7 @@ Last Update: June 19, 2020
 
 """
 
+import matplotlib.path as mpath
 import os
 import numpy as np
 import matplotlib
@@ -27,42 +28,100 @@ from pyglimer.constants import maxz, res
 
 
 def set_mpl_params():
+    # params = {
+    #     # 'font.family': 'Avenir Next',
+    #     'pdf.fonttype': 42,
+    #     'font.weight': 'bold',
+    #     'figure.dpi': 150,
+    #     'axes.labelweight': 'bold',
+    #     'axes.linewidth': 1.5,
+    #     'axes.labelsize': 14,
+    #     'axes.titlesize': 18,
+    #     'axes.titleweight': 'bold',
+    #     'xtick.labelsize': 13,
+    #     'xtick.direction': 'in',
+    #     'xtick.top': True,  # draw label on the top
+    #     'xtick.bottom': True,  # draw label on the bottom
+    #     'xtick.minor.visible': True,
+    #     'xtick.major.top': True,  # draw x axis top major ticks
+    #     'xtick.major.bottom': True,  # draw x axis bottom major ticks
+    #     'xtick.minor.top': True,  # draw x axis top minor ticks
+    #     'xtick.minor.bottom': True,  # draw x axis bottom minor ticks
+    #     'ytick.labelsize': 13,
+    #     'ytick.direction': 'in',
+    #     'ytick.left': True,  # draw label on the top
+    #     'ytick.right': True,  # draw label on the bottom
+    #     'ytick.minor.visible': True,
+    #     'ytick.major.left': True,  # draw x axis top major ticks
+    #     'ytick.major.right': True,  # draw x axis bottom major ticks
+    #     'ytick.minor.left': True,  # draw x axis top minor ticks
+    #     'ytick.minor.right': True,  # draw x axis bottom minor ticks
+    #     'legend.fancybox': False,
+    #     'legend.frameon': False,
+    #     'legend.loc': 'upper left',
+    #     'legend.numpoints': 2,
+    #     'legend.fontsize': 'large',
+    #     'legend.framealpha': 1,
+    #     'legend.scatterpoints': 3,
+    #     'legend.edgecolor': 'inherit'
+    # }
     params = {
-        # 'font.family': 'Avenir Next',
-        'pdf.fonttype': 42,
-        'font.weight': 'bold',
-        'figure.dpi': 150,
-        'axes.labelweight': 'bold',
-        'axes.linewidth': 1.5,
-        'axes.labelsize': 14,
-        'axes.titlesize': 18,
-        'axes.titleweight': 'bold',
-        'xtick.labelsize': 13,
-        'xtick.direction': 'in',
+        'font.family': "Arial",
+        'font.size': 12,
+        # 'pdf.fonttype': 3,
+        'font.weight': 'normal',
+        # 'pdf.fonttype': 42,
+        # 'ps.fonttype': 42,
+        # 'ps.useafm': True,
+        # 'pdf.use14corefonts': True,
+        'axes.unicode_minus': False,
+        'axes.labelweight': 'normal',
+        'axes.labelsize': 'small',
+        'axes.titlesize': 'medium',
+        'axes.linewidth': 1,
+        'axes.grid': False,
+        'grid.color': "k",
+        'grid.linestyle': ":",
+        'grid.alpha': 0.7,
+        'xtick.labelsize': 'small',
+        'xtick.direction': 'out',
         'xtick.top': True,  # draw label on the top
         'xtick.bottom': True,  # draw label on the bottom
         'xtick.minor.visible': True,
         'xtick.major.top': True,  # draw x axis top major ticks
         'xtick.major.bottom': True,  # draw x axis bottom major ticks
+        'xtick.major.size': 4,  # draw x axis top major ticks
+        'xtick.major.width': 1,  # draw x axis top major ticks
         'xtick.minor.top': True,  # draw x axis top minor ticks
         'xtick.minor.bottom': True,  # draw x axis bottom minor ticks
-        'ytick.labelsize': 13,
-        'ytick.direction': 'in',
+        'xtick.minor.width': 1,  # draw x axis top major ticks
+        'xtick.minor.size': 2,  # draw x axis top major ticks
+        'ytick.labelsize': 'small',
+        'ytick.direction': 'out',
         'ytick.left': True,  # draw label on the top
         'ytick.right': True,  # draw label on the bottom
         'ytick.minor.visible': True,
         'ytick.major.left': True,  # draw x axis top major ticks
         'ytick.major.right': True,  # draw x axis bottom major ticks
+        'ytick.major.size': 4,  # draw x axis top major ticks
+        'ytick.major.width': 1,  # draw x axis top major ticks
         'ytick.minor.left': True,  # draw x axis top minor ticks
         'ytick.minor.right': True,  # draw x axis bottom minor ticks
+        'ytick.minor.size': 2,  # draw x axis top major ticks
+        'ytick.minor.width': 1,  # draw x axis top major ticks
         'legend.fancybox': False,
-        'legend.frameon': False,
-        'legend.loc': 'upper left',
-        'legend.numpoints': 2,
-        'legend.fontsize': 'large',
+        'legend.frameon': True,
+        'legend.loc': 'best',
+        'legend.numpoints': 1,
+        'legend.fontsize': 'small',
         'legend.framealpha': 1,
         'legend.scatterpoints': 3,
-        'legend.edgecolor': 'inherit'
+        'legend.edgecolor': 'inherit',
+        'legend.facecolor': 'w',
+        'mathtext.fontset': 'custom',
+        'mathtext.rm': 'Arial',
+        'mathtext.it': 'Arial:italic',
+        'mathtext.bf': 'Arial:bold'
     }
     matplotlib.rcParams.update(params)
     # 25/04/21 this function was depricated? Don't know what it did
@@ -142,8 +201,11 @@ def plot_catalog(catalog):
 
 
 def plot_single_rf(rf, tlim: list or tuple or None = None,
+                   ylim: list or tuple or None = None,
                    depth: np.ndarray or None = None,
                    ax: plt.Axes = None, outputdir: str = None,
+                   pre_fix: str = None, post_fix: str = None,
+                   format: str = None,
                    clean: bool = False):
     """Creates plot of a single receiver function
 
@@ -156,6 +218,8 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
         type==depth (len(list)==2).
         If `None` full trace is plotted.
         Default None.
+    ylim: list or tuple or None
+        y axis amplitude limits in. If `None` ± 1.05 absmax. Default None.
     depth: :class:`numpy.ndarray`
         1D array of depths
     ax : `matplotlib.pyplot.Axes`, optional
@@ -164,6 +228,10 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     outputdir : str, optional
         If set, saves a pdf of the plot to the directory.
         If None, plot will be shown instantly. Defaults to None.
+    pre_fix : str, optional
+        prepend filename
+    post_fix : str, optional
+        append to filename
     clean: bool
         If True, clears out all axes and plots RF only.
         Defaults to False.
@@ -178,7 +246,7 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     if ax is None:
         width, height = 10, 2.5
         fig = plt.figure(figsize=(width, height))
-        ax = plt.gca(zorder=9999999)
+        ax = plt.axes(zorder=9999999)
         axtmp = None
     else:
         bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
@@ -204,22 +272,28 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     #     times = depth
     else:
         z = np.hstack(
-                 ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+            ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
         times = z
 
     # Plot stuff into axes
-    ax.fill_between(times, 0, ydata, where=ydata > 0, 
+    ax.fill_between(times, 0, ydata, where=ydata > 0,
                     interpolate=True, color=(0.9, 0.2, 0.2))
-    ax.fill_between(times, 0, ydata, where=ydata < 0, 
+    ax.fill_between(times, 0, ydata, where=ydata < 0,
                     interpolate=True, color=(0.2, 0.2, 0.7))
     ax.plot(times, ydata, 'k', lw=0.75)
 
     # Set limits
     if tlim is None:
         # ax.set_xlim(times[0], times[-1])
-        ax.set_xlim(0, times[-1])  # don't really wanna see the stuff before  
+        ax.set_xlim(0, times[-1])  # don't really wanna see the stuff before
     else:
         ax.set_xlim(tlim)
+
+    if ylim is None:
+        absmax = 1.1 * np.max(np.abs(ydata))
+        ax.set_ylim([-absmax, absmax])
+    else:
+        ax.set_ylim(ylim)
 
     # Removes top/right axes spines. If you want the whole thing, comment
     # or remove
@@ -246,26 +320,43 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     if axtmp is None:
         plt.tight_layout()
 
-    # Outout the receiver function as pdf using 
+    # Outout the receiver function as pdf using
     # its station name and starttime
+
     if outputdir is not None:
-        filename = os.path.join(outputdir, 
-                                rf.get_id() + "_" 
-                                + rf.stats.starttime._strftime_replacement('%Y%m%dT%H%M%S')
-                                + ".pdf")
-        plt.savefig(filename, format="pdf")
+        # Set pre and post fix
+        if pre_fix is not None:
+            pre_fix = pre_fix + "_"
+        else:
+            pre_fix = ""
+        if post_fix is not None:
+            post_fix = "_" + post_fix
+        else:
+            post_fix = ""
+
+        # Get filename
+        filename = os.path.join(
+            outputdir,
+            pre_fix
+            + rf.get_id() + "_"
+            + rf.stats.starttime._strftime_replacement('%Y%m%dT%H%M%S')
+            + post_fix
+            + f".{format}")
+        plt.savefig(filename, format=format, transparent=True)
+
     return ax
 
+
 def plot_section(rfst, channel="PRF",
-                 timelimits: list or tuple or None = None, 
+                 timelimits: list or tuple or None = None,
                  epilimits: list or tuple or None = None,
                  scalingfactor: float = 2.0, ax: plt.Axes = None,
                  line: bool = True,
-                 linewidth: float = 0.25, outputdir: str or None = None, 
+                 linewidth: float = 0.25, outputfile: str or None = None,
                  title: str or None = None, show: bool = True):
     """Creates plot of a receiver function section as a function
     of epicentral distance.
-    
+
     Parameters
     ----------
     rfst : :class:`pyglimer.RFStream`
@@ -297,18 +388,18 @@ def plot_section(rfst, channel="PRF",
     clean: bool
         If True, clears out all axes and plots RF only.
         Defaults to False.
-    
+
      Returns
     -------
     ax : `matplotlib.pyplot.Axes`
-    
+
     """
-    #set_mpl_params()
-        
+    # set_mpl_params()
+
     # Create figure if no axes is specified
     if ax is None:
-        plt.figure(figsize=(10, 15))
-        ax = plt.gca(zorder=999999)
+        plt.figure(figsize=(8, 6))
+        ax = plt.axes(zorder=9999999)
 
     # Grab one component only
     # That doesn't work anymore. Was there an update in the obspy function?
@@ -316,8 +407,8 @@ def plot_section(rfst, channel="PRF",
     rfst_chan = rfst.sort(keys=['distance'])
 
     if not len(rfst_chan):
-        raise ValueError('There are no receiver functions of channel ' +channel
-    +' in the RFStream.')
+        raise ValueError('There are no receiver functions of channel ' + channel
+                         + ' in the RFStream.')
 
     # Plot traces
     for _i, rf in enumerate(rfst_chan):
@@ -329,7 +420,7 @@ def plot_section(rfst, channel="PRF",
                 times = np.flip(times)
         else:
             z = np.hstack(
-                 ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+                ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
             times = z
 
         rftmp = rf.data * scalingfactor \
@@ -362,7 +453,7 @@ def plot_section(rfst, channel="PRF",
     else:
         plt.ylim(timelimits)
     ax.invert_yaxis()
-    
+
     # Set labels
     plt.xlabel(r"$\Delta$ [$^{\circ}$]")
     if rfst[0].stats.type == 'time':
@@ -375,13 +466,12 @@ def plot_section(rfst, channel="PRF",
         plt.title(title + " - %s" % channel)
     else:
         plt.title("%s component" % channel)
-    
+
     # Set output directory
-    if outputdir is None:
+    if outputfile is None:
         plt.show()
     else:
-        outputfilename = os.path.join(outputdir, "channel_%s.pdf" % channel)
-        plt.savefig(outputfilename, format="pdf")
+        plt.savefig(outputfile, dpi=300, transparent=True)
     return ax
 
 
@@ -390,15 +480,15 @@ def baz_hist(az, nbins):
     Takes in backazimuth distribution and number of bins to compute
     the distribution of incoming angles.
 
-    Parameters:
-    -----------
-    az : `numpy.ndarray`
+    Parameters
+    ----------
+    az : numpy.ndarray
         azimuthal distribution in 1D array
     nbins : int
         Number of bins
 
-    Returns:
-    --------
+    Returns
+    -------å
     None
 
     """
@@ -423,7 +513,8 @@ def baz_hist(az, nbins):
     ax.set_theta_zero_location('N')
     ax.set_theta_direction(-1)
     ax.invert_yaxis()
-    ax.set_xticklabels(['N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE'])
+    ax.set_xticks(np.arange(0, 2*np.pi, 2*np.pi/8))
+    ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
     labels = ax.get_xticklabels()
     for label in labels:
         pos = label.get_position()
@@ -435,9 +526,9 @@ def rayp_hist(rayp, nbins, v=5.8):
     Takes in rayparameter distribution and number of bins to compute
     the distribution of incoming angles.
 
-    Parameters:
-    -----
-    rayp: :class:`numpy.ndarray`
+    Parameters
+    ----------
+    rayp: numpy.ndarray
         1D ndarray of rayparameters
     nbins: int
         Number of bins
@@ -448,11 +539,11 @@ def rayp_hist(rayp, nbins, v=5.8):
         indicates which incidence wave is meant 'S' or 'P'. Default is 'P'
         simple defines boundaries of the plot nothing more nothing less.
 
-    Returns:
-    --------
+    Returns
+    -------
     None
 
-    Note:
+    Notes
     -----
     Get Incidence angle p = sin i/v <--> v sin i / p <--> i = asin(vp)
     Default value 5.8 km/s taken from PREM.
@@ -497,15 +588,16 @@ def rayp_hist(rayp, nbins, v=5.8):
 
 def stream_dist(rayp: list or np.array, baz: list or np.array,
                 nbins: float = 50, v: float = 5.8, phase: str = 'P',
-                outputfile: None or str = None, format: str = "pdf", 
+                outputfile: None or str = None, format: str = "pdf",
                 dpi: int = 300):
     """Uses backazimuth and rayparameter histogram plotting tools to create
     combined overview over the Distribution of incident waves.
 
-    Parameters:
-    rayp: :class:`numpy.ndarray`
+    Parameters
+    ----------
+    rayp: numpy.ndarray
         1D ndarray of rayparameters
-    az: `numpy.ndarray`
+    az: numpy.ndarray
         azimuthal distribution in 1D array
     nbins: int
         Number of bins
@@ -526,14 +618,12 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
 
     """
 
-    plt.figure(figsize=(15, 9))
+    plt.figure(figsize=(10, 4.5))
+    plt.subplots_adjust(wspace=0.05)
     plt.subplot(121, projection="polar")
     baz_hist(baz, nbins)
-    plt.title("Backazimuth distribution")
     plt.subplot(122, projection="polar")
     rayp_hist(rayp, nbins, v=v)
-    plt.title("Incident angle distribution")
-    plt.tight_layout()
 
     if outputfile is None:
         plt.show()

@@ -31,7 +31,7 @@ from pyglimer.data import finddir
 from pyglimer.ccp import CCPStack
 from pyglimer.rf import RFTrace, RFStream
 from pyglimer.rf.create import createRF, read_by_station
-from pyglimer.rf.deconvolve import it, multitaper, spectraldivision, gen_it
+from pyglimer.rf.deconvolve import it, multitaper, spectraldivision  # , gen_it
 from pyglimer.rf.moveout import moveout, DEG2KM
 from pyglimer.waveform.qc import qcs, qcp
 
@@ -147,7 +147,7 @@ def read_raysum(phase, NEZ_file=None, RTZ_file=None, PSS_file=None):
             return PSS, dt, M, N, shift
 
 
-def read_geom(geom_file,phase):
+def read_geom(geom_file, phase):
     """
     Reads in the geometry file of the raysum program to determine parameters.
 
@@ -333,7 +333,7 @@ def ccp_test(phase, dip, geom_file='3D.geom', multiple=False, use_old_rfs=True):
     if not use_old_rfs:
         _, statlat, statlon = rf_test(phase, dip, geom_file=geom_file)
         print("RFs created")
-    
+
     else:
         rfs = read_by_station('raysum', str(dip), phase, 'output/waveforms/RF')
         statlat = []
@@ -463,7 +463,8 @@ def decon_test(PSS_file, phase, method):
             data, IR, iters, rej = gen_it(u, v, dt, phase=phase, shift=shift)
             lrf = None
         elif method == "fqd" or method == "wat" or method == "con":
-            data, lrf = spectraldivision(v, u, dt, shift, phase=phase, regul=method, test=True)
+            data, lrf = spectraldivision(
+                v, u, dt, shift, phase=phase, regul=method, test=True)
         elif method == "multit_fqd":
             data, lrf, _, _ = multitaper(u, v, dt, shift, 'fqd')
             data = lowpass(data, 4.99, 1/dt, zerophase=True)

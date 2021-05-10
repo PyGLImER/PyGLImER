@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>pyglimer.plot.plot_utils &mdash; PyGLImER 0.01 documentation</title>
   
@@ -16,10 +16,7 @@
 
   
   
-
   
-  
-
   
 
   
@@ -32,6 +29,7 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -51,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyGLImER
           
 
           
@@ -88,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
 </ul>
 
@@ -114,8 +113,6 @@
         <div class="rst-content">
         
           
-
-
 
 
 
@@ -173,6 +170,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">matplotlib.path</span> <span class="k">as</span> <span class="nn">mpath</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span>
@@ -184,42 +182,100 @@
 
 
 <span class="k">def</span> <span class="nf">set_mpl_params</span><span class="p">():</span>
+    <span class="c1"># params = {</span>
+    <span class="c1">#     # &#39;font.family&#39;: &#39;Avenir Next&#39;,</span>
+    <span class="c1">#     &#39;pdf.fonttype&#39;: 42,</span>
+    <span class="c1">#     &#39;font.weight&#39;: &#39;bold&#39;,</span>
+    <span class="c1">#     &#39;figure.dpi&#39;: 150,</span>
+    <span class="c1">#     &#39;axes.labelweight&#39;: &#39;bold&#39;,</span>
+    <span class="c1">#     &#39;axes.linewidth&#39;: 1.5,</span>
+    <span class="c1">#     &#39;axes.labelsize&#39;: 14,</span>
+    <span class="c1">#     &#39;axes.titlesize&#39;: 18,</span>
+    <span class="c1">#     &#39;axes.titleweight&#39;: &#39;bold&#39;,</span>
+    <span class="c1">#     &#39;xtick.labelsize&#39;: 13,</span>
+    <span class="c1">#     &#39;xtick.direction&#39;: &#39;in&#39;,</span>
+    <span class="c1">#     &#39;xtick.top&#39;: True,  # draw label on the top</span>
+    <span class="c1">#     &#39;xtick.bottom&#39;: True,  # draw label on the bottom</span>
+    <span class="c1">#     &#39;xtick.minor.visible&#39;: True,</span>
+    <span class="c1">#     &#39;xtick.major.top&#39;: True,  # draw x axis top major ticks</span>
+    <span class="c1">#     &#39;xtick.major.bottom&#39;: True,  # draw x axis bottom major ticks</span>
+    <span class="c1">#     &#39;xtick.minor.top&#39;: True,  # draw x axis top minor ticks</span>
+    <span class="c1">#     &#39;xtick.minor.bottom&#39;: True,  # draw x axis bottom minor ticks</span>
+    <span class="c1">#     &#39;ytick.labelsize&#39;: 13,</span>
+    <span class="c1">#     &#39;ytick.direction&#39;: &#39;in&#39;,</span>
+    <span class="c1">#     &#39;ytick.left&#39;: True,  # draw label on the top</span>
+    <span class="c1">#     &#39;ytick.right&#39;: True,  # draw label on the bottom</span>
+    <span class="c1">#     &#39;ytick.minor.visible&#39;: True,</span>
+    <span class="c1">#     &#39;ytick.major.left&#39;: True,  # draw x axis top major ticks</span>
+    <span class="c1">#     &#39;ytick.major.right&#39;: True,  # draw x axis bottom major ticks</span>
+    <span class="c1">#     &#39;ytick.minor.left&#39;: True,  # draw x axis top minor ticks</span>
+    <span class="c1">#     &#39;ytick.minor.right&#39;: True,  # draw x axis bottom minor ticks</span>
+    <span class="c1">#     &#39;legend.fancybox&#39;: False,</span>
+    <span class="c1">#     &#39;legend.frameon&#39;: False,</span>
+    <span class="c1">#     &#39;legend.loc&#39;: &#39;upper left&#39;,</span>
+    <span class="c1">#     &#39;legend.numpoints&#39;: 2,</span>
+    <span class="c1">#     &#39;legend.fontsize&#39;: &#39;large&#39;,</span>
+    <span class="c1">#     &#39;legend.framealpha&#39;: 1,</span>
+    <span class="c1">#     &#39;legend.scatterpoints&#39;: 3,</span>
+    <span class="c1">#     &#39;legend.edgecolor&#39;: &#39;inherit&#39;</span>
+    <span class="c1"># }</span>
     <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="c1"># &#39;font.family&#39;: &#39;Avenir Next&#39;,</span>
-        <span class="s1">&#39;pdf.fonttype&#39;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
-        <span class="s1">&#39;font.weight&#39;</span><span class="p">:</span> <span class="s1">&#39;bold&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;figure.dpi&#39;</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span>
-        <span class="s1">&#39;axes.labelweight&#39;</span><span class="p">:</span> <span class="s1">&#39;bold&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;axes.linewidth&#39;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span>
-        <span class="s1">&#39;axes.labelsize&#39;</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span>
-        <span class="s1">&#39;axes.titlesize&#39;</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span>
-        <span class="s1">&#39;axes.titleweight&#39;</span><span class="p">:</span> <span class="s1">&#39;bold&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;xtick.labelsize&#39;</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span>
-        <span class="s1">&#39;xtick.direction&#39;</span><span class="p">:</span> <span class="s1">&#39;in&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;font.family&#39;</span><span class="p">:</span> <span class="s2">&quot;Arial&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+        <span class="c1"># &#39;pdf.fonttype&#39;: 3,</span>
+        <span class="s1">&#39;font.weight&#39;</span><span class="p">:</span> <span class="s1">&#39;normal&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;pdf.fonttype&#39;: 42,</span>
+        <span class="c1"># &#39;ps.fonttype&#39;: 42,</span>
+        <span class="c1"># &#39;ps.useafm&#39;: True,</span>
+        <span class="c1"># &#39;pdf.use14corefonts&#39;: True,</span>
+        <span class="s1">&#39;axes.unicode_minus&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;axes.labelweight&#39;</span><span class="p">:</span> <span class="s1">&#39;normal&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;axes.labelsize&#39;</span><span class="p">:</span> <span class="s1">&#39;small&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;axes.titlesize&#39;</span><span class="p">:</span> <span class="s1">&#39;medium&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;axes.linewidth&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;axes.grid&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;grid.color&#39;</span><span class="p">:</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;grid.linestyle&#39;</span><span class="p">:</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;grid.alpha&#39;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="s1">&#39;xtick.labelsize&#39;</span><span class="p">:</span> <span class="s1">&#39;small&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;xtick.direction&#39;</span><span class="p">:</span> <span class="s1">&#39;out&#39;</span><span class="p">,</span>
         <span class="s1">&#39;xtick.top&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># draw label on the top</span>
         <span class="s1">&#39;xtick.bottom&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># draw label on the bottom</span>
         <span class="s1">&#39;xtick.minor.visible&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s1">&#39;xtick.major.top&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># draw x axis top major ticks</span>
         <span class="s1">&#39;xtick.major.bottom&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># draw x axis bottom major ticks</span>
+        <span class="s1">&#39;xtick.major.size&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># draw x axis top major ticks</span>
+        <span class="s1">&#39;xtick.major.width&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># draw x axis top major ticks</span>
         <span class="s1">&#39;xtick.minor.top&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># draw x axis top minor ticks</span>
         <span class="s1">&#39;xtick.minor.bottom&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># draw x axis bottom minor ticks</span>
-        <span class="s1">&#39;ytick.labelsize&#39;</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span>
-        <span class="s1">&#39;ytick.direction&#39;</span><span class="p">:</span> <span class="s1">&#39;in&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;xtick.minor.width&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># draw x axis top major ticks</span>
+        <span class="s1">&#39;xtick.minor.size&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># draw x axis top major ticks</span>
+        <span class="s1">&#39;ytick.labelsize&#39;</span><span class="p">:</span> <span class="s1">&#39;small&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ytick.direction&#39;</span><span class="p">:</span> <span class="s1">&#39;out&#39;</span><span class="p">,</span>
         <span class="s1">&#39;ytick.left&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># draw label on the top</span>
         <span class="s1">&#39;ytick.right&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># draw label on the bottom</span>
         <span class="s1">&#39;ytick.minor.visible&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s1">&#39;ytick.major.left&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># draw x axis top major ticks</span>
         <span class="s1">&#39;ytick.major.right&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># draw x axis bottom major ticks</span>
+        <span class="s1">&#39;ytick.major.size&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># draw x axis top major ticks</span>
+        <span class="s1">&#39;ytick.major.width&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># draw x axis top major ticks</span>
         <span class="s1">&#39;ytick.minor.left&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># draw x axis top minor ticks</span>
         <span class="s1">&#39;ytick.minor.right&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># draw x axis bottom minor ticks</span>
+        <span class="s1">&#39;ytick.minor.size&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># draw x axis top major ticks</span>
+        <span class="s1">&#39;ytick.minor.width&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># draw x axis top major ticks</span>
         <span class="s1">&#39;legend.fancybox&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="s1">&#39;legend.frameon&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="s1">&#39;legend.loc&#39;</span><span class="p">:</span> <span class="s1">&#39;upper left&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;legend.numpoints&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="s1">&#39;legend.fontsize&#39;</span><span class="p">:</span> <span class="s1">&#39;large&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;legend.frameon&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;legend.loc&#39;</span><span class="p">:</span> <span class="s1">&#39;best&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;legend.numpoints&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;legend.fontsize&#39;</span><span class="p">:</span> <span class="s1">&#39;small&#39;</span><span class="p">,</span>
         <span class="s1">&#39;legend.framealpha&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="s1">&#39;legend.scatterpoints&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-        <span class="s1">&#39;legend.edgecolor&#39;</span><span class="p">:</span> <span class="s1">&#39;inherit&#39;</span>
+        <span class="s1">&#39;legend.edgecolor&#39;</span><span class="p">:</span> <span class="s1">&#39;inherit&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;legend.facecolor&#39;</span><span class="p">:</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;mathtext.fontset&#39;</span><span class="p">:</span> <span class="s1">&#39;custom&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;mathtext.rm&#39;</span><span class="p">:</span> <span class="s1">&#39;Arial&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;mathtext.it&#39;</span><span class="p">:</span> <span class="s1">&#39;Arial:italic&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;mathtext.bf&#39;</span><span class="p">:</span> <span class="s1">&#39;Arial:bold&#39;</span>
     <span class="p">}</span>
     <span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
     <span class="c1"># 25/04/21 this function was depricated? Don&#39;t know what it did</span>
@@ -299,8 +355,11 @@
 
 
 <div class="viewcode-block" id="plot_single_rf"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.plot.plot_utils.plot_single_rf">[docs]</a><span class="k">def</span> <span class="nf">plot_single_rf</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">tlim</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">ylim</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="n">depth</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="n">ax</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">outputdir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">pre_fix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">post_fix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="n">clean</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Creates plot of a single receiver function</span>
 
@@ -313,6 +372,8 @@
 <span class="sd">        type==depth (len(list)==2).</span>
 <span class="sd">        If `None` full trace is plotted.</span>
 <span class="sd">        Default None.</span>
+<span class="sd">    ylim: list or tuple or None</span>
+<span class="sd">        y axis amplitude limits in. If `None` ± 1.05 absmax. Default None.</span>
 <span class="sd">    depth: :class:`numpy.ndarray`</span>
 <span class="sd">        1D array of depths</span>
 <span class="sd">    ax : `matplotlib.pyplot.Axes`, optional</span>
@@ -321,6 +382,10 @@
 <span class="sd">    outputdir : str, optional</span>
 <span class="sd">        If set, saves a pdf of the plot to the directory.</span>
 <span class="sd">        If None, plot will be shown instantly. Defaults to None.</span>
+<span class="sd">    pre_fix : str, optional</span>
+<span class="sd">        prepend filename</span>
+<span class="sd">    post_fix : str, optional</span>
+<span class="sd">        append to filename</span>
 <span class="sd">    clean: bool</span>
 <span class="sd">        If True, clears out all axes and plots RF only.</span>
 <span class="sd">        Defaults to False.</span>
@@ -335,7 +400,7 @@
     <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">2.5</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(</span><span class="n">zorder</span><span class="o">=</span><span class="mi">9999999</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">zorder</span><span class="o">=</span><span class="mi">9999999</span><span class="p">)</span>
         <span class="n">axtmp</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">bbox</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_window_extent</span><span class="p">()</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">dpi_scale_trans</span><span class="o">.</span><span class="n">inverted</span><span class="p">())</span>
@@ -361,22 +426,28 @@
     <span class="c1">#     times = depth</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
-                 <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)))</span>
+            <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)))</span>
         <span class="n">times</span> <span class="o">=</span> <span class="n">z</span>
 
     <span class="c1"># Plot stuff into axes</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ydata</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="n">ydata</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> 
+    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ydata</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="n">ydata</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
                     <span class="n">interpolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ydata</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="n">ydata</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> 
+    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ydata</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="n">ydata</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span>
                     <span class="n">interpolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">))</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">ydata</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
 
     <span class="c1"># Set limits</span>
     <span class="k">if</span> <span class="n">tlim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># ax.set_xlim(times[0], times[-1])</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># don&#39;t really wanna see the stuff before  </span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># don&#39;t really wanna see the stuff before</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">tlim</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ylim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">absmax</span> <span class="o">=</span> <span class="mf">1.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ydata</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="o">-</span><span class="n">absmax</span><span class="p">,</span> <span class="n">absmax</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ylim</span><span class="p">)</span>
 
     <span class="c1"># Removes top/right axes spines. If you want the whole thing, comment</span>
     <span class="c1"># or remove</span>
@@ -403,26 +474,43 @@
     <span class="k">if</span> <span class="n">axtmp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
-    <span class="c1"># Outout the receiver function as pdf using </span>
+    <span class="c1"># Outout the receiver function as pdf using</span>
     <span class="c1"># its station name and starttime</span>
+
     <span class="k">if</span> <span class="n">outputdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outputdir</span><span class="p">,</span> 
-                                <span class="n">rf</span><span class="o">.</span><span class="n">get_id</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> 
-                                <span class="o">+</span> <span class="n">rf</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="o">.</span><span class="n">_strftime_replacement</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H%M%S&#39;</span><span class="p">)</span>
-                                <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pdf&quot;</span><span class="p">)</span>
+        <span class="c1"># Set pre and post fix</span>
+        <span class="k">if</span> <span class="n">pre_fix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pre_fix</span> <span class="o">=</span> <span class="n">pre_fix</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pre_fix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">post_fix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">post_fix</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">post_fix</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">post_fix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># Get filename</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">outputdir</span><span class="p">,</span>
+            <span class="n">pre_fix</span>
+            <span class="o">+</span> <span class="n">rf</span><span class="o">.</span><span class="n">get_id</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span>
+            <span class="o">+</span> <span class="n">rf</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="o">.</span><span class="n">_strftime_replacement</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">T%H%M%S&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">post_fix</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;.</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">ax</span></div>
 
+
 <div class="viewcode-block" id="plot_section"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.plot.plot_utils.plot_section">[docs]</a><span class="k">def</span> <span class="nf">plot_section</span><span class="p">(</span><span class="n">rfst</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s2">&quot;PRF&quot;</span><span class="p">,</span>
-                 <span class="n">timelimits</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">timelimits</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">epilimits</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">scalingfactor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">line</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                 <span class="n">linewidth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">outputdir</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">linewidth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Creates plot of a receiver function section as a function</span>
 <span class="sd">    of epicentral distance.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    rfst : :class:`pyglimer.RFStream`</span>
@@ -454,18 +542,18 @@
 <span class="sd">    clean: bool</span>
 <span class="sd">        If True, clears out all axes and plots RF only.</span>
 <span class="sd">        Defaults to False.</span>
-<span class="sd">    </span>
+
 <span class="sd">     Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    ax : `matplotlib.pyplot.Axes`</span>
-<span class="sd">    </span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1">#set_mpl_params()</span>
-        
+    <span class="c1"># set_mpl_params()</span>
+
     <span class="c1"># Create figure if no axes is specified</span>
     <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(</span><span class="n">zorder</span><span class="o">=</span><span class="mi">999999</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">zorder</span><span class="o">=</span><span class="mi">9999999</span><span class="p">)</span>
 
     <span class="c1"># Grab one component only</span>
     <span class="c1"># That doesn&#39;t work anymore. Was there an update in the obspy function?</span>
@@ -473,8 +561,8 @@
     <span class="n">rfst_chan</span> <span class="o">=</span> <span class="n">rfst</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">rfst_chan</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;There are no receiver functions of channel &#39;</span> <span class="o">+</span><span class="n">channel</span>
-    <span class="o">+</span><span class="s1">&#39; in the RFStream.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;There are no receiver functions of channel &#39;</span> <span class="o">+</span> <span class="n">channel</span>
+                         <span class="o">+</span> <span class="s1">&#39; in the RFStream.&#39;</span><span class="p">)</span>
 
     <span class="c1"># Plot traces</span>
     <span class="k">for</span> <span class="n">_i</span><span class="p">,</span> <span class="n">rf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rfst_chan</span><span class="p">):</span>
@@ -486,7 +574,7 @@
                 <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
-                 <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)))</span>
+                <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)))</span>
             <span class="n">times</span> <span class="o">=</span> <span class="n">z</span>
 
         <span class="n">rftmp</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">scalingfactor</span> \
@@ -519,7 +607,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">timelimits</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
-    
+
     <span class="c1"># Set labels</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\Delta$ [$^{\circ}$]&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">rfst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span>
@@ -532,13 +620,12 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span> <span class="o">+</span> <span class="s2">&quot; - </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">channel</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> component&quot;</span> <span class="o">%</span> <span class="n">channel</span><span class="p">)</span>
-    
+
     <span class="c1"># Set output directory</span>
-    <span class="k">if</span> <span class="n">outputdir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">outputfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">outputfilename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outputdir</span><span class="p">,</span> <span class="s2">&quot;channel_</span><span class="si">%s</span><span class="s2">.pdf&quot;</span> <span class="o">%</span> <span class="n">channel</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">outputfilename</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pdf&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ax</span></div>
 
 
@@ -547,15 +634,15 @@
 <span class="sd">    Takes in backazimuth distribution and number of bins to compute</span>
 <span class="sd">    the distribution of incoming angles.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
-<span class="sd">    az : `numpy.ndarray`</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    az : numpy.ndarray</span>
 <span class="sd">        azimuthal distribution in 1D array</span>
 <span class="sd">    nbins : int</span>
 <span class="sd">        Number of bins</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------å</span>
 <span class="sd">    None</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -580,7 +667,8 @@
     <span class="n">ax</span><span class="o">.</span><span class="n">set_theta_zero_location</span><span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_theta_direction</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;NW&#39;</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="s1">&#39;SW&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;SE&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;NE&#39;</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">8</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;NE&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;SE&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;SW&#39;</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="s1">&#39;NW&#39;</span><span class="p">])</span>
     <span class="n">labels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
         <span class="n">pos</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
@@ -592,9 +680,9 @@
 <span class="sd">    Takes in rayparameter distribution and number of bins to compute</span>
 <span class="sd">    the distribution of incoming angles.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----</span>
-<span class="sd">    rayp: :class:`numpy.ndarray`</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rayp: numpy.ndarray</span>
 <span class="sd">        1D ndarray of rayparameters</span>
 <span class="sd">    nbins: int</span>
 <span class="sd">        Number of bins</span>
@@ -605,11 +693,11 @@
 <span class="sd">        indicates which incidence wave is meant &#39;S&#39; or &#39;P&#39;. Default is &#39;P&#39;</span>
 <span class="sd">        simple defines boundaries of the plot nothing more nothing less.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    None</span>
 
-<span class="sd">    Note:</span>
+<span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    Get Incidence angle p = sin i/v &lt;--&gt; v sin i / p &lt;--&gt; i = asin(vp)</span>
 <span class="sd">    Default value 5.8 km/s taken from PREM.</span>
@@ -654,15 +742,16 @@
 
 <div class="viewcode-block" id="stream_dist"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.plot.plot_utils.stream_dist">[docs]</a><span class="k">def</span> <span class="nf">stream_dist</span><span class="p">(</span><span class="n">rayp</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">baz</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
                 <span class="n">nbins</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.8</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span>
-                <span class="n">outputfile</span><span class="p">:</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pdf&quot;</span><span class="p">,</span> 
+                <span class="n">outputfile</span><span class="p">:</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pdf&quot;</span><span class="p">,</span>
                 <span class="n">dpi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Uses backazimuth and rayparameter histogram plotting tools to create</span>
 <span class="sd">    combined overview over the Distribution of incident waves.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    rayp: :class:`numpy.ndarray`</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rayp: numpy.ndarray</span>
 <span class="sd">        1D ndarray of rayparameters</span>
-<span class="sd">    az: `numpy.ndarray`</span>
+<span class="sd">    az: numpy.ndarray</span>
 <span class="sd">        azimuthal distribution in 1D array</span>
 <span class="sd">    nbins: int</span>
 <span class="sd">        Number of bins</span>
@@ -683,14 +772,12 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;polar&quot;</span><span class="p">)</span>
     <span class="n">baz_hist</span><span class="p">(</span><span class="n">baz</span><span class="p">,</span> <span class="n">nbins</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Backazimuth distribution&quot;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;polar&quot;</span><span class="p">)</span>
     <span class="n">rayp_hist</span><span class="p">(</span><span class="n">rayp</span><span class="p">,</span> <span class="n">nbins</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">v</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Incident angle distribution&quot;</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">outputfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -704,25 +791,28 @@
            
           </div>
           <footer>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, the PyGLImER development team.
+        
+        &copy; Copyright 2021, the PyGLImER development team
 
     </p>
   </div>
     
     
     
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 

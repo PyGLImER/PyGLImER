@@ -24,14 +24,21 @@ def resample_or_decimate(data: Stream, sampling_rate_new: int) -> Stream:
     Decimates the data if the desired new sampling rate allows to do so.
     Else the signal will be interpolated (a lot slower).
 
-    :note: The stream has to be filtered before to avoid aliasing.
+    Notes
+    -----
+    The stream has to be filtered before to avoid aliasing.
 
-    :param data: Stream to be resampled.
-    :type data: Stream
-    :param sampling_rate_new: The desired new sampling rate
-    :type sampling_rate_new: int
-    :return: The resampled stream
-    :rtype: Stream
+    Parameters
+    ----------
+    data : Stream
+        Stream to be resampled.
+    sampling_rate_new : int
+        The desired new sampling rate
+
+    Returns
+    -------
+    Stream
+        The resampled stream
     """
     sr = data[0].stats.sampling_rate
     srn = sampling_rate_new
@@ -166,10 +173,15 @@ def filter(s, F, dt, nf):
 
 def ricker(sigma, N2, dt):
     """ create a zero-phase Ricker / Mexican hat wavelet
-INPUT:
-    sigma - standard deviation
-    dt - sampling Interval
-    N2 - number of samples/2 (halflength). Full length = 2*N2+1"""
+    Parameters
+    ----------
+    sigma : float
+        standard deviation
+    dt : float
+        sampling Interval
+    N2 : int
+        number of samples/2 (halflength). Full length = 2*N2+1
+    """
     rick_tt = np.arange(-N2, N2+1, 1, dtype=float)*dt  # time vector
     rick = 2/(np.sqrt(3*sigma)*np.pi**(1/4))*(1-np.power(rick_tt, 2)/sigma**2)\
         * np.exp(-rick_tt**2/(2*sigma**2))
@@ -178,20 +190,35 @@ INPUT:
 
 def noise(N, A):
     """ create random noise
-    INPUT:
-        N: signal length
-        A: maximal amplitude"""
+    Parameters
+    ----------
+    N: int
+        signal length
+    A: float
+        maximal amplitude
+    """
     noise = np.random.rand(N)*A
     return noise
 
 
 def sshift(s, N2, dt, shift):
     """ shift a signal by a given time-shift in the frequency domain
-    INPUT:
-        s: signal
-        N2: length of the signal in f-domain (usually equals the next pof 2)
-        dt: sampling interval
-        shift: the time shift in seconds"""
+
+    Parameters
+    ----------
+    s : Arraylike
+        signal
+    N2 : int
+        length of the signal in f-domain (usually equals the next pof 2)
+    dt : float
+        sampling interval
+    shift : float
+        the time shift in seconds
+
+    Returns
+    -------
+    Timeshifted signal"""
+
     S = np.fft.fft(s, n=N2)
 
     k = round(shift/dt)  # discrete shift
@@ -200,4 +227,5 @@ def sshift(s, N2, dt, shift):
     S = S*(np.cos(p) - 1j*np.sin(p))
 
     s_out = np.real(np.fft.ifft(S, N2))/np.cos(2*np.pi*k/N2)  # correct scaling
+
     return s_out

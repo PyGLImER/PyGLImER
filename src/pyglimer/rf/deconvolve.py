@@ -265,10 +265,21 @@ def it(P, H, dt, shift=0, width=2.5, omega_min=0.5, it_max=200):
 def damped(P, H, mu=10):
     """Outdated use function spectraldivision instead!
     A simple damped deconvolution. I just used it to benchmark
-    INPUT:
-        P: denominator (t-domain)
-        H: enumerator (t-domain)
-        mu: damping factor"""
+
+    Parameters
+    ----------
+    P : Arraylike
+        denominator (t-domain)
+    H : Arraylike
+        enumerator (t-domain)
+    mu : float
+        damping factor
+
+    Returns
+    -------
+    Inverted signal
+
+    """
     P = np.array(P, dtype=float)
     H = np.array(H, dtype=float)
     N = len(H)

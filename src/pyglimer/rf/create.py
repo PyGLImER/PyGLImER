@@ -44,6 +44,7 @@ from pyglimer.rf.deconvolve import it, spectraldivision, multitaper
 from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table,\
     dt_table_3D
 from pyglimer.plot.plot_utils import plot_section, plot_single_rf, stream_dist
+from pyglimer.utils.geo_utils import fix_map_extent
 
 logger = logging.Logger("rf")
 
@@ -488,11 +489,18 @@ class RFStream(Stream):
         """
         Alternative trim method accepting relative times.
         See :meth:`~obspy.core.stream.Stream.trim`.
-        :param starttime,endtime: accept UTCDateTime or seconds relative to
-            reftime
-        :param reftime: reference time, can be an UTCDateTime object or a
+
+        Parameters
+        ----------
+        starttime: UTCDateTime or float, optional
+            starttime as UTC or seconds relative to reftime
+        endtime: UTCDateTime or float, optional
+            endtime as UTC or seconds relative to reftime
+        reftime : UTCDateTime, optional
+            reference time, can be an UTCDateTime object or a
             string. The string will be looked up in the stats dictionary
             (e.g. 'starttime', 'endtime', 'onset').
+
         """
         for tr in self.traces:
             t1 = tr._seconds2utc(starttime, reftime=reftime)
@@ -562,7 +570,7 @@ class RFStream(Stream):
         st = RFStream(traces=RF_mo)
         if 'z' not in locals():
             z = np.hstack(
-                 ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+                ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
         return z, st
 
     def ppoint(self, vmodel_file='iasp91.dat', latb=None, lonb=None):
@@ -750,18 +758,24 @@ class RFStream(Stream):
         """
         Plot back azimuth and rayparameter distributions.
 
-        Parameters:
-        -----------
-        nbins (int) : Number of bins. Default
-        v (float) : assummed surface velocity for the computation of the
+        Parameters
+        ----------
+        nbins : int
+            Number of bins. Default
+        v : float
+            assummed surface velocity for the computation of the
             incidence angle. Default 5.8 km/s.
-        outputfile (str or None) : Path to savefile. If None plot is not saved
-            just shown. Defaults to None.
-        format (str): outputfile format
-        dpi (int) : only used if file format is none vector.
+        outputfile : str, optional
+            Path to savefile. If None plot is not saved just shown. 
+            Defaults to None.
+        format : str, optional
+            outputfile format
+        dpi : int, optional
+            only used if file format is none vector.
 
-        Returns:
-        --------
+
+        Returns
+        -------
         None
 
         """
@@ -790,80 +804,165 @@ class RFStream(Stream):
         stream_dist(np.array(rayp), np.array(baz), nbins=nbins, v=v,
                     outputfile=outputfile, format=format,  dpi=dpi)
 
-    def __dirty_ccp_stacks(self, binlon, binlat, binz):
+    def dirty_ccp_stack(
+            self, dlon: float = 1.0, z_res: float = 1.0,
+            extent=[-180.0, 180.0, -90.0, 90.0], maxz=750,
+            vmodel_file='iasp91.dat'):
         """This is the simplest way of creating quick not really accurate
         CCP stacks.
 
-        This function is still empty, but I'm leaving it here, because I think
-        it should be implemented. Sometime this week maybe
 
-        Parameters:
-        binlon:  `numpy.ndarray`
-        1D Array describing the longitude bins
-        binlon:  `numpy.ndarray`
-        1D Array describing the latitude bins
-        binlon:  `numpy.ndarray`
-        1D Array describing the depth bins
+        .. warning::
+            There are some things that the user should be aware of. The bins
+            right at the poles may or may not have very different areas 
+            compared to the other bins, which is a side effect of the iterative 
+            computation of bin area correction. I have an idea on how to fix
+            it, but it is not really necessary right now. If you are working 
+            with stations at the pole, and you want to CCP stack, I'd strongly
+            advise against using this function anyways. The bins are just 
+            too narrow. This really is just a 'dirty' CCP stack and should only 
+            be used as a first order check if thing are ok.
 
-        Returns:
-        V : 3D `numpy.ndarray`
 
+        Parameters
+        ----------
+        dlon : float, optional
+            stetp size in longitude, by default 1.0
+        z_res : float, optional
+            depth resolution, by default 1.0
+        extent : list, optional
+            list of bounds [minlon, maxlon, minlat, maxlat], 
+            by default [-180.0, 180.0, -90.0, 90.0]
+        maxz : int, optional
+            maxz, by default 750
+        vmodel_file : str, optional
+            velocity model file. IASP91 1-D model used as standard  since 
+            the assumption of rectangular bins is already a bit rough, 
+            by default 'iasp91.dat'
+
+        Returns
+        -------
+        tuple   
+            containing, vectors outlining the mesh illumination etc.
         """
 
         # Check whether moveout and piercing points have been computed.
-        """Then, use a 3d histogram to create stacks, and create them quickly
+        # Then, use a 3d histogram to create stacks, and create them quickly
+        # Create
+        logger.info("Computing Move-out correction")
+        self.moveout(vmodel=vmodel_file)
 
-        Area corrected binswith simple fix
-        WGS84 values:
+        #
+        logger.info("Getting locations corresponding to the traces")
+        latitude, longitude, depth, rf = [], [], [], []
+        for _tr in self:
+            latitude.extend(_tr.stats.pp_latitude)
+            longitude.extend(_tr.stats.pp_longitude)
+            depth.extend(_tr.stats.pp_depth)  # Doubt that it's saved like this
+            rf.extend(_tr.data)
+
+        # WGS84 values:
         f = 1/298.257223563
-        a = 6378137.0
+        a = 6378.137  # in meters
         e = 2*f-f**2
 
-        # Resolution
-        res = 1.0 # in deg
-
         # Surface area
-        A = res**2 * (DEG2KM**2)
+        A = dlon**2 * (DEG2KM**2)
 
-        # Initial latitude vector
-        lon = np.arange(0, 90.0 + res, res)
+        # Get value of degree resolution in kilometers for a given latitude
+        def Dlon(theta): return dlon * np.pi * a * np.cos(theta/180*np.pi) / \
+            (180 * np.sqrt(1 - e**2 * np.sin(theta/180*np.pi)**2))
 
-        # Get value of longitude
-        dlon = pi * a * cos(phi/180*pi) / (180 * sqrt(1 - e**2 * sin(phi/180*pi)**2))/1000
-
-        # Get value of approximate dlat
-        dlat = A/dlon
-
-        # Get cumulative latitude values
-        lat = cumsum(dlat/111.11)
+        # Correct the latitudinal spacing by iteratively walk to the pole
+        lat = [0.0]
+        i = 0
+        while lat[-1] < 90.0:
+            dlat = A/Dlon(lat[-1])/DEG2KM
+            lat.append(lat[-1] + dlat)
+            i += 1
+        lat = np.array(lat)
 
         # Filter out values larger than 90deg
         lat = lat[np.where(lat <= 90)]
 
-        # Create meshgrid from new latittude vector and longitude vector
-        lon = np.arange(0, 180 + res, res)
+        # Add 90.0 to at least include every value,
+        lat = np.append(lat, 90.0)
+
+        # Get how many "rings"
+        fdlat = lat[-1] - lat[-2]
+
+        # Compute cap area
+        cap_theta = lat[-2]
+        area_per_dlon = 2*np.pi * a**2 * \
+            (1-np.cos(cap_theta/180*np.pi)) / (360/dlon)
+
+        # Number of longitude bins at the pol that correspond to one equatorial bin
+        # Not used anymore
+        ndlon = int(np.ceil(A/area_per_dlon))
 
         # Create binedges
         blat = np.hstack((-lat[::-1], 0, lat))
-        blon = np.hstack((-lon[::-1], 0, lon))
-        bz = np.arange(-10, maxz, res)
+        blon = np.arange(-180.0, 180.0 + dlon, dlon)
+        bz = np.arange(-10, maxz, z_res)
 
-        # Create
-        p = np.vstack((all_lat, all_lon, all_z)).T
+        # Get buffered extent
+        fextent = fix_map_extent(extent)
 
-        # Simple stacking 
-        stack = np.histogramdd(p, bins=(blat, blon,bz))
+        # Fix the geographical bin edges depending on the extent
+        blon = blon[np.where((fextent[0] <= blon) & (blon <= fextent[1]))]
+        blat = blat[np.where((fextent[2] <= blat) & (blat <= fextent[3]))]
+
+        # Create Volumes
+        points = np.vstack(
+            (np.array(longitude), np.array(latitude), np.array(depth))).T
+        bins = (blon, blat, bz)
+        ccp, _ = np.histogramdd(points, bins=bins, weights=rf)
+        illum, _ = np.histogramdd(points, bins=bins)
+
+        # #### This is unused at the moment because it is not required for the
+        # #### code to work and only a correction for bins at the very pole.
+
+        # Cut up range into chunks to fix the pol bins.
+        # Number of chunks at the pole
+        # print(len(blon))
+        # print(ndlon)
+        # nchunks = len(blon) // ndlon
+
+        # # Number of chunks at the Poles
+        # slicerange = np.arange(0, len(blon)-1)
+        # chunks = [slicerange[_i*ndlon:_i*ndlon+ndlon]
+        #           for _i in range(nchunks)]
+        # # Fix omitted chunks
+        # chunks.append(slicerange[-(len(blon) - chunks[-1][-1] - 1):])
+
+        # # Loop over chunks at the poles
+        # for _chunk in chunks:
+        #     # South Pole (looks like a dimension mismatch, but should work)
+        #     ccpvals = np.sum(ccp[_chunk, 0, :], axis=0)
+        #     ccp[_chunk, 0, :] = ccpvals
+        #     illumvals = np.sum(illum[_chunk, 0, :], axis=0)
+        #     illum[_chunk, 0, :] = illumvals
+
+        #     # North Pole
+        #     ccpvals = np.sum(ccp[_chunk, -1, :], axis=0)
+        #     ccp[_chunk, -1, :] = ccpvals
+        #     illumvals = np.sum(illum[_chunk, -1, :], axis=0)
+        #     illum[_chunk, -1, :] = illumvals
+
+        # Normalize histograms
+        # Workaround for zero count values tto not get an error.
+        # Where counts == 0, zi = 0, else zi = zz/counts
+        ccpi = np.zeros_like(ccp)
+        ccpi[illum.astype(bool)] = ccp[illum.astype(bool)] / \
+            illum[illum.astype(bool)]
 
         # bin centers
         latc = (blat[:-1] + blat[1:])/2
         lonc = (blon[:-1] + blon[1:])/2
-        zc   = (  bz[:-1] +   bz[1:])/2
+        zc = bz[:-1]
 
-        return latc, lonc, zc, stack
-        """
-
-        # If yes, use to populated a volume histogramdd
-        # output volume data
+        # Create Object from bincenters, and stacks?
+        return latc, lonc, zc, ccpi, illum
 
 
 class RFTrace(Trace):
