@@ -46,31 +46,39 @@ def moveout(
     Corrects the for the moveout of a converted phase. Flips time axis
     and polarity of SRF.
 
-    :param data: Receiver Function.
-    :type data: 1D np.ndarray
-    :param st: Stats from stream object.
-    :type st: :class:`~obspy.core.AttributeDict`
-    :param fname: 1D velocity model for moveout correction.
+    Parameters
+    ----------
+    data : np.ndarray
+        Receiver Function.
+    st : obspy.core.trace.Stats
+        Stream stats
+    fname : str
+        1D velocity model for moveout correction.
         Use '3D' for a 3D raytracing.
-    :type fname: str
-    :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
+    latb : tuple
+         Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
         Will remain unused for 1D RT.
-    :type latb: tuple
-    :param lonb: Tuple in Form (minlon, maxlon)
-    :type lonb: tuple
-    :param taper: If True, the last 10km of the RF will be tapered,
+    lonb : tuple
+        Tuple in Form (minlon, maxlon)
+    taper : bool
+        If True, the last 10km of the RF will be tapered,
         which avoids jumps in station stacks. If False, the upper 5 km will be
         tapered. Should be False for CCP stacks.
-    :type taper: bool
-    :param multiple: Either False (don't include multiples), 'linear' for
+    multiple : bool, optional
+        Either False (don't include multiples), 'linear' for
         linear stack, 'PWS' (phase weighted stack or "zk" for a zhu &
-        kanamori approach). False by default.
-    :type multiple: bool or str, optional
-    :return: z2 : Depth vector in km.
-        RF2 : Vector containing the depth migrated RF.
-        delta : Vector containing Euclidian distance of piercing point from the
-            station at depth z.
-    :rtype: 3 times 1D np.ndarray
+        kanamori approach). False by default., by default False
+
+    Returns
+    -------
+    z2 : Arraylike
+        Depth vector in km.
+    RF2 : Arraylike
+        Vector containing the depth migrated RF.
+    delta : Arraylike
+        Vector containing Euclidian distance of piercing point from the
+        station at depth z.
+
     """
 
     onset = st.onset
@@ -316,8 +324,8 @@ def dt_table_3D(
     # hypothetical conversion depth tables
     if el > 0:
         htab = np.hstack(  # spherical
-                         (np.arange(-round(el/1000, 1), 0, .1),
-                          np.arange(0, maxz+res, res)))
+            (np.arange(-round(el/1000, 1), 0, .1),
+             np.arange(0, maxz+res, res)))
     else:
         htab = np.arange(-round(el/1000), maxz+res, res)
 
@@ -497,8 +505,8 @@ def dt_table(
     # hypothetical conversion depth tables
     if el > 0:
         htab = np.hstack(  # spherical
-                         (np.arange(-round(el/1000, 1), 0, .1),
-                          np.arange(0, maxz+res, res)))
+            (np.arange(-round(el/1000, 1), 0, .1),
+             np.arange(0, maxz+res, res)))
     else:
         htab = np.arange(-round(el/1000), maxz+res, res)
 

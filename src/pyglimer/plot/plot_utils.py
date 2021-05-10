@@ -480,15 +480,15 @@ def baz_hist(az, nbins):
     Takes in backazimuth distribution and number of bins to compute
     the distribution of incoming angles.
 
-    Parameters:
-    -----------
-    az : `numpy.ndarray`
+    Parameters
+    ----------
+    az : numpy.ndarray
         azimuthal distribution in 1D array
     nbins : int
         Number of bins
 
-    Returns:
-    --------
+    Returns
+    -------å
     None
 
     """
@@ -526,9 +526,9 @@ def rayp_hist(rayp, nbins, v=5.8):
     Takes in rayparameter distribution and number of bins to compute
     the distribution of incoming angles.
 
-    Parameters:
-    -----
-    rayp: :class:`numpy.ndarray`
+    Parameters
+    ----------
+    rayp: numpy.ndarray
         1D ndarray of rayparameters
     nbins: int
         Number of bins
@@ -539,11 +539,11 @@ def rayp_hist(rayp, nbins, v=5.8):
         indicates which incidence wave is meant 'S' or 'P'. Default is 'P'
         simple defines boundaries of the plot nothing more nothing less.
 
-    Returns:
-    --------
+    Returns
+    -------
     None
 
-    Note:
+    Notes
     -----
     Get Incidence angle p = sin i/v <--> v sin i / p <--> i = asin(vp)
     Default value 5.8 km/s taken from PREM.
@@ -593,10 +593,11 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
     """Uses backazimuth and rayparameter histogram plotting tools to create
     combined overview over the Distribution of incident waves.
 
-    Parameters:
-    rayp: :class:`numpy.ndarray`
+    Parameters
+    ----------
+    rayp: numpy.ndarray
         1D ndarray of rayparameters
-    az: `numpy.ndarray`
+    az: numpy.ndarray
         azimuthal distribution in 1D array
     nbins: int
         Number of bins

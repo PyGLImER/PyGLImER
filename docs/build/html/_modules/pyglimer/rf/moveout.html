@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>pyglimer.rf.moveout &mdash; PyGLImER 0.01 documentation</title>
   
@@ -16,10 +16,7 @@
 
   
   
-
   
-  
-
   
 
   
@@ -32,6 +29,7 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -51,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyGLImER
           
 
           
@@ -88,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
 </ul>
 
@@ -114,8 +113,6 @@
         <div class="rst-content">
         
           
-
-
 
 
 
@@ -203,31 +200,39 @@
 <span class="sd">    Corrects the for the moveout of a converted phase. Flips time axis</span>
 <span class="sd">    and polarity of SRF.</span>
 
-<span class="sd">    :param data: Receiver Function.</span>
-<span class="sd">    :type data: 1D np.ndarray</span>
-<span class="sd">    :param st: Stats from stream object.</span>
-<span class="sd">    :type st: :class:`~obspy.core.AttributeDict`</span>
-<span class="sd">    :param fname: 1D velocity model for moveout correction.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : np.ndarray</span>
+<span class="sd">        Receiver Function.</span>
+<span class="sd">    st : obspy.core.trace.Stats</span>
+<span class="sd">        Stream stats</span>
+<span class="sd">    fname : str</span>
+<span class="sd">        1D velocity model for moveout correction.</span>
 <span class="sd">        Use &#39;3D&#39; for a 3D raytracing.</span>
-<span class="sd">    :type fname: str</span>
-<span class="sd">    :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.</span>
+<span class="sd">    latb : tuple</span>
+<span class="sd">         Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.</span>
 <span class="sd">        Will remain unused for 1D RT.</span>
-<span class="sd">    :type latb: tuple</span>
-<span class="sd">    :param lonb: Tuple in Form (minlon, maxlon)</span>
-<span class="sd">    :type lonb: tuple</span>
-<span class="sd">    :param taper: If True, the last 10km of the RF will be tapered,</span>
+<span class="sd">    lonb : tuple</span>
+<span class="sd">        Tuple in Form (minlon, maxlon)</span>
+<span class="sd">    taper : bool</span>
+<span class="sd">        If True, the last 10km of the RF will be tapered,</span>
 <span class="sd">        which avoids jumps in station stacks. If False, the upper 5 km will be</span>
 <span class="sd">        tapered. Should be False for CCP stacks.</span>
-<span class="sd">    :type taper: bool</span>
-<span class="sd">    :param multiple: Either False (don&#39;t include multiples), &#39;linear&#39; for</span>
+<span class="sd">    multiple : bool, optional</span>
+<span class="sd">        Either False (don&#39;t include multiples), &#39;linear&#39; for</span>
 <span class="sd">        linear stack, &#39;PWS&#39; (phase weighted stack or &quot;zk&quot; for a zhu &amp;</span>
-<span class="sd">        kanamori approach). False by default.</span>
-<span class="sd">    :type multiple: bool or str, optional</span>
-<span class="sd">    :return: z2 : Depth vector in km.</span>
-<span class="sd">        RF2 : Vector containing the depth migrated RF.</span>
-<span class="sd">        delta : Vector containing Euclidian distance of piercing point from the</span>
-<span class="sd">            station at depth z.</span>
-<span class="sd">    :rtype: 3 times 1D np.ndarray</span>
+<span class="sd">        kanamori approach). False by default., by default False</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    z2 : Arraylike</span>
+<span class="sd">        Depth vector in km.</span>
+<span class="sd">    RF2 : Arraylike</span>
+<span class="sd">        Vector containing the depth migrated RF.</span>
+<span class="sd">    delta : Arraylike</span>
+<span class="sd">        Vector containing Euclidian distance of piercing point from the</span>
+<span class="sd">        station at depth z.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">onset</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">onset</span>
@@ -473,8 +478,8 @@
     <span class="c1"># hypothetical conversion depth tables</span>
     <span class="k">if</span> <span class="n">el</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">htab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>  <span class="c1"># spherical</span>
-                         <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">round</span><span class="p">(</span><span class="n">el</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">),</span>
-                          <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)))</span>
+            <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">round</span><span class="p">(</span><span class="n">el</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">),</span>
+             <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">htab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">round</span><span class="p">(</span><span class="n">el</span><span class="o">/</span><span class="mi">1000</span><span class="p">),</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
 
@@ -654,8 +659,8 @@
     <span class="c1"># hypothetical conversion depth tables</span>
     <span class="k">if</span> <span class="n">el</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">htab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>  <span class="c1"># spherical</span>
-                         <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">round</span><span class="p">(</span><span class="n">el</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">),</span>
-                          <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)))</span>
+            <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">round</span><span class="p">(</span><span class="n">el</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">),</span>
+             <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">htab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">round</span><span class="p">(</span><span class="n">el</span><span class="o">/</span><span class="mi">1000</span><span class="p">),</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
 
@@ -936,25 +941,28 @@
            
           </div>
           <footer>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, the PyGLImER development team.
+        
+        &copy; Copyright 2021, the PyGLImER development team
 
     </p>
   </div>
     
     
     
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 

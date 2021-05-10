@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>pyglimer.utils.signalproc &mdash; PyGLImER 0.01 documentation</title>
   
@@ -16,10 +16,7 @@
 
   
   
-
   
-  
-
   
 
   
@@ -32,6 +29,7 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -51,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyGLImER
           
 
           
@@ -88,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
 </ul>
 
@@ -114,8 +113,6 @@
         <div class="rst-content">
         
           
-
-
 
 
 
@@ -169,10 +166,40 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Sunday, 20th October 2019 10:31:03 am</span>
-<span class="sd">Last Modified: Thursday, 25th March 2021 04:01:06 pm</span>
+<span class="sd">Last Modified: Friday, 30th April 2021 03:56:23 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">Stream</span>
+
+
+<div class="viewcode-block" id="resample_or_decimate"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.signalproc.resample_or_decimate">[docs]</a><span class="k">def</span> <span class="nf">resample_or_decimate</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">sampling_rate_new</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stream</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decimates the data if the desired new sampling rate allows to do so.</span>
+<span class="sd">    Else the signal will be interpolated (a lot slower).</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The stream has to be filtered before to avoid aliasing.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : Stream</span>
+<span class="sd">        Stream to be resampled.</span>
+<span class="sd">    sampling_rate_new : int</span>
+<span class="sd">        The desired new sampling rate</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Stream</span>
+<span class="sd">        The resampled stream</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sr</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span>
+    <span class="n">srn</span> <span class="o">=</span> <span class="n">sampling_rate_new</span>
+    <span class="k">if</span> <span class="n">sr</span><span class="o">/</span><span class="n">srn</span> <span class="o">==</span> <span class="n">sr</span><span class="o">//</span><span class="n">srn</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">decimate</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">sr</span><span class="o">//</span><span class="n">srn</span><span class="p">),</span> <span class="n">no_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">srn</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="convf"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.signalproc.convf">[docs]</a><span class="k">def</span> <span class="nf">convf</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
@@ -300,10 +327,15 @@
 
 <div class="viewcode-block" id="ricker"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.signalproc.ricker">[docs]</a><span class="k">def</span> <span class="nf">ricker</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; create a zero-phase Ricker / Mexican hat wavelet</span>
-<span class="sd">INPUT:</span>
-<span class="sd">    sigma - standard deviation</span>
-<span class="sd">    dt - sampling Interval</span>
-<span class="sd">    N2 - number of samples/2 (halflength). Full length = 2*N2+1&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sigma : float</span>
+<span class="sd">        standard deviation</span>
+<span class="sd">    dt : float</span>
+<span class="sd">        sampling Interval</span>
+<span class="sd">    N2 : int</span>
+<span class="sd">        number of samples/2 (halflength). Full length = 2*N2+1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rick_tt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">N2</span><span class="p">,</span> <span class="n">N2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">*</span><span class="n">dt</span>  <span class="c1"># time vector</span>
     <span class="n">rick</span> <span class="o">=</span> <span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">sigma</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">rick_tt</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>\
         <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">rick_tt</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
@@ -312,20 +344,35 @@
 
 <div class="viewcode-block" id="noise"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.signalproc.noise">[docs]</a><span class="k">def</span> <span class="nf">noise</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; create random noise</span>
-<span class="sd">    INPUT:</span>
-<span class="sd">        N: signal length</span>
-<span class="sd">        A: maximal amplitude&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    N: int</span>
+<span class="sd">        signal length</span>
+<span class="sd">    A: float</span>
+<span class="sd">        maximal amplitude</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">*</span><span class="n">A</span>
     <span class="k">return</span> <span class="n">noise</span></div>
 
 
 <div class="viewcode-block" id="sshift"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.signalproc.sshift">[docs]</a><span class="k">def</span> <span class="nf">sshift</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">shift</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; shift a signal by a given time-shift in the frequency domain</span>
-<span class="sd">    INPUT:</span>
-<span class="sd">        s: signal</span>
-<span class="sd">        N2: length of the signal in f-domain (usually equals the next pof 2)</span>
-<span class="sd">        dt: sampling interval</span>
-<span class="sd">        shift: the time shift in seconds&quot;&quot;&quot;</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    s : Arraylike</span>
+<span class="sd">        signal</span>
+<span class="sd">    N2 : int</span>
+<span class="sd">        length of the signal in f-domain (usually equals the next pof 2)</span>
+<span class="sd">    dt : float</span>
+<span class="sd">        sampling interval</span>
+<span class="sd">    shift : float</span>
+<span class="sd">        the time shift in seconds</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Timeshifted signal&quot;&quot;&quot;</span>
+
     <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">N2</span><span class="p">)</span>
 
     <span class="n">k</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">shift</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>  <span class="c1"># discrete shift</span>
@@ -334,6 +381,7 @@
     <span class="n">S</span> <span class="o">=</span> <span class="n">S</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
 
     <span class="n">s_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">N2</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">k</span><span class="o">/</span><span class="n">N2</span><span class="p">)</span>  <span class="c1"># correct scaling</span>
+
     <span class="k">return</span> <span class="n">s_out</span></div>
 </pre></div>
 
@@ -341,25 +389,28 @@
            
           </div>
           <footer>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, the PyGLImER development team.
+        
+        &copy; Copyright 2021, the PyGLImER development team
 
     </p>
   </div>
     
     
     
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 

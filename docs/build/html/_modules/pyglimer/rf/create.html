@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>pyglimer.rf.create &mdash; PyGLImER 0.01 documentation</title>
   
@@ -16,10 +16,7 @@
 
   
   
-
   
-  
-
   
 
   
@@ -32,6 +29,7 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -51,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyGLImER
           
 
           
@@ -88,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
 </ul>
 
@@ -114,8 +113,6 @@
         <div class="rst-content">
         
           
-
-
 
 
 
@@ -171,7 +168,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Friday, 12th February 2020 03:24:30 pm</span>
-<span class="sd">Last Modified: Sunday, 25th April 2021 12:08:38 pm</span>
+<span class="sd">Last Modified: Sunday, 9th May 2021 10:38:53 am</span>
 
 
 <span class="sd">!The file is split and has a second copyright disclaimer!</span>
@@ -201,6 +198,7 @@
 <span class="kn">from</span> <span class="nn">pyglimer.rf.moveout</span> <span class="kn">import</span> <span class="n">DEG2KM</span><span class="p">,</span> <span class="n">maxz</span><span class="p">,</span> <span class="n">maxzm</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">moveout</span><span class="p">,</span> <span class="n">dt_table</span><span class="p">,</span>\
     <span class="n">dt_table_3D</span>
 <span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">plot_section</span><span class="p">,</span> <span class="n">plot_single_rf</span><span class="p">,</span> <span class="n">stream_dist</span>
+<span class="kn">from</span> <span class="nn">pyglimer.utils.geo_utils</span> <span class="kn">import</span> <span class="n">fix_map_extent</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">(</span><span class="s2">&quot;rf&quot;</span><span class="p">)</span>
 
@@ -645,11 +643,18 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Alternative trim method accepting relative times.</span>
 <span class="sd">        See :meth:`~obspy.core.stream.Stream.trim`.</span>
-<span class="sd">        :param starttime,endtime: accept UTCDateTime or seconds relative to</span>
-<span class="sd">            reftime</span>
-<span class="sd">        :param reftime: reference time, can be an UTCDateTime object or a</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        starttime: UTCDateTime or float, optional</span>
+<span class="sd">            starttime as UTC or seconds relative to reftime</span>
+<span class="sd">        endtime: UTCDateTime or float, optional</span>
+<span class="sd">            endtime as UTC or seconds relative to reftime</span>
+<span class="sd">        reftime : UTCDateTime, optional</span>
+<span class="sd">            reference time, can be an UTCDateTime object or a</span>
 <span class="sd">            string. The string will be looked up in the stats dictionary</span>
 <span class="sd">            (e.g. &#39;starttime&#39;, &#39;endtime&#39;, &#39;onset&#39;).</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">:</span>
             <span class="n">t1</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">_seconds2utc</span><span class="p">(</span><span class="n">starttime</span><span class="p">,</span> <span class="n">reftime</span><span class="o">=</span><span class="n">reftime</span><span class="p">)</span>
@@ -719,7 +724,7 @@
         <span class="n">st</span> <span class="o">=</span> <span class="n">RFStream</span><span class="p">(</span><span class="n">traces</span><span class="o">=</span><span class="n">RF_mo</span><span class="p">)</span>
         <span class="k">if</span> <span class="s1">&#39;z&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">():</span>
             <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
-                 <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)))</span>
+                <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span><span class="o">+</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">z</span><span class="p">,</span> <span class="n">st</span></div>
 
 <div class="viewcode-block" id="RFStream.ppoint"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFStream.ppoint">[docs]</a>    <span class="k">def</span> <span class="nf">ppoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vmodel_file</span><span class="o">=</span><span class="s1">&#39;iasp91.dat&#39;</span><span class="p">,</span> <span class="n">latb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lonb</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -907,18 +912,24 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot back azimuth and rayparameter distributions.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
-<span class="sd">        nbins (int) : Number of bins. Default</span>
-<span class="sd">        v (float) : assummed surface velocity for the computation of the</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nbins : int</span>
+<span class="sd">            Number of bins. Default</span>
+<span class="sd">        v : float</span>
+<span class="sd">            assummed surface velocity for the computation of the</span>
 <span class="sd">            incidence angle. Default 5.8 km/s.</span>
-<span class="sd">        outputfile (str or None) : Path to savefile. If None plot is not saved</span>
-<span class="sd">            just shown. Defaults to None.</span>
-<span class="sd">        format (str): outputfile format</span>
-<span class="sd">        dpi (int) : only used if file format is none vector.</span>
+<span class="sd">        outputfile : str, optional</span>
+<span class="sd">            Path to savefile. If None plot is not saved just shown. </span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        format : str, optional</span>
+<span class="sd">            outputfile format</span>
+<span class="sd">        dpi : int, optional</span>
+<span class="sd">            only used if file format is none vector.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        None</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -947,80 +958,165 @@
         <span class="n">stream_dist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rayp</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">baz</span><span class="p">),</span> <span class="n">nbins</span><span class="o">=</span><span class="n">nbins</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">v</span><span class="p">,</span>
                     <span class="n">outputfile</span><span class="o">=</span><span class="n">outputfile</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>  <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">__dirty_ccp_stacks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binlon</span><span class="p">,</span> <span class="n">binlat</span><span class="p">,</span> <span class="n">binz</span><span class="p">):</span>
+<div class="viewcode-block" id="RFStream.dirty_ccp_stack"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFStream.dirty_ccp_stack">[docs]</a>    <span class="k">def</span> <span class="nf">dirty_ccp_stack</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">dlon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">z_res</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">180.0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">90.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">],</span> <span class="n">maxz</span><span class="o">=</span><span class="mi">750</span><span class="p">,</span>
+            <span class="n">vmodel_file</span><span class="o">=</span><span class="s1">&#39;iasp91.dat&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;This is the simplest way of creating quick not really accurate</span>
 <span class="sd">        CCP stacks.</span>
 
-<span class="sd">        This function is still empty, but I&#39;m leaving it here, because I think</span>
-<span class="sd">        it should be implemented. Sometime this week maybe</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        binlon:  `numpy.ndarray`</span>
-<span class="sd">        1D Array describing the longitude bins</span>
-<span class="sd">        binlon:  `numpy.ndarray`</span>
-<span class="sd">        1D Array describing the latitude bins</span>
-<span class="sd">        binlon:  `numpy.ndarray`</span>
-<span class="sd">        1D Array describing the depth bins</span>
+<span class="sd">        .. warning::</span>
+<span class="sd">            There are some things that the user should be aware of. The bins</span>
+<span class="sd">            right at the poles may or may not have very different areas </span>
+<span class="sd">            compared to the other bins, which is a side effect of the iterative </span>
+<span class="sd">            computation of bin area correction. I have an idea on how to fix</span>
+<span class="sd">            it, but it is not really necessary right now. If you are working </span>
+<span class="sd">            with stations at the pole, and you want to CCP stack, I&#39;d strongly</span>
+<span class="sd">            advise against using this function anyways. The bins are just </span>
+<span class="sd">            too narrow. This really is just a &#39;dirty&#39; CCP stack and should only </span>
+<span class="sd">            be used as a first order check if thing are ok.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        V : 3D `numpy.ndarray`</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dlon : float, optional</span>
+<span class="sd">            stetp size in longitude, by default 1.0</span>
+<span class="sd">        z_res : float, optional</span>
+<span class="sd">            depth resolution, by default 1.0</span>
+<span class="sd">        extent : list, optional</span>
+<span class="sd">            list of bounds [minlon, maxlon, minlat, maxlat], </span>
+<span class="sd">            by default [-180.0, 180.0, -90.0, 90.0]</span>
+<span class="sd">        maxz : int, optional</span>
+<span class="sd">            maxz, by default 750</span>
+<span class="sd">        vmodel_file : str, optional</span>
+<span class="sd">            velocity model file. IASP91 1-D model used as standard  since </span>
+<span class="sd">            the assumption of rectangular bins is already a bit rough, </span>
+<span class="sd">            by default &#39;iasp91.dat&#39;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple   </span>
+<span class="sd">            containing, vectors outlining the mesh illumination etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Check whether moveout and piercing points have been computed.</span>
-        <span class="sd">&quot;&quot;&quot;Then, use a 3d histogram to create stacks, and create them quickly</span>
+        <span class="c1"># Then, use a 3d histogram to create stacks, and create them quickly</span>
+        <span class="c1"># Create</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Computing Move-out correction&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moveout</span><span class="p">(</span><span class="n">vmodel</span><span class="o">=</span><span class="n">vmodel_file</span><span class="p">)</span>
 
-<span class="sd">        Area corrected binswith simple fix</span>
-<span class="sd">        WGS84 values:</span>
-<span class="sd">        f = 1/298.257223563</span>
-<span class="sd">        a = 6378137.0</span>
-<span class="sd">        e = 2*f-f**2</span>
+        <span class="c1">#</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Getting locations corresponding to the traces&quot;</span><span class="p">)</span>
+        <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">rf</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">latitude</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">pp_latitude</span><span class="p">)</span>
+            <span class="n">longitude</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">pp_longitude</span><span class="p">)</span>
+            <span class="n">depth</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">pp_depth</span><span class="p">)</span>  <span class="c1"># Doubt that it&#39;s saved like this</span>
+            <span class="n">rf</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_tr</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
-<span class="sd">        # Resolution</span>
-<span class="sd">        res = 1.0 # in deg</span>
+        <span class="c1"># WGS84 values:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mf">298.257223563</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mf">6378.137</span>  <span class="c1"># in meters</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">f</span><span class="o">-</span><span class="n">f</span><span class="o">**</span><span class="mi">2</span>
 
-<span class="sd">        # Surface area</span>
-<span class="sd">        A = res**2 * (DEG2KM**2)</span>
+        <span class="c1"># Surface area</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">dlon</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">DEG2KM</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 
-<span class="sd">        # Initial latitude vector</span>
-<span class="sd">        lon = np.arange(0, 90.0 + res, res)</span>
+        <span class="c1"># Get value of degree resolution in kilometers for a given latitude</span>
+        <span class="k">def</span> <span class="nf">Dlon</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span> <span class="k">return</span> <span class="n">dlon</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="o">/</span><span class="mi">180</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> \
+            <span class="p">(</span><span class="mi">180</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="o">/</span><span class="mi">180</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
 
-<span class="sd">        # Get value of longitude</span>
-<span class="sd">        dlon = pi * a * cos(phi/180*pi) / (180 * sqrt(1 - e**2 * sin(phi/180*pi)**2))/1000</span>
+        <span class="c1"># Correct the latitudinal spacing by iteratively walk to the pole</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">lat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">90.0</span><span class="p">:</span>
+            <span class="n">dlat</span> <span class="o">=</span> <span class="n">A</span><span class="o">/</span><span class="n">Dlon</span><span class="p">(</span><span class="n">lat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">DEG2KM</span>
+            <span class="n">lat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dlat</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
 
-<span class="sd">        # Get value of approximate dlat</span>
-<span class="sd">        dlat = A/dlon</span>
+        <span class="c1"># Filter out values larger than 90deg</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lat</span> <span class="o">&lt;=</span> <span class="mi">90</span><span class="p">)]</span>
 
-<span class="sd">        # Get cumulative latitude values</span>
-<span class="sd">        lat = cumsum(dlat/111.11)</span>
+        <span class="c1"># Add 90.0 to at least include every value,</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">)</span>
 
-<span class="sd">        # Filter out values larger than 90deg</span>
-<span class="sd">        lat = lat[np.where(lat &lt;= 90)]</span>
+        <span class="c1"># Get how many &quot;rings&quot;</span>
+        <span class="n">fdlat</span> <span class="o">=</span> <span class="n">lat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lat</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
 
-<span class="sd">        # Create meshgrid from new latittude vector and longitude vector</span>
-<span class="sd">        lon = np.arange(0, 180 + res, res)</span>
+        <span class="c1"># Compute cap area</span>
+        <span class="n">cap_theta</span> <span class="o">=</span> <span class="n">lat</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">area_per_dlon</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> \
+            <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">cap_theta</span><span class="o">/</span><span class="mi">180</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">360</span><span class="o">/</span><span class="n">dlon</span><span class="p">)</span>
 
-<span class="sd">        # Create binedges</span>
-<span class="sd">        blat = np.hstack((-lat[::-1], 0, lat))</span>
-<span class="sd">        blon = np.hstack((-lon[::-1], 0, lon))</span>
-<span class="sd">        bz = np.arange(-10, maxz, res)</span>
+        <span class="c1"># Number of longitude bins at the pol that correspond to one equatorial bin</span>
+        <span class="c1"># Not used anymore</span>
+        <span class="n">ndlon</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">A</span><span class="o">/</span><span class="n">area_per_dlon</span><span class="p">))</span>
 
-<span class="sd">        # Create</span>
-<span class="sd">        p = np.vstack((all_lat, all_lon, all_z)).T</span>
+        <span class="c1"># Create binedges</span>
+        <span class="n">blat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="o">-</span><span class="n">lat</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">lat</span><span class="p">))</span>
+        <span class="n">blon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">180.0</span><span class="p">,</span> <span class="mf">180.0</span> <span class="o">+</span> <span class="n">dlon</span><span class="p">,</span> <span class="n">dlon</span><span class="p">)</span>
+        <span class="n">bz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="n">maxz</span><span class="p">,</span> <span class="n">z_res</span><span class="p">)</span>
 
-<span class="sd">        # Simple stacking </span>
-<span class="sd">        stack = np.histogramdd(p, bins=(blat, blon,bz))</span>
+        <span class="c1"># Get buffered extent</span>
+        <span class="n">fextent</span> <span class="o">=</span> <span class="n">fix_map_extent</span><span class="p">(</span><span class="n">extent</span><span class="p">)</span>
 
-<span class="sd">        # bin centers</span>
-<span class="sd">        latc = (blat[:-1] + blat[1:])/2</span>
-<span class="sd">        lonc = (blon[:-1] + blon[1:])/2</span>
-<span class="sd">        zc   = (  bz[:-1] +   bz[1:])/2</span>
+        <span class="c1"># Fix the geographical bin edges depending on the extent</span>
+        <span class="n">blon</span> <span class="o">=</span> <span class="n">blon</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">fextent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">blon</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">blon</span> <span class="o">&lt;=</span> <span class="n">fextent</span><span class="p">[</span><span class="mi">1</span><span class="p">]))]</span>
+        <span class="n">blat</span> <span class="o">=</span> <span class="n">blat</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">fextent</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">blat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">blat</span> <span class="o">&lt;=</span> <span class="n">fextent</span><span class="p">[</span><span class="mi">3</span><span class="p">]))]</span>
 
-<span class="sd">        return latc, lonc, zc, stack</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
+        <span class="c1"># Create Volumes</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">longitude</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">latitude</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">depth</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="p">(</span><span class="n">blon</span><span class="p">,</span> <span class="n">blat</span><span class="p">,</span> <span class="n">bz</span><span class="p">)</span>
+        <span class="n">ccp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogramdd</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">rf</span><span class="p">)</span>
+        <span class="n">illum</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogramdd</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
 
-        <span class="c1"># If yes, use to populated a volume histogramdd</span>
-        <span class="c1"># output volume data</span>
+        <span class="c1"># #### This is unused at the moment because it is not required for the</span>
+        <span class="c1"># #### code to work and only a correction for bins at the very pole.</span>
+
+        <span class="c1"># Cut up range into chunks to fix the pol bins.</span>
+        <span class="c1"># Number of chunks at the pole</span>
+        <span class="c1"># print(len(blon))</span>
+        <span class="c1"># print(ndlon)</span>
+        <span class="c1"># nchunks = len(blon) // ndlon</span>
+
+        <span class="c1"># # Number of chunks at the Poles</span>
+        <span class="c1"># slicerange = np.arange(0, len(blon)-1)</span>
+        <span class="c1"># chunks = [slicerange[_i*ndlon:_i*ndlon+ndlon]</span>
+        <span class="c1">#           for _i in range(nchunks)]</span>
+        <span class="c1"># # Fix omitted chunks</span>
+        <span class="c1"># chunks.append(slicerange[-(len(blon) - chunks[-1][-1] - 1):])</span>
+
+        <span class="c1"># # Loop over chunks at the poles</span>
+        <span class="c1"># for _chunk in chunks:</span>
+        <span class="c1">#     # South Pole (looks like a dimension mismatch, but should work)</span>
+        <span class="c1">#     ccpvals = np.sum(ccp[_chunk, 0, :], axis=0)</span>
+        <span class="c1">#     ccp[_chunk, 0, :] = ccpvals</span>
+        <span class="c1">#     illumvals = np.sum(illum[_chunk, 0, :], axis=0)</span>
+        <span class="c1">#     illum[_chunk, 0, :] = illumvals</span>
+
+        <span class="c1">#     # North Pole</span>
+        <span class="c1">#     ccpvals = np.sum(ccp[_chunk, -1, :], axis=0)</span>
+        <span class="c1">#     ccp[_chunk, -1, :] = ccpvals</span>
+        <span class="c1">#     illumvals = np.sum(illum[_chunk, -1, :], axis=0)</span>
+        <span class="c1">#     illum[_chunk, -1, :] = illumvals</span>
+
+        <span class="c1"># Normalize histograms</span>
+        <span class="c1"># Workaround for zero count values tto not get an error.</span>
+        <span class="c1"># Where counts == 0, zi = 0, else zi = zz/counts</span>
+        <span class="n">ccpi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">ccp</span><span class="p">)</span>
+        <span class="n">ccpi</span><span class="p">[</span><span class="n">illum</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ccp</span><span class="p">[</span><span class="n">illum</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)]</span> <span class="o">/</span> \
+            <span class="n">illum</span><span class="p">[</span><span class="n">illum</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)]</span>
+
+        <span class="c1"># bin centers</span>
+        <span class="n">latc</span> <span class="o">=</span> <span class="p">(</span><span class="n">blat</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">blat</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">lonc</span> <span class="o">=</span> <span class="p">(</span><span class="n">blon</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">blon</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">zc</span> <span class="o">=</span> <span class="n">bz</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Create Object from bincenters, and stacks?</span>
+        <span class="k">return</span> <span class="n">latc</span><span class="p">,</span> <span class="n">lonc</span><span class="p">,</span> <span class="n">zc</span><span class="p">,</span> <span class="n">ccpi</span><span class="p">,</span> <span class="n">illum</span></div></div>
 
 
 <div class="viewcode-block" id="RFTrace"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.rf.create.RFTrace">[docs]</a><span class="k">class</span> <span class="nc">RFTrace</span><span class="p">(</span><span class="n">Trace</span><span class="p">):</span>
@@ -1239,13 +1335,15 @@
         <span class="n">st</span><span class="o">.</span><span class="n">pp_latitude</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">st</span><span class="o">.</span><span class="n">pp_longitude</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">station_elevation</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">pp_depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">round</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">station_elevation</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">),</span>
-                 <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxz</span> <span class="o">+</span> <span class="n">res</span><span class="p">)))[:</span><span class="nb">len</span><span class="p">(</span><span class="n">delta</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">pp_depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">round</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">station_elevation</span><span class="o">/</span><span class="mi">1000</span><span class="p">),</span>
-                                    <span class="n">maxz</span> <span class="o">+</span> <span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">delta</span><span class="p">)]</span>
+        <span class="c1"># if st.station_elevation &gt; 0:</span>
+        <span class="c1">#     st.pp_depth = np.hstack(</span>
+        <span class="c1">#         (np.arange(-round(st.station_elevation/1000, 1), 0, .1),</span>
+        <span class="c1">#          np.arange(0, maxz + res)))[:len(delta)]</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     st.pp_depth = np.arange(-round(st.station_elevation/1000),</span>
+        <span class="c1">#                             maxz + res, res)[0:len(delta)]</span>
+        <span class="c1"># as the other ones are filled with nans we can start here</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">pp_depth</span> <span class="o">=</span> <span class="n">z</span>
 
         <span class="c1"># Calculate ppoint position</span>
         <span class="k">for</span> <span class="n">dis</span> <span class="ow">in</span> <span class="n">delta</span><span class="p">:</span>
@@ -1477,25 +1575,28 @@
            
           </div>
           <footer>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, the PyGLImER development team.
+        
+        &copy; Copyright 2021, the PyGLImER development team
 
     </p>
   </div>
     
     
     
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 

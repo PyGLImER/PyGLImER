@@ -1165,8 +1165,8 @@ only show the progress per chunk.')
         finer grid.
 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         factor: float, optional
             Bingrid epicentral distance multiplier to refine grid.
@@ -1178,6 +1178,7 @@ only show the progress per chunk.')
             Minimum number of illumation points use in the interpolation,
             everything below is downweighted by the square reciprocal
         extent : list or tuple or Non, optional
+        
         Returns
         -------
 

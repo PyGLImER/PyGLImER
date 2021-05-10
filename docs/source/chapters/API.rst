@@ -182,19 +182,19 @@ pyglimer.ccp.compute.bin
 
 pyglimer.ccp.plot_utils.plot_cross_section
 ==========================================
-.. automodule:: pyglimer.plot.plot_cross_section
+.. automodule:: pyglimer.ccp.plot_utils.plot_cross_section
     :members:
     :show-inheritance:
 
 pyglimer.ccp.plot_utils.plot_line_buffer
 ========================================
-.. automodule:: pyglimer.plot.plot_line_buffer
+.. automodule:: pyglimer.ccp.plot_utils.plot_line_buffer
     :members:
     :show-inheritance:
 
 pyglimer.ccp.plot_utils.line_buffer
 ===================================
-.. automodule:: pyglimer.plot.line_buffer
+.. automodule:: pyglimer.ccp.plot_utils.line_buffer
     :members:
     :show-inheritance:
 

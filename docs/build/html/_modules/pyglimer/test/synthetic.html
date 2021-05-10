@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>pyglimer.test.synthetic &mdash; PyGLImER 0.01 documentation</title>
   
@@ -16,10 +16,7 @@
 
   
   
-
   
-  
-
   
 
   
@@ -32,6 +29,7 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -51,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyGLImER
           
 
           
@@ -88,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
 </ul>
 
@@ -114,8 +113,6 @@
         <div class="rst-content">
         
           
-
-
 
 
 
@@ -180,17 +177,29 @@
 
 <div class="viewcode-block" id="synthetic"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.test.synthetic.synthetic">[docs]</a><span class="k">def</span> <span class="nf">synthetic</span><span class="p">(</span><span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">SNR</span><span class="p">,</span> <span class="n">stdv</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Function to create synthetic seismograms (given Impulse response convolved with a Ricker wavelet)</span>
-<span class="sd">INPUT:</span>
-<span class="sd">    N2: half-length of the Input traces, (full length N= N2*2+1)</span>
-<span class="sd">    dt: sampling rate</span>
-<span class="sd">    R: Impulse response / reflectivity series with length N</span>
-<span class="sd">    SNR: ratio of maximal amplitude of the source wavelet to max noise amplitude</span>
-<span class="sd">    stdv : standard deviation of the source pulse (controls width)</span>
-<span class="sd">Output:</span>
-<span class="sd">    v_noise: the theorethical source wavelet with noise independent from the noise on the horizontal compoennt</span>
-<span class="sd">            (equal to the hoizontal component of a seismogram in RF)</span>
-<span class="sd">    h_noise: The horizontal component of the seismogram with noise</span>
+<span class="sd">    Function to create synthetic seismograms (given Impulse response </span>
+<span class="sd">    convolved with a Ricker wavelet)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    N2 : int </span>
+<span class="sd">        half-length of the Input traces, (full length N= N2*2+1)</span>
+<span class="sd">    dt : float </span>
+<span class="sd">        sampling rate</span>
+<span class="sd">    R : Arraylike</span>
+<span class="sd">        Impulse response / reflectivity series with length N</span>
+<span class="sd">    SNR : float</span>
+<span class="sd">        ratio of maximal amplitude of the source wavelet to max noise amplitude</span>
+<span class="sd">    stdv : float</span>
+<span class="sd">        standard deviation of the source pulse (controls width)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple</span>
+<span class="sd">        v_noise : the theorethical source wavelet with noise independent</span>
+<span class="sd">        from the noise on the horizontal component(equal to the hoizontal</span>
+<span class="sd">        component of a seismogram in RF)</span>
+<span class="sd">        h_noise : The horizontal component of the seismogram with noise</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
     <span class="c1"># Full-length</span>
@@ -244,25 +253,28 @@
            
           </div>
           <footer>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, the PyGLImER development team.
+        
+        &copy; Copyright 2021, the PyGLImER development team
 
     </p>
   </div>
     
     
     
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 

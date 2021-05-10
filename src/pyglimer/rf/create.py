@@ -489,11 +489,18 @@ class RFStream(Stream):
         """
         Alternative trim method accepting relative times.
         See :meth:`~obspy.core.stream.Stream.trim`.
-        :param starttime,endtime: accept UTCDateTime or seconds relative to
-            reftime
-        :param reftime: reference time, can be an UTCDateTime object or a
+
+        Parameters
+        ----------
+        starttime: UTCDateTime or float, optional
+            starttime as UTC or seconds relative to reftime
+        endtime: UTCDateTime or float, optional
+            endtime as UTC or seconds relative to reftime
+        reftime : UTCDateTime, optional
+            reference time, can be an UTCDateTime object or a
             string. The string will be looked up in the stats dictionary
             (e.g. 'starttime', 'endtime', 'onset').
+
         """
         for tr in self.traces:
             t1 = tr._seconds2utc(starttime, reftime=reftime)
@@ -751,18 +758,24 @@ class RFStream(Stream):
         """
         Plot back azimuth and rayparameter distributions.
 
-        Parameters:
-        -----------
-        nbins (int) : Number of bins. Default
-        v (float) : assummed surface velocity for the computation of the
+        Parameters
+        ----------
+        nbins : int
+            Number of bins. Default
+        v : float
+            assummed surface velocity for the computation of the
             incidence angle. Default 5.8 km/s.
-        outputfile (str or None) : Path to savefile. If None plot is not saved
-            just shown. Defaults to None.
-        format (str): outputfile format
-        dpi (int) : only used if file format is none vector.
+        outputfile : str, optional
+            Path to savefile. If None plot is not saved just shown. 
+            Defaults to None.
+        format : str, optional
+            outputfile format
+        dpi : int, optional
+            only used if file format is none vector.
 
-        Returns:
-        --------
+
+        Returns
+        -------
         None
 
         """

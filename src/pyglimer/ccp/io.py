@@ -15,28 +15,41 @@ import numpy as np
 
 
 def load_rawrf(filename):
-    """
+    """Loads a matlab raw RF file.
 
     Parameters
     ----------
-    filename (str): filename of the receiver function `.mat`-file to be loaded.
-                    The `.mat`-file is expected to contain following parameters:
-
-                        crfs: MxN matrix of M Receiver Functions and N elements
-                        cbaz: M elements long vector with back azimuth values
-                              corresponding to Receiver functions
-                        crayp: M elements long vector with ray parameter values
-                               corresponding to Receiver functions
-                        cslat: M elements long vector with station latitude
-                               corresponding to Receiver functions
-                        cslon: M elements long vector with station longitude
-                               corresponding to Receiver functions
-                        celev: M elements long vector with station elevation
-                        dt: sampling interval
+    filename : str
+        filename of the receiver function `.mat`-file to be loaded. The 
+        `.mat`-file is expected to contain following parameters. See Notes 
+        below for required content of matlab rawRf file.
 
     Returns
     -------
     rfs, baz, rayp, lat, lon, elev, dt
+
+
+    Notes
+    -----
+    File content
+    :crfs: 
+        MxN matrix of M Receiver Functions and N elements
+    :cbaz:
+        M elements long vector with back azimuth values corresponding to 
+        Receiver functions
+    :crayp: 
+        M elements long vector with ray parameter values corresponding to 
+        Receiver functions
+    :cslat: 
+        M elements long vector with station latitude corresponding to 
+        Receiver functions
+    :cslon: 
+        M elements long vector with station longitude corresponding to 
+        Receiver functions
+    :celev: 
+        M elements long vector with station elevation
+    :dt: 
+        sampling interval
 
     """
 
