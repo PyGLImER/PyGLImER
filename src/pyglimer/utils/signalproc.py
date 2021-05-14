@@ -12,38 +12,38 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Sunday, 20th October 2019 10:31:03 am
-Last Modified: Friday, 30th April 2021 03:56:23 pm
+Last Modified: Friday, 14th May 2021 12:32:48 pm
 '''
 
 import numpy as np
 from obspy import Stream
 
-
-def resample_or_decimate(data: Stream, sampling_rate_new: int) -> Stream:
+def resample_or_decimate(
+        data: Stream, sampling_rate_new: int, filter=True) -> Stream:
     """
     Decimates the data if the desired new sampling rate allows to do so.
     Else the signal will be interpolated (a lot slower).
 
-    Notes
-    -----
-    The stream has to be filtered before to avoid aliasing.
+    :note: The stream has to be filtered a priori to avoid aliasing.
 
-    Parameters
-    ----------
-    data : Stream
-        Stream to be resampled.
-    sampling_rate_new : int
-        The desired new sampling rate
-
-    Returns
-    -------
-    Stream
-        The resampled stream
+    :param data: Stream to be resampled.
+    :type data: Stream
+    :param sampling_rate_new: The desired new sampling rate
+    :type sampling_rate_new: int
+    :return: The resampled stream
+    :rtype: Stream
     """
     sr = data[0].stats.sampling_rate
     srn = sampling_rate_new
+
+    # Chosen this filter design as it's exactly the same as
+    # obspy.Stream.decimate uses
+    if filter:
+        freq = sr * 0.5 / float(sr/srn)
+        data.filter('lowpass_cheby_2', freq=freq, maxorder=12)
+
     if sr/srn == sr//srn:
-        return data.decimate(int(sr//srn), no_filter=True)
+        return data.decimate(int(sr//srn), no_filter=True)  #True
     else:
         return data.resample(srn)
 

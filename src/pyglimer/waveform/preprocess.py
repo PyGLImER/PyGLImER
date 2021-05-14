@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 4th May 2021 11:26:28 am
+Last Modified: Friday, 14th May 2021 12:34:17 pm
 '''
 
 # !/usr/bin/env python3d
@@ -575,9 +575,7 @@ def __cut_resample(st, logger, first_arrival, network, station,
         tr.stats.mseed.encoding = 'FLOAT64'
 
     # trim to according length
-    # Anti-Alias
-    st.filter(type="lowpass_cheby_2", freq=4.9)
-    # st.resample(10)  # resample streams with 10Hz sampling rate
+    # Anti-Alias filtering is now done within the function below
     st = resample_or_decimate(st, 10)
     st.trim(starttime=starttime, endtime=endtime)
     # After trimming length has to be checked again (recording may

@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Thursday, 25th March 2021 03:40:07 pm
+Last Modified: Wednesday, 12th May 2021 11:36:21 am
 '''
 import matplotlib.pyplot as plt
 import numpy as np
