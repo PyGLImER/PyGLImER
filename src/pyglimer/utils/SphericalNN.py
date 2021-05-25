@@ -1,5 +1,5 @@
 """
-Spherical nearest neighbour idea taken from ObsPy originally, 
+Spherical nearest neighbour idea taken from ObsPy originally,
 but heavily modified to include interpolation using shephard's and
 modified shephard's method of inverse distance weighting.
 
@@ -107,7 +107,7 @@ class SphericalNN(object):
     def sparse_distance_matrix(self, other: Union[SphericalNN, None] = None,
                                maximum_distance=180.0, sparse: bool = False,
                                km: bool = False):
-        """Computes the sparse distance matrix between two kdtree. if no other 
+        """Computes the sparse distance matrix between two kdtree. if no other
         kdtree is provided, this kdtree is used
 
         Parameters
@@ -151,11 +151,12 @@ class SphericalNN(object):
 
         return output_mat
 
-    def interpolator(self, qlat, qlon, maximum_distance=None,
-                     no_weighting=False, k: Optional[int] = None, p: float = 2.0):
+    def interpolator(
+        self, qlat, qlon, maximum_distance=None,
+            no_weighting=False, k: Optional[int] = None, p: float = 2.0):
         """Spherical interpolation function using the ``SphericalNN`` object.
-        Returns an interpolator that can be used for interpolating the same 
-        set of locations based on the KDTree. The only input the interpolator 
+        Returns an interpolator that can be used for interpolating the same
+        set of locations based on the KDTree. The only input the interpolator
         takes are the data corresponding to the points in the KDTree.
 
         Parameters
@@ -176,7 +177,7 @@ class SphericalNN(object):
             interpolation. Not used if ``no_weighting = True``. Default None
         p : float, optional
             Exponent to compute the inverse distance weights. Note that in 
-            the limit ``p->inf`` is just a nearest neighbor interpolation. 
+            the limit ``p->inf`` is just a nearest neighbor interpolation.
             Default is 2
 
 

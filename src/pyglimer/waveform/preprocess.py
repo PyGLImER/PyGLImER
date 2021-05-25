@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Friday, 14th May 2021 12:34:17 pm
+Last Modified: Tuesday, 25th May 2021 09:22:47 am
 '''
 
 # !/usr/bin/env python3d
@@ -107,7 +107,6 @@ def preprocess(
     None.
 
     """
-    print('should always be printed')
     ###########
     # logging
     logger = logging.Logger("pyglimer.waveform.preprocess")
@@ -244,7 +243,6 @@ def __event_loop(phase, rot, pol, event, taper_perc, taper_type, model,
     Loops over each event in the event catalogue
     """
     # create list for what will later be the info files
-    print('eventloop')
     infolist = []
 
     # fetch event-data
@@ -445,11 +443,9 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
 
     # Check if RF was already computed and if it should be
     # computed at all, and if the waveform was retained (SNR)
-    print('here we are trying to create RFs')
     if deconmeth and not\
         __file_in_db(os.path.join(rfloc, network, station), network +
                      '.' + station + '.' + ot_loc + '.sac') and crit:
-        print('this condition works')
 
         # 21.04.2020 Second highcut filter
         if hc_filt:
@@ -518,7 +514,6 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
 
             RF.write(os.path.join(rfdir, network + '.' + station + '.' + ot_loc
                      + '.sac'), format='SAC')
-            print(RF, rfdir)
 
             end = time.time()
             rflogger.info("RF created")

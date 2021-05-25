@@ -12,11 +12,12 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Sunday, 20th October 2019 10:31:03 am
-Last Modified: Friday, 14th May 2021 12:32:48 pm
+Last Modified: Tuesday, 18th May 2021 11:22:48 am
 '''
 
 import numpy as np
 from obspy import Stream
+
 
 def resample_or_decimate(
         data: Stream, sampling_rate_new: int, filter=True) -> Stream:
@@ -43,7 +44,7 @@ def resample_or_decimate(
         data.filter('lowpass_cheby_2', freq=freq, maxorder=12)
 
     if sr/srn == sr//srn:
-        return data.decimate(int(sr//srn), no_filter=True)  #True
+        return data.decimate(int(sr//srn), no_filter=True)
     else:
         return data.resample(srn)
 
@@ -159,12 +160,7 @@ def filter(s, F, dt, nf):
         Filtered signal.
 
     """
-    """ 
-    INPUT
-    s: signal in time domain
-    F: Filter's amplitude response
-    dt: sampling interval
-    nf: length of the signal/filter in f-domain"""
+
     S = np.fft.fft(s, n=nf)
     S_f = np.multiply(S, F)*dt
     s_f = np.real(np.fft.ifft(S_f, n=nf))

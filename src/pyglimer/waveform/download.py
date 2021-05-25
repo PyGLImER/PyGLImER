@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Thursday, 25th March 2021 04:02:08 pm
+Last Modified: Tuesday, 25th May 2021 04:40:10 pm
 '''
 
 # !/usr/bin/env python3
@@ -19,9 +19,10 @@ from http.client import IncompleteRead
 import logging
 import os
 import shutil
+from numpy import save
 from tqdm import tqdm
 
-from obspy import read
+from obspy import read, read_inventory
 from obspy import UTCDateTime
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
@@ -31,6 +32,7 @@ from pyasdf import ASDFDataSet
 from pyglimer.database.asdf import writeraw
 from pyglimer import tmp
 from pyglimer.utils.roundhalf import roundhalf
+from pyglimer.utils.utils import download_full_inventory
 
 
 def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
@@ -204,7 +206,9 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
                     domain, restrictions,
                     mseed_storage=get_mseed_storage,
                     stationxml_storage=statloc,
-                    # get_stationxml_storage(network, station, statloc),
+                    #stationxml_storage=statloc,
+                    #stationxml_storage=get_stationxml_storage,
+                    #(network, station, statloc),
                     threads_per_client=3, download_chunk_size_in_mb=50)
                 incomplete = False
             except IncompleteRead:
@@ -219,6 +223,8 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
             # If that works, we will be deleting the cached mseeds here
             shutil.rmtree(tmp.folder)
 
+    if not saveasdf:
+        download_full_inventory(statloc, clients)
     tmp.folder = "finished"  # removes the restriction for preprocess.py
 
 
