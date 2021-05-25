@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Thursday, 25th March 2021 04:04:50 pm
+Last Modified: Tuesday, 25th May 2021 05:13:39 pm
 '''
 import os
 from http.client import IncompleteRead
@@ -24,6 +24,7 @@ from warnings import warn
 
 from obspy import read_events, Catalog
 from obspy.clients.fdsn import Client as Webclient
+from obspy.core.utcdatetime import UTCDateTime
 from obspy.taup import TauPyModel
 # from obspy.clients.fdsn.client import FDSNException
 
@@ -37,12 +38,14 @@ class Request(object):
     the waveforms, the preprocessing of the waveforms, and the creation of
     time domain receiver functions."""
 
-    def __init__(self, phase, rot, evtloc, statloc, rawloc, preproloc,
-                 rfloc, deconmeth, starttime, endtime, wavdownload=True,
-                 pol: str = 'v', minmag: float or int = 5.5,
-                 event_coords=None,  network=None, station=None,
-                 waveform_client=None, re_client=['IRIS'], evtcat=None,
-                 debug=False):
+    def __init__(
+        self, phase: str, rot: str, evtloc: str, statloc: str, rawloc: str,
+        preproloc: str, rfloc: str, deconmeth: str, starttime: UTCDateTime,
+        endtime: UTCDateTime, wavdownload=True, pol: str = 'v',
+        minmag: float or int = 5.5, event_coords: tuple = None,
+        network: str or list = None, station: str or list = None,
+        waveform_client: list = None, re_client=['IRIS'],
+            evtcat: Catalog = None, debug=False):
         """
         Create object that is used to start the receiver function
         workflow.
@@ -208,11 +211,6 @@ class Request(object):
         self.network = network
         self.station = station
 
-        # Server settings
-        # 2021/02/16 Events only from IRIS as the USGS webserice tends to be
-        # unstable and mixing different services will lead to a messed db
-        self.webclient = Webclient('IRIS')
-
         self.waveform_client = waveform_client
         self.re_client = re_client
 
@@ -223,6 +221,13 @@ class Request(object):
             self.download_eventcat()
 
     def download_eventcat(self):
+        """
+        Download the event catalogue from IRIS DMC.
+        """
+        # Server settings
+        # 2021/02/16 Events only from IRIS as the USGS webserice tends to be
+        # unstable and mixing different services will lead to a messed db
+        self.webclient = Webclient('IRIS')
         event_cat_done = False
 
         while not event_cat_done:

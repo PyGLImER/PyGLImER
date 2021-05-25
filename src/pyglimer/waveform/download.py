@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Tuesday, 25th May 2021 04:40:10 pm
+Last Modified: Tuesday, 25th May 2021 04:59:59 pm
 '''
 
 # !/usr/bin/env python3
@@ -19,13 +19,14 @@ from http.client import IncompleteRead
 import logging
 import os
 import shutil
-from numpy import save
 from tqdm import tqdm
 
-from obspy import read, read_inventory
+from obspy import read
 from obspy import UTCDateTime
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
+from obspy.core.event.catalog import Catalog
+from obspy.taup import TauPyModel
 from pathlib import Path
 from pyasdf import ASDFDataSet
 
@@ -35,10 +36,12 @@ from pyglimer.utils.roundhalf import roundhalf
 from pyglimer.utils.utils import download_full_inventory
 
 
-def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
-                rawloc, clients, network: str = None, station: str = None,
-                saveasdf: bool = False, logdir: str = None, debug: bool = False,
-                verbose: bool = False):
+def downloadwav(
+    phase: str, min_epid: float, max_epid: float, model: TauPyModel,
+    event_cat: Catalog, tz: float, ta: float, statloc: str,
+    rawloc: str, clients: list, network: str = None, station: str = None,
+    saveasdf: bool = False, logdir: str = None, debug: bool = False,
+        verbose: bool = False):
     """
     Downloads the waveforms for all events in the catalogue
      for a circular domain around the epicentre with defined epicentral
@@ -206,9 +209,6 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
                     domain, restrictions,
                     mseed_storage=get_mseed_storage,
                     stationxml_storage=statloc,
-                    #stationxml_storage=statloc,
-                    #stationxml_storage=get_stationxml_storage,
-                    #(network, station, statloc),
                     threads_per_client=3, download_chunk_size_in_mb=50)
                 incomplete = False
             except IncompleteRead:
@@ -228,7 +228,9 @@ def downloadwav(phase, min_epid, max_epid, model, event_cat, tz, ta, statloc,
     tmp.folder = "finished"  # removes the restriction for preprocess.py
 
 
-def get_mseed_storage(network, station, location, channel, starttime, endtime):
+def get_mseed_storage(
+    network: str, station: str, location: str, channel: str,
+        starttime: UTCDateTime, endtime: UTCDateTime) -> str:
     """Stores the files and checks if files are already downloaded"""
     # Returning True means that neither the data nor the StationXML file
     # will be downloaded.
@@ -245,7 +247,7 @@ def get_mseed_storage(network, station, location, channel, starttime, endtime):
     return os.path.join(tmp.folder, "%s.%s.mseed" % (network, station))
 
 
-def get_stationxml_storage(network, station, statloc):
+def get_stationxml_storage(network: str, station: str, statloc: str):
 
     # available_channels = []
 
@@ -264,7 +266,9 @@ def get_stationxml_storage(network, station, statloc):
         "filename": filename}
 
 
-def wav_in_db(network, station, location, channel, starttime, endtime):
+def wav_in_db(
+    network: str, station: str, location: str, channel: str,
+        starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
     """Checks if waveform is already downloaded."""
     path = Path(tmp.folder, "%s.%s.mseed" % (network, station))
 
@@ -285,7 +289,9 @@ def wav_in_db(network, station, location, channel, starttime, endtime):
         return False
 
 
-def wav_in_asdf(network, station, location, channel, starttime, endtime):
+def wav_in_asdf(
+    network: str, station: str, location: str, channel: str,
+        starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
     """Is the waveform already in the asdf database?"""
     asdf_file = os.path.join(tmp.folder, os.pardir, 'raw.h5')
 

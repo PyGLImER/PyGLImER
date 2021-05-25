@@ -19,7 +19,7 @@ from joblib import Parallel, delayed
 from obspy.clients.fdsn import Client, header
 
 
-def dt_string(dt):
+def dt_string(dt: float) -> str:
     """Returns Time elapsed string depending on how much time has passed.
     After a certain amount of seconds it returns minutes, and after a certain
     amount of minutes it returns the elapsed time in hours."""
@@ -38,13 +38,23 @@ def dt_string(dt):
     return tstring
 
 
-def chunks(lst, n):
+def chunks(lst: list, n: int) -> list:
     """Yield successive n-sized chunks from lst. Useful for multi-threading"""
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
 
 def download_full_inventory(statloc: str, fdsn_client: list):
+    """
+    This utility loops through statloc and redownloads the whole response
+    (i.e., all channels and all times) for every station. Thus, overwriting
+    the old xml file.
+
+    :param statloc: Folder in which the old stationxmls are saved
+    :type statloc: str
+    :param fdsn_client: List of FDSN providers that should be queried.
+    :type fdsn_client: list
+    """
     bulk = []
     for fi in os.listdir(statloc):
         f = fi.split('.')
@@ -58,7 +68,7 @@ def download_full_inventory(statloc: str, fdsn_client: list):
         for client in fdsn_client)
 
 
-def __client__loop__(client, statloc, bulk):
+def __client__loop__(client: str, statloc: str, bulk: list):
     client = Client(client)
     try:
         stat_inv = client.get_stations_bulk(
@@ -73,17 +83,3 @@ def __client__loop__(client, statloc, bulk):
             stat_inv.select(network=netcode, station=statcode).write(
                 out, format="STATIONXML")
 
-
-# def add_statxml_to_existing(stat: Station, netcode: str, dir: str):
-#     print(type(stat))
-#     net = Network(netcode, stations=[stat])
-#     inv = Inventory(networks=[net])
-#     station = inv[0][0].code
-#     outfile = os.path.join(dir, '%s.%s.xml' % (netcode, station))
-#     try:
-#         old_inv = read_inventory(outfile)
-#     except FileNotFoundError:
-#         old_inv = Inventory()
-#     old_inv.extend(inv)
-#     # Write again to the same file
-#     old_inv.write(outfile, 'STATIONXML')

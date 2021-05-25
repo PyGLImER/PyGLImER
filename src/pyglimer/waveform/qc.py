@@ -12,11 +12,12 @@ Contains quality control for waveforms used for receiver function creation.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 11:38:40 am
-Last Modified: Thursday, 25th March 2021 04:03:31 pm
+Last Modified: Tuesday, 25th May 2021 05:16:23 pm
 '''
 
 import numpy as np
 from obspy.signal import filter
+from obspy import Stream
 
 # QC parameters
 
@@ -29,14 +30,11 @@ highco = np.linspace(.33, .175, 4)  # For SRFs, 16.06.2020 from .175 to .25 Hz
 # SNR criteria for QC
 SNR_criteriaP = [7.5, 1, 10]  # [snrr, snrr2/snrr, snrz]
 
-SNR_criteriaS = [7, .7, 1]  # QC4
-# 11.08 Test with a criterion that lets more waveforms pass:
-# qc_low: [7, .5, 1]
-# normal: [24, .4, 1]
+SNR_criteriaS = [7, .7, 1]
 # [primary/noise, sidelobe/primary, r/z conversions]
 
 
-def qcp(st, dt, sampling_f, onset):
+def qcp(st: Stream, dt: float, sampling_f: float, onset: float) -> tuple:
     """
     Quality control for the downloaded waveforms that are used to create
     PRFS. Works with various filters and SNR criteria
@@ -141,7 +139,7 @@ def qcp(st, dt, sampling_f, onset):
     return st, crit, f, noisemat
 
 
-def qcs(st, dt, sampling_f, onset):
+def qcs(st: Stream, dt: float, sampling_f: float, onset: float) -> tuple:
     """
     Quality control for waveforms that are used to produce SRF. In contrast
     to the ones used for PRF this is a very rigid criterion and will reject

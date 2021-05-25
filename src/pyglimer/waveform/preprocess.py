@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 25th May 2021 09:22:47 am
+Last Modified: Tuesday, 25th May 2021 05:08:13 pm
 '''
 
 # !/usr/bin/env python3d
@@ -754,7 +754,7 @@ def __file_in_db(loc, filename):
         return False
 
 
-def write_info(network, station, dictionary, preproloc):
+def write_info(network: str, station: str, dictionary: dict, preproloc: str):
     """
     Writes information dictionary in shelve format in each of the station
     folders.

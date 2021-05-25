@@ -12,14 +12,17 @@ Contains functions to rotate a stream into different domains
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Saturday, 21st March 2020 07:26:03 pm
-Last Modified: Thursday, 25th March 2021 04:05:35 pm
+Last Modified: Tuesday, 25th May 2021 05:18:07 pm
 '''
 import numpy as np
+from obspy import Stream
 
 from ..utils.createvmodel import load_avvmodel
 
 
-def rotate_PSV(statlat, statlon, rayp, st, phase):
+def rotate_PSV(
+    statlat: float, statlon: float, rayp: float, st: Stream,
+        phase: str) -> tuple:
     """
     Finds the incidence angle of an incoming ray with the weighted average
     of the lithosphere's P velocity with a velocity model compiled from
@@ -97,7 +100,7 @@ def rotate_PSV(statlat, statlon, rayp, st, phase):
     return avp, avs, PSvSh
 
 
-def rotate_LQT(st, phase):
+def rotate_LQT(st: Stream, phase: str) -> tuple:
     """
     Rotates a stream given in RTZ to LQT using Singular Value Decomposition
     Use rotate_LQT_min as it tends to deliver better results.
@@ -210,7 +213,7 @@ def rotate_LQT(st, phase):
     return LQT, QC
 
 
-def rotate_LQT_min(st, phase):
+def rotate_LQT_min(st: Stream, phase: str) -> tuple:
     """
     Rotates stream to LQT by minimising the energy of the S-wave primary
     arrival on the L component (SRF) or maximising the primary arrival

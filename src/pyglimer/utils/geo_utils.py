@@ -23,7 +23,9 @@ from cartopy.geodesic import Geodesic
 from ..constants import R_EARTH
 
 
-def reckon(lat, lon, distance, bearing):
+def reckon(
+    lat: float, lon: float, distance: float, bearing: float) -> Tuple[
+        float, float]:
     """ Computes new latitude and longitude from bearing and distance.
 
     Parameters
@@ -67,7 +69,9 @@ def reckon(lat, lon, distance, bearing):
     return lat2, lon2
 
 
-def gctrack(lat, lon, dist: float = 1.0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def gctrack(
+        lat, lon, dist: float = 1.0) -> Tuple[
+            np.ndarray, np.ndarray, np.ndarray]:
     """Given waypoints and a point distance, this function computes evenly
     spaced points along the great circle and the given waypoints.
 
@@ -160,7 +164,9 @@ def gctrack(lat, lon, dist: float = 1.0) -> Tuple[np.ndarray, np.ndarray, np.nda
     return qlat, qlon, qdists, sdists
 
 
-def geo2cart(r, latitude, longitude):
+def geo2cart(
+    r: float or np.ndarray, latitude: np.ndarray,
+        longitude: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Computes cartesian coordinates from geographical coordinates
 
     Parameters
@@ -189,7 +195,8 @@ def geo2cart(r, latitude, longitude):
     return x, y, z
 
 
-def cart2geo(x, y, z):
+def cart2geo(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> Tuple[
+        np.ndarray, np.ndarray, np.ndarray]:
     """Computes geographical coordinates from cartesian coordinates
 
     Parameters
@@ -217,18 +224,18 @@ def cart2geo(x, y, z):
     return r, latitude, longitude
 
 
-def epi2euc(epi):
+def epi2euc(epi: float) -> float:
     """Converts epicentral distance in to a euclidean distance along the
     corresponding chord."""
     return 2 * R_EARTH * np.sin(np.pi * epi / 360)
 
 
-def euc2epi(euc):
+def euc2epi(euc: float) -> float:
     """Converts euclidean distance to epicentral distance"""
     return 360 * np.arcsin(euc/(2*R_EARTH)) / np.pi
 
 
-def fix_map_extent(extent, fraction=0.05):
+def fix_map_extent(extent: float, fraction=0.05):
 
     # Get extent values and fix them
     minlon, maxlon, minlat, maxlat = extent

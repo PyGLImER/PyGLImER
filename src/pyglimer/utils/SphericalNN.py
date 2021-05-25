@@ -167,8 +167,8 @@ class SphericalNN(object):
             query longitude
         maximum_distance : float, optional
             max distace for the interpolation in degree angle. Default None.
-            If the mindistance to any points is larger than maximum_distance the
-            interpolated value is set to ``np.nan``.
+            If the mindistance to any points is larger than maximum_distance
+            the interpolated value is set to ``np.nan``.
         no_weighting : bool, optional
             Whether or not the function uses a weightied nearest neighbor
             interpolation
@@ -176,7 +176,7 @@ class SphericalNN(object):
             Define maximum number of neighbors to be used for the weighted
             interpolation. Not used if ``no_weighting = True``. Default None
         p : float, optional
-            Exponent to compute the inverse distance weights. Note that in 
+            Exponent to compute the inverse distance weights. Note that in
             the limit ``p->inf`` is just a nearest neighbor interpolation.
             Default is 2
 
@@ -187,7 +187,8 @@ class SphericalNN(object):
         In the future, I may add a variable weighting function for the
         weighted interpolation.
 
-        Please refer to https://en.wikipedia.org/wiki/Inverse_distance_weighting
+        Please refer to
+        https://en.wikipedia.org/wiki/Inverse_distance_weighting
         for the interpolation weighting.
 
 

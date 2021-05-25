@@ -12,7 +12,7 @@ Create a 3D velocity model using Litho1.0
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 01st May 2020 12:11:03
-Last Modified: Thursday, 25th March 2021 03:56:56 pm
+Last Modified: Tuesday, 25th May 2021 05:26:24 pm
 '''
 
 
@@ -24,10 +24,7 @@ import fnmatch
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.spatial import KDTree
-# from obspy.geodetics import gps2dist_azimuth
-# from pathlib import Path
 import plotly.graph_objs as go
-# from plotly.offline import plot
 
 from pyglimer.data import finddir
 from pyglimer.constants import R_EARTH, maxz, res, DEG2KM
@@ -42,167 +39,10 @@ gyps = os.path.join(finddir(), 'velocity_models', 'GyPSuM')
 _MODEL_CACHE = {}
 
 
-def load_gyps(save=False, latb=None, lonb=None):
-    """
-    Compiles the GyPSuM 3D-velocity object from included GyPSuM text files
-
-    Parameters
-    ----------
-    save : Bool, optional
-        Pickle the 3D velocity model after compiling it for the first time.
-        This will allow for faster access to the model. Saving the model takes
-        about 800 MB disk space.
-        The default is False, as it lead to unstabilities with joblib.
-    latb : Tuple, optional
-        Creates a submodel from the full model. In form (minlat, maxlat).
-    lonb : Tuple, optional
-        (minlon, maxlon)
-
-    Returns
-    -------
-    ComplexModel object
-        Object that can be queried for velocities.
-
-    """
-    if latb and not lonb or lonb and not latb:
-        raise ValueError(
-            """"Provide either no geographic boundaries or both latitude
-            and longitude boundaries.""")
-
-    if latb:
-        # Changes the boundaries to ints (mainly for filenames)
-        latb = (int(np.floor(latb[0])), int(np.ceil(latb[1])))
-        lonb = (int(np.floor(lonb[0])), int(np.ceil(lonb[1])))
-
-        try:
-            return _MODEL_CACHE['gyps' + str(latb) + str(lonb)]
-        except KeyError:
-            pass
-        try:
-            with open(
-                os.path.join(
-                    'tmp', str(latb)+str(lonb)+'.pkl', 'rb')) as infile:
-                model = pickle.load(infile)
-
-            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model
-            return model
-        except FileNotFoundError:
-            pass
-
-    try:
-        model = _MODEL_CACHE['gyps']
-        if latb:
-            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
-                    model.submodel(latb, lonb)
-            if save:
-                model.write(filename=str(latb)+str(lonb), folder='tmp')
-        return model
-    except KeyError:
-        pass
-
-    try:
-        filepath = os.path.join(finddir(), 'velocity_models', 'gypsum.pkl')
-        with open(filepath, 'rb') as infile:
-            model = pickle.load(infile)
-        if not latb:
-            _MODEL_CACHE['gyps'] = model
-
-        else:
-            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
-                model.submodel(latb, lonb)
-            if save:
-                model.write(filename=str(latb)+str(lonb), folder='tmp')
-            return model
-
-    except FileNotFoundError:
-        pass
-
-    # Create initial, full model
-    # Create the velocity deviation grids
-    vpd, vsd, _ = np.mgrid[-90:91, -180:181, 0:18]
-    vpd = vpd.astype(float)
-    vsd = vsd.astype(float)
-
-    # Load background model
-    rp, vpb = zip(*np.loadtxt(os.path.join(gyps, 'StartingVpModel.txt')))
-    rs, vsb = zip(*np.loadtxt(os.path.join(gyps, 'StartingVsModel.txt')))
-
-    zbp = R_EARTH - np.array(rp, dtype=float)  # background model depth vector
-    zbs = R_EARTH - np.array(rs, dtype=float)  # background model depth vecto
-    vpb = np.array(vpb)
-    vsb = np.array(vsb)
-
-    del rp, rs
-
-    # Load deviations
-    dirlist = os.listdir(gyps)
-
-    # vp deviations
-    for i, p in enumerate(fnmatch.filter(dirlist, 'P.*')):
-        vpd[:, :, 2*i] = np.reshape(
-            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, 0].shape) / 100
-        vpd[:, :, 2*i + 1] = np.reshape(
-            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, 0].shape) / 100
-
-    # vs deviations
-    for i, p in enumerate(fnmatch.filter(dirlist, 'S.*')):
-        vsd[:, :, 2*i] = np.reshape(
-            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, i].shape) / 100
-        vsd[:, :, 2*i + 1] = np.reshape(
-            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, i].shape) / 100
-
-    # boundaries for the velocity deviations vectors
-    zd = np.hstack(
-        (0, np.repeat(np.hstack((np.arange(100, 475, 75),
-                                 np.array([525, 650, 750]))), 2),
-         850))
-
-    # Interpolation depth
-    # zq = np.unique(np.sort(np.hstack(zb, zd)))
-    # imax = np.where(zq > 850)
-    # zq = zq[:imax]
-    zq = np.arange(0, maxz+res, res)
-
-    # Interpolate background velocity model
-    vp_bg = np.interp(zq, zbp, vpb)
-    vs_bg = np.interp(zq, zbs, vsb)
-
-    del vpb, vsb, zbp, zbs
-
-    # Interpolate velocity disturbances
-    intf = interp1d(zd, vpd, axis=2)
-    dvp = intf(zq)
-    intf = interp1d(zd, vsd, axis=2)
-    dvs = intf(zq)
-
-    vp = np.multiply(dvp, vp_bg) + vp_bg
-    vs = np.multiply(dvs, vs_bg) + vs_bg
-
-    del vpd, vsd, intf, dvp, dvs
-
-    lat = np.arange(-90, 91, 1)
-    lon = np.arange(-180, 181, 1)
-
-    # Create a velocity model with 1km spacing
-    model = ComplexModel(zq, vp, vs, lat, lon)
-
-    # Pickle model
-    if save:
-        model.write()
-
-    if not latb:
-        _MODEL_CACHE['gyps'] = model
-    else:
-        _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
-            model.submodel(latb, lonb)
-        if save:
-            model.write(filename=str(latb)+str(lonb), folder='tmp')
-
-    return model
-
-
 class ComplexModel(object):
-    def __init__(self, z, vp, vs, lat, lon, flatten=True, zf=None):
+    def __init__(
+        self, z: np.ndarray, vp: np.ndarray, vs: np.ndarray, lat: np.ndarray,
+            lon: np.ndarray, flatten=True, zf: np.ndarray = None):
         """
         Velocity model based on GyPSuM model. Compiled and loaded with function
         load_gyps(). The model will be compiled once into a relatively large
@@ -226,7 +66,7 @@ class ComplexModel(object):
             Apply Earth flattening. Should be False for submodels. In that
             case the values for vp and vs are already flattened.
         zf : 1d ndarray
-            flattened depth vector. Only needed if flatten=False.
+            flattened depth vector. Only necessary if flatten=False.
 
         Returns
         -------
@@ -258,7 +98,7 @@ class ComplexModel(object):
             self.vsf = vs
             self.zf = zf
 
-    def query(self, lat, lon, z):
+    def query(self, lat: float, lon: float, z: float):
         """
         Query the 3D velocity model.
 
@@ -319,7 +159,7 @@ class ComplexModel(object):
         with open(oloc + ".pkl", 'wb') as output:
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
 
-    def flatten(self, vp, vs):
+    def flatten(self, vp: np.ndarray, vs: np.ndarray):
         """
         Creates a flat-earth approximated velocity model down to maxz as in
         Peter M. Shearer
@@ -348,7 +188,7 @@ class ComplexModel(object):
 
         return vpf, vsf, zf
 
-    def submodel(self, lat, lon):
+    def submodel(self, lat: tuple, lon: tuple):
         """
         Creates a submodel from the current velocity model within the
         defined geographic boundaries. Can save a lot of RAM.
@@ -584,7 +424,7 @@ class AverageVelModel(object):
         self.avpS = avpS
         self.avsS = avsS
 
-    def query(self, lat, lon, phase):
+    def query(self, lat: float, lon: float, phase: str) -> tuple:
         """
         Query average P- and S-Wave velocity in the upper 15 km (phase=S) or
         6 km (phase=P)
@@ -651,3 +491,163 @@ class AverageVelModel(object):
 
         with open(oloc + ".pkl", 'wb') as output:
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
+
+
+def load_gyps(
+        save=False, latb: tuple = None, lonb: tuple = None) -> ComplexModel:
+    """
+    Compiles the GyPSuM 3D-velocity object from included GyPSuM text files
+
+    Parameters
+    ----------
+    save : Bool, optional
+        Pickle the 3D velocity model after compiling it for the first time.
+        This will allow for faster access to the model. Saving the model takes
+        about 800 MB disk space.
+        The default is False, as it lead to unstabilities with joblib.
+    latb : Tuple, optional
+        Creates a submodel from the full model. In form (minlat, maxlat).
+    lonb : Tuple, optional
+        (minlon, maxlon)
+
+    Returns
+    -------
+    ComplexModel object
+        Object that can be queried for velocities.
+
+    """
+    if latb and not lonb or lonb and not latb:
+        raise ValueError(
+            """"Provide either no geographic boundaries or both latitude
+            and longitude boundaries.""")
+
+    if latb:
+        # Changes the boundaries to ints (mainly for filenames)
+        latb = (int(np.floor(latb[0])), int(np.ceil(latb[1])))
+        lonb = (int(np.floor(lonb[0])), int(np.ceil(lonb[1])))
+
+        try:
+            return _MODEL_CACHE['gyps' + str(latb) + str(lonb)]
+        except KeyError:
+            pass
+        try:
+            with open(
+                os.path.join(
+                    'tmp', str(latb)+str(lonb)+'.pkl', 'rb')) as infile:
+                model = pickle.load(infile)
+
+            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model
+            return model
+        except FileNotFoundError:
+            pass
+
+    try:
+        model = _MODEL_CACHE['gyps']
+        if latb:
+            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
+                    model.submodel(latb, lonb)
+            if save:
+                model.write(filename=str(latb)+str(lonb), folder='tmp')
+        return model
+    except KeyError:
+        pass
+
+    try:
+        filepath = os.path.join(finddir(), 'velocity_models', 'gypsum.pkl')
+        with open(filepath, 'rb') as infile:
+            model = pickle.load(infile)
+        if not latb:
+            _MODEL_CACHE['gyps'] = model
+
+        else:
+            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
+                model.submodel(latb, lonb)
+            if save:
+                model.write(filename=str(latb)+str(lonb), folder='tmp')
+            return model
+
+    except FileNotFoundError:
+        pass
+
+    # Create initial, full model
+    # Create the velocity deviation grids
+    vpd, vsd, _ = np.mgrid[-90:91, -180:181, 0:18]
+    vpd = vpd.astype(float)
+    vsd = vsd.astype(float)
+
+    # Load background model
+    rp, vpb = zip(*np.loadtxt(os.path.join(gyps, 'StartingVpModel.txt')))
+    rs, vsb = zip(*np.loadtxt(os.path.join(gyps, 'StartingVsModel.txt')))
+
+    zbp = R_EARTH - np.array(rp, dtype=float)  # background model depth vector
+    zbs = R_EARTH - np.array(rs, dtype=float)  # background model depth vecto
+    vpb = np.array(vpb)
+    vsb = np.array(vsb)
+
+    del rp, rs
+
+    # Load deviations
+    dirlist = os.listdir(gyps)
+
+    # vp deviations
+    for i, p in enumerate(fnmatch.filter(dirlist, 'P.*')):
+        vpd[:, :, 2*i] = np.reshape(
+            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, 0].shape) / 100
+        vpd[:, :, 2*i + 1] = np.reshape(
+            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, 0].shape) / 100
+
+    # vs deviations
+    for i, p in enumerate(fnmatch.filter(dirlist, 'S.*')):
+        vsd[:, :, 2*i] = np.reshape(
+            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, i].shape) / 100
+        vsd[:, :, 2*i + 1] = np.reshape(
+            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, i].shape) / 100
+
+    # boundaries for the velocity deviations vectors
+    zd = np.hstack(
+        (0, np.repeat(np.hstack((np.arange(100, 475, 75),
+                                 np.array([525, 650, 750]))), 2),
+         850))
+
+    # Interpolation depth
+    # zq = np.unique(np.sort(np.hstack(zb, zd)))
+    # imax = np.where(zq > 850)
+    # zq = zq[:imax]
+    zq = np.arange(0, maxz+res, res)
+
+    # Interpolate background velocity model
+    vp_bg = np.interp(zq, zbp, vpb)
+    vs_bg = np.interp(zq, zbs, vsb)
+
+    del vpb, vsb, zbp, zbs
+
+    # Interpolate velocity disturbances
+    intf = interp1d(zd, vpd, axis=2)
+    dvp = intf(zq)
+    intf = interp1d(zd, vsd, axis=2)
+    dvs = intf(zq)
+
+    vp = np.multiply(dvp, vp_bg) + vp_bg
+    vs = np.multiply(dvs, vs_bg) + vs_bg
+
+    del vpd, vsd, intf, dvp, dvs
+
+    lat = np.arange(-90, 91, 1)
+    lon = np.arange(-180, 181, 1)
+
+    # Create a velocity model with 1km spacing
+    model = ComplexModel(zq, vp, vs, lat, lon)
+
+    # Pickle model
+    if save:
+        model.write()
+
+    if not latb:
+        _MODEL_CACHE['gyps'] = model
+    else:
+        _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
+            model.submodel(latb, lonb)
+        if save:
+            model.write(filename=str(latb)+str(lonb), folder='tmp')
+
+    return model

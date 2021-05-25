@@ -12,7 +12,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Sunday, 20th October 2019 10:31:03 am
-Last Modified: Tuesday, 18th May 2021 11:22:48 am
+Last Modified: Tuesday, 25th May 2021 05:05:10 pm
 '''
 
 import numpy as np
@@ -49,7 +49,7 @@ def resample_or_decimate(
         return data.resample(srn)
 
 
-def convf(u, v, nf, dt):
+def convf(u: np.ndarray, v: np.ndarray, nf: int, dt: float) -> np.ndarray:
     """
     Convolution conducted in the frequency domain.
 
@@ -78,7 +78,7 @@ def convf(u, v, nf, dt):
     return c
 
 
-def corrf(u, v, nf):
+def corrf(u: np.ndarray, v: np.ndarray, nf: int) -> np.ndarray:
     """
     Cross-correlation in frequency domain,
     calculates the x=crosscorr(u,v). Hence, v is the flipped vector.
@@ -106,7 +106,7 @@ def corrf(u, v, nf):
     return x
 
 
-def gaussian(N, dt, width):
+def gaussian(N: int, dt: float, width: float) -> np.ndarray:
     """
     Create a zero-phase Gaussian function. In particular meant to be
     convolved with the impulse
@@ -139,7 +139,7 @@ def gaussian(N, dt, width):
     return G
 
 
-def filter(s, F, dt, nf):
+def filter(s: np.ndarray, F: np.ndarray, dt: float, nf: int) -> np.ndarray:
     """
     Convolves a filter with a signal (given in time domain).
 
@@ -167,7 +167,7 @@ def filter(s, F, dt, nf):
     return s_f
 
 
-def ricker(sigma, N2, dt):
+def ricker(sigma: float, N2: int, dt: float) -> tuple:
     """ create a zero-phase Ricker / Mexican hat wavelet
     Parameters
     ----------
@@ -184,7 +184,7 @@ def ricker(sigma, N2, dt):
     return rick_tt, rick
 
 
-def noise(N, A):
+def noise(N: int, A: float) -> np.ndarray:
     """ create random noise
     Parameters
     ----------
@@ -197,7 +197,7 @@ def noise(N, A):
     return noise
 
 
-def sshift(s, N2, dt, shift):
+def sshift(s: np.ndarray, N2: int, dt: float, shift: float) -> np.ndarray:
     """ shift a signal by a given time-shift in the frequency domain
 
     Parameters
