@@ -12,43 +12,44 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Sunday, 20th October 2019 10:31:03 am
-Last Modified: Friday, 30th April 2021 03:56:23 pm
+Last Modified: Tuesday, 25th May 2021 05:05:10 pm
 '''
 
 import numpy as np
 from obspy import Stream
 
 
-def resample_or_decimate(data: Stream, sampling_rate_new: int) -> Stream:
+def resample_or_decimate(
+        data: Stream, sampling_rate_new: int, filter=True) -> Stream:
     """
     Decimates the data if the desired new sampling rate allows to do so.
     Else the signal will be interpolated (a lot slower).
 
-    Notes
-    -----
-    The stream has to be filtered before to avoid aliasing.
+    :note: The stream has to be filtered a priori to avoid aliasing.
 
-    Parameters
-    ----------
-    data : Stream
-        Stream to be resampled.
-    sampling_rate_new : int
-        The desired new sampling rate
-
-    Returns
-    -------
-    Stream
-        The resampled stream
+    :param data: Stream to be resampled.
+    :type data: Stream
+    :param sampling_rate_new: The desired new sampling rate
+    :type sampling_rate_new: int
+    :return: The resampled stream
+    :rtype: Stream
     """
     sr = data[0].stats.sampling_rate
     srn = sampling_rate_new
+
+    # Chosen this filter design as it's exactly the same as
+    # obspy.Stream.decimate uses
+    if filter:
+        freq = sr * 0.5 / float(sr/srn)
+        data.filter('lowpass_cheby_2', freq=freq, maxorder=12)
+
     if sr/srn == sr//srn:
         return data.decimate(int(sr//srn), no_filter=True)
     else:
         return data.resample(srn)
 
 
-def convf(u, v, nf, dt):
+def convf(u: np.ndarray, v: np.ndarray, nf: int, dt: float) -> np.ndarray:
     """
     Convolution conducted in the frequency domain.
 
@@ -77,7 +78,7 @@ def convf(u, v, nf, dt):
     return c
 
 
-def corrf(u, v, nf):
+def corrf(u: np.ndarray, v: np.ndarray, nf: int) -> np.ndarray:
     """
     Cross-correlation in frequency domain,
     calculates the x=crosscorr(u,v). Hence, v is the flipped vector.
@@ -105,7 +106,7 @@ def corrf(u, v, nf):
     return x
 
 
-def gaussian(N, dt, width):
+def gaussian(N: int, dt: float, width: float) -> np.ndarray:
     """
     Create a zero-phase Gaussian function. In particular meant to be
     convolved with the impulse
@@ -138,7 +139,7 @@ def gaussian(N, dt, width):
     return G
 
 
-def filter(s, F, dt, nf):
+def filter(s: np.ndarray, F: np.ndarray, dt: float, nf: int) -> np.ndarray:
     """
     Convolves a filter with a signal (given in time domain).
 
@@ -159,19 +160,14 @@ def filter(s, F, dt, nf):
         Filtered signal.
 
     """
-    """ 
-    INPUT
-    s: signal in time domain
-    F: Filter's amplitude response
-    dt: sampling interval
-    nf: length of the signal/filter in f-domain"""
+
     S = np.fft.fft(s, n=nf)
     S_f = np.multiply(S, F)*dt
     s_f = np.real(np.fft.ifft(S_f, n=nf))
     return s_f
 
 
-def ricker(sigma, N2, dt):
+def ricker(sigma: float, N2: int, dt: float) -> tuple:
     """ create a zero-phase Ricker / Mexican hat wavelet
     Parameters
     ----------
@@ -188,7 +184,7 @@ def ricker(sigma, N2, dt):
     return rick_tt, rick
 
 
-def noise(N, A):
+def noise(N: int, A: float) -> np.ndarray:
     """ create random noise
     Parameters
     ----------
@@ -201,7 +197,7 @@ def noise(N, A):
     return noise
 
 
-def sshift(s, N2, dt, shift):
+def sshift(s: np.ndarray, N2: int, dt: float, shift: float) -> np.ndarray:
     """ shift a signal by a given time-shift in the frequency domain
 
     Parameters

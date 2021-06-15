@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Thursday, 25th March 2021 03:40:07 pm
+Last Modified: Tuesday, 25th May 2021 05:50:31 pm
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -303,11 +303,10 @@ def plot_vel_grad(
 
     plt.subplot(projection=PlateCarree(central_longitude=cl))
 
-
     _ = plot_map(cl=cl, lat=lat, lon=lon, geology=geology, states=True)
-   # plot depth distribution or amplitude?
-   if plot_amplitude:
-        data = a
+    # plot depth distribution or amplitude?
+    if plot_amplitude:
+            data = a
     else:
         data = z
 

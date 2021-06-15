@@ -1,5 +1,5 @@
 """
-Spherical nearest neighbour idea taken from ObsPy originally, 
+Spherical nearest neighbour idea taken from ObsPy originally,
 but heavily modified to include interpolation using shephard's and
 modified shephard's method of inverse distance weighting.
 
@@ -107,7 +107,7 @@ class SphericalNN(object):
     def sparse_distance_matrix(self, other: Union[SphericalNN, None] = None,
                                maximum_distance=180.0, sparse: bool = False,
                                km: bool = False):
-        """Computes the sparse distance matrix between two kdtree. if no other 
+        """Computes the sparse distance matrix between two kdtree. if no other
         kdtree is provided, this kdtree is used
 
         Parameters
@@ -151,11 +151,12 @@ class SphericalNN(object):
 
         return output_mat
 
-    def interpolator(self, qlat, qlon, maximum_distance=None,
-                     no_weighting=False, k: Optional[int] = None, p: float = 2.0):
+    def interpolator(
+        self, qlat, qlon, maximum_distance=None,
+            no_weighting=False, k: Optional[int] = None, p: float = 2.0):
         """Spherical interpolation function using the ``SphericalNN`` object.
-        Returns an interpolator that can be used for interpolating the same 
-        set of locations based on the KDTree. The only input the interpolator 
+        Returns an interpolator that can be used for interpolating the same
+        set of locations based on the KDTree. The only input the interpolator
         takes are the data corresponding to the points in the KDTree.
 
         Parameters
@@ -166,8 +167,8 @@ class SphericalNN(object):
             query longitude
         maximum_distance : float, optional
             max distace for the interpolation in degree angle. Default None.
-            If the mindistance to any points is larger than maximum_distance the
-            interpolated value is set to ``np.nan``.
+            If the mindistance to any points is larger than maximum_distance
+            the interpolated value is set to ``np.nan``.
         no_weighting : bool, optional
             Whether or not the function uses a weightied nearest neighbor
             interpolation
@@ -175,8 +176,8 @@ class SphericalNN(object):
             Define maximum number of neighbors to be used for the weighted
             interpolation. Not used if ``no_weighting = True``. Default None
         p : float, optional
-            Exponent to compute the inverse distance weights. Note that in 
-            the limit ``p->inf`` is just a nearest neighbor interpolation. 
+            Exponent to compute the inverse distance weights. Note that in
+            the limit ``p->inf`` is just a nearest neighbor interpolation.
             Default is 2
 
 
@@ -186,7 +187,8 @@ class SphericalNN(object):
         In the future, I may add a variable weighting function for the
         weighted interpolation.
 
-        Please refer to https://en.wikipedia.org/wiki/Inverse_distance_weighting
+        Please refer to
+        https://en.wikipedia.org/wiki/Inverse_distance_weighting
         for the interpolation weighting.
 
 

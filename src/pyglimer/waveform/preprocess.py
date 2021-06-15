@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 4th May 2021 11:26:28 am
+Last Modified: Tuesday, 25th May 2021 05:08:13 pm
 '''
 
 # !/usr/bin/env python3d
@@ -107,7 +107,6 @@ def preprocess(
     None.
 
     """
-    print('should always be printed')
     ###########
     # logging
     logger = logging.Logger("pyglimer.waveform.preprocess")
@@ -244,7 +243,6 @@ def __event_loop(phase, rot, pol, event, taper_perc, taper_type, model,
     Loops over each event in the event catalogue
     """
     # create list for what will later be the info files
-    print('eventloop')
     infolist = []
 
     # fetch event-data
@@ -445,11 +443,9 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
 
     # Check if RF was already computed and if it should be
     # computed at all, and if the waveform was retained (SNR)
-    print('here we are trying to create RFs')
     if deconmeth and not\
         __file_in_db(os.path.join(rfloc, network, station), network +
                      '.' + station + '.' + ot_loc + '.sac') and crit:
-        print('this condition works')
 
         # 21.04.2020 Second highcut filter
         if hc_filt:
@@ -518,7 +514,6 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
 
             RF.write(os.path.join(rfdir, network + '.' + station + '.' + ot_loc
                      + '.sac'), format='SAC')
-            print(RF, rfdir)
 
             end = time.time()
             rflogger.info("RF created")
@@ -575,9 +570,7 @@ def __cut_resample(st, logger, first_arrival, network, station,
         tr.stats.mseed.encoding = 'FLOAT64'
 
     # trim to according length
-    # Anti-Alias
-    st.filter(type="lowpass_cheby_2", freq=4.9)
-    # st.resample(10)  # resample streams with 10Hz sampling rate
+    # Anti-Alias filtering is now done within the function below
     st = resample_or_decimate(st, 10)
     st.trim(starttime=starttime, endtime=endtime)
     # After trimming length has to be checked again (recording may
@@ -761,7 +754,7 @@ def __file_in_db(loc, filename):
         return False
 
 
-def write_info(network, station, dictionary, preproloc):
+def write_info(network: str, station: str, dictionary: dict, preproloc: str):
     """
     Writes information dictionary in shelve format in each of the station
     folders.

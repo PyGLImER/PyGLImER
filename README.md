@@ -8,7 +8,6 @@ of user interference.**
 It is largely based on the [ObsPy](https://github.com/obspy/obspy) project and can be seen as a more powerful and user-friendly
 successor of the [GLImER](http://stephanerondenay.com/glimer-web.html) project.
 
-
 ## Installation of this package
 
 A few simple steps:
@@ -34,3 +33,6 @@ This version is an early release. If you encounter any issues or unexpected beha
 
 ## Citing PyGLImER
 If you use PyGLImER to produce content for your publication, please consider citing us. For the time being, please cite our [AGU abstract](https://www.essoar.org/doi/10.1002/essoar.10506417.1).
+
+## Latest
+We are happy to announced that PyGLImER has been awarded an [ORFEUS](http://orfeus-eu.org/) software development grant and are looking forward to further develop this project.

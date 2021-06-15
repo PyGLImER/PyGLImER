@@ -14,13 +14,13 @@ Last Modified: Thursday, 25th March 2021 03:56:56 pm
 """
 
 
-def nextPowerOf2(n):
+def nextPowerOf2(n: int):
     """ just returns the next higher power of two from n"""
     count = 0
 
-    # First n in the below  
-    # condition is for the  
-    # case where n is 0 
+    # First n in the below
+    # condition is for the
+    # case where n is 0
     if n and not (n & (n - 1)):
         return n
 

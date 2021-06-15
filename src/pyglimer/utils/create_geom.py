@@ -12,7 +12,7 @@ Automatic creation of raysum geom files
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 14th May 2020 10:23:03
-Last Modified: Thursday, 25th March 2021 03:56:04 pm
+Last Modified: Tuesday, 25th May 2021 05:21:47 pm
 '''
 
 import os
@@ -20,27 +20,31 @@ import numpy as np
 
 from pyglimer.data import finddir
 
-def geom3D():
-    N = 21
-    bazv = np.arange(0, 360, 20)
-    raypv = np.linspace(0.000040541,0.000081081, 8)
-    # for P:0.000040541,0.000081081 S:0.00009009, 0.00011982
-    shift_max = 55660/2  # 55660
-    filename = '3D'
-    create_geom(N, bazv, raypv, shift_max, filename)
+
+# I used those for figures in the thesis. Can probably be deleted?
+# def geom3D():
+#     N = 21
+#     bazv = np.arange(0, 360, 20)
+#     raypv = np.linspace(0.000040541, 0.000081081, 8)
+#     # for P:0.000040541,0.000081081 S:0.00009009, 0.00011982
+#     shift_max = 55660/2  # 55660
+#     filename = '3D'
+#     create_geom(N, bazv, raypv, shift_max, filename)
 
 
-def geom3D_even():
-    N = 100
-    bazv = np.arange(0, 360, 20)
-    # raypv = np.arange(.1e-5, .11e-4, .25e-5)
-    raypv = np.linspace(0.000040541, 0.000081081, 8)
-    shift_max = 55660
-    filename = '3D'
-    create_geom(N, bazv, raypv, shift_max, filename, shape='even')
+# def geom3D_even():
+#     N = 100
+#     bazv = np.arange(0, 360, 20)
+#     # raypv = np.arange(.1e-5, .11e-4, .25e-5)
+#     raypv = np.linspace(0.000040541, 0.000081081, 8)
+#     shift_max = 55660
+#     filename = '3D'
+#     create_geom(N, bazv, raypv, shift_max, filename, shape='even')
 
 
-def create_geom(N, bazv, raypv, shift_max, filename, shape='cross'):
+def create_geom(
+    N: int, bazv: np.ndarray, raypv: np.ndarray, shift_max: int, filename: str,
+        shape='cross'):
     """
     Creates geometry files for Raysum.
 
@@ -73,13 +77,13 @@ def create_geom(N, bazv, raypv, shift_max, filename, shape='cross'):
     if shape == 'cross':
         if N/2 == round(N/2):
             raise ValueError('Number of station has to be uneven.')
-    
+
         # create shift vectors
         xshift = np.hstack((np.linspace(-shift_max, shift_max, round((N+1)/2)),
                             np.zeros(round((N+1)/2))))
         yshift = np.hstack((np.zeros(round((N+1)/2)),
                            np.linspace(-shift_max, shift_max, round((N+1)/2))))
-    
+
         coords = np.unique(np.column_stack((yshift, xshift)), axis=0)
     else:
         M = np.sqrt(N)  # Number of stations per line
@@ -92,7 +96,9 @@ def create_geom(N, bazv, raypv, shift_max, filename, shape='cross'):
 
     # header
     lines.append('# Automatically created geometry file.\n')
-    lines.append("""# Note that one file cannot contain more than 200 traces (max for raysum).\n""")
+    lines.append(
+        '# Note that one file cannot contain more than ' +
+        '200 traces (max for raysum).\n')
 
     ntr = 0  # Number of traces counter
     fpi = []  # List with indices to split file
@@ -105,7 +111,7 @@ def create_geom(N, bazv, raypv, shift_max, filename, shape='cross'):
                 if rayp == 0:
                     rayp = '0.'
                 else:
-                    rayp = str(round(rayp,6))
+                    rayp = str(round(rayp, 6))
 
                 line = ' '.join(
                     [str(int(bazv[j]))+'.', rayp,
