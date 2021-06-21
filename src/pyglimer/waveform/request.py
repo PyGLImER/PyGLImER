@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Tuesday, 25th May 2021 05:13:39 pm
+Last Modified: Monday, 21st June 2021 04:56:53 pm
 '''
 import os
 from http.client import IncompleteRead
@@ -41,9 +41,9 @@ class Request(object):
     def __init__(
         self, phase: str, rot: str, evtloc: str, statloc: str, rawloc: str,
         preproloc: str, rfloc: str, deconmeth: str, starttime: UTCDateTime,
-        endtime: UTCDateTime, wavdownload=True, pol: str = 'v',
+        endtime: UTCDateTime, pol: str = 'v',
         minmag: float or int = 5.5, event_coords: tuple = None,
-        network: str or list = None, station: str or list = None,
+        network: str = None, station: str = None,
         waveform_client: list = None, re_client=['IRIS'],
             evtcat: Catalog = None, debug=False):
         """
@@ -88,12 +88,6 @@ class Request(object):
         :type starttime: ~obspy.UTCDateTime
         :param endtime: Latest event date to be considered.
         :type endtime: ~obspy.UTCDateTime
-        :param wavdownload: Do you want to start a new download (True),
-            update the current database (True) or only preprocess and create
-            RFs from an existing database (False). False is a lot faster as all
-            CPUs can be used and the preprocessing does not have to wait for
-            the download, defaults to True.
-        :type wavdownload: bool, optional
         :param pol: Polarisation to use as source wavelet. Either "v" for
             vertically polarised or 'h' for horizontally polarised S-waves.
             Will be ignored if phase='S', by default 'v'.
@@ -107,11 +101,11 @@ class Request(object):
         :param network: Limit the dowloand and preprocessing to a certain
             network or several networks (if type==list).
             Wildcards are allowed, by default None., defaults to None
-        :type network: str or list, optional
+        :type network: str, optional
         :param station: Limit the download and preprocessing to a certain
             station or several stations. Use only if network!=None.
             Wildcards are allowed, by default None.
-        :type station: str or list, optional
+        :type station: str, optional
         :param waveform_client: List of FDSN compatible servers to download
             waveforms from.
             See obspy documentation for obspy.Client for allowed acronyms.
@@ -141,7 +135,6 @@ class Request(object):
 
         # Allocate variables in self
         self.debug = debug
-        self.wavdownload = wavdownload
         tmp.re_client = re_client
 
         # Set velocity model
