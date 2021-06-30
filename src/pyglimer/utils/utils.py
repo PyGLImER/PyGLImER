@@ -7,6 +7,7 @@
    (https://www.gnu.org/copyleft/lesser.html)
 :author:
     Lucas Sawade (lsawade@princeton.edu)
+    Peter Makus (makus@gfz-potsdam.de)
 
 
 Last Update: November 2019
@@ -17,6 +18,7 @@ import os
 
 from joblib import Parallel, delayed
 from obspy.clients.fdsn import Client, header
+from obspy.clients.fdsn.header import URL_MAPPINGS
 
 
 def dt_string(dt: float) -> str:
@@ -63,6 +65,41 @@ def download_full_inventory(statloc: str, fdsn_client: list):
         bulk.append((f[0], f[1], '--', '*', '*', '*'))
     if isinstance(fdsn_client, str):
         fdsn_client = [fdsn_client]
+    # That bit is stolen from the massdownloader
+    elif fdsn_client is None:
+        providers = dict(URL_MAPPINGS.items())
+        _p = []
+
+        if "RASPISHAKE" in providers:
+            # exclude RASPISHAKE by default
+            del providers["RASPISHAKE"]
+
+        if "IRIS" in providers:
+            has_iris = True
+            del providers["IRIS"]
+        else:
+            has_iris = False
+
+        if "ODC" in providers:
+            providers["ORFEUS"] = providers["ODC"]
+            del providers["ODC"]
+
+        if "ORFEUS" in providers:
+            has_orfeus = True
+            del providers["ORFEUS"]
+        else:
+            has_orfeus = False
+
+        _p = sorted(providers)
+        if has_orfeus:
+            _p.append("ORFEUS")
+        if has_iris:
+            _p.append("IRIS")
+
+        providers = _p
+
+        fdsn_client = tuple(providers)
+
     _ = Parallel(n_jobs=-1)(
         delayed(__client__loop__)(client, statloc, bulk)
         for client in fdsn_client)
