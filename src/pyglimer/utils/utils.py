@@ -1,4 +1,4 @@
-"""
+'''
 
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
@@ -10,9 +10,10 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 
-Last Update: November 2019
+Created: Tue May 26 2019 13:31:30
+Last Modified: Wednesday, 30th June 2021 09:20:15 am
 
-"""
+'''
 
 import os
 
