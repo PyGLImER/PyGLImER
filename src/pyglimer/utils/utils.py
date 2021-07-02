@@ -11,10 +11,11 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 30th June 2021 09:20:15 am
+Last Modified: Friday, 2nd July 2021 04:08:03 pm
 
 '''
 
+from logging import warn
 import os
 
 from joblib import Parallel, delayed
@@ -63,7 +64,8 @@ def download_full_inventory(statloc: str, fdsn_client: list):
         f = fi.split('.')
         if f[-1].lower() != 'xml':
             continue
-        bulk.append((f[0], f[1], '--', '*', '*', '*'))
+        bulk.append((f[0], f[1], '*', '*', '*', '*'))
+    print(bulk)
     if isinstance(fdsn_client, str):
         fdsn_client = [fdsn_client]
     # That bit is stolen from the massdownloader
@@ -107,12 +109,15 @@ def download_full_inventory(statloc: str, fdsn_client: list):
 
 
 def __client__loop__(client: str, statloc: str, bulk: list):
-    client = Client(client)
     try:
+        client = Client(client)
         stat_inv = client.get_stations_bulk(
             bulk, level='response')
-    except (header.FDSNNoDataException, header.FDSNException):
+    except (header.FDSNNoDataException, header.FDSNException, ValueError) as e:
+        print(e)
+        warn(e)
         return  # wrong client
+        # ValueError is raised for querying a client without station service
     for network in stat_inv:
         netcode = network.code
         for station in network:
