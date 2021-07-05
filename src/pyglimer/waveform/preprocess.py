@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 25th May 2021 05:08:13 pm
+Last Modified: Monday, 5th July 2021 01:14:04 pm
 '''
 
 # !/usr/bin/env python3d
@@ -49,7 +49,7 @@ def preprocess(
     taper_type: str, tz: int, ta: int, statloc: str, rawloc: str,
     preproloc: str, rfloc: str, deconmeth: str, hc_filt: float or None,
     saveasdf: bool = False, netrestr=None, statrestr=None,
-        logdir: str = None, debug: bool = False):
+        logdir: str = None, loglvl: int = logging.WARNING):
     """
      Preprocesses waveforms to create receiver functions
 
@@ -99,8 +99,8 @@ def preprocess(
         time window after first arrival in seconds
     logdir : string, optional
         Set the directory to where the download log is saved
-    debug : Bool, optional
-        All loggers go to debug mode.
+    loglvl : int, optional
+        Set logger to this level.
 
     Returns
     -------
@@ -109,50 +109,13 @@ def preprocess(
     """
     ###########
     # logging
-    logger = logging.Logger("pyglimer.waveform.preprocess")
-    logger.setLevel(logging.WARNING)
-    if debug:
-        logger.setLevel(logging.DEBUG)
+    logger = logging.getLogger("pyglimer.request.preprocess")
+    logger.info('\n\n\n...Preprocessing initialiased...\n')
+    if loglvl == logging.DEBUG:
+        debug = True
 
-    # Create handler to the log
-    if logdir is None:
-        fh = logging.FileHandler(os.path.join('logs', 'preprocess.log'))
-    else:
-        fh = logging.FileHandler(os.path.join(logdir, 'preprocess.log'))
-    fh.setLevel(logging.WARNING)
-    if debug:
-        fh.setLevel(logging.DEBUG)
-    logger.addHandler(fh)
-
-    # Create Formatter
-    fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
-    fh.setFormatter(fmt)
-
-    #########
     # Logging for RF creation
-    rflogger = logging.getLogger("pyglimer.waveform.preprocess.RF")
-    rflogger.setLevel(logging.WARNING)
-    if debug:
-        rflogger.setLevel(logging.DEBUG)
-
-    # Create handler to the log
-    if logdir is None:
-        fhrf = logging.FileHandler(os.path.join('logs', 'RF.log'))
-    else:
-        fhrf = logging.FileHandler(os.path.join(logdir, 'RF.log'))
-    fhrf.setLevel(logging.WARNING)
-    if debug:
-        fhrf.setLevel(logging.DEBUG)
-    rflogger.addHandler(fhrf)
-
-    # Create Formatter
-    fmtrf = logging.Formatter(fmt="""%(asctime)s -
-                                          %(levelname)s - %(message)s""")
-    fhrf.setFormatter(fmtrf)
-
-    # We don't really want to see all the warnings.
-    if not debug:
-        warnings.filterwarnings("ignore")
+    rflogger = logging.getLogger("pyglimer.request.preprocess.RF")
 
     #########
 

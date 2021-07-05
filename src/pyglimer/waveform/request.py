@@ -15,17 +15,19 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Monday, 5th July 2021 09:04:23 am
+Last Modified: Monday, 5th July 2021 01:16:31 pm
 '''
 import os
 from http.client import IncompleteRead
 from datetime import datetime
-from warnings import warn
+import logging
+import warnings
 
 from obspy import read_events, Catalog
 from obspy.clients.fdsn import Client as Webclient
 from obspy.core.utcdatetime import UTCDateTime
 from obspy.taup import TauPyModel
+from tqdm import tqdm
 # from obspy.clients.fdsn.client import FDSNException
 
 from pyglimer.waveform.download import downloadwav
@@ -45,7 +47,7 @@ class Request(object):
         minmag: float or int = 5.5, event_coords: tuple = None,
         network: str = None, station: str = None,
         waveform_client: list = None, re_client=['IRIS'],
-            evtcat: Catalog = None, debug=False):
+            evtcat: Catalog = None, loglvl: int = logging.WARNING):
         """
         Create object that is used to start the receiver function
         workflow.
@@ -113,7 +115,8 @@ class Request(object):
             `<https://www.fdsn.org/webservices/datacenters/>`_. None means
             that all known servers are requested, defaults to None.
         :type waveform_client: list, optional
-        :param re_client: Only relevant, when debug=True. List of servers that
+        :param re_client: Only relevant, when log_lvl=logging.DEBUG. List of
+            servers that
             will be used if data is missing and the script will attempt a
             redownload, usually it's easier to just run a request several
             times. Same logic as for waveform_client applies,
@@ -124,17 +127,18 @@ class Request(object):
             in evtloc. If None a new catalogue will be downloaded (with the
             parameters defined before), by default None, defaults to None
         :type evtcat: str, optional
-        :param debug: If True, all loggers will go to DEBUG mode and all
-            warnings
-            will be shown. That will result in a lot of information being
-            shown! Also joblib will fall back to using only few cores,
-            by default False.
-        :type debug: bool, optional
+        :param loglvl: Level for the loggers. One of the following:
+            logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO,
+            logging.DEBUG
+            If the level is logging.DEBUG, joblib will fall back to using only
+            few cores and downloads will be retried,
+            by default logging.WARNING.
+        :type loglvl: int, optional
         :raises NameError: For invalid phases.
         """
 
         # Allocate variables in self
-        self.debug = debug
+        self.loglvl = loglvl
         tmp.re_client = re_client
 
         # Set velocity model
@@ -154,6 +158,29 @@ class Request(object):
         self.rawloc = os.path.join(rawloc, self.phase)
         self.preproloc = os.path.join(preproloc, self.phase)
         self.rfloc = os.path.join(rfloc, self.phase)
+
+        # logger for the download steps
+        self.logger = logging.getLogger('pyglimer.request')
+        self.logger.setLevel(loglvl)
+        self.fh = logging.FileHandler(
+            os.path.join(self.logdir, 'request.log'))
+        self.fh.setLevel(loglvl)
+        self.logger.addHandler(self.fh)
+        fmt = logging.Formatter(
+            fmt='%(asctime)s - %(levelname)s - %(message)s')
+        self.fh.setFormatter(fmt)
+        consoleHandler = logging.StreamHandler()
+        consoleHandler.setLevel(loglvl)
+        consoleHandler.setFormatter(fmt)
+        self.logger.addHandler(consoleHandler)
+        # We don't really want to see all the warnings.
+        if loglvl > logging.WARNING:
+            warnings.filterwarnings("ignore")
+        else:
+            logging.captureWarnings(True)
+            warnings_logger = logging.getLogger("py.warnings")
+            warnings_logger.addHandler(self.fh)
+            warnings_logger.setLevel(loglvl)
 
         # minimum magnitude
         self.minmag = minmag
@@ -223,27 +250,32 @@ class Request(object):
         self.webclient = Webclient('IRIS')
         event_cat_done = False
 
-        while not event_cat_done:
-            try:
-                # 05.07.2021: Shorten length of a to one year, which is a lot
-                # more robust
-                # :NOTE: perhaps it would be smart to save each year as a file?
-                # BUt then again, they have different requirements...
-                # Check length of request and split if longer than a year.
-                a = 365.25*24*3600  # one yr in seconds
-                if self.endtime-self.starttime > a:
-                    # Request is too big, break it down ito several requests
+        # 05.07.2021: Shorten length of a to one year, which is a lot
+        # more robust
+        # :NOTE: perhaps it would be smart to save each year as a file?
+        # BUt then again, they have different requirements...
+        # Check length of request and split if longer than a year.
+        a = 365.25*24*3600  # one yr in seconds
+        if self.endtime-self.starttime > a:
+            # Request is too big, break it down ito several requests
 
-                    starttimes = [self.starttime, self.starttime+a]
-                    while self.endtime-starttimes[-1] > a:
-                        starttimes.append(starttimes[-1]+a)
-                    endtimes = []
-                    endtimes.extend(starttimes[1:])
-                    endtimes.append(self.endtime)
+            starttimes = [self.starttime, self.starttime+a]
+            while self.endtime-starttimes[-1] > a:
+                starttimes.append(starttimes[-1]+a)
+            endtimes = []
+            endtimes.extend(starttimes[1:])
+            endtimes.append(self.endtime)
+            msg = 'Long request: Breaking it down to %s sub-requests.'\
+                % str(len(endtimes))
+            self.logger.info(msg)
 
-                    # Query
-                    self.evtcat = Catalog()
-                    for st, et in zip(starttimes, endtimes):
+            # Query
+            self.evtcat = Catalog()
+            # We convert the iterator to a list, so tqdm work properly
+            for st, et in tqdm(list(zip(starttimes, endtimes))):
+                event_cat_done = False
+                while not event_cat_done:
+                    try:
                         self.evtcat.extend(
                             self.webclient.get_events(
                                 starttime=st, endtime=et,
@@ -253,26 +285,34 @@ class Request(object):
                                 maxlongitude=self.eMAXLON,
                                 minmagnitude=self.minmag,
                                 maxmagnitude=10, maxdepth=self.maxdepth))
-                    event_cat_done = True
+                        event_cat_done = True
+                    except IncompleteRead:
+                        # Server interrupted connection, just try again
+                        # This usually happens with enormeous requests, we
+                        # should reduce a
+                        msg = "Server interrupted connection, \
+                            restarting download..."
+                        self.logger.warning(msg)
+                        continue
 
-                else:
+        else:
+            while not event_cat_done:
+                try:
                     self.evtcat = self.webclient.get_events(
                         starttime=self.starttime, endtime=self.endtime,
                         minlatitude=self.eMINLAT, maxlatitude=self.eMAXLAT,
                         minlongitude=self.eMINLON, maxlongitude=self.eMAXLON,
                         minmagnitude=self.minmag, maxmagnitude=10,
                         maxdepth=self.maxdepth)
-
                     event_cat_done = True
-
-            except IncompleteRead:
-                # Server interrupted connection, just try again
-                # This usually happens with enormeous requests, we should
-                # reduce a
-                msg = "Server interrupted connection, restarting download..."
-                warn(msg, UserWarning)
-                print(msg)
-                continue
+                except IncompleteRead:
+                    # Server interrupted connection, just try again
+                    # This usually happens with enormeous requests, we should
+                    # reduce a
+                    msg = "Server interrupted connection, \
+                        restarting download..."
+                    self.logger.warning(msg)
+                    continue
 
         os.makedirs(self.evtloc, exist_ok=True)
         # check if there is a better format for event catalog
@@ -280,6 +320,8 @@ class Request(object):
             os.path.join(
                 self.evtloc,
                 datetime.now().strftime("%Y%m%dT%H%M%S")), format="QUAKEML")
+        msg = 'Successfully obtained %s events' % str(self.evtcat.count())
+        self.logger.info(msg)
 
     def download_waveforms(self, verbose: bool = False):
         """
@@ -293,8 +335,8 @@ class Request(object):
         downloadwav(
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
-            network=self.network, station=self.station, logdir=self.logdir,
-            debug=self.debug, verbose=verbose, saveasdf=False)
+            network=self.network, station=self.station, log_fh=self.fh,
+            loglvl=self.loglvl, verbose=verbose, saveasdf=False)
 
     def preprocess(self, hc_filt: float or int or None = None):
         """
@@ -315,4 +357,4 @@ class Request(object):
             'hann', self.tz, self.ta, self.statloc, self.rawloc,
             self.preproloc, self.rfloc, self.deconmeth, hc_filt,
             netrestr=self.network, statrestr=self.station, logdir=self.logdir,
-            debug=self.debug)
+            loglvl=self.loglvl)

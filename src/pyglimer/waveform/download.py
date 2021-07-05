@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Tuesday, 25th May 2021 04:59:59 pm
+Last Modified: Monday, 5th July 2021 11:58:01 am
 '''
 
 # !/usr/bin/env python3
@@ -40,8 +40,8 @@ def downloadwav(
     phase: str, min_epid: float, max_epid: float, model: TauPyModel,
     event_cat: Catalog, tz: float, ta: float, statloc: str,
     rawloc: str, clients: list, network: str = None, station: str = None,
-    saveasdf: bool = False, logdir: str = None, debug: bool = False,
-        verbose: bool = False):
+    saveasdf: bool = False, log_fh: logging.FileHandler = None,
+        loglvl: int = logging.WARNING, verbose: bool = False):
     """
     Downloads the waveforms for all events in the catalogue
      for a circular domain around the epicentre with defined epicentral
@@ -81,10 +81,10 @@ def downloadwav(
     saveasdf : bool, optional
         Save the dataset as Adaptable Seismic Data Format (asdf; recommended).
         Else, one will be left with .mseeds.
-    logdir : string, optional
-        Set the directory to where the download log is saved
-    debug : Bool, optional
-        All loggers go to debug mode.
+    log_fh : logging.FileHandler, optional
+        file handler to be used for the massdownloader logger.
+    loglvl : int, optional
+        Use this logging level.
     verbose: Bool, optional
         Set True, when experiencing issues with download. Output of
         obspy MassDownloader will be logged in download.log.
@@ -116,27 +116,20 @@ def downloadwav(
     ###########
     # logging for the download
     fdsn_mass_logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
-    fdsn_mass_logger.setLevel(logging.WARNING)
-    if debug:
-        fdsn_mass_logger.setLevel(logging.DEBUG)
+    fdsn_mass_logger.setLevel(loglvl)
 
-    # Create handler to the log
-    if logdir is None:
+    # # Create handler to the log
+    if log_fh is None:
         fh = logging.FileHandler(os.path.join('logs', 'download.log'))
+        fh.setLevel(logging.INFO)
+        fh.setLevel(loglvl)
+        # Create Formatter
+        fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
+        fh.setFormatter(fmt)
     else:
-        fh = logging.FileHandler(os.path.join(logdir, 'download.log'))
+        fh = log_fh
 
-    fh.setLevel(logging.INFO)
-    if debug:
-        fh.setLevel(logging.DEBUG)
     fdsn_mass_logger.addHandler(fh)
-
-    if not verbose and not debug:
-        fdsn_mass_logger.propagate = False
-
-    # Create Formatter
-    fmt = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
-    fh.setFormatter(fmt)
 
     ####
     # Loop over each event
