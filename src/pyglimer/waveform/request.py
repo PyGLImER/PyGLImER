@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Monday, 21st June 2021 04:56:53 pm
+Last Modified: Monday, 5th July 2021 09:04:23 am
 '''
 import os
 from http.client import IncompleteRead
@@ -225,8 +225,12 @@ class Request(object):
 
         while not event_cat_done:
             try:
-                # Check length of request and split if longer than 20yrs.
-                a = 20*365.25*24*3600  # 20 years in seconds
+                # 05.07.2021: Shorten length of a to one year, which is a lot
+                # more robust
+                # :NOTE: perhaps it would be smart to save each year as a file?
+                # BUt then again, they have different requirements...
+                # Check length of request and split if longer than a year.
+                a = 365.25*24*3600  # one yr in seconds
                 if self.endtime-self.starttime > a:
                     # Request is too big, break it down ito several requests
 
@@ -263,6 +267,8 @@ class Request(object):
 
             except IncompleteRead:
                 # Server interrupted connection, just try again
+                # This usually happens with enormeous requests, we should
+                # reduce a
                 msg = "Server interrupted connection, restarting download..."
                 warn(msg, UserWarning)
                 print(msg)

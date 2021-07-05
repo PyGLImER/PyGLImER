@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Tuesday, 25th May 2021 05:50:31 pm
+Last Modified: Tuesday, 8th June 2021 04:43:31 pm
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -238,6 +238,40 @@ def plot_map_ccp(
         illummatrix: np.ndarray, profile: list or None,
         p_direct=True, outputfile=None, format='pdf', dpi=300, geology=False,
         title=None):
+    """
+        Create a map plot of the CCP Stack containing user-defined information.
+
+        Parameters
+        ----------
+        lat: tuple, optional
+            boundaries for the map view
+        lon: tuple, optional
+            boundaries for the map view
+        stations : bool, optional
+            Plot the station locations, by default False
+
+        illum : bool, optional
+            Plot bin location with colour depending on the depth-cumulative
+            illumination at bin b, by default False
+        profile : list or tupleor None, optional
+            Plot locations of cross sections into the plot. Information about
+            each cross section is given as a tuple (lon1, lon2, lat1, lat2),
+            several cross sections are given as a list of tuples in said
+            format, by default None.
+        p_direct : bool, optional
+            If true the list in profile decribes areas with coordinates of the
+            lower left and upper right corner, by default True
+        outputfile : str or None, optional
+            Save plot to file, by default None
+        format : str, optional
+            Format for the file to be saved as, by default 'pdf'
+        dpi : int, optional
+            DPI for none vector format plots, by default 300
+        geology : bool, optional
+            Plot a geological map. Requires internet connection
+        title : str, optional
+            Set title for plot.
+    """
     cl = 0.0
     set_mpl_params()
     plt.figure(figsize=(9, 4.5))
