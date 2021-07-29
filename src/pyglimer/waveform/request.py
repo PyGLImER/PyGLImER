@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Monday, 5th July 2021 01:16:31 pm
+Last Modified: Thursday, 29th July 2021 04:28:52 pm
 '''
 import os
 from http.client import IncompleteRead
@@ -338,7 +338,9 @@ class Request(object):
             network=self.network, station=self.station, log_fh=self.fh,
             loglvl=self.loglvl, verbose=verbose, saveasdf=False)
 
-    def preprocess(self, hc_filt: float or int or None = None):
+    def preprocess(
+        self, client: str = 'joblib',
+            hc_filt: float or int or None = None):
         """
         Preprocess an existing database. With parameters defined in self.
 
@@ -357,4 +359,4 @@ class Request(object):
             'hann', self.tz, self.ta, self.statloc, self.rawloc,
             self.preproloc, self.rfloc, self.deconmeth, hc_filt,
             netrestr=self.network, statrestr=self.station, logdir=self.logdir,
-            loglvl=self.loglvl)
+            loglvl=self.loglvl, client=client)
