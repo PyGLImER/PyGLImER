@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 29th July 2021 04:48:25 pm
+Last Modified: Thursday, 29th July 2021 05:28:21 pm
 '''
 
 # !/usr/bin/env python3d
@@ -144,13 +144,13 @@ def preprocess(
     # Returns generator object with evtcats with each 100 events
     evtcats = chunks(event_cat, n_split)
     for evtcat in evtcats:
-        if debug:
-            n_j = 1  # Only way to allow for redownload, maximum 3 requests
-            eh = True
-        else:
-            n_j = -1
+        # if logdebug:
+        #     n_j = 1  # Only way to allow for redownload, maximum 3 requests
+        #     eh = True
+        # else:
+        #     n_j = -1
         if client == 'joblib':
-            out = Parallel(n_jobs=n_j)(
+            out = Parallel(n_jobs=-1)(
                     delayed(__event_loop)(
                         phase, rot, pol, event, taper_perc,
                         taper_type, model, logger, rflogger, eh, tz,
