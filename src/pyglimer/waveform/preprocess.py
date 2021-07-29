@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 29th July 2021 04:27:45 pm
+Last Modified: Thursday, 29th July 2021 04:48:25 pm
 '''
 
 # !/usr/bin/env python3d
@@ -28,7 +28,6 @@ from obspy import read, read_inventory, Stream, UTCDateTime
 # from obspy.clients.iris import Client
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pathlib import Path
-from mpi4py import MPI
 
 # from pyglimer.waveform.preprocessh5 import preprocessh5
 from pyglimer import tmp
@@ -159,6 +158,7 @@ def preprocess(
                         hc_filt, netrestr, statrestr)
                     for event in evtcat)
         elif client == 'MPI':
+            from mpi4py import MPI
             comm = MPI.COMM_WORLD
             rank = comm.Get_rank()
             psize = comm.Get_size()
