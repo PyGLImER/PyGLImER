@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Wednesday, 11th August 2021 05:55:47 pm
+Last Modified: Wednesday, 11th August 2021 08:17:15 pm
 '''
 
 from glob import glob
@@ -62,6 +62,7 @@ class StreamLengthError(Exception):
 def preprocessh5(
     phase, rot, pol, taper_perc, model, taper_type, tz, ta, rawloc, rfloc,
         deconmeth, hc_filt, netrestr, statrestr, logger, rflogger):
+    os.makedirs(rfloc, exist_ok=True)
 
     # Open ds
     for f in glob(os.path.join(rawloc, '*.h5')):
@@ -77,14 +78,18 @@ def preprocessh5(
                 toa, rayp, rayp_s_deg, baz, distance = compute_toa(
                     evt, inv, phase, model)
                 st = ds.get_waveforms(
-                    net, stat, '*', '*', toa-tz, toa-ta, 'raw_recording')
-                if not len(st):
-                    print('no data found', code, net, stat)
-                    continue
-                rf.extend(__station_process__(
+                    net, stat, '*', '*', toa-tz, toa+ta, 'raw_recording')
+                rf_temp = __station_process__(
                     st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
                     ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
-                    distance, rayp, rayp_s_deg, toa))
+                    distance, rayp, rayp_s_deg, toa)
+                if rf_temp is not None:
+                    rf.append(rf_temp)
+                # Write regularly to not clutter too much into the RAM
+                if rf.count() >= 100:
+                    with RFDataBase(os.path.join(rfloc, code)) as rfdb:
+                        rfdb.add_rf(rf)
+                    rf.clear()
         with RFDataBase(os.path.join(rfloc, code)) as rfdb:
             rfdb.add_rf(rf)
 
@@ -117,12 +122,13 @@ def __station_process__(
     Processing that is equal for each waveform recorded on one station
     """
     # Change dtype
-    for tr in st:
-        np.require(tr.data, dtype=np.float64)
-        tr.stats.mseed.encoding = 'FLOAT64'
+    # for tr in st:
+    #     np.require(tr.data, dtype=np.float64)
+    #     tr.stats.mseed.encoding = 'FLOAT64'
 
     # Resample and Anti-Alias
-    st = resample_or_decimate(st, 10)
+    # is done before saving already
+    # st = resample_or_decimate(st, 10)
 
     # Remove repsonse
     st.attach_response(inv)
@@ -142,15 +148,14 @@ def __station_process__(
     ot_fiss = UTCDateTime(origin.time).format_fissures()
     ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]
 
-    st, crit, infodict = __rotate_qc(
-        phase, st, inv, net, stat, baz, distance, ot_fiss,
-        evt, origin.latitude, origin.longitude, origin.depth, rayp_s_deg, toa,
-        logger, infodict, tz, pol)
-    if hc_filt:
-        st.filter('lowpass', freq=hc_filt, zerophase=True, corners=2)
-
     # create RF
     try:
+        st, crit, infodict = __rotate_qc(
+            phase, st, inv, net, stat, baz, distance, ot_fiss, evt,
+            origin.latitude, origin.longitude, origin.depth, rayp_s_deg, toa,
+            logger, infodict, tz, pol)
+        if hc_filt:
+            st.filter('lowpass', freq=hc_filt, zerophase=True, corners=2)
         # Rotate to LQT or PSS
         if rot == "LQT":
             st, ia = rotate_LQT_min(st, phase)
@@ -182,10 +187,12 @@ def __station_process__(
 
     except SNRError as e:
         rflogger.info(e)
+        return None
 
     except Exception as e:
         print("RF creation failed")
         rflogger.exception([net, stat, ot_loc, e])
+        return None
 
     return RF
 
