@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Sunday, 9th May 2021 10:38:53 am
+Last Modified: Wednesday, 11th August 2021 05:17:17 pm
 
 
 !The file is split and has a second copyright disclaimer!
@@ -218,8 +218,9 @@ def createRF(st_in, phase, pol='v', onset=None,
 
     # create RFTrace object
     # create stats
-    stats = rfstats(phase, info=info, starttime=st[0].stats.starttime,
-                    event=event, station=station)
+    stats = rfstats(
+        phase, info=info, starttime=st[0].stats.starttime, event=event,
+        station=station)
     stats.update({"type": "time"})
     RF = RFTrace(trace=RF[0])
     RF.stats.update(stats)
@@ -1339,8 +1340,9 @@ def obj2stats(event=None, station=None):
     return stats
 
 
-def rfstats(phase, info=None, starttime=None, event=None, station=None,
-            tt_model="IASP91"):
+def rfstats(
+    phase, info=None, starttime=None, event=None, station=None,
+        tt_model="IASP91"):
     """
     Creates a stats object for a RFTrace object. Provide an info dic and
     starttime or event and station object. Latter will take longer since
@@ -1376,18 +1378,21 @@ def rfstats(phase, info=None, starttime=None, event=None, station=None,
     # read info file if provided
     if info and starttime:
         i = info["starttime"].index(starttime)
-        stats.update({'distance': info["rdelta"][i],
-                      'back_azimuth': info["rbaz"][i],
-                      'onset': info["onset"][i],
-                      'slowness': info["rayp_s_deg"][i],
-                      'phase': phase, 'event_latitude': info["evtlat"][i],
-                      'event_longitude': info["evtlon"][i],
-                      'event_depth': info["evt_depth"][i],
-                      'event_magnitude': info["magnitude"][i],
-                      'event_time': UTCDateTime(info["ot_ret"][i]),
-                      'station_latitude': info["statlat"],
-                      'station_longitude': info["statlon"],
-                      'station_elevation': info["statel"]})
+        stats.update({
+            'distance': info["rdelta"][i],
+            'back_azimuth': info["rbaz"][i],
+            'onset': info["onset"][i],
+            'slowness': info["rayp_s_deg"][i],
+            'phase': phase, 'event_latitude': info["evtlat"][i],
+            'pol': info['pol'],
+            'event_longitude': info["evtlon"][i],
+            'event_depth': info["evt_depth"][i],
+            'event_magnitude': info["magnitude"][i],
+            'event_time': UTCDateTime(info["ot_ret"][i]),
+            'station_latitude': info["statlat"],
+            'station_longitude': info["statlon"],
+            'station_elevation': info["statel"]
+        })
         if "evt_id" in info:
             stats.update({"event_id": info["evt_id"][i]})
     elif event is not None and station is not None:

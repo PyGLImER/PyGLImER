@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Thursday, 29th July 2021 04:28:52 pm
+Last Modified: Wednesday, 11th August 2021 05:25:46 pm
 '''
 import os
 from http.client import IncompleteRead
@@ -47,7 +47,8 @@ class Request(object):
         minmag: float or int = 5.5, event_coords: tuple = None,
         network: str = None, station: str = None,
         waveform_client: list = None, re_client=['IRIS'],
-            evtcat: Catalog = None, loglvl: int = logging.WARNING):
+        evtcat: Catalog = None, loglvl: int = logging.WARNING,
+            format: str = 'hdf5'):
         """
         Create object that is used to start the receiver function
         workflow.
@@ -140,6 +141,14 @@ class Request(object):
         # Allocate variables in self
         self.loglvl = loglvl
         tmp.re_client = re_client
+
+        if format.lower() == ('hdf5' or 'h5'):
+            self.h5 = True
+        elif format.lower() == ('sac' or 'mseed'):
+            self.h5 = False
+        else:
+            raise NotImplementedError(
+                'Output format %s is unknown.' % format)
 
         # Set velocity model
         self.model = TauPyModel('iasp91')
@@ -336,7 +345,7 @@ class Request(object):
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
             network=self.network, station=self.station, log_fh=self.fh,
-            loglvl=self.loglvl, verbose=verbose, saveasdf=False)
+            loglvl=self.loglvl, verbose=verbose, saveasdf=self.h5)
 
     def preprocess(
         self, client: str = 'joblib',
@@ -359,4 +368,4 @@ class Request(object):
             'hann', self.tz, self.ta, self.statloc, self.rawloc,
             self.preproloc, self.rfloc, self.deconmeth, hc_filt,
             netrestr=self.network, statrestr=self.station, logdir=self.logdir,
-            loglvl=self.loglvl, client=client)
+            loglvl=self.loglvl, client=client, saveasdf=self.h5)

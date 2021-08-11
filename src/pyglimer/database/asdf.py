@@ -11,7 +11,7 @@ Seismic Format (asdf).
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2021 03:24:30 pm
-Last Modified: Thursday, 25th March 2021 03:36:57 pm
+Last Modified: Wednesday, 4th August 2021 01:55:49 pm
 '''
 
 
@@ -19,15 +19,46 @@ import os
 from warnings import warn
 
 import obspy
-from obspy import read, read_inventory
+from obspy import read, read_inventory, UTCDateTime
 from pyasdf import ASDFDataSet
 
-# def rewrite(folder:str, outputfile:str):
+from pyglimer.utils.signalproc import resample_or_decimate
+from pyglimer.utils.roundhalf import roundhalf
+
+
+def rewrite_to_hdf5(cat: obspy.Catalog, rawfolder: str, statloc: str):
+    """
+    Converts an existing miniseed waveform database to hierachal data format
+    (hdf5).
+
+    :param cat: The event catalogue that was used to download the raw data.
+    :type cat: obspy.Catalog
+    :param rawfolder: The folder that the raw data is saved in - ending with
+        the phase code (i.e., waveforms/raw/P)
+    :type rawfolder: str
+    :param statloc: Location that the station xmls are saved in.
+    :type statloc: str
+    """
+    for event in cat:
+        origin_time = event.origins[0].time
+        ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
+        evtlat = event.origins[0].latitude
+        evtlon = event.origins[0].longitude
+        evtlat_loc = str(roundhalf(evtlat))
+        evtlon_loc = str(roundhalf(evtlon))
+        evtdir = os.path.join(
+            rawfolder, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
+        if not os.path.isdir(evtdir):
+            continue
+        if not os.listdir(evtdir):
+            os.rmdir(evtdir)
+            continue
+        writeraw(event, evtdir, statloc, False, True)
 
 
 def writeraw(
     event: obspy.core.event.event.Event, rawfolder: str, statloc: str,
-        verbose: bool):
+        verbose: bool, resample: bool):
     """
     Write the downloaded miniseed, event, and stationxmls to a single asdf
     file.
@@ -40,37 +71,37 @@ def writeraw(
     :type statloc: str
     :param verbose: show warnings?
     :type verbose: bool
+    :param resample: Resample/Decimate the waveforms to 10Hz before writing.
+        Includes an AA-filter.
+    :type resample: bool
     """
     # Folder to save asdf to
     outfolder = os.path.join(rawfolder, os.pardir)
 
+    # 2021/08/03
+    # Let's create one file per station
+    for fi in os.listdir(rawfolder):
+        code = '.'.join(fi.split('.')[:-1])
+        fname = code + '.h5'
+        statxml = read_inventory(os.path.join(statloc, '%s.xml' % code))
+        st = read(os.path.join(rawfolder, fi))
     # Start out by adding the event, which later will be associated to
     # each of the waveforms
-    with ASDFDataSet(os.path.join(outfolder, 'raw.h5')) as ds:
-        # Retrieve eventid - not the most elgant way, but works
-        evtid = event.resource_id
-        try:
-            ds.add_quakeml(event)
-        except ValueError:
-            if verbose:
-                warn(
-                    'Event with event-id %s already in DB, skipping...'
-                    % str(evtid), UserWarning)
-            else:
-                pass
+        if resample:
+            st.filter('lowpass_cheby_2', freq=4, maxorder=12)
+            st = resample_or_decimate(st, 10, filter=False)
 
-    # Read all the waveforms associated to this event
-    try:
-        st = read(os.path.join(rawfolder, '*.mseed'))
-        # Write the waveforms to the asdf
-        with ASDFDataSet(os.path.join(outfolder, 'raw.h5')) as ds:
+        with ASDFDataSet(os.path.join(outfolder, fname)) as ds:
+            # Retrieve eventid - not the most elgant way, but works
+            evtid = event.resource_id
+            try:
+                ds.add_quakeml(event)
+            except ValueError:
+                if verbose:
+                    warn(
+                        'Event with event-id %s already in DB, skipping...'
+                        % str(evtid), UserWarning)
+                else:
+                    pass
             ds.add_waveforms(st, tag='raw_recording', event_id=evtid)
-
-        # Lastly, we will want to save the stationxmls
-        statxml = read_inventory(os.path.join(statloc, '*.xml'))
-        with ASDFDataSet(os.path.join(outfolder, 'raw.h5')) as ds:
             ds.add_stationxml(statxml)
-    except Exception:
-        # For some cases, there will be events without
-        # waveforms associated to them
-        pass

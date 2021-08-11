@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 29th July 2021 05:28:21 pm
+Last Modified: Wednesday, 11th August 2021 05:21:47 pm
 '''
 
 # !/usr/bin/env python3d
@@ -29,7 +29,7 @@ from obspy import read, read_inventory, Stream, UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pathlib import Path
 
-# from pyglimer.waveform.preprocessh5 import preprocessh5
+from pyglimer.waveform.preprocessh5 import preprocessh5
 from pyglimer import tmp
 from pyglimer.utils.signalproc import resample_or_decimate
 from .errorhandler import redownload, redownload_statxml, \
@@ -119,11 +119,12 @@ def preprocess(
 
     #########
 
-    # if saveasdf:
-    #     preprocessh5(
-    #         phase, rot, pol, taper_perc, event_cat, model, taper_type, tz, ta,
-    #         rawloc, preproloc, rfloc, deconmeth, hc_filt, netrestr,
-    #         statrestr, logger, rflogger, debug)
+    if saveasdf:
+        preprocessh5(
+            phase, rot, pol, taper_perc, model, taper_type, tz, ta,
+            rawloc, rfloc, deconmeth, hc_filt, netrestr,
+            statrestr, logger, rflogger)
+        return
     # else:
     # Here, we work with all available cores to speed things up
     # Split up event catalogue to mitigate the danger of data loss
@@ -144,11 +145,7 @@ def preprocess(
     # Returns generator object with evtcats with each 100 events
     evtcats = chunks(event_cat, n_split)
     for evtcat in evtcats:
-        # if logdebug:
-        #     n_j = 1  # Only way to allow for redownload, maximum 3 requests
-        #     eh = True
-        # else:
-        #     n_j = -1
+
         if client == 'joblib':
             out = Parallel(n_jobs=-1)(
                     delayed(__event_loop)(
@@ -430,11 +427,6 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
         # 21.04.2020 Second highcut filter
         if hc_filt:
             st.filter('lowpass', freq=hc_filt, zerophase=True, corners=2)
-        # if phase == "P":
-        #     st.filter('lowpass', freq=1.5, zerophase=True, corners=2)
-        # elif phase == 'S':
-        # change for Kind(2015) to frequ=.125 freq=0.175Hz
-        #     st.filter('lowpass', freq=0.25, zerophase=True, corners=2)
 
         start = time.time()
 
@@ -448,15 +440,6 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
                     crit = False
                     raise SNRError("""The estimated incidence angle is
                                    unrealistic with """ + str(ia) + 'degree.')
-
-            # if rot == "LQT":
-            #     st, b = rotate_LQT(st, phase)
-            #     # addional QC
-            #     if b > 0.75 or b < 1.5:
-            #         crit = False
-            #         raise SNRError("""The energy ratio between Q and L
-            #                        at theoretical arrival is too close
-            #                        to 1 with """ + str(b) + '.')
 
             elif rot == "PSS":
                 _, _, st = rotate_PSV(

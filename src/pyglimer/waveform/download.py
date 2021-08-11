@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Monday, 5th July 2021 11:58:01 am
+Last Modified: Wednesday, 4th August 2021 10:37:13 am
 '''
 
 # !/usr/bin/env python3
@@ -211,7 +211,7 @@ def downloadwav(
 
         # 2021.02.15 Here, we write everything to asdf
         if saveasdf:
-            writeraw(event, tmp.folder, statloc, verbose)
+            writeraw(event, tmp.folder, statloc, verbose, True)
 
             # If that works, we will be deleting the cached mseeds here
             shutil.rmtree(tmp.folder)

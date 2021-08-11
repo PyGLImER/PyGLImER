@@ -12,7 +12,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Sunday, 20th October 2019 10:31:03 am
-Last Modified: Tuesday, 25th May 2021 05:05:10 pm
+Last Modified: Wednesday, 11th August 2021 10:51:01 am
 '''
 
 import numpy as np
@@ -39,7 +39,10 @@ def resample_or_decimate(
 
     # Chosen this filter design as it's exactly the same as
     # obspy.Stream.decimate uses
-    if filter:
+    # Just for RFs to avoid instabilities
+    if filter and srn == 10:
+        data.filter('lowpass_cheby_2', freq=4, maxorder=12)
+    elif filter:
         freq = sr * 0.5 / float(sr/srn)
         data.filter('lowpass_cheby_2', freq=freq, maxorder=12)
 
