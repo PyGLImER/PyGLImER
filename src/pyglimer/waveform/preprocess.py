@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Wednesday, 11th August 2021 05:21:47 pm
+Last Modified: Monday, 16th August 2021 12:39:58 pm
 '''
 
 # !/usr/bin/env python3d
@@ -28,6 +28,8 @@ from obspy import read, read_inventory, Stream, UTCDateTime
 # from obspy.clients.iris import Client
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pathlib import Path
+
+from tqdm.std import tqdm
 
 from pyglimer.waveform.preprocessh5 import preprocessh5
 from pyglimer import tmp
@@ -123,7 +125,7 @@ def preprocess(
         preprocessh5(
             phase, rot, pol, taper_perc, model, taper_type, tz, ta,
             rawloc, rfloc, deconmeth, hc_filt, netrestr,
-            statrestr, logger, rflogger)
+            statrestr, logger, rflogger, client)
         return
     # else:
     # Here, we work with all available cores to speed things up
@@ -146,15 +148,15 @@ def preprocess(
     evtcats = chunks(event_cat, n_split)
     for evtcat in evtcats:
 
-        if client == 'joblib':
+        if client.lower() == 'joblib':
             out = Parallel(n_jobs=-1)(
                     delayed(__event_loop)(
                         phase, rot, pol, event, taper_perc,
                         taper_type, model, logger, rflogger, eh, tz,
                         ta, statloc, rawloc, preproloc, rfloc, deconmeth,
                         hc_filt, netrestr, statrestr)
-                    for event in evtcat)
-        elif client == 'MPI':
+                    for event in tqdm(evtcat))
+        elif client.lower() == 'mpi':
             from mpi4py import MPI
             comm = MPI.COMM_WORLD
             rank = comm.Get_rank()
@@ -163,7 +165,7 @@ def preprocess(
             pmap = pmap.astype(np.int32)
             ind = pmap == rank
             ind = np.arange(len(evtcat))[ind]
-            for ii in ind:
+            for ii in tqdm(ind):
                 __event_loop(
                     phase, rot, pol, evtcat[ii], taper_perc, taper_type,
                     model, logger, rflogger, eh, tz, ta, statloc, rawloc,
@@ -593,25 +595,7 @@ def __rotate_qc(phase, st, station_inv, network, station, baz,
             raise ValueError(
                 ["No matching response file found for", network, station])
 
-    # This step is superfluous simulate/remvove_response does that as well
-    # st.remove_sensitivity(inventory=station_inv)
-
-    # simulate for another instrument like harvard (a stable good one)
-    # 19/02/21 Removing this and rather remove the response entirely
-    # st.simulate(paz_remove=None, paz_simulate=paz_sim,
-    #             simulate_sensitivity=True)
-
-    # ROTATION
-    # try:
-    # If channeles weren't properly aligned
     st.rotate(method='->ZNE', inventory=station_inv)
-    # Error: The directions are not linearly independent,
-    # there doesn't seem to be a fix for this
-    # except ValueError:
-    # st = NotLinearlyIndependentHandler(st, network, station,
-    #                                    st[0].stats.starttime,
-    #                                    st[0].stats.endtime,
-    #                                    station_inv, paz_sim)
 
     st.rotate(method='NE->RT', inventory=station_inv,
               back_azimuth=baz)

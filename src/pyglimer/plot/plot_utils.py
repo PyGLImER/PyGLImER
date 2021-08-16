@@ -200,13 +200,11 @@ def plot_catalog(catalog):
     cbar.ax.set_ylabel(r"       $M_w$", rotation=0)
 
 
-def plot_single_rf(rf, tlim: list or tuple or None = None,
-                   ylim: list or tuple or None = None,
-                   depth: np.ndarray or None = None,
-                   ax: plt.Axes = None, outputdir: str = None,
-                   pre_fix: str = None, post_fix: str = None,
-                   format: str = None,
-                   clean: bool = False):
+def plot_single_rf(
+    rf, tlim: list or tuple or None = None, ylim: list or tuple or None = None,
+    depth: np.ndarray or None = None, ax: plt.Axes = None,
+    outputdir: str = None, pre_fix: str = None,
+        post_fix: str = None, format: str = 'pdf', clean: bool = False):
     """Creates plot of a single receiver function
 
     Parameters

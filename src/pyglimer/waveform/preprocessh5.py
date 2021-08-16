@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Wednesday, 11th August 2021 08:17:15 pm
+Last Modified: Monday, 16th August 2021 01:09:26 pm
 '''
 
 from glob import glob
@@ -26,6 +26,7 @@ import obspy
 from obspy import Stream, UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pyasdf import ASDFDataSet
+from tqdm.std import tqdm
 
 from pyglimer.utils.signalproc import resample_or_decimate
 from pyglimer.database.rfh5 import RFDataBase
@@ -60,43 +61,145 @@ class StreamLengthError(Exception):
 
 
 def preprocessh5(
-    phase, rot, pol, taper_perc, model, taper_type, tz, ta, rawloc, rfloc,
-        deconmeth, hc_filt, netrestr, statrestr, logger, rflogger):
+    phase: str, rot: str, pol: str, taper_perc: float,
+    model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
+    rawloc: str, rfloc: str, deconmeth: str, hc_filt: float, netrestr: str,
+    statrestr: str, logger: logging.Logger, rflogger: logging.Logger,
+        client: str):
+    """
+    Preprocess files saved in hdf5 (pyasdf) format. Will save the computed
+    receiver functions in hdf5 format as well.
+
+    Processing is done via a multiprocessing backend (either joblb or mpi).
+
+    :param phase: The Teleseismic phase to consider
+    :type phase: str
+    :param rot: The Coordinate system that the seismogram should be rotated to.
+    :type rot: str
+    :param pol: Polarisationfor PRFs. Can be either 'v' or 'h' (vertical or 
+        horizontal).
+    :type pol: str
+    :param taper_perc: Percentage for the pre deconvolution taper.
+    :type taper_perc: float
+    :param model: TauPyModel to be used for travel time computations
+    :type model: obspy.taup.TauPyModel
+    :param taper_type: type of taper (see obspy)
+    :type taper_type: str
+    :param tz: Length of time window before theoretical arrival (seconds) 
+    :type tz: int
+    :param ta: Length of time window after theoretical arrival (seconds) 
+    :type ta: int
+    :param rawloc: Directory, in which the raw data is saved.
+    :type rawloc: str
+    :param rfloc: Directory to save the receiver functions in.
+    :type rfloc: str
+    :param deconmeth: Deconvolution method to use.
+    :type deconmeth: str
+    :param hc_filt: Second High-Cut filter (optional, can be None or False)
+    :type hc_filt: float
+    :param netrestr: Network restrictions
+    :type netrestr: str
+    :param statrestr: Station restrictions
+    :type statrestr: str
+    :param logger: 
+    :type logger: logging.Logger
+    :param rflogger: [description]
+    :type rflogger: logging.Logger
+    :param client: Multiprocessing Backend to use
+    :type client: str
+    :raises NotImplementedError: For uknowns multiprocessing backends.
+    """
     os.makedirs(rfloc, exist_ok=True)
 
     # Open ds
-    for f in glob(os.path.join(rawloc, '*.h5')):
-        # Here we do multicore processing for each station rather than for
-        # each event
-        net, stat, _ = os.path.basename(f).split('.')
-        code = '%s.%s' % (net, stat)
-        with ASDFDataSet(f, mode='r') as ds:
-            # get station inventory
-            inv = ds.waveforms[code].StationXML
-            rf = RFStream()
-            for evt in ds.events:
-                toa, rayp, rayp_s_deg, baz, distance = compute_toa(
-                    evt, inv, phase, model)
-                st = ds.get_waveforms(
-                    net, stat, '*', '*', toa-tz, toa+ta, 'raw_recording')
-                rf_temp = __station_process__(
-                    st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
-                    ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
-                    distance, rayp, rayp_s_deg, toa)
-                if rf_temp is not None:
-                    rf.append(rf_temp)
-                # Write regularly to not clutter too much into the RAM
-                if rf.count() >= 100:
-                    with RFDataBase(os.path.join(rfloc, code)) as rfdb:
-                        rfdb.add_rf(rf)
-                    rf.clear()
-        with RFDataBase(os.path.join(rfloc, code)) as rfdb:
-            rfdb.add_rf(rf)
+    fpattern = '%s.%s.h5' % (netrestr or '*', statrestr or '*')
+    flist = list(glob(os.path.join(rawloc, fpattern)))
+    if client.lower() == 'mpi':
+        from mpi4py import MPI
+        comm = MPI.COMM_WORLD
+        rank = comm.Get_rank()
+        psize = comm.Get_size()
+        pmap = (np.arange(len(flist))*psize)/len(flist)
+        pmap = pmap.astype(np.int32)
+        ind = pmap == rank
+        ind = np.arange(len(flist))[ind]
+        for ii in tqdm(ind):
+            _preprocessh5_single(
+                phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
+                deconmeth, hc_filt, netrestr, statrestr, logger, rflogger,
+                flist[ii]
+            )
+    elif client.lower() == 'joblib':
+        Parallel(n_jobs=-1)(delayed(_preprocessh5_single)(
+            phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
+            deconmeth, hc_filt, netrestr, statrestr, logger, rflogger,
+            f) for f in tqdm(flist))
+    else:
+        raise NotImplementedError(
+            'Unknown multiprocessing backend %s.' % client
+        )
+
+
+def _preprocessh5_single(
+    phase: str, rot: str, pol: str, taper_perc: float,
+    model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
+    rfloc: str, deconmeth: str, hc_filt: float, netrestr: str,
+    statrestr: str, logger: logging.Logger, rflogger: logging.Logger,
+        hdf5_file: str):
+    """
+    Single core processing of one single hdf5 file.
+
+    .. warning:: Should not be called use
+        :func:`~seismic.waveform.preprocessh5.preprocess_h5`!
+    """
+    f = hdf5_file
+    net, stat, _ = os.path.basename(f).split('.')
+    code = '%s.%s' % (net, stat)
+    with ASDFDataSet(f, mode='r') as ds:
+        # get station inventory
+        inv = ds.waveforms[code].StationXML
+        rf = RFStream()
+        for evt in tqdm(ds.events):
+            toa, rayp, rayp_s_deg, baz, distance = compute_toa(
+                evt, inv, phase, model)
+            st = ds.get_waveforms(
+                net, stat, '*', '*', toa-tz, toa+ta, 'raw_recording')
+            rf_temp = __station_process__(
+                st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
+                ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
+                distance, rayp, rayp_s_deg, toa)
+            if rf_temp is not None:
+                rf.append(rf_temp)
+            # Write regularly to not clutter too much into the RAM
+            if rf.count() >= 100:
+                with RFDataBase(os.path.join(rfloc, code)) as rfdb:
+                    rfdb.add_rf(rf)
+                rf.clear()
+    with RFDataBase(os.path.join(rfloc, code)) as rfdb:
+        rfdb.add_rf(rf)
 
 
 def compute_toa(
     evt: obspy.core.event.Event, inv: obspy.core.inventory.inventory.Inventory,
-        phase: str, model) -> Tuple[UTCDateTime, float, float, float]:
+    phase: str, model: obspy.taup.TauPyModel) -> Tuple[
+        UTCDateTime, float, float, float]:
+    """
+    Compute time of theoretical arrival for teleseismic events and a given
+    teleseismic phase at the provided station.
+
+    :param evt: Event to compute the arrival for.
+    :type evt: obspy.core.event.Event
+    :param inv: Inventory object holding the information for the station
+    :type inv: obspy.core.inventory.inventory.Inventory
+    :param phase: The teleseismic phase to consider.
+    :type phase: str
+    :param model: Taupymodel to use
+    :type model: obspy.taup.TauPyModel
+    :return: A Tuple holding: [the time of theoretical arrival (UTC),
+        the apparent slowness in s/km, the ray parameter in s/deg,
+        the back azimuth, the distance between station and event in deg]
+    :rtype: Tuple[UTCDateTime, float, float, float]
+    """
     origin = (evt.preferred_origin() or evt.origins[0])
     distance, baz, _ = gps2dist_azimuth(
         inv[0][0].latitude, inv[0][0].longitude, origin.latitude,
@@ -121,15 +224,6 @@ def __station_process__(
     """
     Processing that is equal for each waveform recorded on one station
     """
-    # Change dtype
-    # for tr in st:
-    #     np.require(tr.data, dtype=np.float64)
-    #     tr.stats.mseed.encoding = 'FLOAT64'
-
-    # Resample and Anti-Alias
-    # is done before saving already
-    # st = resample_or_decimate(st, 10)
-
     # Remove repsonse
     st.attach_response(inv)
     st.remove_response()

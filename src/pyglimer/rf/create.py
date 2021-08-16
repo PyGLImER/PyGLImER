@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Wednesday, 11th August 2021 05:17:17 pm
+Last Modified: Monday, 16th August 2021 01:18:24 pm
 
 
 !The file is split and has a second copyright disclaimer!
@@ -92,10 +92,13 @@ def createRF(st_in, phase, pol='v', onset=None,
     """
 
     pol = pol.lower()
+    if pol not in ('h', 'v'):
+        raise NotImplementedError('Unknown polarisation %s.' % pol)
 
     if info:
         ii = info['starttime'].index(st_in[0].stats.starttime)
         shift = info['onset'][ii] - st_in[0].stats.starttime
+        info['pol'] = pol
 
     elif onset:
         shift = onset - st_in[0].stats.starttime
@@ -213,7 +216,7 @@ def createRF(st_in, phase, pol='v', onset=None,
         # I could probably create another QC here and check if fact is
         # the maximum of RF[0].data or even close to the maximum. Let's try:
         if abs(fact) < abs(lrf).max()/2:
-            raise ValueError('The noise level of the created receiver funciton\
+            raise ValueError('The noise level of the created receiver function\
                 is too high.')
 
     # create RFTrace object
@@ -697,13 +700,12 @@ class RFStream(Stream):
                             "pp_longitude": None, 'npts': len(stack)})
         return z, stack, RF_mo
 
-    def plot(self, channel: str = "PRF",
-             lim: list or tuple or None = None,
-             epilimits: list or tuple or None = None,
-             scalingfactor: float = 2.0, ax: plt.Axes = None,
-             line: bool = True,
-             linewidth: float = 0.25, outputdir: str or None = None,
-             title: str or None = None, show: bool = True):
+    def plot(
+        self, channel: str = "PRF", lim: list or tuple or None = None,
+        epilimits: list or tuple or None = None, scalingfactor: float = 2.0,
+        ax: plt.Axes = None, line: bool = True, linewidth: float = 0.25,
+        outputdir: str or None = None, title: str or None = None,
+            show: bool = True, format: str = 'pdf'):
         """Creates plot of a receiver function section as a function
         of epicentral distance or single plot if len(RFStream)==1.
 
@@ -746,12 +748,12 @@ class RFStream(Stream):
         if self.count() == 1:
             # Do single plot
             ax = plot_single_rf(
-                self[0], tlim=lim, ax=ax, outputdir=outputdir)
+                self[0], tlim=lim, ax=ax, outputdir=outputdir, format=format)
         else:
             ax = plot_section(
                 self, timelimits=lim, epilimits=epilimits,
                 scalingfactor=scalingfactor, line=line, linewidth=linewidth,
-                ax=ax, outputdir=outputdir, channel=channel)
+                ax=ax, outputdir=outputdir, channel=channel, format=format)
         return ax
 
     def plot_distribution(self, nbins=50, phase="P",
@@ -1277,10 +1279,10 @@ class RFTrace(Trace):
             st.pp_longitude.append(lon2)
         return delta2
 
-    def plot(self, lim: list or tuple or None = None,
-             depth: np.ndarray or None = None,
-             ax: plt.Axes = None, outputdir: str = None,
-             clean: bool = False):
+    def plot(
+        self, lim: list or tuple or None = None,
+        depth: np.ndarray or None = None, ax: plt.Axes = None,
+            outputdir: str = None, format: str = 'pdf', clean: bool = False):
         """Creates plot of a single receiver function
 
         Parameters
@@ -1306,7 +1308,8 @@ class RFTrace(Trace):
         ax : `matplotlib.pyplot.Axes`
         """
         ax = plot_single_rf(
-            self, lim, depth=depth, ax=ax, outputdir=outputdir, clean=clean)
+            self, lim, depth=depth, ax=ax, outputdir=outputdir, clean=clean,
+            format=format)
         return ax
 
     def write(self, filename, format, **kwargs):

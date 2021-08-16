@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 4th August 2021 10:37:13 am
+Last Modified: Monday, 16th August 2021 11:47:32 am
 '''
 
 # !/usr/bin/env python3
@@ -95,8 +95,6 @@ def downloadwav(
 
     """
 
-    if saveasdf:
-        raise NotImplementedError("Will be implemented in a future version.")
     # needed to check whether data is already in the asdf
     global asdfsave
     asdfsave = saveasdf
@@ -286,7 +284,8 @@ def wav_in_asdf(
     network: str, station: str, location: str, channel: str,
         starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
     """Is the waveform already in the asdf database?"""
-    asdf_file = os.path.join(tmp.folder, os.pardir, 'raw.h5')
+    asdf_file = os.path.join(tmp.folder, os.pardir, '%s.%s.h5' % (
+        network, station))
 
     # Change precision of start and endtime
     # Pyasdf rounds with a precision of 1 for the starttime and 0 for endtime..
