@@ -7,14 +7,14 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Wednesday, 11th August 2021 05:08:16 pm
+Last Modified: Monday, 16th August 2021 05:43:16 pm
 '''
 
 import ast
 import fnmatch
 import os
 import re
-from typing import List
+from typing import Iterable, List, Tuple
 import warnings
 from copy import deepcopy
 
@@ -178,6 +178,34 @@ omitted." % path, category=UserWarning)
                 path = '/'.join(path.split('/')[:-1])
         return all_traces_recursive(self[path], RFStream(), pattern)
 
+    def get_coords(
+        self, network: str, station: str, phase: str = None) -> Tuple[
+            float, float, float]:
+
+        # This might look confusing but it's actually not looping but just
+        # choosing the first available file
+        for tag in self.keys():
+            for ph in self[tag][network][station].keys():
+                phi = phase or ph
+                for pol in self[tag][network][station][phi].keys():
+                    for t in self[tag][network][station][phi][pol].keys():
+                        rf = self.get_data(
+                            network, station, phi, t, tag, pol)
+                        if not rf.count():
+                            continue
+                        return (
+                            rf[0].stats.station_latitude,
+                            rf[0].stats.station_longitude,
+                            rf[0].stats.station_elevation)
+        # No data?
+        return None, None, None
+
+    def walk(
+        self, tag: str, network: str, station: str, phase: str,
+            pol: str = 'v') -> Iterable[RFTrace]:
+        for v in self[tag][network][station][phase][pol].values():
+            yield RFTrace(np.array(v), header=read_hdf5_header(v))
+
 
 class RFDataBase(object):
     """
@@ -207,17 +235,17 @@ class RFDataBase(object):
 
             **Access only through a context manager (see below):**
 
-            >>> with CorrelationDataBase(myfile.h5) as cdb:
-            >>>     type(cdb)  # This is a DBHandler
-            <class 'seismic.db.corr_hdf5.DBHandler'>
+            >>> with RFDataBase(myfile.h5) as rfdb:
+            >>>     type(rfdb)  # This is a DBHandler
+            <class 'pyglimer.database.rfh5.DBHandler'>
 
         Example::
 
-            >>> with CorrelationDataBase(
-                        '/path/to/db/XN-XN.NEP06-NEP06.h5') as cdb:
+            >>> with RFDataBase(
+                        '/path/to/db/XN.NEP06.h5') as rfdb:
             >>>     # find the available tags for existing db
-            >>>     print(list(cdb.keys()))
-            ['co', 'recombined', 'stack_86398', 'subdivision']
+            >>>     print(list(rfdb.keys()))
+            ['rf', 'rfstack']
             >>>     # find available channels with tag subdivision
             >>>     print(cdb.get_available_channels(
             >>>         'subdivision', 'XN-XN', 'NEP06-NEP06'))

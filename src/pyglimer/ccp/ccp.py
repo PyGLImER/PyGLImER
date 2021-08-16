@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Wednesday, 28th April 2021 05:04:08 pm
+Last Modified: Monday, 16th August 2021 06:13:12 pm
 '''
 
 # !/usr/bin/env python3
@@ -25,9 +25,10 @@ import logging
 import time
 
 from copy import deepcopy
+from typing import List, Tuple
 from joblib import Parallel, delayed, cpu_count
 import numpy as np
-from scipy.spatial import cKDTree
+from scipy.spatial import cKDTree, kdtree
 from scipy.interpolate import RegularGridInterpolator
 
 
@@ -47,10 +48,11 @@ from pyglimer.ccp.compute.bin import BinGrid
 from pyglimer.ccp.plot_utils.plot_bins import plot_bins
 from pyglimer.ccp.plot_utils.plot_cross_section import plot_cross_section
 from pyglimer.constants import R_EARTH, DEG2KM, KM2DEG
+from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.database.stations import StationDB
 from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
 from pyglimer.plot.plot_volume import VolumePlot, VolumeExploration
-from pyglimer.rf.create import read_rf
+from pyglimer.rf.create import RFTrace, read_rf
 from pyglimer.rf.moveout import res, maxz, maxzm
 from pyglimer.utils.createvmodel import ComplexModel
 from pyglimer.utils.geo_utils import epi2euc, geo2cart
@@ -332,9 +334,8 @@ class CCPStack(object):
         return plot_cross_section(self, *args, **kwargs)
 
     def compute_stack(
-        self, vel_model: str, rfloc: str = 'output/waveforms/RF',
-        statloc: str = 'output/stations',
-        preproloc: str = 'output/waveforms/preprocessed',
+        self, vel_model: str, rfloc: str,
+        in_format = 'hdf5', preproloc: str = None,
         network: str or list or None = None,
         station: str or list or None = None, geocoords: tuple or None = None,
         pattern: list or None = None, save: str or bool = False,
@@ -462,7 +463,8 @@ class CCPStack(object):
             # create empty lists for station latitude and longitude
             lat = (geocoords[0], geocoords[1])
             lon = (geocoords[2], geocoords[3])
-            db = StationDB(preproloc, phase=self.bingrid.phase, use_old=False)
+            db = StationDB(
+                preproloc or folder, phase=self.bingrid.phase, use_old=False)
             net, stat = db.find_stations(lat, lon, phase=self.bingrid.phase)
             pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
             # Clear memory
@@ -470,10 +472,10 @@ class CCPStack(object):
 
         if not pattern:
             pattern = []  # List of input constraints
-            if not network and not station:  # global
-                pattern.append('*.sac')
+            if not (network and station):
+                pattern.append('*.%s' % in_format)
         else:
-            pattern = ["*{}.*.sac".format(_a) for _a in pattern]
+            pattern = ["*{}.*.%s".format(_a) % in_format for _a in pattern]
 
         streams = []  # List of files filtered for input criteria
         infiles = []  # List of all files in folder
@@ -493,22 +495,25 @@ class CCPStack(object):
                     if type(station) == list:
                         for net in network:
                             for stat in station:
-                                pattern.append('*%s.%s.*.sac' % (net, stat))
+                                pattern.append('*%s.%s.*.%s' % (
+                                    net, stat, in_format))
                     else:
                         raise ValueError("""The combination of network
                                          and station are invalid""")
                 else:
                     for net in network:
-                        pattern.append('*%s.*.sac' % (net))
+                        pattern.append('*%s.*.%s' % (net, in_format))
             elif type(network) == str:
                 if station:
                     if type(station) == str:
-                        pattern.append('*%s.%s.*.sac' % (network, station))
+                        pattern.append('*%s.%s.*.%s' % (
+                            network, station, in_format))
                     elif type(station) == list:
                         for stat in station:
-                            pattern.append('*%s.%s.*.sac' % (net, stat))
+                            pattern.append('*%s.%s.*.%s' % (
+                                net, stat, in_format))
                 else:
-                    pattern.append('*%s.*.sac' % (network))
+                    pattern.append('*%s.*.%s' % (network, in_format))
         elif station:
             raise ValueError("""You have to provide both network and station
                              code if you want to filter by station""")
@@ -524,18 +529,134 @@ class CCPStack(object):
         self.N = self.N + len(streams)
 
         self.logger.info('Number of receiver functions used: '+str(self.N))
-        print('Number of receiver functions used: '+str(self.N))
 
+        # Actual CCP stack
+        # Note loki does mess up the output and threads is slower than
+        # using a single core
+
+        # The test data needs to be filtered
+        if network == 'matlab':
+            filt = [.03, 1.5]  # bandpass frequencies
+
+        # Define grid boundaries for 3D RT
+        latb = (self.coords[0].min(), self.coords[0].max())
+        lonb = (self.coords[1].min(), self.coords[1].max())  
+
+        if in_format.lower() == 'hdf5':
+            for f in streams:
+                self._create_ccp_from_hdf5_mc(
+                    streams, multiple, append_pp, n_closest_points, vel_model,
+                    latb, lonb, filt, endi)
+
+        elif in_format.lower() == 'sac':
+            self._create_ccp_from_sac(
+                streams, multiple, append_pp, n_closest_points, vel_model,
+                latb, lonb, filt, endi)
+        else:
+            raise NotImplementedError(
+                'Unknown input format %s.' % in_format
+            )
+
+        end = time.time()
+        self.logger.info("Stacking finished.")
+        self.logger.info(dt_string(end-start))
+        self.conclude_ccp()
+
+        # save file
+        if save:
+            self.write(filename=save)
+
+    def _create_ccp_from_hdf5_mc(
+        self, streams: List[str], multiple: bool, append_pp: bool,
+        n_closest_points: int, vel_model: str, latb: Tuple[float, float],
+            lonb: Tuple[float, float], filt: Tuple[float, float], endi):
+        # note that those are actually files - confusing variable name
+        out = Parallel(n_jobs=-1)(  # prefer='processes'
+                delayed(self._create_ccp_from_hdf5)(
+                    st, append_pp, n_closest_points, vel_model,
+                    latb, lonb, filt, multiple)
+                for st in tqdm(streams))
+
+        # Awful way to solve it, but the best I could find
+        if multiple:
+            for kk, jj, datal, datalm1, datalm2 in out:
+                for k, j, data, datam1, datam2 in zip(
+                        kk, jj, datal, datalm1, datalm2):
+                    self.bins[k, j] = self.bins[k, j] + data[j]
+
+                    # hit counter + 1
+                    self.illum[k, j] = self.illum[k, j] + 1
+
+                    # multiples
+                    iii = np.where(j <= endi-1)[0]
+                    jm = j[iii]
+                    km = k[iii]
+                    try:
+                        self.bins_m1[
+                            km, jm] = self.bins_m1[km, jm] + datam1[jm]
+                        self.bins_m2[
+                            km, jm] = self.bins_m1[km, jm] + datam1[jm]
+                        self.illumm[km, jm] = self.illum[km, jm] + 1
+                    except IndexError as e:
+                        if not len(datam1) or not len(datam2):
+                            continue
+                        else:
+                            raise IndexError(e)
+
+        else:
+            for kk, jj, datal, _, _ in out:
+                for k, j, data in zip(
+                        kk, jj, datal):
+                    self.bins[k, j] = self.bins[k, j] + data[j]
+
+                    # hit counter + 1
+                    self.illum[k, j] = self.illum[k, j] + 1
+
+    def _create_ccp_from_hdf5(
+        self, f: str, multiple: bool, append_pp: bool,
+        n_closest_points: int, vel_model: str, latb: Tuple[float, float],
+            lonb: Tuple[float, float], filt: Tuple[float, float]):
+        # note that those are actually files - confusing variable name
+        net, stat, _ = os.path.basename(f).split('.')
+        kk = []
+        jj = []
+        datal = []
+        datalm1 = []
+        datalm2 = []
+        with RFDataBase(f, mode='r') as rfdb:
+            for rftr in rfdb.walk('rf', net, stat, self.bingrid.phase):
+                out = self._ccp_process_rftr(
+                    rftr, filt, vel_model, latb, lonb, multiple, append_pp,
+                    n_closest_points)
+        kk.append(out[0])
+        jj.append(out[1])
+        datal.append(out[2])
+        if multiple:
+            datalm1.append(out[3])
+            datalm2.append(out[4])
+        return kk, jj, datal, datalm1, datalm2
+
+    def _create_ccp_from_sac(
+        self, streams: List[str], multiple: bool, append_pp: bool,
+        n_closest_points: int, vel_model: str, latb: Tuple[float, float],
+            lonb: Tuple[float, float], filt: Tuple[float, float], endi):
         # Split job into n chunks
         num_cores = cpu_count()
 
         self.logger.info('Number of cores used: '+str(num_cores))
-        print('Number of cores used: '+str(num_cores))
 
         mem = virtual_memory()
 
         self.logger.info('Available system memory: '+str(mem.total*1e-6)+'MB')
-        print('Available system memory: '+str(mem.total*1e-6)+'MB')
+        # How many tasks should the main process be split in?
+        # If the number is too high, it will need unnecessarily
+        # much disk space or caching (probably also slower).
+        # If it's too low, the progressbar won't work anymore.
+        # !Memmap arrays are getting extremely big, size in byte
+        # is given by: nrows*ncolumns*nbands
+        # with 64 cores and 10 bands/core that results in about
+        # 90 GB for each of the arrays for a finely gridded
+        # CCP stack of North-America
 
         # Check maximum information that can be saved
         # using half of the RAM.
@@ -554,28 +675,6 @@ due to insufficient memory. Each progressbar will \
 only show the progress per chunk.')
         else:
             split_size = len(streams)
-
-        # Actual CCP stack
-        # Note loki does mess up the output and threads is slower than
-        # using a single core
-
-        # The test data needs to be filtered
-        if network == 'matlab':
-            filt = [.03, 1.5]  # bandpass frequencies
-
-        # Define grid boundaries for 3D RT
-        latb = (self.coords[0].min(), self.coords[0].max())
-        lonb = (self.coords[1].min(), self.coords[1].max())
-
-        # How many tasks should the main process be split in?
-        # If the number is too high, it will need unnecessarily
-        # much disk space or caching (probably also slower).
-        # If it's too low, the progressbar won't work anymore.
-        # !Memmap arrays are getting extremely big, size in byte
-        # is given by: nrows*ncolumns*nbands
-        # with 64 cores and 10 bands/core that results in about
-        # 90 GB for each of the arrays for a finely gridded
-        # CCP stack of North-America
 
         for stream_chunk in chunks(streams, split_size):
             num_split_max = num_cores*100  # maximal no of jobs
@@ -630,16 +729,6 @@ only show the progress per chunk.')
                         # hit counter + 1
                         self.illum[k, j] = self.illum[k, j] + 1
 
-        end = time.time()
-        self.logger.info("Stacking finished.")
-        print('Stacking finished.')
-        self.logger.info(dt_string(end-start))
-        self.conclude_ccp()
-
-        # save file
-        if save:
-            self.write(filename=save)
-
     def multicore_stack(self, stream, append_pp, n_closest_points, vmodel,
                         latb, lonb, filt, idx, multiple):
         """
@@ -677,18 +766,31 @@ only show the progress per chunk.')
         datalm2 = []
 
         for st in stream:
-            # read RFs in time domain
-            try:
-                rft = read_rf(st, format='SAC')
-            except (IndexError, Exception) as e:
-                # That happens when there is a corrupted sac file
-                self.logger.exception(e)
-                continue
+            rft = read_rf(st)
+            if multiple:
+                k, j, data, lm1, lm2 = self._ccp_process_rftr(
+                    rft, filt, vmodel, latb, lonb, multiple, append_pp,
+                    n_closest_points)
+                datalm1.append(lm1)
+                datalm2.append(lm2)
+            else:
+                k, j, data = self._ccp_process_rftr(
+                    rft, filt, vmodel, latb, lonb, multiple, append_pp,
+                    n_closest_points)
+            kk.append(k)
+            jj.append(j)
+            datal.append(data)
 
-            if filt:
-                rft.filter(
-                    'bandpass', freqmin=filt[0], freqmax=filt[1],
-                    zerophase=True, corners=2)
+        return kk, jj, datal, datalm1, datalm2
+
+    def _ccp_process_rftr(
+        self, rft: RFTrace, filt: Tuple[float, float], vmodel: str,
+        latb: Tuple[float, float], lonb: Tuple[float, float], multiple: bool,
+            append_pp: bool, n_closest_points: int):
+        if filt:
+            rft.filter(
+                'bandpass', freqmin=filt[0], freqmax=filt[1],
+                zerophase=True, corners=2)
             try:
                 z, rf, rfm1, rfm2 = rft[0].moveout(
                     vmodel, latb=latb, lonb=lonb, taper=False,
@@ -696,12 +798,12 @@ only show the progress per chunk.')
             except ComplexModel.CoverageError as e:
                 # Wrong stations codes can raise this
                 self.logger.warning(e)
-                continue
+                return
             except Exception as e:
                 # Just so the script does not interrupt. Did not occur up
                 # to now
                 self.logger.exception(e)
-                continue
+                return
 
             lat = np.array(rf.stats.pp_latitude)
             lon = np.array(rf.stats.pp_longitude)
@@ -714,21 +816,18 @@ only show the progress per chunk.')
                 self.pplon.append(plon)
             k, j = self.query_bin_tree(lat, lon, rf.data, n_closest_points)
 
-            kk.append(k)
-            jj.append(j)
-            datal.append(rf.data)
-
             if multiple:
                 depthi = np.where(z == maxzm)[0][0]
                 try:
-                    datalm1.append(rfm1.data[:depthi+1])
-                    datalm2.append(rfm2.data[:depthi+1])
+                    lm1 = (rfm1.data[:depthi+1])
+                    lm2 = (rfm2.data[:depthi+1])
                 except AttributeError:
                     # for Interpolationerrors
-                    datalm1.append(None)
-                    datalm2.append(None)
+                    lm1 = None
+                    lm2 = None
+                return k, j, rf.data, lm1, lm2
 
-        return kk, jj, datal, datalm1, datalm2
+            return k, j, rf.data
 
     def conclude_ccp(
         self, keep_empty: bool = False, keep_water: bool = False, r: int = 0,
@@ -1399,14 +1498,13 @@ def read_ccp(filename: str, fmt: str or None = None) -> CCPStack:
 
 
 def init_ccp(
-    spacing: float, vel_model: str, phase: str,
-    statloc: str = 'output/stations',
-    preproloc: str = 'output/waveforms/preprocessed',
-    rfloc: str = 'output/waveforms/RF', network: str or list or None = None,
-    station: str or list or None = None, geocoords: tuple or None = None,
+    rfloc: str, spacing: float, vel_model: str, phase: str,
+    statloc: str = None, preproloc: str = None, network: str or list = None,
+    station: str or list = None, geocoords: tuple or None = None,
     compute_stack: bool = False, filt: tuple or None = None,
     binrad: float = np.cos(np.radians(30)), append_pp: bool = False,
-    multiple: bool = False, save: str or bool = False, verbose: bool = True
+    multiple: bool = False, save: str or bool = False, verbose: bool = True,
+    format: str = 'hdf5'
 ) -> CCPStack:
     """
     Computes a ccp stack in self.ccp using data from statloc and rfloc.
@@ -1479,63 +1577,55 @@ def init_ccp(
     if phase[-1].upper() == 'S' and multiple:
         raise NotImplementedError(
             'Multiple mode is not supported for phase S.')
-    # create empty lists for station latitude and longitude
-    lats = []
-    lons = []
+
+    db = StationDB(preproloc or rfloc, phase=phase, use_old=False)
 
     # Were network and stations provided?
     # Possibility 1 as geo boundaries
     if geocoords:
         lat = (geocoords[0], geocoords[1])
         lon = (geocoords[2], geocoords[3])
-        db = StationDB(preproloc, phase=phase, use_old=False)
-        net, stat = db.find_stations(lat, lon, phase=phase)
-        pattern = ["{}.{}".format(a_, b_) for a_, b_ in zip(net, stat)]
-        files = []
-        for pat in pattern:
-            files.extend(
-                fnmatch.filter(os.listdir(statloc), pat+'.xml'))
-
-    # As strings
-    elif network and type(network) == list:
-        files = []
-        if station:
-            if type(station) != list:
-                raise TypeError(
-                    """Provide a list of stations, when using a list of
-                    networks as parameter.""")
-            for net in network:
-                for stat in station:
-                    pattern2 = net + '.' + stat + '.xml'
-                    files.extend(
-                        fnmatch.filter(os.listdir(statloc), pattern2))
-        else:
-            for net in network:
-                pattern2 = net + '.*.xml'
-                files.extend(
-                    fnmatch.filter(os.listdir(statloc), pattern2))
-    elif network and type(station) == list:
-        files = []
-        for stat in station:
-            pattern2 = network + '.' + stat + '.xml'
-            files.extend(fnmatch.filter(os.listdir(statloc), pattern2))
-    elif network:
-        pattern2 = network + '.' + (station or '*') + '.xml'
-        files = fnmatch.filter(os.listdir(statloc), pattern2)
-
-    # In this case, it will process all available data (for global ccps)
+        subset = db.geo_boundary(lat, lon, phase=phase)
     else:
-        files = os.listdir(statloc)
+        subset = db.db
 
-    # read out station latitudes and longitudes
-    for file in files:
-        try:
-            stat = read_inventory(os.path.join(statloc, file))
-        except TypeError as e:
-            print(
-                "Corrupt station xml, original error message: %s" % e)
-        lats.append(stat[0][0].latitude)
-        lons.append(stat[0][0].longitude)
+    net = list(subset['network'])
+    stat = list(subset['station'])
+    codes = list(subset['code'])
+    lats = list(subset['lat'])
+    lons = list(subset['lon'])
+
+    # Filter
+    if isinstance(network, str) and not isinstance(station, list):
+        codef = fnmatch.filter(codes, '%s.%s' % (network, '*' or station))
+    elif isinstance(network, str) and isinstance(station, list):
+        codef = list(set(codes).intersection([
+                '%s.%s' % (network, stat) for stat in station]))
+    elif isinstance(network, list):
+        if station is not None and not isinstance(station, list):
+            raise TypeError(
+                """Provide a list of stations, when using a list of
+                networks as parameter.""")
+        elif not station:
+            codef = list(set(codes).intersection([
+                '%s.*' % net for net in network]))
+        elif isinstance(station, list):
+            if len(station) != len(network):
+                raise ValueError(
+                    'Length of network and station list have to be equal.')
+            codef = list(set(codes).intersection([
+                '%s.%s' % (net, stat) for net, stat in zip(network, station)]))
+
+    if (network and station) is None:
+        codef = codes
+
+    else:
+        # Find indices
+        ind = [codes.index(cf) for cf in codef]
+        net = np.array(net)[ind]
+        stat = np.array(stat)[ind]
+        lat = np.array(lat)[ind]
+        lon = np.array(lon)[ind]
 
     logdir = os.path.join(os.path.dirname(os.path.abspath(statloc)), 'logs')
 
@@ -1543,7 +1633,7 @@ def init_ccp(
         lats, lons, spacing, phase=phase, verbose=verbose, logdir=logdir)
 
     # Clear Memory
-    del stat, lats, lons, files
+    del stat, lats, lons
 
     if not geocoords:
         pattern = None
@@ -1552,7 +1642,8 @@ def init_ccp(
         ccp.compute_stack(
             vel_model=vel_model, network=network, station=station, save=save,
             filt=filt, multiple=multiple,
-            pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc)
+            pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc,
+            in_format=format)
 
     # _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
 
