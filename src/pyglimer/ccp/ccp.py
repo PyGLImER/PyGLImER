@@ -11,13 +11,14 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 16th August 2021 06:13:12 pm
+Last Modified: Tuesday, 17th August 2021 01:19:38 pm
 '''
 
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import fnmatch
+from glob import glob
 import os
 import pickle
 import logging
@@ -52,7 +53,7 @@ from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.database.stations import StationDB
 from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
 from pyglimer.plot.plot_volume import VolumePlot, VolumeExploration
-from pyglimer.rf.create import RFTrace, read_rf
+from pyglimer.rf.create import RFStream, RFTrace, read_rf
 from pyglimer.rf.moveout import res, maxz, maxzm
 from pyglimer.utils.createvmodel import ComplexModel
 from pyglimer.utils.geo_utils import epi2euc, geo2cart
@@ -335,7 +336,7 @@ class CCPStack(object):
 
     def compute_stack(
         self, vel_model: str, rfloc: str,
-        in_format = 'hdf5', preproloc: str = None,
+        in_format: str = 'hdf5', preproloc: str = None,
         network: str or list or None = None,
         station: str or list or None = None, geocoords: tuple or None = None,
         pattern: list or None = None, save: str or bool = False,
@@ -405,6 +406,8 @@ class CCPStack(object):
         :type multiple: bool, optional
         :raises ValueError: For wrong inputs
         """
+        if in_format.lower() == 'hdf5':
+            in_format = 'h5'
 
         if binrad < 1/(2*np.cos(np.radians(30))):
             raise ValueError(
@@ -451,8 +454,11 @@ class CCPStack(object):
             self.bins_m1 = np.zeros(self.bins[:, :endi].shape)
             self.bins_m2 = np.zeros(self.bins[:, :endi].shape)
             self.illumm = np.zeros(self.bins[:, :endi].shape, dtype=int)
+        else:
+            endi = None
 
-        if network and type(network) == str and not pattern:
+        if network and isinstance(network, str) and not pattern and\
+                in_format.lower() == 'sac':
             # Loop over fewer files
             folder = os.path.join(folder, network)
             if station and type(station) == str:
@@ -475,14 +481,13 @@ class CCPStack(object):
             if not (network and station):
                 pattern.append('*.%s' % in_format)
         else:
-            pattern = ["*{}.*.%s".format(_a) % in_format for _a in pattern]
+            pattern = ["*{}*%s".format(_a) % in_format for _a in pattern]
 
         streams = []  # List of files filtered for input criteria
-        infiles = []  # List of all files in folder
 
-        for root, _, files in os.walk(folder):
-            for name in files:
-                infiles.append(os.path.join(root, name))
+        # List of all input files in the desired format
+        infiles = glob(os.path.join(
+            folder, '**', '*.%s' % in_format), recursive=True)
 
         # Special rule for files imported from Matlab
         if network == 'matlab' or network == 'raysum':
@@ -495,7 +500,7 @@ class CCPStack(object):
                     if type(station) == list:
                         for net in network:
                             for stat in station:
-                                pattern.append('*%s.%s.*.%s' % (
+                                pattern.append('*%s.%s*.%s' % (
                                     net, stat, in_format))
                     else:
                         raise ValueError("""The combination of network
@@ -506,11 +511,11 @@ class CCPStack(object):
             elif type(network) == str:
                 if station:
                     if type(station) == str:
-                        pattern.append('*%s.%s.*.%s' % (
+                        pattern.append('*%s.%s*.%s' % (
                             network, station, in_format))
                     elif type(station) == list:
                         for stat in station:
-                            pattern.append('*%s.%s.*.%s' % (
+                            pattern.append('*%s.%s*.%s' % (
                                 net, stat, in_format))
                 else:
                     pattern.append('*%s.*.%s' % (network, in_format))
@@ -519,34 +524,26 @@ class CCPStack(object):
                              code if you want to filter by station""")
 
         # Do filtering
+        print(infiles, pattern)
         for pat in pattern:
             streams.extend(fnmatch.filter(infiles, pat))
 
         # clear memory
         del pattern, infiles
 
-        # Data counter
-        self.N = self.N + len(streams)
-
-        self.logger.info('Number of receiver functions used: '+str(self.N))
-
-        # Actual CCP stack
-        # Note loki does mess up the output and threads is slower than
-        # using a single core
-
+        # Actual CCP stack #
         # The test data needs to be filtered
         if network == 'matlab':
             filt = [.03, 1.5]  # bandpass frequencies
 
         # Define grid boundaries for 3D RT
         latb = (self.coords[0].min(), self.coords[0].max())
-        lonb = (self.coords[1].min(), self.coords[1].max())  
+        lonb = (self.coords[1].min(), self.coords[1].max())
 
-        if in_format.lower() == 'hdf5':
-            for f in streams:
-                self._create_ccp_from_hdf5_mc(
-                    streams, multiple, append_pp, n_closest_points, vel_model,
-                    latb, lonb, filt, endi)
+        if in_format.lower() == 'h5':
+            self._create_ccp_from_hdf5_mc(
+                streams, multiple, append_pp, n_closest_points, vel_model,
+                latb, lonb, filt, endi)
 
         elif in_format.lower() == 'sac':
             self._create_ccp_from_sac(
@@ -571,11 +568,11 @@ class CCPStack(object):
         n_closest_points: int, vel_model: str, latb: Tuple[float, float],
             lonb: Tuple[float, float], filt: Tuple[float, float], endi):
         # note that those are actually files - confusing variable name
-        out = Parallel(n_jobs=-1)(  # prefer='processes'
+        out = Parallel(n_jobs=1)(
                 delayed(self._create_ccp_from_hdf5)(
-                    st, append_pp, n_closest_points, vel_model,
-                    latb, lonb, filt, multiple)
-                for st in tqdm(streams))
+                    f, multiple, append_pp, n_closest_points, vel_model,
+                    latb, lonb, filt)
+                for f in tqdm(streams))
 
         # Awful way to solve it, but the best I could find
         if multiple:
@@ -611,6 +608,7 @@ class CCPStack(object):
 
                     # hit counter + 1
                     self.illum[k, j] = self.illum[k, j] + 1
+        self.N += len(datal)
 
     def _create_ccp_from_hdf5(
         self, f: str, multiple: bool, append_pp: bool,
@@ -625,21 +623,29 @@ class CCPStack(object):
         datalm2 = []
         with RFDataBase(f, mode='r') as rfdb:
             for rftr in rfdb.walk('rf', net, stat, self.bingrid.phase):
+                rfst = RFStream([rftr])
                 out = self._ccp_process_rftr(
-                    rftr, filt, vel_model, latb, lonb, multiple, append_pp,
+                    rfst, filt, vel_model, latb, lonb, multiple, append_pp,
                     n_closest_points)
-        kk.append(out[0])
-        jj.append(out[1])
-        datal.append(out[2])
-        if multiple:
-            datalm1.append(out[3])
-            datalm2.append(out[4])
+                if not out:
+                    continue
+                kk.append(out[0])
+                jj.append(out[1])
+                datal.append(out[2])
+                if multiple:
+                    datalm1.append(out[3])
+                    datalm2.append(out[4])
         return kk, jj, datal, datalm1, datalm2
 
     def _create_ccp_from_sac(
         self, streams: List[str], multiple: bool, append_pp: bool,
         n_closest_points: int, vel_model: str, latb: Tuple[float, float],
             lonb: Tuple[float, float], filt: Tuple[float, float], endi):
+        # Data counter
+        self.N += len(streams)
+
+        self.logger.info('Number of receiver functions used: '+str(self.N))
+
         # Split job into n chunks
         num_cores = cpu_count()
 
@@ -686,7 +692,7 @@ only show the progress per chunk.')
                     len_split = int(np.ceil(len_split/(len_split/10)))
             num_split = int(np.ceil(len(stream_chunk)/len_split))
 
-            out = Parallel(n_jobs=num_cores)(  # prefer='processes'
+            out = Parallel(n_jobs=1)(  # prefer='processes'
                 delayed(self.multicore_stack)(
                     st, append_pp, n_closest_points, vel_model,
                     latb, lonb, filt, i, multiple)
@@ -767,16 +773,17 @@ only show the progress per chunk.')
 
         for st in stream:
             rft = read_rf(st)
-            if multiple:
-                k, j, data, lm1, lm2 = self._ccp_process_rftr(
+            out = self._ccp_process_rftr(
                     rft, filt, vmodel, latb, lonb, multiple, append_pp,
                     n_closest_points)
+            if not out:
+                continue
+            if multiple:
+                k, j, data, lm1, lm2 = out
                 datalm1.append(lm1)
                 datalm2.append(lm2)
             else:
-                k, j, data = self._ccp_process_rftr(
-                    rft, filt, vmodel, latb, lonb, multiple, append_pp,
-                    n_closest_points)
+                k, j, data = out
             kk.append(k)
             jj.append(j)
             datal.append(data)
@@ -784,50 +791,51 @@ only show the progress per chunk.')
         return kk, jj, datal, datalm1, datalm2
 
     def _ccp_process_rftr(
-        self, rft: RFTrace, filt: Tuple[float, float], vmodel: str,
+        self, rfst: RFStream, filt: Tuple[float, float], vmodel: str,
         latb: Tuple[float, float], lonb: Tuple[float, float], multiple: bool,
             append_pp: bool, n_closest_points: int):
         if filt:
-            rft.filter(
+            rfst.filter(
                 'bandpass', freqmin=filt[0], freqmax=filt[1],
                 zerophase=True, corners=2)
+        try:
+            z, rf, rfm1, rfm2 = rfst[0].moveout(
+                vmodel, latb=latb, lonb=lonb, taper=False,
+                multiple=multiple)
+        except ComplexModel.CoverageError as e:
+            # Wrong stations codes can raise this
+            self.logger.warning(e)
+            return
+        except Exception as e:
+            # Just so the script does not interrupt. Did not occur up
+            # to now
+            self.logger.exception(e)
+            print(e)
+            return
+
+        lat = np.array(rf.stats.pp_latitude)
+        lon = np.array(rf.stats.pp_longitude)
+        if append_pp:
+            plat = np.pad(
+                lat, (0, len(self.z)-len(lat)), constant_values=np.nan)
+            plon = np.pad(
+                lon, (0, len(self.z)-len(lon)), constant_values=np.nan)
+            self.pplat.append(plat)
+            self.pplon.append(plon)
+        k, j = self.query_bin_tree(lat, lon, rf.data, n_closest_points)
+
+        if multiple:
+            depthi = np.where(z == maxzm)[0][0]
             try:
-                z, rf, rfm1, rfm2 = rft[0].moveout(
-                    vmodel, latb=latb, lonb=lonb, taper=False,
-                    multiple=multiple)
-            except ComplexModel.CoverageError as e:
-                # Wrong stations codes can raise this
-                self.logger.warning(e)
-                return
-            except Exception as e:
-                # Just so the script does not interrupt. Did not occur up
-                # to now
-                self.logger.exception(e)
-                return
+                lm1 = (rfm1.data[:depthi+1])
+                lm2 = (rfm2.data[:depthi+1])
+            except AttributeError:
+                # for Interpolationerrors
+                lm1 = None
+                lm2 = None
+            return k, j, rf.data, lm1, lm2
 
-            lat = np.array(rf.stats.pp_latitude)
-            lon = np.array(rf.stats.pp_longitude)
-            if append_pp:
-                plat = np.pad(
-                    lat, (0, len(self.z)-len(lat)), constant_values=np.nan)
-                plon = np.pad(
-                    lon, (0, len(self.z)-len(lon)), constant_values=np.nan)
-                self.pplat.append(plat)
-                self.pplon.append(plon)
-            k, j = self.query_bin_tree(lat, lon, rf.data, n_closest_points)
-
-            if multiple:
-                depthi = np.where(z == maxzm)[0][0]
-                try:
-                    lm1 = (rfm1.data[:depthi+1])
-                    lm2 = (rfm2.data[:depthi+1])
-                except AttributeError:
-                    # for Interpolationerrors
-                    lm1 = None
-                    lm2 = None
-                return k, j, rf.data, lm1, lm2
-
-            return k, j, rf.data
+        return k, j, rf.data
 
     def conclude_ccp(
         self, keep_empty: bool = False, keep_water: bool = False, r: int = 0,
@@ -1578,7 +1586,8 @@ def init_ccp(
         raise NotImplementedError(
             'Multiple mode is not supported for phase S.')
 
-    db = StationDB(preproloc or rfloc, phase=phase, use_old=False)
+    db = StationDB(
+        preproloc or rfloc, phase=phase, use_old=False, hdf5=format == 'hdf5')
 
     # Were network and stations provided?
     # Possibility 1 as geo boundaries
@@ -1624,10 +1633,12 @@ def init_ccp(
         ind = [codes.index(cf) for cf in codef]
         net = np.array(net)[ind]
         stat = np.array(stat)[ind]
-        lat = np.array(lat)[ind]
-        lon = np.array(lon)[ind]
+        lats = np.array(lats)[ind]
+        lons = np.array(lons)[ind]
 
-    logdir = os.path.join(os.path.dirname(os.path.abspath(statloc)), 'logs')
+    logdir = os.path.join(
+        os.path.dirname(os.path.dirname(
+            os.path.abspath(rfloc))), 'logs')
 
     ccp = CCPStack(
         lats, lons, spacing, phase=phase, verbose=verbose, logdir=logdir)
