@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 17th August 2021 01:19:38 pm
+Last Modified: Tuesday, 17th August 2021 03:13:12 pm
 '''
 
 # !/usr/bin/env python3
@@ -342,7 +342,7 @@ class CCPStack(object):
         pattern: list or None = None, save: str or bool = False,
         filt: tuple or None = None,
         binrad: float = 1/(2*np.cos(np.radians(30))), append_pp: bool = False,
-            multiple: bool = False):
+            multiple: bool = False, mc_backend: str = 'joblib'):
         """
         Computes a ccp stack in self.ccp, using the data from rfloc.
         The stack can be limited to some networks and
@@ -503,8 +503,8 @@ class CCPStack(object):
                                 pattern.append('*%s.%s*.%s' % (
                                     net, stat, in_format))
                     else:
-                        raise ValueError("""The combination of network
-                                         and station are invalid""")
+                        raise ValueError(
+                            "Combination of network and station is invalid")
                 else:
                     for net in network:
                         pattern.append('*%s.*.%s' % (net, in_format))
@@ -520,11 +520,11 @@ class CCPStack(object):
                 else:
                     pattern.append('*%s.*.%s' % (network, in_format))
         elif station:
-            raise ValueError("""You have to provide both network and station
-                             code if you want to filter by station""")
+            raise ValueError(
+                "You have to provide both network and station \
+code if you want to filter by station")
 
         # Do filtering
-        print(infiles, pattern)
         for pat in pattern:
             streams.extend(fnmatch.filter(infiles, pat))
 
@@ -543,12 +543,12 @@ class CCPStack(object):
         if in_format.lower() == 'h5':
             self._create_ccp_from_hdf5_mc(
                 streams, multiple, append_pp, n_closest_points, vel_model,
-                latb, lonb, filt, endi)
+                latb, lonb, filt, endi, mc_backend)
 
         elif in_format.lower() == 'sac':
             self._create_ccp_from_sac(
                 streams, multiple, append_pp, n_closest_points, vel_model,
-                latb, lonb, filt, endi)
+                latb, lonb, filt, endi, mc_backend)
         else:
             raise NotImplementedError(
                 'Unknown input format %s.' % in_format
@@ -566,54 +566,57 @@ class CCPStack(object):
     def _create_ccp_from_hdf5_mc(
         self, streams: List[str], multiple: bool, append_pp: bool,
         n_closest_points: int, vel_model: str, latb: Tuple[float, float],
-            lonb: Tuple[float, float], filt: Tuple[float, float], endi):
-        # note that those are actually files - confusing variable name
-        out = Parallel(n_jobs=1)(
-                delayed(self._create_ccp_from_hdf5)(
-                    f, multiple, append_pp, n_closest_points, vel_model,
-                    latb, lonb, filt)
-                for f in tqdm(streams))
+        lonb: Tuple[float, float], filt: Tuple[float, float], endi,
+            mc_backend: str):
+        # note that streams are actually files - confusing variable name
+        if mc_backend.lower() == 'joblib':
+            out = Parallel(n_jobs=-1)(
+                    delayed(self._create_ccp_from_hdf5)(
+                        f, multiple, append_pp, n_closest_points, vel_model,
+                        latb, lonb, filt)
+                    for f in tqdm(streams))
 
-        # Awful way to solve it, but the best I could find
-        if multiple:
-            for kk, jj, datal, datalm1, datalm2 in out:
-                for k, j, data, datam1, datam2 in zip(
-                        kk, jj, datal, datalm1, datalm2):
-                    self.bins[k, j] = self.bins[k, j] + data[j]
+            # Awful way to solve it, but the best I could find
+            self._unpack_joblib_output(multiple, endi, out)
 
-                    # hit counter + 1
-                    self.illum[k, j] = self.illum[k, j] + 1
+        elif mc_backend.upper() == 'MPI':
+            from mpi4py import MPI
+            comm = MPI.COMM_WORLD
+            psize = comm.Get_size()
+            rank = comm.Get_rank()
+            pmap = (np.arange(len(streams))*psize)/len(streams)
+            pmap = pmap.astype(np.int32)
+            ind = pmap == rank
+            ind = np.arange(len(streams))[ind]
 
-                    # multiples
-                    iii = np.where(j <= endi-1)[0]
-                    jm = j[iii]
-                    km = k[iii]
-                    try:
-                        self.bins_m1[
-                            km, jm] = self.bins_m1[km, jm] + datam1[jm]
-                        self.bins_m2[
-                            km, jm] = self.bins_m1[km, jm] + datam1[jm]
-                        self.illumm[km, jm] = self.illum[km, jm] + 1
-                    except IndexError as e:
-                        if not len(datam1) or not len(datam2):
-                            continue
-                        else:
-                            raise IndexError(e)
+            for f in streams:
+                kk, jj, datal, datalm1, datalm2 = self._create_ccp_from_hdf5(
+                    f, multiple, append_pp, n_closest_points, vel_model, latb,
+                    lonb, filt)
+                if multiple:
+                    self._unpack_output_multiple(
+                        kk, jj, datal, datalm1, datalm2, endi)
+                else:
+                    self._unpack_output(kk, jj, datal)
 
-        else:
-            for kk, jj, datal, _, _ in out:
-                for k, j, data in zip(
-                        kk, jj, datal):
-                    self.bins[k, j] = self.bins[k, j] + data[j]
-
-                    # hit counter + 1
-                    self.illum[k, j] = self.illum[k, j] + 1
-        self.N += len(datal)
+            # Gather results
+            self.N = comm.allreduce(self.N, op=MPI.SUM)
+            comm.Allreduce(MPI.IN_PLACE, [self.illum, MPI.DOUBLE], op=MPI.SUM)
+            comm.Allreduce(MPI.IN_PLACE, [self.bins, MPI.DOUBLE], op=MPI.SUM)
+            if multiple:
+                comm.Allreduce(
+                    MPI.IN_PLACE, [self.illumm, MPI.DOUBLE], op=MPI.SUM)
+                comm.Allreduce(
+                    MPI.IN_PLACE, [self.bins_m1, MPI.DOUBLE], op=MPI.SUM)
+                comm.Allreduce(
+                    MPI.IN_PLACE, [self.bins_m2, MPI.DOUBLE], op=MPI.SUM)
 
     def _create_ccp_from_hdf5(
         self, f: str, multiple: bool, append_pp: bool,
         n_closest_points: int, vel_model: str, latb: Tuple[float, float],
-            lonb: Tuple[float, float], filt: Tuple[float, float]):
+        lonb: Tuple[float, float], filt: Tuple[float, float]) -> Tuple[
+            List[np.ndarray], List[np.ndarray], List[np.ndarray],
+            List[np.ndarray], List[np.ndarray]]:
         # note that those are actually files - confusing variable name
         net, stat, _ = os.path.basename(f).split('.')
         kk = []
@@ -640,7 +643,12 @@ class CCPStack(object):
     def _create_ccp_from_sac(
         self, streams: List[str], multiple: bool, append_pp: bool,
         n_closest_points: int, vel_model: str, latb: Tuple[float, float],
-            lonb: Tuple[float, float], filt: Tuple[float, float], endi):
+        lonb: Tuple[float, float], filt: Tuple[float, float], endi: int,
+            mc_backend: str):
+        if mc_backend.upper() == 'MPI':
+            raise NotImplementedError(
+                'MPI in conjunction with sac is not implemented.'
+            )
         # Data counter
         self.N += len(streams)
 
@@ -692,7 +700,7 @@ only show the progress per chunk.')
                     len_split = int(np.ceil(len_split/(len_split/10)))
             num_split = int(np.ceil(len(stream_chunk)/len_split))
 
-            out = Parallel(n_jobs=1)(  # prefer='processes'
+            out = Parallel(n_jobs=num_cores)(
                 delayed(self.multicore_stack)(
                     st, append_pp, n_closest_points, vel_model,
                     latb, lonb, filt, i, multiple)
@@ -700,40 +708,51 @@ only show the progress per chunk.')
                     tqdm(range(num_split)),
                     chunks(stream_chunk, len_split)))
 
-            # Awful way to solve it, but the best I could find
-            if multiple:
-                for kk, jj, datal, datalm1, datalm2 in out:
-                    for k, j, data, datam1, datam2 in zip(
-                            kk, jj, datal, datalm1, datalm2):
-                        self.bins[k, j] = self.bins[k, j] + data[j]
+            self._unpack_joblib_output(multiple, endi, out)
 
-                        # hit counter + 1
-                        self.illum[k, j] = self.illum[k, j] + 1
+    def _unpack_joblib_output(self, multiple: bool, endi: int, out: Tuple):
+        # Awful way to solve it, but the best I could find
+        if multiple:
+            for kk, jj, datal, datalm1, datalm2 in out:
+                self._unpack_output_multiple(
+                    kk, jj, datal, datalm1, datalm2, endi)
+        else:
+            for kk, jj, datal, _, _ in out:
+                self._unpack_output(kk, jj, datal)
 
-                        # multiples
-                        iii = np.where(j <= endi-1)[0]
-                        jm = j[iii]
-                        km = k[iii]
-                        try:
-                            self.bins_m1[
-                                km, jm] = self.bins_m1[km, jm] + datam1[jm]
-                            self.bins_m2[
-                                km, jm] = self.bins_m1[km, jm] + datam1[jm]
-                            self.illumm[km, jm] = self.illum[km, jm] + 1
-                        except IndexError as e:
-                            if not len(datam1) or not len(datam2):
-                                continue
-                            else:
-                                raise IndexError(e)
+    def _unpack_output_multiple(self, kk, jj, datal, datalm1, datalm2, endi):
+        # Count RFs
+        self.N += self.N
+        for k, j, data, datam1, datam2 in zip(kk, jj, datal, datalm1, datalm2):
+            self.bins[k, j] = self.bins[k, j] + data[j]
 
-            else:
-                for kk, jj, datal, _, _ in out:
-                    for k, j, data in zip(
-                            kk, jj, datal):
-                        self.bins[k, j] = self.bins[k, j] + data[j]
+            # hit counter + 1
+            self.illum[k, j] = self.illum[k, j] + 1
 
-                        # hit counter + 1
-                        self.illum[k, j] = self.illum[k, j] + 1
+            # multiples
+            iii = np.where(j <= endi-1)[0]
+            jm = j[iii]
+            km = k[iii]
+            try:
+                self.bins_m1[
+                    km, jm] = self.bins_m1[km, jm] + datam1[jm]
+                self.bins_m2[
+                    km, jm] = self.bins_m2[km, jm] + datam2[jm]
+                self.illumm[km, jm] = self.illum[km, jm] + 1
+            except IndexError as e:
+                if not len(datam1) or not len(datam2):
+                    continue
+                else:
+                    raise IndexError(e)
+
+    def _unpack_output(self, kk, jj, datal):
+        # Count RFs
+        self.N += self.N
+        for k, j, data in zip(kk, jj, datal):
+            self.bins[k, j] = self.bins[k, j] + data[j]
+
+            # hit counter + 1
+            self.illum[k, j] = self.illum[k, j] + 1
 
     def multicore_stack(self, stream, append_pp, n_closest_points, vmodel,
                         latb, lonb, filt, idx, multiple):
@@ -793,7 +812,37 @@ only show the progress per chunk.')
     def _ccp_process_rftr(
         self, rfst: RFStream, filt: Tuple[float, float], vmodel: str,
         latb: Tuple[float, float], lonb: Tuple[float, float], multiple: bool,
-            append_pp: bool, n_closest_points: int):
+        append_pp: bool, n_closest_points: int) -> Tuple[
+            np.ndarray, np.ndarray, np.ndarray]:
+        """
+        Do the depth migration and the piercing point computation for
+        a single receiver function. Then, find the laterally closest bin
+        to the ppoint.
+
+        :param rfst: Input receiver function
+        :type rfst: RFStream
+        :param filt: Filter the receiver function? If so, provide high- and
+            lowpass frequency as a Tuple (in Hz).
+        :type filt: Tuple[float, float]
+        :param vmodel: The velocity model to use.
+        :type vmodel: str
+        :param latb: boundaries for the moveout correction in the form
+            (minlat, maxlat).
+        :type latb: Tuple[float, float]
+        :param lonb: boundaries for the moveout correction in the form
+            (minlon, maxlon).
+        :type lonb: Tuple[float, float]
+        :param multiple: Should the moveout correction be done for crustal
+            multiples as well?
+        :type multiple: bool
+        :param append_pp: Should the coordinates of the ppoint be saved?
+        :type append_pp: bool
+        :param n_closest_points: Number of closest bin points to return.
+        :type n_closest_points: int
+        :return: The indices of the closest bins k and the depth index j.
+            the Receiver fnction data. If multiples also multiple data.
+        :rtype: Tuple[np.ndarray[int], np.ndarray[int], np.ndarray]
+        """
         if filt:
             rfst.filter(
                 'bandpass', freqmin=filt[0], freqmax=filt[1],
@@ -924,26 +973,13 @@ only show the progress per chunk.')
 
         # Check if bins are on land
         if not keep_water:
-            # bm = Basemap(
-            #     resolution='c', projection='cyl',
-            #     llcrnrlat=self.coords[0][0].min(),
-            #     llcrnrlon=self.coords[1][0].min(),
-            #     urcrnrlat=self.coords[0][0].max(),
-            #     urcrnrlon=self.coords[1][0].max())
-
             if keep_empty:
                 self.coords_new = self.coords.copy()
 
             lats, lons = self.coords_new
-            # index = []  # list of indices that contain water
             # list of indices that contain water
             index = globe.is_ocean(lats, lons)[0, :]
-            print(index.shape)
 
-            # for i, (lat, lon) in enumerate(zip(lats[0], lons[0])):
-            #     # if not bm.is_land(lon, lat):
-            #     if not globe.is_land(lat, lon):
-            #         index.append(i)
             self.ccp = np.delete(self.ccp, index, 0)
             self.hits = np.delete(self.hits, index, 0)
             self.coords_new = (np.delete(self.coords_new[0], index, 1),
@@ -1512,7 +1548,7 @@ def init_ccp(
     compute_stack: bool = False, filt: tuple or None = None,
     binrad: float = np.cos(np.radians(30)), append_pp: bool = False,
     multiple: bool = False, save: str or bool = False, verbose: bool = True,
-    format: str = 'hdf5'
+    format: str = 'hdf5', mc_backend: str = 'joblib'
 ) -> CCPStack:
     """
     Computes a ccp stack in self.ccp using data from statloc and rfloc.
@@ -1654,7 +1690,7 @@ def init_ccp(
             vel_model=vel_model, network=network, station=station, save=save,
             filt=filt, multiple=multiple,
             pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc,
-            in_format=format)
+            in_format=format, mc_backend=mc_backend)
 
     # _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
 
