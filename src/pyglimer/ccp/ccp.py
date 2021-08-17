@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 17th August 2021 03:13:12 pm
+Last Modified: Tuesday, 17th August 2021 05:03:09 pm
 '''
 
 # !/usr/bin/env python3
@@ -134,10 +134,10 @@ class CCPStack(object):
     input."""
 
     def __init__(
-        self, latitude: float, longitude: float, edist: float, phase: str,
-            verbose: bool = True, logdir: str or None = None):
+        self, latitude: List[float], longitude: List[float], edist: float,
+            phase: str, verbose: bool = True, logdir: str or None = None):
         """
-        Creates an empy object template for a CCP stack
+        Creates an empy object template for a CCP stack.
 
         :param latitude: Latitudes of all seismic stations.
         :type latitude: 1-D numpy.ndarray
@@ -157,7 +157,7 @@ class CCPStack(object):
         """
 
         # Loggers for the CCP script
-        self.logger = logging.Logger('pyglimer.ccp.ccp')
+        self.logger = logging.getLogger('pyglimer.ccp.ccp')
         self.logger.setLevel(logging.INFO)
 
         # Create handler to the log
@@ -175,8 +175,8 @@ class CCPStack(object):
         fh.setFormatter(fmt)
 
         # Create bingrid
-        self.bingrid = BinGrid(latitude, longitude, edist, phase=phase,
-                               verbose=verbose)
+        self.bingrid = BinGrid(
+            latitude, longitude, edist, phase=phase, verbose=verbose)
 
         # Compute bins
         self.bingrid.compute_bins()
@@ -189,7 +189,6 @@ class CCPStack(object):
 
         # Softlink useful variables and functions
         self.coords = self.bingrid.bins
-        # self.z = np.arange(0, maxz+res, res)
         self.z = np.hstack(
             (np.arange(-10, 0, .1), np.arange(0, maxz+res, res)))
         self.bins = np.zeros([self.coords[0].size, len(self.z)])
@@ -211,7 +210,7 @@ class CCPStack(object):
         return out
 
     def query_bin_tree(
-        self, latitude: np.ndarray, longitude: np.ndarray, data: np.ndarray,
+        self, latitude: np.ndarray, longitude: np.ndarray,
             n_closest_points: int):
         """
         Find closest bins for provided latitude and longitude.
@@ -220,15 +219,13 @@ class CCPStack(object):
         :type latitude: 1-D numpy.ndarray
         :param longitude: Longitudes of piercing points.
         :type longitude: 1-D numpy.ndarray
-        :param data: Depth migrated receiver function data
-        :type data: 1-D numpy.ndarray
         :param n_closest_points: Number of closest points to be found.
         :type n_closest_points: int
         :return: bin index k and depth index j
         :rtype: int
         """
-        i = self.bingrid.query_bin_tree(latitude, longitude, self.binrad_eucl,
-                                        n_closest_points)
+        i = self.bingrid.query_bin_tree(
+            latitude, longitude, self.binrad_eucl, n_closest_points)
 
         # Kd tree returns locations that are too far with maxindex+1
         pos = np.where(i < self.bingrid.Nb)
@@ -345,10 +342,7 @@ class CCPStack(object):
             multiple: bool = False, mc_backend: str = 'joblib'):
         """
         Computes a ccp stack in self.ccp, using the data from rfloc.
-        The stack can be limited to some networks and
-        stations. This will take a long while for big data sets!
-        Note that the grid should be big enough for the provided networks and
-        stations. Best to create the CCPStack object by using ccp.init_ccp().
+        The stack can be limited to some networks and stations.
 
         :param vel_model: Velocity model located in data. Either `iasp91.dat`
             for 1D raytracing or `3D` for 3D raytracing with GYPSuM model.
@@ -357,12 +351,12 @@ class CCPStack(object):
         :param rfloc: Parental folder in which the receiver functions in
             time domain are. The default is 'output/waveforms/RF.
         :type rfloc: str, optional
-        :param statloc: Folder containing the response information. Only needed
-             if option geocoords is used. The default is 'output/stations'.
-        :type statloc: str, optional
+        :param in_format: **INPUT FORMAT** of receiver functions. Either
+            `'sac'` or `'hdf5'`. Defaults to 'hdf5'.
+        :type in_format: str, optional
         :param preproloc: Parental folder containing the preprocessed mseeds.
             Only needed if option geocoords is used. The default is
-            'output/waveforms/preprocessed'.
+            None. **Should be None if hdf5 is used!**
         :type preproloc: str, optional
         :param network: This parameter is ignored if the pattern is given.
             Network or networks that are to be included in the ccp stack.
@@ -380,17 +374,17 @@ class CCPStack(object):
             (minlat, maxlat, minlon, maxlon). Will be ignored if pattern or
             network is given, by default None.
         :type geocoords: Tuple, optional
-        :param pattern: Search pattern for .sac files. Overwrites network,
+        :param pattern: Search pattern for files. Overwrites network,
             station, and geocooords options. Usually only used by
             :func:`~pyglimer.ccp.ccp.init_ccp()`, defaults to None.
         :type pattern: list, optional
         :param save: Either False if the ccp should not be saved or string with
             filename will be saved in config.ccp. Will be saved as pickle file.
+        :type save: str or bool, optional
         :param filt: Decides whether to filter the receiver function prior to
             depth migration. Either a Tuple of form `(lowpassf, highpassf)` or
             `None` / `False`.
         :type filt: tuple, optional
-        :type save: str or bool, optional
         :param binrad: Defines the bin radius with
             bin radius = binrad*distance_bins.
             Full Overlap = 1/(2*cosd(30)), Full coverage: 1.
@@ -404,7 +398,31 @@ class CCPStack(object):
             It can be decided later, whether they should be used in the final
             ccp stack. Will result in a longer computation time.
         :type multiple: bool, optional
+        :param mc_backend: Multi-core backend to use for the computations.
+        Can be either `"joblib"` (multiprocessing) or `"MPI"`. Not that MPI
+        compatibility is only implemented with hdf5 files.
         :raises ValueError: For wrong inputs
+
+
+        .. warning::
+
+            This will take a long while for big data sets!
+
+        .. note::
+
+            When using, `mc_backend='MPI'`. This has to be started from a
+            terminal via mpirun.
+
+        .. note::
+
+            MPI is only compatible with receiver functions saved in hdf5
+            format.
+
+        .. note::
+
+            Note that the grid should be big enough for the provided networks
+            and stations. Best to create the CCPStack object by using
+            :func:`~pyglimer.cpp.ccp.init_ccp()`.
         """
         if in_format.lower() == 'hdf5':
             in_format = 'h5'
@@ -871,7 +889,7 @@ only show the progress per chunk.')
                 lon, (0, len(self.z)-len(lon)), constant_values=np.nan)
             self.pplat.append(plat)
             self.pplon.append(plon)
-        k, j = self.query_bin_tree(lat, lon, rf.data, n_closest_points)
+        k, j = self.query_bin_tree(lat, lon, n_closest_points)
 
         if multiple:
             depthi = np.where(z == maxzm)[0][0]
@@ -1321,7 +1339,7 @@ only show the progress per chunk.')
             Minimum number of illumation points use in the interpolation,
             everything below is downweighted by the square reciprocal
         extent : list or tuple or Non, optional
-        
+  
         Returns
         -------
 
@@ -1543,9 +1561,10 @@ def read_ccp(filename: str, fmt: str or None = None) -> CCPStack:
 
 def init_ccp(
     rfloc: str, spacing: float, vel_model: str, phase: str,
-    statloc: str = None, preproloc: str = None, network: str or list = None,
-    station: str or list = None, geocoords: tuple or None = None,
-    compute_stack: bool = False, filt: tuple or None = None,
+    preproloc: str = None, network: str or List[str] = None,
+    station: str or List[str] = None,
+    geocoords: Tuple[float, float, float, float] = None,
+    compute_stack: bool = False, filt: Tuple[float, float] = None,
     binrad: float = np.cos(np.radians(30)), append_pp: bool = False,
     multiple: bool = False, save: str or bool = False, verbose: bool = True,
     format: str = 'hdf5', mc_backend: str = 'joblib'
@@ -1555,23 +1574,18 @@ def init_ccp(
     The stack can be limited to some networks and
     stations.
 
+    :param rfloc: Parental directory in that the RFs are saved.
+    :type rfloc: str
     :param spacing: Angular distance between each bingrid point.
     :type spacing: float
     :param vel_model: Velocity model located in data. Either iasp91 (1D
         raytracing) or 3D for 3D raytracing using a model compiled from GyPSuM.
     :type vel_model: str
-    :param phase: Either 'S' or 'P'. Use 'S' if dataset contains both SRFs and
-        PRFs.
+    :param phase: The teleseismic phase to be used.
     :type phase: str
-    :param statloc: Directory in that the station xmls are saved,
-        defaults to 'output/stations'
-    :type statloc: str, optional
     :param preproloc: Parental directory in that the preprocessed miniseeds are
-        saved, defaults to 'output/waveforms/preprocessed'
+        saved, defaults to None. **Should be None when working with h5 files!**
     :type preproloc: str, optional
-    :param rfloc: Parental directory in that the RFs are saved,
-        defaults to 'output/waveforms/RF'
-    :type rfloc: str, optional
     :param network: Network or networks that are to be included in the ccp
         stack.
         Standard unix wildcards are allowed. If None, the whole database
@@ -1579,26 +1593,26 @@ def init_ccp(
     :type network: str or list, optional
     :param station: Station or stations that are to be included in the ccp
         stack. Standard unix wildcards are allowed. Can only be list if
-        type(network)=str. If None, the whole database will be used.
+        type(network)==str. If None, the whole database will be used.
         The default is None.
     :type station: str or list, optional
     :param geocoords: An alternative way of selecting networks and stations.
         Given in the form (minlat, maxlat, minlon, maxlon), defaults to None
     :type geocoords: Tuple, optional
     :param compute_stack: If true it will compute the stack by calling
-        :func:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`.
+        :meth:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`.
         That can take a long time! The default is False.
     :type compute_stack: bool, optional
     :param filt: Decides whether to filter the receiver function prior to
             depth migration. Either a Tuple of form `(lowpassf, highpassf)` or
             `None` / `False`.
-    :type filt: tuple, optional
-    :param binrad: Only used if compute_stack=True
+    :type filt: Tuple[float, float], optional
+    :param binrad: *Only used if compute_stack=True*
             Defines the bin radius with bin radius = binrad*distance_bins.
             Full Overlap = cosd(30), Full coverage: 1.
             The default is full overlap.
     :type binrad: float, optional
-    :param append_pp: Only used if compute_stack=True.
+    :param append_pp: *Only used if compute_stack=True.*
         Appends piercing point locations to object. Can be used to plot
         pps on map. Not recommended for large datasets as it takes A LOT
         longer and makes the file a lot larger.
@@ -1611,12 +1625,28 @@ def init_ccp(
     :param save: Either False if the ccp should not be saved or string with
         filename will be saved. Will be saved as pickle file.
         The default is False.
-    :type save: ool or str, optional
+    :type save: bool or str, optional
     :param verbose: Display info in terminal., defaults to True
     :type verbose: bool, optional
+    :param format: The **INPUT FORMAT** from which receiver functions are read.
+        If you saved your receiver function as hdf5 files, set ==hdf5.
+        Defaults to hdf5.
+    :type format: str
+    :param mc_backend: Multi-core backend to use for the computations.
+        Can be either `"joblib"` (multiprocessing) or `"MPI"`. Not that MPI
+        compatibility is only implemented with hdf5 files.
     :raises TypeError: For wrong inputs.
     :return: CCPStack object.
     :rtype: :class:`~pyglimer.ccp.ccp.CCPstack`
+
+    .. note::
+
+        When using, `mc_backend='MPI'`. This has to be started from a terminal
+        via mpirun.
+
+    .. note::
+
+        MPI is only compatible with receiver functions saved in hdf5 format.
     """
     if phase[-1].upper() == 'S' and multiple:
         raise NotImplementedError(
@@ -1691,7 +1721,4 @@ def init_ccp(
             filt=filt, multiple=multiple,
             pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc,
             in_format=format, mc_backend=mc_backend)
-
-    # _MODEL_CACHE.clear()  # So the RAM doesn't stay super full
-
     return ccp

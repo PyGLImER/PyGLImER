@@ -12,7 +12,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Monday, 16th August 2021 04:13:35 pm
+Last Modified: Tuesday, 17th August 2021 04:52:48 pm
 '''
 
 import logging
@@ -41,7 +41,8 @@ def redownload_missing_statxmls(clients, phase, statloc, rawdir, verbose=True):
     :param clients: List of clients (see obspy documentation for
         `~obspy.Client`).
     :type clients: list
-    :param phase: Either "P" or "S", defines in which folder to look for mseeds.
+    :param phase: Either "P" or "S", defines in which folder to look for
+        mseeds.
     :type phase: str
     :param statloc: Folder, in which the station xmls are saved
     :type statloc: str
@@ -50,25 +51,24 @@ def redownload_missing_statxmls(clients, phase, statloc, rawdir, verbose=True):
     :type rawdir: str
     :param verbose: Show some extra information, by default True
     :type verbose: bool, optional
-    """    
+    """
 
     ex = os.listdir(statloc)
-    
+
     # remove file identifier
     for i, xml in enumerate(ex):
         x = xml.split('.')
         ex[i] = x[0] + '.' + x[1]
-    
     wavdir = os.path.join(rawdir, phase)
 
-    out = Parallel(n_jobs=-1)(
+    Parallel(n_jobs=-1)(
         delayed(__client__loop__)(client, ex, wavdir, statloc)
         for client in clients)
 
-        
+
 def __client__loop__(client, existing, wavdir, statloc):
     client = Client(client)
-    
+
     for _, _, files in os.walk(wavdir):
         for fi in files:
             f = fi.split('.')
@@ -79,7 +79,7 @@ def __client__loop__(client, existing, wavdir, statloc):
                 out = os.path.join(statloc, code + '.xml')
                 try:
                     stat_inv = client.get_stations(
-                        network = f[0], station=f[1], level='response',
+                        network=f[0], station=f[1], level='response',
                         filename=out)
                     stat_inv.write(out, format="STATIONXML")
                     existing.append(code)
@@ -89,8 +89,8 @@ def __client__loop__(client, existing, wavdir, statloc):
 
 class StationDB(object):
     def __init__(
-        self, dir, phase=None, use_old=False, hdf5: bool = True,
-            logdir: str or None = None):
+        self, dir: str, phase: str = None, use_old: bool = False,
+            hdf5: bool = True, logdir: str = None):
         """
         Creates a pandas database of all available receiver functions.
         This database is entirely based on the info files in the "preprocessed"
@@ -110,6 +110,9 @@ class StationDB(object):
             That is a lot faster, but it will obviously not update,
             defaults to False
         :type use_old: bool, optional
+        :param hdf5: Use HDF5 database instead of station xmls? Defaults to
+            True.
+        :type hdf5: bool, optional
         :param logdir: Directory for log file
         :type logdr: str, optional
         """
@@ -117,7 +120,7 @@ class StationDB(object):
         self.dir = dir
 
         if phase:
-            self.phase = phase.upper()           
+            self.phase = phase.upper()
 
         # 1. Initiate logger
         self.logger = logging.Logger(
@@ -316,7 +319,9 @@ class StationDB(object):
         del dataS
         return pd.DataFrame.from_dict(dataP)
 
-    def geo_boundary(self, lat, lon, phase=None):
+    def geo_boundary(
+        self, lat: Tuple[float, float], lon: Tuple[float, float],
+            phase: str = None) -> pd.DataFrame:
         """
         Return a subset of the database filtered by location.
 
@@ -342,7 +347,7 @@ class StationDB(object):
             e = self.db['N'+phase+'ret'] > 0
             subset = self.db[a & b & c & d & e]
         else:
-            subset = self.db[a & b & c & d]        
+            subset = self.db[a & b & c & d]
 
         return subset
 

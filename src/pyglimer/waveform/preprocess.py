@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Monday, 16th August 2021 12:39:58 pm
+Last Modified: Tuesday, 17th August 2021 04:22:13 pm
 '''
 
 # !/usr/bin/env python3d
@@ -20,6 +20,7 @@ import os
 import shelve
 import time
 import itertools
+from typing import Tuple
 
 import numpy as np
 from joblib import Parallel, delayed, cpu_count
@@ -113,8 +114,6 @@ def preprocess(
     # logging
     logger = logging.getLogger("pyglimer.request.preprocess")
     logger.info('\n\n\n...Preprocessing initialiased...\n')
-    if loglvl == logging.DEBUG:
-        debug = True
 
     # Logging for RF creation
     rflogger = logging.getLogger("pyglimer.request.preprocess.RF")
@@ -215,9 +214,12 @@ def preprocess(
     print("Download and preprocessing finished.")
 
 
-def __event_loop(phase, rot, pol, event, taper_perc, taper_type, model,
-                 logger, rflogger, eh, tz, ta, statloc, rawloc,
-                 preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr):
+def __event_loop(
+    phase: str, rot: str, pol: str, event: obspy.core.event.Event,
+    taper_perc: float, taper_type: str, model: obspy.taup.TauPyModel,
+    logger: logging.Logger, rflogger: logging.Logger, eh: bool, tz: float,
+    ta: float, statloc: str, rawloc: str, preproloc: str, rfloc: str,
+        deconmeth: str, hc_filt: float, netrestr: str, statrestr: str):
     """
     Loops over each event in the event catalogue
     """
@@ -287,11 +289,14 @@ def __event_loop(phase, rot, pol, event, taper_perc, taper_type, model,
     return infolist
 
 
-def __waveform_loop(phase, rot, pol, filestr, taper_perc,
-                    taper_type, model, origin_time, ot_fiss, evtlat,
-                    evtlon, depth, prepro_folder, event, logger, rflogger,
-                    by_event, eh, tz, ta, statloc, preproloc, rfloc,
-                    deconmeth, hc_filt):
+def __waveform_loop(
+    phase: str, rot: str, pol: str, filestr: str, taper_perc: float,
+    taper_type: str, model: obspy.taup.TauPyModel, origin_time: UTCDateTime,
+    ot_fiss: str, evtlat: float, evtlon: float, depth: float,
+    prepro_folder: str, event: obspy.core.event.event.Event,
+    logger: logging.Logger, rflogger: logging.Logger, by_event, eh: bool,
+    tz: float, ta: float, statloc: str, preproloc: str, rfloc: str,
+        deconmeth: str, hc_filt: float):
     """
     Loops over each waveform for a specific event and a specific station
     """
@@ -507,8 +512,11 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
     # return infodict
 
 
-def __cut_resample(st, logger, first_arrival, network, station,
-                   prepro_folder, filestr, taper_perc, taper_type, eh, tz, ta):
+def __cut_resample(
+    st: obspy.Stream, logger: logging.Logger, first_arrival: UTCDateTime,
+    network: str, station: str, prepro_folder: str, filestr: str,
+    taper_perc: float, taper_type: str, eh: bool, tz: float,
+        ta: float) -> obspy.Stream:
     """Cut and resample raw file. Will overwrite original raw"""
 
     start = time.time()
@@ -568,10 +576,13 @@ def __cut_resample(st, logger, first_arrival, network, station,
     return st
 
 
-def __rotate_qc(phase, st, station_inv, network, station, baz,
-                distance, outf, ot_fiss, event, evtlat, evtlon, depth,
-                rayp_s_deg, first_arrival, infof, logger, infodict, by_event,
-                eh, tz, statloc):
+def __rotate_qc(
+    phase: str, st: obspy.Stream, station_inv: obspy.Inventory, network: str,
+    station: str, baz: float, distance: float, outf: str, ot_fiss: str,
+    event: obspy.core.event.event.Event, evtlat: float, evtlon: float,
+    depth: float, rayp_s_deg: float, first_arrival: UTCDateTime, infof: str,
+    logger: logging.Logger, infodict: dict, by_event, eh: bool, tz: float,
+        statloc: str) -> Tuple[Stream, bool, dict]:
     """REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
     Bugs occur here due to station inventories without response information
     Looks like the bulk downloader sometimes donwnloads
@@ -692,7 +703,7 @@ def __rotate_qc(phase, st, station_inv, network, station, baz,
     return st, crit, infodict
 
 
-def __file_in_db(loc, filename):
+def __file_in_db(loc: str, filename: str) -> bool:
     """Checks if file "filename" is already in location "loc"."""
     path = Path(os.path.join(loc, filename))
     if path.is_file():

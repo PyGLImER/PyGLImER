@@ -7,16 +7,14 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Monday, 16th August 2021 05:43:16 pm
+Last Modified: Tuesday, 17th August 2021 04:36:07 pm
 '''
 
-import ast
 import fnmatch
 import os
 import re
-from typing import Iterable, List, Tuple
+from typing import Iterable, Tuple
 import warnings
-from copy import deepcopy
 
 import numpy as np
 # from numpy.core.fromnumeric import compress
@@ -33,12 +31,12 @@ h5_FMTSTR = os.path.join("{dir}", "{network}.{station}.h5")
 
 class DBHandler(h5py.File):
     """
-    The actual file handler of the hdf5 correlation files.
+    The actual file handler of the hdf5 receiver function files.
 
     .. warning::
 
         **Should not be accessed directly. Access
-        :class:`~seismic.db.corr_hdf5.CorrelationDataBase` instead.**
+        :class:`~pyglimer.database.rfh5.RFDataBase` instead.**
 
     Child object of :class:`h5py.File` and inherets all its attributes and
     functions in addition to functions that are particularly useful for noise
@@ -72,18 +70,16 @@ class DBHandler(h5py.File):
     def add_rf(
             self, data: RFTrace or RFStream, tag: str = 'rf'):
         """
-        Add correlation data to the hdf5 file. Can be accessed using the
-        :func:`~seismic.db.corr_hdf5.DBHandler.get_data()` method.
+        Add receiver function to the hdf5 file. The data can later be accessed
+        using the :meth:`~pyglimer.database.rfh5.DBHandler.get_data()` method.
 
         :param data: Data to save. Either a
-            :class:`~seismic.correlate.correlate.CorrTrace` object or a
-            :class:`~seismic.correlate.correlate.CorrStream` holding one or
+            :class:`~pyglimer.rf.create.RFTrace` object or a
+            :class:`~pyglimer.rf.create.RFStream` holding one or
             several traces.
-        :type data: CorrTrace or CorrStream
+        :type data: RFTrace or RFStream
         :param tag: The tag that the data should be saved under. By convention,
-            unstacked correlations are saved with the tag `'subdivision'`,
-            whereas stacks are saved with the tag `stack_$stacklen$`, where
-            $stacklen$ is to be replaced by the length of the stack in seconds.
+            unstacked correlations are saved with the tag `'rf'`.
         :raises TypeError: for wrong data type.
         """
         if not isinstance(data, RFTrace) and\
@@ -111,40 +107,32 @@ class DBHandler(h5py.File):
                 warnings.warn("The dataset %s is already in file and will be \
 omitted." % path, category=UserWarning)
 
-    def get_corr_options(self) -> dict:
-        try:
-            sco = str(self['co'].attrs['co'])
-            co = ast.literal_eval(sco)
-        except KeyError:
-            raise KeyError('No correlation options in file')
-        return co
-
     def get_data(
         self, network: str, station: str, phase: str, evt_time: UTCDateTime,
             tag: str = 'rf', pol: str = 'v') -> RFStream:
         """
-        Returns a :class:`~seismic.correlate.correlate.CorrStream` holding
+        Returns a :class:`~pyglimer.rf.create.RFStream` holding
         all the requested data.
 
         .. note::
 
             Wildcards are allowed for all parameters.
 
-        :param network: network (combination), e.g., IU-YP
+        :param network: network code, e.g., IU
         :type network: str
-        :param station: station (combination), e.g., HRV-BRK
+        :param station: station code, e.g., HRV
         :type station: str
-        :param channel: channel (combination), e.g., BZ-BR
-        :type channel: str
-        :param corr_start: starttime of the time windows used to computed this
-            correlation, defaults to None
-        :type corr_start: UTCDateTime, optional
-        :param corr_end: endtime of the time windows used to computed this
-            correlation, defaults to None
-        :type corr_end: UTCDateTime, optional
-        :return: a :class:`~seismic.correlate.correlate.CorrStream` holding
-            all the requested data.
-        :rtype: CorrStream
+        :param phase: Teleseismic phase
+        :type phase: str
+        :param evt_time: Origin Time of the Event
+        :type evt_time: UTCDateTime, optional
+        :param tag: Data tag (e.g., 'rf'). Defaults to rf.
+        :type tag: str, optional
+        :param pol: RF Polarisation. Defaults to v.
+        :type pol: str, optional
+        :return: a :class:`~pyglimer.rf.create.RFStream` holding the requested
+            data.
+        :rtype: RFStream
         """
         if isinstance(evt_time, UTCDateTime):
             evt_time = evt_time.format_fissures()
@@ -181,6 +169,18 @@ omitted." % path, category=UserWarning)
     def get_coords(
         self, network: str, station: str, phase: str = None) -> Tuple[
             float, float, float]:
+        """
+        Return the coordinates of the station.
+
+        :param network: Network Code.
+        :type network: str
+        :param station: Station Code
+        :type station: str
+        :param phase: Teleseismic Phase, defaults to None
+        :type phase: str, optional
+        :return: Latitude (dec deg), Longitude (dec deg), Elevation (m)
+        :rtype: Tuple[ float, float, float]
+        """
 
         # This might look confusing but it's actually not looping but just
         # choosing the first available file
@@ -198,11 +198,37 @@ omitted." % path, category=UserWarning)
                             rf[0].stats.station_longitude,
                             rf[0].stats.station_elevation)
         # No data?
+        warnings.warn(
+            'No Data for station %s.%s and phase %s. Returns None.' % (
+                network, station, phase
+            ))
         return None, None, None
 
     def walk(
         self, tag: str, network: str, station: str, phase: str,
             pol: str = 'v') -> Iterable[RFTrace]:
+        """
+        Iterate over all receiver functions with the given properties.
+
+        :param tag: data tag
+        :type tag: str
+        :param network: Network code
+        :type network: str
+        :param station: Statio ncode
+        :type station: str
+        :param phase: Teleseismic phase
+        :type phase: str
+        :param pol: RF-Polarisation, defaults to 'v'
+        :type pol: str, optional
+        :return: Iterator
+        :rtype: Iterable[RFTrace]
+        :yield: one :class:`~pyglimer.rf.create.RFTrace` per receiver function.
+        :rtype: Iterator[Iterable[RFTrace]]
+
+        .. note::
+        
+            Does not accepts wildcards.
+        """
         for v in self[tag][network][station][phase][pol].values():
             yield RFTrace(np.array(v), header=read_hdf5_header(v))
 
@@ -247,11 +273,11 @@ class RFDataBase(object):
             >>>     print(list(rfdb.keys()))
             ['rf', 'rfstack']
             >>>     # find available channels with tag subdivision
-            >>>     print(cdb.get_available_channels(
+            >>>     print(rfdb.get_available_channels(
             >>>         'subdivision', 'XN-XN', 'NEP06-NEP06'))
             ['HHE-HHN', 'HHE-HHZ', 'HHN-HHZ']
             >>>     # Get Data from all times, specific channel and tag
-            >>>     st = cdb.get_data(
+            >>>     st = rfdb.get_data(
             >>>         'XN-XN', 'NEP06-NEP06', 'HHE-HHN', 'subdivision')
             >>> print(st.count())
             250
