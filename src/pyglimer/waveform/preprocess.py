@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 17th August 2021 04:22:13 pm
+Last Modified: Thursday, 19th August 2021 12:23:34 pm
 '''
 
 # !/usr/bin/env python3d
@@ -637,7 +637,7 @@ def __rotate_qc(
             infodict['statlat'] = station_inv[0][0][0].latitude
             infodict['statlon'] = station_inv[0][0][0].longitude
             infodict['statel'] = station_inv[0][0][0].elevation
-            raise SNRError(np.array2string(noisemat))
+            raise SNRError('QC rejected %s' % np.array2string(noisemat))
 
     elif phase[-1] == "S":
         st, crit, f, noisemat = qcs(st, dt, sampling_f, tz)
@@ -650,7 +650,7 @@ def __rotate_qc(
             infodict['statlat'] = station_inv[0][0][0].latitude
             infodict['statlon'] = station_inv[0][0][0].longitude
             infodict['statel'] = station_inv[0][0][0].elevation
-            raise SNRError(np.array2string(noisemat))
+            raise SNRError('QC rejected %s' % np.array2string(noisemat))
 
     #      WRITE FILES     #
     try:

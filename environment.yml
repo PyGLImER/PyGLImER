@@ -25,6 +25,7 @@ dependencies:
   - tqdm
   - flake8
   - pyvista
+  - yaml
   - pip:
     - global-land-mask
     - sphinx

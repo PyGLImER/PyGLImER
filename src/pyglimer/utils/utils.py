@@ -11,16 +11,25 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 2nd July 2021 04:08:03 pm
+Last Modified: Thursday, 19th August 2021 01:17:57 pm
 
 '''
 
 from logging import warn
+import logging
 import os
 
 from joblib import Parallel, delayed
 from obspy.clients.fdsn import Client, header
 from obspy.clients.fdsn.header import URL_MAPPINGS
+
+
+log_lvl = {
+    'DEBUG': logging.DEBUG,
+    'INFO': logging.INFO,
+    'WARNING': logging.WARNING,
+    'CRITICAL': logging.CRITICAL,
+    'ERROR': logging.ERROR}
 
 
 def dt_string(dt: float) -> str:

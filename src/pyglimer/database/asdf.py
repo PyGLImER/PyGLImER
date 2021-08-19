@@ -11,7 +11,7 @@ Seismic Format (asdf).
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2021 03:24:30 pm
-Last Modified: Wednesday, 4th August 2021 01:55:49 pm
+Last Modified: Thursday, 19th August 2021 11:36:28 am
 '''
 
 
@@ -95,7 +95,8 @@ def writeraw(
             # Retrieve eventid - not the most elgant way, but works
             evtid = event.resource_id
             try:
-                ds.add_quakeml(event)
+                if st.count() >= 3:
+                    ds.add_quakeml(event)
             except ValueError:
                 if verbose:
                     warn(

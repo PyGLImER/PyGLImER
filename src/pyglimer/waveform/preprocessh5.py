@@ -12,23 +12,22 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Monday, 16th August 2021 01:09:26 pm
+Last Modified: Thursday, 19th August 2021 02:31:05 pm
 '''
 
 from glob import glob
 import logging
 import os
-from typing import Tuple
+from typing import List, Tuple
 
 import numpy as np
-from joblib import Parallel, delayed, cpu_count
+from joblib import Parallel, delayed
 import obspy
 from obspy import Stream, UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pyasdf import ASDFDataSet
 from tqdm.std import tqdm
 
-from pyglimer.utils.signalproc import resample_or_decimate
 from pyglimer.database.rfh5 import RFDataBase
 from .qc import qcp, qcs
 from .rotate import rotate_LQT_min, rotate_PSV
@@ -76,7 +75,7 @@ def preprocessh5(
     :type phase: str
     :param rot: The Coordinate system that the seismogram should be rotated to.
     :type rot: str
-    :param pol: Polarisationfor PRFs. Can be either 'v' or 'h' (vertical or 
+    :param pol: Polarisationfor PRFs. Can be either 'v' or 'h' (vertical or
         horizontal).
     :type pol: str
     :param taper_perc: Percentage for the pre deconvolution taper.
@@ -85,9 +84,9 @@ def preprocessh5(
     :type model: obspy.taup.TauPyModel
     :param taper_type: type of taper (see obspy)
     :type taper_type: str
-    :param tz: Length of time window before theoretical arrival (seconds) 
+    :param tz: Length of time window before theoretical arrival (seconds)
     :type tz: int
-    :param ta: Length of time window after theoretical arrival (seconds) 
+    :param ta: Length of time window after theoretical arrival (seconds)
     :type ta: int
     :param rawloc: Directory, in which the raw data is saved.
     :type rawloc: str
@@ -101,7 +100,7 @@ def preprocessh5(
     :type netrestr: str
     :param statrestr: Station restrictions
     :type statrestr: str
-    :param logger: 
+    :param logger: Logger to use
     :type logger: logging.Logger
     :param rflogger: [description]
     :type rflogger: logging.Logger
@@ -155,6 +154,18 @@ def _preprocessh5_single(
     f = hdf5_file
     net, stat, _ = os.path.basename(f).split('.')
     code = '%s.%s' % (net, stat)
+
+    outf = os.path.join(rfloc, code)
+
+    # Find out which files have already been processed:
+    if os.path.isfile(outf+'.h5'):
+        with RFDataBase(outf) as rfdb:
+            ret, rej = rfdb.get_known_waveforms()
+            rflogger.debug('Already processed waveforms: %s' % str(ret))
+            rflogger.debug('\nAlready rejected waveforms: %s' % str(rej))
+    else:
+        ret = []
+        rej = []
     with ASDFDataSet(f, mode='r') as ds:
         # get station inventory
         inv = ds.waveforms[code].StationXML
@@ -167,16 +178,23 @@ def _preprocessh5_single(
             rf_temp = __station_process__(
                 st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
                 ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
-                distance, rayp, rayp_s_deg, toa)
+                distance, rayp, rayp_s_deg, toa, rej, ret)
             if rf_temp is not None:
                 rf.append(rf_temp)
             # Write regularly to not clutter too much into the RAM
-            if rf.count() >= 100:
-                with RFDataBase(os.path.join(rfloc, code)) as rfdb:
+            if rf.count() >= 30:
+                with RFDataBase(outf) as rfdb:
+                    rflogger.info('Writing to file %s....' % outf)
                     rfdb.add_rf(rf)
+                    rfdb.add_known_waveform_data(ret, rej)
+                    rflogger.info('..written.')
                 rf.clear()
-    with RFDataBase(os.path.join(rfloc, code)) as rfdb:
+    with RFDataBase(outf) as rfdb:
+        rflogger.info('Writing to file %s....' % outf)
         rfdb.add_rf(rf)
+        rfdb.add_known_waveform_data(ret, rej)
+        rflogger.info('..written.')
+    rf.clear()
 
 
 def compute_toa(
@@ -220,10 +238,18 @@ def compute_toa(
 def __station_process__(
     st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz, ta,  deconmeth,
     hc_filt, logger, rflogger, net, stat, baz, distance, rayp,
-        rayp_s_deg, toa):
+        rayp_s_deg, toa, rej: List[str], ret: List[str]):
     """
     Processing that is equal for each waveform recorded on one station
     """
+    # Is the data already processed?
+    origin = (evt.preferred_origin() or evt.origins[0])
+    ot_fiss = UTCDateTime(origin.time).format_fissures()
+    ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]
+    if ot_fiss in rej or ot_fiss in ret:
+        rflogger.debug('RF with ot %s already processed.' % ot_fiss)
+        return
+
     # Remove repsonse
     st.attach_response(inv)
     st.remove_response()
@@ -238,13 +264,9 @@ def __station_process__(
 
     infodict = {}
 
-    origin = (evt.preferred_origin() or evt.origins[0])
-    ot_fiss = UTCDateTime(origin.time).format_fissures()
-    ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]
-
     # create RF
     try:
-        st, crit, infodict = __rotate_qc(
+        st, _, infodict = __rotate_qc(
             phase, st, inv, net, stat, baz, distance, ot_fiss, evt,
             origin.latitude, origin.longitude, origin.depth, rayp_s_deg, toa,
             logger, infodict, tz, pol)
@@ -255,7 +277,6 @@ def __station_process__(
             st, ia = rotate_LQT_min(st, phase)
             # additional QC
             if ia < 5 or ia > 75:
-                crit = False
                 raise SNRError("""The estimated incidence angle is
                                 unrealistic with """ + str(ia) + 'degree.')
 
@@ -278,9 +299,11 @@ def __station_process__(
         RF = createRF(
             st, phase, pol=pol, info=infodict, trim=trim,
             method=deconmeth)
+        ret.append(ot_fiss)
 
     except SNRError as e:
         rflogger.info(e)
+        rej.append(ot_fiss)
         return None
 
     except Exception as e:
@@ -332,7 +355,7 @@ def __rotate_qc(
             infodict['statlat'] = station_inv[0][0][0].latitude
             infodict['statlon'] = station_inv[0][0][0].longitude
             infodict['statel'] = station_inv[0][0][0].elevation
-            raise SNRError(np.array2string(noisemat))
+            raise SNRError('QC rejected %s' % np.array2string(noisemat))
 
     elif phase[-1] == "S":
         st, crit, f, noisemat = qcs(st, dt, sampling_f, tz)
@@ -345,7 +368,7 @@ def __rotate_qc(
             infodict['statlat'] = station_inv[0][0][0].latitude
             infodict['statlon'] = station_inv[0][0][0].longitude
             infodict['statel'] = station_inv[0][0][0].elevation
-            raise SNRError(np.array2string(noisemat))
+            raise SNRError('QC rejected %s' % np.array2string(noisemat))
 
     # WRITE AN INFO FILE
     # append_info: [key,value]

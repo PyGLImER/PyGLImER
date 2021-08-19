@@ -7,13 +7,13 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Wednesday, 18th August 2021 02:46:58 pm
+Last Modified: Thursday, 19th August 2021 02:02:05 pm
 '''
 
 import fnmatch
 import os
 import re
-from typing import Iterable, Tuple
+from typing import Iterable, List, Tuple
 import warnings
 
 import numpy as np
@@ -66,6 +66,23 @@ class DBHandler(h5py.File):
 
     def _close(self):
         self.close()
+
+    def add_known_waveform_data(self, ret: List[str], rej: List[str]):
+        """
+        Known waveforms to receive. Is just a dictionary with two keys (each
+        of which has a list as item with all retained or rejected waveforms).
+
+        :param known: dict{ret: List[str], rej: List[str]}
+        :type known: dict
+        """
+        try:
+            ds = self.create_dataset('known', data=np.empty(1))
+        except ValueError:
+            ds = self['known']
+            # Already existing, just change attributes
+            pass
+        ds.attrs['ret'] = str(ret)
+        ds.attrs['rej'] = str(rej)
 
     def add_rf(
             self, data: RFTrace or RFStream, tag: str = 'rf'):
@@ -203,6 +220,16 @@ omitted." % path, category=UserWarning)
                 network, station, phase
             ))
         return None, None, None
+
+    def get_known_waveforms(self) -> Tuple[List[str], List[str]]:
+        try:
+            ds = self['known']
+            rej = eval(ds.attrs['rej'])
+            ret = eval(ds.attrs['ret'])
+        except (KeyError, AttributeError):
+            ret = []
+            rej = []
+        return ret, rej
 
     def walk(
         self, tag: str, network: str, station: str, phase: str,
