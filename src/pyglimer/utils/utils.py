@@ -11,7 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Thursday, 19th August 2021 03:15:55 pm
+Last Modified: Thursday, 19th August 2021 04:17:34 pm
 
 '''
 
@@ -74,7 +74,6 @@ def download_full_inventory(statloc: str, fdsn_client: list):
         if f[-1].lower() != 'xml':
             continue
         bulk.append((f[0], f[1], '*', '*', '*', '*'))
-    print(bulk)
     if isinstance(fdsn_client, str):
         fdsn_client = [fdsn_client]
     # That bit is stolen from the massdownloader
@@ -112,7 +111,7 @@ def download_full_inventory(statloc: str, fdsn_client: list):
 
         fdsn_client = tuple(providers)
 
-    _ = Parallel(n_jobs=-1)(
+    _ = Parallel(n_jobs=1)(
         delayed(__client__loop__)(client, statloc, bulk)
         for client in fdsn_client)
 

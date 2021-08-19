@@ -12,7 +12,7 @@ Create a 3D velocity model using Litho1.0
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 01st May 2020 12:11:03
-Last Modified: Tuesday, 25th May 2021 05:26:24 pm
+Last Modified: Thursday, 19th August 2021 04:33:25 pm
 '''
 
 
@@ -86,14 +86,10 @@ class ComplexModel(object):
         del xs, ys, zs
 
         self.z = z
-        # self.ndec = len(str(lat[1]-lat[0]))-1
 
         if flatten:
             self.vpf, self.vsf, self.zf = self.flatten(vp, vs)
         else:
-            # if not zf:
-            #     raise ValueError("""If flatten=False, a zf vector has to be
-            #                      provided""")
             self.vpf = vp
             self.vsf = vs
             self.zf = zf
@@ -260,8 +256,6 @@ class ComplexModel(object):
             surface_count=21,
             # needs to be a large number for good volume rendering
             ))
-        # plot(figvp)
-        # plot(figvs)
         return figvp, figvs
 
     # program-specific Exceptions
@@ -312,11 +306,8 @@ def load_avvmodel():
     # latitude and longitude vector
     latv = np.arange(-90, 91)
     lonv = np.arange(-180, 181)
-    # self.depth = np.arange(-10, 801)
 
     # Create grid, spacing .5 deg, 1km
-    # self.vp, self.vs, _ = np.mgrid[-180:181, -360:361, -10:801]
-
     # Grid of average P and S-wave velocities, used for P-SV-SH rotation
     avpS, avsS = np.mgrid[-90:91, -180:181]
     avpP, avsP = np.mgrid[-90:91, -180:181]
@@ -610,9 +601,6 @@ def load_gyps(
          850))
 
     # Interpolation depth
-    # zq = np.unique(np.sort(np.hstack(zb, zd)))
-    # imax = np.where(zq > 850)
-    # zq = zq[:imax]
     zq = np.arange(0, maxz+res, res)
 
     # Interpolate background velocity model
@@ -635,7 +623,7 @@ def load_gyps(
     lat = np.arange(-90, 91, 1)
     lon = np.arange(-180, 181, 1)
 
-    # Create a velocity model with 1km spacing
+    # Create a velocity model with 1deg spacing
     model = ComplexModel(zq, vp, vs, lat, lon)
 
     # Pickle model
