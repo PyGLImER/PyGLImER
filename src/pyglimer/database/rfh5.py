@@ -7,7 +7,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Tuesday, 17th August 2021 04:36:07 pm
+Last Modified: Wednesday, 18th August 2021 02:46:58 pm
 '''
 
 import fnmatch
@@ -226,8 +226,8 @@ omitted." % path, category=UserWarning)
         :rtype: Iterator[Iterable[RFTrace]]
 
         .. note::
-        
-            Does not accepts wildcards.
+
+            Does not accept wildcards.
         """
         for v in self[tag][network][station][phase][pol].values():
             yield RFTrace(np.array(v), header=read_hdf5_header(v))

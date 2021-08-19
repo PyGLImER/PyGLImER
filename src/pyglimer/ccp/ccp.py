@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 17th August 2021 05:03:09 pm
+Last Modified: Thursday, 19th August 2021 11:12:43 am
 '''
 
 # !/usr/bin/env python3
@@ -22,29 +22,21 @@ from glob import glob
 import os
 import pickle
 import logging
-# import shutil
 import time
 
 from copy import deepcopy
 from typing import List, Tuple
 from joblib import Parallel, delayed, cpu_count
 import numpy as np
-from scipy.spatial import cKDTree, kdtree
 from scipy.interpolate import RegularGridInterpolator
 
-
-from obspy import read_inventory
 import scipy.io as sio
-# from mpl_toolkits.basemap import Basemap
 from global_land_mask import globe
-# from pathlib import Path
 from psutil import virtual_memory
-# import subprocess
 from tqdm import tqdm
 import pyvista as pv
 import vtk
 
-import pyglimer
 from pyglimer.ccp.compute.bin import BinGrid
 from pyglimer.ccp.plot_utils.plot_bins import plot_bins
 from pyglimer.ccp.plot_utils.plot_cross_section import plot_cross_section
@@ -53,7 +45,7 @@ from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.database.stations import StationDB
 from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
 from pyglimer.plot.plot_volume import VolumePlot, VolumeExploration
-from pyglimer.rf.create import RFStream, RFTrace, read_rf
+from pyglimer.rf.create import RFStream, read_rf
 from pyglimer.rf.moveout import res, maxz, maxzm
 from pyglimer.utils.createvmodel import ComplexModel
 from pyglimer.utils.geo_utils import epi2euc, geo2cart
@@ -135,7 +127,8 @@ class CCPStack(object):
 
     def __init__(
         self, latitude: List[float], longitude: List[float], edist: float,
-            phase: str, verbose: bool = True, logdir: str or None = None):
+        phase: str, verbose: bool = True, logdir: str = None,
+            _load: str = None):
         """
         Creates an empy object template for a CCP stack.
 
@@ -154,8 +147,16 @@ class CCPStack(object):
         :type verbose: bool, optional
         :param logdir: Directory for log file
         :type logdr: str, optional
+        :param _load: Parameter is only used internally when loading from a
+            binary numpy file. Then, this passes a filename.
+        :type _load: str
         """
+        # Loading file from npz
+        if _load:
+            self = _load_ccp_npz(self, _load)
+            return
 
+        # Else just initialise an empty object
         # Loggers for the CCP script
         self.logger = logging.getLogger('pyglimer.ccp.ccp')
         self.logger.setLevel(logging.INFO)
@@ -307,7 +308,8 @@ class CCPStack(object):
         qill = np.zeros((Nq, Nz))
 
         # Interpolate each depth
-        for _i, (_ccpcol, _illumcol) in enumerate(zip(self.ccp.T, self.hits.T)):
+        for _i, (_ccpcol, _illumcol) in enumerate(
+                zip(self.ccp.T, self.hits.T)):
             qccp[:, _i] = ccp_interpolator(_ccpcol)
             qill[:, _i] = ill_interpolator(_illumcol)
 
@@ -508,7 +510,7 @@ class CCPStack(object):
             folder, '**', '*.%s' % in_format), recursive=True)
 
         # Special rule for files imported from Matlab
-        if network == 'matlab' or network == 'raysum':
+        if network in ('matlab', 'raysum'):
             pattern.append('*.sac')
 
         # Set filter patterns
@@ -586,6 +588,35 @@ code if you want to filter by station")
         n_closest_points: int, vel_model: str, latb: Tuple[float, float],
         lonb: Tuple[float, float], filt: Tuple[float, float], endi,
             mc_backend: str):
+        """
+        Computes a CCP stack by reading a rf database in hdf5.
+
+        :param streams: List of hdf5 files to read.
+        :type streams: List[str]
+        :param multiple: Regard crustal multiples for stack?
+        :type multiple: bool
+        :param append_pp: Append ppoints to the object?
+        :type append_pp: bool
+        :param n_closest_points: number of closest points to query from kd-tree
+        :type n_closest_points: int
+        :param vel_model: The velocity mdoel to use for depth migration.
+        :type vel_model: str
+        :param latb: Boundary for the CCP calculation in form
+            `(minlat, maxlat)`.
+        :type latb: Tuple[float, float]
+        :param lonb: Boundary for the CCP calculation in form
+            `(minlon, maxlon)`.
+        :type lonb: Tuple[float, float]
+        :param filt: Filter to impose on rfs before migration. Either False
+            or tuple in form (minfreq, maxfreq).
+        :type filt: Tuple[float, float]
+        :param endi: Only relevant if `multiple=True`. Last depth index to
+            consider for multiple computation.
+        :type endi: int
+        :param mc_backend: Multi-core backend to Use. **This does only support
+            `joblib`**
+        :type mc_backend: str
+        """
         # note that streams are actually files - confusing variable name
         if mc_backend.lower() == 'joblib':
             out = Parallel(n_jobs=-1)(
@@ -635,6 +666,37 @@ code if you want to filter by station")
         lonb: Tuple[float, float], filt: Tuple[float, float]) -> Tuple[
             List[np.ndarray], List[np.ndarray], List[np.ndarray],
             List[np.ndarray], List[np.ndarray]]:
+        """
+        Does ppoint calculation and depth migration for rf-functions in hdf5
+        format. (per file based)
+        Subsequently, computes the closest gridpoints in the ccp object.
+
+        :param f: HDF5 file to read.
+        :type f: str
+        :param multiple: Regard crustal multiples for stack?
+        :type multiple: bool
+        :param append_pp: Append ppoints to the object?
+        :type append_pp: bool
+        :param n_closest_points: number of closest points to query from kd-tree
+        :type n_closest_points: int
+        :param vel_model: The velocity mdoel to use for depth migration.
+        :type vel_model: str
+        :param latb: Boundary for the CCP calculation in form
+            `(minlat, maxlat)`.
+        :type latb: Tuple[float, float]
+        :param lonb: Boundary for the CCP calculation in form
+            `(minlon, maxlon)`.
+        :type lonb: Tuple[float, float]
+        :param filt: Filter to impose on rfs before migration. Either False
+            or tuple in form (minfreq, maxfreq).
+        :type filt: Tuple[float, float]
+        :return: (List of lateral indices of closest bins,  List of depth
+            indices of closest gridpoint, list of rf data to stack for each
+            of those indices, list of multiple data (pps), list of multiple
+            data (pss))
+        :rtype: Tuple[ List[np.ndarray], List[np.ndarray], List[np.ndarray],
+            List[np.ndarray], List[np.ndarray]]
+        """
         # note that those are actually files - confusing variable name
         net, stat, _ = os.path.basename(f).split('.')
         kk = []
@@ -663,6 +725,36 @@ code if you want to filter by station")
         n_closest_points: int, vel_model: str, latb: Tuple[float, float],
         lonb: Tuple[float, float], filt: Tuple[float, float], endi: int,
             mc_backend: str):
+        """
+        Computes a CCP stack by reading a rf database in sac.
+
+        :param streams: List of SAC files to read.
+        :type streams: List[str]
+        :param multiple: Regard crustal multiples for stack?
+        :type multiple: bool
+        :param append_pp: Append ppoints to the object?
+        :type append_pp: bool
+        :param n_closest_points: number of closest points to query from kd-tree
+        :type n_closest_points: int
+        :param vel_model: The velocity mdoel to use for depth migration.
+        :type vel_model: str
+        :param latb: Boundary for the CCP calculation in form
+            `(minlat, maxlat)`.
+        :type latb: Tuple[float, float]
+        :param lonb: Boundary for the CCP calculation in form
+            `(minlon, maxlon)`.
+        :type lonb: Tuple[float, float]
+        :param filt: Filter to impose on rfs before migration. Either False
+            or tuple in form (minfreq, maxfreq).
+        :type filt: Tuple[float, float]
+        :param endi: Only relevant if `multiple=True`. Last depth index to
+            consider for multiple computation.
+        :type endi: int
+        :param mc_backend: Multi-core backend to Use. **This does only support
+            `joblib`**
+        :type mc_backend: str
+        :raises NotImplementedError: For uknown mc backends.
+        """
         if mc_backend.upper() == 'MPI':
             raise NotImplementedError(
                 'MPI in conjunction with sac is not implemented.'
@@ -721,14 +813,18 @@ only show the progress per chunk.')
             out = Parallel(n_jobs=num_cores)(
                 delayed(self.multicore_stack)(
                     st, append_pp, n_closest_points, vel_model,
-                    latb, lonb, filt, i, multiple)
-                for i, st in zip(
+                    latb, lonb, filt, multiple)
+                for _, st in zip(
                     tqdm(range(num_split)),
                     chunks(stream_chunk, len_split)))
 
             self._unpack_joblib_output(multiple, endi, out)
 
     def _unpack_joblib_output(self, multiple: bool, endi: int, out: Tuple):
+        """
+        Unpack the output that comes from joblib and add stack them in the CCP
+        object.
+        """
         # Awful way to solve it, but the best I could find
         if multiple:
             for kk, jj, datal, datalm1, datalm2 in out:
@@ -738,7 +834,13 @@ only show the progress per chunk.')
             for kk, jj, datal, _, _ in out:
                 self._unpack_output(kk, jj, datal)
 
-    def _unpack_output_multiple(self, kk, jj, datal, datalm1, datalm2, endi):
+    def _unpack_output_multiple(
+        self, kk: List[int], jj: List[int], datal: List[float],
+            datalm1: List[float], datalm2: List[float], endi: int):
+        """
+        Unpack the output of the kdtree and stack them into the CCP object.
+        Use this function if `multiple=True`
+        """
         # Count RFs
         self.N += self.N
         for k, j, data, datam1, datam2 in zip(kk, jj, datal, datalm1, datalm2):
@@ -763,7 +865,11 @@ only show the progress per chunk.')
                 else:
                     raise IndexError(e)
 
-    def _unpack_output(self, kk, jj, datal):
+    def _unpack_output(self, kk: List[int], jj: List[int], datal: List[float]):
+        """
+        Unpack the output of the kdtree and stack them into the CCP object.
+        Use this function if `multiple=False`.
+        """
         # Count RFs
         self.N += self.N
         for k, j, data in zip(kk, jj, datal):
@@ -772,8 +878,12 @@ only show the progress per chunk.')
             # hit counter + 1
             self.illum[k, j] = self.illum[k, j] + 1
 
-    def multicore_stack(self, stream, append_pp, n_closest_points, vmodel,
-                        latb, lonb, filt, idx, multiple):
+    def multicore_stack(
+        self, stream: List[str], append_pp: bool, n_closest_points: int,
+        vmodel: str, latb: Tuple[float, float], lonb: Tuple[float, float],
+        filt: Tuple[float, float], multiple: bool) -> Tuple[
+        List[int], List[int], List[np.ndarray], List[np.ndarray], List[
+            np.ndarray]]:
         """
         Takes in chunks of data to be processed on one core.
 
@@ -796,8 +906,6 @@ only show the progress per chunk.')
         :param filt: Should the RFs be filtered before the ccp stack?
             If so, provide (lowcof, highcof).
         :type filt: bool or tuple]
-        :param idx: Index for progress bar
-        :type idx: int
         :return: Three lists containing indices and rf-data.
         :rtype: list, list, list
         """
@@ -941,7 +1049,6 @@ only show the progress per chunk.')
         endi = np.where(self.z == z_multiple)[0][0] + 1
         if multiple == 'linear':
 
-            # self.ccp = np.divide(self.bins, self.illum+1)
             self.ccp = np.hstack(((
                 np.divide(self.bins[:, :endi], self.illum[:, :endi]+1) +
                 np.divide(
@@ -972,8 +1079,9 @@ only show the progress per chunk.')
         elif not multiple:
             self.ccp = np.divide(self.bins, self.illum+1)
         else:
-            raise ValueError('The requested multiple stacking mode is \
-                              misspelled or not yet implemented')
+            raise ValueError(
+                'The requested multiple stacking mode is \
+misspelled or not yet implemented')
 
         self.hits = self.illum.copy()
 
@@ -1021,9 +1129,30 @@ only show the progress per chunk.')
         :type filename: str, optional
         :param folder: Output folder, defaults to 'output/ccps'
         :type folder: str, optional
-        :param fmt: Either "pickle" or "matlab" for .mat, defaults to "pickle".
+        :param fmt: Either `"pickle"`, `'npz'` or `"matlab"` for .mat,
+            defaults to "pickle".
         :type fmt: str, optional
         :raises ValueError: For unknown formats.
+
+        .. note::
+
+            Saving in numpy (npz) format is the most robust option. However,
+            loading those files will take the longest time as some attributes
+            have to be recomputed. **NUMPY FORMAT IS RECOMMENDED FOR
+            ARCHIVES!**
+
+        .. warning::
+
+            Pickling files is the fastest option, but might lead to
+            incompatibilities between different PyGLImER versions.
+            **USE PICKLE IF YOU WOULD LIKE TO SAVE FILES FOR SHORTER AMOUNTS
+            OF TIME.**
+
+        .. warning::
+
+            Saving as Matlab files is only meant if one wishes to plot with
+            the old Matlab Receiver function exploration toolset (not
+            recommended anymore).
         """
         # delete logger (cannot be pickled)
         try:
@@ -1034,24 +1163,25 @@ only show the progress per chunk.')
 
         # Standard filename
         if not filename:
-            filename = self.bingrid.phase + '_' + str(self.bingrid.edist) + \
-                '_' + str(self.binrad)
+            filename = '%s_%s_%s' % (
+                self.bingrid.phase, str(self.bingrid.edist),  str(self.binrad))
 
         # Remove filetype identifier if provided
         x = filename.split('.')
         if len(x) > 1:
-            if x[-1] == 'pkl' or x[-1] == 'mat':
+            if x[-1].lower() in ('pkl', 'mat', 'npz'):
+                fmt = x[-1].lower()
                 filename = ''.join(x[:-1])
 
         # output location
         oloc = os.path.join(folder, filename)
 
-        if fmt == "pickle":
+        if fmt in ("pickle", "pkl"):
             with open(oloc + ".pkl", 'wb') as output:
                 pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
 
         # Save as Matlab file (exporting to plot)
-        elif fmt == "matlab":
+        elif fmt in ("matlab", 'mat'):
 
             # Change vectors so it can be corrected for elevation
             # Only for old data standard
@@ -1083,6 +1213,9 @@ only show the progress per chunk.')
 
             sio.savemat(oloc + '.mat', d)
 
+        elif fmt.lower() in ('numpy', 'np', 'npz'):
+            _save_ccp_npz(self, oloc)
+
         # Unknown formats
         else:
             raise ValueError("The format type ", fmt, "is unkown.")
@@ -1097,10 +1230,9 @@ only show the progress per chunk.')
             coords = self.coords
         plot_bins(self.bingrid.stations, coords)
 
-    def compute_kdtree_volume(self,
-                              qlon: np.ndarray or list = None,
-                              qlat: np.ndarray or list = None,
-                              zmax: float = None):
+    def compute_kdtree_volume(
+        self, qlon: np.ndarray or list = None, qlat: np.ndarray or list = None,
+            zmax: float = None):
         """Using the CCP kdtree, we get the closest few points and compute
         the weighting using a distance metric. if points are too far away,
         they aren't weighted
@@ -1209,9 +1341,8 @@ only show the progress per chunk.')
 
         return qlat, qlon, qz, qill, qccp, area
 
-    def create_vtk_mesh(self, geo=True,
-                        bbox: list or None = None,
-                        filename: str or None = None):
+    def create_vtk_mesh(
+            self, geo=True, bbox: list = None, filename: str = None):
         """Creates a mesh with given bounding box s
 
         Parameters
@@ -1223,8 +1354,8 @@ only show the progress per chunk.')
             bounding box [minlon, maxlon, minlat, maxlat]. If None
             No boundaries are taken, by default None
         filename : str or None, optional
-            If set, the computed grid will be output as VTK file under the given
-            filename. This file can then later be opened using either the
+            If set, the computed grid will be output as VTK file under the
+            given filename. This file can then later be opened using either the
             plotting tool or, e.g., Paraview. If None, no file is written.
             By default, None.
 
@@ -1314,9 +1445,9 @@ only show the progress per chunk.')
 
         return grid
 
-    def explore(self, qlon: np.ndarray or list = None,
-                qlat: np.ndarray or list = None,
-                zmax: float = None):
+    def explore(
+        self, qlon: np.ndarray or list = None, qlat: np.ndarray or list = None,
+            zmax: float = None):
         """Creates a volume exploration window set. One window is for all
         plots, and the other window is generated with sliders such that one
         can explore how future plots should be generated. It technically does
@@ -1339,7 +1470,7 @@ only show the progress per chunk.')
             Minimum number of illumation points use in the interpolation,
             everything below is downweighted by the square reciprocal
         extent : list or tuple or Non, optional
-  
+
         Returns
         -------
 
@@ -1353,14 +1484,11 @@ only show the progress per chunk.')
         # Launch plotting tool
         return VolumeExploration(qlon, qlat, qz, qccp)
 
-    def plot_volume_sections(self, qlon: np.ndarray, qlat: np.ndarray,
-                             zmax: float or None = None,
-                             lonsl: float or None = None,
-                             latsl: float or None = None,
-                             zsl: float or None = None,
-                             r: float or None = None,
-                             minillum: int or None = None,
-                             show: bool = True):
+    def plot_volume_sections(
+        self, qlon: np.ndarray, qlat: np.ndarray, zmax: float or None = None,
+        lonsl: float or None = None, latsl: float or None = None,
+        zsl: float or None = None, r: float or None = None,
+            minillum: int or None = None, show: bool = True):
         """Creates the same plot as the `explore` tool, but(!) statically and
         with more options left to the user.
 
@@ -1522,7 +1650,7 @@ only show the progress per chunk.')
         return p_phase
 
 
-def read_ccp(filename: str, fmt: str or None = None) -> CCPStack:
+def read_ccp(filename: str, fmt: str = None) -> CCPStack:
     """
     Read CCP-Stack class file from input folder.
 
@@ -1530,32 +1658,72 @@ def read_ccp(filename: str, fmt: str or None = None) -> CCPStack:
         The default is 'ccp.pkl'.
     :type filename: str, optional
     :param fmt: File format, can be none if the filename has an ending,
-        possible options are "pickle. The default is None.
+        possible options are `"pickle"` or `"npz"`. The default is None.
     :type fmt: str, optional
     :raises ValueError: For unknown formats
     :return: CCPStack object
     :rtype: :class:`~pyglimer.ccp.ccp.CCPStack`
+
+    .. note::
+
+        Loading Files from numpy format will take a while as some
+        recomputations are necessary.
     """
 
     # Trying to identify filetype from ending:
     if not fmt:
         x = filename.split('.')
         if len(x) == 1:
-            raise ValueError("""Could not determine format, please provide
-                             a valid format""")
+            raise ValueError(
+                "Could not determine format, please provide a valid format")
         if x[-1] == 'pkl':
             fmt = 'pickle'
+        elif x[-1] == 'npz':
+            fmt = 'npz'
         else:
-            raise ValueError("""Could not determine format, please provide
-                             a valid format""")
+            raise ValueError(
+                "Could not determine format, please provide a valid format")
+    else:
+        fmt = fmt.lower()
 
     # Open provided file
     if fmt == "pickle":
         with open(filename, 'rb') as infile:
             ccp = pickle.load(infile)
+    elif fmt == 'npz':
+        ccp = CCPStack(None, None, None, None, _load=filename)
     else:
         raise ValueError("Unknown format ", fmt)
 
+    return ccp
+
+
+def _load_ccp_npz(ccp: CCPStack, filename: str) -> CCPStack:
+    """
+    Load a file from numpy format. For that We will do some recomputations
+    and will also have to unpack the used arrays.
+
+    :param ccp: The initialised :class:`~pyglimer.ccp.ccp.CCPStack` object.
+    :type ccp: CCPStack
+    :param filename: path to load from.
+    :type filename: str
+    :return: The loaded :class:`~pyglimer.ccp.ccp.CCPStack` object.
+    :rtype: CCPStack
+    """
+    loaded = dict(np.load(filename))
+    for k in loaded.pop('attrs_pkl'):
+        loaded[k] = loaded[k][0]
+    ccp.bingrid = BinGrid(
+        loaded.pop('statlat'), loaded.pop('statlon'), loaded.pop('edist'),
+        loaded.pop('phase'))
+    # Compute bins
+    ccp.bingrid.compute_bins()
+
+    # Initialize kdTree for Bins
+    ccp.bingrid.bin_tree()
+    ccp.coords = ccp.bingrid.bins
+    for k in loaded:
+        ccp.__dict__[k] = loaded[k]
     return ccp
 
 
@@ -1722,3 +1890,33 @@ def init_ccp(
             pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc,
             in_format=format, mc_backend=mc_backend)
     return ccp
+
+
+def _save_ccp_npz(ccp: CCPStack, oloc: str):
+    """
+    The point of this function is that, in contrast to pickling,
+    the data is stil accessible after PyGLImER has been upgraded.
+    For this, we will have to recompute some objects when loading.
+    (in particular, the bingrid object)
+    """
+    # Save the important things from the bingrid object
+    d = deepcopy(ccp.__dict__)
+    d['phase'] = deepcopy(ccp.bingrid.phase)
+    d['statlat'] = deepcopy(ccp.bingrid.latitude)
+    d['statlon'] = deepcopy(ccp.bingrid.longitude)
+    d['edist'] = deepcopy(ccp.bingrid.edist)
+    d.pop('coords')
+    d.pop('bingrid')
+
+    # Attributes that need to be changed to arrays
+    apkl = []
+    for k in d.keys():
+        if isinstance(d[k], np.ndarray):
+            continue
+        elif isinstance(d[k], list):
+            d[k] = np.array(d[k])
+            continue
+        d[k] = np.array([d[k]])
+        apkl.append(k)
+    d['attrs_pkl'] = np.array(apkl)
+    np.savez_compressed(oloc, **d)

@@ -9,7 +9,7 @@
     Lucas Sawade (lsawade@princeton.edu)
 
 Created: November 2019
-Last Modified: Thursday, 25th March 2021 03:31:51 pm
+Last Modified: Thursday, 19th August 2021 09:39:42 am
 '''
 
 import logging
@@ -49,8 +49,9 @@ def fibonacci_sphere(epi=1):
 class BinGrid(object):
     """Creates Bingrid object from parameters"""
 
-    def __init__(self, latitude, longitude, edist, phase,
-                 verbose=True):
+    def __init__(
+        self, latitude: np.ndarray, longitude: np.ndarray, edist: float,
+            phase: str, verbose: bool = True):
         """
         BinGrid object that can be used to find closest neighbours to
         stations and CCP bins
@@ -84,14 +85,11 @@ class BinGrid(object):
         self.ns = self.latitude.size
 
         # Create Cartesian coordinates from lat/lons
-        self.xs, self.ys, self.zs = geo2cart(R_EARTH, self.latitude,
-                                             self.longitude)
+        self.xs, self.ys, self.zs = geo2cart(
+            R_EARTH, self.latitude, self.longitude)
 
         # Create CCP grid
         self.KDS = self.station_tree()
-
-        # Create CCP Bin kdtree
-        # self.KDB =
 
     def station_tree(self):
         """Using the input"""
