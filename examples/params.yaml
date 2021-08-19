@@ -16,12 +16,12 @@ evt_subdir: 'event_catalogs'
 log_subdir : 'log'
 # levels:
 # 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'
-loglvl: 'DEBUG'
+loglvl: 'WARNING'
 # format, either mseed or hdf5
 format: 'hdf5'
 
 # The teleseismic phase to use (P or S or also more exotic ones)
-phase: 'P'
+phase: 'S'
 
 ### Request parameters
 ## First, everything concerning the download
@@ -31,28 +31,28 @@ waveform_client: ['IRIS']
 # If so insert filename here.
 evtcat: None
 # earliest event
-starttime: '2019-01-1 00:00:00.0'
+starttime: '2009-01-1 00:00:00.0'
 # latest event
-endtime: '2021-03-01 00:00:00.0'
+endtime: '2011-12-31 00:00:00.0'
 # Minumum Magnitude
 minmag: 5.5
 # Specific events (coordinate restrictions)
 # event_coords: (0, 90, -180, 180)
 # Network and station to use, unix-style wildcards are allowed
-network: 'IU'
-station: 'HRV'
+network: 'YP'
+station: '*'
 
 ## concerning preprocessing
 # Coordinate system to rotate to
 # RTZ, LQT, or PSS
-rot: 'RTZ'
+rot: 'PSS'
 # Polarisation, use v for v/q receiver functions
 # and h for transverse (SH)
 pol: 'v'
 # Deconvolution method
 # Iterative time domain: 'it'
 # Waterlevel Spectral Division: 'waterlevel'
-deconmeth: 'waterlevel'
+deconmeth: 'it'
 
 
 
