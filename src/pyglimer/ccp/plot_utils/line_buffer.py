@@ -7,10 +7,10 @@ from shapely.ops import cascaded_union
 
 
 def line_buffer(lat, lon, delta=1.0):
-    """Creates buffer around geographical line using from pole rotated cap 
+    """Creates buffer around geographical line using from pole rotated cap
     outlines. This is far from perfect, but it does "a" job. There isn't much
-    more that one can and be spherically accurate. As long as the amount of 
-    points in the line is fair this should have no problem to immitate a true 
+    more that one can and be spherically accurate. As long as the amount of
+    points in the line is fair this should have no problem to immitate a true
     buffer.
 
     Parameters
@@ -25,7 +25,7 @@ def line_buffer(lat, lon, delta=1.0):
     Returns
     -------
     np.ndarray
-        Nx2 matrix with coordinates of a polygon that forms a buffer around 
+        Nx2 matrix with coordinates of a polygon that forms a buffer around
         the line
 
 

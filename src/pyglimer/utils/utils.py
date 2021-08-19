@@ -11,7 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Thursday, 19th August 2021 01:17:57 pm
+Last Modified: Thursday, 19th August 2021 03:15:55 pm
 
 '''
 
@@ -134,4 +134,3 @@ def __client__loop__(client: str, statloc: str, bulk: list):
             out = os.path.join(statloc, '%s.%s.xml' % (netcode, statcode))
             stat_inv.select(network=netcode, station=statcode).write(
                 out, format="STATIONXML")
-

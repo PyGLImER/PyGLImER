@@ -14,7 +14,7 @@ GLImER functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 1st April 2020 01:51:30 pm
-Last Modified: Thursday, 25th March 2021 03:54:17 pm
+Last Modified: Thursday, 19th August 2021 03:14:24 pm
 '''
 
 import os
@@ -198,7 +198,8 @@ def read_geom(geom_file, phase):
 
 
 def rf_test(
-        phase, dip, rfloc='output/waveforms/RF', geom_file='3D.geom', decon_meth='it'):
+        phase, dip, rfloc='output/waveforms/RF', geom_file='3D.geom',
+        decon_meth='it'):
     """
     Creates synthetic PRFs from Raysum data.
 
@@ -329,7 +330,8 @@ def rf_test(
 #     rfs.append(rf)
 
 
-def ccp_test(phase, dip, geom_file='3D.geom', multiple=False, use_old_rfs=True):
+def ccp_test(
+        phase, dip, geom_file='3D.geom', multiple=False, use_old_rfs=True):
     if not use_old_rfs:
         _, statlat, statlon = rf_test(phase, dip, geom_file=geom_file)
         print("RFs created")
@@ -353,7 +355,8 @@ def ccp_test(phase, dip, geom_file='3D.geom', multiple=False, use_old_rfs=True):
 
     # Create stack
     ccp.compute_stack(
-        'raysum.dat', network='raysum', station=str(dip), save=False, multiple=multiple)
+        'raysum.dat', network='raysum', station=str(dip), save=False,
+        multiple=multiple)
     print('ccp stack concluded')
     ccp.conclude_ccp(r=0, keep_water=True)
     ccp.write('raysum'+phase+str(dip))
@@ -459,9 +462,9 @@ def decon_test(PSS_file, phase, method):
         if method == "it":
             data, _, _ = it(u, v, dt, shift=shift)
             lrf = None
-        elif method == "gen_it":
-            data, IR, iters, rej = gen_it(u, v, dt, phase=phase, shift=shift)
-            lrf = None
+        # elif method == "gen_it":
+        #     data, IR, iters, rej = gen_it(u, v, dt, phase=phase, shift=shift)
+        #     lrf = None
         elif method == "fqd" or method == "wat" or method == "con":
             data, lrf = spectraldivision(
                 v, u, dt, shift, phase=phase, regul=method, test=True)
@@ -475,7 +478,8 @@ def decon_test(PSS_file, phase, method):
             raise NameError
         # if lrf is not None:
         #     # Normalisation for spectral division and multitaper
-        #     # In order to do that, we have to find the factor that is necassary to
+        #     # In order to do that, we have to find the factor that is
+        #       necessary to
         #     # bring the zero-time pulse to 1
         #     fact = abs(lrf).max() #[round(shift/dt)]
         #     data = data/fact
@@ -491,7 +495,8 @@ def decon_test(PSS_file, phase, method):
     return RF, dt
 
 
-def test_SNR(network, station, phase, preproloc='ouput/waveforms/preprocessed'):
+def test_SNR(
+        network, station, phase, preproloc='ouput/waveforms/preprocessed'):
     """Test the automatic QC scripts for a certain station and writes ratings
     in the rating file."""
     noisematls = []

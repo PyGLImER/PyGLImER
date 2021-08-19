@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Monday, 16th August 2021 01:18:24 pm
+Last Modified: Thursday, 19th August 2021 03:05:01 pm
 
 
 !The file is split and has a second copyright disclaimer!
@@ -769,7 +769,7 @@ class RFStream(Stream):
             assummed surface velocity for the computation of the
             incidence angle. Default 5.8 km/s.
         outputfile : str, optional
-            Path to savefile. If None plot is not saved just shown. 
+            Path to savefile. If None plot is not saved just shown.
             Defaults to None.
         format : str, optional
             outputfile format
@@ -817,13 +817,13 @@ class RFStream(Stream):
 
         .. warning::
             There are some things that the user should be aware of. The bins
-            right at the poles may or may not have very different areas 
-            compared to the other bins, which is a side effect of the iterative 
+            right at the poles may or may not have very different areas
+            compared to the other bins, which is a side effect of the iterative
             computation of bin area correction. I have an idea on how to fix
-            it, but it is not really necessary right now. If you are working 
+            it, but it is not really necessary right now. If you are working
             with stations at the pole, and you want to CCP stack, I'd strongly
-            advise against using this function anyways. The bins are just 
-            too narrow. This really is just a 'dirty' CCP stack and should only 
+            advise against using this function anyways. The bins are just
+            too narrow. This really is just a 'dirty' CCP stack and should only
             be used as a first order check if thing are ok.
 
 
@@ -834,18 +834,18 @@ class RFStream(Stream):
         z_res : float, optional
             depth resolution, by default 1.0
         extent : list, optional
-            list of bounds [minlon, maxlon, minlat, maxlat], 
+            list of bounds [minlon, maxlon, minlat, maxlat],
             by default [-180.0, 180.0, -90.0, 90.0]
         maxz : int, optional
             maxz, by default 750
         vmodel_file : str, optional
-            velocity model file. IASP91 1-D model used as standard  since 
-            the assumption of rectangular bins is already a bit rough, 
+            velocity model file. IASP91 1-D model used as standard  since
+            the assumption of rectangular bins is already a bit rough,
             by default 'iasp91.dat'
 
         Returns
         -------
-        tuple   
+        tuple
             containing, vectors outlining the mesh illumination etc.
         """
 
@@ -899,7 +899,8 @@ class RFStream(Stream):
         area_per_dlon = 2*np.pi * a**2 * \
             (1-np.cos(cap_theta/180*np.pi)) / (360/dlon)
 
-        # Number of longitude bins at the pol that correspond to one equatorial bin
+        # Number of longitude bins at the pol that correspond to one equatorial
+        # bin
         # Not used anymore
         ndlon = int(np.ceil(A/area_per_dlon))
 

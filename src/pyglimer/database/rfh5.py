@@ -2,12 +2,13 @@
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   `GNU Lesser General Public License, Version 3 <https://www.gnu.org/copyleft/lesser.html>`
+   `GNU Lesser General Public License, Version 3
+   <https://www.gnu.org/copyleft/lesser.html>`
 :author:
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Thursday, 19th August 2021 02:02:05 pm
+Last Modified: Thursday, 19th August 2021 03:03:30 pm
 '''
 
 import fnmatch
@@ -299,13 +300,9 @@ class RFDataBase(object):
             >>>     # find the available tags for existing db
             >>>     print(list(rfdb.keys()))
             ['rf', 'rfstack']
-            >>>     # find available channels with tag subdivision
-            >>>     print(rfdb.get_available_channels(
-            >>>         'subdivision', 'XN-XN', 'NEP06-NEP06'))
-            ['HHE-HHN', 'HHE-HHZ', 'HHN-HHZ']
-            >>>     # Get Data from all times, specific channel and tag
+            >>>     # Get Data from all times and tag rf, phase P
             >>>     st = rfdb.get_data(
-            >>>         'XN-XN', 'NEP06-NEP06', 'HHE-HHN', 'subdivision')
+            >>>         'XN', 'NEP06', 'P', '*', 'rf')
             >>> print(st.count())
             250
         """
