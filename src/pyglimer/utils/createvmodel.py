@@ -12,7 +12,7 @@ Create a 3D velocity model using Litho1.0
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 01st May 2020 12:11:03
-Last Modified: Friday, 20th August 2021 09:45:57 am
+Last Modified: Friday, 20th August 2021 11:08:41 am
 '''
 
 
@@ -20,6 +20,7 @@ import subprocess
 import pickle
 import os
 import fnmatch
+import warnings
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -272,7 +273,97 @@ class ComplexModel(object):
             return repr(self.value)
 
 
-def load_avvmodel():
+class AverageVelModel(object):
+    def __init__(self, lat, lon, avpP, avsP, avpS, avsS):
+        """
+        Creates a model over the average P and S-wave velocities in the upper
+        crust. These are used by the P-SV-SH rotation algorithm. Model data
+        is extracted from the Litho1.0 model (location provided above).
+        The package is distributed with a readily compiled model.
+
+        Compiling takes up to one hour!
+
+        Returns
+        -------
+        None.
+
+        """
+        # latitude and longitude vector
+        self.latv = lat
+        self.lonv = lon
+
+        self.avpP = avpP
+        self.avsP = avsP
+        self.avpS = avpS
+        self.avsS = avsS
+
+    def query(self, lat: float, lon: float, phase: str) -> tuple:
+        """
+        Query average P- and S-Wave velocity in the upper 15 km (phase=S) or
+        6 km (phase=P)
+
+        Parameters
+        ----------
+        lat : float
+            Latitude.
+        lon : TYPE
+            Longitude.
+        phase : str
+            Primary phase (has to be provided due to different frequency
+                           content)
+
+        Returns
+        -------
+        avp : float
+            Average P-wave veocity in m/s.
+        avs : float
+            Average S-wave velocity in m/s.
+
+        """
+
+        lat = round(lat)
+        lon = round(lon)
+
+        m = np.where(self.latv == lat)[0][0]
+        n = np.where(self.lonv == lon)[0][0]
+
+        if phase[-1] == 'P':
+            avp = self.avpP[m, n]
+            avs = self.avsP[m, n]
+        elif phase[-1] == 'S':
+            avp = self.avpS[m, n]
+            avs = self.avsS[m, n]
+        else:
+            raise NameError('Phase '+phase+' is not known.')
+
+        return avp, avs
+
+    def write(self, filename='avvmodel'):
+        """
+        Save the model.
+
+        Parameters
+        ----------
+        filename : str, optional
+            Filename. The default is 'avvmodel'.
+
+        Returns
+        -------
+        None.
+
+        """
+        folder = os.path.join(finddir(), 'velocity_models')
+        # Remove filetype identifier if provided
+        x = filename.split('.')
+        if len(x) > 1:
+            filename = filename + '.' - x[-1]
+        oloc = os.path.join(folder, filename)
+        os.makedirs(oloc, exist_ok=True)
+
+        np.savez(oloc, **self.__dict__)
+
+
+def load_avvmodel() -> AverageVelModel:
     """
     Creates a model over the average P and S-wave velocities in the upper
     crust. These are used by the P-SV-SH rotation algorithm. Model data
@@ -296,11 +387,20 @@ def load_avvmodel():
         pass
 
     try:
-        filepath = os.path.join(finddir(), 'velocity_models', 'avvmodel.pkl')
-        with open(filepath, 'rb') as infile:
-            _MODEL_CACHE['avv'] = model = pickle.load(infile)
-            return model
+        filepath = os.path.join(finddir(), 'velocity_models', 'avvmodel.npz')
+        # with open(filepath, 'rb') as infile:
+        #     _MODEL_CACHE['avv'] = model = pickle.load(infile)
+        #     return model
+        avvd = dict(np.load(filepath))
+        avvd['lat'] = avvd.pop('latv')
+        avvd['lon'] = avvd.pop('lonv')
+        _MODEL_CACHE['avv'] = model = AverageVelModel(**avvd)
+        return model
     except FileNotFoundError:
+        warnings.warn(
+            'Could not find file for average velocity model...\n\
+Will attempt to compile a new model. This will require litho1.0 to be\
+installed on the systeam and might take a long time...')
         pass
 
     # latitude and longitude vector
@@ -391,99 +491,6 @@ def load_avvmodel():
     return model
 
 
-class AverageVelModel(object):
-    def __init__(self, lat, lon, avpP, avsP, avpS, avsS):
-        """
-        Creates a model over the average P and S-wave velocities in the upper
-        crust. These are used by the P-SV-SH rotation algorithm. Model data
-        is extracted from the Litho1.0 model (location provided above).
-        The package is distributed with a readily compiled model.
-
-        Compiling takes up to one hour!
-
-        Returns
-        -------
-        None.
-
-        """
-        # latitude and longitude vector
-        self.latv = lat
-        self.lonv = lon
-
-        self.avpP = avpP
-        self.avsP = avsP
-        self.avpS = avpS
-        self.avsS = avsS
-
-    def query(self, lat: float, lon: float, phase: str) -> tuple:
-        """
-        Query average P- and S-Wave velocity in the upper 15 km (phase=S) or
-        6 km (phase=P)
-
-        Parameters
-        ----------
-        lat : float
-            Latitude.
-        lon : TYPE
-            Longitude.
-        phase : str
-            Primary phase (has to be provided due to different frequency
-                           content)
-
-        Returns
-        -------
-        avp : float
-            Average P-wave veocity in m/s.
-        avs : float
-            Average S-wave velocity in m/s.
-
-        """
-        # lat = roundhalf(lat)
-        # lon = roundhalf(lon)
-
-        lat = round(lat)
-        lon = round(lon)
-
-        m = np.where(self.latv == lat)[0][0]
-        n = np.where(self.lonv == lon)[0][0]
-
-        if phase[-1] == 'P':
-            avp = self.avpP[m, n]
-            avs = self.avsP[m, n]
-        elif phase[-1] == 'S':
-            avp = self.avpS[m, n]
-            avs = self.avsS[m, n]
-        else:
-            raise NameError('Phase '+phase+' is not known.')
-
-        return avp, avs
-
-    def write(self, filename='avvmodel'):
-        """
-        Save the model.
-
-        Parameters
-        ----------
-        filename : str, optional
-            Filename. The default is 'avvmodel'.
-
-        Returns
-        -------
-        None.
-
-        """
-        folder = os.path.join(finddir(), 'velocity_models')
-        # Remove filetype identifier if provided
-        x = filename.split('.')
-        if len(x) > 1:
-            filename = filename + '.' - x[-1]
-        oloc = os.path.join(folder, filename)
-        os.makedirs(oloc, exist_ok=True)
-
-        with open(oloc + ".pkl", 'wb') as output:
-            pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
-
-
 def load_gyps(
     save=False, latb: tuple = None, lonb: tuple = None,
         flatten=True) -> ComplexModel:
@@ -563,7 +570,6 @@ def load_gyps(
 
     # Create initial, full model
     # Create the velocity deviation grids
-    # vpd, vsd, _ = np.mgrid[-90:91, -180:181, 0:18]
     vpd, vsd, _ = np.mgrid[-90:91, -180:181, 0:9]
     vpd = vpd.astype(float)
     vsd = vsd.astype(float)
