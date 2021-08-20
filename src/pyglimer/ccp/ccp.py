@@ -20,10 +20,12 @@ Last Modified: Thursday, 19th August 2021 11:12:43 am
 import fnmatch
 from glob import glob
 import os
+import sys
 import pickle
 import logging
 import time
 
+from functools import partial
 from copy import deepcopy
 from typing import List, Tuple
 from joblib import Parallel, delayed, cpu_count
@@ -620,10 +622,10 @@ code if you want to filter by station")
         # note that streams are actually files - confusing variable name
         if mc_backend.lower() == 'joblib':
             out = Parallel(n_jobs=-1)(
-                    delayed(self._create_ccp_from_hdf5)(
-                        f, multiple, append_pp, n_closest_points, vel_model,
-                        latb, lonb, filt)
-                    for f in tqdm(streams))
+                delayed(self._create_ccp_from_hdf5)(
+                    f, multiple, append_pp, n_closest_points, vel_model,
+                    latb, lonb, filt)
+                for f in tqdm(streams))
 
             # Awful way to solve it, but the best I could find
             self._unpack_joblib_output(multiple, endi, out)
@@ -919,8 +921,8 @@ only show the progress per chunk.')
         for st in stream:
             rft = read_rf(st)
             out = self._ccp_process_rftr(
-                    rft, filt, vmodel, latb, lonb, multiple, append_pp,
-                    n_closest_points)
+                rft, filt, vmodel, latb, lonb, multiple, append_pp,
+                n_closest_points)
             if not out:
                 continue
             if multiple:
@@ -1230,9 +1232,11 @@ misspelled or not yet implemented')
             coords = self.coords
         plot_bins(self.bingrid.stations, coords)
 
-    def compute_kdtree_volume(
-        self, qlon: np.ndarray or list = None, qlat: np.ndarray or list = None,
-            zmax: float = None):
+    def compute_kdtree_volume(self,
+                              qlon: np.ndarray or list = None,
+                              qlat: np.ndarray or list = None,
+                              zmax: float = None,
+                              verbose: bool = True):
         """Using the CCP kdtree, we get the closest few points and compute
         the weighting using a distance metric. if points are too far away,
         they aren't weighted
@@ -1257,6 +1261,10 @@ misspelled or not yet implemented')
         [type]
             [description]
         """
+
+        def vprint(verbose, *args, **kwargs):
+            print(*args, **kwargs)
+        verboseprint = partial(vprint, verbose)
 
         # Area considered around profile points
         area = 2 * self.binrad
@@ -1294,13 +1302,16 @@ misspelled or not yet implemented')
         )[1]
 
         # Get interpolation weights and rows.
+        verboseprint("Creating Spherical Nearest Neighbour class ...", end="")
         snn = SphericalNN(
             self.coords_new[0][:, cpos], self.coords_new[1][:, cpos])
+        verboseprint(" done.")
+        verboseprint("Creating interpolators ...", end="")
         ccp_interpolator = snn.interpolator(
             mlat, mlon, maximum_distance=area, k=10, p=2.0, no_weighting=False)
         ill_interpolator = snn.interpolator(
             mlat, mlon, maximum_distance=area, no_weighting=True)
-
+        verboseprint(" done.")
         # Get coordinates array from CCPStack
         qz = deepcopy(self.z)
 
@@ -1319,13 +1330,23 @@ misspelled or not yet implemented')
         qill = np.zeros((Nlat, Nlon, Nz))
 
         # Interpolate each depth
+        maintext = "KDTree interpolation ... (intensive part)"
+        verboseprint(maintext)
         for _i, (_ccpcol, _illumcol) in enumerate(
                 zip(self.ccp[cpos, :pos].T, self.hits[cpos, :pos].T)):
+            if _i % int((Nz/10)) == 0:
+                sys.stdout.write("\033[F")  # back to previous line
+                sys.stdout.write("\033[K")
+                verboseprint(maintext +
+                             f"--->  {_i+1:0{len(str(Nz))}d}/{Nz:d}")
             qccp[:, :, _i] = ccp_interpolator(_ccpcol).T
             qill[:, :, _i] = ill_interpolator(_illumcol).T
+        verboseprint("... done.")
 
         # Interpolate onto regular depth grid for easy representation with
         # imshow
+        verboseprint(
+            "Regular Grid interpolation ... (less intensive part)", end="")
         ccp3D_interpolator = RegularGridInterpolator(
             (qlat, qlon, qz), np.where(np.isnan(qccp), 0, qccp))
         ill3D_interpolator = RegularGridInterpolator(
@@ -1338,8 +1359,9 @@ misspelled or not yet implemented')
         # Interpolate
         qccp = ccp3D_interpolator((xqlat, xqlon, xqz))
         qill = ill3D_interpolator((xqlat, xqlon, xqz))
+        verboseprint(" done.")
 
-        return qlat, qlon, qz, qill, qccp, area
+        return qlat, qlon, qqz, qill, qccp, area
 
     def create_vtk_mesh(
             self, geo=True, bbox: list = None, filename: str = None):
@@ -1478,8 +1500,8 @@ misspelled or not yet implemented')
 
         """
         # Compute the volume max radius at depth is z*0.33
-        qlat, qlon, qz, qill, qccp, area = \
-            self.compute_kdtree_volume(qlon, qlat, zmax=zmax)
+        qlat, qlon, qz, qill, qccp, area = self.compute_kdtree_volume(
+            qlon, qlat, zmax=zmax)
 
         # Launch plotting tool
         return VolumeExploration(qlon, qlat, qz, qccp)
@@ -1532,8 +1554,8 @@ misspelled or not yet implemented')
             r = self.bingrid.edist * DEG2KM * 2.0
 
         # Compute the volume max radius at depth is z*0.33
-        qlat, qlon, qz, qill, qccp, area = \
-            self.compute_kdtree_volume(qlon, qlat, zmax=zmax)
+        qlat, qlon, qz, qill, qccp, area = self.compute_kdtree_volume(
+            qlon, qlat, zmax=zmax)
 
         return VolumePlot(qlon, qlat, qz, qccp, xl=lonsl, yl=latsl, zl=zsl,
                           show=show)
@@ -1843,7 +1865,7 @@ def init_ccp(
         codef = fnmatch.filter(codes, '%s.%s' % (network, '*' or station))
     elif isinstance(network, str) and isinstance(station, list):
         codef = list(set(codes).intersection([
-                '%s.%s' % (network, stat) for stat in station]))
+            '%s.%s' % (network, stat) for stat in station]))
     elif isinstance(network, list):
         if station is not None and not isinstance(station, list):
             raise TypeError(
