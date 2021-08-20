@@ -19,6 +19,32 @@ from pyglimer.ccp.plot_utils.midpointcolornorm import MidpointNormalize
 
 
 def get_ax_coor(ax, lat, lon):
+    """Just a way to get axes coordinates
+
+    Parameters
+    ----------
+    ax : axes
+        Givenn axes
+    lat : float
+        Latitude
+    lon : float
+        Longitude
+
+    Returns
+    -------
+    Tuple
+        Axes coordinates for a given set of lat, lon.
+
+    Notes
+    -----
+
+    :Authors:
+        Lucas Sawade (lsawade@princeton.edu)
+
+    :Last Modified:
+        2021.08.20 11.00 (Lucas Sawade)
+
+    """
 
     # Geo point
     pgeo = np.array((lon, lat))
@@ -191,6 +217,7 @@ def plot_cross_section(
                 fontdict=dict(fontsize='small'),
                 bbox=dict(facecolor='w', edgecolor='k'),
                 transform=geoax.transAxes, zorder=100)
+
     # ############### Plot section ###################
 
     # Plot section
