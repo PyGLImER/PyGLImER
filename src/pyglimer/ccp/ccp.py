@@ -333,6 +333,8 @@ class CCPStack(object):
         return slat, slon, sdists, qlat, qlon, qdists, qz, qill, qccp, area
 
     def plot_cross_section(self, *args, **kwargs):
+        """See documentation for 
+        :py:func:pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section"""
         return plot_cross_section(self, *args, **kwargs)
 
     def compute_stack(
@@ -797,8 +799,8 @@ code if you want to filter by station")
             N_splits = int(np.ceil(mem_needed/mem.total))
             split_size = int(np.ceil(len(streams)/N_splits))
             print('Splitting RFs into '+str(N_splits)+' chunks \
-due to insufficient memory. Each progressbar will \
-only show the progress per chunk.')
+                  due to insufficient memory. Each progressbar will \
+                  only show the progress per chunk.')
         else:
             split_size = len(streams)
 
