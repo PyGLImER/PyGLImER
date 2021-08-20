@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Thursday, 19th August 2021 03:05:01 pm
+Last Modified: Friday, 20th August 2021 03:29:38 pm
 
 
 !The file is split and has a second copyright disclaimer!
@@ -750,10 +750,16 @@ class RFStream(Stream):
             ax = plot_single_rf(
                 self[0], tlim=lim, ax=ax, outputdir=outputdir, format=format)
         else:
+            if outputdir:
+                outputfile = os.path.join(outputdir, '%s%s' % (
+                    self[0].stats.network, self[0].stats.station
+                ))
+            else:
+                outputfile = None
             ax = plot_section(
                 self, timelimits=lim, epilimits=epilimits,
                 scalingfactor=scalingfactor, line=line, linewidth=linewidth,
-                ax=ax, outputdir=outputdir, channel=channel, format=format)
+                ax=ax, outputfile=outputfile, channel=channel, format=format)
         return ax
 
     def plot_distribution(self, nbins=50, phase="P",
