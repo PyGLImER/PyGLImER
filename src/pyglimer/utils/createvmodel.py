@@ -12,7 +12,7 @@ Create a 3D velocity model using Litho1.0
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 01st May 2020 12:11:03
-Last Modified: Thursday, 19th August 2021 04:33:25 pm
+Last Modified: Friday, 20th August 2021 09:45:57 am
 '''
 
 
@@ -101,11 +101,11 @@ class ComplexModel(object):
         Parameters
         ----------
         lat : float/int
-            Latitude.
+            Latitude in deg.
         lon : float/int
-            Longitude.
+            Longitude in deg.
         z : float/int
-            depth.
+            depth in km.
 
         Returns
         -------
@@ -485,7 +485,8 @@ class AverageVelModel(object):
 
 
 def load_gyps(
-        save=False, latb: tuple = None, lonb: tuple = None) -> ComplexModel:
+    save=False, latb: tuple = None, lonb: tuple = None,
+        flatten=True) -> ComplexModel:
     """
     Compiles the GyPSuM 3D-velocity object from included GyPSuM text files
 
@@ -562,7 +563,8 @@ def load_gyps(
 
     # Create initial, full model
     # Create the velocity deviation grids
-    vpd, vsd, _ = np.mgrid[-90:91, -180:181, 0:18]
+    # vpd, vsd, _ = np.mgrid[-90:91, -180:181, 0:18]
+    vpd, vsd, _ = np.mgrid[-90:91, -180:181, 0:9]
     vpd = vpd.astype(float)
     vsd = vsd.astype(float)
 
@@ -581,24 +583,22 @@ def load_gyps(
     dirlist = os.listdir(gyps)
 
     # vp deviations
-    for i, p in enumerate(fnmatch.filter(dirlist, 'P.*')):
-        vpd[:, :, 2*i] = np.reshape(
-            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, 0].shape) / 100
-        vpd[:, :, 2*i + 1] = np.reshape(
+    # Deviations are in per cent so divide by 100
+    pdevs = fnmatch.filter(dirlist, 'P.*')
+    pdevs.sort()
+    sdevs = fnmatch.filter(dirlist, 'S.*')
+    sdevs.sort()
+    for i, p in enumerate(pdevs):
+        vpd[:, :, i] = np.reshape(
             np.loadtxt(os.path.join(gyps, p)), vpd[:, :, 0].shape) / 100
 
     # vs deviations
-    for i, p in enumerate(fnmatch.filter(dirlist, 'S.*')):
-        vsd[:, :, 2*i] = np.reshape(
-            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, i].shape) / 100
-        vsd[:, :, 2*i + 1] = np.reshape(
-            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, i].shape) / 100
+    for i, s in enumerate(sdevs):
+        vsd[:, :, i] = np.reshape(
+            np.loadtxt(os.path.join(gyps, s)), vpd[:, :, i].shape) / 100
 
-    # boundaries for the velocity deviations vectors
-    zd = np.hstack(
-        (0, np.repeat(np.hstack((np.arange(100, 475, 75),
-                                 np.array([525, 650, 750]))), 2),
-         850))
+    # Deviation depth vector, contains the upper depth in km
+    zd = np.hstack((0, np.arange(100, 475, 75), 525, 650, 750))
 
     # Interpolation depth
     zq = np.arange(0, maxz+res, res)
@@ -610,9 +610,11 @@ def load_gyps(
     del vpb, vsb, zbp, zbs
 
     # Interpolate velocity disturbances
-    intf = interp1d(zd, vpd, axis=2)
+    # The disturbances are defined as blocks
+    # So only nearest neighbour interpolations!
+    intf = interp1d(zd, vpd, axis=2, kind='previous')
     dvp = intf(zq)
-    intf = interp1d(zd, vsd, axis=2)
+    intf = interp1d(zd, vsd, axis=2, kind='previous')
     dvs = intf(zq)
 
     vp = np.multiply(dvp, vp_bg) + vp_bg
@@ -624,7 +626,7 @@ def load_gyps(
     lon = np.arange(-180, 181, 1)
 
     # Create a velocity model with 1deg spacing
-    model = ComplexModel(zq, vp, vs, lat, lon)
+    model = ComplexModel(zq, vp, vs, lat, lon, flatten=flatten)
 
     # Pickle model
     if save:
