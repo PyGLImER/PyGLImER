@@ -12,7 +12,7 @@ Create a 3D velocity model using Litho1.0
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 01st May 2020 12:11:03
-Last Modified: Friday, 20th August 2021 11:08:41 am
+Last Modified: Friday, 20th August 2021 11:15:35 am
 '''
 
 
@@ -305,12 +305,12 @@ class AverageVelModel(object):
         Parameters
         ----------
         lat : float
-            Latitude.
+            Latitude in decimal degree.
         lon : TYPE
-            Longitude.
+            Longitude in decimal degree.
         phase : str
             Primary phase (has to be provided due to different frequency
-                           content)
+            content and, thereby, difference in queried depths.)
 
         Returns
         -------
@@ -334,7 +334,7 @@ class AverageVelModel(object):
             avp = self.avpS[m, n]
             avs = self.avsS[m, n]
         else:
-            raise NameError('Phase '+phase+' is not known.')
+            raise ValueError('Phase '+phase+' is not known.')
 
         return avp, avs
 

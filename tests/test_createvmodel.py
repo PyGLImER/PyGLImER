@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 19th August 2021 04:27:03 pm
-Last Modified: Friday, 20th August 2021 10:12:05 am
+Last Modified: Friday, 20th August 2021 11:20:12 am
 '''
 
 import unittest
@@ -70,6 +70,25 @@ class TestComplexModel(unittest.TestCase):
         vpf, vsf = submf.query(lat, lon, z)
         self.assertAlmostEqual(vp*6371/(6371-z), vpf)
         self.assertAlmostEqual(vs*6371/(6371-z), vsf)
+
+
+class TestAVVModel(unittest.TestCase):
+    def setUp(self):
+        # The compilation is tested manually elsewhere as it can only be tested
+        # if Litho1.0 is installed
+        self.model = cvm.load_avvmodel()
+
+    def testunknownphase(self):
+        with self.assertRaises(ValueError):
+            self.model.query(0, 0, 'V')
+
+    def testsgreaterp(self):
+        lat = np.random.randint(-90, 90) + np.random.randint(-1, 0)/100
+        lon = np.random.randint(-180, 180) + np.random.randint(-1, 0)/100
+        vpp, vsp = self.model.query(lat, lon, 'P')
+        vps, vss = self.model.query(lat, lon, 'S')
+        self.assertGreater(vps, vpp)
+        self.assertGreater(vss, vsp)
 
 
 if __name__ == "__main__":
