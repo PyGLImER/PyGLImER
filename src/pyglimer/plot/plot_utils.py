@@ -345,13 +345,13 @@ def plot_single_rf(
     return ax
 
 
-def plot_section(rfst, channel="PRF",
-                 timelimits: list or tuple or None = None,
-                 epilimits: list or tuple or None = None,
-                 scalingfactor: float = 2.0, ax: plt.Axes = None,
-                 line: bool = True,
-                 linewidth: float = 0.25, outputfile: str or None = None,
-                 title: str or None = None, show: bool = True):
+def plot_section(
+    rfst, channel="PRF",
+    timelimits: list or tuple or None = None,
+    epilimits: list or tuple or None = None,
+    scalingfactor: float = 2.0, ax: plt.Axes = None,
+    line: bool = True, linewidth: float = 0.25, outputfile: str or None = None,
+        title: str or None = None, show: bool = True, format: str = None):
     """Creates plot of a receiver function section as a function
     of epicentral distance.
 
@@ -467,7 +467,7 @@ def plot_section(rfst, channel="PRF",
     if outputfile is None:
         plt.show()
     else:
-        plt.savefig(outputfile, dpi=300, transparent=True)
+        plt.savefig(outputfile, dpi=300, transparent=True, format=format)
     return ax
 
 
