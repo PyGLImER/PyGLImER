@@ -23,7 +23,8 @@ zalpha = np.where(zqill == 0, 0, 0.5)
 
 # Define norms
 # Define norms
-
+vmin=-0.25
+vmax=0.25
 
 snorm = Normalize(vmin=0, vmax=sdists[-1])
 rfnorm = MidpointNormalize(vmin=vmin, vmax=vmax, midpoint=0.0)

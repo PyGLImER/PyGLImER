@@ -19,11 +19,13 @@ Last Modified: Wednesday, 28th April 2021 05:04:08 pm
 
 import fnmatch
 import os
+import sys
 import pickle
 import logging
 # import shutil
 import time
 
+from functools import partial
 from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 import numpy as np
@@ -939,7 +941,8 @@ only show the progress per chunk.')
     def compute_kdtree_volume(self,
                               qlon: np.ndarray or list = None,
                               qlat: np.ndarray or list = None,
-                              zmax: float = None):
+                              zmax: float = None,
+                              verbose: bool = True):
         """Using the CCP kdtree, we get the closest few points and compute
         the weighting using a distance metric. if points are too far away,
         they aren't weighted
@@ -964,6 +967,10 @@ only show the progress per chunk.')
         [type]
             [description]
         """
+
+        def vprint(verbose, *args, **kwargs):
+            print(*args, **kwargs)
+        verboseprint = partial(vprint, verbose)
 
         # Area considered around profile points
         area = 2 * self.binrad
@@ -1001,13 +1008,16 @@ only show the progress per chunk.')
         )[1]
 
         # Get interpolation weights and rows.
+        verboseprint("Creating Spherical Nearest Neighbour class ...", end="")
         snn = SphericalNN(
             self.coords_new[0][:, cpos], self.coords_new[1][:, cpos])
+        verboseprint(" done.")
+        verboseprint("Creating interpolators ...", end="")
         ccp_interpolator = snn.interpolator(
             mlat, mlon, maximum_distance=area, k=10, p=2.0, no_weighting=False)
         ill_interpolator = snn.interpolator(
             mlat, mlon, maximum_distance=area, no_weighting=True)
-
+        verboseprint(" done.")
         # Get coordinates array from CCPStack
         qz = deepcopy(self.z)
 
@@ -1026,13 +1036,23 @@ only show the progress per chunk.')
         qill = np.zeros((Nlat, Nlon, Nz))
 
         # Interpolate each depth
+        maintext = "KDTree interpolation ... (intensive part)"
+        verboseprint(maintext)
         for _i, (_ccpcol, _illumcol) in enumerate(
                 zip(self.ccp[cpos, :pos].T, self.hits[cpos, :pos].T)):
+            if _i % int((Nz/10)) == 0:
+                sys.stdout.write("\033[F")  # back to previous line
+                sys.stdout.write("\033[K")
+                verboseprint(maintext +
+                             f"--->  {_i+1:0{len(str(Nz))}d}/{Nz:d}")
             qccp[:, :, _i] = ccp_interpolator(_ccpcol).T
             qill[:, :, _i] = ill_interpolator(_illumcol).T
+        verboseprint("... done.")
 
         # Interpolate onto regular depth grid for easy representation with
         # imshow
+        verboseprint(
+            "Regular Grid interpolation ... (less intensive part)", end="")
         ccp3D_interpolator = RegularGridInterpolator(
             (qlat, qlon, qz), np.where(np.isnan(qccp), 0, qccp))
         ill3D_interpolator = RegularGridInterpolator(
@@ -1045,8 +1065,9 @@ only show the progress per chunk.')
         # Interpolate
         qccp = ccp3D_interpolator((xqlat, xqlon, xqz))
         qill = ill3D_interpolator((xqlat, xqlon, xqz))
+        verboseprint(" done.")
 
-        return qlat, qlon, qz, qill, qccp, area
+        return qlat, qlon, qqz, qill, qccp, area
 
     def create_vtk_mesh(self, geo=True,
                         bbox: list or None = None,
@@ -1178,7 +1199,7 @@ only show the progress per chunk.')
             Minimum number of illumation points use in the interpolation,
             everything below is downweighted by the square reciprocal
         extent : list or tuple or Non, optional
-        
+
         Returns
         -------
 
@@ -1186,8 +1207,8 @@ only show the progress per chunk.')
 
         """
         # Compute the volume max radius at depth is z*0.33
-        qlat, qlon, qz, qill, qccp, area = \
-            self.compute_kdtree_volume(qlon, qlat, zmax=zmax)
+        qlat, qlon, qz, qill, qccp, area = self.compute_kdtree_volume(
+            qlon, qlat, zmax=zmax)
 
         # Launch plotting tool
         return VolumeExploration(qlon, qlat, qz, qccp)
@@ -1243,8 +1264,8 @@ only show the progress per chunk.')
             r = self.bingrid.edist * DEG2KM * 2.0
 
         # Compute the volume max radius at depth is z*0.33
-        qlat, qlon, qz, qill, qccp, area = \
-            self.compute_kdtree_volume(qlon, qlat, zmax=zmax)
+        qlat, qlon, qz, qill, qccp, area = self.compute_kdtree_volume(
+            qlon, qlat, zmax=zmax)
 
         return VolumePlot(qlon, qlat, qz, qccp, xl=lonsl, yl=latsl, zl=zsl,
                           show=show)
