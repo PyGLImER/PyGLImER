@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Sunday, 9th May 2021 10:38:53 am
+Last Modified: Thursday, 19th August 2021 03:05:01 pm
 
 
 !The file is split and has a second copyright disclaimer!
@@ -92,10 +92,13 @@ def createRF(st_in, phase, pol='v', onset=None,
     """
 
     pol = pol.lower()
+    if pol not in ('h', 'v'):
+        raise NotImplementedError('Unknown polarisation %s.' % pol)
 
     if info:
         ii = info['starttime'].index(st_in[0].stats.starttime)
         shift = info['onset'][ii] - st_in[0].stats.starttime
+        info['pol'] = pol
 
     elif onset:
         shift = onset - st_in[0].stats.starttime
@@ -213,13 +216,14 @@ def createRF(st_in, phase, pol='v', onset=None,
         # I could probably create another QC here and check if fact is
         # the maximum of RF[0].data or even close to the maximum. Let's try:
         if abs(fact) < abs(lrf).max()/2:
-            raise ValueError('The noise level of the created receiver funciton\
+            raise ValueError('The noise level of the created receiver function\
                 is too high.')
 
     # create RFTrace object
     # create stats
-    stats = rfstats(phase, info=info, starttime=st[0].stats.starttime,
-                    event=event, station=station)
+    stats = rfstats(
+        phase, info=info, starttime=st[0].stats.starttime, event=event,
+        station=station)
     stats.update({"type": "time"})
     RF = RFTrace(trace=RF[0])
     RF.stats.update(stats)
@@ -696,13 +700,12 @@ class RFStream(Stream):
                             "pp_longitude": None, 'npts': len(stack)})
         return z, stack, RF_mo
 
-    def plot(self, channel: str = "PRF",
-             lim: list or tuple or None = None,
-             epilimits: list or tuple or None = None,
-             scalingfactor: float = 2.0, ax: plt.Axes = None,
-             line: bool = True,
-             linewidth: float = 0.25, outputdir: str or None = None,
-             title: str or None = None, show: bool = True):
+    def plot(
+        self, channel: str = "PRF", lim: list or tuple or None = None,
+        epilimits: list or tuple or None = None, scalingfactor: float = 2.0,
+        ax: plt.Axes = None, line: bool = True, linewidth: float = 0.25,
+        outputdir: str or None = None, title: str or None = None,
+            show: bool = True, format: str = 'pdf'):
         """Creates plot of a receiver function section as a function
         of epicentral distance or single plot if len(RFStream)==1.
 
@@ -745,12 +748,12 @@ class RFStream(Stream):
         if self.count() == 1:
             # Do single plot
             ax = plot_single_rf(
-                self[0], tlim=lim, ax=ax, outputdir=outputdir)
+                self[0], tlim=lim, ax=ax, outputdir=outputdir, format=format)
         else:
             ax = plot_section(
                 self, timelimits=lim, epilimits=epilimits,
                 scalingfactor=scalingfactor, line=line, linewidth=linewidth,
-                ax=ax, outputdir=outputdir, channel=channel)
+                ax=ax, outputdir=outputdir, channel=channel, format=format)
         return ax
 
     def plot_distribution(self, nbins=50, phase="P",
@@ -766,7 +769,7 @@ class RFStream(Stream):
             assummed surface velocity for the computation of the
             incidence angle. Default 5.8 km/s.
         outputfile : str, optional
-            Path to savefile. If None plot is not saved just shown. 
+            Path to savefile. If None plot is not saved just shown.
             Defaults to None.
         format : str, optional
             outputfile format
@@ -814,13 +817,13 @@ class RFStream(Stream):
 
         .. warning::
             There are some things that the user should be aware of. The bins
-            right at the poles may or may not have very different areas 
-            compared to the other bins, which is a side effect of the iterative 
+            right at the poles may or may not have very different areas
+            compared to the other bins, which is a side effect of the iterative
             computation of bin area correction. I have an idea on how to fix
-            it, but it is not really necessary right now. If you are working 
+            it, but it is not really necessary right now. If you are working
             with stations at the pole, and you want to CCP stack, I'd strongly
-            advise against using this function anyways. The bins are just 
-            too narrow. This really is just a 'dirty' CCP stack and should only 
+            advise against using this function anyways. The bins are just
+            too narrow. This really is just a 'dirty' CCP stack and should only
             be used as a first order check if thing are ok.
 
 
@@ -831,18 +834,18 @@ class RFStream(Stream):
         z_res : float, optional
             depth resolution, by default 1.0
         extent : list, optional
-            list of bounds [minlon, maxlon, minlat, maxlat], 
+            list of bounds [minlon, maxlon, minlat, maxlat],
             by default [-180.0, 180.0, -90.0, 90.0]
         maxz : int, optional
             maxz, by default 750
         vmodel_file : str, optional
-            velocity model file. IASP91 1-D model used as standard  since 
-            the assumption of rectangular bins is already a bit rough, 
+            velocity model file. IASP91 1-D model used as standard  since
+            the assumption of rectangular bins is already a bit rough,
             by default 'iasp91.dat'
 
         Returns
         -------
-        tuple   
+        tuple
             containing, vectors outlining the mesh illumination etc.
         """
 
@@ -896,7 +899,8 @@ class RFStream(Stream):
         area_per_dlon = 2*np.pi * a**2 * \
             (1-np.cos(cap_theta/180*np.pi)) / (360/dlon)
 
-        # Number of longitude bins at the pol that correspond to one equatorial bin
+        # Number of longitude bins at the pol that correspond to one equatorial
+        # bin
         # Not used anymore
         ndlon = int(np.ceil(A/area_per_dlon))
 
@@ -1276,10 +1280,10 @@ class RFTrace(Trace):
             st.pp_longitude.append(lon2)
         return delta2
 
-    def plot(self, lim: list or tuple or None = None,
-             depth: np.ndarray or None = None,
-             ax: plt.Axes = None, outputdir: str = None,
-             clean: bool = False):
+    def plot(
+        self, lim: list or tuple or None = None,
+        depth: np.ndarray or None = None, ax: plt.Axes = None,
+            outputdir: str = None, format: str = 'pdf', clean: bool = False):
         """Creates plot of a single receiver function
 
         Parameters
@@ -1305,7 +1309,8 @@ class RFTrace(Trace):
         ax : `matplotlib.pyplot.Axes`
         """
         ax = plot_single_rf(
-            self, lim, depth=depth, ax=ax, outputdir=outputdir, clean=clean)
+            self, lim, depth=depth, ax=ax, outputdir=outputdir, clean=clean,
+            format=format)
         return ax
 
     def write(self, filename, format, **kwargs):
@@ -1339,8 +1344,9 @@ def obj2stats(event=None, station=None):
     return stats
 
 
-def rfstats(phase, info=None, starttime=None, event=None, station=None,
-            tt_model="IASP91"):
+def rfstats(
+    phase, info=None, starttime=None, event=None, station=None,
+        tt_model="IASP91"):
     """
     Creates a stats object for a RFTrace object. Provide an info dic and
     starttime or event and station object. Latter will take longer since
@@ -1376,18 +1382,21 @@ def rfstats(phase, info=None, starttime=None, event=None, station=None,
     # read info file if provided
     if info and starttime:
         i = info["starttime"].index(starttime)
-        stats.update({'distance': info["rdelta"][i],
-                      'back_azimuth': info["rbaz"][i],
-                      'onset': info["onset"][i],
-                      'slowness': info["rayp_s_deg"][i],
-                      'phase': phase, 'event_latitude': info["evtlat"][i],
-                      'event_longitude': info["evtlon"][i],
-                      'event_depth': info["evt_depth"][i],
-                      'event_magnitude': info["magnitude"][i],
-                      'event_time': UTCDateTime(info["ot_ret"][i]),
-                      'station_latitude': info["statlat"],
-                      'station_longitude': info["statlon"],
-                      'station_elevation': info["statel"]})
+        stats.update({
+            'distance': info["rdelta"][i],
+            'back_azimuth': info["rbaz"][i],
+            'onset': info["onset"][i],
+            'slowness': info["rayp_s_deg"][i],
+            'phase': phase, 'event_latitude': info["evtlat"][i],
+            'pol': info['pol'],
+            'event_longitude': info["evtlon"][i],
+            'event_depth': info["evt_depth"][i],
+            'event_magnitude': info["magnitude"][i],
+            'event_time': UTCDateTime(info["ot_ret"][i]),
+            'station_latitude': info["statlat"],
+            'station_longitude': info["statlon"],
+            'station_elevation': info["statel"]
+        })
         if "evt_id" in info:
             stats.update({"event_id": info["evt_id"][i]})
     elif event is not None and station is not None:

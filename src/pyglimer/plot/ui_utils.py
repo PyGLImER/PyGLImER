@@ -12,7 +12,6 @@ Last Update: June 19, 2020
 
 """
 
-from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider
 
 
@@ -35,6 +34,8 @@ def set_sliderval_no_callback(slider: Slider, val):
     slider.valtext.set_text(slider.valfmt % val)
     if slider.drawon:
         slider.ax.figure.canvas.draw_idle()
+
+
 '''
 
 class LineBuilder:

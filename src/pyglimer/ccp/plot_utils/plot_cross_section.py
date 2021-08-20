@@ -10,9 +10,7 @@ from matplotlib.cm import ScalarMappable
 import cartopy.crs as ccrs
 from cartopy.mpl.geoaxes import GeoAxes, GeoAxesSubplot
 
-
 # Internal
-import pyglimer.ccp.ccp
 from pyglimer.ccp.plot_utils.plot_map import plot_map
 from pyglimer.ccp.plot_utils.plot_line_buffer import plot_line_buffer
 from pyglimer.ccp.plot_utils.midpointcolornorm import MidpointNormalize
@@ -45,7 +43,7 @@ def plot_cross_section(
         rfcmap: str = "seismic",
         depthextent: Optional[Iterable] = None,
         mapextent: Optional[Iterable] = None):
-    """Plots a cross section for given waypoints. If no axes are given, the 
+    """Plots a cross section for given waypoints. If no axes are given, the
     function will also create figures for the map and the cross section.
 
     Parameters
@@ -57,7 +55,7 @@ def plot_cross_section(
     lon : Arraylike
         Longitudes of the waypoints defining the cross section
     z0 : Optional[float], optional
-        if given the map will be plotted with an illumination map at the given 
+        if given the map will be plotted with an illumination map at the given
         depth, by default None
     ax : Optional[Axes], optional
         Axes to plot the cross section in, by default None
@@ -72,14 +70,14 @@ def plot_cross_section(
     vmax : Optional[float], optional
         maximum value of the cross section, by default None
     label : Optional[str], optional
-        label to put in the corner of the cross section plot and the 
+        label to put in the corner of the cross section plot and the
         cross section waypoints on the map, by default None
     rfcmap : str, optional
         cmap name for the plotting of the cross section, by default "seismic"
     depthextent : Optional[Iterable], optional
         List containing two entries defining min and max depth, by default None
     mapextent : Optional[Iterable], optional
-        List of 4 entries defining [minlon,maxlon, minlat, maxlat], 
+        List of 4 entries defining [minlon,maxlon, minlat, maxlat],
         by default None
 
     Returns
@@ -147,7 +145,8 @@ def plot_cross_section(
                     transform=ccrs.PlateCarree(),
                     cmap=illumcmap, norm=illumnorm)
 
-                # Create colorbar from artifical scalarmappable (alpha is problematic)
+                # Create colorbar from artifical scalarmappable (alpha is
+                # problematic)
                 c = plt.colorbar(
                     ScalarMappable(cmap=plt.get_cmap(
                         illumcmap), norm=illumnorm),

@@ -11,16 +11,25 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 2nd July 2021 04:08:03 pm
+Last Modified: Thursday, 19th August 2021 04:17:34 pm
 
 '''
 
 from logging import warn
+import logging
 import os
 
 from joblib import Parallel, delayed
 from obspy.clients.fdsn import Client, header
 from obspy.clients.fdsn.header import URL_MAPPINGS
+
+
+log_lvl = {
+    'DEBUG': logging.DEBUG,
+    'INFO': logging.INFO,
+    'WARNING': logging.WARNING,
+    'CRITICAL': logging.CRITICAL,
+    'ERROR': logging.ERROR}
 
 
 def dt_string(dt: float) -> str:
@@ -65,7 +74,6 @@ def download_full_inventory(statloc: str, fdsn_client: list):
         if f[-1].lower() != 'xml':
             continue
         bulk.append((f[0], f[1], '*', '*', '*', '*'))
-    print(bulk)
     if isinstance(fdsn_client, str):
         fdsn_client = [fdsn_client]
     # That bit is stolen from the massdownloader
@@ -103,7 +111,7 @@ def download_full_inventory(statloc: str, fdsn_client: list):
 
         fdsn_client = tuple(providers)
 
-    _ = Parallel(n_jobs=-1)(
+    _ = Parallel(n_jobs=1)(
         delayed(__client__loop__)(client, statloc, bulk)
         for client in fdsn_client)
 
@@ -125,4 +133,3 @@ def __client__loop__(client: str, statloc: str, bulk: list):
             out = os.path.join(statloc, '%s.%s.xml' % (netcode, statcode))
             stat_inv.select(network=netcode, station=statcode).write(
                 out, format="STATIONXML")
-

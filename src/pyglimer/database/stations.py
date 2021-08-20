@@ -12,13 +12,15 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Thursday, 25th March 2021 03:47:07 pm
+Last Modified: Tuesday, 17th August 2021 04:52:48 pm
 '''
 
 import logging
 import os
 import shelve
 from copy import deepcopy
+from typing import Tuple
+import glob
 
 from joblib import Parallel, delayed
 from obspy.clients.fdsn import Client, header
@@ -26,6 +28,7 @@ import pandas as pd
 from pathlib import Path
 
 from pyglimer.data import finddir
+from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.plot.plot_map import plot_station_db
 
 
@@ -38,7 +41,8 @@ def redownload_missing_statxmls(clients, phase, statloc, rawdir, verbose=True):
     :param clients: List of clients (see obspy documentation for
         `~obspy.Client`).
     :type clients: list
-    :param phase: Either "P" or "S", defines in which folder to look for mseeds.
+    :param phase: Either "P" or "S", defines in which folder to look for
+        mseeds.
     :type phase: str
     :param statloc: Folder, in which the station xmls are saved
     :type statloc: str
@@ -47,25 +51,24 @@ def redownload_missing_statxmls(clients, phase, statloc, rawdir, verbose=True):
     :type rawdir: str
     :param verbose: Show some extra information, by default True
     :type verbose: bool, optional
-    """    
+    """
 
     ex = os.listdir(statloc)
-    
+
     # remove file identifier
     for i, xml in enumerate(ex):
         x = xml.split('.')
         ex[i] = x[0] + '.' + x[1]
-    
     wavdir = os.path.join(rawdir, phase)
 
-    out = Parallel(n_jobs=-1)(
+    Parallel(n_jobs=-1)(
         delayed(__client__loop__)(client, ex, wavdir, statloc)
         for client in clients)
 
-        
+
 def __client__loop__(client, existing, wavdir, statloc):
     client = Client(client)
-    
+
     for _, _, files in os.walk(wavdir):
         for fi in files:
             f = fi.split('.')
@@ -76,16 +79,18 @@ def __client__loop__(client, existing, wavdir, statloc):
                 out = os.path.join(statloc, code + '.xml')
                 try:
                     stat_inv = client.get_stations(
-                        network = f[0], station=f[1], level='response',
+                        network=f[0], station=f[1], level='response',
                         filename=out)
                     stat_inv.write(out, format="STATIONXML")
                     existing.append(code)
                 except (header.FDSNNoDataException, header.FDSNException):
-                    pass  # wrong client        
+                    pass  # wrong client
+
 
 class StationDB(object):
-    def __init__(self, preproloc, phase=None, use_old=False,
-                 logdir:str or None = None):
+    def __init__(
+        self, dir: str, phase: str = None, use_old: bool = False,
+            hdf5: bool = True, logdir: str = None):
         """
         Creates a pandas database of all available receiver functions.
         This database is entirely based on the info files in the "preprocessed"
@@ -94,9 +99,9 @@ class StationDB(object):
         will be no option to save it, as it should be up to date.
         However, there is an export function
 
-        :param preproloc: Parental folder, in which the preprocessed mseeds are
+        :param dir: Parental folder, in which the preprocessed mseeds are
             saved (i.e. the folder above the phase division).
-        :type preproloc: str
+        :type dir: str
         :param phase: If just one of the primary phases should be checked -
             useful for computational efficiency, when creating ccp.
             Default is None.
@@ -105,17 +110,18 @@ class StationDB(object):
             That is a lot faster, but it will obviously not update,
             defaults to False
         :type use_old: bool, optional
+        :param hdf5: Use HDF5 database instead of station xmls? Defaults to
+            True.
+        :type hdf5: bool, optional
         :param logdir: Directory for log file
         :type logdr: str, optional
-        """        
+        """
 
-        self.preproloc = preproloc
-        
+        self.dir = dir
+
         if phase:
-            self.phase = phase.upper()           
-        #else:
-        #   self.phase = phase
-        
+            self.phase = phase.upper()
+
         # 1. Initiate logger
         self.logger = logging.Logger(
             "pyglimer.database.stations.StationDBaseLogger")
@@ -126,14 +132,13 @@ class StationDB(object):
             try:
                 fh = logging.FileHandler(
                     os.path.join(
-                        preproloc, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
+                        dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
             except FileNotFoundError:
                 os.makedirs(os.path.join(
-                        preproloc, os.pardir, os.pardir, 'logs'), exist_ok=True)
+                        dir, os.pardir, os.pardir, 'logs'), exist_ok=True)
                 fh = logging.FileHandler(
                     os.path.join(
-                        preproloc, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
-            # fh = logging.FileHandler(os.path.join('logs', 'StationDBase.log'))
+                        dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
         else:
             fh = logging.FileHandler(os.path.join(logdir, 'StationDBase.log'))
         fh.setLevel(logging.WARNING)
@@ -146,27 +151,57 @@ class StationDB(object):
 
         # Check if there is already a saved database
         oloc = os.path.join(finddir(), 'database.csv')
-        
+
         if use_old and Path(oloc).is_file():
             self.db = pd.read_csv(oloc)
+        elif hdf5:
+            self.db = self._create_from_hdf5()
         else:
-            self.db = self.__create__()     
+            self.db = self._create_from_info()
 
         # Save Database, don't save if only one phase is requested newly
         if not phase:
             self.db.to_csv(oloc)
 
-    def __create__(self):
+    def _create_from_hdf5(self) -> pd.DataFrame:
+        """
+        Creates a panda database from information read from hdf5 files.
+
+        :return: Simple Pandas Dataframe with station info
+        :rtype: pd.DataFrame
+        """
+        data = {
+                'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
+                'elevation': []
+            }
+        for f in glob.glob(os.path.join(
+                self.dir, '**', '*.*.h5'), recursive=True):
+            net, stat, _ = os.path.basename(f).split('.')
+            data['network'].append(net)
+            data['station'].append(stat)
+            data['code'].append('%s.%s' % (net, stat))
+            # For now, we only do coordinates. Never used anything else anyways
+            with RFDataBase(f, mode='r') as rfdb:
+                lat, lon, el = rfdb.get_coords(net, stat, self.phase)
+            if not lat:
+                continue
+            data['lat'].append(lat)
+            data['lon'].append(lon)
+            data['elevation'].append(el)
+
+        return pd.DataFrame.from_dict(data)
+
+    def _create_from_info(self) -> pd.DataFrame:
         """
         Create panda database.
         """
         if self.phase:
             # Create data dictionary
             data = {
-            'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
-            'elevation': [], 'NP': [], 'NPret': [], 'NS': [], 'NSret': []
+                'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
+                'elevation': [], 'NP': [], 'NPret': [], 'NS': [], 'NSret': []
             }
-            
+
             # oposing phase
             if self.phase == 'P':
                 o = 'S'
@@ -175,11 +210,11 @@ class StationDB(object):
             elif self.phase == 'SKS':
                 o = 'SKS'
             else:
-                raise ValueError('Phase '+self.phase+' not supported.')
-            
+                raise ValueError('Phase %s not supported.' % self.phase)
+
             folder = os.path.join(
-                self.preproloc, self.phase, 'by_station')
-            
+                self.dir, self.phase, 'by_station')
+
             # Check data availability
             for root, _, files in os.walk(folder):
                 if 'info.dat' not in files:
@@ -203,7 +238,7 @@ class StationDB(object):
                         self.logger.debug(
                             ['No P-waveforms retained for station',
                              info['network'] + '.' + info['station']])
-            
+
             # Return dataframe
             return pd.DataFrame.from_dict(data)
 
@@ -212,11 +247,11 @@ class StationDB(object):
             'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
             'elevation': [], 'NP': [], 'NPret': [], 'NS': [], 'NSret': []
             }
-        dataS = deepcopy(dataP)  
+        dataS = deepcopy(dataP)
 
         # Read in info files
-        folderP = os.path.join(self.preproloc, 'P', 'by_station')
-        folderS = os.path.join(self.preproloc, 'S', 'by_station')
+        folderP = os.path.join(self.dir, 'P', 'by_station')
+        folderS = os.path.join(self.dir, 'S', 'by_station')
 
         # Check data availability of PRFs
         for root, _, files in os.walk(folderP):
@@ -238,11 +273,12 @@ class StationDB(object):
                     dataP['NPret'].append(info['numret'])
                 except KeyError:
                     dataP['NPret'].append(0)
-                    self.logger.debug(['No P-waveforms retained for station',
-                                       info['network'] + '.' + info['station']])
+                    self.logger.debug(
+                        'No P-waveforms obtained for station %s.%s' % (
+                            info['network'], info['station']))
 
         # Check data availability of SRFs
-        for root,_ , files in os.walk(folderS):
+        for root, _, files in os.walk(folderS):
             if 'info.dat' not in files:
                 continue  # Skip parent folders or empty folders
             infof = (os.path.join(root, 'info'))
@@ -259,9 +295,9 @@ class StationDB(object):
                     dataS['NSret'].append(info['numret'])
                 except KeyError:
                     dataS['NSret'].append(0)
-                    self.logger.debug('No S-waveforms retained for station' +
-                                        info['network'] + '.' + info['station'])
-
+                    self.logger.debug(
+                        'No S-waveforms obtaimed for station %s.%s' % (
+                            info['network'], info['station']))
 
         # Merge the two dictionaries
         for i, c in enumerate(dataS['code']):
@@ -283,7 +319,9 @@ class StationDB(object):
         del dataS
         return pd.DataFrame.from_dict(dataP)
 
-    def geo_boundary(self, lat, lon, phase=None):
+    def geo_boundary(
+        self, lat: Tuple[float, float], lon: Tuple[float, float],
+            phase: str = None) -> pd.DataFrame:
         """
         Return a subset of the database filtered by location.
 
@@ -299,8 +337,7 @@ class StationDB(object):
         :type phase: str, optional
         :return: Subset of the original DataFrame filtered by location.
         :rtype: pandas.DataFrame
-        """        
-      
+        """
         a = self.db['lat'] >= lat[0]
         b = self.db['lat'] <= lat[1]
         c = self.db['lon'] >= lon[0]
@@ -310,20 +347,21 @@ class StationDB(object):
             e = self.db['N'+phase+'ret'] > 0
             subset = self.db[a & b & c & d & e]
         else:
-            subset = self.db[a & b & c & d]        
+            subset = self.db[a & b & c & d]
 
         return subset
 
     def find_stations(self, lat, lon, phase=None):
         """
         Returns list of networks and stations inside a geoboundary
-        """        
+        """
         subset = self.geo_boundary(lat, lon, phase)
         return list(subset['network']), list(subset['station'])
-    
-    def plot(self, lat:tuple or None=None, lon:tuple or None=None,
-             profile:list or tuple or None=None, p_direct=True,
-             outputfile:str or None=None, format='pdf', dpi=300):
+
+    def plot(
+        self, lat: Tuple[float, float] = None, lon: Tuple[float, float] = None,
+        profile: Tuple[float, float] = None, p_direct: bool = True,
+            outputfile: str = None, format: str = 'pdf', dpi: int = 300):
         """
         Plot the station coverage for a given area. Also allows plotting
         ccp-profiles.

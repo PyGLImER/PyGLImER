@@ -12,7 +12,7 @@ Contains various functions used to evaluate the quality of RF and waveforms
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 25th February 2020 07:28:30 pm
-Last Modified: Thursday, 25th March 2021 03:49:56 pm
+Last Modified: Thursday, 19th August 2021 03:13:09 pm
 '''
 
 import os
@@ -30,9 +30,9 @@ from obspy.clients.iris import Client
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 
 from pyglimer.data import finddir
-from pyglimer.rf.create import createRF, RFStream
+from pyglimer.rf.create import createRF
 from pyglimer.waveform.qc import qcs, qcp
-from pyglimer.waveform.rotate import rotate_PSV, rotate_LQT, rotate_LQT_min
+from pyglimer.waveform.rotate import rotate_PSV
 
 rating = {}  # mutable object
 
@@ -408,7 +408,8 @@ def sort_rated(network, station, phase, preproloc):
     for n in range(1, 5):
         os.makedirs(inloc + str(n), exist_ok=True)
     dic = shelve.open(
-        os.path.join(finddir(), 'ratings') + network + "." + station + "rating")
+        os.path.join(
+            finddir(), 'ratings') + network + "." + station + "rating")
     for file in os.listdir(inloc):
         if file[:4] == "info":  # Skip the info files
             continue
@@ -498,7 +499,7 @@ def automatic_rate(network, station, phase, preproloc):
 #     phase : STRING, optional
 #         "P" or "S".
 #     preproloc : string
-#         Directory that contains the preprocessed files (not quality controlled)
+#         Directory that contains the preprocessed files (not controlled)
 #     """
 
 #     inloc = os.path.join(preproloc, phase, "/by_station/", network, station)
@@ -571,7 +572,7 @@ def automatic_rate(network, station, phase, preproloc):
 #     with shelve.open(info_file) as info:
 #         statlat = info["statlat"]
 #         statlon = info["statlon"]
-#     outloc = config.RF[:-1] + phase + '/' + network + '/' + station + '/test/'
+#     outloc = config.RF[:-1] +phase + '/' + network + '/' + station + '/test/'
 #     if Path(outloc).is_dir():
 #         subprocess.call(['rm', '-rf', outloc])
 #     subprocess.call(['mkdir', '-p', outloc])
