@@ -12,7 +12,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Tuesday, 17th August 2021 04:52:48 pm
+Last Modified: Saturday, 21st August 2021 07:41:42 am
 '''
 
 import logging
@@ -177,14 +177,14 @@ class StationDB(object):
         for f in glob.glob(os.path.join(
                 self.dir, '**', '*.*.h5'), recursive=True):
             net, stat, _ = os.path.basename(f).split('.')
-            data['network'].append(net)
-            data['station'].append(stat)
-            data['code'].append('%s.%s' % (net, stat))
             # For now, we only do coordinates. Never used anything else anyways
             with RFDataBase(f, mode='r') as rfdb:
                 lat, lon, el = rfdb.get_coords(net, stat, self.phase)
             if not lat:
                 continue
+            data['network'].append(net)
+            data['station'].append(stat)
+            data['code'].append('%s.%s' % (net, stat))
             data['lat'].append(lat)
             data['lon'].append(lon)
             data['elevation'].append(el)

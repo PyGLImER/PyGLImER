@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 19th August 2021 11:12:43 am
+Last Modified: Saturday, 21st August 2021 07:44:50 am
 '''
 
 # !/usr/bin/env python3
@@ -1844,6 +1844,8 @@ def init_ccp(
         raise NotImplementedError(
             'Multiple mode is not supported for phase S.')
 
+    if format == 'hdft5':
+        preproloc = None
     db = StationDB(
         preproloc or rfloc, phase=phase, use_old=False, hdf5=format == 'hdf5')
 
