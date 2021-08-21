@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Saturday, 21st August 2021 07:44:50 am
+Last Modified: Saturday, 21st August 2021 08:15:44 am
 '''
 
 # !/usr/bin/env python3
@@ -763,8 +763,6 @@ code if you want to filter by station")
             raise NotImplementedError(
                 'MPI in conjunction with sac is not implemented.'
             )
-        # Data counter
-        self.N += len(streams)
 
         self.logger.info('Number of receiver functions used: '+str(self.N))
 
@@ -845,9 +843,10 @@ code if you want to filter by station")
         Unpack the output of the kdtree and stack them into the CCP object.
         Use this function if `multiple=True`
         """
-        # Count RFs
-        self.N += self.N
         for k, j, data, datam1, datam2 in zip(kk, jj, datal, datalm1, datalm2):
+            if 0 in j:
+                # Count RFs
+                self.N += self.N
             self.bins[k, j] = self.bins[k, j] + data[j]
 
             # hit counter + 1
@@ -875,12 +874,15 @@ code if you want to filter by station")
         Use this function if `multiple=False`.
         """
         # Count RFs
-        self.N += self.N
         for k, j, data in zip(kk, jj, datal):
             self.bins[k, j] = self.bins[k, j] + data[j]
 
             # hit counter + 1
             self.illum[k, j] = self.illum[k, j] + 1
+
+            # We only add the RF once
+            if 0 in j:
+                self.N += self.N
 
     def multicore_stack(
         self, stream: List[str], append_pp: bool, n_closest_points: int,
