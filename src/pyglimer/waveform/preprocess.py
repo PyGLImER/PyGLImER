@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 19th August 2021 12:23:34 pm
+Last Modified: Friday, 20th August 2021 03:02:59 pm
 '''
 
 # !/usr/bin/env python3d
@@ -616,7 +616,7 @@ def __rotate_qc(
     if st.count() > 3:
         stream = {}
         for tr in st:
-            stream[tr.stats.channel[2]] = tr
+            stream[tr.stats.component] = tr
         if "Z" in stream:
             st = Stream([stream["Z"], stream["R"], stream["T"]])
         elif "3" in stream:

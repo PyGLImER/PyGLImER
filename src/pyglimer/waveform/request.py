@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Thursday, 19th August 2021 02:14:46 pm
+Last Modified: Saturday, 21st August 2021 08:04:39 am
 '''
 import os
 from http.client import IncompleteRead
@@ -142,7 +142,7 @@ class Request(object):
 
         if format.lower() == ('hdf5' or 'h5'):
             self.h5 = True
-        elif format.lower() == ('sac' or 'mseed'):
+        elif format.lower() in ('sac', 'mseed'):
             self.h5 = False
         else:
             raise NotImplementedError(

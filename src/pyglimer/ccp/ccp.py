@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 19th August 2021 11:12:43 am
+Last Modified: Monday, 23rd August 2021 06:19:50 pm
 '''
 
 # !/usr/bin/env python3
@@ -623,7 +623,7 @@ code if you want to filter by station")
         """
         # note that streams are actually files - confusing variable name
         if mc_backend.lower() == 'joblib':
-            out = Parallel(n_jobs=-1)(
+            out = Parallel(n_jobs=1)(
                 delayed(self._create_ccp_from_hdf5)(
                     f, multiple, append_pp, n_closest_points, vel_model,
                     latb, lonb, filt)
@@ -640,12 +640,14 @@ code if you want to filter by station")
             pmap = (np.arange(len(streams))*psize)/len(streams)
             pmap = pmap.astype(np.int32)
             ind = pmap == rank
-            ind = np.arange(len(streams))[ind]
+            ind = np.arange(len(streams), dtype=int)[ind]
 
-            for f in streams:
-                kk, jj, datal, datalm1, datalm2 = self._create_ccp_from_hdf5(
-                    f, multiple, append_pp, n_closest_points, vel_model, latb,
-                    lonb, filt)
+            for ii in ind:
+                kk, jj, datal, datalm1, datalm2, N =\
+                    self._create_ccp_from_hdf5(
+                        streams[ii], multiple, append_pp, n_closest_points,
+                        vel_model, latb, lonb, filt)
+                self.N += N
                 if multiple:
                     self._unpack_output_multiple(
                         kk, jj, datal, datalm1, datalm2, endi)
@@ -708,6 +710,8 @@ code if you want to filter by station")
         datal = []
         datalm1 = []
         datalm2 = []
+        # number of rfs
+        N = 0
         with RFDataBase(f, mode='r') as rfdb:
             for rftr in rfdb.walk('rf', net, stat, self.bingrid.phase):
                 rfst = RFStream([rftr])
@@ -716,13 +720,14 @@ code if you want to filter by station")
                     n_closest_points)
                 if not out:
                     continue
+                N += 1
                 kk.append(out[0])
                 jj.append(out[1])
                 datal.append(out[2])
                 if multiple:
                     datalm1.append(out[3])
                     datalm2.append(out[4])
-        return kk, jj, datal, datalm1, datalm2
+        return kk, jj, datal, datalm1, datalm2, N
 
     def _create_ccp_from_sac(
         self, streams: List[str], multiple: bool, append_pp: bool,
@@ -763,8 +768,6 @@ code if you want to filter by station")
             raise NotImplementedError(
                 'MPI in conjunction with sac is not implemented.'
             )
-        # Data counter
-        self.N += len(streams)
 
         self.logger.info('Number of receiver functions used: '+str(self.N))
 
@@ -831,12 +834,14 @@ code if you want to filter by station")
         """
         # Awful way to solve it, but the best I could find
         if multiple:
-            for kk, jj, datal, datalm1, datalm2 in out:
+            for kk, jj, datal, datalm1, datalm2, N in out:
                 self._unpack_output_multiple(
                     kk, jj, datal, datalm1, datalm2, endi)
+                self.N += N
         else:
-            for kk, jj, datal, _, _ in out:
+            for kk, jj, datal, _, _, N in out:
                 self._unpack_output(kk, jj, datal)
+                self.N += N
 
     def _unpack_output_multiple(
         self, kk: List[int], jj: List[int], datal: List[float],
@@ -845,9 +850,10 @@ code if you want to filter by station")
         Unpack the output of the kdtree and stack them into the CCP object.
         Use this function if `multiple=True`
         """
-        # Count RFs
-        self.N += self.N
         for k, j, data, datam1, datam2 in zip(kk, jj, datal, datalm1, datalm2):
+            if 0 in j:
+                # Count RFs
+                self.N += self.N
             self.bins[k, j] = self.bins[k, j] + data[j]
 
             # hit counter + 1
@@ -875,12 +881,15 @@ code if you want to filter by station")
         Use this function if `multiple=False`.
         """
         # Count RFs
-        self.N += self.N
         for k, j, data in zip(kk, jj, datal):
             self.bins[k, j] = self.bins[k, j] + data[j]
 
             # hit counter + 1
             self.illum[k, j] = self.illum[k, j] + 1
+
+            # We only add the RF once
+            if 0 in j:
+                self.N += self.N
 
     def multicore_stack(
         self, stream: List[str], append_pp: bool, n_closest_points: int,
@@ -919,6 +928,7 @@ code if you want to filter by station")
         datal = []
         datalm1 = []
         datalm2 = []
+        N = 0
 
         for st in stream:
             rft = read_rf(st)
@@ -927,6 +937,7 @@ code if you want to filter by station")
                 n_closest_points)
             if not out:
                 continue
+            N += 1
             if multiple:
                 k, j, data, lm1, lm2 = out
                 datalm1.append(lm1)
@@ -937,7 +948,7 @@ code if you want to filter by station")
             jj.append(j)
             datal.append(data)
 
-        return kk, jj, datal, datalm1, datalm2
+        return kk, jj, datal, datalm1, datalm2, N
 
     def _ccp_process_rftr(
         self, rfst: RFStream, filt: Tuple[float, float], vmodel: str,
@@ -1844,6 +1855,9 @@ def init_ccp(
         raise NotImplementedError(
             'Multiple mode is not supported for phase S.')
 
+    if format in ('hdf5', 'h5', 'hdf'):
+        preproloc = None
+        format = 'hdf5'
     db = StationDB(
         preproloc or rfloc, phase=phase, use_old=False, hdf5=format == 'hdf5')
 

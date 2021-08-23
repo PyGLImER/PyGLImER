@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Thursday, 19th August 2021 02:31:05 pm
+Last Modified: Friday, 20th August 2021 03:02:14 pm
 '''
 
 from glob import glob
@@ -125,13 +125,13 @@ def preprocessh5(
         for ii in tqdm(ind):
             _preprocessh5_single(
                 phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, netrestr, statrestr, logger, rflogger,
+                deconmeth, hc_filt, logger, rflogger,
                 flist[ii]
             )
     elif client.lower() == 'joblib':
         Parallel(n_jobs=-1)(delayed(_preprocessh5_single)(
             phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-            deconmeth, hc_filt, netrestr, statrestr, logger, rflogger,
+            deconmeth, hc_filt, logger, rflogger,
             f) for f in tqdm(flist))
     else:
         raise NotImplementedError(
@@ -142,8 +142,8 @@ def preprocessh5(
 def _preprocessh5_single(
     phase: str, rot: str, pol: str, taper_perc: float,
     model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
-    rfloc: str, deconmeth: str, hc_filt: float, netrestr: str,
-    statrestr: str, logger: logging.Logger, rflogger: logging.Logger,
+    rfloc: str, deconmeth: str, hc_filt: float,
+    logger: logging.Logger, rflogger: logging.Logger,
         hdf5_file: str):
     """
     Single core processing of one single hdf5 file.
@@ -334,7 +334,7 @@ def __rotate_qc(
     if st.count() > 3:
         stream = {}
         for tr in st:
-            stream[tr.stats.channel[2]] = tr
+            stream[tr.stats.component] = tr
         if "Z" in stream:
             st = Stream([stream["Z"], stream["R"], stream["T"]])
         elif "3" in stream:

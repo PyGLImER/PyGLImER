@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Thursday, 19th August 2021 03:03:30 pm
+Last Modified: Saturday, 21st August 2021 07:37:22 am
 '''
 
 import fnmatch
@@ -185,8 +185,8 @@ omitted." % path, category=UserWarning)
         return all_traces_recursive(self[path], RFStream(), pattern)
 
     def get_coords(
-        self, network: str, station: str, phase: str = None) -> Tuple[
-            float, float, float]:
+        self, network: str, station: str, phase: str = None,
+            tag: str = 'rf') -> Tuple[float, float, float]:
         """
         Return the coordinates of the station.
 
@@ -202,7 +202,7 @@ omitted." % path, category=UserWarning)
 
         # This might look confusing but it's actually not looping but just
         # choosing the first available file
-        for tag in self.keys():
+        try:
             for ph in self[tag][network][station].keys():
                 phi = phase or ph
                 for pol in self[tag][network][station][phi].keys():
@@ -215,12 +215,13 @@ omitted." % path, category=UserWarning)
                             rf[0].stats.station_latitude,
                             rf[0].stats.station_longitude,
                             rf[0].stats.station_elevation)
-        # No data?
-        warnings.warn(
-            'No Data for station %s.%s and phase %s. Returns None.' % (
-                network, station, phase
-            ))
-        return None, None, None
+        except KeyError:
+            # No data?
+            warnings.warn(
+                'No Data for station %s.%s and phase %s. Returns None.' % (
+                    network, station, phase
+                ))
+            return None, None, None
 
     def get_known_waveforms(self) -> Tuple[List[str], List[str]]:
         try:
