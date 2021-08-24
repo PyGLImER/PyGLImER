@@ -11,7 +11,7 @@ Seismic Format (asdf).
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2021 03:24:30 pm
-Last Modified: Tuesday, 24th August 2021 10:38:28 am
+Last Modified: Tuesday, 24th August 2021 05:17:04 pm
 '''
 
 
@@ -93,7 +93,7 @@ def writeraw(
                 st = resample_or_decimate(st, 10, filter=False)
             except ValueError as e:
                 # Corrupt data
-                print(e)
+                warn(str(e))
                 continue
 
         with ASDFDataSet(os.path.join(outfolder, fname)) as ds:
@@ -110,4 +110,7 @@ def writeraw(
                 else:
                     pass
             ds.add_waveforms(st, tag='raw_recording', event_id=evtid)
-            ds.add_stationxml(statxml)
+            try:
+                ds.add_stationxml(statxml)
+            except TypeError as e:
+                warn(str(e))
