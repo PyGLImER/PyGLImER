@@ -12,7 +12,7 @@ Automatic creation of raysum geom files
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 14th May 2020 10:23:03
-Last Modified: Tuesday, 25th May 2021 05:21:47 pm
+Last Modified: Thursday, 19th August 2021 03:15:31 pm
 '''
 
 import os
@@ -87,7 +87,6 @@ def create_geom(
         coords = np.unique(np.column_stack((yshift, xshift)), axis=0)
     else:
         M = np.sqrt(N)  # Number of stations per line
-        d = shift_max/M
         xshift, yshift = np.mgrid[
             -shift_max:shift_max:M, -shift_max:shift_max:M]
         coords = np.column_stack((xshift.ravel(), yshift.ravel()))

@@ -1,0 +1,58 @@
+# This file is used to define the parameters used for PyGLImER
+#### Project wide parameters
+# lowest level project directory
+proj_dir : 'database'
+# raw waveforms
+raw_subdir: 'waveforms/raw'
+# preprocessed subdir, only in use if fileformat = 'mseed'
+prepro_subdir: 'waveforms/preprocessed'
+# receiver function subdir
+rf_subdir: 'waveforms/RF'
+# statxml subdir
+statloc_subdir: 'stations'
+# subdir for event catalogues
+evt_subdir: 'event_catalogs'
+# directory for logging information
+log_subdir : 'log'
+# levels:
+# 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'
+loglvl: 'DEBUG'
+# format, either mseed or hdf5
+format: 'hdf5'
+
+# The teleseismic phase to use (P or S or also more exotic ones)
+phase: 'S'
+
+### Request parameters
+## First, everything concerning the download
+# waveform client, list of strings
+waveform_client: ['IRIS']
+# Use an already downloaded event catalog
+# If so insert filename here.
+evtcat: None
+# earliest event
+starttime: '2009-01-1 00:00:00.0'
+# latest event
+endtime: '2011-12-31 00:00:00.0'
+# Minumum Magnitude
+minmag: 5.5
+# Specific events (coordinate restrictions)
+# event_coords: (0, 90, -180, 180)
+# Network and station to use, unix-style wildcards are allowed
+network: 'YP'
+station: '*'
+
+## concerning preprocessing
+# Coordinate system to rotate to
+# RTZ, LQT, or PSS
+rot: 'PSS'
+# Polarisation, use v for v/q receiver functions
+# and h for transverse (SH)
+pol: 'v'
+# Deconvolution method
+# Iterative time domain: 'it'
+# Waterlevel Spectral Division: 'waterlevel'
+deconmeth: 'it'
+
+
+

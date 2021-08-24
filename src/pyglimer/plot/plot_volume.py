@@ -17,7 +17,6 @@ import matplotlib.gridspec as gridspec
 from matplotlib import cm
 from matplotlib import colors as matcolors
 from matplotlib.widgets import Slider, CheckButtons
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
 import numpy as np
 from cartopy.crs import PlateCarree
@@ -368,7 +367,7 @@ class VolumeExploration:
             Slice location. Defaults to 135.
         yl :float, optional
             slice location in y direction. Defaults to 37.5.
-        zl : float, optional 
+        zl : float, optional
             zslice location. Defaults to -50.
 
         Notes

@@ -1,4 +1,3 @@
-from typing import Optional
 from .line_buffer import line_buffer
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt

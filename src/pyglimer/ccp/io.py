@@ -20,8 +20,8 @@ def load_rawrf(filename):
     Parameters
     ----------
     filename : str
-        filename of the receiver function `.mat`-file to be loaded. The 
-        `.mat`-file is expected to contain following parameters. See Notes 
+        filename of the receiver function `.mat`-file to be loaded. The
+        `.mat`-file is expected to contain following parameters. See Notes
         below for required content of matlab rawRf file.
 
     Returns
@@ -32,23 +32,23 @@ def load_rawrf(filename):
     Notes
     -----
     File content
-    :crfs: 
+    :crfs:
         MxN matrix of M Receiver Functions and N elements
     :cbaz:
-        M elements long vector with back azimuth values corresponding to 
+        M elements long vector with back azimuth values corresponding to
         Receiver functions
-    :crayp: 
-        M elements long vector with ray parameter values corresponding to 
+    :crayp:
+        M elements long vector with ray parameter values corresponding to
         Receiver functions
-    :cslat: 
-        M elements long vector with station latitude corresponding to 
+    :cslat:
+        M elements long vector with station latitude corresponding to
         Receiver functions
-    :cslon: 
-        M elements long vector with station longitude corresponding to 
+    :cslon:
+        M elements long vector with station longitude corresponding to
         Receiver functions
-    :celev: 
+    :celev:
         M elements long vector with station elevation
-    :dt: 
+    :dt:
         sampling interval
 
     """

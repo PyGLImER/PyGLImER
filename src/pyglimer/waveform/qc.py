@@ -12,7 +12,7 @@ Contains quality control for waveforms used for receiver function creation.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 11:38:40 am
-Last Modified: Tuesday, 25th May 2021 05:16:23 pm
+Last Modified: Friday, 20th August 2021 03:01:14 pm
 '''
 
 import numpy as np
@@ -68,7 +68,7 @@ def qcp(st: Stream, dt: float, sampling_f: float, onset: float) -> tuple:
     # Create stream dict to identify channels
     stream = {}
     for tr in st:
-        stream[tr.stats.channel[2]] = tr.data
+        stream[tr.stats.component] = tr.data
     ptn1 = round(5/dt)
     ptn2 = round((onset-5)/dt)
     nptn = ptn2-ptn1+1
@@ -125,13 +125,11 @@ def qcp(st: Stream, dt: float, sampling_f: float, onset: float) -> tuple:
 
             # overwrite the old traces with the sucessfully filtered ones
             for tr in st:
-                if tr.stats.channel[2] == "R":
+                if tr.stats.component == "R":
                     tr.data = frcomp
-                elif tr.stats.channel[2] == "Z"\
-                    or tr.stats.channel[2] == "3" or\
-                        tr.stats.channel[2] == "Z":
+                elif tr.stats.component in ('Z', '3'):
                     tr.data = fzcomp
-                elif tr.stats.channel[2] == "T":
+                elif tr.stats.component == "T":
                     tr.data = ftcomp
             break  # waveform is accepted
         else:
@@ -174,7 +172,7 @@ def qcs(st: Stream, dt: float, sampling_f: float, onset: float) -> tuple:
     # Create stream dict to identify channels
     stream = {}
     for tr in st:
-        stream[tr.stats.channel[2]] = tr.data
+        stream[tr.stats.component] = tr.data
 
     ptn1 = round(5/dt)  # Hopefully relatively silent time
     ptn2 = round((onset-5)/dt)
@@ -238,13 +236,11 @@ def qcs(st: Stream, dt: float, sampling_f: float, onset: float) -> tuple:
 
             # overwrite the old traces with the sucessfully filtered ones
             for tr in st:
-                if tr.stats.channel[2] == "R":
+                if tr.stats.component == "R":
                     tr.data = frcomp
-                elif tr.stats.channel[2] == "Z"\
-                    or tr.stats.channel[2] == "3" or\
-                        tr.stats.channel[2] == "Z":
+                elif tr.stats.component in ("Z", '3'):
                     tr.data = fzcomp
-                elif tr.stats.channel[2] == "T":
+                elif tr.stats.component == "T":
                     tr.data = ftcomp
             break  # waveform is accepted
         else:

@@ -12,7 +12,7 @@ Create a 3D velocity model using Litho1.0
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 01st May 2020 12:11:03
-Last Modified: Tuesday, 25th May 2021 05:26:24 pm
+Last Modified: Friday, 20th August 2021 11:15:35 am
 '''
 
 
@@ -20,6 +20,7 @@ import subprocess
 import pickle
 import os
 import fnmatch
+import warnings
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -86,14 +87,10 @@ class ComplexModel(object):
         del xs, ys, zs
 
         self.z = z
-        # self.ndec = len(str(lat[1]-lat[0]))-1
 
         if flatten:
             self.vpf, self.vsf, self.zf = self.flatten(vp, vs)
         else:
-            # if not zf:
-            #     raise ValueError("""If flatten=False, a zf vector has to be
-            #                      provided""")
             self.vpf = vp
             self.vsf = vs
             self.zf = zf
@@ -105,11 +102,11 @@ class ComplexModel(object):
         Parameters
         ----------
         lat : float/int
-            Latitude.
+            Latitude in deg.
         lon : float/int
-            Longitude.
+            Longitude in deg.
         z : float/int
-            depth.
+            depth in km.
 
         Returns
         -------
@@ -260,8 +257,6 @@ class ComplexModel(object):
             surface_count=21,
             # needs to be a large number for good volume rendering
             ))
-        # plot(figvp)
-        # plot(figvs)
         return figvp, figvs
 
     # program-specific Exceptions
@@ -278,7 +273,97 @@ class ComplexModel(object):
             return repr(self.value)
 
 
-def load_avvmodel():
+class AverageVelModel(object):
+    def __init__(self, lat, lon, avpP, avsP, avpS, avsS):
+        """
+        Creates a model over the average P and S-wave velocities in the upper
+        crust. These are used by the P-SV-SH rotation algorithm. Model data
+        is extracted from the Litho1.0 model (location provided above).
+        The package is distributed with a readily compiled model.
+
+        Compiling takes up to one hour!
+
+        Returns
+        -------
+        None.
+
+        """
+        # latitude and longitude vector
+        self.latv = lat
+        self.lonv = lon
+
+        self.avpP = avpP
+        self.avsP = avsP
+        self.avpS = avpS
+        self.avsS = avsS
+
+    def query(self, lat: float, lon: float, phase: str) -> tuple:
+        """
+        Query average P- and S-Wave velocity in the upper 15 km (phase=S) or
+        6 km (phase=P)
+
+        Parameters
+        ----------
+        lat : float
+            Latitude in decimal degree.
+        lon : TYPE
+            Longitude in decimal degree.
+        phase : str
+            Primary phase (has to be provided due to different frequency
+            content and, thereby, difference in queried depths.)
+
+        Returns
+        -------
+        avp : float
+            Average P-wave veocity in m/s.
+        avs : float
+            Average S-wave velocity in m/s.
+
+        """
+
+        lat = round(lat)
+        lon = round(lon)
+
+        m = np.where(self.latv == lat)[0][0]
+        n = np.where(self.lonv == lon)[0][0]
+
+        if phase[-1] == 'P':
+            avp = self.avpP[m, n]
+            avs = self.avsP[m, n]
+        elif phase[-1] == 'S':
+            avp = self.avpS[m, n]
+            avs = self.avsS[m, n]
+        else:
+            raise ValueError('Phase '+phase+' is not known.')
+
+        return avp, avs
+
+    def write(self, filename='avvmodel'):
+        """
+        Save the model.
+
+        Parameters
+        ----------
+        filename : str, optional
+            Filename. The default is 'avvmodel'.
+
+        Returns
+        -------
+        None.
+
+        """
+        folder = os.path.join(finddir(), 'velocity_models')
+        # Remove filetype identifier if provided
+        x = filename.split('.')
+        if len(x) > 1:
+            filename = filename + '.' - x[-1]
+        oloc = os.path.join(folder, filename)
+        os.makedirs(oloc, exist_ok=True)
+
+        np.savez(oloc, **self.__dict__)
+
+
+def load_avvmodel() -> AverageVelModel:
     """
     Creates a model over the average P and S-wave velocities in the upper
     crust. These are used by the P-SV-SH rotation algorithm. Model data
@@ -302,21 +387,27 @@ def load_avvmodel():
         pass
 
     try:
-        filepath = os.path.join(finddir(), 'velocity_models', 'avvmodel.pkl')
-        with open(filepath, 'rb') as infile:
-            _MODEL_CACHE['avv'] = model = pickle.load(infile)
-            return model
+        filepath = os.path.join(finddir(), 'velocity_models', 'avvmodel.npz')
+        # with open(filepath, 'rb') as infile:
+        #     _MODEL_CACHE['avv'] = model = pickle.load(infile)
+        #     return model
+        avvd = dict(np.load(filepath))
+        avvd['lat'] = avvd.pop('latv')
+        avvd['lon'] = avvd.pop('lonv')
+        _MODEL_CACHE['avv'] = model = AverageVelModel(**avvd)
+        return model
     except FileNotFoundError:
+        warnings.warn(
+            'Could not find file for average velocity model...\n\
+Will attempt to compile a new model. This will require litho1.0 to be\
+installed on the systeam and might take a long time...')
         pass
 
     # latitude and longitude vector
     latv = np.arange(-90, 91)
     lonv = np.arange(-180, 181)
-    # self.depth = np.arange(-10, 801)
 
     # Create grid, spacing .5 deg, 1km
-    # self.vp, self.vs, _ = np.mgrid[-180:181, -360:361, -10:801]
-
     # Grid of average P and S-wave velocities, used for P-SV-SH rotation
     avpS, avsS = np.mgrid[-90:91, -180:181]
     avpP, avsP = np.mgrid[-90:91, -180:181]
@@ -400,101 +491,9 @@ def load_avvmodel():
     return model
 
 
-class AverageVelModel(object):
-    def __init__(self, lat, lon, avpP, avsP, avpS, avsS):
-        """
-        Creates a model over the average P and S-wave velocities in the upper
-        crust. These are used by the P-SV-SH rotation algorithm. Model data
-        is extracted from the Litho1.0 model (location provided above).
-        The package is distributed with a readily compiled model.
-
-        Compiling takes up to one hour!
-
-        Returns
-        -------
-        None.
-
-        """
-        # latitude and longitude vector
-        self.latv = lat
-        self.lonv = lon
-
-        self.avpP = avpP
-        self.avsP = avsP
-        self.avpS = avpS
-        self.avsS = avsS
-
-    def query(self, lat: float, lon: float, phase: str) -> tuple:
-        """
-        Query average P- and S-Wave velocity in the upper 15 km (phase=S) or
-        6 km (phase=P)
-
-        Parameters
-        ----------
-        lat : float
-            Latitude.
-        lon : TYPE
-            Longitude.
-        phase : str
-            Primary phase (has to be provided due to different frequency
-                           content)
-
-        Returns
-        -------
-        avp : float
-            Average P-wave veocity in m/s.
-        avs : float
-            Average S-wave velocity in m/s.
-
-        """
-        # lat = roundhalf(lat)
-        # lon = roundhalf(lon)
-
-        lat = round(lat)
-        lon = round(lon)
-
-        m = np.where(self.latv == lat)[0][0]
-        n = np.where(self.lonv == lon)[0][0]
-
-        if phase[-1] == 'P':
-            avp = self.avpP[m, n]
-            avs = self.avsP[m, n]
-        elif phase[-1] == 'S':
-            avp = self.avpS[m, n]
-            avs = self.avsS[m, n]
-        else:
-            raise NameError('Phase '+phase+' is not known.')
-
-        return avp, avs
-
-    def write(self, filename='avvmodel'):
-        """
-        Save the model.
-
-        Parameters
-        ----------
-        filename : str, optional
-            Filename. The default is 'avvmodel'.
-
-        Returns
-        -------
-        None.
-
-        """
-        folder = os.path.join(finddir(), 'velocity_models')
-        # Remove filetype identifier if provided
-        x = filename.split('.')
-        if len(x) > 1:
-            filename = filename + '.' - x[-1]
-        oloc = os.path.join(folder, filename)
-        os.makedirs(oloc, exist_ok=True)
-
-        with open(oloc + ".pkl", 'wb') as output:
-            pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
-
-
 def load_gyps(
-        save=False, latb: tuple = None, lonb: tuple = None) -> ComplexModel:
+    save=False, latb: tuple = None, lonb: tuple = None,
+        flatten=True) -> ComplexModel:
     """
     Compiles the GyPSuM 3D-velocity object from included GyPSuM text files
 
@@ -571,7 +570,7 @@ def load_gyps(
 
     # Create initial, full model
     # Create the velocity deviation grids
-    vpd, vsd, _ = np.mgrid[-90:91, -180:181, 0:18]
+    vpd, vsd, _ = np.mgrid[-90:91, -180:181, 0:9]
     vpd = vpd.astype(float)
     vsd = vsd.astype(float)
 
@@ -590,29 +589,24 @@ def load_gyps(
     dirlist = os.listdir(gyps)
 
     # vp deviations
-    for i, p in enumerate(fnmatch.filter(dirlist, 'P.*')):
-        vpd[:, :, 2*i] = np.reshape(
-            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, 0].shape) / 100
-        vpd[:, :, 2*i + 1] = np.reshape(
+    # Deviations are in per cent so divide by 100
+    pdevs = fnmatch.filter(dirlist, 'P.*')
+    pdevs.sort()
+    sdevs = fnmatch.filter(dirlist, 'S.*')
+    sdevs.sort()
+    for i, p in enumerate(pdevs):
+        vpd[:, :, i] = np.reshape(
             np.loadtxt(os.path.join(gyps, p)), vpd[:, :, 0].shape) / 100
 
     # vs deviations
-    for i, p in enumerate(fnmatch.filter(dirlist, 'S.*')):
-        vsd[:, :, 2*i] = np.reshape(
-            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, i].shape) / 100
-        vsd[:, :, 2*i + 1] = np.reshape(
-            np.loadtxt(os.path.join(gyps, p)), vpd[:, :, i].shape) / 100
+    for i, s in enumerate(sdevs):
+        vsd[:, :, i] = np.reshape(
+            np.loadtxt(os.path.join(gyps, s)), vpd[:, :, i].shape) / 100
 
-    # boundaries for the velocity deviations vectors
-    zd = np.hstack(
-        (0, np.repeat(np.hstack((np.arange(100, 475, 75),
-                                 np.array([525, 650, 750]))), 2),
-         850))
+    # Deviation depth vector, contains the upper depth in km
+    zd = np.hstack((0, np.arange(100, 475, 75), 525, 650, 750))
 
     # Interpolation depth
-    # zq = np.unique(np.sort(np.hstack(zb, zd)))
-    # imax = np.where(zq > 850)
-    # zq = zq[:imax]
     zq = np.arange(0, maxz+res, res)
 
     # Interpolate background velocity model
@@ -622,9 +616,11 @@ def load_gyps(
     del vpb, vsb, zbp, zbs
 
     # Interpolate velocity disturbances
-    intf = interp1d(zd, vpd, axis=2)
+    # The disturbances are defined as blocks
+    # So only nearest neighbour interpolations!
+    intf = interp1d(zd, vpd, axis=2, kind='previous')
     dvp = intf(zq)
-    intf = interp1d(zd, vsd, axis=2)
+    intf = interp1d(zd, vsd, axis=2, kind='previous')
     dvs = intf(zq)
 
     vp = np.multiply(dvp, vp_bg) + vp_bg
@@ -635,8 +631,8 @@ def load_gyps(
     lat = np.arange(-90, 91, 1)
     lon = np.arange(-180, 181, 1)
 
-    # Create a velocity model with 1km spacing
-    model = ComplexModel(zq, vp, vs, lat, lon)
+    # Create a velocity model with 1deg spacing
+    model = ComplexModel(zq, vp, vs, lat, lon, flatten=flatten)
 
     # Pickle model
     if save:

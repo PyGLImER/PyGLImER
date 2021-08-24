@@ -13,7 +13,7 @@ Used to test the deconvolve module.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 23rd October 2019 09:37:30 am
-Last Modified: Thursday, 25th March 2021 03:53:12 pm
+Last Modified: Thursday, 19th August 2021 03:13:20 pm
 '''
 
 import numpy as np
@@ -23,14 +23,14 @@ from ..utils import signalproc as sptb
 
 def synthetic(N2, dt, R, SNR, stdv):
     """
-    Function to create synthetic seismograms (given Impulse response 
+    Function to create synthetic seismograms (given Impulse response
     convolved with a Ricker wavelet)
 
     Parameters
     ----------
-    N2 : int 
+    N2 : int
         half-length of the Input traces, (full length N= N2*2+1)
-    dt : float 
+    dt : float
         sampling rate
     R : Arraylike
         Impulse response / reflectivity series with length N

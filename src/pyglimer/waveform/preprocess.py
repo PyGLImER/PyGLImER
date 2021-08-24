@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Monday, 5th July 2021 01:14:04 pm
+Last Modified: Friday, 20th August 2021 03:02:59 pm
 '''
 
 # !/usr/bin/env python3d
@@ -20,7 +20,7 @@ import os
 import shelve
 import time
 import itertools
-import warnings
+from typing import Tuple
 
 import numpy as np
 from joblib import Parallel, delayed, cpu_count
@@ -30,7 +30,9 @@ from obspy import read, read_inventory, Stream, UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pathlib import Path
 
-# from pyglimer.waveform.preprocessh5 import preprocessh5
+from tqdm.std import tqdm
+
+from pyglimer.waveform.preprocessh5 import preprocessh5
 from pyglimer import tmp
 from pyglimer.utils.signalproc import resample_or_decimate
 from .errorhandler import redownload, redownload_statxml, \
@@ -49,7 +51,8 @@ def preprocess(
     taper_type: str, tz: int, ta: int, statloc: str, rawloc: str,
     preproloc: str, rfloc: str, deconmeth: str, hc_filt: float or None,
     saveasdf: bool = False, netrestr=None, statrestr=None,
-        logdir: str = None, loglvl: int = logging.WARNING):
+    logdir: str = None, loglvl: int = logging.WARNING,
+        client: str = 'joblib'):
     """
      Preprocesses waveforms to create receiver functions
 
@@ -111,19 +114,18 @@ def preprocess(
     # logging
     logger = logging.getLogger("pyglimer.request.preprocess")
     logger.info('\n\n\n...Preprocessing initialiased...\n')
-    if loglvl == logging.DEBUG:
-        debug = True
 
     # Logging for RF creation
     rflogger = logging.getLogger("pyglimer.request.preprocess.RF")
 
     #########
 
-    # if saveasdf:
-    #     preprocessh5(
-    #         phase, rot, pol, taper_perc, event_cat, model, taper_type, tz, ta,
-    #         rawloc, preproloc, rfloc, deconmeth, hc_filt, netrestr,
-    #         statrestr, logger, rflogger, debug)
+    if saveasdf:
+        preprocessh5(
+            phase, rot, pol, taper_perc, model, taper_type, tz, ta,
+            rawloc, rfloc, deconmeth, hc_filt, netrestr,
+            statrestr, logger, rflogger, client)
+        return
     # else:
     # Here, we work with all available cores to speed things up
     # Split up event catalogue to mitigate the danger of data loss
@@ -144,18 +146,31 @@ def preprocess(
     # Returns generator object with evtcats with each 100 events
     evtcats = chunks(event_cat, n_split)
     for evtcat in evtcats:
-        if debug:
-            n_j = 1  # Only way to allow for redownload, maximum 3 requests
-            eh = True
+
+        if client.lower() == 'joblib':
+            out = Parallel(n_jobs=-1)(
+                    delayed(__event_loop)(
+                        phase, rot, pol, event, taper_perc,
+                        taper_type, model, logger, rflogger, eh, tz,
+                        ta, statloc, rawloc, preproloc, rfloc, deconmeth,
+                        hc_filt, netrestr, statrestr)
+                    for event in tqdm(evtcat))
+        elif client.lower() == 'mpi':
+            from mpi4py import MPI
+            comm = MPI.COMM_WORLD
+            rank = comm.Get_rank()
+            psize = comm.Get_size()
+            pmap = (np.arange(len(evtcat))*psize)/len(evtcat)
+            pmap = pmap.astype(np.int32)
+            ind = pmap == rank
+            ind = np.arange(len(evtcat))[ind]
+            for ii in tqdm(ind):
+                __event_loop(
+                    phase, rot, pol, evtcat[ii], taper_perc, taper_type,
+                    model, logger, rflogger, eh, tz, ta, statloc, rawloc,
+                    preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr)
         else:
-            n_j = -1
-        out = Parallel(n_jobs=n_j)(
-                delayed(__event_loop)(
-                    phase, rot, pol, event, taper_perc,
-                    taper_type, model, logger, rflogger, eh, tz,
-                    ta, statloc, rawloc, preproloc, rfloc, deconmeth,
-                    hc_filt, netrestr, statrestr)
-                for event in evtcat)
+            raise NotImplementedError('Unknown client %s' % client)
 
         # For simultaneous download, dicts are written
         #  while the processing is happening
@@ -199,9 +214,12 @@ def preprocess(
     print("Download and preprocessing finished.")
 
 
-def __event_loop(phase, rot, pol, event, taper_perc, taper_type, model,
-                 logger, rflogger, eh, tz, ta, statloc, rawloc,
-                 preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr):
+def __event_loop(
+    phase: str, rot: str, pol: str, event: obspy.core.event.Event,
+    taper_perc: float, taper_type: str, model: obspy.taup.TauPyModel,
+    logger: logging.Logger, rflogger: logging.Logger, eh: bool, tz: float,
+    ta: float, statloc: str, rawloc: str, preproloc: str, rfloc: str,
+        deconmeth: str, hc_filt: float, netrestr: str, statrestr: str):
     """
     Loops over each event in the event catalogue
     """
@@ -271,11 +289,14 @@ def __event_loop(phase, rot, pol, event, taper_perc, taper_type, model,
     return infolist
 
 
-def __waveform_loop(phase, rot, pol, filestr, taper_perc,
-                    taper_type, model, origin_time, ot_fiss, evtlat,
-                    evtlon, depth, prepro_folder, event, logger, rflogger,
-                    by_event, eh, tz, ta, statloc, preproloc, rfloc,
-                    deconmeth, hc_filt):
+def __waveform_loop(
+    phase: str, rot: str, pol: str, filestr: str, taper_perc: float,
+    taper_type: str, model: obspy.taup.TauPyModel, origin_time: UTCDateTime,
+    ot_fiss: str, evtlat: float, evtlon: float, depth: float,
+    prepro_folder: str, event: obspy.core.event.event.Event,
+    logger: logging.Logger, rflogger: logging.Logger, by_event, eh: bool,
+    tz: float, ta: float, statloc: str, preproloc: str, rfloc: str,
+        deconmeth: str, hc_filt: float):
     """
     Loops over each waveform for a specific event and a specific station
     """
@@ -413,11 +434,6 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
         # 21.04.2020 Second highcut filter
         if hc_filt:
             st.filter('lowpass', freq=hc_filt, zerophase=True, corners=2)
-        # if phase == "P":
-        #     st.filter('lowpass', freq=1.5, zerophase=True, corners=2)
-        # elif phase == 'S':
-        # change for Kind(2015) to frequ=.125 freq=0.175Hz
-        #     st.filter('lowpass', freq=0.25, zerophase=True, corners=2)
 
         start = time.time()
 
@@ -431,15 +447,6 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
                     crit = False
                     raise SNRError("""The estimated incidence angle is
                                    unrealistic with """ + str(ia) + 'degree.')
-
-            # if rot == "LQT":
-            #     st, b = rotate_LQT(st, phase)
-            #     # addional QC
-            #     if b > 0.75 or b < 1.5:
-            #         crit = False
-            #         raise SNRError("""The energy ratio between Q and L
-            #                        at theoretical arrival is too close
-            #                        to 1 with """ + str(b) + '.')
 
             elif rot == "PSS":
                 _, _, st = rotate_PSV(
@@ -505,8 +512,11 @@ def __waveform_loop(phase, rot, pol, filestr, taper_perc,
     # return infodict
 
 
-def __cut_resample(st, logger, first_arrival, network, station,
-                   prepro_folder, filestr, taper_perc, taper_type, eh, tz, ta):
+def __cut_resample(
+    st: obspy.Stream, logger: logging.Logger, first_arrival: UTCDateTime,
+    network: str, station: str, prepro_folder: str, filestr: str,
+    taper_perc: float, taper_type: str, eh: bool, tz: float,
+        ta: float) -> obspy.Stream:
     """Cut and resample raw file. Will overwrite original raw"""
 
     start = time.time()
@@ -566,10 +576,13 @@ def __cut_resample(st, logger, first_arrival, network, station,
     return st
 
 
-def __rotate_qc(phase, st, station_inv, network, station, baz,
-                distance, outf, ot_fiss, event, evtlat, evtlon, depth,
-                rayp_s_deg, first_arrival, infof, logger, infodict, by_event,
-                eh, tz, statloc):
+def __rotate_qc(
+    phase: str, st: obspy.Stream, station_inv: obspy.Inventory, network: str,
+    station: str, baz: float, distance: float, outf: str, ot_fiss: str,
+    event: obspy.core.event.event.Event, evtlat: float, evtlon: float,
+    depth: float, rayp_s_deg: float, first_arrival: UTCDateTime, infof: str,
+    logger: logging.Logger, infodict: dict, by_event, eh: bool, tz: float,
+        statloc: str) -> Tuple[Stream, bool, dict]:
     """REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
     Bugs occur here due to station inventories without response information
     Looks like the bulk downloader sometimes donwnloads
@@ -593,25 +606,7 @@ def __rotate_qc(phase, st, station_inv, network, station, baz,
             raise ValueError(
                 ["No matching response file found for", network, station])
 
-    # This step is superfluous simulate/remvove_response does that as well
-    # st.remove_sensitivity(inventory=station_inv)
-
-    # simulate for another instrument like harvard (a stable good one)
-    # 19/02/21 Removing this and rather remove the response entirely
-    # st.simulate(paz_remove=None, paz_simulate=paz_sim,
-    #             simulate_sensitivity=True)
-
-    # ROTATION
-    # try:
-    # If channeles weren't properly aligned
     st.rotate(method='->ZNE', inventory=station_inv)
-    # Error: The directions are not linearly independent,
-    # there doesn't seem to be a fix for this
-    # except ValueError:
-    # st = NotLinearlyIndependentHandler(st, network, station,
-    #                                    st[0].stats.starttime,
-    #                                    st[0].stats.endtime,
-    #                                    station_inv, paz_sim)
 
     st.rotate(method='NE->RT', inventory=station_inv,
               back_azimuth=baz)
@@ -621,7 +616,7 @@ def __rotate_qc(phase, st, station_inv, network, station, baz,
     if st.count() > 3:
         stream = {}
         for tr in st:
-            stream[tr.stats.channel[2]] = tr
+            stream[tr.stats.component] = tr
         if "Z" in stream:
             st = Stream([stream["Z"], stream["R"], stream["T"]])
         elif "3" in stream:
@@ -642,7 +637,7 @@ def __rotate_qc(phase, st, station_inv, network, station, baz,
             infodict['statlat'] = station_inv[0][0][0].latitude
             infodict['statlon'] = station_inv[0][0][0].longitude
             infodict['statel'] = station_inv[0][0][0].elevation
-            raise SNRError(np.array2string(noisemat))
+            raise SNRError('QC rejected %s' % np.array2string(noisemat))
 
     elif phase[-1] == "S":
         st, crit, f, noisemat = qcs(st, dt, sampling_f, tz)
@@ -655,7 +650,7 @@ def __rotate_qc(phase, st, station_inv, network, station, baz,
             infodict['statlat'] = station_inv[0][0][0].latitude
             infodict['statlon'] = station_inv[0][0][0].longitude
             infodict['statel'] = station_inv[0][0][0].elevation
-            raise SNRError(np.array2string(noisemat))
+            raise SNRError('QC rejected %s' % np.array2string(noisemat))
 
     #      WRITE FILES     #
     try:
@@ -708,7 +703,7 @@ def __rotate_qc(phase, st, station_inv, network, station, baz,
     return st, crit, infodict
 
 
-def __file_in_db(loc, filename):
+def __file_in_db(loc: str, filename: str) -> bool:
     """Checks if file "filename" is already in location "loc"."""
     path = Path(os.path.join(loc, filename))
     if path.is_file():

@@ -15,8 +15,6 @@ Last Update: June 19, 2020
 
 
 """
-
-import matplotlib.path as mpath
 import os
 import numpy as np
 import matplotlib
@@ -200,13 +198,11 @@ def plot_catalog(catalog):
     cbar.ax.set_ylabel(r"       $M_w$", rotation=0)
 
 
-def plot_single_rf(rf, tlim: list or tuple or None = None,
-                   ylim: list or tuple or None = None,
-                   depth: np.ndarray or None = None,
-                   ax: plt.Axes = None, outputdir: str = None,
-                   pre_fix: str = None, post_fix: str = None,
-                   format: str = None,
-                   clean: bool = False):
+def plot_single_rf(
+    rf, tlim: list or tuple or None = None, ylim: list or tuple or None = None,
+    depth: np.ndarray or None = None, ax: plt.Axes = None,
+    outputdir: str = None, pre_fix: str = None,
+        post_fix: str = None, format: str = 'pdf', clean: bool = False):
     """Creates plot of a single receiver function
 
     Parameters
@@ -249,7 +245,9 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
         ax = plt.axes(zorder=9999999)
         axtmp = None
     else:
-        bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+        fig = plt.gcf()
+        bbox = ax.get_window_extent().transformed(
+            fig.dpi_scale_trans.inverted())
         width, height = bbox.width, bbox.height
         axtmp = ax
 
@@ -347,13 +345,13 @@ def plot_single_rf(rf, tlim: list or tuple or None = None,
     return ax
 
 
-def plot_section(rfst, channel="PRF",
-                 timelimits: list or tuple or None = None,
-                 epilimits: list or tuple or None = None,
-                 scalingfactor: float = 2.0, ax: plt.Axes = None,
-                 line: bool = True,
-                 linewidth: float = 0.25, outputfile: str or None = None,
-                 title: str or None = None, show: bool = True):
+def plot_section(
+    rfst, channel="PRF",
+    timelimits: list or tuple or None = None,
+    epilimits: list or tuple or None = None,
+    scalingfactor: float = 2.0, ax: plt.Axes = None,
+    line: bool = True, linewidth: float = 0.25, outputfile: str or None = None,
+        title: str or None = None, show: bool = True, format: str = None):
     """Creates plot of a receiver function section as a function
     of epicentral distance.
 
@@ -370,7 +368,7 @@ def plot_section(rfst, channel="PRF",
         If `None` from 30 to 90 degrees plotted.
         Default None.
     scalingfactor : float
-        sets the scale for the traces. Could be automated in 
+        sets the scale for the traces. Could be automated in
         future functions(Something like mean distance between
         traces)
         Defaults to 2.0
@@ -407,16 +405,15 @@ def plot_section(rfst, channel="PRF",
     rfst_chan = rfst.sort(keys=['distance'])
 
     if not len(rfst_chan):
-        raise ValueError('There are no receiver functions of channel ' + channel
-                         + ' in the RFStream.')
+        raise ValueError(
+            'There are no receiver functions of channel %s in the RFStream.' %
+            channel)
 
     # Plot traces
     for _i, rf in enumerate(rfst_chan):
-        ydata = rf.data
         if rf.stats.type == 'time':
             times = rf.times() - (rf.stats.onset - rf.stats.starttime)
             if rf.stats.phase[-1] == 'S':
-                ydata = np.flip(-rf.data)
                 times = np.flip(times)
         else:
             z = np.hstack(
@@ -445,7 +442,6 @@ def plot_section(rfst, channel="PRF",
     if timelimits is None:
         if rfst[0].stats.type == 'time':
             ylim0 = 0
-            #rfst_chan[0].stats.starttime - rfst_chan[0].stats.onset
         else:
             ylim0 = times[0]
         ylim1 = times[-1] + ylim0
@@ -471,7 +467,7 @@ def plot_section(rfst, channel="PRF",
     if outputfile is None:
         plt.show()
     else:
-        plt.savefig(outputfile, dpi=300, transparent=True)
+        plt.savefig(outputfile, dpi=300, transparent=True, format=format)
     return ax
 
 
@@ -609,7 +605,7 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
         simple defines boundaries of the rayparemeter plot nothing
         more nothing less.
     outputfile:  str or None
-        Path to savefile. If None plot is not saved just shown. 
+        Path to savefile. If None plot is not saved just shown.
         Defaults to None.
     format: str
         outputfile format
