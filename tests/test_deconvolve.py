@@ -10,7 +10,7 @@ Tests the pyglimer.rf.deconvolve module
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th March 2021 10:13:35 am
-Last Modified: Thursday, 25th March 2021 04:06:22 pm
+Last Modified: Wednesday, 25th August 2021 12:21:29 pm
 '''
 import unittest
 
@@ -45,7 +45,7 @@ class TestIt(unittest.TestCase):
         _, _, r2 = it(g, s, 1, omega_min=0.5)
 
         # test result
-        self.assertIsNone(testing.assert_allclose(r, r2[0:len(r)], atol=0.001))
+        self.assertTrue(np.allclose(r, r2[0:len(r)], atol=0.001))
 
 
 if __name__ == "__main__":

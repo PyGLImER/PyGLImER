@@ -13,7 +13,7 @@ Various Deconvolution approaches used for the RF technique.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 16th October 2019 02:24:30 pm
-Last Modified: Wednesday, 25th August 2021 11:22:12 am
+Last Modified: Wednesday, 25th August 2021 04:48:51 pm
 
 '''
 
@@ -61,8 +61,8 @@ def it(P, H, dt, shift=0, width=2.5, omega_min=0.5, it_max=200):
     N2 = next_fast_len(N)
 
     # Pad input with zeros to the next power of 2
-    P = np.append(P, (N2-len(P))*[0])
-    H = np.append(H, (N2-len(H))*[0])
+    P = np.append(P, np.zeros(N2-len(P)))
+    H = np.append(H, np.zeros(N2-len(H)))
 
     # PREPARING PARAMETERS FOR LOOP #
     it = 0  # number of iteration
@@ -98,7 +98,7 @@ def it(P, H, dt, shift=0, width=2.5, omega_min=0.5, it_max=200):
 
     # Create receiver function
     Gauss = sptb.gaussian(N2, dt, width)
-    rf = sptb.filter(IR, Gauss, dt, N2)
+    rf = sptb.filter(IR, Gauss, dt)
 
     # shift and truncate RF
     if shift:  # only if shift !=0
