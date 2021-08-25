@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 20th August 2021 11:29:54 am
-Last Modified: Tuesday, 24th August 2021 03:18:45 pm
+Last Modified: Wednesday, 25th August 2021 11:19:00 am
 '''
 
 import unittest
@@ -40,7 +40,18 @@ class TestReckon(unittest.TestCase):
 
 
 class TestGCTrack(unittest.TestCase):
-    
+    def testspacing(self):
+        lat = np.random.rand(10)*180-90
+        lon = np.random.rand(10)*360-180
+        d = np.random.randint(1, 20)/4
+        qlat, qlon, qdists, sdists = gu.gctrack(lat, lon, d)
+        for ii, (la, lo, qdi, sdi) in enumerate(
+                zip(qlat, qlon, qdists, sdists)):
+            if ii in (0, len(qlat)-1):
+                # naturally unprecise
+                continue
+            dis = locations2degrees(la, lo, qlat[ii+1], qlon[ii+1])
+            self.assertAlmostEqual(dis, d, delta=.06)
 
 
 if __name__ == "__main__":
