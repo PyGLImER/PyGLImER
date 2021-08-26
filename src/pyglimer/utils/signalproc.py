@@ -12,7 +12,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Sunday, 20th October 2019 10:31:03 am
-Last Modified: Wednesday, 11th August 2021 10:51:01 am
+Last Modified: Wednesday, 25th August 2021 04:50:24 pm
 '''
 
 import numpy as np
@@ -36,6 +36,12 @@ def resample_or_decimate(
     """
     sr = data[0].stats.sampling_rate
     srn = sampling_rate_new
+
+    if srn > sr:
+        raise ValueError('New sampling rate greater than old. This function \
+            is only intended for downsampling.')
+    elif srn == sr:
+        return data
 
     # Chosen this filter design as it's exactly the same as
     # obspy.Stream.decimate uses
@@ -73,7 +79,8 @@ def convf(u: np.ndarray, v: np.ndarray, nf: int, dt: float) -> np.ndarray:
         Convolution of u with v.
 
     """
-
+    if not len(u) or not len(v):
+        raise ValueError('The input arrays have to have a length!')
     U = np.fft.fft(u, n=nf)
     V = np.fft.fft(v, n=nf)
     C = U*V*dt
@@ -101,6 +108,8 @@ def corrf(u: np.ndarray, v: np.ndarray, nf: int) -> np.ndarray:
         Correlation vector.
 
     """
+    if not len(u) or not len(v):
+        raise ValueError('The input arrays have to have a length!')
 
     V = np.conj(np.fft.fft(v, n=nf))
     U = np.fft.fft(u, n=nf)
@@ -111,8 +120,8 @@ def corrf(u: np.ndarray, v: np.ndarray, nf: int) -> np.ndarray:
 
 def gaussian(N: int, dt: float, width: float) -> np.ndarray:
     """
-    Create a zero-phase Gaussian function. In particular meant to be
-    convolved with the impulse
+    Create a zero-phase Gaussian function (i.e., a low-pass filter). In
+    particular meant to be convolved with the impulse
     response that is the output of an iterative deconvolution
 
     Parameters
@@ -130,6 +139,8 @@ def gaussian(N: int, dt: float, width: float) -> np.ndarray:
         Gaussian window.
 
     """
+    if width <= 0:
+        raise ValueError('Gaussian width parameter has to be greater than 0.')
 
     df = 1/(N*dt)  # frequency step
     f = np.arange(0, round(0.5*N), 1, dtype=float)*df  # frequency array
@@ -142,7 +153,7 @@ def gaussian(N: int, dt: float, width: float) -> np.ndarray:
     return G
 
 
-def filter(s: np.ndarray, F: np.ndarray, dt: float, nf: int) -> np.ndarray:
+def filter(s: np.ndarray, F: np.ndarray, dt: float) -> np.ndarray:
     """
     Convolves a filter with a signal (given in time domain).
 
@@ -151,11 +162,10 @@ def filter(s: np.ndarray, F: np.ndarray, dt: float, nf: int) -> np.ndarray:
     s : np.array
         Signal given in time domain.
     F : np.array
-        Filter's amplitude response.
+        Filter's amplitude response (i.e., frequency domain).
     dt : FLOAT
         Sampling interval [s].
-    nf : INTEGER
-        Array length in frequency domain (use next power of 2).
+
 
     Returns
     -------
@@ -163,6 +173,7 @@ def filter(s: np.ndarray, F: np.ndarray, dt: float, nf: int) -> np.ndarray:
         Filtered signal.
 
     """
+    nf = len(F)
 
     S = np.fft.fft(s, n=nf)
     S_f = np.multiply(S, F)*dt
@@ -221,7 +232,6 @@ def sshift(s: np.ndarray, N2: int, dt: float, shift: float) -> np.ndarray:
     S = np.fft.fft(s, n=N2)
 
     k = round(shift/dt)  # discrete shift
-    # p = 2*np.pi*np.arange(0, N2, 1, dtype=float)*k/N2  # phase shift
     p = 2*np.pi*np.arange(1, N2+1, 1, dtype=float)*k/N2  # phase shift
     S = S*(np.cos(p) - 1j*np.sin(p))
 
