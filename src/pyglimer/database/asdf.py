@@ -11,14 +11,17 @@ Seismic Format (asdf).
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2021 03:24:30 pm
-Last Modified: Friday, 27th August 2021 09:35:54 am
+Last Modified: Friday, 27th August 2021 02:17:42 pm
 '''
 
 import logging
 import os
+from threading import Event
 
 import obspy
 from obspy import read, read_inventory, UTCDateTime
+from obspy.core.inventory.inventory import Inventory
+from obspy.core.stream import Stream
 from pyasdf import ASDFDataSet
 
 from pyglimer.utils.signalproc import resample_or_decimate
@@ -83,27 +86,33 @@ def writeraw(
     # Let's create one file per station
     for fi in os.listdir(rawfolder):
         code = '.'.join(fi.split('.')[:-1])
-        fname = code + '.h5'
         try:
             statxml = read_inventory(os.path.join(statloc, '%s.xml' % code))
             st = read(os.path.join(rawfolder, fi))
         # Start out by adding the event, which later will be associated to
         # each of the waveforms
-            if resample:
-                st.filter('lowpass_cheby_2', freq=4, maxorder=12)
-                st = resample_or_decimate(st, 10, filter=False)
-
-            with ASDFDataSet(os.path.join(outfolder, fname)) as ds:
-                # Retrieve eventid - not the most elgant way, but works
-                evtid = event.resource_id
-                try:
-                    if st.count() >= 3:
-                        ds.add_quakeml(event)
-                except ValueError:
-                    logging.info(
-                            'Event with event-id %s already in DB, skipping...'
-                            % str(evtid), UserWarning)
-                ds.add_waveforms(st, tag='raw_recording', event_id=evtid)
-                ds.add_stationxml(statxml)
+            write_st(st, event, outfolder, statxml, resample)
         except Exception as e:
             logger.error(e)
+
+
+def write_st(
+    st: Stream, event: Event, outfolder: str, statxml: Inventory,
+        resample: bool = True):
+    fname = '%s.%s.h5' % (st[0].stats.network, st[0].stats.station)
+    if resample:
+        st.filter('lowpass_cheby_2', freq=4, maxorder=12)
+        st = resample_or_decimate(st, 10, filter=False)
+
+    with ASDFDataSet(os.path.join(outfolder, fname)) as ds:
+        # Retrieve eventid - not the most elgant way, but works
+        evtid = event.resource_id
+        try:
+            if st.count() >= 3:
+                ds.add_quakeml(event)
+        except ValueError:
+            logging.info(
+                    'Event with event-id %s already in DB, skipping...'
+                    % str(evtid), UserWarning)
+        ds.add_waveforms(st, tag='raw_recording', event_id=evtid)
+        ds.add_stationxml(statxml)

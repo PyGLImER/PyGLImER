@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Saturday, 21st August 2021 08:04:39 am
+Last Modified: Friday, 27th August 2021 02:37:35 pm
 '''
 import os
 from http.client import IncompleteRead
@@ -30,7 +30,7 @@ from obspy.taup import TauPyModel
 from tqdm import tqdm
 # from obspy.clients.fdsn.client import FDSNException
 
-from pyglimer.waveform.download import downloadwav
+from pyglimer.waveform.download import download_small_db, downloadwav
 from pyglimer.waveform.preprocess import preprocess
 from pyglimer.utils import utils as pu
 
@@ -345,6 +345,13 @@ class Request(object):
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
             network=self.network, station=self.station, log_fh=self.fh,
             loglvl=self.loglvl, verbose=verbose, saveasdf=self.h5)
+
+    def download_waveforms_small_db(self, channel: str):
+        download_small_db(
+            self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
+            self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
+            self.network, self.station, channel, self.h5, log_fh=self.fh,
+            loglvl=self.loglvl)
 
     def preprocess(
         self, client: str = 'joblib',
