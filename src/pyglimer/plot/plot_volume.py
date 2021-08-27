@@ -139,7 +139,9 @@ class VolumePlot:
         self.linewidth = 1.5
 
         # Colormap settings
-        self.vmin0, self.vmax0 = [np.nanmin(V), np.nanmax(V)]
+        self.vmin0, self.vmax0 = [-0.05, 0.05]
+        # Due to the interpolation the above valuers are not easily identifiable
+        # by distribution
         self.vmin, self.vmax = self.vmin0, self.vmax0
         self.norm = matcolors.TwoSlopeNorm(
             vmin=self.vmin, vcenter=0.0, vmax=self.vmax)
