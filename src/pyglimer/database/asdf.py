@@ -11,12 +11,11 @@ Seismic Format (asdf).
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2021 03:24:30 pm
-Last Modified: Tuesday, 24th August 2021 05:17:04 pm
+Last Modified: Friday, 27th August 2021 09:35:54 am
 '''
 
-
+import logging
 import os
-from warnings import warn
 
 import obspy
 from obspy import read, read_inventory, UTCDateTime
@@ -78,39 +77,33 @@ def writeraw(
     # Folder to save asdf to
     outfolder = os.path.join(rawfolder, os.pardir)
 
+    logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
+
     # 2021/08/03
     # Let's create one file per station
     for fi in os.listdir(rawfolder):
         code = '.'.join(fi.split('.')[:-1])
         fname = code + '.h5'
-        statxml = read_inventory(os.path.join(statloc, '%s.xml' % code))
-        st = read(os.path.join(rawfolder, fi))
-    # Start out by adding the event, which later will be associated to
-    # each of the waveforms
-        if resample:
-            try:
+        try:
+            statxml = read_inventory(os.path.join(statloc, '%s.xml' % code))
+            st = read(os.path.join(rawfolder, fi))
+        # Start out by adding the event, which later will be associated to
+        # each of the waveforms
+            if resample:
                 st.filter('lowpass_cheby_2', freq=4, maxorder=12)
                 st = resample_or_decimate(st, 10, filter=False)
-            except ValueError as e:
-                # Corrupt data
-                warn(str(e))
-                continue
 
-        with ASDFDataSet(os.path.join(outfolder, fname)) as ds:
-            # Retrieve eventid - not the most elgant way, but works
-            evtid = event.resource_id
-            try:
-                if st.count() >= 3:
-                    ds.add_quakeml(event)
-            except ValueError:
-                if verbose:
-                    warn(
-                        'Event with event-id %s already in DB, skipping...'
-                        % str(evtid), UserWarning)
-                else:
-                    pass
-            ds.add_waveforms(st, tag='raw_recording', event_id=evtid)
-            try:
+            with ASDFDataSet(os.path.join(outfolder, fname)) as ds:
+                # Retrieve eventid - not the most elgant way, but works
+                evtid = event.resource_id
+                try:
+                    if st.count() >= 3:
+                        ds.add_quakeml(event)
+                except ValueError:
+                    logging.info(
+                            'Event with event-id %s already in DB, skipping...'
+                            % str(evtid), UserWarning)
+                ds.add_waveforms(st, tag='raw_recording', event_id=evtid)
                 ds.add_stationxml(statxml)
-            except TypeError as e:
-                warn(str(e))
+        except Exception as e:
+            logger.error(e)
