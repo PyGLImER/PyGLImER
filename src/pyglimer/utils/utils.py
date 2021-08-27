@@ -11,7 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 27th August 2021 03:56:40 pm
+Last Modified: Friday, 27th August 2021 04:07:01 pm
 
 '''
 
@@ -136,22 +136,26 @@ def __client__loop_wav__(
 
 def save_raw(
         saved: dict, st: Stream, rawloc: str, inv: Inventory, saveasdf: bool):
+    # Just use the same name
     for evt, startt, endt, net, stat in zip(
         saved['event'], saved['startt'], saved['endt'], saved['net'],
             saved['stat']):
         # earlier we downloaded all locations, but we don't really want
         # to have several, so let's just keep one
-        sst = st.select(network=net, station=stat)
-        ssst = Stream()
-        ii = 0
-        while ssst.count() < 3:
-            ssst = sst.select(location=sst[ii].stats.location)
-        slst = ssst.slice(startt, endt)
-        if saveasdf:
-            sinv = inv.select(net, stat, starttime=startt, endtime=endt)
-            write_st(slst, evt, rawloc, sinv)
-        else:
-            save_raw_mseed(evt, slst, rawloc, net, stat)
+        try:
+            sst = st.select(network=net, station=stat)
+            ssst = Stream()
+            ii = 0
+            while ssst.count() < 3:
+                ssst = sst.select(location=sst[ii].stats.location)
+            slst = ssst.slice(startt, endt)
+            if saveasdf:
+                sinv = inv.select(net, stat, starttime=startt, endtime=endt)
+                write_st(slst, evt, rawloc, sinv)
+            else:
+                save_raw_mseed(evt, slst, rawloc, net, stat)
+        except Exception as e:
+            logging.error(e)
 
 
 def save_raw_mseed(evt: Event, slst: Stream, rawloc: str, net: str, stat: str):
