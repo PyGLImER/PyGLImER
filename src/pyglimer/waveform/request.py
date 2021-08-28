@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Friday, 27th August 2021 02:37:35 pm
+Last Modified: Saturday, 28th August 2021 01:15:04 pm
 '''
 import os
 from http.client import IncompleteRead
@@ -339,6 +339,13 @@ class Request(object):
         ----------
         verbose : Bool, optional
             Set True if you wish to log the output of the obspy MassDownloader.
+
+        .. seealso::
+
+            You should check whether the method
+            :meth:`~pyglimer.waveform.request.Request.download_waveforms_small\
+            _db` might be better suited for your needs.
+            Both methods offer unique advantages.
         """
         downloadwav(
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
@@ -347,6 +354,25 @@ class Request(object):
             loglvl=self.loglvl, verbose=verbose, saveasdf=self.h5)
 
     def download_waveforms_small_db(self, channel: str):
+        """
+        A different method to download raw waveform data. This method will
+        be faster than
+        :meth:`~pyglimer.waveform.request.Request.download_waveforms` for
+        small databases (e.g., single networks or stations). Another
+        advantage of this method is that the attributes network and station
+        in :class:`~pyglimer.waveforms.request.Request` can be lists.
+
+        :param channel: The channel you will want to download, accepts
+            unix style wildcards.
+        :type channel: str
+
+        .. seealso::
+
+            You should check whether the method
+            :meth:`~pyglimer.waveform.request.Request.download_Waveforms`
+            might be better suited for your needs. Both methods offer unique
+            advantages.
+        """
         download_small_db(
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,

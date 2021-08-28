@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 27th August 2021 04:01:22 pm
+Last Modified: Saturday, 28th August 2021 01:41:23 pm
 '''
 
 # !/usr/bin/env python3
@@ -19,7 +19,6 @@ from http.client import IncompleteRead
 import logging
 import os
 import shutil
-from numpy import save
 from tqdm import tqdm
 
 from joblib import Parallel, delayed
@@ -46,6 +45,10 @@ def download_small_db(
     rawloc: str, clients: list, network: str = '*', station: str = '*',
     channel: str = '*', saveasdf: bool = False,
         log_fh: logging.FileHandler = None, loglvl: int = logging.WARNING):
+    """
+    see corresponding method :meth:`~pyglimer.waveform.request.Request.\
+    download_waveforms_small_db`
+    """
 
     # If station and network are None
     station = station or '*'

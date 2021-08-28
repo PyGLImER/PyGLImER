@@ -11,7 +11,7 @@ Seismic Format (asdf).
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2021 03:24:30 pm
-Last Modified: Friday, 27th August 2021 02:17:42 pm
+Last Modified: Saturday, 28th August 2021 01:19:26 pm
 '''
 
 import logging
@@ -99,6 +99,21 @@ def writeraw(
 def write_st(
     st: Stream, event: Event, outfolder: str, statxml: Inventory,
         resample: bool = True):
+    """
+    Write raw waveform data to an asdf file. This includes the corresponding
+    (teleseismic) event and the station inventory (i.e., response information).
+
+    :param st: The stream holding the raw waveform data.
+    :type st: Stream
+    :param event: The seismic event associated to the recorded data.
+    :type event: Event
+    :param outfolder: Output folder to write the asdf file to.
+    :type outfolder: str
+    :param statxml: The station inventory
+    :type statxml: Inventory
+    :param resample: Resample the data to 10Hz sampling rate? Defaults to True.
+    :type resample: bool, optional
+    """
     fname = '%s.%s.h5' % (st[0].stats.network, st[0].stats.station)
     if resample:
         st.filter('lowpass_cheby_2', freq=4, maxorder=12)

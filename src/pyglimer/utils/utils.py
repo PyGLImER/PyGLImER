@@ -11,7 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 27th August 2021 04:07:01 pm
+Last Modified: Saturday, 28th August 2021 01:37:48 pm
 
 '''
 
@@ -19,7 +19,7 @@ from logging import warn
 import logging
 import os
 from threading import Event
-from typing import List
+from typing import List, Tuple
 
 from joblib import Parallel, delayed
 from obspy.clients.fdsn import Client, header
@@ -98,7 +98,20 @@ def join_inv(invlist=List[Inventory]) -> Inventory:
     return inv
 
 
-def __client__loop__(client: str, statloc: str, bulk: list):
+def __client__loop__(client: str or Client, statloc: str, bulk: list):
+    """
+    Download station information from specified client and for the
+    specified bulk list.
+
+    :param client: FDSN client to use
+    :type client: str or obspy.fdsn.clients.Client
+    :param statloc: Location in which the station xmls are to be saved.
+    :type statloc: str
+    :param bulk: Bulk list to described the queried download.
+    :type bulk: list
+    :return: The inventory for all downloaded stations
+    :rtype: obspy.Inventory
+    """
     try:
         if not isinstance(client, Client):
             client = Client(client)
@@ -122,6 +135,24 @@ def __client__loop__(client: str, statloc: str, bulk: list):
 def __client__loop_wav__(
     client: str, rawloc: str, bulk: list, saved: dict, saveasdf: bool,
         inv: Inventory):
+    """
+    Download waveforms from specified client and for the
+    specified bulk list.
+
+    :param client: FDSN client to use
+    :type client: str or obspy.fdsn.clients.Client
+    :param rawloc: Location in which the waveforms are to be saved
+    :type rawloc: str
+    :param bulk: Bulk list to described the queried download.
+    :type bulk: list
+    :param saved: Dictionary holding information about each request and
+        their associated events.
+    :type saved: dict
+    :param saveasdf: True if the desired output format will be asdf.
+    :type saveasdf: bool
+    :param inv: The inventory for all downloaded stations
+    :type inv: obspy.Inventory
+    """
     try:
         if not isinstance(client, Client):
             client = Client(client)
@@ -136,6 +167,23 @@ def __client__loop_wav__(
 
 def save_raw(
         saved: dict, st: Stream, rawloc: str, inv: Inventory, saveasdf: bool):
+    """
+    Save the raw waveform data in the desired format.
+    The point of this function is mainly that the waveforms will be saved
+    with the correct associations and at the correct locations.
+
+    :param saved: Dictionary holding information about the original streams
+        to identify them afterwards.
+    :type saved: dict
+    :param st: obspy stream holding all data (from various stations)
+    :type st: Stream
+    :param rawloc: Parental directory (with phase) to save the files in.
+    :type rawloc: str
+    :param inv: The inventory holding all the station information
+    :type inv: Inventory
+    :param saveasdf: If True the data will be saved in asdf format.
+    :type saveasdf: bool
+    """
     # Just use the same name
     for evt, startt, endt, net, stat in zip(
         saved['event'], saved['startt'], saved['endt'], saved['net'],
@@ -159,6 +207,22 @@ def save_raw(
 
 
 def save_raw_mseed(evt: Event, slst: Stream, rawloc: str, net: str, stat: str):
+    """
+    Saves input stream in the correct location in mini seed format.
+
+    :param evt: event that is associated to the recording.
+    :type evt: Event
+    :param slst: The selected stream. Should contain all components of one
+        recording of a teleseismic event.
+    :type slst: Stream
+    :param rawloc: Location (with phase) to save the miniseed files in (will
+        also create subfolders).
+    :type rawloc: str
+    :param net: Network code
+    :type net: str
+    :param stat: Station Code
+    :type stat: str
+    """
     o = (evt.preferred_origin() or evt.origins[0])
     ot_loc = UTCDateTime(o.time, precision=-1).format_fissures()[:-6]
     evtlat_loc = str(roundhalf(o.latitude))
@@ -170,7 +234,21 @@ def save_raw_mseed(evt: Event, slst: Stream, rawloc: str, net: str, stat: str):
     slst.write(fn, fmt='mseed')
 
 
-def get_multiple_fdsn_clients(clients: List[str] or str or None):
+def get_multiple_fdsn_clients(
+        clients: List[str] or str or None) -> Tuple[Client]:
+    """
+    Returns a tuple holding all the queried fdsn providers. Also finds
+    all available fdsn providers if input is None. Will also sort the clients
+    so the big providers (IRIS and ORFEUS) come last.
+
+    Just a modified version of a code in the obspy mass downloader.
+
+    :param clients: List of strings, each describing one client.
+        Put None if you want to use all available.
+    :type clients: List[str] or str or None
+    :return: Tuple of the fdsn Client objects.
+    :rtype: Tuple[Client]
+    """
     # That bit is stolen from the massdownloader
     if isinstance(clients, str):
         clients = [clients]
