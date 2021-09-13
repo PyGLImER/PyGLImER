@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Thursday, 19th August 2021 11:39:16 am
+Last Modified: Monday, 13th September 2021 11:58:53 am
 '''
 
 # !/usr/bin/env python3
@@ -21,6 +21,7 @@ import os
 import shutil
 from tqdm import tqdm
 
+from joblib import Parallel, delayed
 from obspy import read
 from obspy import UTCDateTime
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
@@ -33,7 +34,116 @@ from pyasdf import ASDFDataSet
 from pyglimer.database.asdf import writeraw
 from pyglimer import tmp
 from pyglimer.utils.roundhalf import roundhalf
+from pyglimer.utils import utils as pu
 from pyglimer.utils.utils import download_full_inventory
+from pyglimer.waveform.preprocessh5 import compute_toa
+
+
+def download_small_db(
+    phase: str, min_epid: float, max_epid: float, model: TauPyModel,
+    event_cat: Catalog, tz: float, ta: float, statloc: str,
+    rawloc: str, clients: list, network: str, station: str, channel: str,
+        saveasdf: bool):
+    """
+    see corresponding method :meth:`~pyglimer.waveform.request.Request.\
+    download_waveforms_small_db`
+    """
+
+    # logging
+    logger = logging.getLogger('pyglimer.request')
+
+    # If station and network are None
+    station = station or '*'
+    network = network or '*'
+    # First we download the stations to subsequently compute the times of
+    # theoretical arrival
+    clients = pu.get_multiple_fdsn_clients(clients)
+
+    logger.info('Requesting data from the following FDSN servers:\n %s' % str(
+        clients))
+
+    bulk_stat = pu.create_bulk_str(network, station, '*', channel, '*', '*')
+
+    logger.info('Bulk_stat parameter created.')
+    logger.debug('Bulk stat parameters: %s' % str(bulk_stat))
+
+    logger.info('Initialising station response download.')
+    out = Parallel(n_jobs=-1, prefer='threads')(
+        delayed(pu.__client__loop__)(client, statloc, bulk_stat)
+        for client in clients)
+    inv = pu.join_inv([inv for inv in out])
+
+    logger.info(
+        'Computing theoretical times of arrival and checking available data.')
+
+    # Now we compute the theoretical arrivals using the events and the station
+    # information
+    # We make a list of dicts akin to
+    d = {'event': [], 'startt': [], 'endt': [], 'net': [], 'stat': []}
+    for net in inv:
+        for stat in net:
+            for evt in event_cat:
+                try:
+                    toa, _, _, _, delta = compute_toa(
+                        evt, stat.latitude, stat.longitude, phase, model)
+                except IndexError:
+                    # occurs when there is no arrival of the phase at stat
+                    logger.info(
+                        'No valid arrival found for station %s,' % stat.code +
+                        'event %s, and phase %s' % (evt.resource_id, phase))
+                    continue
+                # We only do that if the epicentral distances are correct
+                if delta < min_epid or delta > max_epid:
+                    logger.info(
+                        'No valid arrival found for station %s, ' % stat.code +
+                        'event %s, and phase %s' % (evt.resource_id, phase))
+                    continue
+                # Already in DB?
+                if saveasdf:
+                    with ASDFDataSet(os.path.join(rawloc, '%s.%s.h5' % (
+                            network, station))) as ds:
+                        if evt in ds.events:
+                            logger.info(
+                                'File already in database. %s ' % stat.code +
+                                'Event: %s' % evt.resource_id)
+                            continue
+                else:
+                    o = (evt.preferred_origin() or evt.origins[0])
+                    ot_loc = UTCDateTime(
+                        o.time, precision=-1).format_fissures()[:-6]
+                    evtlat_loc = str(roundhalf(o.latitude))
+                    evtlon_loc = str(roundhalf(o.longitude))
+                    folder = os.path.join(
+                        rawloc, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
+                    fn = os.path.join(folder, '%s.%s.mseed' % (net, stat))
+                    if os.path.isfile(fn):
+                        logger.info(
+                            'File already in database. %s ' % stat.code +
+                            'Event: %s' % evt.resource_id)
+                        continue
+                # It's new data, so add to request!
+                d['event'].append(evt)
+                d['startt'].append(toa-tz)
+                d['endt'].append(toa+ta)
+                d['net'].append(net.code)
+                d['stat'].append(stat.code)
+
+    # Create waveform download bulk list
+    bulk_wav = pu.create_bulk_str(
+        d['net'], d['stat'], '*', channel, d['startt'], d['endt'])
+
+    if len(bulk_wav) == 0:
+        logger.info('No new data found.')
+        return
+
+    # This does almost certainly need to be split up, so we don't overload the
+    # RAM with the downloaded mseeds
+    logger.info('Initialising waveform donwload.')
+
+    Parallel(n_jobs=-1, prefer='threads')(
+        delayed(pu.__client__loop_wav__)(
+            client, rawloc, bulk_wav, d, saveasdf, inv)
+        for client in clients)
 
 
 def downloadwav(
@@ -288,9 +398,7 @@ def wav_in_asdf(
     """Is the waveform already in the asdf database?
     Based on the assumption that the file is there if the event is there.
     Has the advantage that files that are trimmed differently will not be down-
-    loaded again
-    Check over events
-    rather than over start and endtime!"""
+    loaded again"""
     asdf_file = os.path.join(tmp.folder, os.pardir, '%s.%s.h5' % (
         network, station))
 

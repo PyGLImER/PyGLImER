@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Saturday, 21st August 2021 08:04:39 am
+Last Modified: Monday, 13th September 2021 10:43:12 am
 '''
 import os
 from http.client import IncompleteRead
@@ -30,7 +30,7 @@ from obspy.taup import TauPyModel
 from tqdm import tqdm
 # from obspy.clients.fdsn.client import FDSNException
 
-from pyglimer.waveform.download import downloadwav
+from pyglimer.waveform.download import download_small_db, downloadwav
 from pyglimer.waveform.preprocess import preprocess
 from pyglimer.utils import utils as pu
 
@@ -339,12 +339,44 @@ class Request(object):
         ----------
         verbose : Bool, optional
             Set True if you wish to log the output of the obspy MassDownloader.
+
+        .. seealso::
+
+            You should check whether the method
+            :meth:`~pyglimer.waveform.request.Request.download_waveforms_small\
+            _db` might be better suited for your needs.
+            Both methods offer unique advantages.
         """
         downloadwav(
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
             network=self.network, station=self.station, log_fh=self.fh,
             loglvl=self.loglvl, verbose=verbose, saveasdf=self.h5)
+
+    def download_waveforms_small_db(self, channel: str):
+        """
+        A different method to download raw waveform data. This method will
+        be faster than
+        :meth:`~pyglimer.waveform.request.Request.download_waveforms` for
+        small databases (e.g., single networks or stations). Another
+        advantage of this method is that the attributes network and station
+        in :class:`~pyglimer.waveforms.request.Request` can be lists.
+
+        :param channel: The channel you will want to download, accepts
+            unix style wildcards.
+        :type channel: str
+
+        .. seealso::
+
+            You should check whether the method
+            :meth:`~pyglimer.waveform.request.Request.download_Waveforms`
+            might be better suited for your needs. Both methods offer unique
+            advantages.
+        """
+        download_small_db(
+            self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
+            self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
+            self.network, self.station, channel, self.h5)
 
     def preprocess(
         self, client: str = 'joblib',
@@ -366,5 +398,5 @@ class Request(object):
             self.phase, self.rot, self.pol, 0.05, self.evtcat, self.model,
             'hann', self.tz, self.ta, self.statloc, self.rawloc,
             self.preproloc, self.rfloc, self.deconmeth, hc_filt,
-            netrestr=self.network, statrestr=self.station, logdir=self.logdir,
-            loglvl=self.loglvl, client=client, saveasdf=self.h5)
+            netrestr=self.network, statrestr=self.station, client=client,
+            saveasdf=self.h5)
