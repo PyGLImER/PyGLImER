@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Saturday, 28th August 2021 01:41:23 pm
+Last Modified: Monday, 13th September 2021 09:20:46 am
 '''
 
 # !/usr/bin/env python3
@@ -367,9 +367,7 @@ def wav_in_asdf(
     """Is the waveform already in the asdf database?
     Based on the assumption that the file is there if the event is there.
     Has the advantage that files that are trimmed differently will not be down-
-    loaded again
-    Check over events
-    rather than over start and endtime!"""
+    loaded again"""
     asdf_file = os.path.join(tmp.folder, os.pardir, '%s.%s.h5' % (
         network, station))
 

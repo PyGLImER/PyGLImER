@@ -2,12 +2,13 @@
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   `GNU Lesser General Public License, Version 3 <https://www.gnu.org/copyleft/lesser.html>`
+   `GNU Lesser General Public License, Version 3\
+        <https://www.gnu.org/copyleft/lesser.html>`
 :author:
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 25th August 2021 11:54:15 am
-Last Modified: Wednesday, 25th August 2021 04:52:43 pm
+Last Modified: Monday, 13th September 2021 09:23:35 am
 '''
 
 import unittest
@@ -15,7 +16,6 @@ import unittest
 import numpy as np
 from obspy import read
 import scipy
-from scipy.fftpack import next_fast_len
 
 from pyglimer.utils import signalproc as sptb
 
