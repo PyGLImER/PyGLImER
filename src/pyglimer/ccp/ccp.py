@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 13th September 2021 12:25:47 pm
+Last Modified: Monday, 13th September 2021 02:58:03 pm
 '''
 
 # !/usr/bin/env python3
@@ -464,7 +464,7 @@ class CCPStack(object):
             self.logger.info('Stacking started')
         except AttributeError:
             # Loggers for the CCP script
-            self.logger = logging.Logger('pyglimer.ccp.ccp')
+            self.logger = logging.getLogger('pyglimer.ccp.ccp')
             self.logger.setLevel(logging.INFO)
 
             # Create handler to the log
@@ -560,6 +560,9 @@ code if you want to filter by station")
         # The test data needs to be filtered
         if network == 'matlab':
             filt = [.03, 1.5]  # bandpass frequencies
+
+        self.logger.debug('Using data from the following files: %s' % (
+            str(streams)))
 
         # Define grid boundaries for 3D RT
         latb = (self.coords[0].min(), self.coords[0].max())
@@ -668,6 +671,8 @@ code if you want to filter by station")
                     MPI.IN_PLACE, [self.bins_m1, MPI.DOUBLE], op=MPI.SUM)
                 comm.Allreduce(
                     MPI.IN_PLACE, [self.bins_m2, MPI.DOUBLE], op=MPI.SUM)
+
+        self.logger.info('Number of receiver functions used: '+str(self.N))
 
     def _create_ccp_from_hdf5(
         self, f: str, multiple: bool, append_pp: bool,
@@ -804,9 +809,10 @@ code if you want to filter by station")
         if mem_needed > mem.total:
             N_splits = int(np.ceil(mem_needed/mem.total))
             split_size = int(np.ceil(len(streams)/N_splits))
-            print('Splitting RFs into '+str(N_splits)+' chunks \
-                  due to insufficient memory. Each progressbar will \
-                  only show the progress per chunk.')
+            print(
+                'Splitting RFs into %s chunks due to insufficient memory.' +
+                'Each progressbar will only show the progress per chunk.' %
+                str(N_splits))
         else:
             split_size = len(streams)
 
@@ -1003,7 +1009,6 @@ code if you want to filter by station")
             # Just so the script does not interrupt. Did not occur up
             # to now
             self.logger.exception(e)
-            print(e)
             return
 
         lat = np.array(rf.stats.pp_latitude)
@@ -1022,8 +1027,12 @@ code if you want to filter by station")
             try:
                 lm1 = (rfm1.data[:depthi+1])
                 lm2 = (rfm2.data[:depthi+1])
-            except AttributeError:
+            except AttributeError as e:
                 # for Interpolationerrors
+                self.logger.exception(
+                    'Error in multiple computation. Mostly caused by issue' +
+                    'during the interpolation. Origninal Error message below.')
+                self.logger.exception(e)
                 lm1 = None
                 lm2 = None
             return k, j, rf.data, lm1, lm2
