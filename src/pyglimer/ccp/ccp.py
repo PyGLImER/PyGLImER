@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 13th September 2021 02:58:03 pm
+Last Modified: Monday, 13th September 2021 03:45:38 pm
 '''
 
 # !/usr/bin/env python3
@@ -334,8 +334,10 @@ class CCPStack(object):
         return slat, slon, sdists, qlat, qlon, qdists, qz, qill, qccp, area
 
     def plot_cross_section(self, *args, **kwargs):
-        """See documentation for 
-        :py:func:pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section"""
+        """
+        See documentation for
+        :func:`~pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section`
+        """
         return plot_cross_section(self, *args, **kwargs)
 
     def compute_stack(

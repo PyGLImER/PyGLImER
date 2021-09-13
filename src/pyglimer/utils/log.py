@@ -8,12 +8,10 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 13th September 2021 10:38:53 am
-Last Modified: Monday, 13th September 2021 12:16:53 pm
+Last Modified: Monday, 13th September 2021 03:46:51 pm
 '''
 
 import logging
-
-import multiprocessing
 
 
 def start_logger_if_necessary(

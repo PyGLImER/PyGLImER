@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Friday, 20th August 2021 03:29:38 pm
+Last Modified: Monday, 13th September 2021 04:18:25 pm
 
 
 !The file is split and has a second copyright disclaimer!
@@ -25,7 +25,9 @@ Tom Eulenfeld.
 from copy import deepcopy
 import json
 import logging
+from multiprocessing import Event
 from operator import itemgetter
+from typing import Tuple
 # from pkg_resources import resource_filename
 import warnings
 import os
@@ -49,9 +51,10 @@ from pyglimer.utils.geo_utils import fix_map_extent
 logger = logging.Logger("rf")
 
 
-def createRF(st_in, phase, pol='v', onset=None,
-             method='it', trim=None, event=None, station=None,
-             info=None):
+def createRF(
+    st_in: Stream, phase: str, pol: str = 'v', onset: UTCDateTime = None,
+    method: str = 'it', trim: Tuple[float, float] = None, event=None,
+        station=None, info: dict = None):
     """
     Creates a receiver function with the defined method from an obspy
     stream.
@@ -188,7 +191,7 @@ def createRF(st_in, phase, pol='v', onset=None,
         elif phase[-1] == "P":
             width = 2.5
         else:
-            raise ValueError('Phase '+phase+' is not supported.')
+            raise ValueError('Phase %s is not supported.' % phase)
         lrf = None
         RF[0].data = it(v, u, dt, shift=shift, width=width)[0]
     elif method == "dampedf":
