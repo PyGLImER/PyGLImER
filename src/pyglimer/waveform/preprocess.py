@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Friday, 20th August 2021 03:02:59 pm
+Last Modified: Monday, 13th September 2021 12:21:11 pm
 '''
 
 # !/usr/bin/env python3d
@@ -29,15 +29,14 @@ from obspy import read, read_inventory, Stream, UTCDateTime
 # from obspy.clients.iris import Client
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pathlib import Path
-
 from tqdm.std import tqdm
 
+from pyglimer.utils.log import create_mpi_logger
 from pyglimer.waveform.preprocessh5 import preprocessh5
 from pyglimer import tmp
 from pyglimer.utils.signalproc import resample_or_decimate
 from .errorhandler import redownload, redownload_statxml, \
     NoMatchingResponseHandler  # , NotLinearlyIndependentHandler
-# from ..constants import DEG2KM
 from .qc import qcp, qcs
 from .rotate import rotate_LQT_min, rotate_PSV  # , rotate_LQT
 from ..rf.create import createRF
@@ -51,7 +50,6 @@ def preprocess(
     taper_type: str, tz: int, ta: int, statloc: str, rawloc: str,
     preproloc: str, rfloc: str, deconmeth: str, hc_filt: float or None,
     saveasdf: bool = False, netrestr=None, statrestr=None,
-    logdir: str = None, loglvl: int = logging.WARNING,
         client: str = 'joblib'):
     """
      Preprocesses waveforms to create receiver functions
@@ -148,7 +146,7 @@ def preprocess(
     for evtcat in evtcats:
 
         if client.lower() == 'joblib':
-            out = Parallel(n_jobs=-1)(
+            out = Parallel(n_jobs=-1, backend='multiprocessing')(
                     delayed(__event_loop)(
                         phase, rot, pol, event, taper_perc,
                         taper_type, model, logger, rflogger, eh, tz,
@@ -164,6 +162,10 @@ def preprocess(
             pmap = pmap.astype(np.int32)
             ind = pmap == rank
             ind = np.arange(len(evtcat))[ind]
+
+            # get new MPI compatible loggers
+            logger = create_mpi_logger(logger, rank)
+            rflogger = logging.getLogger("%s.RF" % logger.name)
             for ii in tqdm(ind):
                 __event_loop(
                     phase, rot, pol, evtcat[ii], taper_perc, taper_type,
@@ -211,7 +213,7 @@ def preprocess(
                 logger.exception([e, d])
                 continue
 
-    print("Download and preprocessing finished.")
+    logger.info("Preprocessing finished.")
 
 
 def __event_loop(
@@ -223,6 +225,8 @@ def __event_loop(
     """
     Loops over each event in the event catalogue
     """
+    logger.info('Processing waveforms for event %s.' % event.resource_id)
+
     # create list for what will later be the info files
     infolist = []
 
@@ -365,8 +369,8 @@ def __waveform_loop(
             first_arrival = origin_time + arrival.time
 
             end = time.time()
-            logger.info("Before cut and resample")
-            logger.info(dt_string(end-start))
+            logger.debug("Before cut and resample")
+            logger.debug(dt_string(end-start))
 
             # Check if step is already done
             if st[0].stats.sampling_rate != 10:
@@ -406,8 +410,11 @@ def __waveform_loop(
 
         finally:
             end = time.time()
-            logger.info("File preprocessed.")
-            logger.info(dt_string(end-start))
+            logger.info(
+                "File preprocessed.\n" +
+                "Station %s.%s\n" % (network, station) +
+                "Event %s" % event.resource_id)
+            logger.debug(dt_string(end-start))
 
     else:  # The file was already processed
 
@@ -445,8 +452,9 @@ def __waveform_loop(
                 # additional QC
                 if ia < 5 or ia > 75:
                     crit = False
-                    raise SNRError("""The estimated incidence angle is
-                                   unrealistic with """ + str(ia) + 'degree.')
+                    raise SNRError(
+                        "The estimated incidence angle is " +
+                        "unrealistic with %s degree." % str(ia))
 
             elif rot == "PSS":
                 _, _, st = rotate_PSV(
@@ -486,8 +494,11 @@ def __waveform_loop(
                      + '.sac'), format='SAC')
 
             end = time.time()
-            rflogger.info("RF created")
-            rflogger.info(dt_string(end-start))
+            rflogger.info(
+                "RF created.\n" +
+                'Station %s.%s\n' % (network, station) +
+                'Event: %s' % event.resource_id)
+            rflogger.debug(dt_string(end-start))
 
         # Exception that occured in the RF creation
         # Usually don't happen
@@ -570,8 +581,8 @@ def __cut_resample(
             os.path.join(prepro_folder, filestr), format="MSEED")
 
     end = time.time()
-    logger.info("Unprocessed file rewritten")
-    logger.info(dt_string(end - start))
+    logger.debug("Unprocessed file rewritten")
+    logger.debug(dt_string(end - start))
 
     return st
 

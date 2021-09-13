@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Saturday, 28th August 2021 01:15:04 pm
+Last Modified: Monday, 13th September 2021 10:43:12 am
 '''
 import os
 from http.client import IncompleteRead
@@ -376,8 +376,7 @@ class Request(object):
         download_small_db(
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
-            self.network, self.station, channel, self.h5, log_fh=self.fh,
-            loglvl=self.loglvl)
+            self.network, self.station, channel, self.h5)
 
     def preprocess(
         self, client: str = 'joblib',
@@ -399,5 +398,5 @@ class Request(object):
             self.phase, self.rot, self.pol, 0.05, self.evtcat, self.model,
             'hann', self.tz, self.ta, self.statloc, self.rawloc,
             self.preproloc, self.rfloc, self.deconmeth, hc_filt,
-            netrestr=self.network, statrestr=self.station, logdir=self.logdir,
-            loglvl=self.loglvl, client=client, saveasdf=self.h5)
+            netrestr=self.network, statrestr=self.station, client=client,
+            saveasdf=self.h5)

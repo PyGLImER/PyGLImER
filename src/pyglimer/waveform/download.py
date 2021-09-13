@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Monday, 13th September 2021 09:20:46 am
+Last Modified: Monday, 13th September 2021 11:58:53 am
 '''
 
 # !/usr/bin/env python3
@@ -42,13 +42,15 @@ from pyglimer.waveform.preprocessh5 import compute_toa
 def download_small_db(
     phase: str, min_epid: float, max_epid: float, model: TauPyModel,
     event_cat: Catalog, tz: float, ta: float, statloc: str,
-    rawloc: str, clients: list, network: str = '*', station: str = '*',
-    channel: str = '*', saveasdf: bool = False,
-        log_fh: logging.FileHandler = None, loglvl: int = logging.WARNING):
+    rawloc: str, clients: list, network: str, station: str, channel: str,
+        saveasdf: bool):
     """
     see corresponding method :meth:`~pyglimer.waveform.request.Request.\
     download_waveforms_small_db`
     """
+
+    # logging
+    logger = logging.getLogger('pyglimer.request')
 
     # If station and network are None
     station = station or '*'
@@ -56,12 +58,23 @@ def download_small_db(
     # First we download the stations to subsequently compute the times of
     # theoretical arrival
     clients = pu.get_multiple_fdsn_clients(clients)
+
+    logger.info('Requesting data from the following FDSN servers:\n %s' % str(
+        clients))
+
     bulk_stat = pu.create_bulk_str(network, station, '*', channel, '*', '*')
 
+    logger.info('Bulk_stat parameter created.')
+    logger.debug('Bulk stat parameters: %s' % str(bulk_stat))
+
+    logger.info('Initialising station response download.')
     out = Parallel(n_jobs=-1, prefer='threads')(
         delayed(pu.__client__loop__)(client, statloc, bulk_stat)
         for client in clients)
     inv = pu.join_inv([inv for inv in out])
+
+    logger.info(
+        'Computing theoretical times of arrival and checking available data.')
 
     # Now we compute the theoretical arrivals using the events and the station
     # information
@@ -75,15 +88,24 @@ def download_small_db(
                         evt, stat.latitude, stat.longitude, phase, model)
                 except IndexError:
                     # occurs when there is no arrival of the phase at stat
+                    logger.info(
+                        'No valid arrival found for station %s,' % stat.code +
+                        'event %s, and phase %s' % (evt.resource_id, phase))
                     continue
                 # We only do that if the epicentral distances are correct
                 if delta < min_epid or delta > max_epid:
+                    logger.info(
+                        'No valid arrival found for station %s, ' % stat.code +
+                        'event %s, and phase %s' % (evt.resource_id, phase))
                     continue
                 # Already in DB?
                 if saveasdf:
                     with ASDFDataSet(os.path.join(rawloc, '%s.%s.h5' % (
                             network, station))) as ds:
                         if evt in ds.events:
+                            logger.info(
+                                'File already in database. %s ' % stat.code +
+                                'Event: %s' % evt.resource_id)
                             continue
                 else:
                     o = (evt.preferred_origin() or evt.origins[0])
@@ -95,6 +117,9 @@ def download_small_db(
                         rawloc, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
                     fn = os.path.join(folder, '%s.%s.mseed' % (net, stat))
                     if os.path.isfile(fn):
+                        logger.info(
+                            'File already in database. %s ' % stat.code +
+                            'Event: %s' % evt.resource_id)
                         continue
                 # It's new data, so add to request!
                 d['event'].append(evt)
@@ -107,8 +132,14 @@ def download_small_db(
     bulk_wav = pu.create_bulk_str(
         d['net'], d['stat'], '*', channel, d['startt'], d['endt'])
 
+    if len(bulk_wav) == 0:
+        logger.info('No new data found.')
+        return
+
     # This does almost certainly need to be split up, so we don't overload the
     # RAM with the downloaded mseeds
+    logger.info('Initialising waveform donwload.')
+
     Parallel(n_jobs=-1, prefer='threads')(
         delayed(pu.__client__loop_wav__)(
             client, rawloc, bulk_wav, d, saveasdf, inv)

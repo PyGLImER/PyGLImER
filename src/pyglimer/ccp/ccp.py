@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 23rd August 2021 06:19:50 pm
+Last Modified: Monday, 13th September 2021 12:25:47 pm
 '''
 
 # !/usr/bin/env python3
@@ -54,6 +54,7 @@ from pyglimer.utils.geo_utils import epi2euc, geo2cart
 from pyglimer.utils.geo_utils import gctrack
 from pyglimer.utils.geo_utils import fix_map_extent
 from pyglimer.utils.SphericalNN import SphericalNN
+from pyglimer.utils.log import create_mpi_logger
 from pyglimer.utils.utils import dt_string, chunks
 
 
@@ -623,7 +624,7 @@ code if you want to filter by station")
         """
         # note that streams are actually files - confusing variable name
         if mc_backend.lower() == 'joblib':
-            out = Parallel(n_jobs=1)(
+            out = Parallel(n_jobs=1, backend='multiprocess')(
                 delayed(self._create_ccp_from_hdf5)(
                     f, multiple, append_pp, n_closest_points, vel_model,
                     latb, lonb, filt)
@@ -642,6 +643,8 @@ code if you want to filter by station")
             ind = pmap == rank
             ind = np.arange(len(streams), dtype=int)[ind]
 
+            # get new MPI compatible loggers
+            self.logger = create_mpi_logger(self.logger, rank)
             for ii in ind:
                 kk, jj, datal, datalm1, datalm2, N =\
                     self._create_ccp_from_hdf5(
@@ -817,7 +820,7 @@ code if you want to filter by station")
                     len_split = int(np.ceil(len_split/(len_split/10)))
             num_split = int(np.ceil(len(stream_chunk)/len_split))
 
-            out = Parallel(n_jobs=num_cores)(
+            out = Parallel(n_jobs=num_cores, backend='multiprocess')(
                 delayed(self.multicore_stack)(
                     st, append_pp, n_closest_points, vel_model,
                     latb, lonb, filt, multiple)

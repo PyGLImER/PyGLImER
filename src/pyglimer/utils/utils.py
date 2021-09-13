@@ -11,7 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Saturday, 28th August 2021 01:37:48 pm
+Last Modified: Monday, 13th September 2021 10:27:18 am
 
 '''
 
@@ -112,14 +112,15 @@ def __client__loop__(client: str or Client, statloc: str, bulk: list):
     :return: The inventory for all downloaded stations
     :rtype: obspy.Inventory
     """
+    logger = logging.getLogger('pyglimer.request')
+
     try:
         if not isinstance(client, Client):
             client = Client(client)
         stat_inv = client.get_stations_bulk(
             bulk, level='response')
     except (header.FDSNNoDataException, header.FDSNException, ValueError) as e:
-        print(e)
-        warn(e)
+        logger.warning(str(e))
         return  # wrong client
         # ValueError is raised for querying a client without station service
     for network in stat_inv:
@@ -153,13 +154,13 @@ def __client__loop_wav__(
     :param inv: The inventory for all downloaded stations
     :type inv: obspy.Inventory
     """
+    logger = logging.getLogger('pyglimer.request')
     try:
         if not isinstance(client, Client):
             client = Client(client)
         st = client.get_waveforms_bulk(bulk)
     except (header.FDSNNoDataException, header.FDSNException, ValueError) as e:
-        print(e)
-        warn(e)
+        logger.warning(str(e))
         return  # wrong client
         # ValueError is raised for querying a client without station service
     save_raw(saved, st, rawloc, inv, saveasdf)

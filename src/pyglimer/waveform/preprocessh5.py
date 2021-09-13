@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Friday, 27th August 2021 02:49:34 pm
+Last Modified: Monday, 13th September 2021 12:19:56 pm
 '''
 
 from glob import glob
@@ -29,6 +29,7 @@ from pyasdf import ASDFDataSet
 from tqdm.std import tqdm
 
 from pyglimer.database.rfh5 import RFDataBase
+from pyglimer.utils.log import create_mpi_logger
 from .qc import qcp, qcs
 from .rotate import rotate_LQT_min, rotate_PSV
 from ..rf.create import RFStream, createRF
@@ -122,11 +123,14 @@ def preprocessh5(
         pmap = pmap.astype(np.int32)
         ind = pmap == rank
         ind = np.arange(len(flist))[ind]
+
+        # get new MPI compatible loggers
+        logger = create_mpi_logger(logger, rank)
+        rflogger = logging.getLogger("%s.RF" % logger.name)
         for ii in tqdm(ind):
             _preprocessh5_single(
                 phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, logger, rflogger,
-                flist[ii]
+                deconmeth, hc_filt, logger, rflogger, flist[ii]
             )
     elif client.lower() == 'joblib':
         Parallel(n_jobs=-1)(delayed(_preprocessh5_single)(
