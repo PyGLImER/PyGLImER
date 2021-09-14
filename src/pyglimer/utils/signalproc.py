@@ -12,7 +12,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Sunday, 20th October 2019 10:31:03 am
-Last Modified: Wednesday, 25th August 2021 04:50:24 pm
+Last Modified: Thursday, 26th August 2021 08:32:29 am
 '''
 
 import numpy as np
@@ -183,6 +183,7 @@ def filter(s: np.ndarray, F: np.ndarray, dt: float) -> np.ndarray:
 
 def ricker(sigma: float, N2: int, dt: float) -> tuple:
     """ create a zero-phase Ricker / Mexican hat wavelet
+
     Parameters
     ----------
     sigma : float
