@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 13th September 2021 10:38:53 am
-Last Modified: Monday, 13th September 2021 03:46:51 pm
+Last Modified: Tuesday, 14th September 2021 08:57:30 am
 '''
 
 import logging
@@ -47,9 +47,9 @@ def create_mpi_logger(logger: logging.Logger, rank: int) -> logging.Logger:
     Creates a very similar logger to the input logger, but with name and
     filehandler dependent on mpi rank.
 
-    :param logger: [description]
+    :param logger: The original logger to crete a rank-dependent version on.
     :type logger: logging.Logger
-    :return: [description]
+    :return: The rank dependent logger (different name and different file)
     :rtype: logging.Logger
     """
     lvl = logger.level
@@ -57,5 +57,5 @@ def create_mpi_logger(logger: logging.Logger, rank: int) -> logging.Logger:
     name = '%srank%s' % (logger.name, rankstr)
     for h in logger.handlers:
         if hasattr(h, 'baseFilename'):
-            fn = h.baseFilename
+            fn = '%srank%s' % (h.baseFilename, rankstr)
     return start_logger_if_necessary(name, fn, lvl)

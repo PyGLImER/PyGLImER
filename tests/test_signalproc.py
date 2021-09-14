@@ -8,11 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 25th August 2021 11:54:15 am
-<<<<<<< HEAD
-Last Modified: Tuesday, 14th September 2021 08:10:57 am
-=======
-Last Modified: Tuesday, 14th September 2021 08:10:57 am
->>>>>>> 84fe690d07b311234cb544260aa1b16fc6e225a0
+Last Modified: Tuesday, 14th September 2021 08:38:30 am
 '''
 
 import unittest
