@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 23rd August 2021 06:19:50 pm
+Last Modified: Monday, 13th September 2021 03:45:38 pm
 '''
 
 # !/usr/bin/env python3
@@ -54,6 +54,7 @@ from pyglimer.utils.geo_utils import epi2euc, geo2cart
 from pyglimer.utils.geo_utils import gctrack
 from pyglimer.utils.geo_utils import fix_map_extent
 from pyglimer.utils.SphericalNN import SphericalNN
+from pyglimer.utils.log import create_mpi_logger
 from pyglimer.utils.utils import dt_string, chunks
 
 
@@ -333,8 +334,10 @@ class CCPStack(object):
         return slat, slon, sdists, qlat, qlon, qdists, qz, qill, qccp, area
 
     def plot_cross_section(self, *args, **kwargs):
-        """See documentation for 
-        :py:func:pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section"""
+        """
+        See documentation for
+        :func:`~pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section`
+        """
         return plot_cross_section(self, *args, **kwargs)
 
     def compute_stack(
@@ -463,7 +466,7 @@ class CCPStack(object):
             self.logger.info('Stacking started')
         except AttributeError:
             # Loggers for the CCP script
-            self.logger = logging.Logger('pyglimer.ccp.ccp')
+            self.logger = logging.getLogger('pyglimer.ccp.ccp')
             self.logger.setLevel(logging.INFO)
 
             # Create handler to the log
@@ -560,6 +563,9 @@ code if you want to filter by station")
         if network == 'matlab':
             filt = [.03, 1.5]  # bandpass frequencies
 
+        self.logger.debug('Using data from the following files: %s' % (
+            str(streams)))
+
         # Define grid boundaries for 3D RT
         latb = (self.coords[0].min(), self.coords[0].max())
         lonb = (self.coords[1].min(), self.coords[1].max())
@@ -623,7 +629,7 @@ code if you want to filter by station")
         """
         # note that streams are actually files - confusing variable name
         if mc_backend.lower() == 'joblib':
-            out = Parallel(n_jobs=1)(
+            out = Parallel(n_jobs=1, backend='multiprocess')(
                 delayed(self._create_ccp_from_hdf5)(
                     f, multiple, append_pp, n_closest_points, vel_model,
                     latb, lonb, filt)
@@ -642,6 +648,8 @@ code if you want to filter by station")
             ind = pmap == rank
             ind = np.arange(len(streams), dtype=int)[ind]
 
+            # get new MPI compatible loggers
+            self.logger = create_mpi_logger(self.logger, rank)
             for ii in ind:
                 kk, jj, datal, datalm1, datalm2, N =\
                     self._create_ccp_from_hdf5(
@@ -665,6 +673,8 @@ code if you want to filter by station")
                     MPI.IN_PLACE, [self.bins_m1, MPI.DOUBLE], op=MPI.SUM)
                 comm.Allreduce(
                     MPI.IN_PLACE, [self.bins_m2, MPI.DOUBLE], op=MPI.SUM)
+
+        self.logger.info('Number of receiver functions used: '+str(self.N))
 
     def _create_ccp_from_hdf5(
         self, f: str, multiple: bool, append_pp: bool,
@@ -801,9 +811,10 @@ code if you want to filter by station")
         if mem_needed > mem.total:
             N_splits = int(np.ceil(mem_needed/mem.total))
             split_size = int(np.ceil(len(streams)/N_splits))
-            print('Splitting RFs into '+str(N_splits)+' chunks \
-                  due to insufficient memory. Each progressbar will \
-                  only show the progress per chunk.')
+            print(
+                'Splitting RFs into %s chunks due to insufficient memory.' +
+                'Each progressbar will only show the progress per chunk.' %
+                str(N_splits))
         else:
             split_size = len(streams)
 
@@ -817,7 +828,7 @@ code if you want to filter by station")
                     len_split = int(np.ceil(len_split/(len_split/10)))
             num_split = int(np.ceil(len(stream_chunk)/len_split))
 
-            out = Parallel(n_jobs=num_cores)(
+            out = Parallel(n_jobs=num_cores, backend='multiprocess')(
                 delayed(self.multicore_stack)(
                     st, append_pp, n_closest_points, vel_model,
                     latb, lonb, filt, multiple)
@@ -1000,7 +1011,6 @@ code if you want to filter by station")
             # Just so the script does not interrupt. Did not occur up
             # to now
             self.logger.exception(e)
-            print(e)
             return
 
         lat = np.array(rf.stats.pp_latitude)
@@ -1019,8 +1029,12 @@ code if you want to filter by station")
             try:
                 lm1 = (rfm1.data[:depthi+1])
                 lm2 = (rfm2.data[:depthi+1])
-            except AttributeError:
+            except AttributeError as e:
                 # for Interpolationerrors
+                self.logger.exception(
+                    'Error in multiple computation. Mostly caused by issue' +
+                    'during the interpolation. Origninal Error message below.')
+                self.logger.exception(e)
                 lm1 = None
                 lm2 = None
             return k, j, rf.data, lm1, lm2

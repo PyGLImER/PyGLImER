@@ -2,12 +2,17 @@
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   `GNU Lesser General Public License, Version 3 <https://www.gnu.org/copyleft/lesser.html>`
+   `GNU Lesser General Public License, Version 3\
+        <https://www.gnu.org/copyleft/lesser.html>`
 :author:
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 25th August 2021 11:54:15 am
+<<<<<<< HEAD
 Last Modified: Thursday, 26th August 2021 08:49:01 am
+=======
+Last Modified: Monday, 13th September 2021 09:23:35 am
+>>>>>>> 84fe690d07b311234cb544260aa1b16fc6e225a0
 '''
 
 import unittest

@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Friday, 20th August 2021 03:02:14 pm
+Last Modified: Monday, 13th September 2021 12:19:56 pm
 '''
 
 from glob import glob
@@ -29,6 +29,7 @@ from pyasdf import ASDFDataSet
 from tqdm.std import tqdm
 
 from pyglimer.database.rfh5 import RFDataBase
+from pyglimer.utils.log import create_mpi_logger
 from .qc import qcp, qcs
 from .rotate import rotate_LQT_min, rotate_PSV
 from ..rf.create import RFStream, createRF
@@ -122,11 +123,14 @@ def preprocessh5(
         pmap = pmap.astype(np.int32)
         ind = pmap == rank
         ind = np.arange(len(flist))[ind]
+
+        # get new MPI compatible loggers
+        logger = create_mpi_logger(logger, rank)
+        rflogger = logging.getLogger("%s.RF" % logger.name)
         for ii in tqdm(ind):
             _preprocessh5_single(
                 phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, logger, rflogger,
-                flist[ii]
+                deconmeth, hc_filt, logger, rflogger, flist[ii]
             )
     elif client.lower() == 'joblib':
         Parallel(n_jobs=-1)(delayed(_preprocessh5_single)(
@@ -172,7 +176,7 @@ def _preprocessh5_single(
         rf = RFStream()
         for evt in tqdm(ds.events):
             toa, rayp, rayp_s_deg, baz, distance = compute_toa(
-                evt, inv, phase, model)
+                evt, inv[0][0].latitude, inv[0][0].longitude, phase, model)
             st = ds.get_waveforms(
                 net, stat, '*', '*', toa-tz, toa+ta, 'raw_recording')
             rf_temp = __station_process__(
@@ -198,7 +202,7 @@ def _preprocessh5_single(
 
 
 def compute_toa(
-    evt: obspy.core.event.Event, inv: obspy.core.inventory.inventory.Inventory,
+    evt: obspy.core.event.Event, slat: float, slon: float,
     phase: str, model: obspy.taup.TauPyModel) -> Tuple[
         UTCDateTime, float, float, float]:
     """
@@ -207,8 +211,10 @@ def compute_toa(
 
     :param evt: Event to compute the arrival for.
     :type evt: obspy.core.event.Event
-    :param inv: Inventory object holding the information for the station
-    :type inv: obspy.core.inventory.inventory.Inventory
+    :param slat: station latitude
+    :type slat: float
+    :param slon: station longitude
+    :type slon: float
     :param phase: The teleseismic phase to consider.
     :type phase: str
     :param model: Taupymodel to use
@@ -220,7 +226,7 @@ def compute_toa(
     """
     origin = (evt.preferred_origin() or evt.origins[0])
     distance, baz, _ = gps2dist_azimuth(
-        inv[0][0].latitude, inv[0][0].longitude, origin.latitude,
+        slat, slon, origin.latitude,
         origin.longitude)
     distance = kilometer2degrees(distance/1000)
 
