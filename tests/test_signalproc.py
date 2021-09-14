@@ -9,9 +9,9 @@
 
 Created: Wednesday, 25th August 2021 11:54:15 am
 <<<<<<< HEAD
-Last Modified: Thursday, 26th August 2021 08:49:01 am
+Last Modified: Tuesday, 14th September 2021 08:10:57 am
 =======
-Last Modified: Monday, 13th September 2021 09:23:35 am
+Last Modified: Tuesday, 14th September 2021 08:10:57 am
 >>>>>>> 84fe690d07b311234cb544260aa1b16fc6e225a0
 '''
 
@@ -112,9 +112,8 @@ class TestSShift(unittest.TestCase):
     def test_empty_array(self):
         s = np.array([])
         phi = 0
-        out = sptb.sshift(s, len(s), 1, phi)
         with self.assertRaises(ValueError):
-            self.assertTrue(np.allclose(out, s))
+            sptb.sshift(s, len(s), 1, phi)
 
 
 if __name__ == "__main__":
