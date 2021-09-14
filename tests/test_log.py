@@ -7,9 +7,10 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 14th September 2021 08:39:45 am
-Last Modified: Tuesday, 14th September 2021 09:17:50 am
+Last Modified: Tuesday, 14th September 2021 10:36:22 am
 '''
 
+import logging
 import unittest
 from unittest.mock import patch, mock_open
 import os
@@ -64,6 +65,11 @@ class TestCreateMPILogger(unittest.TestCase):
         for h in mpilog.handlers:
             if hasattr(h, 'baseFilename'):
                 self.assertEqual(os.path.basename(h.baseFilename), exp_fname)
+
+    def test_no_fh(self):
+        logger = logging.getLogger('testlogger')
+        with self.assertRaises(ValueError):
+            log.create_mpi_logger(logger, 10)
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 13th September 2021 10:38:53 am
-Last Modified: Tuesday, 14th September 2021 08:57:30 am
+Last Modified: Tuesday, 14th September 2021 10:34:36 am
 '''
 
 import logging
@@ -58,4 +58,9 @@ def create_mpi_logger(logger: logging.Logger, rank: int) -> logging.Logger:
     for h in logger.handlers:
         if hasattr(h, 'baseFilename'):
             fn = '%srank%s' % (h.baseFilename, rankstr)
-    return start_logger_if_necessary(name, fn, lvl)
+    try:
+        return start_logger_if_necessary(name, fn, lvl)
+    except UnboundLocalError:
+        raise ValueError(
+            'The logger used as input has to have a configured FileHandler.'
+        )
