@@ -18,4 +18,6 @@ install:
   - pip install -e .
 
 # command to run tests in tests/
-script: pytest tests
+# -p no:logging disables capturing all log output, which
+# would interfer with the test for util/log
+script: pytest tests -p no:logging
