@@ -11,15 +11,17 @@ Seismic Format (asdf).
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2021 03:24:30 pm
-Last Modified: Saturday, 28th August 2021 01:19:26 pm
+Last Modified: Wednesday, 22nd September 2021 09:43:01 am
 '''
 
 import logging
 import os
+import shutil
 from threading import Event
 
 import obspy
 from obspy import read, read_inventory, UTCDateTime
+from obspy.core.event.catalog import read_events
 from obspy.core.inventory.inventory import Inventory
 from obspy.core.stream import Stream
 from pyasdf import ASDFDataSet
@@ -28,20 +30,26 @@ from pyglimer.utils.signalproc import resample_or_decimate
 from pyglimer.utils.roundhalf import roundhalf
 
 
-def rewrite_to_hdf5(cat: obspy.Catalog, rawfolder: str, statloc: str):
+def rewrite_to_hdf5(catfile: str, rawfolder: str, statloc: str):
     """
     Converts an existing miniseed waveform database to hierachal data format
     (hdf5).
 
-    :param cat: The event catalogue that was used to download the raw data.
-    :type cat: obspy.Catalog
+    :param catfile: The pat hto the event catalogue that was used to download
+        the raw data. Will be altered during the process (removes already used
+        ones).
+    :type catfile: path to obspy.Catalog (str)
     :param rawfolder: The folder that the raw data is saved in - ending with
         the phase code (i.e., waveforms/raw/P)
     :type rawfolder: str
     :param statloc: Location that the station xmls are saved in.
     :type statloc: str
     """
-    for event in cat:
+    # Create backup of original catalog
+    shutil.copyfile(catfile, '%s_bac' % catfile)
+    cat = read_events(catfile)
+    while cat.count():
+        event = cat[0]
         origin_time = event.origins[0].time
         ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
         evtlat = event.origins[0].latitude
@@ -56,6 +64,12 @@ def rewrite_to_hdf5(cat: obspy.Catalog, rawfolder: str, statloc: str):
             os.rmdir(evtdir)
             continue
         writeraw(event, evtdir, statloc, False, True)
+        logging.warn('removing event...')
+        print(event)
+        del cat[0]
+        # Overwrite old catalog, so we don't have to restart the whole
+        # process over again afterwards
+        cat.write(catfile, format="QUAKEML")
 
 
 def writeraw(
