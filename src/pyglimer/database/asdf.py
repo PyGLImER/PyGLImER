@@ -11,7 +11,7 @@ Seismic Format (asdf).
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2021 03:24:30 pm
-Last Modified: Wednesday, 22nd September 2021 09:43:01 am
+Last Modified: Wednesday, 22nd September 2021 03:18:12 pm
 '''
 
 import logging
@@ -59,11 +59,11 @@ def rewrite_to_hdf5(catfile: str, rawfolder: str, statloc: str):
         evtdir = os.path.join(
             rawfolder, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
         if not os.path.isdir(evtdir):
-            continue
-        if not os.listdir(evtdir):
+            pass
+        elif not os.listdir(evtdir):
             os.rmdir(evtdir)
-            continue
-        writeraw(event, evtdir, statloc, False, True)
+        else:
+            writeraw(event, evtdir, statloc, False, True)
         logging.warn('removing event...')
         print(event)
         del cat[0]
