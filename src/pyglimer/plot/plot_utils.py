@@ -294,8 +294,6 @@ def plot_single_rf(
                         interpolate=True, color=(0.2, 0.2, 0.7))
     ax.plot(times, ydata, 'k', lw=0.75)
 
-
-
     # Set limits
     if tlim is None:
         # ax.set_xlim(times[0], times[-1])
