@@ -202,7 +202,8 @@ def plot_single_rf(
     rf, tlim: list or tuple or None = None, ylim: list or tuple or None = None,
     depth: np.ndarray or None = None, ax: plt.Axes = None,
     outputdir: str = None, pre_fix: str = None,
-        post_fix: str = None, format: str = 'pdf', clean: bool = False):
+    post_fix: str = None, format: str = 'pdf', clean: bool = False,
+        std: np.ndarray = None):
     """Creates plot of a single receiver function
 
     Parameters
@@ -231,6 +232,11 @@ def plot_single_rf(
     clean: bool
         If True, clears out all axes and plots RF only.
         Defaults to False.
+    std: np.ndarray, optional
+            **Only if self.type == stastack**. Plots the upper and lower
+            limit of the standard deviation in the plot. Provide the std
+            as a numpy array (can be easily computed from the output of
+            :meth:`~pyglimer.rf.create.RFStream.bootstrap`)
 
      Returns
     -------
@@ -274,11 +280,21 @@ def plot_single_rf(
         times = z
 
     # Plot stuff into axes
-    ax.fill_between(times, 0, ydata, where=ydata > 0,
-                    interpolate=True, color=(0.9, 0.2, 0.2))
-    ax.fill_between(times, 0, ydata, where=ydata < 0,
-                    interpolate=True, color=(0.2, 0.2, 0.7))
+    if std is not None:
+        ax.plot(times, ydata-std, 'k--', lw=0.75)
+        ax.plot(times, ydata+std, 'k--', lw=0.75)
+        ax.fill_between(times, 0, ydata, where=ydata > 0,
+                        interpolate=True, color=(0.9, 0.2, 0.2), alpha=.5)
+        ax.fill_between(times, 0, ydata, where=ydata < 0,
+                        interpolate=True, color=(0.2, 0.2, 0.7), alpha=.5)
+    else:
+        ax.fill_between(times, 0, ydata, where=ydata > 0,
+                        interpolate=True, color=(0.9, 0.2, 0.2))
+        ax.fill_between(times, 0, ydata, where=ydata < 0,
+                        interpolate=True, color=(0.2, 0.2, 0.7))
     ax.plot(times, ydata, 'k', lw=0.75)
+
+
 
     # Set limits
     if tlim is None:
