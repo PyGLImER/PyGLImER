@@ -269,11 +269,6 @@ def plot_single_rf(
         if rf.stats.phase[-1] == 'S':
             times = np.flip(times)
             ydata = np.flip(-rf.data)
-    # elif rf.stats.type == 'stastack':
-    #     if depth is None:
-    #         raise ValueError("If type is stastack a depth vector"
-    #                          "must be feed.")
-    #     times = depth
     else:
         z = np.hstack(
             ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
@@ -296,7 +291,6 @@ def plot_single_rf(
 
     # Set limits
     if tlim is None:
-        # ax.set_xlim(times[0], times[-1])
         ax.set_xlim(0, times[-1])  # don't really wanna see the stuff before
     else:
         ax.set_xlim(tlim)
