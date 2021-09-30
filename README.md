@@ -1,4 +1,4 @@
-# PyGLImER  [![Build Status](![example workflow](https://github.com/PeterMakus/PyGLImER/actions/workflows/test_on_push.yml/badge.svg)] [![Documentation Status](https://github.com/PeterMakus/PyGLImER/actions/workflows/deplot_gh_pages.yml/badge.svg)](https://pyglimer.readthedocs.io/en/latest/?badge=latest) [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+# PyGLImER  ![Build Status](![example workflow](https://github.com/PeterMakus/PyGLImER/actions/workflows/test_on_push.yml/badge.svg) ![Documentation Status](https://github.com/PeterMakus/PyGLImER/actions/workflows/deplot_gh_pages.yml/badge.svg) [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
 ## A workflow to create a global database for Ps and Sp receiver function imaging of crustal and upper mantle discontinuties 
 
