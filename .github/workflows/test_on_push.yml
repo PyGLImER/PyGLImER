@@ -1,4 +1,4 @@
-name: Run Unittests on Push
+name: Build Status
 on: [push]
 
 jobs:
