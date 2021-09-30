@@ -4,9 +4,10 @@ global-land-mask
 numpy
 OWSLib
 colorama
-cython
+cython # caropy
 dill
 geographiclib
+geos > 3.7.2 # cartopy
 joblib 
 matplotlib
 obspy
@@ -20,7 +21,7 @@ pyasdf
 scipy
 tqdm
 flake8
-proj
+proj >= 8.0.0 # cartopy requirement
 pyyaml
 wheel
 
