@@ -39,8 +39,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           # weird requirements for cartopy
-          apt-get install libproj-dev proj-data proj-bin
-          apt-get install libgeos-dev  
+          sudo apt-get install libproj-dev proj-data proj-bin
+          sudo apt-get install libgeos-dev  
       - name: Install cartopy
         run: |
           # has to be done seperately because cartopy is weird
