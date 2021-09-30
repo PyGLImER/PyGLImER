@@ -7,7 +7,7 @@ colorama
 cython # caropy
 dill
 geographiclib
-geos > 3.7.2 # cartopy
+GEOS
 joblib 
 matplotlib
 obspy
