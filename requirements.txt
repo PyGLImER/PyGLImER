@@ -21,7 +21,7 @@ pyasdf
 scipy
 tqdm
 flake8
-proj >= 8.0.0 # cartopy requirement
+proj # cartopy requirement
 pyyaml
 wheel
 
