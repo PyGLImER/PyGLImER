@@ -1,0 +1,31 @@
+# This file contains reuqirements for automatic deployment on CIs
+# To obtain install requirements, check setup.cfg or environment.yml
+global-land-mask
+OWSLib
+cartopy
+colorama
+dill
+geographiclib
+joblib 
+matplotlib
+numpy
+obspy
+pandas
+pathlib
+pip
+plotly
+prov
+psutil
+pyasdf
+scipy
+tqdm
+flake8
+pyyaml
+
+# For documentation
+sphinx
+sphinx_rtd_theme
+
+# For tests
+pytest
+py
