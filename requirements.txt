@@ -4,6 +4,7 @@ global-land-mask
 numpy
 OWSLib
 colorama
+cython
 dill
 geographiclib
 joblib 
