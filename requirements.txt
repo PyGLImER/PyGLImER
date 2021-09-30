@@ -1,14 +1,13 @@
 # This file contains reuqirements for automatic deployment on CIs
 # To obtain install requirements, check setup.cfg or environment.yml
 global-land-mask
+numpy
 OWSLib
-cartopy
 colorama
 dill
 geographiclib
 joblib 
 matplotlib
-numpy
 obspy
 pandas
 pathlib
@@ -21,6 +20,9 @@ scipy
 tqdm
 flake8
 pyyaml
+
+# requirements that depend on the ones above
+cartopy
 
 # For documentation
 sphinx
