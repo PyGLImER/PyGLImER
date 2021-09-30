@@ -22,7 +22,7 @@ flake8
 pyyaml
 
 # requirements that depend on the ones above
-cartopy
+# cartopy
 
 # For documentation
 sphinx
