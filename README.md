@@ -13,6 +13,9 @@ successor of the [GLImER](http://stephanerondenay.com/glimer-web.html) project.
 A few simple steps:
 
 ```bash
+# Change directory to the same directory that this repo is in (i.e., same directory as setup.py)
+cd $PathToThisRepo$
+
 # Create the conda environment and install dependencies
 conda env create -f environment.yml
 
@@ -20,7 +23,7 @@ conda env create -f environment.yml
 conda activate PyGLImER
 
 # Install your package
-pip install  $InstallationDirectory$
+pip install -e .
 ```
 
 ## Getting started
