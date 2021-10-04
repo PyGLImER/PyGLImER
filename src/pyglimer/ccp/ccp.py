@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 13th September 2021 03:45:38 pm
+Last Modified: Monday, 4th October 2021 05:08:14 pm
 '''
 
 # !/usr/bin/env python3
@@ -408,8 +408,8 @@ class CCPStack(object):
             ccp stack. Will result in a longer computation time.
         :type multiple: bool, optional
         :param mc_backend: Multi-core backend to use for the computations.
-        Can be either `"joblib"` (multiprocessing) or `"MPI"`. Not that MPI
-        compatibility is only implemented with hdf5 files.
+            Can be either `"joblib"` (multiprocessing) or `"MPI"`. Not that
+            MPI compatibility is only implemented with hdf5 files.
         :raises ValueError: For wrong inputs
 
 
