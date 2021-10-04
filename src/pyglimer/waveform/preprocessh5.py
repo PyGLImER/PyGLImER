@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Monday, 13th September 2021 12:19:56 pm
+Last Modified: Monday, 4th October 2021 03:29:24 pm
 '''
 
 from glob import glob
@@ -164,7 +164,7 @@ def _preprocessh5_single(
     # Find out which files have already been processed:
     if os.path.isfile(outf+'.h5'):
         with RFDataBase(outf) as rfdb:
-            ret, rej = rfdb.get_known_waveforms()
+            ret, rej = rfdb._get_known_waveforms()
             rflogger.debug('Already processed waveforms: %s' % str(ret))
             rflogger.debug('\nAlready rejected waveforms: %s' % str(rej))
     else:
@@ -190,13 +190,13 @@ def _preprocessh5_single(
                 with RFDataBase(outf) as rfdb:
                     rflogger.info('Writing to file %s....' % outf)
                     rfdb.add_rf(rf)
-                    rfdb.add_known_waveform_data(ret, rej)
+                    rfdb._add_known_waveform_data(ret, rej)
                     rflogger.info('..written.')
                 rf.clear()
     with RFDataBase(outf) as rfdb:
         rflogger.info('Writing to file %s....' % outf)
         rfdb.add_rf(rf)
-        rfdb.add_known_waveform_data(ret, rej)
+        rfdb._add_known_waveform_data(ret, rej)
         rflogger.info('..written.')
     rf.clear()
 
