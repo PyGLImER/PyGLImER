@@ -43,23 +43,23 @@ The only function of this class is to return a :py:class:`~pyglimer.database.rfh
 .. warning::
 
     If you should for some reason decide to not use the context manager, you will have to close the hdf5 file
-    with :py:meth:`pyglimer.database.rfh5.DBHandler._close()` to avoid corrupting your files!
+    with :py:meth:`~pyglimer.database.rfh5.DBHandler._close()` to avoid corrupting your files!
 
 :py:class:`~pyglimer.database.rfh5.DBHandler` has the following public methods:
 
 .. hlist::
     :columns: 1
 
-    * :py:meth:`~pyglimer.database.rfh5.RFDataBase.add_rf()` to add receiver functions to the database
-    * :py:meth:`~pyglimer.database.rfh5.RFDataBase.get_data()` to read data from this file
-    * :py:meth:`~pyglimer.database.rfh5.RFDataBase.get_coords()` to get the coordinates of the associated station
-    * :py:meth:`~pyglimer.database.rfh5.RFDataBase.walk()` to iterate over all receiver functions in a subset defined by the provided arguments
+    * :py:meth:`~pyglimer.database.rfh5.DBHandler.add_rf()` to add receiver functions to the database
+    * :py:meth:`~pyglimer.database.rfh5.DBHandler.get_data()` to read data from this file
+    * :py:meth:`~pyglimer.database.rfh5.DBHandler.get_coords()` to get the coordinates of the associated station
+    * :py:meth:`~pyglimer.database.rfh5.DBHandler.walk()` to iterate over all receiver functions in a subset defined by the provided arguments
 
 Reading data
 ############
 
 The most common usecase is probably that you will want to access receciver functions that **PyGLImER** computed
-for you (as shown earlier). To do so, you can use the :py:meth:`~pyglimer.database.rfh5.RFDataBase.get_data()`
+for you (as shown earlier). To do so, you can use the :py:meth:`~pyglimer.database.rfh5.DBHandler.get_data()`
 method:
 
 >>> from pyglimer.database.rfh5 import RFDataBase
@@ -78,7 +78,7 @@ caused by events with any origin time (``evt_time='*'``).
 
 .. seealso::
     
-    If you want to create your own function to :py:meth:`~pyglimer.database.rfh5.RFDataBase.walk()`
+    If you want to create your own function to :py:meth:`~pyglimer.database.rfh5.DBHandler.walk()`
     might come in handy.
 
 Tags
