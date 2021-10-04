@@ -54,7 +54,7 @@ A Request object has four public methods:
 .. hlist::
     :columns: 1
 
-    * :py:meth:`~pyglimer.waveform.request.Request.download_evtcat()`
+    * :py:meth:`~pyglimer.waveform.request.Request.download_eventcat()`
     * :py:meth:`~pyglimer.waveform.request.Request.download_waveforms()`
     * :py:meth:`~pyglimer.waveform.request.Request.download_waveforms_small_db()`
     * :py:meth:`~pyglimer.waveform.request.Request.preprocess()`

@@ -28,7 +28,6 @@ def load_rawrf(filename):
     -------
     rfs, baz, rayp, lat, lon, elev, dt
 
-
     Notes
     -----
     File content

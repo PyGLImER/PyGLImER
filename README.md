@@ -1,4 +1,4 @@
-# PyGLImER  [![Build Status](https://travis-ci.com/PeterMakus/PyGLImER.svg?branch=master)](https://travis-ci.com/PeterMakus/PyGLImER) [![Documentation Status](https://readthedocs.org/projects/pyglimer/badge/?version=latest)](https://pyglimer.readthedocs.io/en/latest/?badge=latest) [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+# PyGLImER [![Build Status](https://github.com/PeterMakus/PyGLImER/actions/workflows/test_on_push.yml/badge.svg?branch=master)](https://github.com/PeterMakus/PyGLImER/actions/workflows/test_on_push.yml) [![Documentation Status](https://github.com/PeterMakus/PyGLImER/actions/workflows/deploy_gh_pages.yml/badge.svg?branch=master)](https://github.com/PeterMakus/PyGLImER/actions/workflows/deploy_gh_pages.yml) [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
 ## A workflow to create a global database for Ps and Sp receiver function imaging of crustal and upper mantle discontinuties 
 
@@ -13,6 +13,9 @@ successor of the [GLImER](http://stephanerondenay.com/glimer-web.html) project.
 A few simple steps:
 
 ```bash
+# Change directory to the same directory that this repo is in (i.e., same directory as setup.py)
+cd $PathToThisRepo$
+
 # Create the conda environment and install dependencies
 conda env create -f environment.yml
 
@@ -20,11 +23,11 @@ conda env create -f environment.yml
 conda activate PyGLImER
 
 # Install your package
-pip install  $InstallationDirectory$
+pip install -e .
 ```
 
 ## Getting started
-Access PyGLImER's documentation [here](https://pyglimer.readthedocs.io/en/latest/).
+Access PyGLImER's documentation [here](https://petermakus.github.io/PyGLImER/).
 
 PyGLImER comes with a few tutorials (Jupyter notebooks). You can find those in the `examples/` directory.
 

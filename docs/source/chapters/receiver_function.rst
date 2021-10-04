@@ -26,9 +26,9 @@ Receiver functions stored in hdf5 format
 If you saved your receiver functions in *hdf5* format, you can use the :py:class:`~pyglimer.database.rfh5.RFDataBase` class
 to access and manipulate your database.
 
-As a user, you will only ever be calling the :class:`~pyglimer.database.rfh5.RFDataBase` class.
-The only function of this class is to return a :class:`~pyglimer.database.rfh5.DBHandler`, which hold all the
-"useful" functions. To call :class:`~pyglimer.database.rfh5.RFDataBase`, use a context manager like so:
+As a user, you will only ever be calling the :py:class:`~pyglimer.database.rfh5.RFDataBase` class.
+The only function of this class is to return a :py:class:`~pyglimer.database.rfh5.DBHandler`, which hold all the
+"useful" functions. To call :py:class:`~pyglimer.database.rfh5.RFDataBase`, use a context manager like so:
 
 >>> from pyglimer.database.rfh5 import RFDataBase
 >>> with RFDataBase('/path/to/myfile.h5') as rfdb:
@@ -37,29 +37,29 @@ The only function of this class is to return a :class:`~pyglimer.database.rfh5.D
 
 .. warning::
 
-    Do not call :class:`~pyglimer.database.rfh5.DBHandler` directly! This might lead to unexpected behaviour or
+    Do not call :py:class:`~pyglimer.database.rfh5.DBHandler` directly! This might lead to unexpected behaviour or
     even dataloss due to corrupted hdf5 files.
 
 .. warning::
 
     If you should for some reason decide to not use the context manager, you will have to close the hdf5 file
-    with :meth:`pyglimer.database.rfh5.DBHandler._close` to avoid corrupting your files!
+    with :py:meth:`~pyglimer.database.rfh5.DBHandler._close()` to avoid corrupting your files!
 
 :py:class:`~pyglimer.database.rfh5.DBHandler` has the following public methods:
 
 .. hlist::
     :columns: 1
 
-    * :py:meth:`~pyglimer.database.rfh5.RFDataBase.add_rf` to add receiver functions to the database
-    * :py:meth:`~pyglimer.database.rfh5.RFDataBase.get_data` to read data from this file
-    * :py:meth:`~pyglimer.database.rfh5.RFDataBase.get_coords` to get the coordinates of the associated station
-    * :py:meth:`~pyglimer.database.rfh5.RFDataBase.walk` to iterate over all receiver functions in a subset defined by the provided arguments
+    * :py:meth:`~pyglimer.database.rfh5.DBHandler.add_rf()` to add receiver functions to the database
+    * :py:meth:`~pyglimer.database.rfh5.DBHandler.get_data()` to read data from this file
+    * :py:meth:`~pyglimer.database.rfh5.DBHandler.get_coords()` to get the coordinates of the associated station
+    * :py:meth:`~pyglimer.database.rfh5.DBHandler.walk()` to iterate over all receiver functions in a subset defined by the provided arguments
 
 Reading data
 ############
 
 The most common usecase is probably that you will want to access receciver functions that **PyGLImER** computed
-for you (as shown earlier). To do so, you can use the :py:meth:`~pyglimer.database.rfh5.RFDataBase.get_data`
+for you (as shown earlier). To do so, you can use the :py:meth:`~pyglimer.database.rfh5.DBHandler.get_data()`
 method:
 
 >>> from pyglimer.database.rfh5 import RFDataBase
@@ -78,7 +78,7 @@ caused by events with any origin time (``evt_time='*'``).
 
 .. seealso::
     
-    If you want to create your own function to :py:meth:`~pyglimer.database.rfh5.RFDataBase.walk`
+    If you want to create your own function to :py:meth:`~pyglimer.database.rfh5.DBHandler.walk()`
     might come in handy.
 
 Tags
@@ -91,8 +91,10 @@ tag for receiver function data.
 Getting an overview over available data
 #######################################
 
-You can **Access the DBHandler like a dictionary**: Just like in h5py, it is possible to access the :class:`~pyglimer.database.rfh5.DBHandler` like a dictionary. The logic works as follows:
-    dbh[tag][netcomb][statcomb][chacomb][corr_start][corr_end]
+You can **Access the DBHandler like a dictionary**:
+Just like in h5py, it is possible to access the :class:`~pyglimer.database.rfh5.DBHandler` like a dictionary. The logic works as follows:
+
+    dbh[tag][network][station][phase][pol][evt_time]
 
 Following the logic of the structure above, we can get a list of all available tags as follows:
 
@@ -143,8 +145,6 @@ consult the example Jupyter notebooks.
         depending on the type of receiver function: **1.** For *depth-migrated* RFs, the plot will be against
         depth. **2.** For an :py:class:`~pyglimer.rf.create.RFTrace` in time domain, the plot will be against time.
         
-    * :py:meth:`~pyglimer.rf.create.RFTrace.
-
 Methods for RFStream objects
 ############################
 
@@ -162,4 +162,4 @@ Methods for RFStream objects
         For that to work, all RFs have to be from the same station.
     * :py:meth:`~pyglimer.rf.create.RFStream.dirty_ccp_stack()`
         Create a simple CCP Stack. For more on CCP stacking, see
-        `the later part of this tutorial <../ccp>`_ :warning: ***This method is experimental!***
+        `the later part of this tutorial <./ccp>`_ **This method is experimental!**

@@ -3,18 +3,18 @@ Common Conversion Point Stacking
 
 Provided that we have an extensive RF database for a certain geographic region,
 we can create a volume of those receiver functions depending on piercing points
-with varying grades of spatial averaging. Those volumes are referred to as Common
-Conversion Point (CCP) stacks.
+with varying grades of spatial averaging. Those volumes are referred to as *Common
+Conversion Point (CCP)* stacks.
 
 CCPStack objects
 ++++++++++++++++
-In PyGLImER, the base class enabling CCP stacking is the :py:class:`~pyglimer.ccp.ccp.CCPStack` class.
-However, to understand how CCP-Stacking in PyGLImER is implemented,
+In **PyGLImER**, the base class enabling CCP stacking is the :py:class:`~pyglimer.ccp.ccp.CCPStack` class.
+However, to understand how CCP-Stacking is implemented,
 we will have to have a small intermezzo about binning.
 
 CCP bins
 ========
-In PyGLImER CCP bins are round in mapview (cylindric in 3D). If a piercing point of a receiver function is inside
+In **PyGLImER**, CCP bins are round in mapview (cylindric in 3D). If a piercing point of a receiver function is inside
 of a bin, it will be added to this bin (i.e. there is one "station" stack in each bin). As such the shape of a bingrid is controlled
 by two parameters: The bin's radius R and the interbin distance d.
 
