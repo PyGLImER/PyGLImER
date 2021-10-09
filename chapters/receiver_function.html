@@ -1,92 +1,259 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Handling Receiver Functions &mdash; PyGLImER 0.01 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-    <script src="../_static/js/theme.js"></script>
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Handling Receiver Functions</title>
+    
+  <link href="../_static/css/theme.css" rel="stylesheet" />
+  <link href="../_static/css/index.c5995385ac14fb8791e8eb36b4908be2.css" rel="stylesheet" />
+
+    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-book-theme.css?digest=c3fdc42140077d1ad13ad2f1588a4309" />
+    
+  <link rel="preload" as="script" href="../_static/js/index.1c5a1a01449ed65a7b51.js">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx-book-theme.12a9622fbb08dcb3a2a40b2c02b83a57.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Common Conversion Point Stacking" href="ccp.html" />
-    <link rel="prev" title="Waveform Download, preprocessing, and receiver function creation" href="download.html" /> 
-</head>
+    <link rel="prev" title="Waveform Download, preprocessing, and receiver function creation" href="download.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> PyGLImER
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../_static/logo.png" class="logo" alt="logo">
+      
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        <p class="caption" role="heading">
+ <span class="caption-text">
+  Contents:
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="introduction.html">
+   Introduction
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="download.html">
+   Waveform Download, preprocessing, and receiver function creation
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Handling Receiver Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="ccp.html">
+   Common Conversion Point Stacking
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="plotting.html">
+   Plotting
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="API.html">
+   <code class="docutils literal notranslate">
+    <span class="pre">
+     PyGLImER
+    </span>
+   </code>
+   API
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav> <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Handling Receiver Functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#reading-receiver-functions-that-were-saved-in-sac-format">Reading receiver functions that were saved in sac format</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#receiver-functions-stored-in-hdf5-format">Receiver functions stored in hdf5 format</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#reading-data">Reading data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tags">Tags</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#getting-an-overview-over-available-data">Getting an overview over available data</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#writing-data-to-hdf5">Writing data to hdf5</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#methods-available-for-both-rfstream-and-rftrace-objects">Methods available for both RFStream and RFTrace objects</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#methods-for-rfstream-objects">Methods for RFStream objects</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="ccp.html">Common Conversion Point Stacking</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
-</ul>
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="topbar container-xl fixed-top">
+    <div class="topbar-contents row">
+        <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show"></div>
+        <div class="col pl-md-4 topbar-main">
+            
+            <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+                data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+                aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+                title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+                <i class="fas fa-bars"></i>
+                <i class="fas fa-arrow-left"></i>
+                <i class="fas fa-arrow-up"></i>
+            </button>
+            
+            
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="../_sources/chapters/receiver_function.rst.txt"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.rst</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+</div>
+
+            <!-- Source interaction buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Connect with source repository"><i class="fab fa-github"></i></button>
+    <div class="dropdown-buttons sourcebuttons">
+        <a class="repository-button"
+            href="https://github.com/lwsspy/lwsspy"><button type="button" class="btn btn-secondary topbarbtn"
+                data-toggle="tooltip" data-placement="left" title="Source repository"><i
+                    class="fab fa-github"></i>repository</button></a>
+        <a class="issues-button"
+            href="https://github.com/lwsspy/lwsspy/issues/new?title=Issue%20on%20page%20%2Fchapters/receiver_function.html&body=Your%20issue%20content%20here."><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Open an issue"><i class="fas fa-lightbulb"></i>open issue</button></a>
+        <a class="edit-button" href="https://github.com/lwsspy/lwsspy/edit/master/chapters/receiver_function.rst"><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Edit this page"><i class="fas fa-pencil-alt"></i>suggest edit</button></a>
+    </div>
+</div>
+
+            <!-- Full screen (wrap in <a> to have style consistency -->
+
+<a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+        data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+        title="Fullscreen mode"><i
+            class="fas fa-expand"></i></button></a>
+
+            <!-- Launch buttons -->
 
         </div>
-      </div>
-    </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PyGLImER</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Handling Receiver Functions</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/chapters/receiver_function.rst.txt" rel="nofollow"> View page source</a>
-      </li>
+        <!-- Table of contents -->
+        <div class="d-none d-md-block col-md-2 bd-toc show">
+            
+            <div class="tocsection onthispage pt-5 pb-3">
+                <i class="fas fa-list"></i> Contents
+            </div>
+            <nav id="bd-toc-nav" aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#reading-receiver-functions-that-were-saved-in-sac-format">
+   Reading receiver functions that were saved in sac format
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#receiver-functions-stored-in-hdf5-format">
+   Receiver functions stored in hdf5 format
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#reading-data">
+     Reading data
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#tags">
+     Tags
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#getting-an-overview-over-available-data">
+     Getting an overview over available data
+    </a>
+   </li>
   </ul>
-  <hr/>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#writing-data-to-hdf5">
+   Writing data to hdf5
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#methods-available-for-both-rfstream-and-rftrace-objects">
+   Methods available for both RFStream and RFTrace objects
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#methods-for-rfstream-objects">
+     Methods for RFStream objects
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <section id="handling-receiver-functions">
-<h1>Handling Receiver Functions<a class="headerlink" href="#handling-receiver-functions" title="Permalink to this headline"></a></h1>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="handling-receiver-functions">
+<h1>Handling Receiver Functions<a class="headerlink" href="#handling-receiver-functions" title="Permalink to this headline">¶</a></h1>
 <p>Supposing that you have created receiver functions and have them available in the directory <code class="docutils literal notranslate"><span class="pre">output/RF</span></code>,
 we can now start imaging!</p>
 <p>Handling of receiver functions is generally done by using the <a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a> and <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> classes. These
@@ -98,13 +265,13 @@ by Tom Eulenfeld.</p>
 while an <a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a> object can only hold one receiver function. As all rfs are saved in .sac format,
 saving <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> will lead to the creation of several files.</p>
 </div>
-<section id="reading-receiver-functions-that-were-saved-in-sac-format">
-<h2>Reading receiver functions that were saved in sac format<a class="headerlink" href="#reading-receiver-functions-that-were-saved-in-sac-format" title="Permalink to this headline"></a></h2>
+<div class="section" id="reading-receiver-functions-that-were-saved-in-sac-format">
+<h2>Reading receiver functions that were saved in sac format<a class="headerlink" href="#reading-receiver-functions-that-were-saved-in-sac-format" title="Permalink to this headline">¶</a></h2>
 <p>Receiver functions in .sac format can be read using the <a class="reference internal" href="API.html#pyglimer.rf.create.read_rf" title="pyglimer.rf.create.read_rf"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_rf()</span></code></a> function. By doing so, we
 obtain an <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> object, on which we can apply a number of functions.</p>
-</section>
-<section id="receiver-functions-stored-in-hdf5-format">
-<h2>Receiver functions stored in hdf5 format<a class="headerlink" href="#receiver-functions-stored-in-hdf5-format" title="Permalink to this headline"></a></h2>
+</div>
+<div class="section" id="receiver-functions-stored-in-hdf5-format">
+<h2>Receiver functions stored in hdf5 format<a class="headerlink" href="#receiver-functions-stored-in-hdf5-format" title="Permalink to this headline">¶</a></h2>
 <p>If you saved your receiver functions in <em>hdf5</em> format, you can use the <a class="reference internal" href="API.html#pyglimer.database.rfh5.RFDataBase" title="pyglimer.database.rfh5.RFDataBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code></a> class
 to access and manipulate your database.</p>
 <p>As a user, you will only ever be calling the <a class="reference internal" href="API.html#pyglimer.database.rfh5.RFDataBase" title="pyglimer.database.rfh5.RFDataBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code></a> class.
@@ -134,8 +301,8 @@ with <code class="xref py py-meth docutils literal notranslate"><span class="pre
 <li><p><a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler.walk" title="pyglimer.database.rfh5.DBHandler.walk"><code class="xref py py-meth docutils literal notranslate"><span class="pre">walk()</span></code></a> to iterate over all receiver functions in a subset defined by the provided arguments</p></li>
 </ul>
 </td></tr></table>
-<section id="reading-data">
-<h3>Reading data<a class="headerlink" href="#reading-data" title="Permalink to this headline"></a></h3>
+<div class="section" id="reading-data">
+<h3>Reading data<a class="headerlink" href="#reading-data" title="Permalink to this headline">¶</a></h3>
 <p>The most common usecase is probably that you will want to access receciver functions that <strong>PyGLImER</strong> computed
 for you (as shown earlier). To do so, you can use the <a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler.get_data" title="pyglimer.database.rfh5.DBHandler.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a>
 method:</p>
@@ -158,14 +325,14 @@ caused by events with any origin time (<code class="docutils literal notranslate
 <p>If you want to create your own function to <a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler.walk" title="pyglimer.database.rfh5.DBHandler.walk"><code class="xref py py-meth docutils literal notranslate"><span class="pre">walk()</span></code></a>
 might come in handy.</p>
 </div>
-</section>
-<section id="tags">
-<h3>Tags<a class="headerlink" href="#tags" title="Permalink to this headline"></a></h3>
+</div>
+<div class="section" id="tags">
+<h3>Tags<a class="headerlink" href="#tags" title="Permalink to this headline">¶</a></h3>
 <p><strong>PyGLImER</strong> uses tags to identify your data. You could for example use different tags for differently processed data. <code class="docutils literal notranslate"><span class="pre">rf</span></code> is the standard
 tag for receiver function data.</p>
-</section>
-<section id="getting-an-overview-over-available-data">
-<h3>Getting an overview over available data<a class="headerlink" href="#getting-an-overview-over-available-data" title="Permalink to this headline"></a></h3>
+</div>
+<div class="section" id="getting-an-overview-over-available-data">
+<h3>Getting an overview over available data<a class="headerlink" href="#getting-an-overview-over-available-data" title="Permalink to this headline">¶</a></h3>
 <p>You can <strong>Access the DBHandler like a dictionary</strong>:
 Just like in h5py, it is possible to access the <a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler" title="pyglimer.database.rfh5.DBHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code></a> like a dictionary. The logic works as follows:</p>
 <blockquote>
@@ -176,10 +343,10 @@ Just like in h5py, it is possible to access the <a class="reference internal" hr
 <span class="go">[&#39;rf&#39;, &#39;rf_with_my_funny_processing_idea&#39;]</span>
 </pre></div>
 </div>
-</section>
-</section>
-<section id="writing-data-to-hdf5">
-<h2>Writing data to hdf5<a class="headerlink" href="#writing-data-to-hdf5" title="Permalink to this headline"></a></h2>
+</div>
+</div>
+<div class="section" id="writing-data-to-hdf5">
+<h2>Writing data to hdf5<a class="headerlink" href="#writing-data-to-hdf5" title="Permalink to this headline">¶</a></h2>
 <p>If you postprocess your receiver functions (e.g., stacking), you might want to save the data afterwards.
 You can do that like below:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span> <span class="nn">pyglimer.database.rfh5</span> <span class="kn">import</span> <span class="n">RFDataBase</span>
@@ -194,9 +361,9 @@ You can do that like below:</p>
 </div>
 <p>We can retrieve the <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> as shown above.
 Network, station, and channel information are determined automatically from the header and used to identify and locate the data.</p>
-</section>
-<section id="methods-available-for-both-rfstream-and-rftrace-objects">
-<h2>Methods available for both RFStream and RFTrace objects<a class="headerlink" href="#methods-available-for-both-rfstream-and-rftrace-objects" title="Permalink to this headline"></a></h2>
+</div>
+<div class="section" id="methods-available-for-both-rfstream-and-rftrace-objects">
+<h2>Methods available for both RFStream and RFTrace objects<a class="headerlink" href="#methods-available-for-both-rfstream-and-rftrace-objects" title="Permalink to this headline">¶</a></h2>
 <p>No matter whether your data was stored as <em>mseed</em> or <em>hdf5</em>, after reading it, you will receive an <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a>
 object. Below you can find a list of the available public methods. For examples on how to use them, please
 consult the example Jupyter notebooks.</p>
@@ -227,8 +394,8 @@ depth. <strong>2.</strong> For an <a class="reference internal" href="API.html#p
 </li>
 </ul>
 </td></tr></table>
-<section id="methods-for-rfstream-objects">
-<h3>Methods for RFStream objects<a class="headerlink" href="#methods-for-rfstream-objects" title="Permalink to this headline"></a></h3>
+<div class="section" id="methods-for-rfstream-objects">
+<h3>Methods for RFStream objects<a class="headerlink" href="#methods-for-rfstream-objects" title="Permalink to this headline">¶</a></h3>
 <table class="hlist"><tr><td><ul class="simple">
 <li><dl class="simple">
 <dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFStream.write" title="pyglimer.rf.create.RFStream.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a></dt><dd><p>to write receiver function(s) to SAC file(s) (in time domain). Creates one file per receiver function.</p>
@@ -259,39 +426,61 @@ For that to work, all RFs have to be from the same station.</p>
 </li>
 </ul>
 </td></tr></table>
-</section>
-</section>
-</section>
+</div>
+</div>
+</div>
 
 
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="download.html" class="btn btn-neutral float-left" title="Waveform Download, preprocessing, and receiver function creation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="ccp.html" class="btn btn-neutral float-right" title="Common Conversion Point Stacking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+              </div>
+              
+        
+            
+
+
+
+<div class='prev-next-bottom'>
+    
+    <div id="prev">
+        <a class="left-prev" href="download.html" title="previous page">
+            <i class="prevnext-label fas fa-angle-left"></i>
+            <div class="prevnext-info">
+                <p class="prevnext-label">previous</p>
+                <p class="prevnext-title">Waveform Download, preprocessing, and receiver function creation</p>
+            </div>
+        </a>
     </div>
+     <div id="next">
+        <a class="right-next" href="ccp.html" title="next page">
+            <div class="prevnext-info">
+                <p class="prevnext-label">next</p>
+                <p class="prevnext-title">Common Conversion Point Stacking</p>
+            </div>
+            <i class="prevnext-label fas fa-angle-right"></i>
+        </a>
+     </div>
 
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2021, the PyGLImER development team.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
+</div>
+        
         </div>
-      </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
+    </div>
+    <footer class="footer">
+    <div class="container">
+      <p>
+        
+          By Peter Makus, Lucas Sawade<br/>
+        
+            &copy; Copyright 2021, the PyGLImER development team.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
 
-</body>
+
+      </div>
+    </div>
+  
+  <script src="../_static/js/index.1c5a1a01449ed65a7b51.js"></script>
+
+  
+  </body>
 </html>

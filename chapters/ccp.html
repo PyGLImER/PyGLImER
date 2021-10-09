@@ -1,96 +1,243 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Common Conversion Point Stacking &mdash; PyGLImER 0.01 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-    <script src="../_static/js/theme.js"></script>
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Common Conversion Point Stacking</title>
+    
+  <link href="../_static/css/theme.css" rel="stylesheet" />
+  <link href="../_static/css/index.c5995385ac14fb8791e8eb36b4908be2.css" rel="stylesheet" />
+
+    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-book-theme.css?digest=c3fdc42140077d1ad13ad2f1588a4309" />
+    
+  <link rel="preload" as="script" href="../_static/js/index.1c5a1a01449ed65a7b51.js">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx-book-theme.12a9622fbb08dcb3a2a40b2c02b83a57.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Plotting" href="plotting.html" />
-    <link rel="prev" title="Handling Receiver Functions" href="receiver_function.html" /> 
-</head>
+    <link rel="prev" title="Handling Receiver Functions" href="receiver_function.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> PyGLImER
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../_static/logo.png" class="logo" alt="logo">
+      
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        <p class="caption" role="heading">
+ <span class="caption-text">
+  Contents:
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="introduction.html">
+   Introduction
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="download.html">
+   Waveform Download, preprocessing, and receiver function creation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="receiver_function.html">
+   Handling Receiver Functions
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Common Conversion Point Stacking
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="plotting.html">
+   Plotting
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="API.html">
+   <code class="docutils literal notranslate">
+    <span class="pre">
+     PyGLImER
+    </span>
+   </code>
+   API
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav> <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="receiver_function.html">Handling Receiver Functions</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Common Conversion Point Stacking</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#ccpstack-objects">CCPStack objects</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ccp-bins">CCP bins</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#creating-a-ccp-stack-in-pyglimer">Creating a CCP stack in PyGLImER</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
-</ul>
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="topbar container-xl fixed-top">
+    <div class="topbar-contents row">
+        <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show"></div>
+        <div class="col pl-md-4 topbar-main">
+            
+            <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+                data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+                aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+                title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+                <i class="fas fa-bars"></i>
+                <i class="fas fa-arrow-left"></i>
+                <i class="fas fa-arrow-up"></i>
+            </button>
+            
+            
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="../_sources/chapters/ccp.rst.txt"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.rst</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+</div>
+
+            <!-- Source interaction buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Connect with source repository"><i class="fab fa-github"></i></button>
+    <div class="dropdown-buttons sourcebuttons">
+        <a class="repository-button"
+            href="https://github.com/lwsspy/lwsspy"><button type="button" class="btn btn-secondary topbarbtn"
+                data-toggle="tooltip" data-placement="left" title="Source repository"><i
+                    class="fab fa-github"></i>repository</button></a>
+        <a class="issues-button"
+            href="https://github.com/lwsspy/lwsspy/issues/new?title=Issue%20on%20page%20%2Fchapters/ccp.html&body=Your%20issue%20content%20here."><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Open an issue"><i class="fas fa-lightbulb"></i>open issue</button></a>
+        <a class="edit-button" href="https://github.com/lwsspy/lwsspy/edit/master/chapters/ccp.rst"><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Edit this page"><i class="fas fa-pencil-alt"></i>suggest edit</button></a>
+    </div>
+</div>
+
+            <!-- Full screen (wrap in <a> to have style consistency -->
+
+<a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+        data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+        title="Fullscreen mode"><i
+            class="fas fa-expand"></i></button></a>
+
+            <!-- Launch buttons -->
 
         </div>
-      </div>
-    </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PyGLImER</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Common Conversion Point Stacking</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/chapters/ccp.rst.txt" rel="nofollow"> View page source</a>
-      </li>
+        <!-- Table of contents -->
+        <div class="d-none d-md-block col-md-2 bd-toc show">
+            
+            <div class="tocsection onthispage pt-5 pb-3">
+                <i class="fas fa-list"></i> Contents
+            </div>
+            <nav id="bd-toc-nav" aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ccpstack-objects">
+   CCPStack objects
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#ccp-bins">
+     CCP bins
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#creating-a-ccp-stack-in-pyglimer">
+     Creating a CCP stack in PyGLImER
+    </a>
+   </li>
   </ul>
-  <hr/>
+ </li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <section id="common-conversion-point-stacking">
-<h1>Common Conversion Point Stacking<a class="headerlink" href="#common-conversion-point-stacking" title="Permalink to this headline"></a></h1>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="common-conversion-point-stacking">
+<h1>Common Conversion Point Stacking<a class="headerlink" href="#common-conversion-point-stacking" title="Permalink to this headline">¶</a></h1>
 <p>Provided that we have an extensive RF database for a certain geographic region,
 we can create a volume of those receiver functions depending on piercing points
 with varying grades of spatial averaging. Those volumes are referred to as <em>Common
 Conversion Point (CCP)</em> stacks.</p>
-<section id="ccpstack-objects">
-<h2>CCPStack objects<a class="headerlink" href="#ccpstack-objects" title="Permalink to this headline"></a></h2>
+<div class="section" id="ccpstack-objects">
+<h2>CCPStack objects<a class="headerlink" href="#ccpstack-objects" title="Permalink to this headline">¶</a></h2>
 <p>In <strong>PyGLImER</strong>, the base class enabling CCP stacking is the <a class="reference internal" href="API.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> class.
 However, to understand how CCP-Stacking is implemented,
 we will have to have a small intermezzo about binning.</p>
-<section id="ccp-bins">
-<h3>CCP bins<a class="headerlink" href="#ccp-bins" title="Permalink to this headline"></a></h3>
+<div class="section" id="ccp-bins">
+<h3>CCP bins<a class="headerlink" href="#ccp-bins" title="Permalink to this headline">¶</a></h3>
 <p>In <strong>PyGLImER</strong>, CCP bins are round in mapview (cylindric in 3D). If a piercing point of a receiver function is inside
 of a bin, it will be added to this bin (i.e. there is one “station” stack in each bin). As such the shape of a bingrid is controlled
 by two parameters: The bin’s radius R and the interbin distance d.</p>
@@ -107,9 +254,9 @@ our digital image, but the resolving power will not increase). Therefore, PyGLIm
 <p>The maximal bin radius allowed by PyGLImER equals 4 times the bin distance (to limit computational expense).
 The minimal bin radius one should use is cos(30deg)*bin distance. For lower values the bingrid will not cover the whole surface area.</p>
 </div>
-</section>
-<section id="creating-a-ccp-stack-in-pyglimer">
-<h3>Creating a CCP stack in PyGLImER<a class="headerlink" href="#creating-a-ccp-stack-in-pyglimer" title="Permalink to this headline"></a></h3>
+</div>
+<div class="section" id="creating-a-ccp-stack-in-pyglimer">
+<h3>Creating a CCP stack in PyGLImER<a class="headerlink" href="#creating-a-ccp-stack-in-pyglimer" title="Permalink to this headline">¶</a></h3>
 <p>CCP stacks in PyGLImER are usually not created by initialising the <a class="reference internal" href="API.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> class but by calling the
 <a class="reference internal" href="API.html#pyglimer.ccp.ccp.init_ccp" title="pyglimer.ccp.ccp.init_ccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code></a> function, which, itself, initialises the aforementioned object.</p>
 <p>Using <a class="reference internal" href="API.html#pyglimer.ccp.ccp.init_ccp" title="pyglimer.ccp.ccp.init_ccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code></a>, there are two ways to create a <a class="reference internal" href="API.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> object:</p>
@@ -140,39 +287,61 @@ For compatibility with older plotting programs in Matlab (a legacy from GLImER),
 <p class="admonition-title">Warning</p>
 <p>If you want to store your CCP Stack for a longer period of time, we recommend using the <em>npz</em> format to do so.</p>
 </div>
-</section>
-</section>
-</section>
+</div>
+</div>
+</div>
 
 
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="receiver_function.html" class="btn btn-neutral float-left" title="Handling Receiver Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="plotting.html" class="btn btn-neutral float-right" title="Plotting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+              </div>
+              
+        
+            
+
+
+
+<div class='prev-next-bottom'>
+    
+    <div id="prev">
+        <a class="left-prev" href="receiver_function.html" title="previous page">
+            <i class="prevnext-label fas fa-angle-left"></i>
+            <div class="prevnext-info">
+                <p class="prevnext-label">previous</p>
+                <p class="prevnext-title">Handling Receiver Functions</p>
+            </div>
+        </a>
     </div>
+     <div id="next">
+        <a class="right-next" href="plotting.html" title="next page">
+            <div class="prevnext-info">
+                <p class="prevnext-label">next</p>
+                <p class="prevnext-title">Plotting</p>
+            </div>
+            <i class="prevnext-label fas fa-angle-right"></i>
+        </a>
+     </div>
 
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2021, the PyGLImER development team.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
+</div>
+        
         </div>
-      </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
+    </div>
+    <footer class="footer">
+    <div class="container">
+      <p>
+        
+          By Peter Makus, Lucas Sawade<br/>
+        
+            &copy; Copyright 2021, the PyGLImER development team.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
 
-</body>
+
+      </div>
+    </div>
+  
+  <script src="../_static/js/index.1c5a1a01449ed65a7b51.js"></script>
+
+  
+  </body>
 </html>
