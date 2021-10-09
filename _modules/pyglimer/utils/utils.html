@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pyglimer.utils.utils</title>
     
-  <link href="../../../_static/css/theme.css" rel="stylesheet" />
-  <link href="../../../_static/css/index.c5995385ac14fb8791e8eb36b4908be2.css" rel="stylesheet" />
+  <link href="../../../_static/css/theme.css" rel="stylesheet">
+  <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
 
     
   <link rel="stylesheet"
@@ -23,19 +23,21 @@
 
     
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-book-theme.css?digest=c3fdc42140077d1ad13ad2f1588a4309" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/blank.css" />
     
-  <link rel="preload" as="script" href="../../../_static/js/index.1c5a1a01449ed65a7b51.js">
+  <link rel="preload" as="script" href="../../../_static/js/index.be7d3bbb2ef33a8344ce.js">
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx-book-theme.12a9622fbb08dcb3a2a40b2c02b83a57.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="en" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
     
   </head>
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
@@ -43,140 +45,124 @@
     <div class="container-fluid" id="banner"></div>
 
     
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+
+<a class="navbar-brand" href="../../../index.html">
+  <img src="../../../_static/logo.png" class="logo" alt="logo">
+</a>
+
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../chapters/introduction/introduction.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../chapters/creation/index.html">
+  Receiver Functions
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../chapters/receiver_functions/index.html">
+  RF Handling
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../chapters/ccp/index.html">
+  CCP
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../chapters/plotting/index.html">
+  Plotting
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../chapters/api/index.html">
+  API
+ </a>
+</li>
+
+    
+    <li class="nav-item">
+        <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+    </li>
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/PeterMakus/PyGLImER" rel="noopener" target="_blank" title="GitHub">
+            <span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label>
+          </a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
 
     <div class="container-xl">
       <div class="row">
           
-<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
-    
-        <div class="navbar-brand-box">
-    <a class="navbar-brand text-wrap" href="../../../index.html">
-      
-        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
-        
-      
-      
-      <img src="../../../_static/logo.png" class="logo" alt="logo">
-      
-      
-    </a>
-</div><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
   <i class="icon fas fa-search"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
-</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
-    <div class="bd-toc-item active">
-        <p class="caption" role="heading">
- <span class="caption-text">
-  Contents:
- </span>
-</p>
-<ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="../../../chapters/introduction.html">
-   Introduction
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../../chapters/download.html">
-   Waveform Download, preprocessing, and receiver function creation
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../../chapters/receiver_function.html">
-   Handling Receiver Functions
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../../chapters/ccp.html">
-   Common Conversion Point Stacking
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../../chapters/plotting.html">
-   Plotting
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../../../chapters/API.html">
-   <code class="docutils literal notranslate">
-    <span class="pre">
-     PyGLImER
-    </span>
-   </code>
-   API
-  </a>
- </li>
-</ul>
-
-    </div>
-</nav> <!-- To handle the deprecated key -->
-
-<div class="navbar_extra_footer">
-  Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
-</div>
-
-</div>
-
-
-          
-
-
-          
-<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
     
-    <div class="topbar container-xl fixed-top">
-    <div class="topbar-contents row">
-        <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show"></div>
-        <div class="col pl-md-4 topbar-main">
+  </div>
+</nav>
+            </div>
             
-            <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
-                data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
-                aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
-                title="Toggle navigation" data-toggle="tooltip" data-placement="left">
-                <i class="fas fa-bars"></i>
-                <i class="fas fa-arrow-left"></i>
-                <i class="fas fa-arrow-up"></i>
-            </button>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
             
+          </div>
+          
+
+          
+          
             
-            <!-- Source interaction buttons -->
-
-<div class="dropdown-buttons-trigger">
-    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
-        aria-label="Connect with source repository"><i class="fab fa-github"></i></button>
-    <div class="dropdown-buttons sourcebuttons">
-        <a class="repository-button"
-            href="https://github.com/lwsspy/lwsspy"><button type="button" class="btn btn-secondary topbarbtn"
-                data-toggle="tooltip" data-placement="left" title="Source repository"><i
-                    class="fab fa-github"></i>repository</button></a>
-        <a class="issues-button"
-            href="https://github.com/lwsspy/lwsspy/issues/new?title=Issue%20on%20page%20%2F_modules/pyglimer/utils/utils.html&body=Your%20issue%20content%20here."><button
-                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
-                title="Open an issue"><i class="fas fa-lightbulb"></i>open issue</button></a>
-        
-    </div>
-</div>
-
-            <!-- Full screen (wrap in <a> to have style consistency -->
-
-<a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
-        data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
-        title="Fullscreen mode"><i
-            class="fas fa-expand"></i></button></a>
-
-            <!-- Launch buttons -->
-
-        </div>
-
-        <!-- Table of contents -->
-        <div class="d-none d-md-block col-md-2 bd-toc show">
-            
-        </div>
-    </div>
-</div>
-    <div id="main-content" class="row">
-        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
-        
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
               <div>
                 
   <h1>Source code for pyglimer.utils.utils</h1><div class="highlight"><pre>
@@ -222,7 +208,7 @@
     <span class="s1">&#39;ERROR&#39;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">}</span>
 
 
-<div class="viewcode-block" id="dt_string"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.utils.dt_string">[docs]</a><span class="k">def</span> <span class="nf">dt_string</span><span class="p">(</span><span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="dt_string"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.dt_string">[docs]</a><span class="k">def</span> <span class="nf">dt_string</span><span class="p">(</span><span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Returns Time elapsed string depending on how much time has passed.</span>
 <span class="sd">    After a certain amount of seconds it returns minutes, and after a certain</span>
 <span class="sd">    amount of minutes it returns the elapsed time in hours.&quot;&quot;&quot;</span>
@@ -241,13 +227,13 @@
     <span class="k">return</span> <span class="n">tstring</span></div>
 
 
-<div class="viewcode-block" id="chunks"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.utils.chunks">[docs]</a><span class="k">def</span> <span class="nf">chunks</span><span class="p">(</span><span class="n">lst</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<div class="viewcode-block" id="chunks"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.chunks">[docs]</a><span class="k">def</span> <span class="nf">chunks</span><span class="p">(</span><span class="n">lst</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Yield successive n-sized chunks from lst. Useful for multi-threading&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">),</span> <span class="n">n</span><span class="p">):</span>
         <span class="k">yield</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">n</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="download_full_inventory"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.utils.download_full_inventory">[docs]</a><span class="k">def</span> <span class="nf">download_full_inventory</span><span class="p">(</span><span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fdsn_client</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<div class="viewcode-block" id="download_full_inventory"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.download_full_inventory">[docs]</a><span class="k">def</span> <span class="nf">download_full_inventory</span><span class="p">(</span><span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fdsn_client</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This utility loops through statloc and redownloads the whole response</span>
 <span class="sd">    (i.e., all channels and all times) for every station. Thus, overwriting</span>
@@ -347,7 +333,7 @@
     <span class="n">save_raw</span><span class="p">(</span><span class="n">saved</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="save_raw"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.utils.save_raw">[docs]</a><span class="k">def</span> <span class="nf">save_raw</span><span class="p">(</span>
+<div class="viewcode-block" id="save_raw"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.save_raw">[docs]</a><span class="k">def</span> <span class="nf">save_raw</span><span class="p">(</span>
         <span class="n">saved</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">st</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inv</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Save the raw waveform data in the desired format.</span>
@@ -388,7 +374,7 @@
             <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">e</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="save_raw_mseed"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.utils.save_raw_mseed">[docs]</a><span class="k">def</span> <span class="nf">save_raw_mseed</span><span class="p">(</span><span class="n">evt</span><span class="p">:</span> <span class="n">Event</span><span class="p">,</span> <span class="n">slst</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">net</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">stat</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="save_raw_mseed"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.save_raw_mseed">[docs]</a><span class="k">def</span> <span class="nf">save_raw_mseed</span><span class="p">(</span><span class="n">evt</span><span class="p">:</span> <span class="n">Event</span><span class="p">,</span> <span class="n">slst</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">net</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">stat</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Saves input stream in the correct location in mini seed format.</span>
 
@@ -416,7 +402,7 @@
     <span class="n">slst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;mseed&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_multiple_fdsn_clients"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.utils.get_multiple_fdsn_clients">[docs]</a><span class="k">def</span> <span class="nf">get_multiple_fdsn_clients</span><span class="p">(</span>
+<div class="viewcode-block" id="get_multiple_fdsn_clients"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.get_multiple_fdsn_clients">[docs]</a><span class="k">def</span> <span class="nf">get_multiple_fdsn_clients</span><span class="p">(</span>
         <span class="n">clients</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="ow">or</span> <span class="nb">str</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Client</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a tuple holding all the queried fdsn providers. Also finds</span>
@@ -471,7 +457,7 @@
     <span class="k">return</span> <span class="n">clients</span></div>
 
 
-<div class="viewcode-block" id="create_bulk_str"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.utils.utils.create_bulk_str">[docs]</a><span class="k">def</span> <span class="nf">create_bulk_str</span><span class="p">(</span>
+<div class="viewcode-block" id="create_bulk_str"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.create_bulk_str">[docs]</a><span class="k">def</span> <span class="nf">create_bulk_str</span><span class="p">(</span>
     <span class="n">networks</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">stations</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">t0</span><span class="p">:</span> <span class="n">UTCDateTime</span> <span class="ow">or</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">List</span><span class="p">[</span><span class="n">UTCDateTime</span><span class="p">],</span>
         <span class="n">t1</span><span class="p">:</span> <span class="n">UTCDateTime</span> <span class="ow">or</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">List</span><span class="p">[</span><span class="n">UTCDateTime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]:</span>
@@ -556,36 +542,34 @@
 
               </div>
               
-        
-            
-
-
-
-<div class='prev-next-bottom'>
-    
-
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
 </div>
-        
-        </div>
-    </div>
-    <footer class="footer">
-    <div class="container">
-      <p>
-        
-          By Peter Makus, Lucas Sawade<br/>
-        
-            &copy; Copyright 2021, the PyGLImER development team.<br/>
-      </p>
-    </div>
-  </footer>
-</main>
-
+              
+          </main>
+          
 
       </div>
     </div>
   
-  <script src="../../../_static/js/index.1c5a1a01449ed65a7b51.js"></script>
-
-  
+  <script src="../../../_static/js/index.be7d3bbb2ef33a8344ce.js"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2021, the PyGLImER development team.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
   </body>
 </html>

@@ -1,0 +1,627 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pyglimer.test</title>
+    
+  <link href="../../_static/css/theme.css" rel="stylesheet">
+  <link href="../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/blank.css" />
+    
+  <link rel="preload" as="script" href="../../_static/js/index.be7d3bbb2ef33a8344ce.js">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="pyglimer.utils" href="utils.html" />
+    <link rel="prev" title="pyglimer.database" href="database.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+
+<a class="navbar-brand" href="../../index.html">
+  <img src="../../_static/logo.png" class="logo" alt="logo">
+</a>
+
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../introduction/introduction.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../creation/index.html">
+  Receiver Functions
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../receiver_functions/index.html">
+  RF Handling
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../ccp/index.html">
+  CCP
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../plotting/index.html">
+  Plotting
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="index.html">
+  API
+ </a>
+</li>
+
+    
+    <li class="nav-item">
+        <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+    </li>
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/PeterMakus/PyGLImER" rel="noopener" target="_blank" title="GitHub">
+            <span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label>
+          </a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="waveform.html">
+   pyglimer.waveform
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="rf.html">
+   pyglimer.rf
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="database.html">
+   pyglimer.database
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   pyglimer.test
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="utils.html">
+   pyglimer.utils
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="ccp.html">
+   pyglimer.ccp
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-pyglimer.test.rate">
+   pyglimer.test.rate
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-pyglimer.test.synthetic">
+   pyglimer.test.synthetic
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-pyglimer.test.tests">
+   pyglimer.test.tests
+  </a>
+ </li>
+</ul>
+
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/PeterMakus/PyGLImER/edit/master/docs/chapters/api/test.rst">
+        <i class="fas fa-pencil-alt"></i> Edit this page
+    </a>
+</div>
+
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <section id="pyglimer-test">
+<h1>pyglimer.test<a class="headerlink" href="#pyglimer-test" title="Permalink to this headline">¶</a></h1>
+<section id="module-pyglimer.test.rate">
+<span id="pyglimer-test-rate"></span><h2>pyglimer.test.rate<a class="headerlink" href="#module-pyglimer.test.rate" title="Permalink to this headline">¶</a></h2>
+<p>Contains various functions used to evaluate the quality of RF and waveforms</p>
+<dl class="field-list simple">
+<dt class="field-odd">copyright</dt>
+<dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
+</dd>
+<dt class="field-even">license</dt>
+<dd class="field-even"><p>GNU Lesser General Public License, Version 3
+(<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
+</dd>
+<dt class="field-odd">author</dt>
+<dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
+</dd>
+</dl>
+<p>Created: Tuesday, 25th February 2020 07:28:30 pm
+Last Modified: Thursday, 19th August 2021 03:13:09 pm</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.test.rate.automatic_rate">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.test.rate.</span></span><span class="sig-name descname"><span class="pre">automatic_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/rate.html#automatic_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.rate.automatic_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks the automatic QC criteria for SRF waveforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>STRING</em>) – Network code (2 letters).</p></li>
+<li><p><strong>station</strong> (<em>STRING</em>) – Station code (3 letters).</p></li>
+<li><p><strong>phase</strong> (<em>STRING</em><em>, </em><em>optional</em>) – “P” or “S”.</p></li>
+<li><p><strong>preproloc</strong> (<em>string</em>) – Directory that contains the preprocessed files (not quality controlled)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>diff</strong> (<em>INTEGER</em>) – Number of waveforms that were not rated 3 or 4.</p></li>
+<li><p><strong>ret</strong> (<em>INTEGER</em>) – Number of automatically retained waveforms.</p></li>
+<li><p><strong>sts</strong> (<em>LIST</em>) – List containing all retained + filtered streams.</p></li>
+<li><p><strong>crits</strong> (<em>LIST</em>) – List containing bools (retained or not) corresponding to streams in
+sts.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.test.rate.rate">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.test.rate.</span></span><span class="sig-name descname"><span class="pre">rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">review</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retained</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decon_meth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'it'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_tt_calculation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/rate.html#rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.rate.rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Module to rate and review the quality of Sp or Ps waveforms from the given
+station. Shows the automatic rating from qc. Tapers can be controlled with
+the mouse. Rating is done with the keyboard. Makes only sense if the
+files in preproloc have not been quality controlled (the script is a
+reminant from an earlier alpha version).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>STRING</em>) – Network code (two letters).</p></li>
+<li><p><strong>phase</strong> (<em>STRING</em>) – Either “P” for Ps or “S” Sp. The default is “S”.</p></li>
+<li><p><strong>preproloc</strong> (<em>string</em>) – Directory that contains the preprocessed files (not quality controlled)</p></li>
+<li><p><strong>station</strong> (<em>str</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Station code (three letters).</p></li>
+<li><p><strong>review</strong> (<em>INTEGER</em><em>, </em><em>optional</em>) – If true, already rated waveforms are shown.
+Can also be an integer between 1 and 4. Then, only waveforms rated
+with the respected rating are shown. The default is False.</p></li>
+<li><p><strong>retained</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Show only waveforms retained by qcp or qcs. The default is False.</p></li>
+<li><p><strong>decon_meth</strong> (<em>STRING</em><em>, </em><em>optional</em>) – Deconvolution method, “waterlevel”, ‘dampedf’ for constant
+damping level, ‘it’ for iterative time domain deconvoltuion, ‘multit’
+for multitaper or ‘fqd’ for frequency dependently damped spectral
+division. The default is ‘it’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>Exception</strong> – For Typing mistakes.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.test.rate.sort_rated">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.test.rate.</span></span><span class="sig-name descname"><span class="pre">sort_rated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/rate.html#sort_rated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.rate.sort_rated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Functions that sorts waveforms in 4 folders,
+depending on their manual rating.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>STRING</em>) – Network code (2 letters).</p></li>
+<li><p><strong>station</strong> (<em>STRING</em>) – Station code (3 letters).</p></li>
+<li><p><strong>phase</strong> (<em>STRING</em><em>, </em><em>optional</em>) – “P” or “S”.</p></li>
+<li><p><strong>preproloc</strong> (<em>string</em>) – Directory that contains the preprocessed files (not quality controlled)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pyglimer.test.synthetic">
+<span id="pyglimer-test-synthetic"></span><h2>pyglimer.test.synthetic<a class="headerlink" href="#module-pyglimer.test.synthetic" title="Permalink to this headline">¶</a></h2>
+<p>Create synthetic impulse resonses.
+Used to test the deconvolve module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">copyright</dt>
+<dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
+</dd>
+<dt class="field-even">license</dt>
+<dd class="field-even"><p>GNU Lesser General Public License, Version 3
+(<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
+</dd>
+<dt class="field-odd">author</dt>
+<dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
+</dd>
+</dl>
+<p>Created: Wednesday, 23rd October 2019 09:37:30 am
+Last Modified: Thursday, 19th August 2021 03:13:20 pm</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.test.synthetic.create_R">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.test.synthetic.</span></span><span class="sig-name descname"><span class="pre">create_R</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/synthetic.html#create_R"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.synthetic.create_R" title="Permalink to this definition">¶</a></dt>
+<dd><p>Program to create random reflectivity series
+INPUT
+N2: half-length of the signal (N=2*N2+1)
+M: number of seismic discontinuities</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.test.synthetic.synthetic">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.test.synthetic.</span></span><span class="sig-name descname"><span class="pre">synthetic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SNR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/synthetic.html#synthetic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.synthetic.synthetic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to create synthetic seismograms (given Impulse response
+convolved with a Ricker wavelet)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>N2</strong> (<em>int</em>) – half-length of the Input traces, (full length N= N2*2+1)</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – sampling rate</p></li>
+<li><p><strong>R</strong> (<em>Arraylike</em>) – Impulse response / reflectivity series with length N</p></li>
+<li><p><strong>SNR</strong> (<em>float</em>) – ratio of maximal amplitude of the source wavelet to max noise amplitude</p></li>
+<li><p><strong>stdv</strong> (<em>float</em>) – standard deviation of the source pulse (controls width)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>v_noise : the theorethical source wavelet with noise independent
+from the noise on the horizontal component(equal to the hoizontal
+component of a seismogram in RF)
+h_noise : The horizontal component of the seismogram with noise</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pyglimer.test.tests">
+<span id="pyglimer-test-tests"></span><h2>pyglimer.test.tests<a class="headerlink" href="#module-pyglimer.test.tests" title="Permalink to this headline">¶</a></h2>
+<p>Created on Wed Apr  1 13:51:46 2020
+Assorted functions that serve as a tests (mostly with synthetic data) of other
+GLImER functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">copyright</dt>
+<dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
+</dd>
+<dt class="field-even">license</dt>
+<dd class="field-even"><p>GNU Lesser General Public License, Version 3
+(<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
+</dd>
+<dt class="field-odd">author</dt>
+<dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
+</dd>
+</dl>
+<p>Created: Wednesday, 1st April 2020 01:51:30 pm
+Last Modified: Thursday, 19th August 2021 03:14:24 pm</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.test.tests.decon_test">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">decon_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PSS_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#decon_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.decon_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to test a given deconvolution method with synthetic data created
+with raysum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>PSS_file</strong> (<em>str</em>) – Filename of raysum file containing P-Sv-Sh traces.</p></li>
+<li><p><strong>phase</strong> (<em>str</em>) – “S” or “P”.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Deconvolution method: use 1. “fqd”, “wat”, or “con for
+frequency-dependent damped, waterlevel damped, constantly damped
+spectraldivision. 2. “it” for iterative deconvolution, and 3.
+“multit_con” or “multitap_fqd” for constantly or frequency-dependent
+damped multitaper deconvolution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>RF</strong> (<em>np.array</em>) – Matrix containing all receiver functions.</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – Sampling interval.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.test.tests.moveout_test">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">moveout_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PSS_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#moveout_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.moveout_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates synthetic PRFs and stacks them after depth migration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>PSS_file</strong> (<em>str</em>) – Filename of raysum file containing P-Sv-Sh traces.</p></li>
+<li><p><strong>q</strong> (<em>float</em>) – Slowness [s/m].</p></li>
+<li><p><strong>phase</strong> (<em>str</em>) – Either “P” for Ps or “S” for Sp.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>z</strong> (<em>np.array</em>) – Depth vector.</p></li>
+<li><p><strong>stack</strong> (<em>np.array</em>) – Receiver function stack.</p></li>
+<li><p><strong>RF_mo</strong> (<em>np.array</em>) – Matrix containing all depth migrated RFs.</p></li>
+<li><p><strong>RF</strong> (<em>np.array</em>) – Matrix containing all RFs.</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – Sampling interval.</p></li>
+<li><p><strong>PSS</strong> (<em>np.array</em>) – Matrix containing all traces in P-Sv-Sh.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.test.tests.read_geom">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">read_geom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#read_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.read_geom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in the geometry file of the raysum program to determine parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>geom_file</strong> (<em>str</em>) – Filename of the geometry file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>baz</strong> (<em>np.ndarray(1D)</em>) – Array containing the backazimuths of each trace [deg].</p></li>
+<li><p><strong>q</strong> (<em>np.ndarray(1D)</em>) – Array containing the slownesses of each trace [s/m].</p></li>
+<li><p><strong>dN</strong> (<em>np.ndarray(1D)</em>) – Array containing the north shift of each trace [m].</p></li>
+<li><p><strong>dE</strong> (<em>np.ndarray(1D)</em>) – Array containing the east shift of each trace [m].</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.test.tests.read_raysum">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">read_raysum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NEZ_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RTZ_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PSS_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#read_raysum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.read_raysum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the output of the raysum program (by Andrew Frederiksen).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>NEZ_file</strong> (<em>str</em><em>, </em><em>optional</em>) – Filename of file in NEZ coordinate system. The default is None.</p></li>
+<li><p><strong>RTZ_file</strong> (<em>str</em><em>, </em><em>optional</em>) – Filename of file in RTZ coordinate system. The default is None.</p></li>
+<li><p><strong>PSS_file</strong> (<em>str</em><em>, </em><em>optional</em>) – Filename of file in P-Sv-Sh coordinate system. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>Exception</strong> – For wron inputs.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>stream</strong> (<em>np.array</em>) – One numpy array for each provided input file.</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – The sampling interval [s].</p></li>
+<li><p><strong>M</strong> (<em>int</em>) – Number of traces per file.</p></li>
+<li><p><strong>N</strong> (<em>int</em>) – Number of samples per trace</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.test.tests.read_rfs_mat">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">read_rfs_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output/ccps'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output/waveforms/RF/P/matlab'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'matlab'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#read_rfs_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.read_rfs_mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in Matlab files constructed by the old GLImER workflow.
+It takes a long time to decode h5 files with that and they cannot
+be pickled either, so no multicore :-/</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – filename.</p></li>
+<li><p><strong>path</strong> (<em>str</em><em>, </em><em>optional</em>) – Input directory. The default is ‘output/ccps’.</p></li>
+<li><p><strong>outdir</strong> (<em>str</em><em>, </em><em>optional</em>) – Output directory. The default is ‘output/waveform/RF/matlab’.</p></li>
+<li><p><strong>outfile</strong> (<em>str</em><em>, </em><em>optional</em>) – Output file. The default is ‘matlab’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>rf</strong> (<em>RFTrace</em>) – RFTrace object, one per receiver function.</p></li>
+<li><p><strong>i</strong> (<em>int</em>) – position in .mat.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.test.tests.rf_test">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">rf_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfloc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output/waveforms/RF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geom_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'3D.geom'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decon_meth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'it'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#rf_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.rf_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates synthetic PRFs from Raysum data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phase</strong> (<em>string</em>) – “P” or “S”.</p></li>
+<li><p><strong>dip</strong> (<em>int</em>) – Dip of the LAB in deg, determines, which files to use</p></li>
+<li><p><strong>rfloc</strong> (<em>The parental directory</em><em>, </em><em>in which the RFs are saved.</em>) – </p></li>
+<li><p><strong>geom_file</strong> (<em>str</em><em>, </em><em>optional</em>) – Filename of the geometry file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>rfs</strong> – List of RFTrace objects. Will in addition be saved in SAC format.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.test.tests.test_SNR">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">test_SNR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ouput/waveforms/preprocessed'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#test_SNR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.test_SNR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test the automatic QC scripts for a certain station and writes ratings
+in the rating file.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'> 
+    <a class='left-prev' id="prev-link" href="database.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">pyglimer.database</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="utils.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">pyglimer.utils</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <script src="../../_static/js/index.be7d3bbb2ef33a8344ce.js"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2021, the PyGLImER development team.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

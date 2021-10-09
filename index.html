@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>PyGLImER - A workflow to create a global database for Ps and Sp receiver functions in Python</title>
     
-  <link href="_static/css/theme.css" rel="stylesheet" />
-  <link href="_static/css/index.c5995385ac14fb8791e8eb36b4908be2.css" rel="stylesheet" />
+  <link href="_static/css/theme.css" rel="stylesheet">
+  <link href="_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
 
     
   <link rel="stylesheet"
@@ -23,20 +24,22 @@
 
     
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/sphinx-book-theme.css?digest=c3fdc42140077d1ad13ad2f1588a4309" />
+    <link rel="stylesheet" type="text/css" href="_static/css/blank.css" />
     
-  <link rel="preload" as="script" href="_static/js/index.1c5a1a01449ed65a7b51.js">
+  <link rel="preload" as="script" href="_static/js/index.be7d3bbb2ef33a8344ce.js">
 
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx-book-theme.12a9622fbb08dcb3a2a40b2c02b83a57.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Introduction" href="chapters/introduction.html" />
+    <link rel="next" title="Introduction" href="chapters/introduction/introduction.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="en" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
     
   </head>
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
@@ -44,162 +47,130 @@
     <div class="container-fluid" id="banner"></div>
 
     
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+
+<a class="navbar-brand" href="#">
+  <img src="_static/logo.png" class="logo" alt="logo">
+</a>
+
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="chapters/introduction/introduction.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="chapters/creation/index.html">
+  Receiver Functions
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="chapters/receiver_functions/index.html">
+  RF Handling
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="chapters/ccp/index.html">
+  CCP
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="chapters/plotting/index.html">
+  Plotting
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="chapters/api/index.html">
+  API
+ </a>
+</li>
+
+    
+    <li class="nav-item">
+        <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+    </li>
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/PeterMakus/PyGLImER" rel="noopener" target="_blank" title="GitHub">
+            <span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label>
+          </a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
 
     <div class="container-xl">
       <div class="row">
           
-<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
-    
-        <div class="navbar-brand-box">
-    <a class="navbar-brand text-wrap" href="#">
-      
-        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
-        
-      
-      
-      <img src="_static/logo.png" class="logo" alt="logo">
-      
-      
-    </a>
-</div><form class="bd-search d-flex align-items-center" action="search.html" method="get">
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar"><form class="bd-search d-flex align-items-center" action="search.html" method="get">
   <i class="icon fas fa-search"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
-</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
-    <div class="bd-toc-item active">
-        <p class="caption" role="heading">
- <span class="caption-text">
-  Contents:
- </span>
-</p>
-<ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="chapters/introduction.html">
-   Introduction
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="chapters/download.html">
-   Waveform Download, preprocessing, and receiver function creation
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="chapters/receiver_function.html">
-   Handling Receiver Functions
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="chapters/ccp.html">
-   Common Conversion Point Stacking
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="chapters/plotting.html">
-   Plotting
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="chapters/API.html">
-   <code class="docutils literal notranslate">
-    <span class="pre">
-     PyGLImER
-    </span>
-   </code>
-   API
-  </a>
- </li>
-</ul>
-
-    </div>
-</nav> <!-- To handle the deprecated key -->
-
-<div class="navbar_extra_footer">
-  Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
-</div>
-
-</div>
-
-
-          
-
-
-          
-<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
     
-    <div class="topbar container-xl fixed-top">
-    <div class="topbar-contents row">
-        <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show"></div>
-        <div class="col pl-md-4 topbar-main">
-            
-            <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
-                data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
-                aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
-                title="Toggle navigation" data-toggle="tooltip" data-placement="left">
-                <i class="fas fa-bars"></i>
-                <i class="fas fa-arrow-left"></i>
-                <i class="fas fa-arrow-up"></i>
-            </button>
-            
-            
-<div class="dropdown-buttons-trigger">
-    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
-            class="fas fa-download"></i></button>
-
-    <div class="dropdown-buttons">
-        <!-- ipynb file if we had a myst markdown file -->
-        
-        <!-- Download raw file -->
-        <a class="dropdown-buttons" href="_sources/index.rst.txt"><button type="button"
-                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
-                data-placement="left">.rst</button></a>
-        <!-- Download PDF via print -->
-        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
-            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
-    </div>
-</div>
-
-            <!-- Source interaction buttons -->
-
-<div class="dropdown-buttons-trigger">
-    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
-        aria-label="Connect with source repository"><i class="fab fa-github"></i></button>
-    <div class="dropdown-buttons sourcebuttons">
-        <a class="repository-button"
-            href="https://github.com/lwsspy/lwsspy"><button type="button" class="btn btn-secondary topbarbtn"
-                data-toggle="tooltip" data-placement="left" title="Source repository"><i
-                    class="fab fa-github"></i>repository</button></a>
-        <a class="issues-button"
-            href="https://github.com/lwsspy/lwsspy/issues/new?title=Issue%20on%20page%20%2Findex.html&body=Your%20issue%20content%20here."><button
-                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
-                title="Open an issue"><i class="fas fa-lightbulb"></i>open issue</button></a>
-        <a class="edit-button" href="https://github.com/lwsspy/lwsspy/edit/master/index.rst"><button
-                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
-                title="Edit this page"><i class="fas fa-pencil-alt"></i>suggest edit</button></a>
-    </div>
-</div>
-
-            <!-- Full screen (wrap in <a> to have style consistency -->
-
-<a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
-        data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
-        title="Fullscreen mode"><i
-            class="fas fa-expand"></i></button></a>
-
-            <!-- Launch buttons -->
-
-        </div>
-
-        <!-- Table of contents -->
-        <div class="d-none d-md-block col-md-2 bd-toc show">
-            
-            <div class="tocsection onthispage pt-5 pb-3">
-                <i class="fas fa-list"></i> Contents
+  </div>
+</nav>
             </div>
-            <nav id="bd-toc-nav" aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
  <li class="toc-h1 nav-item toc-entry">
   <a class="reference internal nav-link" href="#">
    PyGLImER - A workflow to create a global database for Ps and Sp receiver functions in Python
   </a>
+  <ul class="visible nav section-nav flex-column">
+  </ul>
  </li>
  <li class="toc-h1 nav-item toc-entry">
   <a class="reference internal nav-link" href="#indices-and-tables">
@@ -208,108 +179,148 @@
  </li>
 </ul>
 
-            </nav>
-        </div>
-    </div>
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/PeterMakus/PyGLImER/edit/master/docs/index.rst">
+        <i class="fas fa-pencil-alt"></i> Edit this page
+    </a>
 </div>
-    <div id="main-content" class="row">
-        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
-        
+
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
               <div>
                 
-  <div class="section" id="pyglimer-a-workflow-to-create-a-global-database-for-ps-and-sp-receiver-functions-in-python">
+  <section id="pyglimer-a-workflow-to-create-a-global-database-for-ps-and-sp-receiver-functions-in-python">
 <h1>PyGLImER - A workflow to create a global database for Ps and Sp receiver functions in Python<a class="headerlink" href="#pyglimer-a-workflow-to-create-a-global-database-for-ps-and-sp-receiver-functions-in-python" title="Permalink to this headline">¶</a></h1>
 <p>This is the documentation for the PyGLImER repository, available at:
 <a class="reference external" href="https://github.com/PeterMakus/PyGLImER">PyGLImER</a></p>
+<p><strong>Package Introduction</strong></p>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="chapters/introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="chapters/download.html#the-request-class">The Request Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapters/introduction/introduction.html">Introduction</a></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="chapters/receiver_function.html">Handling Receiver Functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="chapters/receiver_function.html#reading-receiver-functions-that-were-saved-in-sac-format">Reading receiver functions that were saved in sac format</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chapters/receiver_function.html#receiver-functions-stored-in-hdf5-format">Receiver functions stored in hdf5 format</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chapters/receiver_function.html#writing-data-to-hdf5">Writing data to hdf5</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chapters/receiver_function.html#methods-available-for-both-rfstream-and-rftrace-objects">Methods available for both RFStream and RFTrace objects</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="chapters/ccp.html">Common Conversion Point Stacking</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="chapters/ccp.html#ccpstack-objects">CCPStack objects</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="chapters/plotting.html">Plotting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="chapters/plotting.html#single-receiver-function">Single Receiver Function</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chapters/plotting.html#receiver-function-section">Receiver Function Section</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chapters/plotting.html#ccp-stack-plotting">CCP Stack Plotting</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="chapters/API.html#pyglimer-waveform">pyglimer.waveform</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chapters/API.html#pyglimer-rf">pyglimer.rf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chapters/API.html#pyglimer-database">pyglimer.database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chapters/API.html#pyglimer-test">pyglimer.test</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chapters/API.html#pyglimer-utils">pyglimer.utils</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chapters/API.html#pyglimer-ccp">pyglimer.ccp</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chapters/API.html#pyglimer-plot">pyglimer.plot</a></li>
+</div>
+<p><strong>Waveform Download, Preprocessing, and Receiver Function Creation</strong> <em>Tools to
+get from 0 to Receiver-Function-Hero.</em></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="chapters/creation/index.html">Receiver Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chapters/creation/requestclass.html">The Request Class</a></li>
 </ul>
 </li>
 </ul>
 </div>
+<p><strong>Handling of Receiver Functions</strong> <em>Overview of capabilities of the Receiver
+Function class and associated classes.</em></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="chapters/receiver_functions/index.html">RF Handling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chapters/receiver_functions/sac.html">Reading receiver functions that were saved in sac format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chapters/receiver_functions/hdf5.html">Receiver functions stored in hdf5 format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chapters/receiver_functions/hdf5.html#writing-data-to-hdf5">Writing data to hdf5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chapters/receiver_functions/methods.html">Methods available for both RFStream and RFTrace objects</a></li>
+</ul>
+</li>
+</ul>
 </div>
-<div class="section" id="indices-and-tables">
+<p><strong>Common Conversion Point Stacking</strong> <em>Tool to create Common Conversion Point
+Stack from your computed Receiver Functions.</em></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="chapters/ccp/index.html">CCP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chapters/ccp/intro.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chapters/ccp/ccpstackobject.html">CCPStack objects</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p><strong>Plotting Routines</strong> <em>Summary of available plotting routines.</em></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="chapters/plotting/index.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chapters/plotting/receiverfunctions.html">Plotting Plain Receiver Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chapters/plotting/ccp.html">CCP Stack Plotting</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p><strong>Function Library</strong></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="chapters/api/index.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chapters/api/waveform.html">pyglimer.waveform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chapters/api/rf.html">pyglimer.rf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chapters/api/database.html">pyglimer.database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chapters/api/test.html">pyglimer.test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chapters/api/utils.html">pyglimer.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chapters/api/ccp.html">pyglimer.ccp</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
-</div>
+</section>
 
 
               </div>
               
-        
-            
-
-
-
-<div class='prev-next-bottom'>
-    
-     <div id="next">
-        <a class="right-next" href="chapters/introduction.html" title="next page">
-            <div class="prevnext-info">
-                <p class="prevnext-label">next</p>
-                <p class="prevnext-title">Introduction</p>
-            </div>
-            <i class="prevnext-label fas fa-angle-right"></i>
-        </a>
-     </div>
-
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='right-next' id="next-link" href="chapters/introduction/introduction.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Introduction</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
 </div>
-        
-        </div>
-    </div>
-    <footer class="footer">
-    <div class="container">
-      <p>
-        
-          By Peter Makus, Lucas Sawade<br/>
-        
-            &copy; Copyright 2021, the PyGLImER development team.<br/>
-      </p>
-    </div>
-  </footer>
-</main>
-
+              
+          </main>
+          
 
       </div>
     </div>
   
-  <script src="_static/js/index.1c5a1a01449ed65a7b51.js"></script>
-
-  
+  <script src="_static/js/index.be7d3bbb2ef33a8344ce.js"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2021, the PyGLImER development team.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
   </body>
 </html>
