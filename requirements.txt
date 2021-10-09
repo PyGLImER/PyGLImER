@@ -29,7 +29,7 @@ wheel
 
 # For documentation
 sphinx
-sphinx_rtd_theme
+sphinx_book_theme
 
 # For tests
 pytest

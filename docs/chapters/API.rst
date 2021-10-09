@@ -118,11 +118,6 @@ pyglimer.test.tests
 
 pyglimer.utils
 ++++++++++++++
-pyglimer.utils.changedb
-=======================
-.. automodule:: pyglimer.utils.changedb
-    :members:
-    :show-inheritance:
 
 pyglimer.utils.create_geom
 ==========================
