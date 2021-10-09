@@ -50,6 +50,7 @@ jobs:
           # python-version: 3.8
           auto-activate-base: false
           use-only-tar-bz2: true
+      
       # To keep Conda activated you have to use 'shell: bash -l {0}' line
       # To specifiy the shell
       - name: INFO using bash shell
@@ -57,14 +58,6 @@ jobs:
         run: |
           conda info
           conda list
-
-      # - name: Install lwsspy
-      #   shell: bash -l {0}
-      #   run: pip install -e .
-      
-      # - name: Install Doc Reqs
-      #   shell: bash -l {0}
-      #   run: pip install -r docs/requirements.txt
       
       - name: Make Docs
         shell: bash -l {0}
