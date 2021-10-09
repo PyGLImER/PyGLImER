@@ -90,6 +90,12 @@ pyglimer.database.asdf
     :members:
     :show-inheritance:
 
+pyglimer.database.rfh5
+======================
+.. automodule:: pyglimer.database.rfh5
+    :members:
+    :show-inheritance:
+
 pyglimer.test
 +++++++++++++
 pyglimer.test.rate

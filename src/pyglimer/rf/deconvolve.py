@@ -13,7 +13,7 @@ Various Deconvolution approaches used for the RF technique.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 16th October 2019 02:24:30 pm
-Last Modified: Wednesday, 25th August 2021 04:48:51 pm
+Last Modified: Monday, 13th September 2021 04:31:00 pm
 
 '''
 
@@ -208,7 +208,7 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
         longitudinal component.
     :rtype: 1D np.ndarray
     """
-    phase = phase[-1]
+    phase = phase[-1].upper()
 
     N = len(v)
 
@@ -218,11 +218,11 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
         vn[:round((tshift-2)/ndt)] = v[:round((tshift-2)/ndt)]
     elif phase == "S":
         vn[:round((tshift/2)/ndt)] = v[:round((tshift/2)/ndt)]
-        # vn[:round((tshift/6)/ndt)] = u[:round((tshift/6)/ndt)]
+    else:
+        raise ValueError('Unknown teleseismic phase')
 
     # number of points in fft
     nf = next_fast_len(N)
-    # nft = nf/2 + 1
 
     # fourier transform
     uf = np.fft.fft(u, n=nf)
@@ -233,18 +233,16 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
     den = np.multiply(vf, np.conj(vf))
     noise = np.multiply(vnf, np.conj(vnf))
 
-    # den0 = den
-
     # which regularization do you want?
     freqdep = regul == 'fqd'
     const = regul == 'con'
     water = regul == 'wat'
 
     if not freqdep and not const and not water:
-        raise Exception("Regularization not defined (your input: regul=",
-                        regul, """). Use either 'fqd' for frequency-dependent
-                        or 'con' for constant value regularization or 'wat'
-                        for water-level.""")
+        raise ValueError(
+            "Regularization not defined (your input: regul=%s. " % regul +
+            'Use either "fqd" for frequency-dependent or "con" for constant ' +
+            "value regularization or 'wat' for water-level.")
 
     # constant damping factor regularization
     if test:
@@ -423,7 +421,7 @@ def multitaper(
     # Multitaper
     # SR: problem here is how the loop is done ... there's only a peak
     # at the pulse because the two windows of the num and den are moving
-    # together. One should first comput the entire estimate of the wavelet
+    # together. One should first compute the entire estimate of the wavelet
     # and the data for each valie of k, and then do the sum of products for
     # each k!!!
 

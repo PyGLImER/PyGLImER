@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Friday, 20th August 2021 03:29:38 pm
+Last Modified: Monday, 27th September 2021 03:42:20 pm
 
 
 !The file is split and has a second copyright disclaimer!
@@ -25,7 +25,9 @@ Tom Eulenfeld.
 from copy import deepcopy
 import json
 import logging
+from multiprocessing import Event
 from operator import itemgetter
+from typing import List, Tuple
 # from pkg_resources import resource_filename
 import warnings
 import os
@@ -45,13 +47,15 @@ from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table,\
     dt_table_3D
 from pyglimer.plot.plot_utils import plot_section, plot_single_rf, stream_dist
 from pyglimer.utils.geo_utils import fix_map_extent
+from pyglimer.utils.statistics import stack_case_resampling
 
 logger = logging.Logger("rf")
 
 
-def createRF(st_in, phase, pol='v', onset=None,
-             method='it', trim=None, event=None, station=None,
-             info=None):
+def createRF(
+    st_in: Stream, phase: str, pol: str = 'v', onset: UTCDateTime = None,
+    method: str = 'it', trim: Tuple[float, float] = None, event=None,
+        station=None, info: dict = None):
     """
     Creates a receiver function with the defined method from an obspy
     stream.
@@ -188,7 +192,7 @@ def createRF(st_in, phase, pol='v', onset=None,
         elif phase[-1] == "P":
             width = 2.5
         else:
-            raise ValueError('Phase '+phase+' is not supported.')
+            raise ValueError('Phase %s is not supported.' % phase)
         lrf = None
         RF[0].data = it(v, u, dt, shift=shift, width=width)[0]
     elif method == "dampedf":
@@ -488,6 +492,43 @@ class RFStream(Stream):
         if format.upper() == 'Q':
             for tr in self:
                 tr.stats.station = tr.stats.station.split('.')[1]
+
+    def bootstrap(
+            self, b: int = 1000, vmodel_file: str = 'iasp91.dat') -> List[
+                np.ndarray]:
+        """
+        Monte Carlo Case resampling algorithm that creates b numbers of
+        replacement resampled stacks of the moveout corrected receiver
+        function.
+
+        The returned list can be used to compute statistical measures like
+        standard deviation, standard error, median, etc.
+
+        :param b: Number of iterations that the algorithm is supposed to
+            perform, defaults to 1000.
+        :type b: int, optional
+        :param vmodel_file: The velocity model to use for the depth migration.
+            Defaults to 'iasp91.dat'
+        :type vmodel_file: str
+        :return: A list of the bootstraped stacks.
+        :rtype: List[np.ndarray]
+        """
+        st = self[0].stats
+
+        if vmodel_file == 'iasp91.dat' or vmodel_file == 'raysum.dat':
+            latb = None
+            lonb = None
+        else:
+            latb = (st.station_latitude-10, st.station_latitude+10)
+            lonb = (st.station_longitude-20, st.station_longitude+20)
+
+        z, RF_mo = self.moveout(
+                vmodel=vmodel_file, latb=latb, lonb=lonb, multiple=False)
+        data = np.empty((RF_mo.count(), RF_mo[0].count()))
+        for ii, tr in enumerate(RF_mo):
+            data[ii] = tr.data
+
+        return stack_case_resampling(data, b)
 
     def trim2(self, starttime=None, endtime=None, reftime=None, **kwargs):
         """
@@ -1289,7 +1330,8 @@ class RFTrace(Trace):
     def plot(
         self, lim: list or tuple or None = None,
         depth: np.ndarray or None = None, ax: plt.Axes = None,
-            outputdir: str = None, format: str = 'pdf', clean: bool = False):
+        outputdir: str = None, format: str = 'pdf', clean: bool = False,
+            std: np.ndarray = None):
         """Creates plot of a single receiver function
 
         Parameters
@@ -1309,6 +1351,11 @@ class RFTrace(Trace):
         clean: bool
             If True, clears out all axes and plots RF only.
             Defaults to False.
+        std: np.ndarray, optional
+            **Only if self.type == stastack**. Plots the upper and lower
+            limit of the standard deviation in the plot. Provide the std
+            as a numpy array (can be easily computed from the output of
+            :meth:`~pyglimer.rf.create.RFStream.bootstrap`)
 
         Returns
         -------
@@ -1316,7 +1363,7 @@ class RFTrace(Trace):
         """
         ax = plot_single_rf(
             self, lim, depth=depth, ax=ax, outputdir=outputdir, clean=clean,
-            format=format)
+            format=format, std=std)
         return ax
 
     def write(self, filename, format, **kwargs):

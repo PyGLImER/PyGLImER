@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Saturday, 21st August 2021 07:37:22 am
+Last Modified: Monday, 4th October 2021 03:28:36 pm
 '''
 
 import fnmatch
@@ -68,7 +68,7 @@ class DBHandler(h5py.File):
     def _close(self):
         self.close()
 
-    def add_known_waveform_data(self, ret: List[str], rej: List[str]):
+    def _add_known_waveform_data(self, ret: List[str], rej: List[str]):
         """
         Known waveforms to receive. Is just a dictionary with two keys (each
         of which has a list as item with all retained or rejected waveforms).
@@ -81,7 +81,6 @@ class DBHandler(h5py.File):
         except ValueError:
             ds = self['known']
             # Already existing, just change attributes
-            pass
         ds.attrs['ret'] = str(ret)
         ds.attrs['rej'] = str(rej)
 
@@ -223,7 +222,7 @@ omitted." % path, category=UserWarning)
                 ))
             return None, None, None
 
-    def get_known_waveforms(self) -> Tuple[List[str], List[str]]:
+    def _get_known_waveforms(self) -> Tuple[List[str], List[str]]:
         try:
             ds = self['known']
             rej = eval(ds.attrs['rej'])
@@ -386,7 +385,7 @@ def convert_header_to_hdf5(dataset: h5py.Dataset, header: Stats):
 
 def read_hdf5_header(dataset: h5py.Dataset) -> Stats:
     """
-    Takes an hdft5 dataset as input and returns the header of the CorrTrace.
+    Takes an hdf5 dataset as input and returns the header of the CorrTrace.
 
     :param dataset: The dataset to be read from
     :type dataset: h5py.Dataset

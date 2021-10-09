@@ -2,12 +2,13 @@
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   `GNU Lesser General Public License, Version 3 <https://www.gnu.org/copyleft/lesser.html>`
+   `GNU Lesser General Public License, Version 3\
+        <https://www.gnu.org/copyleft/lesser.html>`
 :author:
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 25th August 2021 11:54:15 am
-Last Modified: Wednesday, 25th August 2021 04:52:43 pm
+Last Modified: Tuesday, 14th September 2021 08:38:30 am
 '''
 
 import unittest
@@ -15,7 +16,6 @@ import unittest
 import numpy as np
 from obspy import read
 import scipy
-from scipy.fftpack import next_fast_len
 
 from pyglimer.utils import signalproc as sptb
 
@@ -89,6 +89,27 @@ class TestGaussian(unittest.TestCase):
     def test_width0(self):
         with self.assertRaises(ValueError):
             sptb.gaussian(100, 1, 0)
+
+
+class TestSShift(unittest.TestCase):
+    def test_result_forwards(self):
+        s = np.random.rand(np.random.randint(100, 150))
+        phi = np.random.randint(-50, 50)
+        out = sptb.sshift(s, len(s), 1, phi)
+
+        self.assertTrue(np.allclose(out, np.roll(s, phi)))
+
+    def test_shift_0(self):
+        s = np.random.rand(np.random.randint(100, 150))
+        phi = 0
+        out = sptb.sshift(s, len(s), 1, phi)
+        self.assertTrue(np.allclose(out, s))
+
+    def test_empty_array(self):
+        s = np.array([])
+        phi = 0
+        with self.assertRaises(ValueError):
+            sptb.sshift(s, len(s), 1, phi)
 
 
 if __name__ == "__main__":

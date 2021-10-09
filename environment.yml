@@ -30,3 +30,4 @@ dependencies:
     - global-land-mask
     - sphinx
     - sphinx-rtd-theme
+    - -e .
