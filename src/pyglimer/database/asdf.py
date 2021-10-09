@@ -11,6 +11,7 @@ Seismic Format (asdf).
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2021 03:24:30 pm
+
 Last Modified: Wednesday, 22nd September 2021 03:18:12 pm
 '''
 
@@ -100,6 +101,7 @@ def writeraw(
     # Let's create one file per station
     for fi in os.listdir(rawfolder):
         code = '.'.join(fi.split('.')[:-1])
+
         try:
             statxml = read_inventory(os.path.join(statloc, '%s.xml' % code))
             st = read(os.path.join(rawfolder, fi))
