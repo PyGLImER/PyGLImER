@@ -28,6 +28,6 @@ dependencies:
   - pyyaml
   - pip:
     - global-land-mask
-    - sphinx
+    - sphinx<4.0
     - pydata-sphinx-theme
     - -e .

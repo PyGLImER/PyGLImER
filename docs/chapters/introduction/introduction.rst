@@ -11,3 +11,4 @@ project.
 A review of the receiver function technique is given here: `Upper Mantle Imaging
 with Array Recordings of Converted and Scattered Teleseismic Waves
 <https://link.springer.com/article/10.1007/s10712-009-9071-5>`_
+
