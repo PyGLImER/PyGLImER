@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Handling Receiver Functions &mdash; PyGLImER 0.01 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Common Conversion Point Stacking" href="ccp.html" />
+    <link rel="prev" title="Waveform Download, preprocessing, and receiver function creation" href="download.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> PyGLImER
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Handling Receiver Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#reading-receiver-functions-that-were-saved-in-sac-format">Reading receiver functions that were saved in sac format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#receiver-functions-stored-in-hdf5-format">Receiver functions stored in hdf5 format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#reading-data">Reading data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tags">Tags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#getting-an-overview-over-available-data">Getting an overview over available data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#writing-data-to-hdf5">Writing data to hdf5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#methods-available-for-both-rfstream-and-rftrace-objects">Methods available for both RFStream and RFTrace objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#methods-for-rfstream-objects">Methods for RFStream objects</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyGLImER</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Handling Receiver Functions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/chapters/receiver_function.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="handling-receiver-functions">
+<h1>Handling Receiver Functions<a class="headerlink" href="#handling-receiver-functions" title="Permalink to this headline"></a></h1>
+<p>Supposing that you have created receiver functions and have them available in the directory <code class="docutils literal notranslate"><span class="pre">output/RF</span></code>,
+we can now start imaging!</p>
+<p>Handling of receiver functions is generally done by using the <a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a> and <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> classes. These
+classes are built upon a modified version of the <a class="reference external" href="https://rf.readthedocs.io/en/latest/index.html">rf</a> project
+by Tom Eulenfeld.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Just as in the obspy base classes, an <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> can hold several receiver functions,
+while an <a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a> object can only hold one receiver function. As all rfs are saved in .sac format,
+saving <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> will lead to the creation of several files.</p>
+</div>
+<section id="reading-receiver-functions-that-were-saved-in-sac-format">
+<h2>Reading receiver functions that were saved in sac format<a class="headerlink" href="#reading-receiver-functions-that-were-saved-in-sac-format" title="Permalink to this headline"></a></h2>
+<p>Receiver functions in .sac format can be read using the <a class="reference internal" href="API.html#pyglimer.rf.create.read_rf" title="pyglimer.rf.create.read_rf"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_rf()</span></code></a> function. By doing so, we
+obtain an <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> object, on which we can apply a number of functions.</p>
+</section>
+<section id="receiver-functions-stored-in-hdf5-format">
+<h2>Receiver functions stored in hdf5 format<a class="headerlink" href="#receiver-functions-stored-in-hdf5-format" title="Permalink to this headline"></a></h2>
+<p>If you saved your receiver functions in <em>hdf5</em> format, you can use the <a class="reference internal" href="API.html#pyglimer.database.rfh5.RFDataBase" title="pyglimer.database.rfh5.RFDataBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code></a> class
+to access and manipulate your database.</p>
+<p>As a user, you will only ever be calling the <a class="reference internal" href="API.html#pyglimer.database.rfh5.RFDataBase" title="pyglimer.database.rfh5.RFDataBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code></a> class.
+The only function of this class is to return a <a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler" title="pyglimer.database.rfh5.DBHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code></a>, which hold all the
+“useful” functions. To call <a class="reference internal" href="API.html#pyglimer.database.rfh5.RFDataBase" title="pyglimer.database.rfh5.RFDataBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code></a>, use a context manager like so:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyglimer.database.rfh5</span> <span class="kn">import</span> <span class="n">RFDataBase</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="s1">&#39;/path/to/myfile.h5&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="nb">type</span><span class="p">(</span><span class="n">rfdb</span><span class="p">)</span>  <span class="c1"># This is a DBHandler</span>
+<span class="go">&lt;class &#39;pyglimer.database.rfh5.DBHandler&#39;&gt;</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Do not call <a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler" title="pyglimer.database.rfh5.DBHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code></a> directly! This might lead to unexpected behaviour or
+even dataloss due to corrupted hdf5 files.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you should for some reason decide to not use the context manager, you will have to close the hdf5 file
+with <code class="xref py py-meth docutils literal notranslate"><span class="pre">_close()</span></code> to avoid corrupting your files!</p>
+</div>
+<p><a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler" title="pyglimer.database.rfh5.DBHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code></a> has the following public methods:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><p><a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler.add_rf" title="pyglimer.database.rfh5.DBHandler.add_rf"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_rf()</span></code></a> to add receiver functions to the database</p></li>
+<li><p><a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler.get_data" title="pyglimer.database.rfh5.DBHandler.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a> to read data from this file</p></li>
+<li><p><a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler.get_coords" title="pyglimer.database.rfh5.DBHandler.get_coords"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_coords()</span></code></a> to get the coordinates of the associated station</p></li>
+<li><p><a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler.walk" title="pyglimer.database.rfh5.DBHandler.walk"><code class="xref py py-meth docutils literal notranslate"><span class="pre">walk()</span></code></a> to iterate over all receiver functions in a subset defined by the provided arguments</p></li>
+</ul>
+</td></tr></table>
+<section id="reading-data">
+<h3>Reading data<a class="headerlink" href="#reading-data" title="Permalink to this headline"></a></h3>
+<p>The most common usecase is probably that you will want to access receciver functions that <strong>PyGLImER</strong> computed
+for you (as shown earlier). To do so, you can use the <a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler.get_data" title="pyglimer.database.rfh5.DBHandler.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a>
+method:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyglimer.database.rfh5</span> <span class="kn">import</span> <span class="n">RFDataBase</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="s1">&#39;/path/to/myfile.h5&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">rfst</span> <span class="o">=</span> <span class="n">rfdb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s1">&#39;IU&#39;</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="n">evt_time</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">pol</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># rfst is a RFStream object on that we can use methods (more later)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cst</span><span class="p">))</span>
+<span class="go">&lt;class &#39;pyglimer.rf.create.CorrStream&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#rfst.count()</span>
+<span class="go">289</span>
+</pre></div>
+</div>
+<p>As you can see, we use seed station codes to identify data. All arguments accept wildcards.
+The data we are loading are receiver functions from waveforms recorded at every station of the <em>IU</em> network
+caused by events with any origin time (<code class="docutils literal notranslate"><span class="pre">evt_time='*'</span></code>).</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>If you want to create your own function to <a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler.walk" title="pyglimer.database.rfh5.DBHandler.walk"><code class="xref py py-meth docutils literal notranslate"><span class="pre">walk()</span></code></a>
+might come in handy.</p>
+</div>
+</section>
+<section id="tags">
+<h3>Tags<a class="headerlink" href="#tags" title="Permalink to this headline"></a></h3>
+<p><strong>PyGLImER</strong> uses tags to identify your data. You could for example use different tags for differently processed data. <code class="docutils literal notranslate"><span class="pre">rf</span></code> is the standard
+tag for receiver function data.</p>
+</section>
+<section id="getting-an-overview-over-available-data">
+<h3>Getting an overview over available data<a class="headerlink" href="#getting-an-overview-over-available-data" title="Permalink to this headline"></a></h3>
+<p>You can <strong>Access the DBHandler like a dictionary</strong>:
+Just like in h5py, it is possible to access the <a class="reference internal" href="API.html#pyglimer.database.rfh5.DBHandler" title="pyglimer.database.rfh5.DBHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code></a> like a dictionary. The logic works as follows:</p>
+<blockquote>
+<div><p>dbh[tag][network][station][phase][pol][evt_time]</p>
+</div></blockquote>
+<p>Following the logic of the structure above, we can get a list of all available tags as follows:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">dbh</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="go">[&#39;rf&#39;, &#39;rf_with_my_funny_processing_idea&#39;]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="writing-data-to-hdf5">
+<h2>Writing data to hdf5<a class="headerlink" href="#writing-data-to-hdf5" title="Permalink to this headline"></a></h2>
+<p>If you postprocess your receiver functions (e.g., stacking), you might want to save the data afterwards.
+You can do that like below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span> <span class="nn">pyglimer.database.rfh5</span> <span class="kn">import</span> <span class="n">RFDataBase</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="c1"># Suppose you have a RFStream or RFTrace object rf</span>
+<span class="linenos">4</span><span class="c1"># that has a header with all the station information</span>
+<span class="linenos">5</span>
+<span class="linenos">6</span><span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="s1">&#39;/path/to/myfile.h5&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
+<span class="linenos">7</span>    <span class="n">rfst</span> <span class="o">=</span> <span class="n">rfdb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+<span class="linenos">8</span>        <span class="n">rf</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;rf_with_my_funny_processing_idea&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can retrieve the <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> as shown above.
+Network, station, and channel information are determined automatically from the header and used to identify and locate the data.</p>
+</section>
+<section id="methods-available-for-both-rfstream-and-rftrace-objects">
+<h2>Methods available for both RFStream and RFTrace objects<a class="headerlink" href="#methods-available-for-both-rfstream-and-rftrace-objects" title="Permalink to this headline"></a></h2>
+<p>No matter whether your data was stored as <em>mseed</em> or <em>hdf5</em>, after reading it, you will receive an <a class="reference internal" href="API.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a>
+object. Below you can find a list of the available public methods. For examples on how to use them, please
+consult the example Jupyter notebooks.</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><dl class="simple">
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace.write" title="pyglimer.rf.create.RFTrace.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a></dt><dd><p>to write receiver function to a SAC file(in time domain)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace.moveout" title="pyglimer.rf.create.RFTrace.moveout"><code class="xref py py-meth docutils literal notranslate"><span class="pre">moveout()</span></code></a></dt><dd><p>to migrate the receiver function(s) to depth domain using one of the provided velocity-depth models
+(either ‘3D’ for GyPsum or ‘iasp91.dat’ for iasp91). Piercing points will be appended to the object.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace.ppoint" title="pyglimer.rf.create.RFTrace.ppoint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ppoint()</span></code></a></dt><dd><p>to compute the piercing points in depth without migrating the receiver function using the provided velocity
+model.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace.plot" title="pyglimer.rf.create.RFTrace.plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></dt><dd><p>to plot the receiver function(s). The plot will be different
+depending on the type of receiver function: <strong>1.</strong> For <em>depth-migrated</em> RFs, the plot will be against
+depth. <strong>2.</strong> For an <a class="reference internal" href="API.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a> in time domain, the plot will be against time.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td></tr></table>
+<section id="methods-for-rfstream-objects">
+<h3>Methods for RFStream objects<a class="headerlink" href="#methods-for-rfstream-objects" title="Permalink to this headline"></a></h3>
+<table class="hlist"><tr><td><ul class="simple">
+<li><dl class="simple">
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFStream.write" title="pyglimer.rf.create.RFStream.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a></dt><dd><p>to write receiver function(s) to SAC file(s) (in time domain). Creates one file per receiver function.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFStream.plot" title="pyglimer.rf.create.RFStream.plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></dt><dd><p>This plot will show the receiver functions depending on epicentral distance (i.e., a section)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFStream.plot_distribution" title="pyglimer.rf.create.RFStream.plot_distribution"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_distribution()</span></code></a></dt><dd><p>Plot the azimuthal and ray-parameter distribution of all traces in the stream in a rose diagram.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFStream.station_stack" title="pyglimer.rf.create.RFStream.station_stack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">station_stack()</span></code></a></dt><dd><p>to create a station specific stack of all receiver function in the object.
+For that to work, all RFs have to be from the same station.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="API.html#pyglimer.rf.create.RFStream.dirty_ccp_stack" title="pyglimer.rf.create.RFStream.dirty_ccp_stack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dirty_ccp_stack()</span></code></a></dt><dd><p>Create a simple CCP Stack. For more on CCP stacking, see
+<a class="reference external" href="./ccp">the later part of this tutorial</a> <strong>This method is experimental!</strong></p>
+</dd>
+</dl>
+</li>
+</ul>
+</td></tr></table>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="download.html" class="btn btn-neutral float-left" title="Waveform Download, preprocessing, and receiver function creation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ccp.html" class="btn btn-neutral float-right" title="Common Conversion Point Stacking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, the PyGLImER development team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

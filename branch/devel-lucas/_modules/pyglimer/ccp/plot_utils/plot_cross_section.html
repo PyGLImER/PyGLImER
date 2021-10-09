@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyglimer.ccp.plot_utils.plot_cross_section &mdash; PyGLImER 0.01 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> PyGLImER
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chapters/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">PyGLImER</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>pyglimer.ccp.plot_utils.plot_cross_section</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyglimer.ccp.plot_utils.plot_cross_section</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Basic</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Iterable</span>
+
+<span class="c1"># External</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.axes</span> <span class="kn">import</span> <span class="n">Axes</span>
+<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">mcolors</span>
+<span class="kn">from</span> <span class="nn">matplotlib.cm</span> <span class="kn">import</span> <span class="n">ScalarMappable</span>
+<span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
+<span class="kn">from</span> <span class="nn">cartopy.mpl.geoaxes</span> <span class="kn">import</span> <span class="n">GeoAxes</span><span class="p">,</span> <span class="n">GeoAxesSubplot</span>
+
+<span class="c1"># Internal</span>
+<span class="kn">from</span> <span class="nn">pyglimer.ccp.plot_utils.plot_map</span> <span class="kn">import</span> <span class="n">plot_map</span>
+<span class="kn">from</span> <span class="nn">pyglimer.ccp.plot_utils.plot_line_buffer</span> <span class="kn">import</span> <span class="n">plot_line_buffer</span>
+<span class="kn">from</span> <span class="nn">pyglimer.ccp.plot_utils.midpointcolornorm</span> <span class="kn">import</span> <span class="n">MidpointNormalize</span>
+
+
+<div class="viewcode-block" id="get_ax_coor"><a class="viewcode-back" href="../../../../chapters/API.html#pyglimer.ccp.plot_utils.plot_cross_section.get_ax_coor">[docs]</a><span class="k">def</span> <span class="nf">get_ax_coor</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Just a way to get axes coordinates</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ax : axes</span>
+<span class="sd">        Givenn axes</span>
+<span class="sd">    lat : float</span>
+<span class="sd">        Latitude</span>
+<span class="sd">    lon : float</span>
+<span class="sd">        Longitude</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple</span>
+<span class="sd">        Axes coordinates for a given set of lat, lon.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+
+<span class="sd">    :Authors:</span>
+<span class="sd">        Lucas Sawade (lsawade@princeton.edu)</span>
+
+<span class="sd">    :Last Modified:</span>
+<span class="sd">        2021.08.20 11.00 (Lucas Sawade)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Geo point</span>
+    <span class="n">pgeo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">))</span>
+
+    <span class="c1"># Geo to data</span>
+    <span class="n">pdata</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">transData</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">pgeo</span><span class="p">)</span>
+
+    <span class="c1"># Data to disp</span>
+    <span class="n">pdisp</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="o">.</span><span class="n">inverted</span><span class="p">()</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">pdata</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pdisp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pdisp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="plot_cross_section"><a class="viewcode-back" href="../../../../chapters/API.html#pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section">[docs]</a><span class="k">def</span> <span class="nf">plot_cross_section</span><span class="p">(</span>
+        <span class="n">ccp</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span>
+        <span class="n">z0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Axes</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">geoax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">GeoAxes</span><span class="p">,</span> <span class="n">GeoAxesSubplot</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mapplot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">minillum</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">label</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rfcmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;seismic&quot;</span><span class="p">,</span>
+        <span class="n">depthextent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mapextent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots a cross section for given waypoints. If no axes are given, the</span>
+<span class="sd">    function will also create figures for the map and the cross section.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ccp : CCPStack</span>
+<span class="sd">        CCPStack as computed using the cpp module</span>
+<span class="sd">    lat : Arraylike</span>
+<span class="sd">        Latitudes of the waypoints defining the cross section</span>
+<span class="sd">    lon : Arraylike</span>
+<span class="sd">        Longitudes of the waypoints defining the cross section</span>
+<span class="sd">    z0 : Optional[float], optional</span>
+<span class="sd">        if given the map will be plotted with an illumination map at the given</span>
+<span class="sd">        depth, by default None</span>
+<span class="sd">    ax : Optional[Axes], optional</span>
+<span class="sd">        Axes to plot the cross section in, by default None</span>
+<span class="sd">    geoax : Optional[Union[GeoAxes, GeoAxesSubplot]], optional</span>
+<span class="sd">        Axes to plot the waypoins in, by default None</span>
+<span class="sd">    mapplot : bool, optional</span>
+<span class="sd">        plot the map or not, by default True</span>
+<span class="sd">    minillum : int, optional</span>
+<span class="sd">        minimum illumination count to not be grayed out, by default 50</span>
+<span class="sd">    vmin : Optional[float], optional</span>
+<span class="sd">        minimum value of the cross section, by default None</span>
+<span class="sd">    vmax : Optional[float], optional</span>
+<span class="sd">        maximum value of the cross section, by default None</span>
+<span class="sd">    label : Optional[str], optional</span>
+<span class="sd">        label to put in the corner of the cross section plot and the</span>
+<span class="sd">        cross section waypoints on the map, by default None</span>
+<span class="sd">    rfcmap : str, optional</span>
+<span class="sd">        cmap name for the plotting of the cross section, by default &quot;seismic&quot;</span>
+<span class="sd">    depthextent : Optional[Iterable], optional</span>
+<span class="sd">        List containing two entries defining min and max depth, by default None</span>
+<span class="sd">    mapextent : Optional[Iterable], optional</span>
+<span class="sd">        List of 4 entries defining [minlon,maxlon, minlat, maxlat],</span>
+<span class="sd">        by default None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple</span>
+<span class="sd">        ax, geoax</span>
+
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+
+<span class="sd">    :Authors:</span>
+<span class="sd">        Lucas Sawade (lsawade@princeton.edu)</span>
+
+<span class="sd">    :Last Modified:</span>
+<span class="sd">        2021.04.21 20.00 (Lucas Sawade)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get Cross section</span>
+    <span class="n">slat</span><span class="p">,</span> <span class="n">slon</span><span class="p">,</span> <span class="n">sdists</span><span class="p">,</span> <span class="n">qlat</span><span class="p">,</span> <span class="n">qlon</span><span class="p">,</span> <span class="n">qdists</span><span class="p">,</span> <span class="n">qz</span><span class="p">,</span> <span class="n">qillum</span><span class="p">,</span> <span class="n">qccp</span><span class="p">,</span> <span class="n">epi_area</span> <span class="o">=</span> \
+        <span class="n">ccp</span><span class="o">.</span><span class="n">get_profile</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+
+    <span class="c1"># Define norms</span>
+    <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vmin</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">qccp</span><span class="p">[</span><span class="n">qccp</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]),</span> <span class="mf">0.98</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">qccp</span><span class="p">[</span><span class="n">qccp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">],</span> <span class="mf">0.98</span><span class="p">)</span>
+
+    <span class="c1"># Norm for the cross section</span>
+    <span class="n">rfnorm</span> <span class="o">=</span> <span class="n">MidpointNormalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">midpoint</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">snorm</span> <span class="o">=</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">sdists</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Set illumination boundaries for section plotting</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">qillum</span><span class="o">/</span><span class="n">minillum</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">alpha</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+
+    <span class="c1"># ############### Plot map ###################</span>
+    <span class="k">if</span> <span class="n">mapplot</span><span class="p">:</span>
+
+        <span class="c1"># Create a map figure if None present</span>
+        <span class="k">if</span> <span class="n">geoax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">geoax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">mapextent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">geoax</span><span class="o">.</span><span class="n">set_extent</span><span class="p">(</span><span class="n">mapextent</span><span class="p">)</span>
+            <span class="n">plot_map</span><span class="p">(</span><span class="n">geoax</span><span class="p">)</span>
+            <span class="n">geoax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelright</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labeltop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="c1"># Plot illumination</span>
+            <span class="k">if</span> <span class="n">z0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Get depth slice (mainly for the illumination)</span>
+                <span class="n">zqlat</span><span class="p">,</span> <span class="n">zqlon</span><span class="p">,</span> <span class="n">zqill</span><span class="p">,</span> <span class="n">zqccp</span><span class="p">,</span> <span class="n">zextent</span><span class="p">,</span> <span class="n">z0</span> <span class="o">=</span> <span class="n">ccp</span><span class="o">.</span><span class="n">get_depth_slice</span><span class="p">(</span>
+                    <span class="n">z0</span><span class="o">=</span><span class="n">z0</span><span class="p">)</span>
+                <span class="n">zalpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">zqill</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+
+                <span class="c1"># Get norm and cmap for the illumination map</span>
+                <span class="n">illumnorm</span> <span class="o">=</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">zqill</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+                <span class="n">illumcmap</span> <span class="o">=</span> <span class="s1">&#39;magma_r&#39;</span>
+
+                <span class="n">geoax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+                    <span class="n">zqill</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">zalpha</span><span class="p">,</span>
+                    <span class="n">extent</span><span class="o">=</span><span class="n">zextent</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
+                    <span class="n">transform</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">(),</span>
+                    <span class="n">cmap</span><span class="o">=</span><span class="n">illumcmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">illumnorm</span><span class="p">)</span>
+
+                <span class="c1"># Create colorbar from artifical scalarmappable (alpha is</span>
+                <span class="c1"># problematic)</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span>
+                    <span class="n">ScalarMappable</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span>
+                        <span class="n">illumcmap</span><span class="p">),</span> <span class="n">norm</span><span class="o">=</span><span class="n">illumnorm</span><span class="p">),</span>
+                    <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s2">&quot;Hitcount&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Set colormap alpha manually</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">solids</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="c1"># Plot cross section</span>
+        <span class="n">geoax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">qlon</span><span class="p">,</span> <span class="n">qlat</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">())</span>
+
+        <span class="c1"># Plot waypoints</span>
+        <span class="n">geoax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">slon</span><span class="p">,</span> <span class="n">slat</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">sdists</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Greys&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">snorm</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">(),</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+
+        <span class="c1"># Plot buffer that shows where we got cross section stuff from</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">plot_line_buffer</span><span class="p">(</span>
+            <span class="n">qlat</span><span class="p">,</span> <span class="n">qlon</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="n">epi_area</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">geoax</span><span class="p">,</span>
+            <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+            <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+        <span class="c1"># This plots the ccp, locations, but I&#39;m not sure if that&#39;s necesary</span>
+        <span class="c1"># geoax.plot(ccp.coords_new[1], ccp.coords_new[0], &#39;k&#39;,</span>
+        <span class="c1">#            zorder=0, transform=ccrs.PlateCarree())</span>
+
+        <span class="c1"># Plot label</span>
+        <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">get_ax_coor</span><span class="p">(</span><span class="n">geoax</span><span class="p">,</span> <span class="n">qlat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">qlon</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">geoax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">,</span>
+                <span class="n">label</span><span class="p">,</span>
+                <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+                <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span>
+                <span class="n">fontdict</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;small&#39;</span><span class="p">),</span>
+                <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">),</span>
+                <span class="n">transform</span><span class="o">=</span><span class="n">geoax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="c1"># ############### Plot section ###################</span>
+
+    <span class="c1"># Plot section</span>
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">depthextent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">depthextent</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">minz</span> <span class="o">=</span> <span class="n">depthextent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">minz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">qz</span><span class="p">)</span>
+
+    <span class="c1"># Plot section</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="n">qccp</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="n">rfcmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">rfnorm</span><span class="p">,</span>
+        <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">qdists</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">qz</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">qz</span><span class="p">)],</span>
+        <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">rasterized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Plot waypoints</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">sdists</span><span class="p">,</span> <span class="n">minz</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">sdists</span><span class="p">),</span> <span class="n">c</span><span class="o">=</span><span class="n">sdists</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Greys&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">snorm</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">clip_on</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Offset [$^\circ$]&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Depth [km]&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+            <span class="n">qdists</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">1.025</span><span class="p">,</span>
+            <span class="n">label</span><span class="p">,</span>
+            <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+            <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span>
+            <span class="n">fontdict</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;small&#39;</span><span class="p">),</span>
+            <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">),</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">geoax</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, the PyGLImER development team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

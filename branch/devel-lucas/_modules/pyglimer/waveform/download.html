@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyglimer.waveform.download &mdash; PyGLImER 0.01 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyGLImER</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>pyglimer.waveform.download</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyglimer.waveform.download</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">:copyright:</span>
+<span class="sd">   The PyGLImER development team (makus@gfz-potsdam.de).</span>
+<span class="sd">:license:</span>
+<span class="sd">   GNU Lesser General Public License, Version 3</span>
+<span class="sd">   (https://www.gnu.org/copyleft/lesser.html)</span>
+<span class="sd">:author:</span>
+<span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
+
+<span class="sd">Created: Tue May 26 2019 13:31:30</span>
+<span class="sd">Last Modified: Monday, 13th September 2021 11:58:53 am</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1"># !/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+
+<span class="kn">from</span> <span class="nn">http.client</span> <span class="kn">import</span> <span class="n">IncompleteRead</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">read</span>
+<span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">UTCDateTime</span>
+<span class="kn">from</span> <span class="nn">obspy.clients.fdsn.mass_downloader</span> <span class="kn">import</span> <span class="n">CircularDomain</span><span class="p">,</span> \
+    <span class="n">Restrictions</span><span class="p">,</span> <span class="n">MassDownloader</span>
+<span class="kn">from</span> <span class="nn">obspy.core.event.catalog</span> <span class="kn">import</span> <span class="n">Catalog</span>
+<span class="kn">from</span> <span class="nn">obspy.taup</span> <span class="kn">import</span> <span class="n">TauPyModel</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">pyasdf</span> <span class="kn">import</span> <span class="n">ASDFDataSet</span>
+
+<span class="kn">from</span> <span class="nn">pyglimer.database.asdf</span> <span class="kn">import</span> <span class="n">writeraw</span>
+<span class="kn">from</span> <span class="nn">pyglimer</span> <span class="kn">import</span> <span class="n">tmp</span>
+<span class="kn">from</span> <span class="nn">pyglimer.utils.roundhalf</span> <span class="kn">import</span> <span class="n">roundhalf</span>
+<span class="kn">from</span> <span class="nn">pyglimer.utils</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">pu</span>
+<span class="kn">from</span> <span class="nn">pyglimer.utils.utils</span> <span class="kn">import</span> <span class="n">download_full_inventory</span>
+<span class="kn">from</span> <span class="nn">pyglimer.waveform.preprocessh5</span> <span class="kn">import</span> <span class="n">compute_toa</span>
+
+
+<div class="viewcode-block" id="download_small_db"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.download.download_small_db">[docs]</a><span class="k">def</span> <span class="nf">download_small_db</span><span class="p">(</span>
+    <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">min_epid</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_epid</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">TauPyModel</span><span class="p">,</span>
+    <span class="n">event_cat</span><span class="p">:</span> <span class="n">Catalog</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">clients</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">saveasdf</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    see corresponding method :meth:`~pyglimer.waveform.request.Request.\</span>
+<span class="sd">    download_waveforms_small_db`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># logging</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pyglimer.request&#39;</span><span class="p">)</span>
+
+    <span class="c1"># If station and network are None</span>
+    <span class="n">station</span> <span class="o">=</span> <span class="n">station</span> <span class="ow">or</span> <span class="s1">&#39;*&#39;</span>
+    <span class="n">network</span> <span class="o">=</span> <span class="n">network</span> <span class="ow">or</span> <span class="s1">&#39;*&#39;</span>
+    <span class="c1"># First we download the stations to subsequently compute the times of</span>
+    <span class="c1"># theoretical arrival</span>
+    <span class="n">clients</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">get_multiple_fdsn_clients</span><span class="p">(</span><span class="n">clients</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Requesting data from the following FDSN servers:</span><span class="se">\n</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span>
+        <span class="n">clients</span><span class="p">))</span>
+
+    <span class="n">bulk_stat</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">create_bulk_str</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Bulk_stat parameter created.&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Bulk stat parameters: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">bulk_stat</span><span class="p">))</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialising station response download.&#39;</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s1">&#39;threads&#39;</span><span class="p">)(</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">pu</span><span class="o">.</span><span class="n">__client__loop__</span><span class="p">)(</span><span class="n">client</span><span class="p">,</span> <span class="n">statloc</span><span class="p">,</span> <span class="n">bulk_stat</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="n">clients</span><span class="p">)</span>
+    <span class="n">inv</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">join_inv</span><span class="p">([</span><span class="n">inv</span> <span class="k">for</span> <span class="n">inv</span> <span class="ow">in</span> <span class="n">out</span><span class="p">])</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s1">&#39;Computing theoretical times of arrival and checking available data.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Now we compute the theoretical arrivals using the events and the station</span>
+    <span class="c1"># information</span>
+    <span class="c1"># We make a list of dicts akin to</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;startt&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;endt&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;net&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;stat&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+    <span class="k">for</span> <span class="n">net</span> <span class="ow">in</span> <span class="n">inv</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">net</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="n">event_cat</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">toa</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">compute_toa</span><span class="p">(</span>
+                        <span class="n">evt</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="c1"># occurs when there is no arrival of the phase at stat</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s1">&#39;No valid arrival found for station </span><span class="si">%s</span><span class="s1">,&#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span> <span class="o">+</span>
+                        <span class="s1">&#39;event </span><span class="si">%s</span><span class="s1">, and phase </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">phase</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="c1"># We only do that if the epicentral distances are correct</span>
+                <span class="k">if</span> <span class="n">delta</span> <span class="o">&lt;</span> <span class="n">min_epid</span> <span class="ow">or</span> <span class="n">delta</span> <span class="o">&gt;</span> <span class="n">max_epid</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s1">&#39;No valid arrival found for station </span><span class="si">%s</span><span class="s1">, &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span> <span class="o">+</span>
+                        <span class="s1">&#39;event </span><span class="si">%s</span><span class="s1">, and phase </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">phase</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="c1"># Already in DB?</span>
+                <span class="k">if</span> <span class="n">saveasdf</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">ASDFDataSet</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rawloc</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.h5&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">)))</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">evt</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">events</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                <span class="s1">&#39;File already in database. </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span> <span class="o">+</span>
+                                <span class="s1">&#39;Event: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">)</span>
+                            <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">o</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">ot_loc</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span>
+                        <span class="n">o</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">precision</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
+                    <span class="n">evtlat_loc</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">roundhalf</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">latitude</span><span class="p">))</span>
+                    <span class="n">evtlon_loc</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">roundhalf</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">longitude</span><span class="p">))</span>
+                    <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">rawloc</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ot_loc</span><span class="p">,</span> <span class="n">evtlat_loc</span><span class="p">,</span> <span class="n">evtlon_loc</span><span class="p">))</span>
+                    <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.mseed&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s1">&#39;File already in database. </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span> <span class="o">+</span>
+                            <span class="s1">&#39;Event: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                <span class="c1"># It&#39;s new data, so add to request!</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;startt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">toa</span><span class="o">-</span><span class="n">tz</span><span class="p">)</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;endt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">toa</span><span class="o">+</span><span class="n">ta</span><span class="p">)</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;net&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stat</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+
+    <span class="c1"># Create waveform download bulk list</span>
+    <span class="n">bulk_wav</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">create_bulk_str</span><span class="p">(</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;net&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">],</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;startt&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;endt&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bulk_wav</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No new data found.&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># This does almost certainly need to be split up, so we don&#39;t overload the</span>
+    <span class="c1"># RAM with the downloaded mseeds</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialising waveform donwload.&#39;</span><span class="p">)</span>
+
+    <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s1">&#39;threads&#39;</span><span class="p">)(</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">pu</span><span class="o">.</span><span class="n">__client__loop_wav__</span><span class="p">)(</span>
+            <span class="n">client</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">bulk_wav</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">,</span> <span class="n">inv</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="n">clients</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="downloadwav"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.download.downloadwav">[docs]</a><span class="k">def</span> <span class="nf">downloadwav</span><span class="p">(</span>
+    <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">min_epid</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_epid</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">TauPyModel</span><span class="p">,</span>
+    <span class="n">event_cat</span><span class="p">:</span> <span class="n">Catalog</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">clients</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">saveasdf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">log_fh</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">loglvl</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Downloads the waveforms for all events in the catalogue</span>
+<span class="sd">     for a circular domain around the epicentre with defined epicentral</span>
+<span class="sd">     distances from Clients defined in clients. Also Station</span>
+<span class="sd">     xmls for corresponding stations are downloaded.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    phase : string</span>
+<span class="sd">        Arrival phase to be used. P, S, SKS, or ScS.</span>
+<span class="sd">    min_epid : float</span>
+<span class="sd">        Minimal epicentral distance to be downloaded.</span>
+<span class="sd">    max_epid : float</span>
+<span class="sd">        Maxmimal epicentral distance to be downloaded.</span>
+<span class="sd">    model : obspy.taup.TauPyModel</span>
+<span class="sd">        1D velocity model to calculate arrival.</span>
+<span class="sd">    event_cat : Obspy event catalog</span>
+<span class="sd">        Catalog containing all events, for which waveforms should be</span>
+<span class="sd">        downloaded.</span>
+<span class="sd">    tz : int</span>
+<span class="sd">        time window before first arrival to download (seconds)</span>
+<span class="sd">    ta : int</span>
+<span class="sd">        time window after first arrival to download (seconds)</span>
+<span class="sd">    statloc : string</span>
+<span class="sd">        Directory containing the station xmls.</span>
+<span class="sd">    rawloc : string</span>
+<span class="sd">        Directory containing the raw seismograms.</span>
+<span class="sd">    clients : list</span>
+<span class="sd">        List of FDSN servers. See obspy.Client documentation for acronyms.</span>
+<span class="sd">    network : string or list, optional</span>
+<span class="sd">        Network restrictions. Only download from these networks, wildcards</span>
+<span class="sd">        allowed. The default is None.</span>
+<span class="sd">    station : string or list, optional</span>
+<span class="sd">        Only allowed if network != None. Station restrictions.</span>
+<span class="sd">        Only download from these stations, wildcards are allowed.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    saveasdf : bool, optional</span>
+<span class="sd">        Save the dataset as Adaptable Seismic Data Format (asdf; recommended).</span>
+<span class="sd">        Else, one will be left with .mseeds.</span>
+<span class="sd">    log_fh : logging.FileHandler, optional</span>
+<span class="sd">        file handler to be used for the massdownloader logger.</span>
+<span class="sd">    loglvl : int, optional</span>
+<span class="sd">        Use this logging level.</span>
+<span class="sd">    verbose: Bool, optional</span>
+<span class="sd">        Set True, when experiencing issues with download. Output of</span>
+<span class="sd">        obspy MassDownloader will be logged in download.log.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># needed to check whether data is already in the asdf</span>
+    <span class="k">global</span> <span class="n">asdfsave</span>
+    <span class="n">asdfsave</span> <span class="o">=</span> <span class="n">saveasdf</span>
+
+    <span class="c1"># Calculate the min and max theoretical arrival time after event time</span>
+    <span class="c1"># according to minimum and maximum epicentral distance</span>
+    <span class="n">min_time</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_travel_times</span><span class="p">(</span><span class="n">source_depth_in_km</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+                                      <span class="n">distance_in_degree</span><span class="o">=</span><span class="n">min_epid</span><span class="p">,</span>
+                                      <span class="n">phase_list</span><span class="o">=</span><span class="p">[</span><span class="n">phase</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time</span>
+
+    <span class="n">max_time</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_travel_times</span><span class="p">(</span><span class="n">source_depth_in_km</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+                                      <span class="n">distance_in_degree</span><span class="o">=</span><span class="n">max_epid</span><span class="p">,</span>
+                                      <span class="n">phase_list</span><span class="o">=</span><span class="p">[</span><span class="n">phase</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time</span>
+
+    <span class="n">mdl</span> <span class="o">=</span> <span class="n">MassDownloader</span><span class="p">(</span><span class="n">providers</span><span class="o">=</span><span class="n">clients</span><span class="p">)</span>
+
+    <span class="c1">###########</span>
+    <span class="c1"># logging for the download</span>
+    <span class="n">fdsn_mass_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;obspy.clients.fdsn.mass_downloader&quot;</span><span class="p">)</span>
+    <span class="n">fdsn_mass_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">loglvl</span><span class="p">)</span>
+
+    <span class="c1"># # Create handler to the log</span>
+    <span class="k">if</span> <span class="n">log_fh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;logs&#39;</span><span class="p">,</span> <span class="s1">&#39;download.log&#39;</span><span class="p">))</span>
+        <span class="n">fh</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="n">fh</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">loglvl</span><span class="p">)</span>
+        <span class="c1"># Create Formatter</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
+            <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">fh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fh</span> <span class="o">=</span> <span class="n">log_fh</span>
+
+    <span class="n">fdsn_mass_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+
+    <span class="c1">####</span>
+    <span class="c1"># Loop over each event</span>
+    <span class="k">global</span> <span class="n">event</span>
+    <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">event_cat</span><span class="p">):</span>
+        <span class="c1"># fetch event-data</span>
+        <span class="n">origin_time</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time</span>
+        <span class="n">ot_fiss</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">origin_time</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()</span>
+        <span class="n">fdsn_mass_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Downloading event: &#39;</span><span class="o">+</span><span class="n">ot_fiss</span><span class="p">)</span>
+        <span class="n">evtlat</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latitude</span>
+        <span class="n">evtlon</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span>
+
+        <span class="c1"># Download location</span>
+        <span class="n">ot_loc</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">origin_time</span><span class="p">,</span> <span class="n">precision</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
+        <span class="n">evtlat_loc</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">roundhalf</span><span class="p">(</span><span class="n">evtlat</span><span class="p">))</span>
+        <span class="n">evtlon_loc</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">roundhalf</span><span class="p">(</span><span class="n">evtlon</span><span class="p">))</span>
+        <span class="n">tmp</span><span class="o">.</span><span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">rawloc</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ot_loc</span><span class="p">,</span> <span class="n">evtlat_loc</span><span class="p">,</span> <span class="n">evtlon_loc</span><span class="p">))</span>
+
+        <span class="c1"># create folder for each event</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Circular domain around the epicenter. This module also offers</span>
+        <span class="c1"># rectangular and global domains. More complex domains can be</span>
+        <span class="c1"># defined by inheriting from the Domain class.</span>
+
+        <span class="n">domain</span> <span class="o">=</span> <span class="n">CircularDomain</span><span class="p">(</span><span class="n">latitude</span><span class="o">=</span><span class="n">evtlat</span><span class="p">,</span> <span class="n">longitude</span><span class="o">=</span><span class="n">evtlon</span><span class="p">,</span>
+                                <span class="n">minradius</span><span class="o">=</span><span class="n">min_epid</span><span class="p">,</span> <span class="n">maxradius</span><span class="o">=</span><span class="n">max_epid</span><span class="p">)</span>
+
+        <span class="n">restrictions</span> <span class="o">=</span> <span class="n">Restrictions</span><span class="p">(</span>
+            <span class="c1"># Get data from sufficient time before earliest arrival</span>
+            <span class="c1"># and after the latest arrival</span>
+            <span class="c1"># Note: All the traces will still have the same length</span>
+            <span class="n">starttime</span><span class="o">=</span><span class="n">origin_time</span> <span class="o">+</span> <span class="n">min_time</span> <span class="o">-</span> <span class="n">tz</span><span class="p">,</span>
+            <span class="n">endtime</span><span class="o">=</span><span class="n">origin_time</span> <span class="o">+</span> <span class="n">max_time</span> <span class="o">+</span> <span class="n">ta</span><span class="p">,</span>
+            <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">station</span><span class="p">,</span>
+            <span class="c1"># You might not want to deal with gaps in the data.</span>
+            <span class="c1"># If this setting is</span>
+            <span class="c1"># True, any trace with a gap/overlap will be discarded.</span>
+            <span class="c1"># This will delete streams with several traces!</span>
+            <span class="n">reject_channels_with_gaps</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="c1"># And you might only want waveforms that have data for at least 95%</span>
+            <span class="c1"># of the requested time span. Any trace that is shorter than 95% of</span>
+            <span class="c1"># the desired total duration will be discarded.</span>
+            <span class="n">minimum_length</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>  <span class="c1"># For 1.00 it will always delete the waveform</span>
+            <span class="c1"># No two stations should be closer than 1 km to each other. This is</span>
+            <span class="c1"># useful to for example filter out stations that are part of</span>
+            <span class="c1"># different networks but at the same physical station. Settings</span>
+            <span class="c1"># this option to zero or None will disable that filtering.</span>
+            <span class="c1"># Guard against the same station having different names.</span>
+            <span class="n">minimum_interstation_distance_in_m</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
+            <span class="c1"># Only HH or BH channels. If a station has BH channels, those will</span>
+            <span class="c1"># be downloaded, otherwise the HH. Nothing will be downloaded if it</span>
+            <span class="c1"># has neither.</span>
+            <span class="n">channel_priorities</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;BH[ZNE12]&quot;</span><span class="p">,</span> <span class="s2">&quot;HH[ZNE12]&quot;</span><span class="p">],</span>
+            <span class="c1"># Location codes are arbitrary and there is no rule as to which</span>
+            <span class="c1"># location is best. Same logic as for the previous setting.</span>
+            <span class="c1"># location_priorities=[&quot;&quot;, &quot;00&quot;, &quot;10&quot;],</span>
+            <span class="n">sanitize</span><span class="o">=</span><span class="kc">False</span>
+            <span class="c1"># discards all mseeds for which no station information is available</span>
+            <span class="c1"># I changed it too False because else it will redownload over and</span>
+            <span class="c1"># over and slow down the script</span>
+        <span class="p">)</span>
+
+        <span class="c1"># The data will be downloaded to the ``./waveforms/`` and</span>
+        <span class="c1"># ``./stations/`` folders with automatically chosen file names.</span>
+        <span class="n">incomplete</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">while</span> <span class="n">incomplete</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mdl</span><span class="o">.</span><span class="n">download</span><span class="p">(</span>
+                    <span class="n">domain</span><span class="p">,</span> <span class="n">restrictions</span><span class="p">,</span>
+                    <span class="n">mseed_storage</span><span class="o">=</span><span class="n">get_mseed_storage</span><span class="p">,</span>
+                    <span class="n">stationxml_storage</span><span class="o">=</span><span class="n">statloc</span><span class="p">,</span>
+                    <span class="n">threads_per_client</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">download_chunk_size_in_mb</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+                <span class="n">incomplete</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">except</span> <span class="n">IncompleteRead</span><span class="p">:</span>
+                <span class="k">continue</span>  <span class="c1"># Just retry for poor connection</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">incomplete</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Any other error: continue</span>
+
+        <span class="c1"># 2021.02.15 Here, we write everything to asdf</span>
+        <span class="k">if</span> <span class="n">saveasdf</span><span class="p">:</span>
+            <span class="n">writeraw</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">statloc</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># If that works, we will be deleting the cached mseeds here</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">saveasdf</span><span class="p">:</span>
+        <span class="n">download_full_inventory</span><span class="p">(</span><span class="n">statloc</span><span class="p">,</span> <span class="n">clients</span><span class="p">)</span>
+    <span class="n">tmp</span><span class="o">.</span><span class="n">folder</span> <span class="o">=</span> <span class="s2">&quot;finished&quot;</span>  <span class="c1"># removes the restriction for preprocess.py</span></div>
+
+
+<div class="viewcode-block" id="get_mseed_storage"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.download.get_mseed_storage">[docs]</a><span class="k">def</span> <span class="nf">get_mseed_storage</span><span class="p">(</span>
+    <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">starttime</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">,</span> <span class="n">endtime</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Stores the files and checks if files are already downloaded&quot;&quot;&quot;</span>
+    <span class="c1"># Returning True means that neither the data nor the StationXML file</span>
+    <span class="c1"># will be downloaded.</span>
+
+    <span class="k">if</span> <span class="n">asdfsave</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">wav_in_asdf</span><span class="p">(</span>
+                <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">starttime</span><span class="p">,</span> <span class="n">endtime</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">wav_in_db</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">starttime</span><span class="p">,</span> <span class="n">endtime</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># If a string is returned the file will be saved in that location.</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.mseed&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">))</span></div>
+
+
+<span class="k">def</span> <span class="nf">get_stationxml_storage</span><span class="p">(</span><span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+    <span class="c1"># available_channels = []</span>
+
+    <span class="c1"># missing_channels = []</span>
+
+    <span class="c1"># path = Path(statloc, &quot;%s.%s.xml&quot; % (network, station))</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">statloc</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.xml&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+
+        <span class="s2">&quot;available_channels&quot;</span><span class="p">:</span> <span class="p">[],</span>
+
+        <span class="s2">&quot;missing_channels&quot;</span><span class="p">:</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span>
+
+        <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">filename</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="wav_in_db"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.download.wav_in_db">[docs]</a><span class="k">def</span> <span class="nf">wav_in_db</span><span class="p">(</span>
+    <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">starttime</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">,</span> <span class="n">endtime</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Checks if waveform is already downloaded.&quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.mseed&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">network</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">station</span> <span class="o">+</span> <span class="s1">&#39;.mseed&#39;</span><span class="p">))</span>
+        <span class="c1"># &#39;.&#39; + location +</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># All three channels are downloaded</span>
+    <span class="c1"># In case, channels are missing</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">==</span> <span class="n">channel</span> <span class="ow">or</span> <span class="n">st</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">==</span> <span class="n">channel</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">==</span> <span class="n">channel</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="wav_in_asdf"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.download.wav_in_asdf">[docs]</a><span class="k">def</span> <span class="nf">wav_in_asdf</span><span class="p">(</span>
+    <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">starttime</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">,</span> <span class="n">endtime</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Is the waveform already in the asdf database?</span>
+<span class="sd">    Based on the assumption that the file is there if the event is there.</span>
+<span class="sd">    Has the advantage that files that are trimmed differently will not be down-</span>
+<span class="sd">    loaded again&quot;&quot;&quot;</span>
+    <span class="n">asdf_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.h5&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="n">ASDFDataSet</span><span class="p">(</span><span class="n">asdf_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">events</span></div>
+
+
+<span class="c1"># def wav_in_asdf(</span>
+<span class="c1">#     network: str, station: str, location: str, channel: str,</span>
+<span class="c1">#         starttime: UTCDateTime, endtime: UTCDateTime) -&gt; bool:</span>
+<span class="c1">#     &quot;&quot;&quot;Is the waveform already in the asdf database?&quot;&quot;&quot;</span>
+<span class="c1">#     asdf_file = os.path.join(tmp.folder, os.pardir, &#39;%s.%s.h5&#39; % (</span>
+<span class="c1">#         network, station))</span>
+
+<span class="c1">#     # Change precision of start and endtime</span>
+<span class="c1">#     # Pyasdf rounds with a precision of 1 for the starttime and 0 for endtime</span>
+<span class="c1">#     starttime = UTCDateTime(</span>
+<span class="c1">#         starttime, precision=1).format_iris_web_service()[:-4]</span>
+<span class="c1">#     endtime = endtime.format_iris_web_service()[:-4]</span>
+
+<span class="c1">#     # Waveforms are saved in pyasdf with filenames akin to:</span>
+<span class="c1">#     nametag = &quot;%s.%s.%s.%s__%s__%s__raw_recording&quot;\</span>
+<span class="c1">#         % (network, station, location, channel, starttime, endtime)</span>
+
+<span class="c1">#     with ASDFDataSet(asdf_file) as ds:</span>
+<span class="c1">#         return nametag in ds.waveforms[&#39;%s.%s&#39; % (network, station)]:</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, the PyGLImER development team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

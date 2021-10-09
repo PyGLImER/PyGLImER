@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyglimer.waveform.request &mdash; PyGLImER 0.01 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyGLImER</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>pyglimer.waveform.request</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyglimer.waveform.request</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Contains the request class that is used to initialise the FDSN request for</span>
+<span class="sd">the waveforms, the preprocessing of the waveforms, and the creation of</span>
+<span class="sd">time domain receiver functions.</span>
+
+
+<span class="sd">:copyright:</span>
+<span class="sd">   The PyGLImER development team (makus@gfz-potsdam.de).</span>
+<span class="sd">:license:</span>
+<span class="sd">   GNU Lesser General Public License, Version 3</span>
+<span class="sd">   (https://www.gnu.org/copyleft/lesser.html)</span>
+<span class="sd">:author:</span>
+<span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
+
+<span class="sd">Created: Monday, 27th April 2020 10:55:03 pm</span>
+<span class="sd">Last Modified: Monday, 13th September 2021 10:43:12 am</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">http.client</span> <span class="kn">import</span> <span class="n">IncompleteRead</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">read_events</span><span class="p">,</span> <span class="n">Catalog</span>
+<span class="kn">from</span> <span class="nn">obspy.clients.fdsn</span> <span class="kn">import</span> <span class="n">Client</span> <span class="k">as</span> <span class="n">Webclient</span>
+<span class="kn">from</span> <span class="nn">obspy.core.utcdatetime</span> <span class="kn">import</span> <span class="n">UTCDateTime</span>
+<span class="kn">from</span> <span class="nn">obspy.taup</span> <span class="kn">import</span> <span class="n">TauPyModel</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="c1"># from obspy.clients.fdsn.client import FDSNException</span>
+
+<span class="kn">from</span> <span class="nn">pyglimer.waveform.download</span> <span class="kn">import</span> <span class="n">download_small_db</span><span class="p">,</span> <span class="n">downloadwav</span>
+<span class="kn">from</span> <span class="nn">pyglimer.waveform.preprocess</span> <span class="kn">import</span> <span class="n">preprocess</span>
+<span class="kn">from</span> <span class="nn">pyglimer.utils</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">pu</span>
+
+
+<div class="viewcode-block" id="Request"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.request.Request">[docs]</a><span class="k">class</span> <span class="nc">Request</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;&quot;Initialises the FDSN request for</span>
+<span class="sd">    the waveforms, the preprocessing of the waveforms, and the creation of</span>
+<span class="sd">    time domain receiver functions.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">proj_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">raw_subdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prepro_subdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">rf_subdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">statloc_subdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">evt_subdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">log_subdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rot</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">deconmeth</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">starttime</span><span class="p">:</span> <span class="n">UTCDateTime</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">endtime</span><span class="p">:</span> <span class="n">UTCDateTime</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pol</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span>
+        <span class="n">minmag</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="nb">int</span> <span class="o">=</span> <span class="mf">5.5</span><span class="p">,</span> <span class="n">event_coords</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">waveform_client</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">evtcat</span><span class="p">:</span> <span class="n">Catalog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">loglvl</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span>
+            <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;hdf5&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create object that is used to start the receiver function</span>
+<span class="sd">        workflow.</span>
+
+<span class="sd">        :param proj_dir: parental directory that all project files</span>
+<span class="sd">            will be saved in (as subfolders).</span>
+<span class="sd">        :type proj_dir: str</span>
+<span class="sd">        :param raw_subdir: Directory, in which to store the raw waveform data.</span>
+<span class="sd">        :type raw_subdir: str</span>
+<span class="sd">        :param prepro_subdir: Directory, in which to store the preprocessed</span>
+<span class="sd">            waveform data (mseed). **Irrelevant if format is hdf5**.</span>
+<span class="sd">        :type prepro_subdir: str</span>
+<span class="sd">        :param rf_subdir: Directory, in which to store the receiver functions</span>
+<span class="sd">            in time domain (sac).</span>
+<span class="sd">        :type rf_subdir: str</span>
+<span class="sd">        :param statloc_subdir: Directory, in which to store the station</span>
+<span class="sd">            inventories (xml).</span>
+<span class="sd">        :type statloc: str</span>
+<span class="sd">        :param evt_subdir: Directory, in which to store the event catalogue.</span>
+<span class="sd">        :type evt_subdir: str</span>
+<span class="sd">        :param log_subdir: Directory that logs are stored in.</span>
+<span class="sd">        :type log_subir: str</span>
+<span class="sd">        :param phase: Arrival phase that is to be used as source phase.</span>
+<span class="sd">            &quot;S&quot; to create S-Sp receiver functions and &quot;P&quot; for P-Ps receiver</span>
+<span class="sd">            functions, &quot;SKS&quot; or &quot;ScS&quot; are allowed as well.</span>
+<span class="sd">        :type phase: str</span>
+<span class="sd">        :param rot: The coordinate system in that the seismogram should be</span>
+<span class="sd">            rotated</span>
+<span class="sd">            prior to deconvolution. Options are &quot;RTZ&quot; for radial, transverse,</span>
+<span class="sd">            vertical; &quot;LQT&quot; for an orthogonal coordinate system computed by</span>
+<span class="sd">            minimising primary energy on the</span>
+<span class="sd">            converted component, or &quot;PSS&quot; for a rotation along the polarisation</span>
+<span class="sd">            directions using the Litho1.0 surface wave tomography model.</span>
+<span class="sd">        :type rot: str</span>
+<span class="sd">        :param deconmeth: The deconvolution method to use for the RF creation.</span>
+<span class="sd">            Possible options are:</span>
+<span class="sd">            &#39;it&#39;: iterative time domain deconvolution (Ligorria &amp; Ammon, 1999)</span>
+<span class="sd">            &#39;dampedf&#39;: damped frequency deconvolution</span>
+<span class="sd">            &#39;fqd&#39;: frequency dependent damping - not a good choice for SRF</span>
+<span class="sd">            &#39;waterlevel&#39;: Langston (1977)</span>
+<span class="sd">            &#39;multit&#39;: for multitaper (Helffrich, 2006)</span>
+<span class="sd">            False/None: don&#39;t create RFs</span>
+<span class="sd">        :type deconmeth: str</span>
+<span class="sd">        :param starttime: Earliest event date to be considered.</span>
+<span class="sd">        :type starttime: :class:`obspy.UTCDateTime` or str</span>
+<span class="sd">        :param endtime: Latest event date to be considered.</span>
+<span class="sd">        :type endtime: :class:`obspy.UTCDateTime` or str</span>
+<span class="sd">        :param pol: Polarisation to use as source wavelet. Either &quot;v&quot; for</span>
+<span class="sd">            vertically polarised or &#39;h&#39; for horizontally polarised S-waves.</span>
+<span class="sd">            Will be ignored if phase=&#39;S&#39;, by default &#39;v&#39;.</span>
+<span class="sd">        :type pol: str, optional</span>
+<span class="sd">        :param minmag: Minimum magnitude, by default 5.5</span>
+<span class="sd">        :type minmag: float, optional</span>
+<span class="sd">        :param event_coords: In case you wish to constrain events to certain</span>
+<span class="sd">            origns. Given in the form (minlat, maxlat, minlon, maxlon),</span>
+<span class="sd">            by default None.</span>
+<span class="sd">        :type event_coords: Tuple, optional</span>
+<span class="sd">        :param network: Limit the dowloand and preprocessing to a certain</span>
+<span class="sd">            network.</span>
+<span class="sd">            Wildcards are allowed, by default None., defaults to None</span>
+<span class="sd">        :type network: str, optional</span>
+<span class="sd">        :param station: Limit the download and preprocessing to a certain</span>
+<span class="sd">            station or several stations. Use only if network!=None.</span>
+<span class="sd">            Wildcards are allowed, by default None.</span>
+<span class="sd">        :type station: str, optional</span>
+<span class="sd">        :param waveform_client: List of FDSN compatible servers to download</span>
+<span class="sd">            waveforms from.</span>
+<span class="sd">            See obspy documentation for obspy.Client for allowed acronyms.</span>
+<span class="sd">            A list of servers by region can be found at</span>
+<span class="sd">            `&lt;https://www.fdsn.org/webservices/datacenters/&gt;`_. None means</span>
+<span class="sd">            that all known servers are requested, defaults to None.</span>
+<span class="sd">        :type waveform_client: list, optional</span>
+<span class="sd">        :param evtcat: In case you want to use an already existing event</span>
+<span class="sd">            catalogue</span>
+<span class="sd">            in evtloc. If None a new catalogue will be downloaded (with the</span>
+<span class="sd">            parameters defined before), by default None, defaults to None</span>
+<span class="sd">        :type evtcat: str, optional</span>
+<span class="sd">        :param loglvl: Level for the loggers. One of the following:</span>
+<span class="sd">            CRITICAL, ERROR, WARNING, INFO,or DEBUG</span>
+<span class="sd">            If the level is DEBUG, joblib will fall back to using only</span>
+<span class="sd">            few cores and downloads will be retried,</span>
+<span class="sd">            by default WARNING.</span>
+<span class="sd">        :type loglvl: str, optional</span>
+<span class="sd">        :raises NameError: For invalid phases.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Allocate variables in self</span>
+        <span class="n">loglvl</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">log_lvl</span><span class="p">[</span><span class="n">loglvl</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loglvl</span> <span class="o">=</span> <span class="n">loglvl</span>
+
+        <span class="k">if</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="p">(</span><span class="s1">&#39;hdf5&#39;</span> <span class="ow">or</span> <span class="s1">&#39;h5&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h5</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;sac&#39;</span><span class="p">,</span> <span class="s1">&#39;mseed&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h5</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s1">&#39;Output format </span><span class="si">%s</span><span class="s1"> is unknown.&#39;</span> <span class="o">%</span> <span class="nb">format</span><span class="p">)</span>
+
+        <span class="c1"># Set velocity model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">TauPyModel</span><span class="p">(</span><span class="s1">&#39;iasp91&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pol</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rot</span> <span class="o">=</span> <span class="n">rot</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deconmeth</span> <span class="o">=</span> <span class="n">deconmeth</span>
+
+        <span class="c1"># Directories</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">proj_dir</span><span class="p">,</span> <span class="n">log_subdir</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evtloc</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">proj_dir</span><span class="p">,</span> <span class="n">evt_subdir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statloc</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">proj_dir</span><span class="p">,</span> <span class="n">statloc_subdir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rawloc</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">proj_dir</span><span class="p">,</span> <span class="n">raw_subdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preproloc</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">proj_dir</span><span class="p">,</span> <span class="n">prepro_subdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rfloc</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">proj_dir</span><span class="p">,</span> <span class="n">rf_subdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">)</span>
+
+        <span class="c1"># logger for the download steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pyglimer.request&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">loglvl</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logdir</span><span class="p">,</span> <span class="s1">&#39;request.log&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">loglvl</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="p">)</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
+            <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+        <span class="n">consoleHandler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+        <span class="n">consoleHandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">loglvl</span><span class="p">)</span>
+        <span class="n">consoleHandler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">consoleHandler</span><span class="p">)</span>
+        <span class="c1"># We don&#39;t really want to see all the warnings.</span>
+        <span class="k">if</span> <span class="n">loglvl</span> <span class="o">&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">captureWarnings</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">warnings_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;py.warnings&quot;</span><span class="p">)</span>
+            <span class="n">warnings_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="p">)</span>
+            <span class="n">warnings_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">loglvl</span><span class="p">)</span>
+
+        <span class="c1"># minimum magnitude</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minmag</span> <span class="o">=</span> <span class="n">minmag</span>
+
+        <span class="c1"># Request time window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">starttime</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">starttime</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endtime</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">endtime</span><span class="p">)</span>
+
+        <span class="c1"># geographical constraints</span>
+        <span class="k">if</span> <span class="n">event_coords</span><span class="p">:</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eMINLAT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eMAXLAT</span><span class="p">,</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">eMINLON</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eMAXLON</span><span class="p">)</span> <span class="o">=</span> <span class="n">event_coords</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eMINLAT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eMAXLAT</span><span class="p">,</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">eMINLON</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eMAXLON</span><span class="p">)</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="c1"># Set event depth and min/max epicentral distances</span>
+        <span class="c1"># according to phase (see Wilson et. al., 2006)</span>
+        <span class="c1"># and time window before (tz) and after (ta) first arrival</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ta</span> <span class="o">=</span> <span class="mi">120</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maxdepth</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min_epid</span> <span class="o">=</span> <span class="mf">28.1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_epid</span> <span class="o">=</span> <span class="mf">95.8</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maxdepth</span> <span class="o">=</span> <span class="mi">300</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min_epid</span> <span class="o">=</span> <span class="mi">55</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_epid</span> <span class="o">=</span> <span class="mi">80</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="mi">120</span>
+        <span class="c1"># (see Yuan et al. 2006)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;SCS&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maxdepth</span> <span class="o">=</span> <span class="mi">300</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min_epid</span> <span class="o">=</span> <span class="mi">50</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_epid</span> <span class="o">=</span> <span class="mi">75</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="mi">120</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;SKS&#39;</span><span class="p">:</span>
+            <span class="c1"># (see Zhang et. al. (2014))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maxdepth</span> <span class="o">=</span> <span class="mi">300</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min_epid</span> <span class="o">=</span> <span class="mi">90</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_epid</span> <span class="o">=</span> <span class="mi">120</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="mi">120</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s1">&#39;The phase&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;is not valid or not</span>
+<span class="s2">                            implemented yet.&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># network and station filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">station</span> <span class="o">=</span> <span class="n">station</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">waveform_client</span> <span class="o">=</span> <span class="n">waveform_client</span>
+
+        <span class="c1"># Download or process available data?</span>
+        <span class="k">if</span> <span class="n">evtcat</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+            <span class="c1"># yaml files don&#39;t accept None</span>
+            <span class="n">evtcat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">evtcat</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">evtcat</span> <span class="o">=</span> <span class="n">read_events</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evtloc</span><span class="p">,</span> <span class="n">evtcat</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">download_eventcat</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Request.download_eventcat"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.request.Request.download_eventcat">[docs]</a>    <span class="k">def</span> <span class="nf">download_eventcat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Download the event catalogue from IRIS DMC.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Server settings</span>
+        <span class="c1"># 2021/02/16 Events only from IRIS as the USGS webserice tends to be</span>
+        <span class="c1"># unstable and mixing different services will lead to a messed db</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">webclient</span> <span class="o">=</span> <span class="n">Webclient</span><span class="p">(</span><span class="s1">&#39;IRIS&#39;</span><span class="p">)</span>
+        <span class="n">event_cat_done</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># 05.07.2021: Shorten length of a to one year, which is a lot</span>
+        <span class="c1"># more robust</span>
+        <span class="c1"># :NOTE: perhaps it would be smart to save each year as a file?</span>
+        <span class="c1"># BUt then again, they have different requirements...</span>
+        <span class="c1"># Check length of request and split if longer than a year.</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mf">365.25</span><span class="o">*</span><span class="mi">24</span><span class="o">*</span><span class="mi">3600</span>  <span class="c1"># one yr in seconds</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">endtime</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">starttime</span> <span class="o">&gt;</span> <span class="n">a</span><span class="p">:</span>
+            <span class="c1"># Request is too big, break it down ito several requests</span>
+
+            <span class="n">starttimes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">starttime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">starttime</span><span class="o">+</span><span class="n">a</span><span class="p">]</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">endtime</span><span class="o">-</span><span class="n">starttimes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">a</span><span class="p">:</span>
+                <span class="n">starttimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">starttimes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">a</span><span class="p">)</span>
+            <span class="n">endtimes</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">endtimes</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">starttimes</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="n">endtimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endtime</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Long request: Breaking it down to </span><span class="si">%s</span><span class="s1"> sub-requests.&#39;</span>\
+                <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">endtimes</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="c1"># Query</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">evtcat</span> <span class="o">=</span> <span class="n">Catalog</span><span class="p">()</span>
+            <span class="c1"># We convert the iterator to a list, so tqdm work properly</span>
+            <span class="k">for</span> <span class="n">st</span><span class="p">,</span> <span class="n">et</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">starttimes</span><span class="p">,</span> <span class="n">endtimes</span><span class="p">))):</span>
+                <span class="n">event_cat_done</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">while</span> <span class="ow">not</span> <span class="n">event_cat_done</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">evtcat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">webclient</span><span class="o">.</span><span class="n">get_events</span><span class="p">(</span>
+                                <span class="n">starttime</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">endtime</span><span class="o">=</span><span class="n">et</span><span class="p">,</span>
+                                <span class="n">minlatitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eMINLAT</span><span class="p">,</span>
+                                <span class="n">maxlatitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eMAXLAT</span><span class="p">,</span>
+                                <span class="n">minlongitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eMINLON</span><span class="p">,</span>
+                                <span class="n">maxlongitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eMAXLON</span><span class="p">,</span>
+                                <span class="n">minmagnitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">minmag</span><span class="p">,</span>
+                                <span class="n">maxmagnitude</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxdepth</span><span class="p">))</span>
+                        <span class="n">event_cat_done</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">except</span> <span class="n">IncompleteRead</span><span class="p">:</span>
+                        <span class="c1"># Server interrupted connection, just try again</span>
+                        <span class="c1"># This usually happens with enormeous requests, we</span>
+                        <span class="c1"># should reduce a</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Server interrupted connection, </span><span class="se">\</span>
+<span class="s2">                            restarting download...&quot;</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="k">continue</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">event_cat_done</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">evtcat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">webclient</span><span class="o">.</span><span class="n">get_events</span><span class="p">(</span>
+                        <span class="n">starttime</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">starttime</span><span class="p">,</span> <span class="n">endtime</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">endtime</span><span class="p">,</span>
+                        <span class="n">minlatitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eMINLAT</span><span class="p">,</span> <span class="n">maxlatitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eMAXLAT</span><span class="p">,</span>
+                        <span class="n">minlongitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eMINLON</span><span class="p">,</span> <span class="n">maxlongitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eMAXLON</span><span class="p">,</span>
+                        <span class="n">minmagnitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">minmag</span><span class="p">,</span> <span class="n">maxmagnitude</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                        <span class="n">maxdepth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxdepth</span><span class="p">)</span>
+                    <span class="n">event_cat_done</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">except</span> <span class="n">IncompleteRead</span><span class="p">:</span>
+                    <span class="c1"># Server interrupted connection, just try again</span>
+                    <span class="c1"># This usually happens with enormeous requests, we should</span>
+                    <span class="c1"># reduce a</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Server interrupted connection, </span><span class="se">\</span>
+<span class="s2">                        restarting download...&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evtloc</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># check if there is a better format for event catalog</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evtcat</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">evtloc</span><span class="p">,</span>
+                <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">T%H%M%S&quot;</span><span class="p">)),</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;QUAKEML&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Successfully obtained </span><span class="si">%s</span><span class="s1"> events&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evtcat</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Request.download_waveforms"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.request.Request.download_waveforms">[docs]</a>    <span class="k">def</span> <span class="nf">download_waveforms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the download of waveforms and response files.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        verbose : Bool, optional</span>
+<span class="sd">            Set True if you wish to log the output of the obspy MassDownloader.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            You should check whether the method</span>
+<span class="sd">            :meth:`~pyglimer.waveform.request.Request.download_waveforms_small\</span>
+<span class="sd">            _db` might be better suited for your needs.</span>
+<span class="sd">            Both methods offer unique advantages.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">downloadwav</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_epid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_epid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">evtcat</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">statloc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rawloc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveform_client</span><span class="p">,</span>
+            <span class="n">network</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="n">log_fh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="p">,</span>
+            <span class="n">loglvl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loglvl</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">saveasdf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h5</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Request.download_waveforms_small_db"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.request.Request.download_waveforms_small_db">[docs]</a>    <span class="k">def</span> <span class="nf">download_waveforms_small_db</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A different method to download raw waveform data. This method will</span>
+<span class="sd">        be faster than</span>
+<span class="sd">        :meth:`~pyglimer.waveform.request.Request.download_waveforms` for</span>
+<span class="sd">        small databases (e.g., single networks or stations). Another</span>
+<span class="sd">        advantage of this method is that the attributes network and station</span>
+<span class="sd">        in :class:`~pyglimer.waveforms.request.Request` can be lists.</span>
+
+<span class="sd">        :param channel: The channel you will want to download, accepts</span>
+<span class="sd">            unix style wildcards.</span>
+<span class="sd">        :type channel: str</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            You should check whether the method</span>
+<span class="sd">            :meth:`~pyglimer.waveform.request.Request.download_Waveforms`</span>
+<span class="sd">            might be better suited for your needs. Both methods offer unique</span>
+<span class="sd">            advantages.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">download_small_db</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_epid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_epid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">evtcat</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">statloc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rawloc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveform_client</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Request.preprocess"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.request.Request.preprocess">[docs]</a>    <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;joblib&#39;</span><span class="p">,</span>
+            <span class="n">hc_filt</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="nb">int</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Preprocess an existing database. With parameters defined in self.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        hc_filt : float or int or None, optional</span>
+<span class="sd">            Highcut frequency to filter with right before deconvolution.</span>
+<span class="sd">            Recommended if time domain deconvolution is used. For spectral</span>
+<span class="sd">            division, filtering can still be done after deconvolution (i.e.</span>
+<span class="sd">            set in :func:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`).</span>
+<span class="sd">            Value for PRFs should usually be lower than 2 Hz and for SRFs lower</span>
+<span class="sd">            than .4 Hz, by default None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">preprocess</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pol</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">evtcat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+            <span class="s1">&#39;hann&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">statloc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rawloc</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">preproloc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rfloc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">deconmeth</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">,</span>
+            <span class="n">netrestr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">statrestr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">,</span>
+            <span class="n">saveasdf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h5</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, the PyGLImER development team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

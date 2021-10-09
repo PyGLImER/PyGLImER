@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyglimer.waveform.preprocessh5 &mdash; PyGLImER 0.01 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyGLImER</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>pyglimer.waveform.preprocessh5</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyglimer.waveform.preprocessh5</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This is a newer version of preprocess.py meant to be used with pyasdf.</span>
+<span class="sd">Now, we will have to work in a very different manner than for .mseed files</span>
+<span class="sd">and process files station wise rather than event wise.</span>
+
+<span class="sd">:copyright:</span>
+<span class="sd">   The PyGLImER development team (makus@gfz-potsdam.de).</span>
+<span class="sd">:license:</span>
+<span class="sd">   GNU Lesser General Public License, Version 3</span>
+<span class="sd">   (https://www.gnu.org/copyleft/lesser.html)</span>
+<span class="sd">:author:</span>
+<span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
+
+<span class="sd">Created: Thursday, 18th February 2021 02:26:03 pm</span>
+<span class="sd">Last Modified: Monday, 4th October 2021 03:29:24 pm</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">import</span> <span class="nn">obspy</span>
+<span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">UTCDateTime</span>
+<span class="kn">from</span> <span class="nn">obspy.geodetics</span> <span class="kn">import</span> <span class="n">gps2dist_azimuth</span><span class="p">,</span> <span class="n">kilometer2degrees</span>
+<span class="kn">from</span> <span class="nn">pyasdf</span> <span class="kn">import</span> <span class="n">ASDFDataSet</span>
+<span class="kn">from</span> <span class="nn">tqdm.std</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">pyglimer.database.rfh5</span> <span class="kn">import</span> <span class="n">RFDataBase</span>
+<span class="kn">from</span> <span class="nn">pyglimer.utils.log</span> <span class="kn">import</span> <span class="n">create_mpi_logger</span>
+<span class="kn">from</span> <span class="nn">.qc</span> <span class="kn">import</span> <span class="n">qcp</span><span class="p">,</span> <span class="n">qcs</span>
+<span class="kn">from</span> <span class="nn">.rotate</span> <span class="kn">import</span> <span class="n">rotate_LQT_min</span><span class="p">,</span> <span class="n">rotate_PSV</span>
+<span class="kn">from</span> <span class="nn">..rf.create</span> <span class="kn">import</span> <span class="n">RFStream</span><span class="p">,</span> <span class="n">createRF</span>
+
+
+<span class="c1"># program-specific Exceptions</span>
+<div class="viewcode-block" id="SNRError"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.preprocessh5.SNRError">[docs]</a><span class="k">class</span> <span class="nc">SNRError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;raised when the SNR is too high&quot;&quot;&quot;</span>
+    <span class="c1"># Constructor method</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="c1"># __str__ display function</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="StreamLengthError"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.preprocessh5.StreamLengthError">[docs]</a><span class="k">class</span> <span class="nc">StreamLengthError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;raised when stream has fewer than 3 components&quot;&quot;&quot;</span>
+    <span class="c1"># Constructor method</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="c1"># __str__ display function</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="preprocessh5"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.preprocessh5.preprocessh5">[docs]</a><span class="k">def</span> <span class="nf">preprocessh5</span><span class="p">(</span>
+    <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rot</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pol</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">obspy</span><span class="o">.</span><span class="n">taup</span><span class="o">.</span><span class="n">TauPyModel</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ta</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rfloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">deconmeth</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">netrestr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">statrestr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span>
+        <span class="n">client</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Preprocess files saved in hdf5 (pyasdf) format. Will save the computed</span>
+<span class="sd">    receiver functions in hdf5 format as well.</span>
+
+<span class="sd">    Processing is done via a multiprocessing backend (either joblb or mpi).</span>
+
+<span class="sd">    :param phase: The Teleseismic phase to consider</span>
+<span class="sd">    :type phase: str</span>
+<span class="sd">    :param rot: The Coordinate system that the seismogram should be rotated to.</span>
+<span class="sd">    :type rot: str</span>
+<span class="sd">    :param pol: Polarisationfor PRFs. Can be either &#39;v&#39; or &#39;h&#39; (vertical or</span>
+<span class="sd">        horizontal).</span>
+<span class="sd">    :type pol: str</span>
+<span class="sd">    :param taper_perc: Percentage for the pre deconvolution taper.</span>
+<span class="sd">    :type taper_perc: float</span>
+<span class="sd">    :param model: TauPyModel to be used for travel time computations</span>
+<span class="sd">    :type model: obspy.taup.TauPyModel</span>
+<span class="sd">    :param taper_type: type of taper (see obspy)</span>
+<span class="sd">    :type taper_type: str</span>
+<span class="sd">    :param tz: Length of time window before theoretical arrival (seconds)</span>
+<span class="sd">    :type tz: int</span>
+<span class="sd">    :param ta: Length of time window after theoretical arrival (seconds)</span>
+<span class="sd">    :type ta: int</span>
+<span class="sd">    :param rawloc: Directory, in which the raw data is saved.</span>
+<span class="sd">    :type rawloc: str</span>
+<span class="sd">    :param rfloc: Directory to save the receiver functions in.</span>
+<span class="sd">    :type rfloc: str</span>
+<span class="sd">    :param deconmeth: Deconvolution method to use.</span>
+<span class="sd">    :type deconmeth: str</span>
+<span class="sd">    :param hc_filt: Second High-Cut filter (optional, can be None or False)</span>
+<span class="sd">    :type hc_filt: float</span>
+<span class="sd">    :param netrestr: Network restrictions</span>
+<span class="sd">    :type netrestr: str</span>
+<span class="sd">    :param statrestr: Station restrictions</span>
+<span class="sd">    :type statrestr: str</span>
+<span class="sd">    :param logger: Logger to use</span>
+<span class="sd">    :type logger: logging.Logger</span>
+<span class="sd">    :param rflogger: [description]</span>
+<span class="sd">    :type rflogger: logging.Logger</span>
+<span class="sd">    :param client: Multiprocessing Backend to use</span>
+<span class="sd">    :type client: str</span>
+<span class="sd">    :raises NotImplementedError: For uknowns multiprocessing backends.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">rfloc</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Open ds</span>
+    <span class="n">fpattern</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.h5&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">netrestr</span> <span class="ow">or</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">statrestr</span> <span class="ow">or</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span>
+    <span class="n">flist</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rawloc</span><span class="p">,</span> <span class="n">fpattern</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;mpi&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+        <span class="n">rank</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span>
+        <span class="n">psize</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span>
+        <span class="n">pmap</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flist</span><span class="p">))</span><span class="o">*</span><span class="n">psize</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">flist</span><span class="p">)</span>
+        <span class="n">pmap</span> <span class="o">=</span> <span class="n">pmap</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">pmap</span> <span class="o">==</span> <span class="n">rank</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flist</span><span class="p">))[</span><span class="n">ind</span><span class="p">]</span>
+
+        <span class="c1"># get new MPI compatible loggers</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">create_mpi_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">rank</span><span class="p">)</span>
+        <span class="n">rflogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.RF&quot;</span> <span class="o">%</span> <span class="n">logger</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">ind</span><span class="p">):</span>
+            <span class="n">_preprocessh5_single</span><span class="p">(</span>
+                <span class="n">phase</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span> <span class="n">ta</span><span class="p">,</span> <span class="n">rfloc</span><span class="p">,</span>
+                <span class="n">deconmeth</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">,</span> <span class="n">flist</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+            <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">client</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;joblib&#39;</span><span class="p">:</span>
+        <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">_preprocessh5_single</span><span class="p">)(</span>
+            <span class="n">phase</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span> <span class="n">ta</span><span class="p">,</span> <span class="n">rfloc</span><span class="p">,</span>
+            <span class="n">deconmeth</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">,</span>
+            <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">flist</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s1">&#39;Unknown multiprocessing backend </span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="n">client</span>
+        <span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_preprocessh5_single</span><span class="p">(</span>
+    <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rot</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pol</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">obspy</span><span class="o">.</span><span class="n">taup</span><span class="o">.</span><span class="n">TauPyModel</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ta</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">rfloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">deconmeth</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span>
+        <span class="n">hdf5_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Single core processing of one single hdf5 file.</span>
+
+<span class="sd">    .. warning:: Should not be called use</span>
+<span class="sd">        :func:`~seismic.waveform.preprocessh5.preprocess_h5`!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">hdf5_file</span>
+    <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">)</span>
+
+    <span class="n">outf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rfloc</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+
+    <span class="c1"># Find out which files have already been processed:</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">outf</span><span class="o">+</span><span class="s1">&#39;.h5&#39;</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="n">outf</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
+            <span class="n">ret</span><span class="p">,</span> <span class="n">rej</span> <span class="o">=</span> <span class="n">rfdb</span><span class="o">.</span><span class="n">_get_known_waveforms</span><span class="p">()</span>
+            <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Already processed waveforms: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ret</span><span class="p">))</span>
+            <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Already rejected waveforms: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">rej</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">rej</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="n">ASDFDataSet</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+        <span class="c1"># get station inventory</span>
+        <span class="n">inv</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">waveforms</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">StationXML</span>
+        <span class="n">rf</span> <span class="o">=</span> <span class="n">RFStream</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">events</span><span class="p">):</span>
+            <span class="n">toa</span><span class="p">,</span> <span class="n">rayp</span><span class="p">,</span> <span class="n">rayp_s_deg</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">compute_toa</span><span class="p">(</span>
+                <span class="n">evt</span><span class="p">,</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">get_waveforms</span><span class="p">(</span>
+                <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">toa</span><span class="o">-</span><span class="n">tz</span><span class="p">,</span> <span class="n">toa</span><span class="o">+</span><span class="n">ta</span><span class="p">,</span> <span class="s1">&#39;raw_recording&#39;</span><span class="p">)</span>
+            <span class="n">rf_temp</span> <span class="o">=</span> <span class="n">__station_process__</span><span class="p">(</span>
+                <span class="n">st</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span>
+                <span class="n">ta</span><span class="p">,</span> <span class="n">deconmeth</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span>
+                <span class="n">distance</span><span class="p">,</span> <span class="n">rayp</span><span class="p">,</span> <span class="n">rayp_s_deg</span><span class="p">,</span> <span class="n">toa</span><span class="p">,</span> <span class="n">rej</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">rf_temp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">rf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rf_temp</span><span class="p">)</span>
+            <span class="c1"># Write regularly to not clutter too much into the RAM</span>
+            <span class="k">if</span> <span class="n">rf</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">30</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="n">outf</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
+                    <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Writing to file </span><span class="si">%s</span><span class="s1">....&#39;</span> <span class="o">%</span> <span class="n">outf</span><span class="p">)</span>
+                    <span class="n">rfdb</span><span class="o">.</span><span class="n">add_rf</span><span class="p">(</span><span class="n">rf</span><span class="p">)</span>
+                    <span class="n">rfdb</span><span class="o">.</span><span class="n">_add_known_waveform_data</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">rej</span><span class="p">)</span>
+                    <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;..written.&#39;</span><span class="p">)</span>
+                <span class="n">rf</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="n">outf</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
+        <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Writing to file </span><span class="si">%s</span><span class="s1">....&#39;</span> <span class="o">%</span> <span class="n">outf</span><span class="p">)</span>
+        <span class="n">rfdb</span><span class="o">.</span><span class="n">add_rf</span><span class="p">(</span><span class="n">rf</span><span class="p">)</span>
+        <span class="n">rfdb</span><span class="o">.</span><span class="n">_add_known_waveform_data</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">rej</span><span class="p">)</span>
+        <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;..written.&#39;</span><span class="p">)</span>
+    <span class="n">rf</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="compute_toa"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.waveform.preprocessh5.compute_toa">[docs]</a><span class="k">def</span> <span class="nf">compute_toa</span><span class="p">(</span>
+    <span class="n">evt</span><span class="p">:</span> <span class="n">obspy</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="n">slat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">slon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">obspy</span><span class="o">.</span><span class="n">taup</span><span class="o">.</span><span class="n">TauPyModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+        <span class="n">UTCDateTime</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute time of theoretical arrival for teleseismic events and a given</span>
+<span class="sd">    teleseismic phase at the provided station.</span>
+
+<span class="sd">    :param evt: Event to compute the arrival for.</span>
+<span class="sd">    :type evt: obspy.core.event.Event</span>
+<span class="sd">    :param slat: station latitude</span>
+<span class="sd">    :type slat: float</span>
+<span class="sd">    :param slon: station longitude</span>
+<span class="sd">    :type slon: float</span>
+<span class="sd">    :param phase: The teleseismic phase to consider.</span>
+<span class="sd">    :type phase: str</span>
+<span class="sd">    :param model: Taupymodel to use</span>
+<span class="sd">    :type model: obspy.taup.TauPyModel</span>
+<span class="sd">    :return: A Tuple holding: [the time of theoretical arrival (UTC),</span>
+<span class="sd">        the apparent slowness in s/km, the ray parameter in s/deg,</span>
+<span class="sd">        the back azimuth, the distance between station and event in deg]</span>
+<span class="sd">    :rtype: Tuple[UTCDateTime, float, float, float]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">distance</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">gps2dist_azimuth</span><span class="p">(</span>
+        <span class="n">slat</span><span class="p">,</span> <span class="n">slon</span><span class="p">,</span> <span class="n">origin</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
+        <span class="n">origin</span><span class="o">.</span><span class="n">longitude</span><span class="p">)</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="n">kilometer2degrees</span><span class="p">(</span><span class="n">distance</span><span class="o">/</span><span class="mi">1000</span><span class="p">)</span>
+
+    <span class="c1"># compute time of first arrival &amp; ray parameter</span>
+    <span class="n">arrival</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_travel_times</span><span class="p">(</span>
+        <span class="n">source_depth_in_km</span><span class="o">=</span><span class="n">origin</span><span class="o">.</span><span class="n">depth</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">distance_in_degree</span><span class="o">=</span><span class="n">distance</span><span class="p">,</span>
+        <span class="n">phase_list</span><span class="o">=</span><span class="p">[</span><span class="n">phase</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">rayp_s_deg</span> <span class="o">=</span> <span class="n">arrival</span><span class="o">.</span><span class="n">ray_param_sec_degree</span>
+    <span class="n">rayp</span> <span class="o">=</span> <span class="n">rayp_s_deg</span> <span class="o">/</span> <span class="mf">111319.9</span>  <span class="c1"># apparent slowness</span>
+    <span class="n">toa</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">time</span> <span class="o">+</span> <span class="n">arrival</span><span class="o">.</span><span class="n">time</span>
+
+    <span class="k">return</span> <span class="n">toa</span><span class="p">,</span> <span class="n">rayp</span><span class="p">,</span> <span class="n">rayp_s_deg</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">distance</span></div>
+
+
+<span class="k">def</span> <span class="nf">__station_process__</span><span class="p">(</span>
+    <span class="n">st</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span> <span class="n">ta</span><span class="p">,</span>  <span class="n">deconmeth</span><span class="p">,</span>
+    <span class="n">hc_filt</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">rayp</span><span class="p">,</span>
+        <span class="n">rayp_s_deg</span><span class="p">,</span> <span class="n">toa</span><span class="p">,</span> <span class="n">rej</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ret</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Processing that is equal for each waveform recorded on one station</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Is the data already processed?</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ot_fiss</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">origin</span><span class="o">.</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()</span>
+    <span class="n">ot_loc</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">origin</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">precision</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">ot_fiss</span> <span class="ow">in</span> <span class="n">rej</span> <span class="ow">or</span> <span class="n">ot_fiss</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">:</span>
+        <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;RF with ot </span><span class="si">%s</span><span class="s1"> already processed.&#39;</span> <span class="o">%</span> <span class="n">ot_fiss</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Remove repsonse</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">attach_response</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">remove_response</span><span class="p">()</span>
+
+    <span class="c1"># DEMEAN AND DETREND #</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">detrend</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;demean&#39;</span><span class="p">)</span>
+
+    <span class="c1"># TAPER #</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">taper</span><span class="p">(</span>
+        <span class="n">max_percentage</span><span class="o">=</span><span class="n">taper_perc</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">taper_type</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">side</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">)</span>
+
+    <span class="n">infodict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># create RF</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">st</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">infodict</span> <span class="o">=</span> <span class="n">__rotate_qc</span><span class="p">(</span>
+            <span class="n">phase</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">ot_fiss</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span>
+            <span class="n">origin</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span> <span class="n">origin</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">origin</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span> <span class="n">rayp_s_deg</span><span class="p">,</span> <span class="n">toa</span><span class="p">,</span>
+            <span class="n">logger</span><span class="p">,</span> <span class="n">infodict</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span> <span class="n">pol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hc_filt</span><span class="p">:</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;lowpass&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">hc_filt</span><span class="p">,</span> <span class="n">zerophase</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">corners</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># Rotate to LQT or PSS</span>
+        <span class="k">if</span> <span class="n">rot</span> <span class="o">==</span> <span class="s2">&quot;LQT&quot;</span><span class="p">:</span>
+            <span class="n">st</span><span class="p">,</span> <span class="n">ia</span> <span class="o">=</span> <span class="n">rotate_LQT_min</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">phase</span><span class="p">)</span>
+            <span class="c1"># additional QC</span>
+            <span class="k">if</span> <span class="n">ia</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">or</span> <span class="n">ia</span> <span class="o">&gt;</span> <span class="mi">75</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SNRError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;The estimated incidence angle is</span>
+<span class="s2">                                unrealistic with &quot;&quot;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ia</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;degree.&#39;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">rot</span> <span class="o">==</span> <span class="s2">&quot;PSS&quot;</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">st</span> <span class="o">=</span> <span class="n">rotate_PSV</span><span class="p">(</span>
+                <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
+                <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span>
+                <span class="n">rayp</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">phase</span><span class="p">)</span>
+
+        <span class="c1"># Create RF object</span>
+        <span class="k">if</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+            <span class="n">trim</span> <span class="o">=</span> <span class="p">[</span><span class="mi">40</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">distance</span> <span class="o">&gt;=</span> <span class="mi">70</span><span class="p">:</span>
+                <span class="n">trim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ta</span> <span class="o">-</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">distance</span> <span class="o">+</span> <span class="mi">180</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">trim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ta</span> <span class="o">-</span> <span class="mi">40</span>
+        <span class="k">elif</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+            <span class="n">trim</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">RF</span> <span class="o">=</span> <span class="n">createRF</span><span class="p">(</span>
+            <span class="n">st</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">pol</span><span class="o">=</span><span class="n">pol</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">infodict</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="n">trim</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">deconmeth</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ot_fiss</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="n">SNRError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">rej</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ot_fiss</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RF creation failed&quot;</span><span class="p">)</span>
+        <span class="n">rflogger</span><span class="o">.</span><span class="n">exception</span><span class="p">([</span><span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">ot_loc</span><span class="p">,</span> <span class="n">e</span><span class="p">])</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">RF</span>
+
+
+<span class="k">def</span> <span class="nf">__rotate_qc</span><span class="p">(</span>
+    <span class="n">phase</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">station_inv</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">ot_fiss</span><span class="p">,</span>
+    <span class="n">event</span><span class="p">,</span> <span class="n">evtlat</span><span class="p">,</span> <span class="n">evtlon</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">rayp_s_deg</span><span class="p">,</span> <span class="n">first_arrival</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">infodict</span><span class="p">,</span>
+        <span class="n">tz</span><span class="p">,</span> <span class="n">pol</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE</span>
+<span class="sd">    Bugs occur here due to station inventories without response information</span>
+<span class="sd">    Looks like the bulk downloader sometimes donwnloads</span>
+<span class="sd">    station inventories without response files. I could fix that here by</span>
+<span class="sd">    redownloading the response file (alike to the 3 traces problem)&quot;&quot;&quot;</span>
+
+    <span class="n">st</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;-&gt;ZNE&#39;</span><span class="p">,</span> <span class="n">inventory</span><span class="o">=</span><span class="n">station_inv</span><span class="p">)</span>
+
+    <span class="n">st</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;NE-&gt;RT&#39;</span><span class="p">,</span> <span class="n">inventory</span><span class="o">=</span><span class="n">station_inv</span><span class="p">,</span>
+              <span class="n">back_azimuth</span><span class="o">=</span><span class="n">baz</span><span class="p">)</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+
+    <span class="c1"># Sometimes streams contain more than 3 traces:</span>
+    <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">stream</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
+            <span class="n">stream</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">component</span><span class="p">]</span> <span class="o">=</span> <span class="n">tr</span>
+        <span class="k">if</span> <span class="s2">&quot;Z&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">Stream</span><span class="p">([</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">]])</span>
+        <span class="k">elif</span> <span class="s2">&quot;3&quot;</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">Stream</span><span class="p">([</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">]])</span>
+        <span class="k">del</span> <span class="n">stream</span>
+
+    <span class="c1"># SNR CRITERIA</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span>  <span class="c1"># sampling interval</span>
+    <span class="n">sampling_f</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span>
+
+    <span class="k">if</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+        <span class="n">st</span><span class="p">,</span> <span class="n">crit</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">noisemat</span> <span class="o">=</span> <span class="n">qcp</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">sampling_f</span><span class="p">,</span> <span class="n">tz</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">crit</span><span class="p">:</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dt</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;sampling_rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampling_f</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;network&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;station&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statlat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latitude</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statlon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">elevation</span>
+            <span class="k">raise</span> <span class="n">SNRError</span><span class="p">(</span><span class="s1">&#39;QC rejected </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">np</span><span class="o">.</span><span class="n">array2string</span><span class="p">(</span><span class="n">noisemat</span><span class="p">))</span>
+
+    <span class="k">elif</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+        <span class="n">st</span><span class="p">,</span> <span class="n">crit</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">noisemat</span> <span class="o">=</span> <span class="n">qcs</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">sampling_f</span><span class="p">,</span> <span class="n">tz</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">crit</span><span class="p">:</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dt</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;sampling_rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampling_f</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;network&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;station&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statlat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latitude</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statlon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">elevation</span>
+            <span class="k">raise</span> <span class="n">SNRError</span><span class="p">(</span><span class="s1">&#39;QC rejected </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">np</span><span class="o">.</span><span class="n">array2string</span><span class="p">(</span><span class="n">noisemat</span><span class="p">))</span>
+
+    <span class="c1"># WRITE AN INFO FILE</span>
+    <span class="c1"># append_info: [key,value]</span>
+    <span class="n">append_inf</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">[</span><span class="s1">&#39;magnitude&#39;</span><span class="p">,</span> <span class="p">(</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">preferred_magnitude</span><span class="p">()</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">magnitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="s1">&#39;mag&#39;</span><span class="p">]],</span>
+        <span class="p">[</span><span class="s1">&#39;magnitude_type&#39;</span><span class="p">,</span> <span class="p">(</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">preferred_magnitude</span><span class="p">()</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">magnitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span>
+                <span class="s1">&#39;magnitude_type&#39;</span><span class="p">]],</span>
+        <span class="p">[</span><span class="s1">&#39;evtlat&#39;</span><span class="p">,</span> <span class="n">evtlat</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;evtlon&#39;</span><span class="p">,</span> <span class="n">evtlon</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;ot_ret&#39;</span><span class="p">,</span> <span class="n">ot_fiss</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;ot_all&#39;</span><span class="p">,</span> <span class="n">ot_fiss</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;evt_depth&#39;</span><span class="p">,</span> <span class="n">depth</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;evt_id&#39;</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resource_id&#39;</span><span class="p">)],</span>
+        <span class="p">[</span><span class="s1">&#39;noisemat&#39;</span><span class="p">,</span> <span class="n">noisemat</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;co_f&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;npts&#39;</span><span class="p">,</span> <span class="n">st</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">npts</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;rbaz&#39;</span><span class="p">,</span> <span class="n">baz</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;rdelta&#39;</span><span class="p">,</span> <span class="n">distance</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;rayp_s_deg&#39;</span><span class="p">,</span> <span class="n">rayp_s_deg</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;onset&#39;</span><span class="p">,</span> <span class="n">first_arrival</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;starttime&#39;</span><span class="p">,</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;pol&#39;</span><span class="p">,</span> <span class="n">pol</span><span class="p">]</span>
+        <span class="p">]</span>
+
+    <span class="c1"># Check if values are already in dict</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">append_inf</span><span class="p">:</span>
+        <span class="n">infodict</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dt</span>
+    <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;sampling_rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampling_f</span>
+    <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;network&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
+    <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;station&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station</span>
+    <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statlat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latitude</span>
+    <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statlon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span>
+    <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">elevation</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stream accepted. Preprocessing successful&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">st</span><span class="p">,</span> <span class="n">crit</span><span class="p">,</span> <span class="n">infodict</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, the PyGLImER development team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plotting &mdash; PyGLImER 0.01 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="PyGLImER API" href="API.html" />
+    <link rel="prev" title="Common Conversion Point Stacking" href="ccp.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> PyGLImER
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#single-receiver-function">Single Receiver Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#receiver-function-section">Receiver Function Section</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ccp-stack-plotting">CCP Stack Plotting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#volume-sections">Volume Sections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cross-section">Cross Section</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyGLImER</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Plotting</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/chapters/plotting.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="plotting">
+<h1>Plotting<a class="headerlink" href="#plotting" title="Permalink to this headline"></a></h1>
+<p>Here we can start putting all the plotting tools, and actual example plots
+that look good and not those tiny weird looking jupyter notebook plots.</p>
+<p>We’ll still use the exact same routines and codes.</p>
+<section id="single-receiver-function">
+<h2>Single Receiver Function<a class="headerlink" href="#single-receiver-function" title="Permalink to this headline"></a></h2>
+<p>Given the data downloaded using the example notebook for data collection, we
+can simply read and plot them using</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">set_mpl_params</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">plot_single_rf</span>
+<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">pyglimer.rf.create</span> <span class="kn">import</span> <span class="n">read_rf</span>
+<span class="linenos"> 4</span><span class="n">set_mpl_params</span><span class="p">()</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="c1"># Read all RFs from Station IU/HRV</span>
+<span class="linenos"> 7</span><span class="n">rfst</span> <span class="o">=</span> <span class="n">read_rf</span><span class="p">(</span><span class="s2">&quot;../database/waveforms/RF/P/IU/HRV/*.sac&quot;</span><span class="p">)</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="c1"># Some random RF from the 800 avalable one at IU.HRV</span>
+<span class="linenos">10</span><span class="n">N</span> <span class="o">=</span> <span class="mi">753</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="c1"># Plot RF and save its output.</span>
+<span class="linenos">13</span><span class="n">plot_single_rf</span><span class="p">(</span><span class="n">rfst</span><span class="p">[</span><span class="n">N</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>which results in the following image:</p>
+<img alt="../_images/IU.HRV.00.PRF_raw.svg" src="../_images/IU.HRV.00.PRF_raw.svg" /><p>We can time limit the figure as well</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_single_rf</span><span class="p">(</span><span class="n">rfst</span><span class="p">[</span><span class="n">N</span><span class="p">],</span> <span class="n">tlim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>which cuts out the RF between 0 and 20 seconds</p>
+<img alt="../_images/IU.HRV.00.PRF_timelimit.svg" src="../_images/IU.HRV.00.PRF_timelimit.svg" /><p>If you feel artsy and only want the trace</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_single_rf</span><span class="p">(</span><span class="n">rfst</span><span class="p">[</span><span class="n">N</span><span class="p">],</span> <span class="n">tlim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="n">clean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which removes all labels, axes etc.</p>
+<img alt="../_images/IU.HRV.00.PRF_timelimit.svg" src="../_images/IU.HRV.00.PRF_timelimit.svg" /></section>
+<section id="receiver-function-section">
+<h2>Receiver Function Section<a class="headerlink" href="#receiver-function-section" title="Permalink to this headline"></a></h2>
+<p>We can plot all receiver functions in an <code class="docutils literal notranslate"><span class="pre">RFStream</span></code> into a section depending
+on epicentral distance.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot section</span>
+<span class="n">plot_section</span><span class="p">(</span><span class="n">rfst</span><span class="p">,</span> <span class="n">scalingfactor</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This plots all available RFs in the Stream into a section</p>
+<img alt="../_images/section_raw.png" src="../_images/section_raw.png" />
+<p>Also this plot can be limited using the right arguments</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># Plot section with limits</span>
+<span class="linenos">2</span><span class="n">timelimits</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>  <span class="c1"># seconds</span>
+<span class="linenos">3</span><span class="n">epilimits</span> <span class="o">=</span> <span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">36</span><span class="p">)</span>  <span class="c1"># epicentral distance</span>
+<span class="linenos">4</span><span class="n">plot_section</span><span class="p">(</span><span class="n">rfst</span><span class="p">,</span> <span class="n">scalingfactor</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span>
+<span class="linenos">5</span>             <span class="n">timelimits</span><span class="o">=</span><span class="n">timelimits</span><span class="p">,</span> <span class="n">epilimits</span><span class="o">=</span><span class="n">epilimits</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which provides a more detailed view of the receiver functions</p>
+<img alt="../_images/section_limits.png" src="../_images/section_limits.png" />
+</section>
+<section id="ccp-stack-plotting">
+<h2>CCP Stack Plotting<a class="headerlink" href="#ccp-stack-plotting" title="Permalink to this headline"></a></h2>
+<p>The stacks computed and saved by the routines have a few built-in plotting
+tools for simple visualization</p>
+<section id="volume-sections">
+<h3>Volume Sections<a class="headerlink" href="#volume-sections" title="Permalink to this headline"></a></h3>
+<p>Here we compute a CCP volume first and subsequently slice through it by simply
+taking slices from a 3D matrix.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyglimer.ccp.ccp</span> <span class="kn">import</span> <span class="n">read_ccp</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">set_mpl_params</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="linenos"> 4</span><span class="n">set_mpl_params</span><span class="p">()</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="c1"># Read the CCP Stack</span>
+<span class="linenos"> 7</span><span class="n">ccpstack</span> <span class="o">=</span> <span class="n">read_ccp</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;../ccp_IU_HRV.pkl&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="c1"># Create spacing</span>
+<span class="linenos">10</span><span class="n">lats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">41</span><span class="p">,</span> <span class="mf">43.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+<span class="linenos">11</span><span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">72.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">69.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+<span class="linenos">12</span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">211</span><span class="p">)</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="c1"># Plot volume slices: vplot is a VolumePlot object</span>
+<span class="linenos">15</span><span class="n">vplot</span> <span class="o">=</span> <span class="n">ccpstack</span><span class="o">.</span><span class="n">plot_volume_sections</span><span class="p">(</span>
+<span class="linenos">16</span>    <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span><span class="p">,</span> <span class="n">zmax</span><span class="o">=</span><span class="mi">211</span><span class="p">,</span> <span class="n">lonsl</span><span class="o">=-</span><span class="mf">71.45</span><span class="p">,</span> <span class="n">latsl</span><span class="o">=</span><span class="mf">42.5</span><span class="p">,</span> <span class="n">zsl</span><span class="o">=</span><span class="mi">23</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/ccp_volume.png" src="../_images/ccp_volume.png" />
+</section>
+<section id="cross-section">
+<h3>Cross Section<a class="headerlink" href="#cross-section" title="Permalink to this headline"></a></h3>
+<p>We can build cross sections without actually compute a full volume. This is
+done (like the computation of the fiull volume) by using a KDTree that
+provides weighted nearest neighbour interpolation on a sphere.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyglimer.ccp.ccp</span> <span class="kn">import</span> <span class="n">read_ccp</span>
+<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">set_mpl_params</span>
+<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="linenos"> 5</span><span class="n">set_mpl_params</span><span class="p">()</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c1"># Read the CCP Stack</span>
+<span class="linenos"> 8</span><span class="n">ccpstack</span> <span class="o">=</span> <span class="n">read_ccp</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;../ccp_IU_HRV.pkl&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1"># Create points waypoints for the cross section</span>
+<span class="linenos">11</span><span class="n">lat0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">42.5</span><span class="p">,</span> <span class="mf">42.5</span><span class="p">])</span>
+<span class="linenos">12</span><span class="n">lon0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">72.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">69.5</span><span class="p">])</span>
+<span class="linenos">13</span><span class="n">lat1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">41.5</span><span class="p">,</span> <span class="mf">43.5</span><span class="p">])</span>
+<span class="linenos">14</span><span class="n">lon1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">71.45</span><span class="p">,</span> <span class="o">-</span><span class="mf">71.45</span><span class="p">])</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="c1"># Set RF boundaries</span>
+<span class="linenos">17</span><span class="n">mapextent</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">73.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">69</span><span class="p">,</span> <span class="mi">41</span><span class="p">,</span> <span class="mi">44</span><span class="p">]</span>
+<span class="linenos">18</span><span class="n">depthextent</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">]</span>
+<span class="linenos">19</span><span class="n">vmin</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
+<span class="linenos">20</span><span class="n">vmax</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># Plot cross sections</span>
+<span class="linenos">23</span><span class="n">ax1</span><span class="p">,</span> <span class="n">geoax</span> <span class="o">=</span> <span class="n">ccpstack</span><span class="o">.</span><span class="n">plot_cross_section</span><span class="p">(</span>
+<span class="linenos">24</span>    <span class="n">lat0</span><span class="p">,</span> <span class="n">lon0</span><span class="p">,</span> <span class="n">z0</span><span class="o">=</span><span class="mi">23</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+<span class="linenos">25</span>    <span class="n">mapplot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">minillum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span>
+<span class="linenos">26</span>    <span class="n">depthextent</span><span class="o">=</span><span class="n">depthextent</span><span class="p">,</span>
+<span class="linenos">27</span>    <span class="n">mapextent</span><span class="o">=</span><span class="n">mapextent</span><span class="p">)</span>
+<span class="linenos">28</span><span class="n">ax2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ccpstack</span><span class="o">.</span><span class="n">plot_cross_section</span><span class="p">(</span>
+<span class="linenos">29</span>    <span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+<span class="linenos">30</span>    <span class="n">geoax</span><span class="o">=</span><span class="n">geoax</span><span class="p">,</span> <span class="n">mapplot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos">31</span>    <span class="n">minillum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">,</span>
+<span class="linenos">32</span>    <span class="n">depthextent</span><span class="o">=</span><span class="n">depthextent</span>
+<span class="linenos">33</span><span class="p">)</span>
+<span class="linenos">34</span>
+<span class="linenos">35</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This snippet creates a map including the illumination</p>
+<img alt="../_images/cross_section_map.png" src="../_images/cross_section_map.png" />
+<p>and the respective cross sections A</p>
+<img alt="../_images/cross_section_A.png" src="../_images/cross_section_A.png" />
+<p>and B</p>
+<img alt="../_images/cross_section_B.png" src="../_images/cross_section_B.png" />
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ccp.html" class="btn btn-neutral float-left" title="Common Conversion Point Stacking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="API.html" class="btn btn-neutral float-right" title="PyGLImER API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, the PyGLImER development team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

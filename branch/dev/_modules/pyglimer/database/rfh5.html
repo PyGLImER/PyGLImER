@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyglimer.database.rfh5 &mdash; PyGLImER 0.01 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> PyGLImER
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../chapters/API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyGLImER</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>pyglimer.database.rfh5</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyglimer.database.rfh5</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">:copyright:</span>
+<span class="sd">   The PyGLImER development team (makus@gfz-potsdam.de).</span>
+<span class="sd">:license:</span>
+<span class="sd">   `GNU Lesser General Public License, Version 3</span>
+<span class="sd">   &lt;https://www.gnu.org/copyleft/lesser.html&gt;`</span>
+<span class="sd">:author:</span>
+<span class="sd">   Peter Makus (makus@gfz-potsdam.de)</span>
+
+<span class="sd">Created: Wednesday, 11th August 2021 03:20:09 pm</span>
+<span class="sd">Last Modified: Monday, 4th October 2021 03:28:36 pm</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1"># from numpy.core.fromnumeric import compress</span>
+<span class="kn">from</span> <span class="nn">obspy.core.utcdatetime</span> <span class="kn">import</span> <span class="n">UTCDateTime</span>
+<span class="kn">from</span> <span class="nn">obspy.core</span> <span class="kn">import</span> <span class="n">Stats</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+
+<span class="kn">from</span> <span class="nn">pyglimer.rf.create</span> <span class="kn">import</span> <span class="n">RFStream</span><span class="p">,</span> <span class="n">RFTrace</span>
+
+
+<span class="n">hierarchy</span> <span class="o">=</span> <span class="s2">&quot;/</span><span class="si">{tag}</span><span class="s2">/</span><span class="si">{network}</span><span class="s2">/</span><span class="si">{station}</span><span class="s2">/</span><span class="si">{phase}</span><span class="s2">/</span><span class="si">{pol}</span><span class="s2">/</span><span class="si">{evt_time}</span><span class="s2">&quot;</span>
+<span class="n">h5_FMTSTR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{dir}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{network}</span><span class="s2">.</span><span class="si">{station}</span><span class="s2">.h5&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DBHandler"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.database.rfh5.DBHandler">[docs]</a><span class="k">class</span> <span class="nc">DBHandler</span><span class="p">(</span><span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The actual file handler of the hdf5 receiver function files.</span>
+
+<span class="sd">    .. warning::</span>
+
+<span class="sd">        **Should not be accessed directly. Access</span>
+<span class="sd">        :class:`~pyglimer.database.rfh5.RFDataBase` instead.**</span>
+
+<span class="sd">    Child object of :class:`h5py.File` and inherets all its attributes and</span>
+<span class="sd">    functions in addition to functions that are particularly useful for noise</span>
+<span class="sd">    correlations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">compression</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DBHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">compression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(\w+?)(\d+)&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">!=</span> <span class="s1">&#39;gzip&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;Compression of type </span><span class="si">%s</span><span class="s1"> is not supported.&#39;</span>
+                    <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(\w+?)(\d+)&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">):</span>
+                <span class="n">ii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)[</span><span class="n">ii</span><span class="p">]</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s1">&#39;Chosen compression level is not available for </span><span class="si">%s</span><span class="s1">. </span><span class="se">\</span>
+<span class="si">%s</span><span class="s1"> Has been chosen instead (closest)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">compression</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_add_known_waveform_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ret</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">rej</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Known waveforms to receive. Is just a dictionary with two keys (each</span>
+<span class="sd">        of which has a list as item with all retained or rejected waveforms).</span>
+
+<span class="sd">        :param known: dict{ret: List[str], rej: List[str]}</span>
+<span class="sd">        :type known: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;known&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;known&#39;</span><span class="p">]</span>
+            <span class="c1"># Already existing, just change attributes</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;ret&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;rej&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">rej</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DBHandler.add_rf"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.database.rfh5.DBHandler.add_rf">[docs]</a>    <span class="k">def</span> <span class="nf">add_rf</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">RFTrace</span> <span class="ow">or</span> <span class="n">RFStream</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;rf&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add receiver function to the hdf5 file. The data can later be accessed</span>
+<span class="sd">        using the :meth:`~pyglimer.database.rfh5.DBHandler.get_data()` method.</span>
+
+<span class="sd">        :param data: Data to save. Either a</span>
+<span class="sd">            :class:`~pyglimer.rf.create.RFTrace` object or a</span>
+<span class="sd">            :class:`~pyglimer.rf.create.RFStream` holding one or</span>
+<span class="sd">            several traces.</span>
+<span class="sd">        :type data: RFTrace or RFStream</span>
+<span class="sd">        :param tag: The tag that the data should be saved under. By convention,</span>
+<span class="sd">            unstacked correlations are saved with the tag `&#39;rf&#39;`.</span>
+<span class="sd">        :raises TypeError: for wrong data type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">RFTrace</span><span class="p">)</span> <span class="ow">and</span>\
+                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">RFStream</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Data has to be either a </span><span class="se">\</span>
+<span class="s1">:class:`~pyglimer.rf.create.RFTrace` object or a </span><span class="se">\</span>
+<span class="s1">:class:`~~pyglimer.rf.create.RFStream` object&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">RFTrace</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">hierarchy</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">,</span>
+                <span class="n">network</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span>
+                <span class="n">pol</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">pol</span><span class="p">,</span> <span class="n">evt_time</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">event_time</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">())</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">compression</span><span class="p">,</span>
+                    <span class="n">compression_opts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span><span class="p">)</span>
+                <span class="n">convert_header_to_hdf5</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">st</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The dataset </span><span class="si">%s</span><span class="s2"> is already in file and will be </span><span class="se">\</span>
+<span class="s2">omitted.&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DBHandler.get_data"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.database.rfh5.DBHandler.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">evt_time</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">,</span>
+            <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">pol</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;v&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RFStream</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a :class:`~pyglimer.rf.create.RFStream` holding</span>
+<span class="sd">        all the requested data.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            Wildcards are allowed for all parameters.</span>
+
+<span class="sd">        :param network: network code, e.g., IU</span>
+<span class="sd">        :type network: str</span>
+<span class="sd">        :param station: station code, e.g., HRV</span>
+<span class="sd">        :type station: str</span>
+<span class="sd">        :param phase: Teleseismic phase</span>
+<span class="sd">        :type phase: str</span>
+<span class="sd">        :param evt_time: Origin Time of the Event</span>
+<span class="sd">        :type evt_time: UTCDateTime, optional</span>
+<span class="sd">        :param tag: Data tag (e.g., &#39;rf&#39;). Defaults to rf.</span>
+<span class="sd">        :type tag: str, optional</span>
+<span class="sd">        :param pol: RF Polarisation. Defaults to v.</span>
+<span class="sd">        :type pol: str, optional</span>
+<span class="sd">        :return: a :class:`~pyglimer.rf.create.RFStream` holding the requested</span>
+<span class="sd">            data.</span>
+<span class="sd">        :rtype: RFStream</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evt_time</span><span class="p">,</span> <span class="n">UTCDateTime</span><span class="p">):</span>
+            <span class="n">evt_time</span> <span class="o">=</span> <span class="n">evt_time</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">evt_time</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">hierarchy</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">station</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="n">phase</span><span class="p">,</span>
+            <span class="n">pol</span><span class="o">=</span><span class="n">pol</span><span class="p">,</span> <span class="n">evt_time</span><span class="o">=</span><span class="n">evt_time</span><span class="p">)</span>
+        <span class="c1"># Extremely ugly way of changing the path</span>
+        <span class="k">if</span> <span class="s1">&#39;*&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">path</span><span class="p">])</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">read_hdf5_header</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">path</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">RFStream</span><span class="p">(</span><span class="n">RFTrace</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">))</span>
+        <span class="c1"># Now, we need to differ between the fnmatch pattern and the actually</span>
+        <span class="c1"># acessed path</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/*&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">evt_time</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pol</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">station</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">network</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+                            <span class="n">path</span> <span class="o">=</span> <span class="n">tag</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">4</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">all_traces_recursive</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">path</span><span class="p">],</span> <span class="n">RFStream</span><span class="p">(),</span> <span class="n">pattern</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DBHandler.get_coords"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.database.rfh5.DBHandler.get_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_coords</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;rf&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the coordinates of the station.</span>
+
+<span class="sd">        :param network: Network Code.</span>
+<span class="sd">        :type network: str</span>
+<span class="sd">        :param station: Station Code</span>
+<span class="sd">        :type station: str</span>
+<span class="sd">        :param phase: Teleseismic Phase, defaults to None</span>
+<span class="sd">        :type phase: str, optional</span>
+<span class="sd">        :return: Latitude (dec deg), Longitude (dec deg), Elevation (m)</span>
+<span class="sd">        :rtype: Tuple[ float, float, float]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># This might look confusing but it&#39;s actually not looping but just</span>
+        <span class="c1"># choosing the first available file</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="n">tag</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">station</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">phi</span> <span class="o">=</span> <span class="n">phase</span> <span class="ow">or</span> <span class="n">ph</span>
+                <span class="k">for</span> <span class="n">pol</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="n">tag</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">station</span><span class="p">][</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="n">tag</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">station</span><span class="p">][</span><span class="n">phi</span><span class="p">][</span><span class="n">pol</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">rf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+                            <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">pol</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">rf</span><span class="o">.</span><span class="n">count</span><span class="p">():</span>
+                            <span class="k">continue</span>
+                        <span class="k">return</span> <span class="p">(</span>
+                            <span class="n">rf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station_latitude</span><span class="p">,</span>
+                            <span class="n">rf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station_longitude</span><span class="p">,</span>
+                            <span class="n">rf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station_elevation</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c1"># No data?</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s1">&#39;No Data for station </span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1"> and phase </span><span class="si">%s</span><span class="s1">. Returns None.&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">phase</span>
+                <span class="p">))</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_known_waveforms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;known&#39;</span><span class="p">]</span>
+            <span class="n">rej</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;rej&#39;</span><span class="p">])</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;ret&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">rej</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">ret</span><span class="p">,</span> <span class="n">rej</span>
+
+<div class="viewcode-block" id="DBHandler.walk"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.database.rfh5.DBHandler.walk">[docs]</a>    <span class="k">def</span> <span class="nf">walk</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">pol</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;v&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">RFTrace</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterate over all receiver functions with the given properties.</span>
+
+<span class="sd">        :param tag: data tag</span>
+<span class="sd">        :type tag: str</span>
+<span class="sd">        :param network: Network code</span>
+<span class="sd">        :type network: str</span>
+<span class="sd">        :param station: Statio ncode</span>
+<span class="sd">        :type station: str</span>
+<span class="sd">        :param phase: Teleseismic phase</span>
+<span class="sd">        :type phase: str</span>
+<span class="sd">        :param pol: RF-Polarisation, defaults to &#39;v&#39;</span>
+<span class="sd">        :type pol: str, optional</span>
+<span class="sd">        :return: Iterator</span>
+<span class="sd">        :rtype: Iterable[RFTrace]</span>
+<span class="sd">        :yield: one :class:`~pyglimer.rf.create.RFTrace` per receiver function.</span>
+<span class="sd">        :rtype: Iterator[Iterable[RFTrace]]</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            Does not accept wildcards.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="n">tag</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">station</span><span class="p">][</span><span class="n">phase</span><span class="p">][</span><span class="n">pol</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="n">RFTrace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="n">read_hdf5_header</span><span class="p">(</span><span class="n">v</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="RFDataBase"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.database.rfh5.RFDataBase">[docs]</a><span class="k">class</span> <span class="nc">RFDataBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class to handle the hdf5 files that contain noise correlations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;gzip3&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access an hdf5 file holding receiver functions. The resulting file can</span>
+<span class="sd">        be accessed using all functionalities of</span>
+<span class="sd">        `h5py &lt;https://www.h5py.org/&gt;`_ (for example as a dict).</span>
+
+<span class="sd">        :param path: Full path to the file</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param mode: Mode to access the file. Options are: &#39;a&#39; for all, &#39;w&#39; for</span>
+<span class="sd">            write, &#39;r+&#39; for writing in an already existing file, or &#39;r&#39; for</span>
+<span class="sd">            read-only , defaults to &#39;a&#39;.</span>
+<span class="sd">        :type mode: str, optional</span>
+<span class="sd">        :param compression: The compression algorithm and compression level</span>
+<span class="sd">            that the arrays should be saved with. &#39;gzip3&#39; tends to perform</span>
+<span class="sd">            well, else you could choose &#39;gzipx&#39; where x is a digit between</span>
+<span class="sd">            1 and 9 (i.e., 9 is the highest compression) or None for fastest</span>
+<span class="sd">            perfomance, defaults to &#39;gzip3&#39;.</span>
+<span class="sd">        :type compression: str, optional</span>
+
+<span class="sd">        .. warning::</span>
+
+<span class="sd">            **Access only through a context manager (see below):**</span>
+
+<span class="sd">            &gt;&gt;&gt; with RFDataBase(myfile.h5) as rfdb:</span>
+<span class="sd">            &gt;&gt;&gt;     type(rfdb)  # This is a DBHandler</span>
+<span class="sd">            &lt;class &#39;pyglimer.database.rfh5.DBHandler&#39;&gt;</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            &gt;&gt;&gt; with RFDataBase(</span>
+<span class="sd">                        &#39;/path/to/db/XN.NEP06.h5&#39;) as rfdb:</span>
+<span class="sd">            &gt;&gt;&gt;     # find the available tags for existing db</span>
+<span class="sd">            &gt;&gt;&gt;     print(list(rfdb.keys()))</span>
+<span class="sd">            [&#39;rf&#39;, &#39;rfstack&#39;]</span>
+<span class="sd">            &gt;&gt;&gt;     # Get Data from all times and tag rf, phase P</span>
+<span class="sd">            &gt;&gt;&gt;     st = rfdb.get_data(</span>
+<span class="sd">            &gt;&gt;&gt;         &#39;XN&#39;, &#39;NEP06&#39;, &#39;P&#39;, &#39;*&#39;, &#39;rf&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; print(st.count())</span>
+<span class="sd">            250</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Create / read file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;h5&#39;</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">+=</span> <span class="s1">&#39;.h5&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">=</span> <span class="n">compression</span>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DBHandler</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_handler</span> <span class="o">=</span> <span class="n">DBHandler</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_handler</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">tb</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_handler</span><span class="o">.</span><span class="n">_close</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="all_traces_recursive"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.database.rfh5.all_traces_recursive">[docs]</a><span class="k">def</span> <span class="nf">all_traces_recursive</span><span class="p">(</span>
+    <span class="n">group</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">_hl</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">Group</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="n">RFStream</span><span class="p">,</span>
+        <span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RFStream</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recursively, appends all traces in a h5py group to the input stream.</span>
+<span class="sd">    In addition this will check whether the data matches a certain pattern.</span>
+
+<span class="sd">    :param group: group to search through</span>
+<span class="sd">    :type group: class:`h5py._hl.group.Group`</span>
+<span class="sd">    :param stream: Stream to append the traces to</span>
+<span class="sd">    :type stream: CorrStream</span>
+<span class="sd">    :param pattern: pattern for the path in the hdf5 file, see fnmatch for</span>
+<span class="sd">        details.</span>
+<span class="sd">    :type pattern: str</span>
+<span class="sd">    :return: Stream with appended traces</span>
+<span class="sd">    :rtype: CorrStream</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pattern</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">h5py</span><span class="o">.</span><span class="n">_hl</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+            <span class="n">all_traces_recursive</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">stream</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">stream</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">RFTrace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="n">read_hdf5_header</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s1">&#39;Header could not be converted. Attributes are: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">attrs</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">stream</span></div>
+
+
+<div class="viewcode-block" id="convert_header_to_hdf5"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.database.rfh5.convert_header_to_hdf5">[docs]</a><span class="k">def</span> <span class="nf">convert_header_to_hdf5</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="n">Stats</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert an :class:`~obspy.core.Stats` object and adds it to the provided</span>
+<span class="sd">    hdf5 dataset.</span>
+
+<span class="sd">    :param dataset: the dataset that the header should be added to</span>
+<span class="sd">    :type dataset: h5py.Dataset</span>
+<span class="sd">    :param header: The trace&#39;s header</span>
+<span class="sd">    :type header: Stats</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">UTCDateTime</span><span class="p">):</span>
+                <span class="c1"># convert time to string</span>
+                <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s1">&#39;The header contains an item of type </span><span class="si">%s</span><span class="s1">. Information</span><span class="se">\</span>
+<span class="s1">            of this type cannot be written to an hdf5 file.&#39;</span>
+                <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">])),</span> <span class="ne">UserWarning</span><span class="p">)</span>
+            <span class="k">continue</span></div>
+
+
+<div class="viewcode-block" id="read_hdf5_header"><a class="viewcode-back" href="../../../chapters/API.html#pyglimer.database.rfh5.read_hdf5_header">[docs]</a><span class="k">def</span> <span class="nf">read_hdf5_header</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stats</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes an hdf5 dataset as input and returns the header of the CorrTrace.</span>
+
+<span class="sd">    :param dataset: The dataset to be read from</span>
+<span class="sd">    :type dataset: h5py.Dataset</span>
+<span class="sd">    :return: The trace&#39;s header</span>
+<span class="sd">    :rtype: Stats</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span>
+    <span class="n">time_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;starttime&#39;</span><span class="p">,</span> <span class="s1">&#39;endtime&#39;</span><span class="p">,</span> <span class="s1">&#39;onset&#39;</span><span class="p">,</span> <span class="s1">&#39;event_time&#39;</span><span class="p">]</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">time_keys</span><span class="p">:</span>
+            <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;processing&#39;</span><span class="p">:</span>
+            <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">Stats</span><span class="p">(</span><span class="n">header</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, the PyGLImER development team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

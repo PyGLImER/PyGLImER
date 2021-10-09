@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Common Conversion Point Stacking &mdash; PyGLImER 0.01 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Plotting" href="plotting.html" />
+    <link rel="prev" title="Handling Receiver Functions" href="receiver_function.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> PyGLImER
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Waveform Download, preprocessing, and receiver function creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Common Conversion Point Stacking</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ccpstack-objects">CCPStack objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ccp-bins">CCP bins</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-ccp-stack-in-pyglimer">Creating a CCP stack in PyGLImER</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyGLImER</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Common Conversion Point Stacking</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/chapters/ccp.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="common-conversion-point-stacking">
+<h1>Common Conversion Point Stacking<a class="headerlink" href="#common-conversion-point-stacking" title="Permalink to this headline"></a></h1>
+<p>Provided that we have an extensive RF database for a certain geographic region,
+we can create a volume of those receiver functions depending on piercing points
+with varying grades of spatial averaging. Those volumes are referred to as <em>Common
+Conversion Point (CCP)</em> stacks.</p>
+<section id="ccpstack-objects">
+<h2>CCPStack objects<a class="headerlink" href="#ccpstack-objects" title="Permalink to this headline"></a></h2>
+<p>In <strong>PyGLImER</strong>, the base class enabling CCP stacking is the <a class="reference internal" href="API.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> class.
+However, to understand how CCP-Stacking is implemented,
+we will have to have a small intermezzo about binning.</p>
+<section id="ccp-bins">
+<h3>CCP bins<a class="headerlink" href="#ccp-bins" title="Permalink to this headline"></a></h3>
+<p>In <strong>PyGLImER</strong>, CCP bins are round in mapview (cylindric in 3D). If a piercing point of a receiver function is inside
+of a bin, it will be added to this bin (i.e. there is one “station” stack in each bin). As such the shape of a bingrid is controlled
+by two parameters: The bin’s radius R and the interbin distance d.</p>
+<p>The bin radius decides, whether a piercing point is close enough (smaller
+than R) to be added to the bin. High bin radii result in strong spatial averaging, which mitigates noise and can be helpful if the
+illumination is low, whereas small radii have the potential of revealing small scale details.</p>
+<p>Concerning the bin distance, we face a tradeoff between resolution and computational efficiency. Dense grids will take significantly
+longer to compute and to plot than coarse grids. However, finely gridded bingrids have a higher resolution (much like pixels in a
+digital image). It should be mentioned though that the resolution that can be reached this way is limited and depending on the bin radius.
+In a way, higher bin radii introduce a blur to our image, which we cannot remove by decreasing the bin distance (much like we can upscale
+our digital image, but the resolving power will not increase). Therefore, PyGLImER has a threshold for the bin radius.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The maximal bin radius allowed by PyGLImER equals 4 times the bin distance (to limit computational expense).
+The minimal bin radius one should use is cos(30deg)*bin distance. For lower values the bingrid will not cover the whole surface area.</p>
+</div>
+</section>
+<section id="creating-a-ccp-stack-in-pyglimer">
+<h3>Creating a CCP stack in PyGLImER<a class="headerlink" href="#creating-a-ccp-stack-in-pyglimer" title="Permalink to this headline"></a></h3>
+<p>CCP stacks in PyGLImER are usually not created by initialising the <a class="reference internal" href="API.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> class but by calling the
+<a class="reference internal" href="API.html#pyglimer.ccp.ccp.init_ccp" title="pyglimer.ccp.ccp.init_ccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code></a> function, which, itself, initialises the aforementioned object.</p>
+<p>Using <a class="reference internal" href="API.html#pyglimer.ccp.ccp.init_ccp" title="pyglimer.ccp.ccp.init_ccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code></a>, there are two ways to create a <a class="reference internal" href="API.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> object:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>By Creating a bingrid tailored to be used with data from predefined networks and stations (i.e. one
+has to know network and station codes for the desired stack.</p></li>
+<li><p>More commonly, one would like to create a CCP stack containing all available data for a given area.
+In order to that, <a class="reference internal" href="API.html#pyglimer.ccp.ccp.init_ccp" title="pyglimer.ccp.ccp.init_ccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code></a> can be called with the <code class="docutils literal notranslate"><span class="pre">geocoords</span></code> parameter.
+Then, PyGLImER will automatically find all stations available in the given area and create a bingrid around those data.</p></li>
+</ol>
+</div></blockquote>
+<p><strong>Populating the CCP object</strong> is done by <a class="reference internal" href="API.html#pyglimer.ccp.ccp.init_ccp" title="pyglimer.ccp.ccp.init_ccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code></a> if called using the <code class="docutils literal notranslate"><span class="pre">compute_stack=True</span></code>
+argument (recommended), else one will have to call <a class="reference internal" href="API.html#pyglimer.ccp.ccp.CCPStack.compute_stack" title="pyglimer.ccp.ccp.CCPStack.compute_stack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compute_stack()</span></code></a>.</p>
+<p><strong>Finalising the CCP object.</strong> Up to now data was only saved in the object and we have not created an actual CCP stack, yet.
+We can do just that by calling <a class="reference internal" href="API.html#pyglimer.ccp.ccp.CCPStack.conclude_ccp" title="pyglimer.ccp.ccp.CCPStack.conclude_ccp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">conclude_ccp()</span></code></a>. Here, we can decide <strong>1.</strong> if we want to keep
+empty bins <strong>2.</strong> what should be the threshold for a minimum amount of data per bin <strong>3.</strong> Whether we want to discards bins
+that are on water surfaces or keep them.</p>
+<p><strong>Saving our CCP object.</strong> The standard format to save these objects is pickle <cite>.pkl</cite>, which provides the fastest
+reading speed. However, if you want to archive your data we recommend using the <strong>numpy npz</strong> format as older pickle
+files can sometimes lead to compatibility issues after updating PyGLImER.
+For compatibility with older plotting programs in Matlab (a legacy from GLImER), we can also save our CCP object as <cite>.mat</cite>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>A ccp object saved as <cite>.mat</cite> will not save all data - only the finalised stack!</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you want to store your CCP Stack for a longer period of time, we recommend using the <em>npz</em> format to do so.</p>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="receiver_function.html" class="btn btn-neutral float-left" title="Handling Receiver Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plotting.html" class="btn btn-neutral float-right" title="Plotting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, the PyGLImER development team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

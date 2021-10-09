@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Waveform Download, preprocessing, and receiver function creation &mdash; PyGLImER 0.01 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Handling Receiver Functions" href="receiver_function.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> PyGLImER
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Waveform Download, preprocessing, and receiver function creation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-request-class">The Request Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mseed-sac-database">MSEED/SAC Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hdf5-database">HDF5 Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#methods-of-the-request-class">Methods of the Request class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-the-parameters-for-your-request">Setting the parameters for your request</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="receiver_function.html">Handling Receiver Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ccp.html">Common Conversion Point Stacking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API.html"><code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyGLImER</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Waveform Download, preprocessing, and receiver function creation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/chapters/download.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="waveform-download-preprocessing-and-receiver-function-creation">
+<h1>Waveform Download, preprocessing, and receiver function creation<a class="headerlink" href="#waveform-download-preprocessing-and-receiver-function-creation" title="Permalink to this headline"></a></h1>
+<p>Our first step will be to download the data from FDSN webservices for a certain time window.</p>
+<section id="the-request-class">
+<h2>The Request Class<a class="headerlink" href="#the-request-class" title="Permalink to this headline"></a></h2>
+<p>The <a class="reference internal" href="API.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> class handles all steps from download, over preprocessing,
+to deconvolution (i.e. the creation of a time domain receiver function).
+Since PyGLImER-v0.1.0 the database can be saved in two different formats - <em>MSEED</em> (raw waveforms), <em>SAC</em>
+(receiver functions), and <em>XML</em> (station response and event database) <strong>OR</strong> in <em>hdf5</em> (hierachical data format).
+Both options have advantages and downsides (see below).</p>
+<section id="mseed-sac-database">
+<h3>MSEED/SAC Database<a class="headerlink" href="#mseed-sac-database" title="Permalink to this headline"></a></h3>
+<p>If the user chooses this option, the <a class="reference internal" href="API.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> object will create
+a folder structure as defined by the user. Those contain raw (i.e. unprocessed, but downsampled)
+waveform files in miniseed format, preprocessed (3 component in RTZ coordinate system, and filtered/discarded
+by signal to noise ratio) waveforms in miniseed format together with info-files (shelve format),
+and receiver functions in time domain and in .SAC format, respectively). Additionally,
+a directory with station response files will be created.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Saving your database in this format might be the better option if you create a relatively
+small database. Then, computational times tend to be shorter.
+However, for large databases (e.g., world-wide) this will create millions of files and
+potentially overload your file system.</p>
+</div>
+</section>
+<section id="hdf5-database">
+<h3>HDF5 Database<a class="headerlink" href="#hdf5-database" title="Permalink to this headline"></a></h3>
+<p>Your second option is to save data in <em>hdf5</em> format. In this case, only two directories will be created;
+one for the downsampled raw-data and another one for the final time-domain receiver functions. The raw data
+management is based on <a class="reference external" href="https://seismicdata.github.io/pyasdf/">PyASDF</a> (head there to
+learn how to access waveforms, event catalogues, and station response files), whereas receiver
+functions are saved in an hdf5 variant specific to PyGLImER (in the following, we will learn how to use it).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Use this format if you plan to create a large database as it will both save some disk space
+and, more importantly, create only two files per station.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Once a database is created,
+a new Request object will always update existing raw-data if the same
+rawdir is chosen (i.e. download new data, if any available). This is valid for both
+formats!</p>
+</div>
+</section>
+<section id="methods-of-the-request-class">
+<h3>Methods of the Request class<a class="headerlink" href="#methods-of-the-request-class" title="Permalink to this headline"></a></h3>
+<p>A Request object has four public methods:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><p><a class="reference internal" href="API.html#pyglimer.waveform.request.Request.download_eventcat" title="pyglimer.waveform.request.Request.download_eventcat"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_eventcat()</span></code></a></p></li>
+<li><p><a class="reference internal" href="API.html#pyglimer.waveform.request.Request.download_waveforms" title="pyglimer.waveform.request.Request.download_waveforms"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms()</span></code></a></p></li>
+<li><p><a class="reference internal" href="API.html#pyglimer.waveform.request.Request.download_waveforms_small_db" title="pyglimer.waveform.request.Request.download_waveforms_small_db"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms_small_db()</span></code></a></p></li>
+<li><p><a class="reference internal" href="API.html#pyglimer.waveform.request.Request.preprocess" title="pyglimer.waveform.request.Request.preprocess"><code class="xref py py-meth docutils literal notranslate"><span class="pre">preprocess()</span></code></a></p></li>
+</ul>
+</td></tr></table>
+<p>The functions are responsible for:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><p>Downloading the event catalogue - for which waveforms should be downloaded</p></li>
+<li><p>(2+3) Downloading station information - such as response data - and raw waveform data</p></li>
+<li><p>Downsampling the raw data, preprocessing the raw data and saving the filtered data in a different directory, and creating receiver functions.</p></li>
+</ul>
+</td></tr></table>
+<p>However, all parameters are already set, when initialising the <a class="reference internal" href="API.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> object.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As you surely have noticed, there are two functions to download data. As the name suggests
+<a class="reference internal" href="API.html#pyglimer.waveform.request.Request.download_waveforms_small_db" title="pyglimer.waveform.request.Request.download_waveforms_small_db"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms_small_db()</span></code></a>, is the tool
+of choice if you wish to download smaller databases, consisting of data from only few stations
+or networks. This function does also have the advantage that you can
+<strong>download data from defined lists of networks and stations</strong> instead of having to rely only on wildcards.
+For smaller databases <a class="reference internal" href="API.html#pyglimer.waveform.request.Request.download_waveforms_small_db" title="pyglimer.waveform.request.Request.download_waveforms_small_db"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms_small_db()</span></code></a> will
+download data up to twice faster than <a class="reference internal" href="API.html#pyglimer.waveform.request.Request.download_waveforms" title="pyglimer.waveform.request.Request.download_waveforms"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms()</span></code></a>.
+The latter will be the better choice if you create databases on continental or even global scales. It
+utilises the <a class="reference external" href="https://docs.obspy.org/packages/autogen/obspy.clients.fdsn.mass_downloader.html">Obspy Mass Downloader</a>.</p>
+</div>
+</section>
+<section id="setting-the-parameters-for-your-request">
+<h3>Setting the parameters for your request<a class="headerlink" href="#setting-the-parameters-for-your-request" title="Permalink to this headline"></a></h3>
+<p>The parameters for preprocessing and download are set when initialising the
+<a class="reference internal" href="API.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> object. Probably the most convenient way to define them
+is to create a <em>yaml</em> file with the parameters. An example comes with this repository in <cite>params.yaml</cite>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># This file is used to define the parameters used for PyGLImER</span>
+<span class="linenos"> 2</span><span class="c1">#### Project wide parameters</span>
+<span class="linenos"> 3</span><span class="c1"># lowest level project directory</span>
+<span class="linenos"> 4</span><span class="nt">proj_dir </span><span class="p">:</span> <span class="s">&#39;database&#39;</span>
+<span class="linenos"> 5</span><span class="c1"># raw waveforms</span>
+<span class="linenos"> 6</span><span class="nt">raw_subdir</span><span class="p">:</span> <span class="s">&#39;waveforms/raw&#39;</span>
+<span class="linenos"> 7</span><span class="c1"># preprocessed subdir, only in use if fileformat = &#39;mseed&#39;</span>
+<span class="linenos"> 8</span><span class="nt">prepro_subdir</span><span class="p">:</span> <span class="s">&#39;waveforms/preprocessed&#39;</span>
+<span class="linenos"> 9</span><span class="c1"># receiver function subdir</span>
+<span class="linenos">10</span><span class="nt">rf_subdir</span><span class="p">:</span> <span class="s">&#39;waveforms/RF&#39;</span>
+<span class="linenos">11</span><span class="c1"># statxml subdir</span>
+<span class="linenos">12</span><span class="nt">statloc_subdir</span><span class="p">:</span> <span class="s">&#39;stations&#39;</span>
+<span class="linenos">13</span><span class="c1"># subdir for event catalogues</span>
+<span class="linenos">14</span><span class="nt">evt_subdir</span><span class="p">:</span> <span class="s">&#39;event_catalogs&#39;</span>
+<span class="linenos">15</span><span class="c1"># directory for logging information</span>
+<span class="linenos">16</span><span class="nt">log_subdir </span><span class="p">:</span> <span class="s">&#39;log&#39;</span>
+<span class="linenos">17</span><span class="c1"># levels:</span>
+<span class="linenos">18</span><span class="c1"># &#39;DEBUG&#39;, &#39;INFO&#39;, &#39;WARNING&#39;, &#39;ERROR&#39;, or &#39;CRITICAL&#39;</span>
+<span class="linenos">19</span><span class="nt">loglvl</span><span class="p">:</span> <span class="s">&#39;DEBUG&#39;</span>
+<span class="linenos">20</span><span class="c1"># format, either mseed or hdf5</span>
+<span class="linenos">21</span><span class="nt">format</span><span class="p">:</span> <span class="s">&#39;hdf5&#39;</span>
+<span class="linenos">22</span>
+<span class="linenos">23</span><span class="c1"># The teleseismic phase to use (P or S or also more exotic ones like SKS, PKP, ScS)</span>
+<span class="linenos">24</span><span class="nt">phase</span><span class="p">:</span> <span class="s">&#39;S&#39;</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span><span class="c1">### Request parameters</span>
+<span class="linenos">27</span><span class="c1">## First, everything concerning the download</span>
+<span class="linenos">28</span><span class="c1"># waveform client, list of strings</span>
+<span class="linenos">29</span><span class="c1"># use None if you want to download from all available FDSN servers</span>
+<span class="linenos">30</span><span class="nt">waveform_client</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;IRIS&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">31</span><span class="c1"># Use an already downloaded event catalog</span>
+<span class="linenos">32</span><span class="c1"># If so insert path+filename here.</span>
+<span class="linenos">33</span><span class="nt">evtcat</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">34</span><span class="c1"># earliest event</span>
+<span class="linenos">35</span><span class="nt">starttime</span><span class="p">:</span> <span class="s">&#39;2009-01-1</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span>
+<span class="linenos">36</span><span class="c1"># latest event</span>
+<span class="linenos">37</span><span class="nt">endtime</span><span class="p">:</span> <span class="s">&#39;2011-12-31</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span>
+<span class="linenos">38</span><span class="c1"># Minumum Magnitude</span>
+<span class="linenos">39</span><span class="nt">minmag</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5.5</span>
+<span class="linenos">40</span><span class="c1"># Network and station to use, unix-style wildcards are allowed</span>
+<span class="linenos">41</span><span class="c1"># if you use the Request.download_waveforms_small_db method,</span>
+<span class="linenos">42</span><span class="c1"># you can also provide a list of networks and/or a list of stations</span>
+<span class="linenos">43</span><span class="nt">network</span><span class="p">:</span> <span class="s">&#39;YP&#39;</span>
+<span class="linenos">44</span><span class="nt">station</span><span class="p">:</span> <span class="s">&#39;*&#39;</span>
+<span class="linenos">45</span>
+<span class="linenos">46</span><span class="c1">## concerning preprocessing</span>
+<span class="linenos">47</span><span class="c1"># Coordinate system to rotate the seismogram to before deconvolution</span>
+<span class="linenos">48</span><span class="c1"># RTZ, LQT, or PSS</span>
+<span class="linenos">49</span><span class="nt">rot</span><span class="p">:</span> <span class="s">&#39;PSS&#39;</span>
+<span class="linenos">50</span><span class="c1"># Polarisation, use v for v/q receiver functions</span>
+<span class="linenos">51</span><span class="c1"># and h for transverse (SH)</span>
+<span class="linenos">52</span><span class="nt">pol</span><span class="p">:</span> <span class="s">&#39;v&#39;</span>
+<span class="linenos">53</span><span class="c1"># Deconvolution method to use</span>
+<span class="linenos">54</span><span class="c1"># Iterative time domain: &#39;it&#39;</span>
+<span class="linenos">55</span><span class="c1"># Waterlevel Spectral Division: &#39;waterlevel&#39;</span>
+<span class="linenos">56</span><span class="nt">deconmeth</span><span class="p">:</span> <span class="s">&#39;it&#39;</span>
+</pre></div>
+</div>
+<p>You can then read the yaml file using <em>pyyaml</em> like so:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">yaml</span>
+
+<span class="kn">from</span> <span class="nn">pyglimer.waveform.request</span> <span class="kn">import</span> <span class="n">Request</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/path/to/my/params.yaml&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">pfile</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+
+<span class="n">r</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Alternatively, you could of course just set the parameters while initialising the
+object.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="receiver_function.html" class="btn btn-neutral float-right" title="Handling Receiver Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, the PyGLImER development team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
