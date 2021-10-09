@@ -1,11 +1,8 @@
 <img src="docs/chapters/figures/logo.png" alt="drawing" width="400"/>
-<br/>
-
 
 [![Build Status](https://github.com/PeterMakus/PyGLImER/actions/workflows/test_on_push.yml/badge.svg?branch=master)](https://github.com/PeterMakus/PyGLImER/actions/workflows/test_on_push.yml) [![Documentation Status](https://github.com/PeterMakus/PyGLImER/actions/workflows/deploy_gh_pages.yml/badge.svg?branch=master)](https://github.com/PeterMakus/PyGLImER/actions/workflows/deploy_gh_pages.yml) [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
 ---
-<br/>
 
 # PyGLImER
 
