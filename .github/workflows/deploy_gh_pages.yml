@@ -1,10 +1,14 @@
 name: sphinx
-on: [push, pull_request]
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
-env:
-  DEFAULT_BRANCH: "master"
-  #SPHINXOPTS: "-W --keep-going -T"
-  # ^-- If these SPHINXOPTS are enabled, then be strict about the builds and fail on any warnings
+# env:
+#   DEFAULT_BRANCH: "master"
+#   #SPHINXOPTS: "-W --keep-going -T"
+#   # ^-- If these SPHINXOPTS are enabled, then be strict about the builds and fail on any warnings
 
 jobs:
   build-and-deploy:
