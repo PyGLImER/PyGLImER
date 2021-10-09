@@ -57,7 +57,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_book_theme'
+html_theme = 'pydata_sphinx_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -68,9 +68,56 @@ html_title = ""
 html_logo = "chapters/figures/logo.png"
 # html_favicon = "chapters/figures/favicon.ico"
 
-html_theme_options = {
-    "repository_url": "https://github.com/lwsspy/lwsspy",
-    "use_issues_button": True,
-    "use_repository_button": True,
-    "use_edit_page_button": True,
+html_context = {
+    # "github_url": "https://github.com", # or your GitHub Enterprise interprise
+    "github_user": 'PeterMakus',
+    "github_repo": 'PyGLImER',
+    "github_version": "master",
+    "doc_path": "docs",
 }
+
+html_theme_options = {
+    "external_links": [
+        {"url": "http://www.stephanerondenay.com/glimer-web.html", "name": "GLImER"}
+    ],
+    "github_url": "https://github.com/PeterMakus/PyGLImER",
+    "use_edit_page_button": True,
+    # "show_toc_level": 1,
+
+    # "repository_url": "https://github.com/lwsspy/lwsspy",
+    # "use_issues_button": True,
+    # "use_repository_button": True,
+    # "use_edit_page_button": True,
+    # "github_url": "https://github.com/PeterMakus/PyGLImER",
+    # "logo_link": "chapters/figures/logo.png",
+    # "icon_links": [
+    #     {
+    #         "name": "GitHub",
+    #         "url": "https://github.com/PeterMakus/PyGLImER",
+    #         "icon": "fab fa-github-square",
+    #     },
+
+    # ],
+    "collapse_navigation": True,
+    # "page_sidebar_items": ["page-toc"],
+    "navigation_depth": 5,
+    # "navbar_align": "left"
+
+    # "search_bar_position": "navbar",  # TODO: Deprecated - remove in future version
+    # [left, content, right] For testing that the navbar items align properly
+    # "navbar_align": "left",
+    # "navbar_start": ["navbar-logo"],  # "navbar-version"],
+    # "navbar_center": ["navbar-nav"],  # "navbar-version"],  # Just for testing
+    # "navbar-version"],  # Just for testing
+    # "navbar_end": ["navbar-icon-links"],
+    # "footer_items": ["copyright", "sphinx-version", ""],
+
+}
+# ''
+# html_sidebars = {
+#     "contributing": ["search-field", "custom-template"],
+#     "changelog": [],
+# }
+# html_sidebars = {
+#     # "**": ["search-field.html", "sidebar-nav-bs.html", "sidebar-ethical-ads.html"]
+# }

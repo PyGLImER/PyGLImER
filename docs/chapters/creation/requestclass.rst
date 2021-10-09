@@ -1,8 +1,3 @@
-Waveform Download, preprocessing, and receiver function creation
-----------------------------------------------------------------
-
-Our first step will be to download the data from FDSN webservices for a certain time window.
-
 The Request Class
 +++++++++++++++++
 The :py:class:`~pyglimer.waveform.request.Request` class handles all steps from download, over preprocessing,

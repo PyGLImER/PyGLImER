@@ -29,5 +29,5 @@ dependencies:
   - pip:
     - global-land-mask
     - sphinx
-    - sphinx_book_theme
+    - pydata-sphinx-theme
     - -e .
