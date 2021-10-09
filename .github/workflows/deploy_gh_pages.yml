@@ -3,9 +3,11 @@ name: Documentation
 # Define on which aciton and on which branch to perform action
 on:
   push:
-    branches: [ master ]
+    branches:
+      - main
   pull_request:
-    branches: [ master ]
+    branches:
+      - main
 
 jobs:
 

@@ -84,40 +84,10 @@ html_theme_options = {
     "use_edit_page_button": True,
     # "show_toc_level": 1,
 
-    # "repository_url": "https://github.com/lwsspy/lwsspy",
-    # "use_issues_button": True,
-    # "use_repository_button": True,
-    # "use_edit_page_button": True,
-    # "github_url": "https://github.com/PeterMakus/PyGLImER",
-    # "logo_link": "chapters/figures/logo.png",
-    # "icon_links": [
-    #     {
-    #         "name": "GitHub",
-    #         "url": "https://github.com/PeterMakus/PyGLImER",
-    #         "icon": "fab fa-github-square",
-    #     },
+    "use_edit_page_button": True,
 
-    # ],
-    "collapse_navigation": True,
-    # "page_sidebar_items": ["page-toc"],
-    "navigation_depth": 5,
+    # "collapse_navigation": True,
+    "navigation_depth": 2,
     # "navbar_align": "left"
 
-    # "search_bar_position": "navbar",  # TODO: Deprecated - remove in future version
-    # [left, content, right] For testing that the navbar items align properly
-    # "navbar_align": "left",
-    # "navbar_start": ["navbar-logo"],  # "navbar-version"],
-    # "navbar_center": ["navbar-nav"],  # "navbar-version"],  # Just for testing
-    # "navbar-version"],  # Just for testing
-    # "navbar_end": ["navbar-icon-links"],
-    # "footer_items": ["copyright", "sphinx-version", ""],
-
 }
-# ''
-# html_sidebars = {
-#     "contributing": ["search-field", "custom-template"],
-#     "changelog": [],
-# }
-# html_sidebars = {
-#     # "**": ["search-field.html", "sidebar-nav-bs.html", "sidebar-ethical-ads.html"]
-# }
