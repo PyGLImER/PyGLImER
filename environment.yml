@@ -30,4 +30,5 @@ dependencies:
     - global-land-mask
     - sphinx<4.0
     - pydata-sphinx-theme
+    - sphinx-copybutton
     - -e .

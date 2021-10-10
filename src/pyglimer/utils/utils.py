@@ -112,8 +112,9 @@ def __client__loop__(client: str or Client, statloc: str, bulk: list):
     :rtype: obspy.Inventory
     """
     logger = logging.getLogger('pyglimer.request')
-
+    
     try:
+        print("Hello from he loop")
         if not isinstance(client, Client):
             client = Client(client)
         stat_inv = client.get_stations_bulk(

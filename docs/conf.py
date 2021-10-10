@@ -38,7 +38,8 @@ release = '0.01'
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
               'sphinx.ext.githubpages',
-              'sphinx.ext.napoleon'
+              'sphinx.ext.napoleon',
+              'sphinx_copybutton'
               ]
 
 # For docstring __init__ documentation
