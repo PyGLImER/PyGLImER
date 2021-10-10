@@ -82,19 +82,20 @@ def download_small_db(
     d = {'event': [], 'startt': [], 'endt': [], 'net': [], 'stat': []}
     for net in inv:
         for stat in net:
+            logger.info(f"Checking {net.code}{stat.code}")
             for evt in event_cat:
                 try:
                     toa, _, _, _, delta = compute_toa(
                         evt, stat.latitude, stat.longitude, phase, model)
                 except IndexError:
                     # occurs when there is no arrival of the phase at stat
-                    logger.info(
+                    logger.debug(
                         'No valid arrival found for station %s,' % stat.code +
                         'event %s, and phase %s' % (evt.resource_id, phase))
                     continue
                 # We only do that if the epicentral distances are correct
                 if delta < min_epid or delta > max_epid:
-                    logger.info(
+                    logger.debug(
                         'No valid arrival found for station %s, ' % stat.code +
                         'event %s, and phase %s' % (evt.resource_id, phase))
                     continue
