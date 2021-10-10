@@ -82,7 +82,7 @@ def download_small_db(
     d = {'event': [], 'startt': [], 'endt': [], 'net': [], 'stat': []}
     for net in inv:
         for stat in net:
-            logger.info(f"Checking {net.code}{stat.code}")
+            logger.info(f"Checking {net.code}.{stat.code}")
             for evt in event_cat:
                 try:
                     toa, _, _, _, delta = compute_toa(
