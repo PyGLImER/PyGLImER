@@ -114,19 +114,21 @@ def __client__loop__(client: str or Client, statloc: str, bulk: list):
     logger = logging.getLogger('pyglimer.request')
     
     try:
-        print("Hello from he loop")
+    
         if not isinstance(client, Client):
             client = Client(client)
         stat_inv = client.get_stations_bulk(
             bulk, level='response')
     except (header.FDSNNoDataException, header.FDSNException, ValueError) as e:
         logger.warning(str(e))
+        logger.debug(f"{bulk}")
         return  # wrong client
         # ValueError is raised for querying a client without station service
     for network in stat_inv:
         netcode = network.code
         for station in network:
             statcode = station.code
+            logger.debug(f"{netcode}.{statcode}")
             out = os.path.join(statloc, '%s.%s.xml' % (netcode, statcode))
             stat_inv.select(network=netcode, station=statcode).write(
                 out, format="STATIONXML")
