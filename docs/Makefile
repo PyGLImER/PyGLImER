@@ -5,8 +5,8 @@
 # from the environment for the first two.
 SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
-SOURCEDIR     = source
-BUILDDIR      = build
+SOURCEDIR     = .
+BUILDDIR      = _build
 GH_PAGES_SOURCES = source ../src/pyglimer ../setup.py ./Makefile ../setup.cfg ../tests ../formatting_test
 
 # Put it first so that "make" without argument is like "make help".

@@ -75,14 +75,15 @@ def gctrack(
     """Given waypoints and a point distance, this function computes evenly
     spaced points along the great circle and the given waypoints.
 
+    .. warning:: This function is not very accurate, but it it is fast. You may
+                 want to resort to more accurate functions that is of importance
+                 for your work. Here this function is only used for the purpose
+                 of making cross sections.
+
     Parameters
     ----------
-    lat : np.ndarray
-        waypoint latitudes
-    lon : np.ndarray
-        waypoint longitudes
-    dist : float
-        distance in degrees
+    lat : np.ndarray waypoint latitudes lon : np.ndarray waypoint longitudes
+        dist : float distance in degrees
 
 
     Returns
@@ -93,11 +94,11 @@ def gctrack(
     Notes
     -----
 
-    :Authors:
+    :Authors: 
         Lucas Sawade (lsawade@princeton.edu)
 
-    :Last Modified:
-        2020.04.20 00.30
+    :Last Modified: 
+        2021.10.10 02.17
 
     """
 
@@ -107,12 +108,17 @@ def gctrack(
     az = np.zeros(N-1)
 
     # Create Geodesic class
-    G = Geodesic()
+    G = Geodesic(flattening=0.0)
 
     # Get distances along the waypoints
     mat = np.asarray(G.inverse(np.array((lon[0:-1], lat[0:-1])).T,
                                np.array((lon[1:], lat[1:])).T))
     dists = mat[:, 0]/1000.0/111.11
+
+    if np.any(dists > 180.0):
+        raise ValueError(
+            "Distance between waypoints shouldn't exceed 180 deg. "
+            "For numerical stability.")
     az = mat[:, 1]
 
     # Cumulative station distances
@@ -120,16 +126,21 @@ def gctrack(
     sdists[1:] = np.cumsum(dists)
 
     # Get tracks between segments that are far apart
+    
     tracks = []
     for _i in range(N-1):
 
-        if dists[_i] > dist:
-            # Create vector between two poitns
-            trackdists = np.arange(0, dists[_i], dist)
-            track = np.array(reckon(lat[_i], lon[_i], trackdists, az[_i]))
+        # New dist vector
+        trackdists = np.linspace(0, dists[_i], int(np.ceil((dists[_i])/dist)))
+        track = np.array(reckon(lat[_i], lon[_i], trackdists, az[_i]))
 
-        else:
-            track = np.array((lat[_i:_i+1], lon[_i:_i+1]))
+        # if dists[_i] > dist:
+        # Create vector between two poitns
+            # trackdists = np.arange(0, dists[_i], dist)
+            # track = np.array(reckon(lat[_i], lon[_i], trackdists, az[_i]))
+        # else:
+        #     # pass
+        #     track = np.array((lat[_i:_i+1], lon[_i:_i+1]))
 
         tracks.append(track)
 
@@ -160,6 +171,10 @@ def gctrack(
     ilat = interp1d(cdists, utrack[:, 0])
     ilon = interp1d(cdists, utrack[:, 1])
     qlat, qlon = ilat(qdists), ilon(qdists)
+
+    # Fix longitudes
+    qlon = np.where(qlon < -180.0, qlon+360.0, qlon)
+    qlon = np.where(qlon > 180.0, qlon-360.0, qlon)
 
     return qlat, qlon, qdists, sdists
 

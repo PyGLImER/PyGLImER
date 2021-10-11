@@ -237,7 +237,7 @@ def plot_cross_section(
         qccp,
         cmap=rfcmap, norm=rfnorm,
         extent=[0, np.max(qdists), np.max(qz), np.min(qz)],
-        aspect='auto', alpha=alpha, rasterized=True)
+        aspect='auto', rasterized=True)  # , alpha=alpha )
 
     # Plot waypoints
 

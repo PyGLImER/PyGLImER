@@ -9,6 +9,7 @@ incoming `.mat` files that are produced by the GLImER database.
    (https://www.gnu.org/copyleft/lesser.html)
 :author:
    Lucas Sawade (lsawade@princeton.edu)
+
 """
 import h5py
 import numpy as np
@@ -20,17 +21,22 @@ def load_rawrf(filename):
     Parameters
     ----------
     filename : str
-        filename of the receiver function `.mat`-file to be loaded. The
-        `.mat`-file is expected to contain following parameters. See Notes
+        filename of the receiver function ``.mat``-file to be loaded. The
+        ``.mat``-file is expected to contain following parameters. See Notes
         below for required content of matlab rawRf file.
+
 
     Returns
     -------
     rfs, baz, rayp, lat, lon, elev, dt
+        Set of RF variables
+
 
     Notes
     -----
+
     File content
+
     :crfs:
         MxN matrix of M Receiver Functions and N elements
     :cbaz:
@@ -49,6 +55,7 @@ def load_rawrf(filename):
         M elements long vector with station elevation
     :dt:
         sampling interval
+
 
     """
 
