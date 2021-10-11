@@ -28,8 +28,9 @@ wheel
 # cartopy
 
 # For documentation
-sphinx
-sphinx_rtd_theme
+sphinx<4.0
+pydata-sphinx-theme
+sphinx-copybutton
 
 # For tests
 pytest

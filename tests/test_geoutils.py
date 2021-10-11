@@ -21,9 +21,10 @@ from pyglimer.utils import geo_utils as gu
 
 class TestReckon(unittest.TestCase):
     def testsamepoint(self):
+        d = 360*np.random.randint(1, 100)
+
         lat = np.random.randint(-90, 90)
         lon = np.random.randint(-180, 180)
-        d = 360*np.random.randint(1, 100)
         b = np.random.random()*360
         la, lo = gu.reckon(lat, lon, d, b)
         self.assertAlmostEqual(la, lat)
@@ -39,19 +40,25 @@ class TestReckon(unittest.TestCase):
         self.assertAlmostEqual(dis, d)
 
 
-class TestGCTrack(unittest.TestCase):
-    def testspacing(self):
-        lat = np.random.rand(10)*180-90
-        lon = np.random.rand(10)*360-180
-        d = np.random.randint(1, 20)/4
-        qlat, qlon, qdists, sdists = gu.gctrack(lat, lon, d)
-        for ii, (la, lo, qdi, sdi) in enumerate(
-                zip(qlat, qlon, qdists, sdists)):
-            if ii in (0, len(qlat)-1):
-                # naturally unprecise
-                continue
-            dis = locations2degrees(la, lo, qlat[ii+1], qlon[ii+1])
-            self.assertAlmostEqual(dis, d, delta=.06)
+def testspacing():
+    d = 10*(np.random.rand(1))/20
+
+    lat = np.random.rand(10)*180-90
+    lon = np.random.rand(10)*360-90
+
+    qlat, qlon, qdists, sdists = gu.gctrack(lat, lon, d)
+    for ii, (la, lo, qdi, sdi) in enumerate(
+            zip(qlat, qlon, qdists, sdists)):
+        if ii in (0, len(qlat)-1):
+            # naturally unprecise
+            continue
+        dis = locations2degrees(la, lo, qlat[ii+1], qlon[ii+1])
+
+        # print('Debug')
+        # print(d, dis)
+        # print(lat)
+        # print(lon)
+        np.testing.assert_approx_equal(dis, d, significant=1.0)
 
 
 if __name__ == "__main__":
