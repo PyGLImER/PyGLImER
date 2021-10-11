@@ -4,8 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CCPStack objects</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
@@ -23,15 +22,18 @@
       
 
     
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/blank.css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/blank.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     
   <link rel="preload" as="script" href="../../_static/js/index.be7d3bbb2ef33a8344ce.js">
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Plotting" href="../plotting/index.html" />
@@ -216,13 +218,13 @@
               
               <div>
                 
-  <section id="ccpstack-objects">
+  <div class="section" id="ccpstack-objects">
 <h1>CCPStack objects<a class="headerlink" href="#ccpstack-objects" title="Permalink to this headline">¶</a></h1>
 <p>In <strong>PyGLImER</strong>, the base class enabling CCP stacking is the
 <a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> class. However, to understand how
 CCP-Stacking is implemented, we will have to have a small intermezzo about
 binning.</p>
-<section id="ccp-bins">
+<div class="section" id="ccp-bins">
 <h2>CCP bins<a class="headerlink" href="#ccp-bins" title="Permalink to this headline">¶</a></h2>
 <p>In <strong>PyGLImER</strong>, CCP bins are round in mapview (cylindric in
 3D). If a piercing point of a receiver function is inside of a bin, it will be
@@ -249,8 +251,8 @@ has a threshold for the bin radius.</p>
 cos(30deg)*bin distance. For lower values the bingrid will not cover the
 whole surface area.</p>
 </div>
-</section>
-<section id="creating-a-ccp-stack-in-pyglimer">
+</div>
+<div class="section" id="creating-a-ccp-stack-in-pyglimer">
 <h2>Creating a CCP stack in PyGLImER<a class="headerlink" href="#creating-a-ccp-stack-in-pyglimer" title="Permalink to this headline">¶</a></h2>
 <p>CCP stacks in PyGLImER are usually not created by initialising the
 <a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> class but by calling the
@@ -296,8 +298,8 @@ stack!</p>
 <p>If you want to store your CCP Stack for a longer period of time, we
 recommend using the <em>npz</em> format to do so.</p>
 </div>
-</section>
-</section>
+</div>
+</div>
 
 
               </div>
@@ -339,7 +341,7 @@ recommend using the <em>npz</em> format to do so.</p>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br>
 </p>
     </div>
     

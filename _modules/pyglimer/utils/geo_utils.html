@@ -22,15 +22,18 @@
       
 
     
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/blank.css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/blank.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
     
   <link rel="preload" as="script" href="../../../_static/js/index.be7d3bbb2ef33a8344ce.js">
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -243,14 +246,15 @@
     <span class="sd">&quot;&quot;&quot;Given waypoints and a point distance, this function computes evenly</span>
 <span class="sd">    spaced points along the great circle and the given waypoints.</span>
 
+<span class="sd">    .. warning:: This function is not very accurate, but it it is fast. You may</span>
+<span class="sd">                 want to resort to more accurate functions that is of importance</span>
+<span class="sd">                 for your work. Here this function is only used for the purpose</span>
+<span class="sd">                 of making cross sections.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    lat : np.ndarray</span>
-<span class="sd">        waypoint latitudes</span>
-<span class="sd">    lon : np.ndarray</span>
-<span class="sd">        waypoint longitudes</span>
-<span class="sd">    dist : float</span>
-<span class="sd">        distance in degrees</span>
+<span class="sd">    lat : np.ndarray waypoint latitudes lon : np.ndarray waypoint longitudes</span>
+<span class="sd">        dist : float distance in degrees</span>
 
 
 <span class="sd">    Returns</span>
@@ -261,11 +265,11 @@
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 
-<span class="sd">    :Authors:</span>
+<span class="sd">    :Authors: </span>
 <span class="sd">        Lucas Sawade (lsawade@princeton.edu)</span>
 
-<span class="sd">    :Last Modified:</span>
-<span class="sd">        2020.04.20 00.30</span>
+<span class="sd">    :Last Modified: </span>
+<span class="sd">        2021.10.10 02.17</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -275,12 +279,17 @@
     <span class="n">az</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># Create Geodesic class</span>
-    <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">()</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">(</span><span class="n">flattening</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 
     <span class="c1"># Get distances along the waypoints</span>
     <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">lon</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">lat</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
                                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">lon</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">lat</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
     <span class="n">dists</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mf">1000.0</span><span class="o">/</span><span class="mf">111.11</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">dists</span> <span class="o">&gt;</span> <span class="mf">180.0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Distance between waypoints shouldn&#39;t exceed 180 deg. &quot;</span>
+            <span class="s2">&quot;For numerical stability.&quot;</span><span class="p">)</span>
     <span class="n">az</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># Cumulative station distances</span>
@@ -288,16 +297,21 @@
     <span class="n">sdists</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
 
     <span class="c1"># Get tracks between segments that are far apart</span>
+    
     <span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
 
-        <span class="k">if</span> <span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">dist</span><span class="p">:</span>
-            <span class="c1"># Create vector between two poitns</span>
-            <span class="n">trackdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="n">dist</span><span class="p">)</span>
-            <span class="n">track</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reckon</span><span class="p">(</span><span class="n">lat</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="n">lon</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="n">trackdists</span><span class="p">,</span> <span class="n">az</span><span class="p">[</span><span class="n">_i</span><span class="p">]))</span>
+        <span class="c1"># New dist vector</span>
+        <span class="n">trackdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">])</span><span class="o">/</span><span class="n">dist</span><span class="p">)))</span>
+        <span class="n">track</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reckon</span><span class="p">(</span><span class="n">lat</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="n">lon</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="n">trackdists</span><span class="p">,</span> <span class="n">az</span><span class="p">[</span><span class="n">_i</span><span class="p">]))</span>
 
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">track</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">lat</span><span class="p">[</span><span class="n">_i</span><span class="p">:</span><span class="n">_i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">lon</span><span class="p">[</span><span class="n">_i</span><span class="p">:</span><span class="n">_i</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="c1"># if dists[_i] &gt; dist:</span>
+        <span class="c1"># Create vector between two poitns</span>
+            <span class="c1"># trackdists = np.arange(0, dists[_i], dist)</span>
+            <span class="c1"># track = np.array(reckon(lat[_i], lon[_i], trackdists, az[_i]))</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     # pass</span>
+        <span class="c1">#     track = np.array((lat[_i:_i+1], lon[_i:_i+1]))</span>
 
         <span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
 
@@ -328,6 +342,10 @@
     <span class="n">ilat</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">cdists</span><span class="p">,</span> <span class="n">utrack</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
     <span class="n">ilon</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">cdists</span><span class="p">,</span> <span class="n">utrack</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
     <span class="n">qlat</span><span class="p">,</span> <span class="n">qlon</span> <span class="o">=</span> <span class="n">ilat</span><span class="p">(</span><span class="n">qdists</span><span class="p">),</span> <span class="n">ilon</span><span class="p">(</span><span class="n">qdists</span><span class="p">)</span>
+
+    <span class="c1"># Fix longitudes</span>
+    <span class="n">qlon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">qlon</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">180.0</span><span class="p">,</span> <span class="n">qlon</span><span class="o">+</span><span class="mf">360.0</span><span class="p">,</span> <span class="n">qlon</span><span class="p">)</span>
+    <span class="n">qlon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">qlon</span> <span class="o">&gt;</span> <span class="mf">180.0</span><span class="p">,</span> <span class="n">qlon</span><span class="o">-</span><span class="mf">360.0</span><span class="p">,</span> <span class="n">qlon</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">qlat</span><span class="p">,</span> <span class="n">qlon</span><span class="p">,</span> <span class="n">qdists</span><span class="p">,</span> <span class="n">sdists</span></div>
 
@@ -463,7 +481,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br>
 </p>
     </div>
     

@@ -22,15 +22,18 @@
       
 
     
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/blank.css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/css/blank.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
     
   <link rel="preload" as="script" href="../../../_static/js/index.be7d3bbb2ef33a8344ce.js">
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -280,20 +283,23 @@
 <span class="sd">    :rtype: obspy.Inventory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pyglimer.request&#39;</span><span class="p">)</span>
-
+    
     <span class="k">try</span><span class="p">:</span>
+    
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">Client</span><span class="p">):</span>
             <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
         <span class="n">stat_inv</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_stations_bulk</span><span class="p">(</span>
             <span class="n">bulk</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;response&#39;</span><span class="p">)</span>
     <span class="k">except</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">FDSNNoDataException</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">FDSNException</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bulk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span>  <span class="c1"># wrong client</span>
         <span class="c1"># ValueError is raised for querying a client without station service</span>
     <span class="k">for</span> <span class="n">network</span> <span class="ow">in</span> <span class="n">stat_inv</span><span class="p">:</span>
         <span class="n">netcode</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">code</span>
         <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="n">network</span><span class="p">:</span>
             <span class="n">statcode</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">code</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">netcode</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">statcode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">statloc</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.xml&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">netcode</span><span class="p">,</span> <span class="n">statcode</span><span class="p">))</span>
             <span class="n">stat_inv</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="n">netcode</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">statcode</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
                 <span class="n">out</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;STATIONXML&quot;</span><span class="p">)</span>
@@ -565,7 +571,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br>
 </p>
     </div>
     

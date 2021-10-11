@@ -4,8 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pyglimer.test</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
@@ -23,15 +22,18 @@
       
 
     
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/blank.css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/blank.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     
   <link rel="preload" as="script" href="../../_static/js/index.be7d3bbb2ef33a8344ce.js">
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="pyglimer.utils" href="utils.html" />
@@ -241,9 +243,9 @@
               
               <div>
                 
-  <section id="pyglimer-test">
+  <div class="section" id="pyglimer-test">
 <h1>pyglimer.test<a class="headerlink" href="#pyglimer-test" title="Permalink to this headline">¶</a></h1>
-<section id="module-pyglimer.test.rate">
+<div class="section" id="module-pyglimer.test.rate">
 <span id="pyglimer-test-rate"></span><h2>pyglimer.test.rate<a class="headerlink" href="#module-pyglimer.test.rate" title="Permalink to this headline">¶</a></h2>
 <p>Contains various functions used to evaluate the quality of RF and waveforms</p>
 <dl class="field-list simple">
@@ -261,8 +263,8 @@
 <p>Created: Tuesday, 25th February 2020 07:28:30 pm
 Last Modified: Thursday, 19th August 2021 03:13:09 pm</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.test.rate.automatic_rate">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.test.rate.</span></span><span class="sig-name descname"><span class="pre">automatic_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/rate.html#automatic_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.rate.automatic_rate" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.test.rate.automatic_rate">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.test.rate.</span></code><code class="sig-name descname"><span class="pre">automatic_rate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/rate.html#automatic_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.rate.automatic_rate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks the automatic QC criteria for SRF waveforms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -287,8 +289,8 @@ sts.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.test.rate.rate">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.test.rate.</span></span><span class="sig-name descname"><span class="pre">rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">review</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retained</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decon_meth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'it'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_tt_calculation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/rate.html#rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.rate.rate" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.test.rate.rate">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.test.rate.</span></code><code class="sig-name descname"><span class="pre">rate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">review</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retained</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decon_meth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'it'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_tt_calculation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/rate.html#rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.rate.rate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Module to rate and review the quality of Sp or Ps waveforms from the given
 station. Shows the automatic rating from qc. Tapers can be controlled with
 the mouse. Rating is done with the keyboard. Makes only sense if the
@@ -324,8 +326,8 @@ division. The default is ‘it’</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.test.rate.sort_rated">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.test.rate.</span></span><span class="sig-name descname"><span class="pre">sort_rated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/rate.html#sort_rated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.rate.sort_rated" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.test.rate.sort_rated">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.test.rate.</span></code><code class="sig-name descname"><span class="pre">sort_rated</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/rate.html#sort_rated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.rate.sort_rated" title="Permalink to this definition">¶</a></dt>
 <dd><p>Functions that sorts waveforms in 4 folders,
 depending on their manual rating.</p>
 <dl class="field-list simple">
@@ -346,8 +348,8 @@ depending on their manual rating.</p>
 </dl>
 </dd></dl>
 
-</section>
-<section id="module-pyglimer.test.synthetic">
+</div>
+<div class="section" id="module-pyglimer.test.synthetic">
 <span id="pyglimer-test-synthetic"></span><h2>pyglimer.test.synthetic<a class="headerlink" href="#module-pyglimer.test.synthetic" title="Permalink to this headline">¶</a></h2>
 <p>Create synthetic impulse resonses.
 Used to test the deconvolve module.</p>
@@ -366,8 +368,8 @@ Used to test the deconvolve module.</p>
 <p>Created: Wednesday, 23rd October 2019 09:37:30 am
 Last Modified: Thursday, 19th August 2021 03:13:20 pm</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.test.synthetic.create_R">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.test.synthetic.</span></span><span class="sig-name descname"><span class="pre">create_R</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/synthetic.html#create_R"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.synthetic.create_R" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.test.synthetic.create_R">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.test.synthetic.</span></code><code class="sig-name descname"><span class="pre">create_R</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/synthetic.html#create_R"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.synthetic.create_R" title="Permalink to this definition">¶</a></dt>
 <dd><p>Program to create random reflectivity series
 INPUT
 N2: half-length of the signal (N=2*N2+1)
@@ -375,8 +377,8 @@ M: number of seismic discontinuities</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.test.synthetic.synthetic">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.test.synthetic.</span></span><span class="sig-name descname"><span class="pre">synthetic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SNR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/synthetic.html#synthetic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.synthetic.synthetic" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.test.synthetic.synthetic">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.test.synthetic.</span></code><code class="sig-name descname"><span class="pre">synthetic</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SNR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/synthetic.html#synthetic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.synthetic.synthetic" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to create synthetic seismograms (given Impulse response
 convolved with a Ricker wavelet)</p>
 <dl class="field-list simple">
@@ -401,8 +403,8 @@ h_noise : The horizontal component of the seismogram with noise</p>
 </dl>
 </dd></dl>
 
-</section>
-<section id="module-pyglimer.test.tests">
+</div>
+<div class="section" id="module-pyglimer.test.tests">
 <span id="pyglimer-test-tests"></span><h2>pyglimer.test.tests<a class="headerlink" href="#module-pyglimer.test.tests" title="Permalink to this headline">¶</a></h2>
 <p>Created on Wed Apr  1 13:51:46 2020
 Assorted functions that serve as a tests (mostly with synthetic data) of other
@@ -422,8 +424,8 @@ GLImER functions.</p>
 <p>Created: Wednesday, 1st April 2020 01:51:30 pm
 Last Modified: Thursday, 19th August 2021 03:14:24 pm</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.test.tests.decon_test">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">decon_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PSS_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#decon_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.decon_test" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.test.tests.decon_test">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></code><code class="sig-name descname"><span class="pre">decon_test</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PSS_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#decon_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.decon_test" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to test a given deconvolution method with synthetic data created
 with raysum.</p>
 <dl class="field-list simple">
@@ -449,8 +451,8 @@ damped multitaper deconvolution.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.test.tests.moveout_test">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">moveout_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PSS_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#moveout_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.moveout_test" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.test.tests.moveout_test">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></code><code class="sig-name descname"><span class="pre">moveout_test</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PSS_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#moveout_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.moveout_test" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates synthetic PRFs and stacks them after depth migration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -475,8 +477,8 @@ damped multitaper deconvolution.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.test.tests.read_geom">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">read_geom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#read_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.read_geom" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.test.tests.read_geom">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></code><code class="sig-name descname"><span class="pre">read_geom</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#read_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.read_geom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads in the geometry file of the raysum program to determine parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -495,8 +497,8 @@ damped multitaper deconvolution.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.test.tests.read_raysum">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">read_raysum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NEZ_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RTZ_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PSS_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#read_raysum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.read_raysum" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.test.tests.read_raysum">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></code><code class="sig-name descname"><span class="pre">read_raysum</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NEZ_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RTZ_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PSS_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#read_raysum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.read_raysum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the output of the raysum program (by Andrew Frederiksen).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -522,8 +524,8 @@ damped multitaper deconvolution.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.test.tests.read_rfs_mat">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">read_rfs_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output/ccps'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output/waveforms/RF/P/matlab'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'matlab'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#read_rfs_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.read_rfs_mat" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.test.tests.read_rfs_mat">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></code><code class="sig-name descname"><span class="pre">read_rfs_mat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output/ccps'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output/waveforms/RF/P/matlab'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'matlab'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#read_rfs_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.read_rfs_mat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads in Matlab files constructed by the old GLImER workflow.
 It takes a long time to decode h5 files with that and they cannot
 be pickled either, so no multicore :-/</p>
@@ -546,8 +548,8 @@ be pickled either, so no multicore :-/</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.test.tests.rf_test">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">rf_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfloc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output/waveforms/RF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geom_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'3D.geom'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decon_meth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'it'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#rf_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.rf_test" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.test.tests.rf_test">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></code><code class="sig-name descname"><span class="pre">rf_test</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfloc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output/waveforms/RF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geom_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'3D.geom'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decon_meth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'it'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#rf_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.rf_test" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates synthetic PRFs from Raysum data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -568,14 +570,14 @@ be pickled either, so no multicore :-/</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.test.tests.test_SNR">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></span><span class="sig-name descname"><span class="pre">test_SNR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ouput/waveforms/preprocessed'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#test_SNR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.test_SNR" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.test.tests.test_SNR">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.test.tests.</span></code><code class="sig-name descname"><span class="pre">test_SNR</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ouput/waveforms/preprocessed'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/test/tests.html#test_SNR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.test.tests.test_SNR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test the automatic QC scripts for a certain station and writes ratings
 in the rating file.</p>
 </dd></dl>
 
-</section>
-</section>
+</div>
+</div>
 
 
               </div>
@@ -617,7 +619,7 @@ in the rating file.</p>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br>
 </p>
     </div>
     

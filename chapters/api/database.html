@@ -4,8 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pyglimer.database</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
@@ -23,15 +22,18 @@
       
 
     
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/blank.css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/blank.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     
   <link rel="preload" as="script" href="../../_static/js/index.be7d3bbb2ef33a8344ce.js">
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="pyglimer.test" href="test.html" />
@@ -241,9 +243,9 @@
               
               <div>
                 
-  <section id="pyglimer-database">
+  <div class="section" id="pyglimer-database">
 <h1>pyglimer.database<a class="headerlink" href="#pyglimer-database" title="Permalink to this headline">¶</a></h1>
-<section id="module-pyglimer.database.stations">
+<div class="section" id="module-pyglimer.database.stations">
 <span id="pyglimer-database-stations"></span><h2>pyglimer.database.stations<a class="headerlink" href="#module-pyglimer.database.stations" title="Permalink to this headline">¶</a></h2>
 <p>Database management and overview for the PyGLImER database.</p>
 <dl class="field-list simple">
@@ -261,8 +263,8 @@
 <p>Created: Friday, 12th February 2020 03:24:30 pm
 Last Modified: Saturday, 21st August 2021 07:41:42 am</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.database.stations.redownload_missing_statxmls">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.database.stations.</span></span><span class="sig-name descname"><span class="pre">redownload_missing_statxmls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/stations.html#redownload_missing_statxmls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.stations.redownload_missing_statxmls" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.stations.redownload_missing_statxmls">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.database.stations.</span></code><code class="sig-name descname"><span class="pre">redownload_missing_statxmls</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/stations.html#redownload_missing_statxmls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.stations.redownload_missing_statxmls" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fairly primitive program that walks through existing raw waveforms in
 rawdir and looks for missing station xmls in statloc and, afterwards,
 attemps a redownload</p>
@@ -282,8 +284,8 @@ mseeds.</p></li>
 </dl>
 </dd></dl>
 
-</section>
-<section id="module-pyglimer.database.asdf">
+</div>
+<div class="section" id="module-pyglimer.database.asdf">
 <span id="pyglimer-database-asdf"></span><h2>pyglimer.database.asdf<a class="headerlink" href="#module-pyglimer.database.asdf" title="Permalink to this headline">¶</a></h2>
 <p>A module to handle and rewrite the PyGLiMER database to and in Adaptable
 Seismic Format (asdf).</p>
@@ -302,8 +304,8 @@ Seismic Format (asdf).</p>
 <p>Created: Friday, 12th February 2021 03:24:30 pm</p>
 <p>Last Modified: Wednesday, 22nd September 2021 03:18:12 pm</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.database.asdf.rewrite_to_hdf5">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.database.asdf.</span></span><span class="sig-name descname"><span class="pre">rewrite_to_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">catfile</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawfolder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/asdf.html#rewrite_to_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.asdf.rewrite_to_hdf5" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.asdf.rewrite_to_hdf5">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.database.asdf.</span></code><code class="sig-name descname"><span class="pre">rewrite_to_hdf5</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">catfile</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawfolder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/asdf.html#rewrite_to_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.asdf.rewrite_to_hdf5" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts an existing miniseed waveform database to hierachal data format
 (hdf5).</p>
 <dl class="field-list simple">
@@ -321,8 +323,8 @@ the phase code (i.e., waveforms/raw/P)</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.database.asdf.write_st">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.database.asdf.</span></span><span class="sig-name descname"><span class="pre">write_st</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">threading.Event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfolder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statxml</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.inventory.inventory.Inventory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/asdf.html#write_st"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.asdf.write_st" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.asdf.write_st">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.database.asdf.</span></code><code class="sig-name descname"><span class="pre">write_st</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">threading.Event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfolder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statxml</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.inventory.inventory.Inventory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/asdf.html#write_st"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.asdf.write_st" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write raw waveform data to an asdf file. This includes the corresponding
 (teleseismic) event and the station inventory (i.e., response information).</p>
 <dl class="field-list simple">
@@ -339,8 +341,8 @@ the phase code (i.e., waveforms/raw/P)</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.database.asdf.writeraw">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.database.asdf.</span></span><span class="sig-name descname"><span class="pre">writeraw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.event.event.Event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawfolder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/asdf.html#writeraw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.asdf.writeraw" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.asdf.writeraw">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.database.asdf.</span></code><code class="sig-name descname"><span class="pre">writeraw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.event.event.Event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawfolder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/asdf.html#writeraw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.asdf.writeraw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the downloaded miniseed, event, and stationxmls to a single asdf
 file.</p>
 <dl class="field-list simple">
@@ -357,8 +359,8 @@ Includes an AA-filter.</p></li>
 </dl>
 </dd></dl>
 
-</section>
-<section id="module-pyglimer.database.rfh5">
+</div>
+<div class="section" id="module-pyglimer.database.rfh5">
 <span id="pyglimer-database-rfh5"></span><h2>pyglimer.database.rfh5<a class="headerlink" href="#module-pyglimer.database.rfh5" title="Permalink to this headline">¶</a></h2>
 <dl class="field-list simple">
 <dt class="field-odd">copyright</dt>
@@ -375,8 +377,8 @@ Includes an AA-filter.</p></li>
 <p>Created: Wednesday, 11th August 2021 03:20:09 pm
 Last Modified: Monday, 4th October 2021 03:28:36 pm</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pyglimer.database.rfh5.DBHandler">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></span><span class="sig-name descname"><span class="pre">DBHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#DBHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.DBHandler" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.rfh5.DBHandler">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></code><code class="sig-name descname"><span class="pre">DBHandler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#DBHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.DBHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">h5py._hl.files.File</span></code></p>
 <p>The actual file handler of the hdf5 receiver function files.</p>
 <div class="admonition warning">
@@ -459,8 +461,8 @@ value is 1.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pyglimer.database.rfh5.DBHandler.add_rf">
-<span class="sig-name descname"><span class="pre">add_rf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="rf.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><span class="pre">pyglimer.rf.create.RFTrace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'rf'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#DBHandler.add_rf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.DBHandler.add_rf" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.rfh5.DBHandler.add_rf">
+<code class="sig-name descname"><span class="pre">add_rf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="rf.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><span class="pre">pyglimer.rf.create.RFTrace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'rf'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#DBHandler.add_rf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.DBHandler.add_rf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add receiver function to the hdf5 file. The data can later be accessed
 using the <a class="reference internal" href="#pyglimer.database.rfh5.DBHandler.get_data" title="pyglimer.database.rfh5.DBHandler.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a> method.</p>
 <dl class="field-list simple">
@@ -481,8 +483,8 @@ unstacked correlations are saved with the tag <cite>‘rf’</cite>.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyglimer.database.rfh5.DBHandler.get_coords">
-<span class="sig-name descname"><span class="pre">get_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'rf'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#DBHandler.get_coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.DBHandler.get_coords" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.rfh5.DBHandler.get_coords">
+<code class="sig-name descname"><span class="pre">get_coords</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'rf'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#DBHandler.get_coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.DBHandler.get_coords" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the coordinates of the station.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -502,8 +504,8 @@ unstacked correlations are saved with the tag <cite>‘rf’</cite>.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyglimer.database.rfh5.DBHandler.get_data">
-<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evt_time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'rf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'v'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><span class="pre">pyglimer.rf.create.RFStream</span></a></span></span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#DBHandler.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.DBHandler.get_data" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.rfh5.DBHandler.get_data">
+<code class="sig-name descname"><span class="pre">get_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evt_time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'rf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'v'</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><span class="pre">pyglimer.rf.create.RFStream</span></a><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#DBHandler.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.DBHandler.get_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a <a class="reference internal" href="rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> holding
 all the requested data.</p>
 <div class="admonition note">
@@ -532,8 +534,8 @@ data.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyglimer.database.rfh5.DBHandler.walk">
-<span class="sig-name descname"><span class="pre">walk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'v'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="rf.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><span class="pre">pyglimer.rf.create.RFTrace</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#DBHandler.walk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.DBHandler.walk" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.rfh5.DBHandler.walk">
+<code class="sig-name descname"><span class="pre">walk</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'v'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="rf.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><span class="pre">pyglimer.rf.create.RFTrace</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#DBHandler.walk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.DBHandler.walk" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterate over all receiver functions with the given properties.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -567,8 +569,8 @@ data.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pyglimer.database.rfh5.RFDataBase">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></span><span class="sig-name descname"><span class="pre">RFDataBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'a'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'gzip3'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#RFDataBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.RFDataBase" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.rfh5.RFDataBase">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></code><code class="sig-name descname"><span class="pre">RFDataBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'a'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'gzip3'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#RFDataBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.RFDataBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Base class to handle the hdf5 files that contain noise correlations.</p>
 <p>Access an hdf5 file holding receiver functions. The resulting file can
@@ -614,8 +616,8 @@ perfomance, defaults to ‘gzip3’.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.database.rfh5.all_traces_recursive">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></span><span class="sig-name descname"><span class="pre">all_traces_recursive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">h5py._hl.group.Group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><span class="pre">pyglimer.rf.create.RFStream</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><span class="pre">pyglimer.rf.create.RFStream</span></a></span></span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#all_traces_recursive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.all_traces_recursive" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.rfh5.all_traces_recursive">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></code><code class="sig-name descname"><span class="pre">all_traces_recursive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">h5py._hl.group.Group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><span class="pre">pyglimer.rf.create.RFStream</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><span class="pre">pyglimer.rf.create.RFStream</span></a><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#all_traces_recursive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.all_traces_recursive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Recursively, appends all traces in a h5py group to the input stream.
 In addition this will check whether the data matches a certain pattern.</p>
 <dl class="field-list simple">
@@ -637,8 +639,8 @@ details.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.database.rfh5.convert_header_to_hdf5">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></span><span class="sig-name descname"><span class="pre">convert_header_to_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">h5py._hl.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.trace.Stats</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#convert_header_to_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.convert_header_to_hdf5" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.rfh5.convert_header_to_hdf5">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></code><code class="sig-name descname"><span class="pre">convert_header_to_hdf5</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">h5py._hl.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.trace.Stats</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#convert_header_to_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.convert_header_to_hdf5" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert an <code class="xref py py-class docutils literal notranslate"><span class="pre">Stats</span></code> object and adds it to the provided
 hdf5 dataset.</p>
 <dl class="field-list simple">
@@ -652,8 +654,8 @@ hdf5 dataset.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.database.rfh5.read_hdf5_header">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></span><span class="sig-name descname"><span class="pre">read_hdf5_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">h5py._hl.dataset.Dataset</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">obspy.core.trace.Stats</span></span></span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#read_hdf5_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.read_hdf5_header" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.database.rfh5.read_hdf5_header">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></code><code class="sig-name descname"><span class="pre">read_hdf5_header</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">h5py._hl.dataset.Dataset</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">obspy.core.trace.Stats</span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#read_hdf5_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.read_hdf5_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes an hdf5 dataset as input and returns the header of the CorrTrace.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -668,8 +670,8 @@ hdf5 dataset.</p>
 </dl>
 </dd></dl>
 
-</section>
-</section>
+</div>
+</div>
 
 
               </div>
@@ -711,7 +713,7 @@ hdf5 dataset.</p>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br>
 </p>
     </div>
     

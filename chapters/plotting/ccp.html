@@ -4,8 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CCP Stack Plotting</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
@@ -23,15 +22,18 @@
       
 
     
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/blank.css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/blank.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     
   <link rel="preload" as="script" href="../../_static/js/index.be7d3bbb2ef33a8344ce.js">
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="API" href="../api/index.html" />
@@ -216,84 +218,133 @@
               
               <div>
                 
-  <section id="ccp-stack-plotting">
+  <div class="section" id="ccp-stack-plotting">
 <h1>CCP Stack Plotting<a class="headerlink" href="#ccp-stack-plotting" title="Permalink to this headline">¶</a></h1>
 <p>The stacks computed and saved by the routines have a few built-in plotting
 tools for simple visualization</p>
-<section id="volume-sections">
+<div class="section" id="volume-sections">
 <h2>Volume Sections<a class="headerlink" href="#volume-sections" title="Permalink to this headline">¶</a></h2>
 <p>Here we compute a CCP volume first and subsequently slice through it by simply
 taking slices from a 3D matrix.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyglimer.ccp.ccp</span> <span class="kn">import</span> <span class="n">read_ccp</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">set_mpl_params</span>
-<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="linenos"> 4</span><span class="n">set_mpl_params</span><span class="p">()</span>
-<span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="c1"># Read the CCP Stack</span>
-<span class="linenos"> 7</span><span class="n">ccpstack</span> <span class="o">=</span> <span class="n">read_ccp</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;../ccp_IU_HRV.pkl&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-<span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="c1"># Create spacing</span>
-<span class="linenos">10</span><span class="n">lats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">41</span><span class="p">,</span> <span class="mf">43.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
-<span class="linenos">11</span><span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">72.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">69.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
-<span class="linenos">12</span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">211</span><span class="p">)</span>
-<span class="linenos">13</span>
-<span class="linenos">14</span><span class="c1"># Plot volume slices: vplot is a VolumePlot object</span>
-<span class="linenos">15</span><span class="n">vplot</span> <span class="o">=</span> <span class="n">ccpstack</span><span class="o">.</span><span class="n">plot_volume_sections</span><span class="p">(</span>
-<span class="linenos">16</span>    <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span><span class="p">,</span> <span class="n">zmax</span><span class="o">=</span><span class="mi">211</span><span class="p">,</span> <span class="n">lonsl</span><span class="o">=-</span><span class="mf">71.45</span><span class="p">,</span> <span class="n">latsl</span><span class="o">=</span><span class="mf">42.5</span><span class="p">,</span> <span class="n">zsl</span><span class="o">=</span><span class="mi">23</span><span class="p">)</span>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglimer.ccp.ccp</span> <span class="kn">import</span> <span class="n">read_ccp</span>
+<span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">set_mpl_params</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="n">set_mpl_params</span><span class="p">()</span>
+
+<span class="c1"># Read the CCP Stack</span>
+<span class="n">ccpstack</span> <span class="o">=</span> <span class="n">read_ccp</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;../ccp_IU_HRV.pkl&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="c1"># Create spacing</span>
+<span class="n">lats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">41</span><span class="p">,</span> <span class="mf">43.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+<span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">72.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">69.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">211</span><span class="p">)</span>
+
+<span class="c1"># Plot volume slices: vplot is a VolumePlot object</span>
+<span class="n">vplot</span> <span class="o">=</span> <span class="n">ccpstack</span><span class="o">.</span><span class="n">plot_volume_sections</span><span class="p">(</span>
+    <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span><span class="p">,</span> <span class="n">zmax</span><span class="o">=</span><span class="mi">211</span><span class="p">,</span> <span class="n">lonsl</span><span class="o">=-</span><span class="mf">71.45</span><span class="p">,</span> <span class="n">latsl</span><span class="o">=</span><span class="mf">42.5</span><span class="p">,</span> <span class="n">zsl</span><span class="o">=</span><span class="mi">23</span><span class="p">)</span>
 </pre></div>
-</div>
+</td></tr></table></div>
 <img alt="../../_images/ccp_volume.png" src="../../_images/ccp_volume.png" />
-</section>
-<section id="cross-section">
+</div>
+<div class="section" id="cross-section">
 <h2>Cross Section<a class="headerlink" href="#cross-section" title="Permalink to this headline">¶</a></h2>
 <p>We can build cross sections without actually compute a full volume. This is
 done (like the computation of the fiull volume) by using a KDTree that
 provides weighted nearest neighbour interpolation on a sphere.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyglimer.ccp.ccp</span> <span class="kn">import</span> <span class="n">read_ccp</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">set_mpl_params</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="linenos"> 5</span><span class="n">set_mpl_params</span><span class="p">()</span>
-<span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="c1"># Read the CCP Stack</span>
-<span class="linenos"> 8</span><span class="n">ccpstack</span> <span class="o">=</span> <span class="n">read_ccp</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;../ccp_IU_HRV.pkl&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-<span class="linenos"> 9</span>
-<span class="linenos">10</span><span class="c1"># Create points waypoints for the cross section</span>
-<span class="linenos">11</span><span class="n">lat0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">42.5</span><span class="p">,</span> <span class="mf">42.5</span><span class="p">])</span>
-<span class="linenos">12</span><span class="n">lon0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">72.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">69.5</span><span class="p">])</span>
-<span class="linenos">13</span><span class="n">lat1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">41.5</span><span class="p">,</span> <span class="mf">43.5</span><span class="p">])</span>
-<span class="linenos">14</span><span class="n">lon1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">71.45</span><span class="p">,</span> <span class="o">-</span><span class="mf">71.45</span><span class="p">])</span>
-<span class="linenos">15</span>
-<span class="linenos">16</span><span class="c1"># Set RF boundaries</span>
-<span class="linenos">17</span><span class="n">mapextent</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">73.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">69</span><span class="p">,</span> <span class="mi">41</span><span class="p">,</span> <span class="mi">44</span><span class="p">]</span>
-<span class="linenos">18</span><span class="n">depthextent</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">]</span>
-<span class="linenos">19</span><span class="n">vmin</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
-<span class="linenos">20</span><span class="n">vmax</span> <span class="o">=</span> <span class="mf">0.1</span>
-<span class="linenos">21</span>
-<span class="linenos">22</span><span class="c1"># Plot cross sections</span>
-<span class="linenos">23</span><span class="n">ax1</span><span class="p">,</span> <span class="n">geoax</span> <span class="o">=</span> <span class="n">ccpstack</span><span class="o">.</span><span class="n">plot_cross_section</span><span class="p">(</span>
-<span class="linenos">24</span>    <span class="n">lat0</span><span class="p">,</span> <span class="n">lon0</span><span class="p">,</span> <span class="n">z0</span><span class="o">=</span><span class="mi">23</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
-<span class="linenos">25</span>    <span class="n">mapplot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">minillum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span>
-<span class="linenos">26</span>    <span class="n">depthextent</span><span class="o">=</span><span class="n">depthextent</span><span class="p">,</span>
-<span class="linenos">27</span>    <span class="n">mapextent</span><span class="o">=</span><span class="n">mapextent</span><span class="p">)</span>
-<span class="linenos">28</span><span class="n">ax2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ccpstack</span><span class="o">.</span><span class="n">plot_cross_section</span><span class="p">(</span>
-<span class="linenos">29</span>    <span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
-<span class="linenos">30</span>    <span class="n">geoax</span><span class="o">=</span><span class="n">geoax</span><span class="p">,</span> <span class="n">mapplot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="linenos">31</span>    <span class="n">minillum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">,</span>
-<span class="linenos">32</span>    <span class="n">depthextent</span><span class="o">=</span><span class="n">depthextent</span>
-<span class="linenos">33</span><span class="p">)</span>
-<span class="linenos">34</span>
-<span class="linenos">35</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pyglimer.ccp.ccp</span> <span class="kn">import</span> <span class="n">read_ccp</span>
+<span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">set_mpl_params</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="n">set_mpl_params</span><span class="p">()</span>
+
+<span class="c1"># Read the CCP Stack</span>
+<span class="n">ccpstack</span> <span class="o">=</span> <span class="n">read_ccp</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;../ccp_IU_HRV.pkl&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="c1"># Create points waypoints for the cross section</span>
+<span class="n">lat0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">42.5</span><span class="p">,</span> <span class="mf">42.5</span><span class="p">])</span>
+<span class="n">lon0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">72.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">69.5</span><span class="p">])</span>
+<span class="n">lat1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">41.5</span><span class="p">,</span> <span class="mf">43.5</span><span class="p">])</span>
+<span class="n">lon1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">71.45</span><span class="p">,</span> <span class="o">-</span><span class="mf">71.45</span><span class="p">])</span>
+
+<span class="c1"># Set RF boundaries</span>
+<span class="n">mapextent</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">73.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">69</span><span class="p">,</span> <span class="mi">41</span><span class="p">,</span> <span class="mi">44</span><span class="p">]</span>
+<span class="n">depthextent</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">]</span>
+<span class="n">vmin</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
+<span class="n">vmax</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+<span class="c1"># Plot cross sections</span>
+<span class="n">ax1</span><span class="p">,</span> <span class="n">geoax</span> <span class="o">=</span> <span class="n">ccpstack</span><span class="o">.</span><span class="n">plot_cross_section</span><span class="p">(</span>
+    <span class="n">lat0</span><span class="p">,</span> <span class="n">lon0</span><span class="p">,</span> <span class="n">z0</span><span class="o">=</span><span class="mi">23</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+    <span class="n">mapplot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">minillum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span>
+    <span class="n">depthextent</span><span class="o">=</span><span class="n">depthextent</span><span class="p">,</span>
+    <span class="n">mapextent</span><span class="o">=</span><span class="n">mapextent</span><span class="p">)</span>
+<span class="n">ax2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ccpstack</span><span class="o">.</span><span class="n">plot_cross_section</span><span class="p">(</span>
+    <span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+    <span class="n">geoax</span><span class="o">=</span><span class="n">geoax</span><span class="p">,</span> <span class="n">mapplot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">minillum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">,</span>
+    <span class="n">depthextent</span><span class="o">=</span><span class="n">depthextent</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-</div>
+</td></tr></table></div>
 <p>This snippet creates a map including the illumination</p>
 <img alt="../../_images/cross_section_map.png" src="../../_images/cross_section_map.png" />
 <p>and the respective cross sections A</p>
 <img alt="../../_images/cross_section_A.png" src="../../_images/cross_section_A.png" />
 <p>and B</p>
 <img alt="../../_images/cross_section_B.png" src="../../_images/cross_section_B.png" />
-</section>
-</section>
+</div>
+</div>
 
 
               </div>
@@ -335,7 +386,7 @@ provides weighted nearest neighbour interpolation on a sphere.</p>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br>
 </p>
     </div>
     

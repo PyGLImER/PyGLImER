@@ -4,8 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pyglimer.utils</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
@@ -23,15 +22,18 @@
       
 
     
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/blank.css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/blank.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     
   <link rel="preload" as="script" href="../../_static/js/index.be7d3bbb2ef33a8344ce.js">
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="pyglimer.ccp" href="ccp.html" />
@@ -261,9 +263,9 @@
               
               <div>
                 
-  <section id="pyglimer-utils">
+  <div class="section" id="pyglimer-utils">
 <h1>pyglimer.utils<a class="headerlink" href="#pyglimer-utils" title="Permalink to this headline">¶</a></h1>
-<section id="module-pyglimer.utils.create_geom">
+<div class="section" id="module-pyglimer.utils.create_geom">
 <span id="pyglimer-utils-create-geom"></span><h2>pyglimer.utils.create_geom<a class="headerlink" href="#module-pyglimer.utils.create_geom" title="Permalink to this headline">¶</a></h2>
 <p>Automatic creation of raysum geom files</p>
 <dl class="field-list simple">
@@ -281,8 +283,8 @@
 <p>Created: Thursday, 14th May 2020 10:23:03
 Last Modified: Thursday, 19th August 2021 03:15:31 pm</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.create_geom.create_geom">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.create_geom.</span></span><span class="sig-name descname"><span class="pre">create_geom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bazv</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raypv</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_max</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cross'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/create_geom.html#create_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.create_geom.create_geom" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.create_geom.create_geom">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.create_geom.</span></code><code class="sig-name descname"><span class="pre">create_geom</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bazv</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raypv</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_max</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cross'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/create_geom.html#create_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.create_geom.create_geom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates geometry files for Raysum.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -308,8 +310,8 @@ Else has to be N=M**2. Were M is a natural number</p></li>
 </dl>
 </dd></dl>
 
-</section>
-<section id="module-pyglimer.utils.createvmodel">
+</div>
+<div class="section" id="module-pyglimer.utils.createvmodel">
 <span id="pyglimer-utils-createvmodel"></span><h2>pyglimer.utils.createvmodel<a class="headerlink" href="#module-pyglimer.utils.createvmodel" title="Permalink to this headline">¶</a></h2>
 <p>Create a 3D velocity model using Litho1.0</p>
 <dl class="field-list simple">
@@ -327,8 +329,8 @@ Else has to be N=M**2. Were M is a natural number</p></li>
 <p>Created: Friday, 01st May 2020 12:11:03
 Last Modified: Friday, 20th August 2021 11:15:35 am</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.createvmodel.load_avvmodel">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.createvmodel.</span></span><span class="sig-name descname"><span class="pre">load_avvmodel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pyglimer.utils.createvmodel.AverageVelModel</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/createvmodel.html#load_avvmodel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.createvmodel.load_avvmodel" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.createvmodel.load_avvmodel">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.createvmodel.</span></code><code class="sig-name descname"><span class="pre">load_avvmodel</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pyglimer.utils.createvmodel.AverageVelModel</span><a class="reference internal" href="../../_modules/pyglimer/utils/createvmodel.html#load_avvmodel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.createvmodel.load_avvmodel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a model over the average P and S-wave velocities in the upper
 crust. These are used by the P-SV-SH rotation algorithm. Model data
 is extracted from the Litho1.0 model (location provided above).
@@ -348,8 +350,8 @@ in data for a pickle file.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.createvmodel.load_gyps">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.createvmodel.</span></span><span class="sig-name descname"><span class="pre">load_gyps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flatten</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pyglimer.utils.createvmodel.ComplexModel</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/createvmodel.html#load_gyps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.createvmodel.load_gyps" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.createvmodel.load_gyps">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.createvmodel.</span></code><code class="sig-name descname"><span class="pre">load_gyps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flatten</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pyglimer.utils.createvmodel.ComplexModel</span><a class="reference internal" href="../../_modules/pyglimer/utils/createvmodel.html#load_gyps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.createvmodel.load_gyps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compiles the GyPSuM 3D-velocity object from included GyPSuM text files</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -371,8 +373,8 @@ The default is False, as it lead to unstabilities with joblib.</p></li>
 </dl>
 </dd></dl>
 
-</section>
-<section id="module-pyglimer.utils.geo_utils">
+</div>
+<div class="section" id="module-pyglimer.utils.geo_utils">
 <span id="pyglimer-utils-geo-utils"></span><h2>pyglimer.utils.geo_utils<a class="headerlink" href="#module-pyglimer.utils.geo_utils" title="Permalink to this headline">¶</a></h2>
 <p>Geographical utilities.</p>
 <dl class="field-list simple">
@@ -389,13 +391,13 @@ The default is False, as it lead to unstabilities with joblib.</p></li>
 </dl>
 <p>Last Update: November 2019</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.geo_utils.cart2geo">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></span><span class="sig-name descname"><span class="pre">cart2geo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#cart2geo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.cart2geo" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.geo_utils.cart2geo">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></code><code class="sig-name descname"><span class="pre">cart2geo</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#cart2geo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.cart2geo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes geographical coordinates from cartesian coordinates</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>arrays</strong><strong>)</strong> (<em>x</em><em> (</em><em>numpy.array corresponding to y/z</em>) – </p></li>
+<li><p><strong>(</strong><strong>numpy.array corresponding to y/z arrays</strong><strong>)</strong> (<em>x</em>) – </p></li>
 <li><p><strong>(</strong><strong>numpy.array</strong><strong>)</strong> (<em>z</em>) – </p></li>
 <li><p><strong>(</strong><strong>numpy.array</strong><strong>)</strong> – </p></li>
 </ul>
@@ -410,30 +412,33 @@ The default is False, as it lead to unstabilities with joblib.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.geo_utils.epi2euc">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></span><span class="sig-name descname"><span class="pre">epi2euc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epi</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#epi2euc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.epi2euc" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.geo_utils.epi2euc">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></code><code class="sig-name descname"><span class="pre">epi2euc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epi</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#epi2euc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.epi2euc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts epicentral distance in to a euclidean distance along the
 corresponding chord.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.geo_utils.euc2epi">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></span><span class="sig-name descname"><span class="pre">euc2epi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">euc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#euc2epi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.euc2epi" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.geo_utils.euc2epi">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></code><code class="sig-name descname"><span class="pre">euc2epi</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">euc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#euc2epi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.euc2epi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts euclidean distance to epicentral distance</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.geo_utils.gctrack">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></span><span class="sig-name descname"><span class="pre">gctrack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#gctrack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.gctrack" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.geo_utils.gctrack">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></code><code class="sig-name descname"><span class="pre">gctrack</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#gctrack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.gctrack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given waypoints and a point distance, this function computes evenly
 spaced points along the great circle and the given waypoints.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function is not very accurate, but it it is fast. You may
+want to resort to more accurate functions that is of importance
+for your work. Here this function is only used for the purpose
+of making cross sections.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>lat</strong> (<em>np.ndarray</em>) – waypoint latitudes</p></li>
-<li><p><strong>lon</strong> (<em>np.ndarray</em>) – waypoint longitudes</p></li>
-<li><p><strong>dist</strong> (<em>float</em>) – distance in degrees</p></li>
-</ul>
+<dd class="field-odd"><p><strong>lat</strong> (<em>np.ndarray waypoint latitudes lon : np.ndarray waypoint longitudes</em>) – dist : float distance in degrees</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p></p>
@@ -448,19 +453,19 @@ spaced points along the great circle and the given waypoints.</p>
 <dd class="field-odd"><p>Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)</p>
 </dd>
 <dt class="field-even">Last Modified</dt>
-<dd class="field-even"><p>2020.04.20 00.30</p>
+<dd class="field-even"><p>2021.10.10 02.17</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.geo_utils.geo2cart">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></span><span class="sig-name descname"><span class="pre">geo2cart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#geo2cart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.geo2cart" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.geo_utils.geo2cart">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></code><code class="sig-name descname"><span class="pre">geo2cart</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#geo2cart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.geo2cart" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes cartesian coordinates from geographical coordinates</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>arrays</strong><strong>)</strong> (<em>r</em><em> (</em><em>float</em><em> or </em><em>numpy.array corresponding to lat/lon</em>) – </p></li>
+<li><p><strong>(</strong><strong>float</strong><strong> or </strong><strong>numpy.array corresponding to lat/lon arrays</strong><strong>)</strong> (<em>r</em>) – </p></li>
 <li><p><strong>location</strong> – </p></li>
 <li><p><strong>(</strong><strong>numpy.array</strong><strong>)</strong> (<em>longitude</em>) – </p></li>
 <li><p><strong>(</strong><strong>numpy.array</strong><strong>)</strong> – </p></li>
@@ -476,8 +481,8 @@ spaced points along the great circle and the given waypoints.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.geo_utils.reckon">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></span><span class="sig-name descname"><span class="pre">reckon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bearing</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#reckon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.reckon" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.geo_utils.reckon">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></code><code class="sig-name descname"><span class="pre">reckon</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bearing</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#reckon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.reckon" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes new latitude and longitude from bearing and distance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -502,8 +507,8 @@ bearing = np.pi/2 # 90 degrees
 # lon2  0.36056 - the long result I’m hoping for.</p>
 </dd></dl>
 
-</section>
-<section id="module-pyglimer.utils.nextpowof2">
+</div>
+<div class="section" id="module-pyglimer.utils.nextpowof2">
 <span id="pyglimer-utils-nextpowof2"></span><h2>pyglimer.utils.nextpowof2<a class="headerlink" href="#module-pyglimer.utils.nextpowof2" title="Permalink to this headline">¶</a></h2>
 <dl class="field-list simple">
 <dt class="field-odd">copyright</dt>
@@ -520,13 +525,13 @@ bearing = np.pi/2 # 90 degrees
 <p>Created: Friday, 18th October 2019 08:11:03 pm
 Last Modified: Thursday, 25th March 2021 03:56:56 pm</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.nextpowof2.nextPowerOf2">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.nextpowof2.</span></span><span class="sig-name descname"><span class="pre">nextPowerOf2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/nextpowof2.html#nextPowerOf2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.nextpowof2.nextPowerOf2" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.nextpowof2.nextPowerOf2">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.nextpowof2.</span></code><code class="sig-name descname"><span class="pre">nextPowerOf2</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/nextpowof2.html#nextPowerOf2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.nextpowof2.nextPowerOf2" title="Permalink to this definition">¶</a></dt>
 <dd><p>just returns the next higher power of two from n</p>
 </dd></dl>
 
-</section>
-<section id="module-pyglimer.utils.roundhalf">
+</div>
+<div class="section" id="module-pyglimer.utils.roundhalf">
 <span id="pyglimer-utils-roundhalf"></span><h2>pyglimer.utils.roundhalf<a class="headerlink" href="#module-pyglimer.utils.roundhalf" title="Permalink to this headline">¶</a></h2>
 <p>Rounds to next 0.5</p>
 <dl class="field-list simple">
@@ -544,8 +549,8 @@ Last Modified: Thursday, 25th March 2021 03:56:56 pm</p>
 <p>Created: Saturday, 02nd May 2020 01:48:03 pm
 Last Modified: Thursday, 25th March 2021 04:00:02 pm</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.roundhalf.roundhalf">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.roundhalf.</span></span><span class="sig-name descname"><span class="pre">roundhalf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/roundhalf.html#roundhalf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.roundhalf.roundhalf" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.roundhalf.roundhalf">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.roundhalf.</span></code><code class="sig-name descname"><span class="pre">roundhalf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="../../_modules/pyglimer/utils/roundhalf.html#roundhalf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.roundhalf.roundhalf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rounds to next half of integer</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -560,8 +565,8 @@ Last Modified: Thursday, 25th March 2021 04:00:02 pm</p>
 </dl>
 </dd></dl>
 
-</section>
-<section id="module-pyglimer.utils.signalproc">
+</div>
+<div class="section" id="module-pyglimer.utils.signalproc">
 <span id="pyglimer-utils-signalproc"></span><h2>pyglimer.utils.signalproc<a class="headerlink" href="#module-pyglimer.utils.signalproc" title="Permalink to this headline">¶</a></h2>
 <dl class="field-list simple">
 <dt class="field-odd">copyright</dt>
@@ -578,8 +583,8 @@ Last Modified: Thursday, 25th March 2021 04:00:02 pm</p>
 <p>Created: Sunday, 20th October 2019 10:31:03 am
 Last Modified: Thursday, 26th August 2021 08:32:29 am</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.signalproc.convf">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></span><span class="sig-name descname"><span class="pre">convf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#convf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.convf" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.signalproc.convf">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></code><code class="sig-name descname"><span class="pre">convf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#convf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.convf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convolution conducted in the frequency domain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -600,8 +605,8 @@ Last Modified: Thursday, 26th August 2021 08:32:29 am</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.signalproc.corrf">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></span><span class="sig-name descname"><span class="pre">corrf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#corrf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.corrf" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.signalproc.corrf">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></code><code class="sig-name descname"><span class="pre">corrf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#corrf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.corrf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cross-correlation in frequency domain,
 calculates the x=crosscorr(u,v). Hence, v is the flipped vector.</p>
 <dl class="field-list simple">
@@ -622,8 +627,8 @@ calculates the x=crosscorr(u,v). Hence, v is the flipped vector.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.signalproc.filter">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></span><span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.filter" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.signalproc.filter">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></code><code class="sig-name descname"><span class="pre">filter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convolves a filter with a signal (given in time domain).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -643,8 +648,8 @@ calculates the x=crosscorr(u,v). Hence, v is the flipped vector.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.signalproc.gaussian">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></span><span class="sig-name descname"><span class="pre">gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.gaussian" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.signalproc.gaussian">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></code><code class="sig-name descname"><span class="pre">gaussian</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.gaussian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a zero-phase Gaussian function (i.e., a low-pass filter). In
 particular meant to be convolved with the impulse
 response that is the output of an iterative deconvolution</p>
@@ -666,8 +671,8 @@ response that is the output of an iterative deconvolution</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.signalproc.noise">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></span><span class="sig-name descname"><span class="pre">noise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.noise" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.signalproc.noise">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></code><code class="sig-name descname"><span class="pre">noise</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.noise" title="Permalink to this definition">¶</a></dt>
 <dd><p>create random noise
 :param N: signal length
 :type N: int
@@ -676,8 +681,8 @@ response that is the output of an iterative deconvolution</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.signalproc.resample_or_decimate">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></span><span class="sig-name descname"><span class="pre">resample_or_decimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate_new</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">obspy.core.stream.Stream</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#resample_or_decimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.resample_or_decimate" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.signalproc.resample_or_decimate">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></code><code class="sig-name descname"><span class="pre">resample_or_decimate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate_new</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">obspy.core.stream.Stream</span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#resample_or_decimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.resample_or_decimate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decimates the data if the desired new sampling rate allows to do so.
 Else the signal will be interpolated (a lot slower).</p>
 <dl class="field-list simple">
@@ -700,8 +705,8 @@ Else the signal will be interpolated (a lot slower).</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.signalproc.ricker">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></span><span class="sig-name descname"><span class="pre">ricker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#ricker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.ricker" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.signalproc.ricker">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></code><code class="sig-name descname"><span class="pre">ricker</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#ricker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.ricker" title="Permalink to this definition">¶</a></dt>
 <dd><p>create a zero-phase Ricker / Mexican hat wavelet</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -715,8 +720,8 @@ Else the signal will be interpolated (a lot slower).</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.signalproc.sshift">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></span><span class="sig-name descname"><span class="pre">sshift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#sshift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.sshift" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.signalproc.sshift">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.signalproc.</span></code><code class="sig-name descname"><span class="pre">sshift</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="../../_modules/pyglimer/utils/signalproc.html#sshift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.signalproc.sshift" title="Permalink to this definition">¶</a></dt>
 <dd><p>shift a signal by a given time-shift in the frequency domain</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -736,8 +741,8 @@ Else the signal will be interpolated (a lot slower).</p>
 </dl>
 </dd></dl>
 
-</section>
-<section id="module-pyglimer.utils.utils">
+</div>
+<div class="section" id="module-pyglimer.utils.utils">
 <span id="pyglimer-utils-utils"></span><h2>pyglimer.utils.utils<a class="headerlink" href="#module-pyglimer.utils.utils" title="Permalink to this headline">¶</a></h2>
 <dl class="field-list simple">
 <dt class="field-odd">copyright</dt>
@@ -755,14 +760,14 @@ Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-
 <p>Created: Tue May 26 2019 13:31:30
 Last Modified: Monday, 13th September 2021 03:46:30 pm</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.utils.chunks">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></span><span class="sig-name descname"><span class="pre">chunks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#chunks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.chunks" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.utils.chunks">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">chunks</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">list</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#chunks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.chunks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Yield successive n-sized chunks from lst. Useful for multi-threading</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.utils.create_bulk_str">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></span><span class="sig-name descname"><span class="pre">create_bulk_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">networks</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#create_bulk_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.create_bulk_str" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.utils.create_bulk_str">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">create_bulk_str</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">networks</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#create_bulk_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.create_bulk_str" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to generate the input for the obspy functions:
 get_stations_bulk() and get_waveforms_bulk().</p>
 <dl class="field-list simple">
@@ -793,8 +798,8 @@ get_stations_bulk() and get_waveforms_bulk().</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.utils.download_full_inventory">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></span><span class="sig-name descname"><span class="pre">download_full_inventory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fdsn_client</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#download_full_inventory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.download_full_inventory" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.utils.download_full_inventory">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">download_full_inventory</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fdsn_client</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#download_full_inventory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.download_full_inventory" title="Permalink to this definition">¶</a></dt>
 <dd><p>This utility loops through statloc and redownloads the whole response
 (i.e., all channels and all times) for every station. Thus, overwriting
 the old xml file.</p>
@@ -809,16 +814,16 @@ the old xml file.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.utils.dt_string">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></span><span class="sig-name descname"><span class="pre">dt_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#dt_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.dt_string" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.utils.dt_string">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">dt_string</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#dt_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.dt_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns Time elapsed string depending on how much time has passed.
 After a certain amount of seconds it returns minutes, and after a certain
 amount of minutes it returns the elapsed time in hours.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.utils.get_multiple_fdsn_clients">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></span><span class="sig-name descname"><span class="pre">get_multiple_fdsn_clients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clients</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">obspy.clients.fdsn.client.Client</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#get_multiple_fdsn_clients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.get_multiple_fdsn_clients" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.utils.get_multiple_fdsn_clients">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">get_multiple_fdsn_clients</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clients</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">obspy.clients.fdsn.client.Client</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#get_multiple_fdsn_clients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.get_multiple_fdsn_clients" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a tuple holding all the queried fdsn providers. Also finds
 all available fdsn providers if input is None. Will also sort the clients
 so the big providers (IRIS and ORFEUS) come last.</p>
@@ -838,8 +843,8 @@ Put None if you want to use all available.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.utils.save_raw">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></span><span class="sig-name descname"><span class="pre">save_raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">saved</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.inventory.inventory.Inventory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saveasdf</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#save_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.save_raw" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.utils.save_raw">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">save_raw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">saved</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.inventory.inventory.Inventory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saveasdf</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#save_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.save_raw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the raw waveform data in the desired format.
 The point of this function is mainly that the waveforms will be saved
 with the correct associations and at the correct locations.</p>
@@ -858,8 +863,8 @@ to identify them afterwards.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.utils.save_raw_mseed">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></span><span class="sig-name descname"><span class="pre">save_raw_mseed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">threading.Event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slst</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#save_raw_mseed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.save_raw_mseed" title="Permalink to this definition">¶</a></dt>
+<dt id="pyglimer.utils.utils.save_raw_mseed">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">save_raw_mseed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">threading.Event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slst</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#save_raw_mseed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.save_raw_mseed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Saves input stream in the correct location in mini seed format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -876,8 +881,8 @@ also create subfolders).</p></li>
 </dl>
 </dd></dl>
 
-</section>
-</section>
+</div>
+</div>
 
 
               </div>
@@ -919,7 +924,7 @@ also create subfolders).</p></li>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br>
 </p>
     </div>
     

@@ -4,8 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>The Request Class</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
@@ -23,15 +22,18 @@
       
 
     
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/blank.css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/blank.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     
   <link rel="preload" as="script" href="../../_static/js/index.be7d3bbb2ef33a8344ce.js">
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="RF Handling" href="../receiver_functions/index.html" />
@@ -221,14 +223,14 @@
               
               <div>
                 
-  <section id="the-request-class">
+  <div class="section" id="the-request-class">
 <h1>The Request Class<a class="headerlink" href="#the-request-class" title="Permalink to this headline">¶</a></h1>
 <p>The <a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> class handles all steps from download, over preprocessing,
 to deconvolution (i.e. the creation of a time domain receiver function).
 Since PyGLImER-v0.1.0 the database can be saved in two different formats - <em>MSEED</em> (raw waveforms), <em>SAC</em>
 (receiver functions), and <em>XML</em> (station response and event database) <strong>OR</strong> in <em>hdf5</em> (hierachical data format).
 Both options have advantages and downsides (see below).</p>
-<section id="mseed-sac-database">
+<div class="section" id="mseed-sac-database">
 <h2>MSEED/SAC Database<a class="headerlink" href="#mseed-sac-database" title="Permalink to this headline">¶</a></h2>
 <p>If the user chooses this option, the <a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> object will create
 a folder structure as defined by the user. Those contain raw (i.e. unprocessed, but downsampled)
@@ -243,8 +245,8 @@ small database. Then, computational times tend to be shorter.
 However, for large databases (e.g., world-wide) this will create millions of files and
 potentially overload your file system.</p>
 </div>
-</section>
-<section id="hdf5-database">
+</div>
+<div class="section" id="hdf5-database">
 <h2>HDF5 Database<a class="headerlink" href="#hdf5-database" title="Permalink to this headline">¶</a></h2>
 <p>Your second option is to save data in <em>hdf5</em> format. In this case, only two directories will be created;
 one for the downsampled raw-data and another one for the final time-domain receiver functions. The raw data
@@ -263,8 +265,8 @@ a new Request object will always update existing raw-data if the same
 rawdir is chosen (i.e. download new data, if any available). This is valid for both
 formats!</p>
 </div>
-</section>
-<section id="methods-of-the-request-class">
+</div>
+<div class="section" id="methods-of-the-request-class">
 <h2>Methods of the Request class<a class="headerlink" href="#methods-of-the-request-class" title="Permalink to this headline">¶</a></h2>
 <p>A Request object has four public methods:</p>
 <table class="hlist"><tr><td><ul class="simple">
@@ -294,70 +296,125 @@ download data up to twice faster than <a class="reference internal" href="../api
 The latter will be the better choice if you create databases on continental or even global scales. It
 utilises the <a class="reference external" href="https://docs.obspy.org/packages/autogen/obspy.clients.fdsn.mass_downloader.html">Obspy Mass Downloader</a>.</p>
 </div>
-</section>
-<section id="setting-the-parameters-for-your-request">
+</div>
+<div class="section" id="setting-the-parameters-for-your-request">
 <h2>Setting the parameters for your request<a class="headerlink" href="#setting-the-parameters-for-your-request" title="Permalink to this headline">¶</a></h2>
 <p>The parameters for preprocessing and download are set when initialising the
 <a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> object. Probably the most convenient way to define them
 is to create a <em>yaml</em> file with the parameters. An example comes with this repository in <cite>params.yaml</cite>:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># This file is used to define the parameters used for PyGLImER</span>
-<span class="linenos"> 2</span><span class="c1">#### Project wide parameters</span>
-<span class="linenos"> 3</span><span class="c1"># lowest level project directory</span>
-<span class="linenos"> 4</span><span class="nt">proj_dir </span><span class="p">:</span> <span class="s">&#39;database&#39;</span>
-<span class="linenos"> 5</span><span class="c1"># raw waveforms</span>
-<span class="linenos"> 6</span><span class="nt">raw_subdir</span><span class="p">:</span> <span class="s">&#39;waveforms/raw&#39;</span>
-<span class="linenos"> 7</span><span class="c1"># preprocessed subdir, only in use if fileformat = &#39;mseed&#39;</span>
-<span class="linenos"> 8</span><span class="nt">prepro_subdir</span><span class="p">:</span> <span class="s">&#39;waveforms/preprocessed&#39;</span>
-<span class="linenos"> 9</span><span class="c1"># receiver function subdir</span>
-<span class="linenos">10</span><span class="nt">rf_subdir</span><span class="p">:</span> <span class="s">&#39;waveforms/RF&#39;</span>
-<span class="linenos">11</span><span class="c1"># statxml subdir</span>
-<span class="linenos">12</span><span class="nt">statloc_subdir</span><span class="p">:</span> <span class="s">&#39;stations&#39;</span>
-<span class="linenos">13</span><span class="c1"># subdir for event catalogues</span>
-<span class="linenos">14</span><span class="nt">evt_subdir</span><span class="p">:</span> <span class="s">&#39;event_catalogs&#39;</span>
-<span class="linenos">15</span><span class="c1"># directory for logging information</span>
-<span class="linenos">16</span><span class="nt">log_subdir </span><span class="p">:</span> <span class="s">&#39;log&#39;</span>
-<span class="linenos">17</span><span class="c1"># levels:</span>
-<span class="linenos">18</span><span class="c1"># &#39;DEBUG&#39;, &#39;INFO&#39;, &#39;WARNING&#39;, &#39;ERROR&#39;, or &#39;CRITICAL&#39;</span>
-<span class="linenos">19</span><span class="nt">loglvl</span><span class="p">:</span> <span class="s">&#39;DEBUG&#39;</span>
-<span class="linenos">20</span><span class="c1"># format, either mseed or hdf5</span>
-<span class="linenos">21</span><span class="nt">format</span><span class="p">:</span> <span class="s">&#39;hdf5&#39;</span>
-<span class="linenos">22</span>
-<span class="linenos">23</span><span class="c1"># The teleseismic phase to use (P or S or also more exotic ones like SKS, PKP, ScS)</span>
-<span class="linenos">24</span><span class="nt">phase</span><span class="p">:</span> <span class="s">&#39;S&#39;</span>
-<span class="linenos">25</span>
-<span class="linenos">26</span><span class="c1">### Request parameters</span>
-<span class="linenos">27</span><span class="c1">## First, everything concerning the download</span>
-<span class="linenos">28</span><span class="c1"># waveform client, list of strings</span>
-<span class="linenos">29</span><span class="c1"># use None if you want to download from all available FDSN servers</span>
-<span class="linenos">30</span><span class="nt">waveform_client</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;IRIS&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">31</span><span class="c1"># Use an already downloaded event catalog</span>
-<span class="linenos">32</span><span class="c1"># If so insert path+filename here.</span>
-<span class="linenos">33</span><span class="nt">evtcat</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">34</span><span class="c1"># earliest event</span>
-<span class="linenos">35</span><span class="nt">starttime</span><span class="p">:</span> <span class="s">&#39;2009-01-1</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span>
-<span class="linenos">36</span><span class="c1"># latest event</span>
-<span class="linenos">37</span><span class="nt">endtime</span><span class="p">:</span> <span class="s">&#39;2011-12-31</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span>
-<span class="linenos">38</span><span class="c1"># Minumum Magnitude</span>
-<span class="linenos">39</span><span class="nt">minmag</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5.5</span>
-<span class="linenos">40</span><span class="c1"># Network and station to use, unix-style wildcards are allowed</span>
-<span class="linenos">41</span><span class="c1"># if you use the Request.download_waveforms_small_db method,</span>
-<span class="linenos">42</span><span class="c1"># you can also provide a list of networks and/or a list of stations</span>
-<span class="linenos">43</span><span class="nt">network</span><span class="p">:</span> <span class="s">&#39;YP&#39;</span>
-<span class="linenos">44</span><span class="nt">station</span><span class="p">:</span> <span class="s">&#39;*&#39;</span>
-<span class="linenos">45</span>
-<span class="linenos">46</span><span class="c1">## concerning preprocessing</span>
-<span class="linenos">47</span><span class="c1"># Coordinate system to rotate the seismogram to before deconvolution</span>
-<span class="linenos">48</span><span class="c1"># RTZ, LQT, or PSS</span>
-<span class="linenos">49</span><span class="nt">rot</span><span class="p">:</span> <span class="s">&#39;PSS&#39;</span>
-<span class="linenos">50</span><span class="c1"># Polarisation, use v for v/q receiver functions</span>
-<span class="linenos">51</span><span class="c1"># and h for transverse (SH)</span>
-<span class="linenos">52</span><span class="nt">pol</span><span class="p">:</span> <span class="s">&#39;v&#39;</span>
-<span class="linenos">53</span><span class="c1"># Deconvolution method to use</span>
-<span class="linenos">54</span><span class="c1"># Iterative time domain: &#39;it&#39;</span>
-<span class="linenos">55</span><span class="c1"># Waterlevel Spectral Division: &#39;waterlevel&#39;</span>
-<span class="linenos">56</span><span class="nt">deconmeth</span><span class="p">:</span> <span class="s">&#39;it&#39;</span>
+<div class="highlight-yaml notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># This file is used to define the parameters used for PyGLImER</span>
+<span class="c1">#### Project wide parameters</span>
+<span class="c1"># lowest level project directory</span>
+<span class="nt">proj_dir </span><span class="p">:</span> <span class="s">&#39;database&#39;</span>
+<span class="c1"># raw waveforms</span>
+<span class="nt">raw_subdir</span><span class="p">:</span> <span class="s">&#39;waveforms/raw&#39;</span>
+<span class="c1"># preprocessed subdir, only in use if fileformat = &#39;mseed&#39;</span>
+<span class="nt">prepro_subdir</span><span class="p">:</span> <span class="s">&#39;waveforms/preprocessed&#39;</span>
+<span class="c1"># receiver function subdir</span>
+<span class="nt">rf_subdir</span><span class="p">:</span> <span class="s">&#39;waveforms/RF&#39;</span>
+<span class="c1"># statxml subdir</span>
+<span class="nt">statloc_subdir</span><span class="p">:</span> <span class="s">&#39;stations&#39;</span>
+<span class="c1"># subdir for event catalogues</span>
+<span class="nt">evt_subdir</span><span class="p">:</span> <span class="s">&#39;event_catalogs&#39;</span>
+<span class="c1"># directory for logging information</span>
+<span class="nt">log_subdir </span><span class="p">:</span> <span class="s">&#39;log&#39;</span>
+<span class="c1"># levels:</span>
+<span class="c1"># &#39;DEBUG&#39;, &#39;INFO&#39;, &#39;WARNING&#39;, &#39;ERROR&#39;, or &#39;CRITICAL&#39;</span>
+<span class="nt">loglvl</span><span class="p">:</span> <span class="s">&#39;DEBUG&#39;</span>
+<span class="c1"># format, either mseed or hdf5</span>
+<span class="nt">format</span><span class="p">:</span> <span class="s">&#39;hdf5&#39;</span>
+
+<span class="c1"># The teleseismic phase to use (P or S or also more exotic ones like SKS, PKP, ScS)</span>
+<span class="nt">phase</span><span class="p">:</span> <span class="s">&#39;S&#39;</span>
+
+<span class="c1">### Request parameters</span>
+<span class="c1">## First, everything concerning the download</span>
+<span class="c1"># waveform client, list of strings</span>
+<span class="c1"># use None if you want to download from all available FDSN servers</span>
+<span class="nt">waveform_client</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;IRIS&#39;</span><span class="p p-Indicator">]</span>
+<span class="c1"># Use an already downloaded event catalog</span>
+<span class="c1"># If so insert path+filename here.</span>
+<span class="nt">evtcat</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="c1"># earliest event</span>
+<span class="nt">starttime</span><span class="p">:</span> <span class="s">&#39;2009-01-1</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span>
+<span class="c1"># latest event</span>
+<span class="nt">endtime</span><span class="p">:</span> <span class="s">&#39;2011-12-31</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span>
+<span class="c1"># Minumum Magnitude</span>
+<span class="nt">minmag</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5.5</span>
+<span class="c1"># Network and station to use, unix-style wildcards are allowed</span>
+<span class="c1"># if you use the Request.download_waveforms_small_db method,</span>
+<span class="c1"># you can also provide a list of networks and/or a list of stations</span>
+<span class="nt">network</span><span class="p">:</span> <span class="s">&#39;YP&#39;</span>
+<span class="nt">station</span><span class="p">:</span> <span class="s">&#39;*&#39;</span>
+
+<span class="c1">## concerning preprocessing</span>
+<span class="c1"># Coordinate system to rotate the seismogram to before deconvolution</span>
+<span class="c1"># RTZ, LQT, or PSS</span>
+<span class="nt">rot</span><span class="p">:</span> <span class="s">&#39;PSS&#39;</span>
+<span class="c1"># Polarisation, use v for v/q receiver functions</span>
+<span class="c1"># and h for transverse (SH)</span>
+<span class="nt">pol</span><span class="p">:</span> <span class="s">&#39;v&#39;</span>
+<span class="c1"># Deconvolution method to use</span>
+<span class="c1"># Iterative time domain: &#39;it&#39;</span>
+<span class="c1"># Waterlevel Spectral Division: &#39;waterlevel&#39;</span>
+<span class="nt">deconmeth</span><span class="p">:</span> <span class="s">&#39;it&#39;</span>
 </pre></div>
-</div>
+</td></tr></table></div>
 <p>You can then read the yaml file using <em>pyyaml</em> like so:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">yaml</span>
 
@@ -371,8 +428,8 @@ is to create a <em>yaml</em> file with the parameters. An example comes with thi
 </div>
 <p>Alternatively, you could of course just set the parameters while initialising the
 object.</p>
-</section>
-</section>
+</div>
+</div>
 
 
               </div>
@@ -414,7 +471,7 @@ object.</p>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br>
 </p>
     </div>
     

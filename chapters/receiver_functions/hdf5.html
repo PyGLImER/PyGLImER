@@ -4,8 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Receiver functions stored in hdf5 format</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
@@ -23,15 +22,18 @@
       
 
     
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/blank.css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/css/blank.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     
   <link rel="preload" as="script" href="../../_static/js/index.be7d3bbb2ef33a8344ce.js">
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Methods available for both RFStream and RFTrace objects" href="methods.html" />
@@ -238,7 +240,7 @@
               
               <div>
                 
-  <section id="receiver-functions-stored-in-hdf5-format">
+  <div class="section" id="receiver-functions-stored-in-hdf5-format">
 <h1>Receiver functions stored in hdf5 format<a class="headerlink" href="#receiver-functions-stored-in-hdf5-format" title="Permalink to this headline">¶</a></h1>
 <p>If you saved your receiver functions in <em>hdf5</em> format, you can use the
 <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.RFDataBase" title="pyglimer.database.rfh5.RFDataBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code></a> class to access and manipulate
@@ -279,7 +281,7 @@ the coordinates of the associated station</p></li>
 receiver functions in a subset defined by the provided arguments</p></li>
 </ul>
 </td></tr></table>
-<section id="reading-data">
+<div class="section" id="reading-data">
 <h2>Reading data<a class="headerlink" href="#reading-data" title="Permalink to this headline">¶</a></h2>
 <p>The most common usecase is probably that you will want to access receciver
 functions that <strong>PyGLImER</strong> computed for you (as shown earlier). To do so, you
@@ -304,14 +306,14 @@ time (<code class="docutils literal notranslate"><span class="pre">evt_time='*'<
 <p>If you want to create your own function to
 <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler.walk" title="pyglimer.database.rfh5.DBHandler.walk"><code class="xref py py-meth docutils literal notranslate"><span class="pre">walk()</span></code></a> might come in handy.</p>
 </div>
-</section>
-<section id="tags">
+</div>
+<div class="section" id="tags">
 <h2>Tags<a class="headerlink" href="#tags" title="Permalink to this headline">¶</a></h2>
 <p><strong>PyGLImER</strong> uses tags to identify your data. You could for example use
 different tags for differently processed data. <code class="docutils literal notranslate"><span class="pre">rf</span></code> is the standard tag for
 receiver function data.</p>
-</section>
-<section id="getting-an-overview-over-available-data">
+</div>
+<div class="section" id="getting-an-overview-over-available-data">
 <h2>Getting an overview over available data<a class="headerlink" href="#getting-an-overview-over-available-data" title="Permalink to this headline">¶</a></h2>
 <p>You can <strong>Access the DBHandler like a dictionary</strong>: Just like in h5py, it is
 possible to access the <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler" title="pyglimer.database.rfh5.DBHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code></a> like a
@@ -325,26 +327,33 @@ tags as follows:</p>
 <span class="go">[&#39;rf&#39;, &#39;rf_with_my_funny_processing_idea&#39;]</span>
 </pre></div>
 </div>
-</section>
-</section>
-<section id="writing-data-to-hdf5">
+</div>
+</div>
+<div class="section" id="writing-data-to-hdf5">
 <h1>Writing data to hdf5<a class="headerlink" href="#writing-data-to-hdf5" title="Permalink to this headline">¶</a></h1>
 <p>If you postprocess your receiver functions (e.g., stacking), you might want to
 save the data afterwards. You can do that like below:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span> <span class="nn">pyglimer.database.rfh5</span> <span class="kn">import</span> <span class="n">RFDataBase</span>
-<span class="linenos">2</span>
-<span class="linenos">3</span><span class="c1"># Suppose you have a RFStream or RFTrace object rf</span>
-<span class="linenos">4</span><span class="c1"># that has a header with all the station information</span>
-<span class="linenos">5</span>
-<span class="linenos">6</span><span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="s1">&#39;/path/to/myfile.h5&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
-<span class="linenos">7</span>    <span class="n">rfst</span> <span class="o">=</span> <span class="n">rfdb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
-<span class="linenos">8</span>        <span class="n">rf</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;rf_with_my_funny_processing_idea&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglimer.database.rfh5</span> <span class="kn">import</span> <span class="n">RFDataBase</span>
+
+<span class="c1"># Suppose you have a RFStream or RFTrace object rf</span>
+<span class="c1"># that has a header with all the station information</span>
+
+<span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="s1">&#39;/path/to/myfile.h5&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
+    <span class="n">rfst</span> <span class="o">=</span> <span class="n">rfdb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+        <span class="n">rf</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;rf_with_my_funny_processing_idea&#39;</span><span class="p">)</span>
 </pre></div>
-</div>
+</td></tr></table></div>
 <p>We can retrieve the <a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> as shown above.
 Network, station, and channel information are determined automatically from the
 header and used to identify and locate the data.</p>
-</section>
+</div>
 
 
               </div>
@@ -386,7 +395,7 @@ header and used to identify and locate the data.</p>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br>
 </p>
     </div>
     
