@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Tuesday, 12th October 2021 08:19:12 am
+Last Modified: Tuesday, 12th October 2021 08:46:58 am
 '''
 
 import fnmatch
@@ -333,7 +333,7 @@ def all_traces_recursive(
     for v in group.values():
         if isinstance(v, h5py._hl.group.Group):
             all_traces_recursive(v, stream, pattern)
-        if not fnmatch.fnmatch(v.name, pattern) and v.name not in pattern:
+        elif not fnmatch.fnmatch(v.name, pattern) and v.name not in pattern:
             continue
         else:
             try:
