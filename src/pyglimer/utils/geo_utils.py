@@ -69,21 +69,81 @@ def reckon(
     return lat2, lon2
 
 
+def geodiff(lat, lon):
+    """Computes Azimuths and distances between geographical points."""
+
+    # Create Geodesic class
+    G = Geodesic(flattening=0.0)
+
+    mat = np.asarray(
+        G.inverse(
+            np.array((lon[0:-1], lat[0:-1])).T,
+            np.array((lon[1:], lat[1:])).T
+        )
+    )
+
+    dists = mat[:, 0] / (2.0 * R_EARTH * np.pi / 360.0)
+    az = mat[:, 1]
+
+    return dists, az
+
+
+def geodist(lat, lon):
+    """Computes Azimuths and distances between geographical points."""
+
+    # Compute distances
+    dists, _ = geodiff(lat, lon)
+
+    M = len(lat)
+    cdists = np.zeros(M)
+    cdists[1:] = np.cumsum(dists)
+
+    return cdists
+
+
 def gctrack(
-        lat, lon, dist: float = 1.0) -> Tuple[
+        lat, lon, dist: float = 1.0, constantdist: bool = True) -> Tuple[
             np.ndarray, np.ndarray, np.ndarray]:
     """Given waypoints and a point distance, this function computes evenly
     spaced points along the great circle and the given waypoints.
 
-    .. warning:: This function is not very accurate, but it it is fast. You may
-                 want to resort to more accurate functions that is of importance
-                 for your work. Here this function is only used for the purpose
-                 of making cross sections.
+    .. warning:: This function is not very accurate, but it is fast. You may
+                 want to resort to more accurate functions if that is of
+                 importance for your work. Here this function is only used for
+                 the purpose of making cross sections.
+
+    .. warning:: 
+
+        **``constantdist``** The reason for this option is the fact that two 
+        waypoints are most likely not a multiple of ``dist`` apart from each 
+        other. A previous implementation included an interpolation between, but
+        the interpolation of a parametric curve in 3D space is not as simple as
+        I had hoped. The following explanation is for ``N`` segments defined by
+        ``N+1`` waypoints. 
+        ``constantdist`` sets the spacing constant, but the waypoint is most 
+        likely not exactly hit making the distance between the point before 
+        the (n+1)-th waypoint smaller than the the rest. This will be the 
+        same in all segments between n and (n+1)th waypoints. The alternative
+        is to create linspace between the waypoints with 
+        ``N = round(total_dist/dist) + 1`` points including ``n`` and
+        ``(n+1)`` waypoints. This is essentially the more accurate way of
+        defining the segments, but each segment has a different spacing that
+        is not exactly ``dist``.
+
+
 
     Parameters
     ----------
-    lat : np.ndarray waypoint latitudes lon : np.ndarray waypoint longitudes
-        dist : float distance in degrees
+    lat : np.ndarray
+        waypoint latitudes
+    lon : np.ndarray
+        waypoint longitudes
+    dist : float
+        distance in degrees
+    constantdist: bool
+        Not really important for the enduser, but there are two ways of computing
+        a gctrack along a curve. for 2 points only the most accurate way
+        is to set ``constant_dist`` to ``False``. 
 
 
     Returns
@@ -94,54 +154,61 @@ def gctrack(
     Notes
     -----
 
-    :Authors: 
+    :Authors:
         Lucas Sawade (lsawade@princeton.edu)
 
-    :Last Modified: 
+    :Last Modified:
         2021.10.10 02.17
 
     """
 
     # First get distances between points
     N = len(lon)
-    dists = np.zeros(N-1)
-    az = np.zeros(N-1)
+    # dists = np.zeros(N-1)
+    # az = np.zeros(N-1)
 
     # Create Geodesic class
     G = Geodesic(flattening=0.0)
 
-    # Get distances along the waypoints
-    mat = np.asarray(G.inverse(np.array((lon[0:-1], lat[0:-1])).T,
-                               np.array((lon[1:], lat[1:])).T))
-    dists = mat[:, 0]/1000.0/111.11
+    # Get tracks between segments that are far apart
+    dists, az = geodiff(lat, lon)
 
-    if np.any(dists > 180.0):
+    if np.any(dists/100 < dist):
         raise ValueError(
-            "Distance between waypoints shouldn't exceed 180 deg. "
-            "For numerical stability.")
-    az = mat[:, 1]
+            "Final deltadeg between points in tracks should be at least "
+            "100 times less smallest distance between waypoints.")
+
+    if not constantdist:
+        updated_dist = []
 
     # Cumulative station distances
     sdists = np.zeros(N)
     sdists[1:] = np.cumsum(dists)
 
-    # Get tracks between segments that are far apart
-    
     tracks = []
     for _i in range(N-1):
 
-        # New dist vector
-        trackdists = np.linspace(0, dists[_i], int(np.ceil((dists[_i])/dist)))
+        # Choice of created equally space vector a long the track
+        if constantdist:
+            # New dist vector
+            trackdists = np.arange(0, dists[_i], dist)
+        else:
+            # Get the length of the linspace
+            N = int(np.round((dists[_i])/dist))
+
+            # Get the closest distance measure
+            updist = dists[_i]/N
+
+            # Attached to list.
+            updated_dist.append(updist)
+
+            trackdists = np.linspace(0, dists[_i] - updist, N)
+
         track = np.array(reckon(lat[_i], lon[_i], trackdists, az[_i]))
 
-        # if dists[_i] > dist:
-        # Create vector between two poitns
-            # trackdists = np.arange(0, dists[_i], dist)
-            # track = np.array(reckon(lat[_i], lon[_i], trackdists, az[_i]))
-        # else:
-        #     # pass
-        #     track = np.array((lat[_i:_i+1], lon[_i:_i+1]))
-
+        # Remove geolocations that overshot
+        tmpdist = geodist(track[0, :], track[1, :])
+        track = track[:, np.where(tmpdist < dists[_i])[0]]
         tracks.append(track)
 
     # Add last point because usually not added
@@ -155,28 +222,17 @@ def gctrack(
     utrack = utrack[np.sort(idx), :]
 
     # Get distances along the new track
-    mat = np.asarray(G.inverse(
-        np.array((utrack[0:-1, 1], utrack[0:-1, 0])).T,
-        np.array((utrack[1:, 1],   utrack[1:, 0])).T))
-    udists = mat[:, 0]/1000.0/111.11
+    udists, _ = geodiff(utrack[:, 1], utrack[:, 0])
 
     # Compute cumulative distance
     M = len(utrack[:, 0])
     cdists = np.zeros(M)
     cdists[1:] = np.cumsum(udists)
 
-    # Interpolate to the final vectors
-    maxdist = np.max(cdists)
-    qdists = np.linspace(0, maxdist, int(maxdist/dist))
-    ilat = interp1d(cdists, utrack[:, 0])
-    ilon = interp1d(cdists, utrack[:, 1])
-    qlat, qlon = ilat(qdists), ilon(qdists)
-
-    # Fix longitudes
-    qlon = np.where(qlon < -180.0, qlon+360.0, qlon)
-    qlon = np.where(qlon > 180.0, qlon-360.0, qlon)
-
-    return qlat, qlon, qdists, sdists
+    if constantdist:
+        return utrack[:, 0], utrack[:, 1], cdists
+    else:
+        return utrack[:, 0], utrack[:, 1], cdists, updated_dist
 
 
 def geo2cart(

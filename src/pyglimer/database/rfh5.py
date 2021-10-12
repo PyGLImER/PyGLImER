@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Monday, 4th October 2021 03:28:36 pm
+Last Modified: Tuesday, 12th October 2021 08:19:12 am
 '''
 
 import fnmatch
@@ -133,7 +133,7 @@ omitted." % path, category=UserWarning)
 
         .. note::
 
-            Wildcards are allowed for all parameters.
+            `Wildcards are allowed for all parameters`.
 
         :param network: network code, e.g., IU
         :type network: str
@@ -151,9 +151,10 @@ omitted." % path, category=UserWarning)
             data.
         :rtype: RFStream
         """
-        if isinstance(evt_time, UTCDateTime):
+        try:
+            evt_time = UTCDateTime(evt_time)
             evt_time = evt_time.format_fissures()
-        else:
+        except TypeError:
             evt_time = '*'
 
         path = hierarchy.format(
@@ -167,20 +168,7 @@ omitted." % path, category=UserWarning)
         # Now, we need to differ between the fnmatch pattern and the actually
         # acessed path
         pattern = path.replace('/*', '*')
-        if evt_time == '*':
-            if pol == '*':
-                if phase == '*':
-                    if station == '*':
-                        if network == '*':
-                            path = tag
-                        else:
-                            path = '/'.join(path.split('/')[:-4])
-                    else:
-                        path = '/'.join(path.split('/')[:-3])
-                else:
-                    path = '/'.join(path.split('/')[:-2])
-            else:
-                path = '/'.join(path.split('/')[:-1])
+        path = path.split('*')[0]
         return all_traces_recursive(self[path], RFStream(), pattern)
 
     def get_coords(
@@ -343,10 +331,10 @@ def all_traces_recursive(
     :rtype: CorrStream
     """
     for v in group.values():
-        if not fnmatch.fnmatch(v.name, pattern) and v.name not in pattern:
-            continue
         if isinstance(v, h5py._hl.group.Group):
             all_traces_recursive(v, stream, pattern)
+        if not fnmatch.fnmatch(v.name, pattern) and v.name not in pattern:
+            continue
         else:
             try:
                 stream.append(
