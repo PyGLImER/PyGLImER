@@ -139,7 +139,7 @@ def download_small_db(
 
     # This does almost certainly need to be split up, so we don't overload the
     # RAM with the downloaded mseeds
-    logger.info('Initialising waveform donwload.')
+    logger.info('Initialising waveform download.')
 
     Parallel(n_jobs=-1, prefer='threads')(
         delayed(pu.__client__loop_wav__)(
