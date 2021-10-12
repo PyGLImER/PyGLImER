@@ -81,6 +81,12 @@
 </li>
 
 <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../introduction/installation.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../creation/index.html">
   Receiver Functions
  </a>
@@ -426,19 +432,44 @@ corresponding chord.</p>
 
 <dl class="py function">
 <dt id="pyglimer.utils.geo_utils.gctrack">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></code><code class="sig-name descname"><span class="pre">gctrack</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#gctrack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.gctrack" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></code><code class="sig-name descname"><span class="pre">gctrack</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constantdist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#gctrack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.gctrack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given waypoints and a point distance, this function computes evenly
 spaced points along the great circle and the given waypoints.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This function is not very accurate, but it it is fast. You may
-want to resort to more accurate functions that is of importance
-for your work. Here this function is only used for the purpose
-of making cross sections.</p>
+<p>This function is not very accurate, but it is fast. You may
+want to resort to more accurate functions if that is of
+importance for your work. Here this function is only used for
+the purpose of making cross sections.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>``constantdist``</strong> The reason for this option is the fact that two
+waypoints are most likely not a multiple of <code class="docutils literal notranslate"><span class="pre">dist</span></code> apart from each
+other. A previous implementation included an interpolation between, but
+the interpolation of a parametric curve in 3D space is not as simple as
+I had hoped. The following explanation is for <code class="docutils literal notranslate"><span class="pre">N</span></code> segments defined by
+<code class="docutils literal notranslate"><span class="pre">N+1</span></code> waypoints.
+<code class="docutils literal notranslate"><span class="pre">constantdist</span></code> sets the spacing constant, but the waypoint is most
+likely not exactly hit making the distance between the point before
+the (n+1)-th waypoint smaller than the the rest. This will be the
+same in all segments between n and (n+1)th waypoints. The alternative
+is to create linspace between the waypoints with
+<code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">=</span> <span class="pre">round(total_dist/dist)</span> <span class="pre">+</span> <span class="pre">1</span></code> points including <code class="docutils literal notranslate"><span class="pre">n</span></code> and
+<code class="docutils literal notranslate"><span class="pre">(n+1)</span></code> waypoints. This is essentially the more accurate way of
+defining the segments, but each segment has a different spacing that
+is not exactly <code class="docutils literal notranslate"><span class="pre">dist</span></code>.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>lat</strong> (<em>np.ndarray waypoint latitudes lon : np.ndarray waypoint longitudes</em>) – dist : float distance in degrees</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>np.ndarray</em>) – waypoint latitudes</p></li>
+<li><p><strong>lon</strong> (<em>np.ndarray</em>) – waypoint longitudes</p></li>
+<li><p><strong>dist</strong> (<em>float</em>) – distance in degrees</p></li>
+<li><p><strong>constantdist</strong> (<em>bool</em>) – Not really important for the enduser, but there are two ways of computing
+a gctrack along a curve. for 2 points only the most accurate way
+is to set <code class="docutils literal notranslate"><span class="pre">constant_dist</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p></p>
@@ -478,6 +509,18 @@ of making cross sections.</p>
 <dd class="field-odd"><p>xyz coordinates coordinates of same size as latitude and longitude arrays</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.geo_utils.geodiff">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></code><code class="sig-name descname"><span class="pre">geodiff</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#geodiff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.geodiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes Azimuths and distances between geographical points.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.geo_utils.geodist">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.geo_utils.</span></code><code class="sig-name descname"><span class="pre">geodist</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/geo_utils.html#geodist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.geo_utils.geodist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes Azimuths and distances between geographical points.</p>
 </dd></dl>
 
 <dl class="py function">

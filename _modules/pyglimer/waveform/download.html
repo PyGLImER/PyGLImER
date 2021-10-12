@@ -79,6 +79,12 @@
 </li>
 
 <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../chapters/introduction/installation.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../../../chapters/creation/index.html">
   Receiver Functions
  </a>
@@ -310,7 +316,7 @@
 
     <span class="c1"># This does almost certainly need to be split up, so we don&#39;t overload the</span>
     <span class="c1"># RAM with the downloaded mseeds</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialising waveform donwload.&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialising waveform download.&#39;</span><span class="p">)</span>
 
     <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s1">&#39;threads&#39;</span><span class="p">)(</span>
         <span class="n">delayed</span><span class="p">(</span><span class="n">pu</span><span class="o">.</span><span class="n">__client__loop_wav__</span><span class="p">)(</span>

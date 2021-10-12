@@ -79,6 +79,12 @@
 </li>
 
 <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../chapters/introduction/installation.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../../../chapters/creation/index.html">
   Receiver Functions
  </a>
@@ -240,21 +246,81 @@
     <span class="k">return</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span></div>
 
 
+<div class="viewcode-block" id="geodiff"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.geo_utils.geodiff">[docs]</a><span class="k">def</span> <span class="nf">geodiff</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes Azimuths and distances between geographical points.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Create Geodesic class</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">(</span><span class="n">flattening</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">lon</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">lat</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">lon</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">lat</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">T</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">dists</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">R_EARTH</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">360.0</span><span class="p">)</span>
+    <span class="n">az</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">dists</span><span class="p">,</span> <span class="n">az</span></div>
+
+
+<div class="viewcode-block" id="geodist"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.geo_utils.geodist">[docs]</a><span class="k">def</span> <span class="nf">geodist</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes Azimuths and distances between geographical points.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Compute distances</span>
+    <span class="n">dists</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">geodiff</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+
+    <span class="n">M</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">cdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+    <span class="n">cdists</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cdists</span></div>
+
+
 <div class="viewcode-block" id="gctrack"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.geo_utils.gctrack">[docs]</a><span class="k">def</span> <span class="nf">gctrack</span><span class="p">(</span>
-        <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+        <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">constantdist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
             <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Given waypoints and a point distance, this function computes evenly</span>
 <span class="sd">    spaced points along the great circle and the given waypoints.</span>
 
-<span class="sd">    .. warning:: This function is not very accurate, but it it is fast. You may</span>
-<span class="sd">                 want to resort to more accurate functions that is of importance</span>
-<span class="sd">                 for your work. Here this function is only used for the purpose</span>
-<span class="sd">                 of making cross sections.</span>
+<span class="sd">    .. warning:: This function is not very accurate, but it is fast. You may</span>
+<span class="sd">                 want to resort to more accurate functions if that is of</span>
+<span class="sd">                 importance for your work. Here this function is only used for</span>
+<span class="sd">                 the purpose of making cross sections.</span>
+
+<span class="sd">    .. warning:: </span>
+
+<span class="sd">        **``constantdist``** The reason for this option is the fact that two </span>
+<span class="sd">        waypoints are most likely not a multiple of ``dist`` apart from each </span>
+<span class="sd">        other. A previous implementation included an interpolation between, but</span>
+<span class="sd">        the interpolation of a parametric curve in 3D space is not as simple as</span>
+<span class="sd">        I had hoped. The following explanation is for ``N`` segments defined by</span>
+<span class="sd">        ``N+1`` waypoints. </span>
+<span class="sd">        ``constantdist`` sets the spacing constant, but the waypoint is most </span>
+<span class="sd">        likely not exactly hit making the distance between the point before </span>
+<span class="sd">        the (n+1)-th waypoint smaller than the the rest. This will be the </span>
+<span class="sd">        same in all segments between n and (n+1)th waypoints. The alternative</span>
+<span class="sd">        is to create linspace between the waypoints with </span>
+<span class="sd">        ``N = round(total_dist/dist) + 1`` points including ``n`` and</span>
+<span class="sd">        ``(n+1)`` waypoints. This is essentially the more accurate way of</span>
+<span class="sd">        defining the segments, but each segment has a different spacing that</span>
+<span class="sd">        is not exactly ``dist``.</span>
+
+
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    lat : np.ndarray waypoint latitudes lon : np.ndarray waypoint longitudes</span>
-<span class="sd">        dist : float distance in degrees</span>
+<span class="sd">    lat : np.ndarray</span>
+<span class="sd">        waypoint latitudes</span>
+<span class="sd">    lon : np.ndarray</span>
+<span class="sd">        waypoint longitudes</span>
+<span class="sd">    dist : float</span>
+<span class="sd">        distance in degrees</span>
+<span class="sd">    constantdist: bool</span>
+<span class="sd">        Not really important for the enduser, but there are two ways of computing</span>
+<span class="sd">        a gctrack along a curve. for 2 points only the most accurate way</span>
+<span class="sd">        is to set ``constant_dist`` to ``False``. </span>
 
 
 <span class="sd">    Returns</span>
@@ -265,54 +331,61 @@
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 
-<span class="sd">    :Authors: </span>
+<span class="sd">    :Authors:</span>
 <span class="sd">        Lucas Sawade (lsawade@princeton.edu)</span>
 
-<span class="sd">    :Last Modified: </span>
+<span class="sd">    :Last Modified:</span>
 <span class="sd">        2021.10.10 02.17</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># First get distances between points</span>
     <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
-    <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">az</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># dists = np.zeros(N-1)</span>
+    <span class="c1"># az = np.zeros(N-1)</span>
 
     <span class="c1"># Create Geodesic class</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="p">(</span><span class="n">flattening</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 
-    <span class="c1"># Get distances along the waypoints</span>
-    <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">lon</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">lat</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
-                               <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">lon</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">lat</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
-    <span class="n">dists</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mf">1000.0</span><span class="o">/</span><span class="mf">111.11</span>
+    <span class="c1"># Get tracks between segments that are far apart</span>
+    <span class="n">dists</span><span class="p">,</span> <span class="n">az</span> <span class="o">=</span> <span class="n">geodiff</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">dists</span> <span class="o">&gt;</span> <span class="mf">180.0</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">dists</span><span class="o">/</span><span class="mi">100</span> <span class="o">&lt;</span> <span class="n">dist</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Distance between waypoints shouldn&#39;t exceed 180 deg. &quot;</span>
-            <span class="s2">&quot;For numerical stability.&quot;</span><span class="p">)</span>
-    <span class="n">az</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="s2">&quot;Final deltadeg between points in tracks should be at least &quot;</span>
+            <span class="s2">&quot;100 times less smallest distance between waypoints.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">constantdist</span><span class="p">:</span>
+        <span class="n">updated_dist</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Cumulative station distances</span>
     <span class="n">sdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
     <span class="n">sdists</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
 
-    <span class="c1"># Get tracks between segments that are far apart</span>
-    
     <span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
 
-        <span class="c1"># New dist vector</span>
-        <span class="n">trackdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">])</span><span class="o">/</span><span class="n">dist</span><span class="p">)))</span>
+        <span class="c1"># Choice of created equally space vector a long the track</span>
+        <span class="k">if</span> <span class="n">constantdist</span><span class="p">:</span>
+            <span class="c1"># New dist vector</span>
+            <span class="n">trackdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="n">dist</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Get the length of the linspace</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">])</span><span class="o">/</span><span class="n">dist</span><span class="p">))</span>
+
+            <span class="c1"># Get the closest distance measure</span>
+            <span class="n">updist</span> <span class="o">=</span> <span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">]</span><span class="o">/</span><span class="n">N</span>
+
+            <span class="c1"># Attached to list.</span>
+            <span class="n">updated_dist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">updist</span><span class="p">)</span>
+
+            <span class="n">trackdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">]</span> <span class="o">-</span> <span class="n">updist</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+
         <span class="n">track</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reckon</span><span class="p">(</span><span class="n">lat</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="n">lon</span><span class="p">[</span><span class="n">_i</span><span class="p">],</span> <span class="n">trackdists</span><span class="p">,</span> <span class="n">az</span><span class="p">[</span><span class="n">_i</span><span class="p">]))</span>
 
-        <span class="c1"># if dists[_i] &gt; dist:</span>
-        <span class="c1"># Create vector between two poitns</span>
-            <span class="c1"># trackdists = np.arange(0, dists[_i], dist)</span>
-            <span class="c1"># track = np.array(reckon(lat[_i], lon[_i], trackdists, az[_i]))</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     # pass</span>
-        <span class="c1">#     track = np.array((lat[_i:_i+1], lon[_i:_i+1]))</span>
-
+        <span class="c1"># Remove geolocations that overshot</span>
+        <span class="n">tmpdist</span> <span class="o">=</span> <span class="n">geodist</span><span class="p">(</span><span class="n">track</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">track</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">track</span> <span class="o">=</span> <span class="n">track</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tmpdist</span> <span class="o">&lt;</span> <span class="n">dists</span><span class="p">[</span><span class="n">_i</span><span class="p">])[</span><span class="mi">0</span><span class="p">]]</span>
         <span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
 
     <span class="c1"># Add last point because usually not added</span>
@@ -326,28 +399,17 @@
     <span class="n">utrack</span> <span class="o">=</span> <span class="n">utrack</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="p">:]</span>
 
     <span class="c1"># Get distances along the new track</span>
-    <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">utrack</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">utrack</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">utrack</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">],</span>   <span class="n">utrack</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
-    <span class="n">udists</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mf">1000.0</span><span class="o">/</span><span class="mf">111.11</span>
+    <span class="n">udists</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">geodiff</span><span class="p">(</span><span class="n">utrack</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">utrack</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
 
     <span class="c1"># Compute cumulative distance</span>
     <span class="n">M</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">utrack</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
     <span class="n">cdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
     <span class="n">cdists</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">udists</span><span class="p">)</span>
 
-    <span class="c1"># Interpolate to the final vectors</span>
-    <span class="n">maxdist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">cdists</span><span class="p">)</span>
-    <span class="n">qdists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxdist</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">maxdist</span><span class="o">/</span><span class="n">dist</span><span class="p">))</span>
-    <span class="n">ilat</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">cdists</span><span class="p">,</span> <span class="n">utrack</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
-    <span class="n">ilon</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">cdists</span><span class="p">,</span> <span class="n">utrack</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
-    <span class="n">qlat</span><span class="p">,</span> <span class="n">qlon</span> <span class="o">=</span> <span class="n">ilat</span><span class="p">(</span><span class="n">qdists</span><span class="p">),</span> <span class="n">ilon</span><span class="p">(</span><span class="n">qdists</span><span class="p">)</span>
-
-    <span class="c1"># Fix longitudes</span>
-    <span class="n">qlon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">qlon</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">180.0</span><span class="p">,</span> <span class="n">qlon</span><span class="o">+</span><span class="mf">360.0</span><span class="p">,</span> <span class="n">qlon</span><span class="p">)</span>
-    <span class="n">qlon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">qlon</span> <span class="o">&gt;</span> <span class="mf">180.0</span><span class="p">,</span> <span class="n">qlon</span><span class="o">-</span><span class="mf">360.0</span><span class="p">,</span> <span class="n">qlon</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">qlat</span><span class="p">,</span> <span class="n">qlon</span><span class="p">,</span> <span class="n">qdists</span><span class="p">,</span> <span class="n">sdists</span></div>
+    <span class="k">if</span> <span class="n">constantdist</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">utrack</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">utrack</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">cdists</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">utrack</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">utrack</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">cdists</span><span class="p">,</span> <span class="n">updated_dist</span></div>
 
 
 <div class="viewcode-block" id="geo2cart"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.geo_utils.geo2cart">[docs]</a><span class="k">def</span> <span class="nf">geo2cart</span><span class="p">(</span>
