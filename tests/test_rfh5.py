@@ -8,16 +8,14 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th October 2021 02:04:06 pm
-Last Modified: Tuesday, 19th October 2021 03:51:54 pm
+Last Modified: Tuesday, 19th October 2021 03:53:47 pm
 '''
 
-from copy import deepcopy
 import unittest
 from unittest.mock import patch, MagicMock
 import warnings
 
 from obspy import read, UTCDateTime
-from obspy.core import AttribDict
 import numpy as np
 import h5py
 
