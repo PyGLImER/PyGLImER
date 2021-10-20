@@ -2,13 +2,13 @@
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   `GNU Lesser General Public License, Version 3
+   `GNU Lesser General Public License, Version 3 \
    <https://www.gnu.org/copyleft/lesser.html>`
 :author:
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Tuesday, 19th October 2021 03:48:31 pm
+Last Modified: Tuesday, 19th October 2021 04:11:50 pm
 '''
 
 import fnmatch

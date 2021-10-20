@@ -14,7 +14,7 @@ Contains functions for moveout correction and station stacking.
 !The file is split and has a second copyright disclaimer!
 
 Created: Tuesday, 7th April 2020 10:08:30 am
-Last Modified: Thursday, 25th March 2021 03:51:18 pm
+Last Modified: Wednesday, 20th October 2021 01:01:39 pm
 '''
 
 import os
@@ -203,10 +203,6 @@ def moveout(
             tckm2 = interpolate.splrep(zm2, RFm2)
         except TypeError:
             multiple = False
-            # u, c = np.unique(zm1, return_counts=True)
-            # dup = u[c > 1]
-            # u, c = np.unique(zm2, return_counts=True)
-            # dup2 = u[c > 1]
             mes = "Interpolation error in multiples. Only primary conversion\
                  will be used."
             warnings.warn(mes, category=UserWarning, stacklevel=1)
@@ -354,11 +350,6 @@ def dt_table_3D(
 
     # Numerical integration
     for kk, _ in enumerate(htab_f[1:]):
-        # ii = np.where(model.zf > h)[0][0] - 1  # >=
-
-        # # When there is elevation (velocity model starts at depth 0!)
-        # if ii == -1:
-        #     ii = 0
 
         with warnings.catch_warnings():
             # Catch Zerodivision warnings
@@ -371,11 +362,6 @@ def dt_table_3D(
                 break
 
         az = baz
-
-        # if np.isnan(delta[kk+1]) or q_a[ii] == 0 or q_b[ii] == 0:
-        #     # Supercritical
-        #     delta = delta[:kk+1]
-        #     break
 
         coords = Geodesic.WGS84.ArcDirect(lat, lon, az, delta[kk+1])
         lat2, lon2 = coords['lat2'], coords['lon2']
@@ -403,7 +389,7 @@ def dt_table_3D(
 
     dt_a = np.cumsum(dt_a)[:len(delta)]
     dt_b = np.cumsum(dt_b)[:len(delta)]
-    dt = dt_b-dt_a  # Delay primary conversion
+    dt = dt_b - dt_a  # Delay primary conversion
 
     # Find travel times for multiples
     # We will have to assume that the multiples don't cross into a different
@@ -414,13 +400,10 @@ def dt_table_3D(
         # mphase 1 is PPs for P and SSp for S
         # mphase 2 is PSs, and SPp, respectively
         if phase == 'P':
-            # dt_mphase1 = dt + 2*dt_a
-            # dt_mphase2 = dt + dt_b + dt_a
-            # The two are the same, first one just overly complicated
             dt_mphase1 = dt_b + dt_a
             dt_mphase2 = 2*dt_b
+
             # Truncate The travel time table for multiples
-            # if dt_mphase1.max() > 100 or dt_mphase2.max() > 100:
             try:
                 dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 >= 100)[0][0]]
             except IndexError:
@@ -429,8 +412,7 @@ def dt_table_3D(
                 dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
             except IndexError:
                 pass
-            # elif dt_mphase2.max() > 100:
-            #     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=100)[0][0]]
+
         else:
             # Reduce travel times for S since the data will be flipped
             dt_mphase1 = dt - 2*dt_b
@@ -571,9 +553,6 @@ def dt_table(
                 dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
             except IndexError:
                 pass
-            # elif dt_mphase2.max() > 100:
-            #     print('h2')
-            #     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2>=100)[0][0]]
         else:
             # Reduce travel times for S since the data will be flipped
             dt_mphase1 = dt - 2*dt_b
@@ -606,7 +585,7 @@ def ppoint(q_a: float, q_b: float, dz: float, p: float, phase: str):
     dz : float
         Vertical distance between two consecutive piercing points [km].
     p : float
-        slowness in s/km.
+        Horizontal slowness in s/km.
     phase : string
         Either "S" or "P".
 
@@ -636,7 +615,7 @@ def earth_flattening(
     Parameters
     ----------
     maxz : int
-        Maximal intepolation depth [km]. Given at beginning of file.
+        Maximal interpolation depth [km]. Given at beginning of file.
     z : np.array
         Depth vector [km].
     dz : np.array

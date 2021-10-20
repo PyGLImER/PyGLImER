@@ -13,7 +13,7 @@ Various Deconvolution approaches used for the RF technique.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 16th October 2019 02:24:30 pm
-Last Modified: Monday, 13th September 2021 04:31:00 pm
+Last Modified: Wednesday, 20th October 2021 01:37:08 pm
 
 '''
 
@@ -260,8 +260,6 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
     # waterlevel regularization
     elif water:
         eps = max(noise.real)
-        # eps = 10
-        # eps = 100  # constant wl to reproduce Rychert et al
         den[den.real < eps] = eps
 
     # numerator
