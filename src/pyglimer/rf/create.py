@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Monday, 27th September 2021 03:42:20 pm
+Last Modified: Wednesday, 20th October 2021 03:47:33 pm
 
 
 !The file is split and has a second copyright disclaimer!
@@ -107,8 +107,9 @@ def createRF(
     elif onset:
         shift = onset - st_in[0].stats.starttime
     else:
-        raise ValueError('Provide either info dict as input or give data\
-            manually (see docstring).')
+        raise ValueError(
+            'Provide either info dict as input or give args manually ' +
+            '(see docstring).')
 
     # sampling interval
     dt = st_in[0].stats.delta
@@ -125,9 +126,10 @@ def createRF(
     # taper traces
     if trim:
         if not type(trim) == list and len(trim) != 2:
-            raise Exception("""Trim has to be given as list with two elements
-                            [a, b]. Where a and b are the taper length in s
-                            on the left and right side, respectively.""")
+            raise Exception(
+                """Trim has to be given as list with two elements
+                [a, b]. Where a and b are the taper length in s
+                on the left and right side, respectively.""")
         # Hann taper with 7.5s taper window
         tap = hann(round(15 / dt))
         taper = np.ones(st[0].stats.npts)
@@ -220,8 +222,9 @@ def createRF(
         # I could probably create another QC here and check if fact is
         # the maximum of RF[0].data or even close to the maximum. Let's try:
         if abs(fact) < abs(lrf).max()/2:
-            raise ValueError('The noise level of the created receiver function\
-                is too high.')
+            raise ValueError(
+                'The noise level of the created receiver function is too high.'
+                )
 
     # create RFTrace object
     # create stats
@@ -375,14 +378,6 @@ _FORMATHEADERS = {'sac': ('stla', 'stlo', 'stel', 'evla', 'evlo',
 _HEADER_CONVERSIONS = {'sac': {'onset': (__SAC2UTC, __UTC2SAC),
                                'event_time': (__SAC2UTC, __UTC2SAC)}}
 
-_TF = '.datetime:%Y-%m-%dT%H:%M:%S'
-
-_H5INDEX = {
-    'rf': ('waveforms/{network}.{station}.{location}/{event_time%s}/' % _TF +
-           '{channel}_{starttime%s}_{endtime%s}' % (_TF, _TF)),
-    'profile': 'waveforms/{channel[2]}_{box_pos}'
-}
-
 
 def read_rf(pathname_or_url, format=None, **kwargs):
     """
@@ -478,14 +473,9 @@ class RFStream(Stream):
             tr._write_format_specific_header(format)
             if format.upper() == 'Q':
                 tr.stats.station = tr.id
-        # if format.upper() == 'H5':
-        #     index = self.type
-        #     if index is None and 'event_time' in self[0].stats:
-        #         index = 'rf'
-        #     if index:
-        #         import obspyh5
-        #         old_index = obspyh5._INDEX
-        #         obspyh5.set_index(_H5INDEX[index])
+        if format.upper() == 'H5':
+            raise ValueError(
+                'Use the rfh5 module to add rfs to h5 file.')
         super(RFStream, self).write(filename, format, **kwargs)
         # if format.upper() == 'H5' and index:
         #     obspyh5.set_index(old_index)

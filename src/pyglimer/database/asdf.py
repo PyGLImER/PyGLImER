@@ -12,7 +12,7 @@ Seismic Format (asdf).
 
 Created: Friday, 12th February 2021 03:24:30 pm
 
-Last Modified: Wednesday, 22nd September 2021 03:18:12 pm
+Last Modified: Wednesday, 20th October 2021 04:41:45 pm
 '''
 
 import logging
@@ -134,7 +134,6 @@ def write_st(
     if resample:
         st.filter('lowpass_cheby_2', freq=4, maxorder=12)
         st = resample_or_decimate(st, 10, filter=False)
-
     with ASDFDataSet(os.path.join(outfolder, fname)) as ds:
         # Retrieve eventid - not the most elgant way, but works
         evtid = event.resource_id
