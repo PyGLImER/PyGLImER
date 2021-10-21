@@ -249,13 +249,13 @@
   <div class="section" id="receiver-functions-stored-in-hdf5-format">
 <h1>Receiver functions stored in hdf5 format<a class="headerlink" href="#receiver-functions-stored-in-hdf5-format" title="Permalink to this headline">¶</a></h1>
 <p>If you saved your receiver functions in <em>hdf5</em> format, you can use the
-<a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.RFDataBase" title="pyglimer.database.rfh5.RFDataBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code></a> class to access and manipulate
+<code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code> class to access and manipulate
 your database.</p>
 <p>As a user, you will only ever be calling the
-<a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.RFDataBase" title="pyglimer.database.rfh5.RFDataBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code></a> class. The only function of this
-class is to return a <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler" title="pyglimer.database.rfh5.DBHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code></a>, which hold
+<code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code> class. The only function of this
+class is to return a <code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code>, which hold
 all the “useful” functions. To call
-<a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.RFDataBase" title="pyglimer.database.rfh5.RFDataBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code></a>, use a context manager like so:</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code>, use a context manager like so:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyglimer.database.rfh5</span> <span class="kn">import</span> <span class="n">RFDataBase</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="s1">&#39;/path/to/myfile.h5&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="nb">type</span><span class="p">(</span><span class="n">rfdb</span><span class="p">)</span>  <span class="c1"># This is a DBHandler</span>
@@ -264,7 +264,7 @@ all the “useful” functions. To call
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Do not call <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler" title="pyglimer.database.rfh5.DBHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code></a> directly! This
+<p>Do not call <code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code> directly! This
 might lead to unexpected behaviour or even dataloss due to corrupted hdf5
 files.</p>
 </div>
@@ -275,15 +275,15 @@ will have to close the hdf5 file with
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">_close()</span></code> to avoid corrupting
 your files!</p>
 </div>
-<p><a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler" title="pyglimer.database.rfh5.DBHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code></a> has the following public methods:</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code> has the following public methods:</p>
 <table class="hlist"><tr><td><ul class="simple">
-<li><p><a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler.add_rf" title="pyglimer.database.rfh5.DBHandler.add_rf"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_rf()</span></code></a> to add receiver
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_rf()</span></code> to add receiver
 functions to the database</p></li>
-<li><p><a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler.get_data" title="pyglimer.database.rfh5.DBHandler.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a> to read data from
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code> to read data from
 this file</p></li>
-<li><p><a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler.get_coords" title="pyglimer.database.rfh5.DBHandler.get_coords"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_coords()</span></code></a> to get
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_coords()</span></code> to get
 the coordinates of the associated station</p></li>
-<li><p><a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler.walk" title="pyglimer.database.rfh5.DBHandler.walk"><code class="xref py py-meth docutils literal notranslate"><span class="pre">walk()</span></code></a> to iterate over all
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">walk()</span></code> to iterate over all
 receiver functions in a subset defined by the provided arguments</p></li>
 </ul>
 </td></tr></table>
@@ -291,7 +291,7 @@ receiver functions in a subset defined by the provided arguments</p></li>
 <h2>Reading data<a class="headerlink" href="#reading-data" title="Permalink to this headline">¶</a></h2>
 <p>The most common usecase is probably that you will want to access receciver
 functions that <strong>PyGLImER</strong> computed for you (as shown earlier). To do so, you
-can use the <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler.get_data" title="pyglimer.database.rfh5.DBHandler.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a> method:</p>
+can use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code> method:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyglimer.database.rfh5</span> <span class="kn">import</span> <span class="n">RFDataBase</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="s1">&#39;/path/to/myfile.h5&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">rfst</span> <span class="o">=</span> <span class="n">rfdb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
@@ -310,7 +310,7 @@ time (<code class="docutils literal notranslate"><span class="pre">evt_time='*'<
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>If you want to create your own function to
-<a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler.walk" title="pyglimer.database.rfh5.DBHandler.walk"><code class="xref py py-meth docutils literal notranslate"><span class="pre">walk()</span></code></a> might come in handy.</p>
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">walk()</span></code> might come in handy.</p>
 </div>
 </div>
 <div class="section" id="tags">
@@ -322,7 +322,7 @@ receiver function data.</p>
 <div class="section" id="getting-an-overview-over-available-data">
 <h2>Getting an overview over available data<a class="headerlink" href="#getting-an-overview-over-available-data" title="Permalink to this headline">¶</a></h2>
 <p>You can <strong>Access the DBHandler like a dictionary</strong>: Just like in h5py, it is
-possible to access the <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler" title="pyglimer.database.rfh5.DBHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code></a> like a
+possible to access the <code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code> like a
 dictionary. The logic works as follows:</p>
 <blockquote>
 <div><p>dbh[tag][network][station][phase][pol][evt_time]</p>
@@ -356,7 +356,7 @@ save the data afterwards. You can do that like below:</p>
         <span class="n">rf</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;rf_with_my_funny_processing_idea&#39;</span><span class="p">)</span>
 </pre></div>
 </td></tr></table></div>
-<p>We can retrieve the <a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> as shown above.
+<p>We can retrieve the <code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code> as shown above.
 Network, station, and channel information are determined automatically from the
 header and used to identify and locate the data.</p>
 </div>

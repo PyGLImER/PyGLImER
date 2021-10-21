@@ -231,14 +231,14 @@
                 
   <div class="section" id="the-request-class">
 <h1>The Request Class<a class="headerlink" href="#the-request-class" title="Permalink to this headline">¶</a></h1>
-<p>The <a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> class handles all steps from download, over preprocessing,
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code> class handles all steps from download, over preprocessing,
 to deconvolution (i.e. the creation of a time domain receiver function).
 Since PyGLImER-v0.1.0 the database can be saved in two different formats - <em>MSEED</em> (raw waveforms), <em>SAC</em>
 (receiver functions), and <em>XML</em> (station response and event database) <strong>OR</strong> in <em>hdf5</em> (hierachical data format).
 Both options have advantages and downsides (see below).</p>
 <div class="section" id="mseed-sac-database">
 <h2>MSEED/SAC Database<a class="headerlink" href="#mseed-sac-database" title="Permalink to this headline">¶</a></h2>
-<p>If the user chooses this option, the <a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> object will create
+<p>If the user chooses this option, the <code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code> object will create
 a folder structure as defined by the user. Those contain raw (i.e. unprocessed, but downsampled)
 waveform files in miniseed format, preprocessed (3 component in RTZ coordinate system, and filtered/discarded
 by signal to noise ratio) waveforms in miniseed format together with info-files (shelve format),
@@ -276,10 +276,10 @@ formats!</p>
 <h2>Methods of the Request class<a class="headerlink" href="#methods-of-the-request-class" title="Permalink to this headline">¶</a></h2>
 <p>A Request object has four public methods:</p>
 <table class="hlist"><tr><td><ul class="simple">
-<li><p><a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request.download_eventcat" title="pyglimer.waveform.request.Request.download_eventcat"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_eventcat()</span></code></a></p></li>
-<li><p><a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request.download_waveforms" title="pyglimer.waveform.request.Request.download_waveforms"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms()</span></code></a></p></li>
-<li><p><a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request.download_waveforms_small_db" title="pyglimer.waveform.request.Request.download_waveforms_small_db"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms_small_db()</span></code></a></p></li>
-<li><p><a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request.preprocess" title="pyglimer.waveform.request.Request.preprocess"><code class="xref py py-meth docutils literal notranslate"><span class="pre">preprocess()</span></code></a></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_eventcat()</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms()</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms_small_db()</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">preprocess()</span></code></p></li>
 </ul>
 </td></tr></table>
 <p>The functions are responsible for:</p>
@@ -289,16 +289,16 @@ formats!</p>
 <li><p>Downsampling the raw data, preprocessing the raw data and saving the filtered data in a different directory, and creating receiver functions.</p></li>
 </ul>
 </td></tr></table>
-<p>However, all parameters are already set, when initialising the <a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> object.</p>
+<p>However, all parameters are already set, when initialising the <code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code> object.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>As you surely have noticed, there are two functions to download data. As the name suggests
-<a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request.download_waveforms_small_db" title="pyglimer.waveform.request.Request.download_waveforms_small_db"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms_small_db()</span></code></a>, is the tool
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms_small_db()</span></code>, is the tool
 of choice if you wish to download smaller databases, consisting of data from only few stations
 or networks. This function does also have the advantage that you can
 <strong>download data from defined lists of networks and stations</strong> instead of having to rely only on wildcards.
-For smaller databases <a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request.download_waveforms_small_db" title="pyglimer.waveform.request.Request.download_waveforms_small_db"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms_small_db()</span></code></a> will
-download data up to twice faster than <a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request.download_waveforms" title="pyglimer.waveform.request.Request.download_waveforms"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms()</span></code></a>.
+For smaller databases <code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms_small_db()</span></code> will
+download data up to twice faster than <code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms()</span></code>.
 The latter will be the better choice if you create databases on continental or even global scales. It
 utilises the <a class="reference external" href="https://docs.obspy.org/packages/autogen/obspy.clients.fdsn.mass_downloader.html">Obspy Mass Downloader</a>.</p>
 </div>
@@ -306,7 +306,7 @@ utilises the <a class="reference external" href="https://docs.obspy.org/packages
 <div class="section" id="setting-the-parameters-for-your-request">
 <h2>Setting the parameters for your request<a class="headerlink" href="#setting-the-parameters-for-your-request" title="Permalink to this headline">¶</a></h2>
 <p>The parameters for preprocessing and download are set when initialising the
-<a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> object. Probably the most convenient way to define them
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code> object. Probably the most convenient way to define them
 is to create a <em>yaml</em> file with the parameters. An example comes with this repository in <cite>params.yaml</cite>:</p>
 <div class="highlight-yaml notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
 <span class="normal"> 2</span>

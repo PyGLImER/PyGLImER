@@ -190,7 +190,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Wednesday, 16th October 2019 02:24:30 pm</span>
-<span class="sd">Last Modified: Wednesday, 20th October 2021 01:37:08 pm</span>
+<span class="sd">Last Modified: Thursday, 21st October 2021 03:59:20 pm</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 
@@ -269,8 +269,9 @@
 
         <span class="c1"># compute residual for ongoing iteration it</span>
         <span class="n">r_new</span> <span class="o">=</span> <span class="n">H</span> <span class="o">-</span> <span class="n">est</span>
-        <span class="n">omega</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r_new</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">((</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r_new</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">r_new</span>
 
     <span class="c1"># Create receiver function</span>
@@ -417,9 +418,9 @@
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">freqdep</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">const</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">water</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Regularization not defined (your input: regul=</span><span class="si">%s</span><span class="s2">. &quot;</span> <span class="o">%</span> <span class="n">regul</span> <span class="o">+</span>
-            <span class="s1">&#39;Use either &quot;fqd&quot; for frequency-dependent or &quot;con&quot; for constant &#39;</span> <span class="o">+</span>
-            <span class="s2">&quot;value regularization or &#39;wat&#39; for water-level.&quot;</span><span class="p">)</span>
+            <span class="s2">&quot;Regularization not defined (your input: regul=</span><span class="si">%s</span><span class="s2">. &quot;</span> <span class="o">%</span> <span class="n">regul</span>
+            <span class="o">+</span> <span class="s1">&#39;Use either &quot;fqd&quot; for frequency-dependent or &quot;con&quot; for constant &#39;</span>
+            <span class="o">+</span> <span class="s2">&quot;value regularization or &#39;wat&#39; for water-level.&quot;</span><span class="p">)</span>
 
     <span class="c1"># constant damping factor regularization</span>
     <span class="k">if</span> <span class="n">test</span><span class="p">:</span>

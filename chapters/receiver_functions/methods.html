@@ -232,35 +232,35 @@
   <div class="section" id="methods-available-for-both-rfstream-and-rftrace-objects">
 <h1>Methods available for both RFStream and RFTrace objects<a class="headerlink" href="#methods-available-for-both-rfstream-and-rftrace-objects" title="Permalink to this headline">¶</a></h1>
 <p>No matter whether your data was stored as <em>mseed</em> or <em>hdf5</em>, after reading it,
-you will receive an <a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> object. Below you can
+you will receive an <code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code> object. Below you can
 find a list of the available public methods. For examples on how to use them,
 please consult the example Jupyter notebooks.</p>
 <div class="section" id="methods-for-rftrace-objects">
 <h2>Methods for RFTrace objects<a class="headerlink" href="#methods-for-rftrace-objects" title="Permalink to this headline">¶</a></h2>
 <table class="hlist"><tr><td><ul class="simple">
 <li><dl class="simple">
-<dt><a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFTrace.write" title="pyglimer.rf.create.RFTrace.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a></dt><dd><p>to write receiver function to a SAC file(in time domain)</p>
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></dt><dd><p>to write receiver function to a SAC file(in time domain)</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFTrace.moveout" title="pyglimer.rf.create.RFTrace.moveout"><code class="xref py py-meth docutils literal notranslate"><span class="pre">moveout()</span></code></a></dt><dd><p>to migrate the receiver function(s) to depth domain using one of the
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">moveout()</span></code></dt><dd><p>to migrate the receiver function(s) to depth domain using one of the
 provided velocity-depth models (either ‘3D’ for GyPsum or ‘iasp91.dat’
 for iasp91). Piercing points will be appended to the object.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFTrace.ppoint" title="pyglimer.rf.create.RFTrace.ppoint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ppoint()</span></code></a></dt><dd><p>to compute the piercing points in depth without migrating the receiver
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">ppoint()</span></code></dt><dd><p>to compute the piercing points in depth without migrating the receiver
 function using the provided velocity model.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFTrace.plot" title="pyglimer.rf.create.RFTrace.plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></dt><dd><p>to plot the receiver function(s). The plot will be different depending
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></dt><dd><p>to plot the receiver function(s). The plot will be different depending
 on the type of receiver function: <strong>1.</strong> For <em>depth-migrated</em> RFs, the
 plot will be against depth. <strong>2.</strong> For an
-<a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a> in time domain, the plot will be
+<code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code> in time domain, the plot will be
 against time.</p>
 </dd>
 </dl>
@@ -272,31 +272,31 @@ against time.</p>
 <h2>Methods for RFStream objects<a class="headerlink" href="#methods-for-rfstream-objects" title="Permalink to this headline">¶</a></h2>
 <table class="hlist"><tr><td><ul class="simple">
 <li><dl class="simple">
-<dt><a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFStream.write" title="pyglimer.rf.create.RFStream.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a></dt><dd><p>to write receiver function(s) to SAC file(s) (in time domain). Creates
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></dt><dd><p>to write receiver function(s) to SAC file(s) (in time domain). Creates
 one file per receiver function.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFStream.plot" title="pyglimer.rf.create.RFStream.plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></dt><dd><p>This plot will show the receiver functions depending on epicentral
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></dt><dd><p>This plot will show the receiver functions depending on epicentral
 distance (i.e., a section)</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFStream.plot_distribution" title="pyglimer.rf.create.RFStream.plot_distribution"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_distribution()</span></code></a></dt><dd><p>Plot the azimuthal and ray-parameter distribution of all traces in the
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_distribution()</span></code></dt><dd><p>Plot the azimuthal and ray-parameter distribution of all traces in the
 stream in a rose diagram.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFStream.station_stack" title="pyglimer.rf.create.RFStream.station_stack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">station_stack()</span></code></a></dt><dd><p>to create a station specific stack of all receiver function in the
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">station_stack()</span></code></dt><dd><p>to create a station specific stack of all receiver function in the
 object. For that to work, all RFs have to be from the same station.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFStream.dirty_ccp_stack" title="pyglimer.rf.create.RFStream.dirty_ccp_stack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dirty_ccp_stack()</span></code></a></dt><dd><p>Create a simple CCP Stack. For more on CCP stacking, see <a class="reference external" href="./ccp">the later part
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">dirty_ccp_stack()</span></code></dt><dd><p>Create a simple CCP Stack. For more on CCP stacking, see <a class="reference external" href="./ccp">the later part
 of this tutorial</a> <strong>This method is experimental!</strong></p>
 </dd>
 </dl>
