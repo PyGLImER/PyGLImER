@@ -12,12 +12,8 @@
 #
 import os
 import sys
-# sys.path.insert(0, os.path.abspath('..'))
-# sys.path.insert(0, os.path.abspath('../src'))
+
 sys.path.insert(0, os.path.abspath('../src'))
-# sys.path.insert(0, os.path.abspath('..'))
-# sys.path.insert(0, os.path.abspath('.'))
-# sys.path.insert(0, os.path.abspath('../'))
 
 
 # -- Project information -----------------------------------------------------
@@ -27,7 +23,7 @@ copyright = '2021, the PyGLImER development team'
 author = 'Peter Makus, Lucas Sawade'
 
 # The full version, including alpha/beta/rc tags
-release = '0.01'
+release = '0.1'
 
 
 # -- General configuration ---------------------------------------------------
