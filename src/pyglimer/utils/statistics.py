@@ -4,13 +4,13 @@ Toolbox for statistical tools to quantify errors in receiver functions.
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   `GNU Lesser General Public License, Version 3 \
-       <https://www.gnu.org/copyleft/lesser.html>`
+    GNU Lesser General Public License, Version 3
+    (https://www.gnu.org/copyleft/lesser.html)
 :author:
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th September 2021 03:14:17 pm
-Last Modified: Monday, 27th September 2021 03:18:56 pm
+Last Modified: Thursday, 21st October 2021 10:23:01 am
 '''
 
 

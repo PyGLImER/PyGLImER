@@ -11,8 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Monday, 13th September 2021 03:46:30 pm
-
+Last Modified: Thursday, 21st October 2021 03:42:52 pm
 '''
 
 import logging
@@ -112,9 +111,8 @@ def __client__loop__(client: str or Client, statloc: str, bulk: list):
     :rtype: obspy.Inventory
     """
     logger = logging.getLogger('pyglimer.request')
-    
+
     try:
-    
         if not isinstance(client, Client):
             client = Client(client)
         stat_inv = client.get_stations_bulk(

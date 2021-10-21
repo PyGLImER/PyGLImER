@@ -9,7 +9,7 @@
     Lucas Sawade (lsawade@princeton.edu)
 
 Created: November 2019
-Last Modified: Thursday, 19th August 2021 09:39:42 am
+Last Modified: Thursday, 21st October 2021 10:05:06 am
 '''
 
 import logging
@@ -24,10 +24,20 @@ from ...constants import R_EARTH
 from ...utils.geo_utils import geo2cart, cart2geo, epi2euc
 from ...utils.utils import dt_string
 
-logger = logging.Logger("binlogger")
+logger = logging.getLogger("pyglimer.ccp.compute.bin")
 
 
-def fibonacci_sphere(epi=1):
+def fibonacci_sphere(epi: float = 1):
+    """
+    Creates a Fibonacci sphere, which is a reasonable approximaton for equal
+    distance points on a sphere.
+
+    :param epi: distance between the closest points in degree, defaults to 1
+    :type epi: float, optional
+    :return: a one dimensional array containing the cartesian points
+        [x, y, z] for each index.
+    :rtype: np.ndarray[List[float]]
+    """
     # Get number of samples from epicentral distance first get euclidean
     # distance d
     d = 2 * np.sin(epi / 180 * np.pi / 2)
@@ -39,7 +49,6 @@ def fibonacci_sphere(epi=1):
         y = ((i * offset) - 1) + (offset / 2)
         r = np.sqrt(1 - y ** 2)
         phi = ((i + 1) % samples) * increment
-        # print(phi)
         x = np.cos(phi) * r
         z = np.sin(phi) * r
         points.append([x, y, z])

@@ -13,7 +13,7 @@ Various Deconvolution approaches used for the RF technique.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 16th October 2019 02:24:30 pm
-Last Modified: Monday, 13th September 2021 04:31:00 pm
+Last Modified: Thursday, 21st October 2021 03:59:20 pm
 
 '''
 
@@ -92,8 +92,9 @@ def it(P, H, dt, shift=0, width=2.5, omega_min=0.5, it_max=200):
 
         # compute residual for ongoing iteration it
         r_new = H - est
-        omega = abs((np.linalg.norm(r)**2 - np.linalg.norm(r_new)**2) /
-                    np.linalg.norm(r)**2)
+        omega = abs((
+            np.linalg.norm(r)**2 - np.linalg.norm(r_new)**2)
+            / np.linalg.norm(r)**2)
         r = r_new
 
     # Create receiver function
@@ -240,9 +241,9 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
 
     if not freqdep and not const and not water:
         raise ValueError(
-            "Regularization not defined (your input: regul=%s. " % regul +
-            'Use either "fqd" for frequency-dependent or "con" for constant ' +
-            "value regularization or 'wat' for water-level.")
+            "Regularization not defined (your input: regul=%s. " % regul
+            + 'Use either "fqd" for frequency-dependent or "con" for constant '
+            + "value regularization or 'wat' for water-level.")
 
     # constant damping factor regularization
     if test:
@@ -260,8 +261,6 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
     # waterlevel regularization
     elif water:
         eps = max(noise.real)
-        # eps = 10
-        # eps = 100  # constant wl to reproduce Rychert et al
         den[den.real < eps] = eps
 
     # numerator

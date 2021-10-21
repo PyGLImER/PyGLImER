@@ -12,7 +12,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Saturday, 21st August 2021 07:41:42 am
+Last Modified: Thursday, 21st October 2021 03:57:25 pm
 '''
 
 import logging
@@ -135,7 +135,7 @@ class StationDB(object):
                         dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
             except FileNotFoundError:
                 os.makedirs(os.path.join(
-                        dir, os.pardir, os.pardir, 'logs'), exist_ok=True)
+                    dir, os.pardir, os.pardir, 'logs'), exist_ok=True)
                 fh = logging.FileHandler(
                     os.path.join(
                         dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
@@ -171,9 +171,8 @@ class StationDB(object):
         :rtype: pd.DataFrame
         """
         data = {
-                'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
-                'elevation': []
-            }
+            'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
+            'elevation': []}
         for f in glob.glob(os.path.join(
                 self.dir, '**', '*.*.h5'), recursive=True):
             net, stat, _ = os.path.basename(f).split('.')
@@ -245,8 +244,7 @@ class StationDB(object):
         # Create data dictionary
         dataP = {
             'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
-            'elevation': [], 'NP': [], 'NPret': [], 'NS': [], 'NSret': []
-            }
+            'elevation': [], 'NP': [], 'NPret': [], 'NS': [], 'NSret': []}
         dataS = deepcopy(dataP)
 
         # Read in info files

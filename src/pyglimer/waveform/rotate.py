@@ -12,11 +12,14 @@ Contains functions to rotate a stream into different domains
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Saturday, 21st March 2020 07:26:03 pm
-Last Modified: Tuesday, 25th May 2021 05:18:07 pm
+Last Modified: Thursday, 21st October 2021 10:55:04 am
 '''
+import warnings
+
 import numpy as np
 from obspy import Stream
 
+from pyglimer.constants import onsetS, onsetP
 from ..utils.createvmodel import load_avvmodel
 
 
@@ -96,7 +99,6 @@ def rotate_PSV(
         elif tr.stats.channel[2] == "T":
             tr.stats.channel = tr.stats.channel[0:2] + "H"
             tr.data = PSS[2]
-    # PSvSh.normalize()
     return avp, avs, PSvSh
 
 
@@ -121,10 +123,14 @@ def rotate_LQT(st: Stream, phase: str) -> tuple:
         Should deviate from 1 as far as possible.
 
     """
+    warnings.warn(
+        'This function is deprecated, use rotate_LQT_min instead!',
+        DeprecationWarning
+    )
     if phase[-1] == 'P':
-        onset = 30
+        onset = onsetP
     elif phase[-1] == 'S':
-        onset = 120
+        onset = onsetS
 
     dt = st[0].stats.delta  # sampling interval
 
@@ -236,9 +242,9 @@ def rotate_LQT_min(st: Stream, phase: str) -> tuple:
     """
     phase = phase[-1]
     if phase == 'P':
-        onset = 30
+        onset = onsetP
     elif phase == 'S':
-        onset = 120
+        onset = onsetS
 
     dt = st[0].stats.delta
 
@@ -259,7 +265,7 @@ def rotate_LQT_min(st: Stream, phase: str) -> tuple:
         ZR = np.array([stream["3"], stream["R"]])
 
     # calculate energy of the two components around zero
-    ia = np.linspace(0, np.pi/2, num=90)  # incidence angle
+    ia = np.linspace(0, np.pi/2, num=91)  # incidence angle
     E_L = []
     for ii in ia:
         A_rot = np.array([[np.cos(ii), np.sin(ii)],
