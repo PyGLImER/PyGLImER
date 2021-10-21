@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Monday, 4th October 2021 03:29:24 pm
+Last Modified: Thursday, 21st October 2021 01:39:32 pm
 '''
 
 from glob import glob
@@ -70,7 +70,7 @@ def preprocessh5(
     Preprocess files saved in hdf5 (pyasdf) format. Will save the computed
     receiver functions in hdf5 format as well.
 
-    Processing is done via a multiprocessing backend (either joblb or mpi).
+    Processing is done via a multiprocessing backend (either joblib or mpi).
 
     :param phase: The Teleseismic phase to consider
     :type phase: str
@@ -283,8 +283,9 @@ def __station_process__(
             st, ia = rotate_LQT_min(st, phase)
             # additional QC
             if ia < 5 or ia > 75:
-                raise SNRError("""The estimated incidence angle is
-                                unrealistic with """ + str(ia) + 'degree.')
+                raise SNRError(
+                    "The estimated incidence angle is unrealistic with" +
+                    '%s degree.' % str(ia))
 
         elif rot == "PSS":
             _, _, st = rotate_PSV(
@@ -324,11 +325,9 @@ def __rotate_qc(
     phase, st, station_inv, network, station, baz, distance, ot_fiss,
     event, evtlat, evtlon, depth, rayp_s_deg, first_arrival, logger, infodict,
         tz, pol):
-    """REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
-    Bugs occur here due to station inventories without response information
-    Looks like the bulk downloader sometimes donwnloads
-    station inventories without response files. I could fix that here by
-    redownloading the response file (alike to the 3 traces problem)"""
+    """
+    REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
+    """
 
     st.rotate(method='->ZNE', inventory=station_inv)
 
@@ -377,7 +376,6 @@ def __rotate_qc(
             raise SNRError('QC rejected %s' % np.array2string(noisemat))
 
     # WRITE AN INFO FILE
-    # append_info: [key,value]
     append_inf = [
         ['magnitude', (
             event.preferred_magnitude() or event.magnitudes[0])['mag']],
