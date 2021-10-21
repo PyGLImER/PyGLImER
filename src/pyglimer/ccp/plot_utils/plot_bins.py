@@ -83,7 +83,7 @@ def plot_bins(stations, bins, ax=None, kwargsS=None, kwargsB=None):
         if x is None or y is None:
             tex.set_text("lat:         \nlon:        ")
         else:
-            tex.set_text("lat: %3.4f$^\circ$ \nlon: %3.4f$^\circ$" % (y, x))
+            tex.set_text(r"lat: %3.4f$^\circ$ \nlon: %3.4f$^\circ$" % (y, x))
         plt.draw()
 
     def mouse_move(event):

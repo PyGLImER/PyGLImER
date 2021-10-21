@@ -247,7 +247,7 @@ def plot_cross_section(
         marker='o', edgecolor='k',
         zorder=10, clip_on=False)
 
-    plt.xlabel('Offset [$^\circ$]')
+    plt.xlabel(r'Offset [$^\circ$]')
     plt.ylabel('Depth [km]')
 
     if label is not None:

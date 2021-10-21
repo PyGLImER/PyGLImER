@@ -100,8 +100,8 @@ class SphericalNN(object):
         set or ndarray
             Set of pairs (i, j) where i < j
         """
-        distkm = np.abs(2 * np.sin(maximum_distance/2.0 /
-                                   180.0*np.pi)) * R_EARTH
+        distkm = np.abs(
+            2 * np.sin(maximum_distance/2.0 / 180.0*np.pi)) * R_EARTH
         return self.kd_tree.query_pairs(distkm, output_type='ndarray')
 
     def sparse_distance_matrix(self, other: Union[SphericalNN, None] = None,
@@ -128,8 +128,8 @@ class SphericalNN(object):
             Set of pairs (i, j) where i < j
         """
         # Get distance
-        distkm = np.abs(2 * np.sin(maximum_distance/2.0 /
-                                   180.0*np.pi)) * R_EARTH
+        distkm = np.abs(
+            2 * np.sin(maximum_distance/2.0 / 180.0*np.pi)) * R_EARTH
 
         # Get tree
         if isinstance(other, SphericalNN):

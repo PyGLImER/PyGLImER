@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 20th August 2021 11:29:54 am
-Last Modified: Wednesday, 25th August 2021 11:19:00 am
+Last Modified: Thursday, 21st October 2021 03:26:30 pm
 '''
 
 import unittest
@@ -40,112 +40,82 @@ class TestReckon(unittest.TestCase):
         dis = locations2degrees(lat, lon, la, lo)
         self.assertAlmostEqual(dis, d)
 
+    def testspacing(self):
 
-def testspacing():
+        # Least distance between waypoints
+        mind = 10
 
-    # Least distance between waypoints
-    mind = 10
+        # Create random new distance rangin from
+        # 0.5-1.0 * (a hundreth of the least distance betweem waypoints)
+        d = (0.5 * np.random.rand(1) + 0.5)*mind/100
+        d = d[0]
+        # Create randomly but evenly distirbuted waypoints.
+        lon, lat = e2D(10, 340, 160, mind)
 
-    # Create random new distance rangin from
-    # 0.5-1.0 * (a hundreth of the least distance betweem waypoints)
-    d = (0.5 * np.random.rand(1) + 0.5)*mind/100
-    d = d[0]
-    # Create randomly but evenly distirbuted waypoints.
-    lon, lat = e2D(10, 340, 160, mind)
+        # Compute GCTrack
+        qlat, qlon, qdists = gu.gctrack(lat, lon, d)
 
-    # Compute GCTrack
-    qlat, qlon, qdists = gu.gctrack(lat, lon, d)
+        # Find locations of waypoints
+        pos = []
+        for _lat, _lon in zip(lat, lon):
+            pos.append(
+                np.where(
+                    np.isclose(_lat, qlat) & np.isclose(_lon, qlon))[0])
+        pos = [[_i-1, _i, _i+1] for _i in pos]
+        pos = np.array(pos).flatten().tolist()
+        # print("Waypoint idxs", pos)
 
-    # Find locations of waypoints
-    pos = []
-    for _lat, _lon in zip(lat, lon):
-        pos.append(np.where(np.isclose(_lat, qlat)
-                   & np.isclose(_lon, qlon))[0])
-    pos = [[_i-1, _i, _i+1] for _i in pos]
-    pos = np.array(pos).flatten().tolist()
-    # print("Waypoint idxs", pos)
+        for ii, (la, lo, _) in enumerate(
+                zip(qlat, qlon, qdists)):
+            if ii in pos:
+                # naturally unprecise
+                continue
+            dis = locations2degrees(la, lo, qlat[ii+1], qlon[ii+1])
 
-    for ii, (la, lo, _) in enumerate(
-            zip(qlat, qlon, qdists)):
-        if ii in pos:
-            # naturally unprecise
-            continue
-        dis = locations2degrees(la, lo, qlat[ii+1], qlon[ii+1])
+            np.testing.assert_approx_equal(dis, d, significant=10.0)
 
-        # try:
-        np.testing.assert_approx_equal(dis, d, significant=10.0)
-        # raise AssertionError
-        # except:
-        #     print(f"{ii}/{len(qlat)}", d, dis)
-        #     print(lat, lon)
-        #     print(la, lo)
+    def testspacing_2(self):
+        """This tests the accuracy between """
 
-        #     plt.figure()
-        #     plt.plot(lon, lat, 'o')
-        #     plt.plot(qlon, qlat, '-x')
-        #     plt.show(block=True)
+        # Least distance between waypoints
+        mind = 10
 
-        #     # print(qlat, qlon)
-        #     raise AssertionError
+        # Create random new distance rangin from
+        # 0.5-1.0 * (a hundreth of the least distance betweem waypoints)
+        d = (0.5 * np.random.rand(1) + 0.5)*mind/100
+        d = d[0]
+        # Create randomly but evenly distirbuted waypoints.
+        lon, lat = e2D(2, 340, 160, mind)
 
+        # Compute GCTrack
+        qlat, qlon, qdists, updated_dists = gu.gctrack(
+            lat, lon, d, constantdist=False)
 
-def testspacing():
-    """This tests the accuracy between """
+        # print("Updated:")
+        # print(d, np.max(updated_dists), np.min(updated_dists))
+        # print(np.array(updated_dists)-d)
 
-    # Least distance between waypoints
-    mind = 10
+        # Find locations of waypoints
+        pos = []
+        for _lat, _lon in zip(lat, lon):
+            tpos = np.where(np.isclose(_lat, qlat) & np.isclose(_lon, qlon))[0]
+            # print(len(tpos))
+            if len(tpos) > 1:
+                pos.append(tpos)
+            else:
+                pos.extend(tpos)
 
-    # Create random new distance rangin from
-    # 0.5-1.0 * (a hundreth of the least distance betweem waypoints)
-    d = (0.5 * np.random.rand(1) + 0.5)*mind/100
-    d = d[0]
-    # Create randomly but evenly distirbuted waypoints.
-    lon, lat = e2D(2, 340, 160, mind)
+        pos = [[_i-1, _i, _i+1] for _i in pos]
+        pos = np.array(pos).flatten().tolist()
 
-    # Compute GCTrack
-    qlat, qlon, qdists, updated_dists = gu.gctrack(
-        lat, lon, d, constantdist=False)
+        for ii, (la, lo, _) in enumerate(
+                zip(qlat, qlon, qdists)):
+            if ii in pos:
+                # naturally unprecise
+                continue
+            dis = locations2degrees(la, lo, qlat[ii+1], qlon[ii+1])
 
-    print("Updated:")
-    print(d, np.max(updated_dists), np.min(updated_dists))
-    print(np.array(updated_dists)-d)
-
-    # Find locations of waypoints
-    pos = []
-    for _lat, _lon in zip(lat, lon):
-        tpos = np.where(np.isclose(_lat, qlat) & np.isclose(_lon, qlon))[0]
-        print(len(tpos))
-        if len(tpos) > 1:
-            pos.append(tpos)
-        else:
-            pos.extend(tpos)
-
-    pos = [[_i-1, _i, _i+1] for _i in pos]
-    pos = np.array(pos).flatten().tolist()
-    # print("Waypoint idxs", pos)
-    print(pos)
-    for ii, (la, lo, _) in enumerate(
-            zip(qlat, qlon, qdists)):
-        if ii in pos:
-            # naturally unprecise
-            continue
-        dis = locations2degrees(la, lo, qlat[ii+1], qlon[ii+1])
-
-        # try:
-        np.testing.assert_approx_equal(dis, d, significant=1)
-        # raise AssertionError
-        # except:
-        #     print(f"{ii}/{len(qlat)}", d, dis)
-        #     print(lat, lon)
-        #     print(la, lo)
-
-        #     plt.figure()
-        #     plt.plot(lon, lat, 'o')
-        #     plt.plot(qlon, qlat, '-x')
-        #     plt.show(block=True)
-
-        #     # print(qlat, qlon)
-        #     raise AssertionError
+            np.testing.assert_approx_equal(dis, d, significant=1)
 
 
 if __name__ == "__main__":

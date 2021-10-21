@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Thursday, 21st October 2021 01:39:32 pm
+Last Modified: Thursday, 21st October 2021 03:41:46 pm
 '''
 
 from glob import glob
@@ -284,8 +284,8 @@ def __station_process__(
             # additional QC
             if ia < 5 or ia > 75:
                 raise SNRError(
-                    "The estimated incidence angle is unrealistic with" +
-                    '%s degree.' % str(ia))
+                    "The estimated incidence angle is unrealistic with"
+                    + '%s degree.' % str(ia))
 
         elif rot == "PSS":
             _, _, st = rotate_PSV(
@@ -393,8 +393,7 @@ def __rotate_qc(
         ['rayp_s_deg', rayp_s_deg],
         ['onset', first_arrival],
         ['starttime', st[0].stats.starttime],
-        ['pol', pol]
-        ]
+        ['pol', pol]]
 
     # Check if values are already in dict
     for key, value in append_inf:

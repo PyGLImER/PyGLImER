@@ -10,14 +10,14 @@ Tests the pyglimer.rf.deconvolve module
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th March 2021 10:13:35 am
-Last Modified: Wednesday, 20th October 2021 01:38:22 pm
+Last Modified: Thursday, 21st October 2021 03:28:53 pm
 '''
 import unittest
 
 import numpy as np
 from scipy.signal.windows import gaussian
 
-from pyglimer.rf.deconvolve import it, spectraldivision, multitaper
+from pyglimer.rf.deconvolve import it, spectraldivision
 
 
 class TestIt(unittest.TestCase):

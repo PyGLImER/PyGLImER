@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 21st October 2021 01:32:59 pm
+Last Modified: Thursday, 21st October 2021 03:38:49 pm
 '''
 
 import fnmatch
@@ -142,12 +142,12 @@ def preprocess(
 
         if client.lower() == 'joblib':
             out = Parallel(n_jobs=-1, backend='multiprocessing')(
-                    delayed(__event_loop)(
-                        phase, rot, pol, event, taper_perc,
-                        taper_type, model, logger, rflogger, eh, tz,
-                        ta, statloc, rawloc, preproloc, rfloc, deconmeth,
-                        hc_filt, netrestr, statrestr)
-                    for event in tqdm(evtcat))
+                delayed(__event_loop)(
+                    phase, rot, pol, event, taper_perc,
+                    taper_type, model, logger, rflogger, eh, tz,
+                    ta, statloc, rawloc, preproloc, rfloc, deconmeth,
+                    hc_filt, netrestr, statrestr)
+                for event in tqdm(evtcat))
         elif client.lower() == 'mpi':
             from mpi4py import MPI
             comm = MPI.COMM_WORLD
@@ -341,7 +341,7 @@ def __waveform_loop(
                 else:
                     raise FileNotFoundError(
                         "Station XML not available for station %s.%s" % (
-                         network, station))
+                            network, station))
 
             # compute theoretical arrival
             distance, baz, _ = gps2dist_azimuth(
@@ -400,9 +400,9 @@ def __waveform_loop(
         finally:
             end = time.time()
             logger.info(
-                "File preprocessed.\n" +
-                "Station %s.%s\n" % (network, station) +
-                "Event %s" % event.resource_id)
+                "File preprocessed.\n"
+                + "Station %s.%s\n" % (network, station)
+                + "Event %s" % event.resource_id)
             logger.debug(dt_string(end-start))
 
     else:  # The file was already processed
@@ -442,8 +442,8 @@ def __waveform_loop(
                 if ia < 5 or ia > 75:
                     crit = False
                     raise SNRError(
-                        "The estimated incidence angle is " +
-                        "unrealistic with %s degree." % str(ia))
+                        "The estimated incidence angle is "
+                        + "unrealistic with %s degree." % str(ia))
 
             elif rot == "PSS":
                 _, _, st = rotate_PSV(
@@ -485,9 +485,9 @@ def __waveform_loop(
 
             end = time.time()
             rflogger.info(
-                "RF created.\n" +
-                'Station %s.%s\n' % (network, station) +
-                'Event: %s' % event.resource_id)
+                "RF created.\n"
+                + 'Station %s.%s\n' % (network, station)
+                + 'Event: %s' % event.resource_id)
             rflogger.debug(dt_string(end-start))
 
         # Exception that occured in the RF creation
@@ -667,22 +667,23 @@ def __rotate_qc(
 
     # WRITE AN INFO FILE
     # append_info: [key,value]
-    append_inf = [['magnitude', (event.preferred_magnitude() or
-                                 event.magnitudes[0])['mag']],
-                  ['magnitude_type', (
-                      event.preferred_magnitude() or event.magnitudes[0])[
-                          'magnitude_type']],
-                  ['evtlat', evtlat], ['evtlon', evtlon],
-                  ['ot_ret', ot_fiss], ['ot_all', ot_fiss],
-                  ['evt_depth', depth],
-                  ['evt_id', event.get('resource_id')],
-                  ['noisemat', noisemat],
-                  ['co_f', f], ['npts', st[1].stats.npts],
-                  ['rbaz', baz],
-                  ['rdelta', distance],
-                  ['rayp_s_deg', rayp_s_deg],
-                  ['onset', first_arrival],
-                  ['starttime', st[0].stats.starttime]]
+    append_inf = [
+        ['magnitude', (
+            event.preferred_magnitude() or event.magnitudes[0])['mag']],
+        ['magnitude_type', (
+            event.preferred_magnitude() or event.magnitudes[0])[
+                'magnitude_type']],
+        ['evtlat', evtlat], ['evtlon', evtlon],
+        ['ot_ret', ot_fiss], ['ot_all', ot_fiss],
+        ['evt_depth', depth],
+        ['evt_id', event.get('resource_id')],
+        ['noisemat', noisemat],
+        ['co_f', f], ['npts', st[1].stats.npts],
+        ['rbaz', baz],
+        ['rdelta', distance],
+        ['rayp_s_deg', rayp_s_deg],
+        ['onset', first_arrival],
+        ['starttime', st[0].stats.starttime]]
 
     # Check if values are already in dict
     for key, value in append_inf:

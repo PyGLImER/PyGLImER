@@ -12,7 +12,7 @@ Seismic Format (asdf).
 
 Created: Friday, 12th February 2021 03:24:30 pm
 
-Last Modified: Wednesday, 20th October 2021 04:41:45 pm
+Last Modified: Thursday, 21st October 2021 03:56:17 pm
 '''
 
 import logging
@@ -142,7 +142,7 @@ def write_st(
                 ds.add_quakeml(event)
         except ValueError:
             logging.info(
-                    'Event with event-id %s already in DB, skipping...'
-                    % str(evtid), UserWarning)
+                'Event with event-id %s already in DB, skipping...'
+                % str(evtid), UserWarning)
         ds.add_waveforms(st, tag='raw_recording', event_id=evtid)
         ds.add_stationxml(statxml)

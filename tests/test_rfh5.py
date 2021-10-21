@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th October 2021 02:04:06 pm
-Last Modified: Tuesday, 19th October 2021 03:53:47 pm
+Last Modified: Thursday, 21st October 2021 03:34:18 pm
 '''
 
 import unittest
@@ -178,10 +178,10 @@ class TestDBHandler(unittest.TestCase):
     def test_add_already_available_data(self):
         st = self.rftr.stats
         path = rfh5.hierarchy.format(
-                tag='rf',
-                network=st.network, station=st.station,
-                phase=st.phase, pol=st.pol,
-                evt_time=st.event_time.format_fissures())
+            tag='rf',
+            network=st.network, station=st.station,
+            phase=st.phase, pol=st.pol,
+            evt_time=st.event_time.format_fissures())
         with warnings.catch_warnings(record=True) as w:
             with patch.object(self.dbh, 'create_dataset') as create_ds_mock:
                 create_ds_mock.side_effect = ValueError('test')
@@ -209,8 +209,8 @@ class TestDBHandler(unittest.TestCase):
         pol = 'v'
         evt_time = UTCDateTime(0)
         exp_path = rfh5.hierarchy.format(
-                    tag=tag, network=net, station=stat, phase=phase,
-                    pol=pol, evt_time=evt_time.format_fissures())
+            tag=tag, network=net, station=stat, phase=phase,
+            pol=pol, evt_time=evt_time.format_fissures())
         d = {exp_path: self.rftr.data}
         file_mock.side_effect = d.__getitem__
         self.assertTrue(np.all(self.dbh[exp_path] == d[exp_path]))
@@ -230,8 +230,8 @@ class TestDBHandler(unittest.TestCase):
         pol = 'v'
         evt_time = UTCDateTime(0)
         exp_path = rfh5.hierarchy.format(
-                    tag=tag, network=net, station=stat, phase=phase,
-                    pol=pol, evt_time=evt_time.format_fissures())
+            tag=tag, network=net, station=stat, phase=phase,
+            pol=pol, evt_time=evt_time.format_fissures())
         d = {exp_path: self.rftr.data, '/rand/AB/': self.rftr.data}
         file_mock.side_effect = d.__getitem__
 
@@ -252,8 +252,8 @@ class TestDBHandler(unittest.TestCase):
         evt_time = '*'
         pol = '*'
         exp_path = rfh5.hierarchy.format(
-                    tag=tag, network=net, station=stat, phase=phase,
-                    pol=pol, evt_time=evt_time)
+            tag=tag, network=net, station=stat, phase=phase,
+            pol=pol, evt_time=evt_time)
         exp_path = '/'.join(exp_path.split('/')[:-4])
         d = {exp_path: self.rftr.data, '/rand/AB/': self.rftr.data}
         file_mock.side_effect = d.__getitem__
@@ -268,9 +268,9 @@ class TestDBHandler(unittest.TestCase):
     def test_get_coords(self, file_mock, get_data_mock):
         get_data_mock.return_value = RFStream([self.rftr])
         d_inner = {'bla': create_group_mock({}, '/rf/%s/%s/P/v' % (
-                self.rftr.stats.network, self.rftr.stats.station), True)}
+            self.rftr.stats.network, self.rftr.stats.station), True)}
         d_middle = {'v': create_group_mock(d_inner, '/rf/%s/%s/P' % (
-                self.rftr.stats.network, self.rftr.stats.station), True)}
+            self.rftr.stats.network, self.rftr.stats.station), True)}
         d_outer = {
             'P': create_group_mock(d_middle, '/rf/%s/%s' % (
                 self.rftr.stats.network, self.rftr.stats.station), True)}
@@ -286,9 +286,9 @@ class TestDBHandler(unittest.TestCase):
     def test_get_coords_warning(self, file_mock, get_data_mock):
         get_data_mock.return_value = RFStream([self.rftr])
         d_inner = {'bla': create_group_mock({}, '/rf/%s/%s/P/v' % (
-                self.rftr.stats.network, self.rftr.stats.station), True)}
+            self.rftr.stats.network, self.rftr.stats.station), True)}
         d_middle = {'v': create_group_mock(d_inner, '/rf/%s/%s/P' % (
-                self.rftr.stats.network, self.rftr.stats.station), True)}
+            self.rftr.stats.network, self.rftr.stats.station), True)}
         d_outer = {
             'P': create_group_mock(d_middle, '/rf/%s/%s' % (
                 self.rftr.stats.network, self.rftr.stats.station), True)}
