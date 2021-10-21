@@ -186,7 +186,7 @@
 <span class="sd">    Lucas Sawade (lsawade@princeton.edu)</span>
 
 <span class="sd">Created: November 2019</span>
-<span class="sd">Last Modified: Thursday, 19th August 2021 09:39:42 am</span>
+<span class="sd">Last Modified: Thursday, 21st October 2021 10:05:06 am</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -201,10 +201,20 @@
 <span class="kn">from</span> <span class="nn">...utils.geo_utils</span> <span class="kn">import</span> <span class="n">geo2cart</span><span class="p">,</span> <span class="n">cart2geo</span><span class="p">,</span> <span class="n">epi2euc</span>
 <span class="kn">from</span> <span class="nn">...utils.utils</span> <span class="kn">import</span> <span class="n">dt_string</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">(</span><span class="s2">&quot;binlogger&quot;</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;pyglimer.ccp.compute.bin&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">fibonacci_sphere</span><span class="p">(</span><span class="n">epi</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="fibonacci_sphere"><a class="viewcode-back" href="../../../../chapters/api/ccp.html#pyglimer.ccp.compute.bin.fibonacci_sphere">[docs]</a><span class="k">def</span> <span class="nf">fibonacci_sphere</span><span class="p">(</span><span class="n">epi</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a Fibonacci sphere, which is a reasonable approximaton for equal</span>
+<span class="sd">    distance points on a sphere.</span>
+
+<span class="sd">    :param epi: distance between the closest points in degree, defaults to 1</span>
+<span class="sd">    :type epi: float, optional</span>
+<span class="sd">    :return: a one dimensional array containing the cartesian points</span>
+<span class="sd">        [x, y, z] for each index.</span>
+<span class="sd">    :rtype: np.ndarray[List[float]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get number of samples from epicentral distance first get euclidean</span>
     <span class="c1"># distance d</span>
     <span class="n">d</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">epi</span> <span class="o">/</span> <span class="mi">180</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
@@ -216,11 +226,10 @@
         <span class="n">y</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span> <span class="o">*</span> <span class="n">offset</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">offset</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">phi</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">samples</span><span class="p">)</span> <span class="o">*</span> <span class="n">increment</span>
-        <span class="c1"># print(phi)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span>
         <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span>
         <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="BinGrid"><a class="viewcode-back" href="../../../../chapters/api/ccp.html#pyglimer.ccp.compute.bin.BinGrid">[docs]</a><span class="k">class</span> <span class="nc">BinGrid</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>

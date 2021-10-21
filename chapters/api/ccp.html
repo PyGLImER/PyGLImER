@@ -951,7 +951,7 @@ Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;p
 </dd>
 </dl>
 <p>Created: November 2019
-Last Modified: Thursday, 19th August 2021 09:39:42 am</p>
+Last Modified: Thursday, 21st October 2021 10:05:06 am</p>
 <dl class="py class">
 <dt id="pyglimer.ccp.compute.bin.BinGrid">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.compute.bin.</span></code><code class="sig-name descname"><span class="pre">BinGrid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#BinGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.BinGrid" title="Permalink to this definition">¶</a></dt>
@@ -1033,6 +1033,25 @@ input.</p>
 <dd><p>Using the input</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.ccp.compute.bin.fibonacci_sphere">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.compute.bin.</span></code><code class="sig-name descname"><span class="pre">fibonacci_sphere</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epi</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#fibonacci_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.fibonacci_sphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a Fibonacci sphere, which is a reasonable approximaton for equal
+distance points on a sphere.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>epi</strong> (<em>float</em><em>, </em><em>optional</em>) – distance between the closest points in degree, defaults to 1</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a one dimensional array containing the cartesian points
+[x, y, z] for each index.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray[List[float]]</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

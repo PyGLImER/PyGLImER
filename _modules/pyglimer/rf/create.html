@@ -191,10 +191,10 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Friday, 12th February 2020 03:24:30 pm</span>
-<span class="sd">Last Modified: Monday, 27th September 2021 03:42:20 pm</span>
+<span class="sd">Last Modified: Thursday, 21st October 2021 10:20:33 am</span>
 
 
-<span class="sd">!The file is split and has a second copyright disclaimer!</span>
+<span class="sd">**The file is split and has a second copyright disclaimer**</span>
 <span class="sd">Some parts of this code are modified versions of the rf module by</span>
 <span class="sd">Tom Eulenfeld.</span>
 
@@ -202,7 +202,6 @@
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Event</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="c1"># from pkg_resources import resource_filename</span>
@@ -284,8 +283,9 @@
     <span class="k">elif</span> <span class="n">onset</span><span class="p">:</span>
         <span class="n">shift</span> <span class="o">=</span> <span class="n">onset</span> <span class="o">-</span> <span class="n">st_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Provide either info dict as input or give data</span><span class="se">\</span>
-<span class="s1">            manually (see docstring).&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Provide either info dict as input or give args manually &#39;</span> <span class="o">+</span>
+            <span class="s1">&#39;(see docstring).&#39;</span><span class="p">)</span>
 
     <span class="c1"># sampling interval</span>
     <span class="n">dt</span> <span class="o">=</span> <span class="n">st_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span>
@@ -302,9 +302,10 @@
     <span class="c1"># taper traces</span>
     <span class="k">if</span> <span class="n">trim</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">trim</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">trim</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Trim has to be given as list with two elements</span>
-<span class="s2">                            [a, b]. Where a and b are the taper length in s</span>
-<span class="s2">                            on the left and right side, respectively.&quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="sd">&quot;&quot;&quot;Trim has to be given as list with two elements</span>
+<span class="sd">                [a, b]. Where a and b are the taper length in s</span>
+<span class="sd">                on the left and right side, respectively.&quot;&quot;&quot;</span><span class="p">)</span>
         <span class="c1"># Hann taper with 7.5s taper window</span>
         <span class="n">tap</span> <span class="o">=</span> <span class="n">hann</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">15</span> <span class="o">/</span> <span class="n">dt</span><span class="p">))</span>
         <span class="n">taper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">npts</span><span class="p">)</span>
@@ -397,8 +398,9 @@
         <span class="c1"># I could probably create another QC here and check if fact is</span>
         <span class="c1"># the maximum of RF[0].data or even close to the maximum. Let&#39;s try:</span>
         <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">fact</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lrf</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The noise level of the created receiver function</span><span class="se">\</span>
-<span class="s1">                is too high.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;The noise level of the created receiver function is too high.&#39;</span>
+                <span class="p">)</span>
 
     <span class="c1"># create RFTrace object</span>
     <span class="c1"># create stats</span>
@@ -552,14 +554,6 @@
 <span class="n">_HEADER_CONVERSIONS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sac&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;onset&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">__SAC2UTC</span><span class="p">,</span> <span class="n">__UTC2SAC</span><span class="p">),</span>
                                <span class="s1">&#39;event_time&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">__SAC2UTC</span><span class="p">,</span> <span class="n">__UTC2SAC</span><span class="p">)}}</span>
 
-<span class="n">_TF</span> <span class="o">=</span> <span class="s1">&#39;.datetime:%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span>
-
-<span class="n">_H5INDEX</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;rf&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;waveforms/</span><span class="si">{network}</span><span class="s1">.</span><span class="si">{station}</span><span class="s1">.</span><span class="si">{location}</span><span class="s1">/{event_time</span><span class="si">%s</span><span class="s1">}/&#39;</span> <span class="o">%</span> <span class="n">_TF</span> <span class="o">+</span>
-           <span class="s1">&#39;</span><span class="si">{channel}</span><span class="s1">_{starttime</span><span class="si">%s</span><span class="s1">}_{endtime</span><span class="si">%s</span><span class="s1">}&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_TF</span><span class="p">,</span> <span class="n">_TF</span><span class="p">)),</span>
-    <span class="s1">&#39;profile&#39;</span><span class="p">:</span> <span class="s1">&#39;waveforms/</span><span class="si">{channel[2]}</span><span class="s1">_</span><span class="si">{box_pos}</span><span class="s1">&#39;</span>
-<span class="p">}</span>
-
 
 <div class="viewcode-block" id="read_rf"><a class="viewcode-back" href="../../../chapters/api/rf.html#pyglimer.rf.create.read_rf">[docs]</a><span class="k">def</span> <span class="nf">read_rf</span><span class="p">(</span><span class="n">pathname_or_url</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -655,14 +649,9 @@
             <span class="n">tr</span><span class="o">.</span><span class="n">_write_format_specific_header</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">format</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span>
                 <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">id</span>
-        <span class="c1"># if format.upper() == &#39;H5&#39;:</span>
-        <span class="c1">#     index = self.type</span>
-        <span class="c1">#     if index is None and &#39;event_time&#39; in self[0].stats:</span>
-        <span class="c1">#         index = &#39;rf&#39;</span>
-        <span class="c1">#     if index:</span>
-        <span class="c1">#         import obspyh5</span>
-        <span class="c1">#         old_index = obspyh5._INDEX</span>
-        <span class="c1">#         obspyh5.set_index(_H5INDEX[index])</span>
+        <span class="k">if</span> <span class="nb">format</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;H5&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Use the rfh5 module to add rfs to h5 file.&#39;</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">RFStream</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="c1"># if format.upper() == &#39;H5&#39; and index:</span>
         <span class="c1">#     obspyh5.set_index(old_index)</span>

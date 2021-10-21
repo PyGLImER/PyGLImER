@@ -192,7 +192,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Monday, 27th April 2020 10:55:03 pm</span>
-<span class="sd">Last Modified: Monday, 13th September 2021 10:43:12 am</span>
+<span class="sd">Last Modified: Thursday, 21st October 2021 10:30:47 am</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">http.client</span> <span class="kn">import</span> <span class="n">IncompleteRead</span>
@@ -205,8 +205,8 @@
 <span class="kn">from</span> <span class="nn">obspy.core.utcdatetime</span> <span class="kn">import</span> <span class="n">UTCDateTime</span>
 <span class="kn">from</span> <span class="nn">obspy.taup</span> <span class="kn">import</span> <span class="n">TauPyModel</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="c1"># from obspy.clients.fdsn.client import FDSNException</span>
 
+<span class="kn">from</span> <span class="nn">pyglimer.constants</span> <span class="kn">import</span> <span class="n">onsetP</span><span class="p">,</span> <span class="n">onsetS</span>
 <span class="kn">from</span> <span class="nn">pyglimer.waveform.download</span> <span class="kn">import</span> <span class="n">download_small_db</span><span class="p">,</span> <span class="n">downloadwav</span>
 <span class="kn">from</span> <span class="nn">pyglimer.waveform.preprocess</span> <span class="kn">import</span> <span class="n">preprocess</span>
 <span class="kn">from</span> <span class="nn">pyglimer.utils</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">pu</span>
@@ -388,24 +388,24 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">maxdepth</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">min_epid</span> <span class="o">=</span> <span class="mf">28.1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">max_epid</span> <span class="o">=</span> <span class="mf">95.8</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="mi">30</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="n">onsetP</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">maxdepth</span> <span class="o">=</span> <span class="mi">300</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">min_epid</span> <span class="o">=</span> <span class="mi">55</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">max_epid</span> <span class="o">=</span> <span class="mi">80</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="mi">120</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="n">onsetS</span>
         <span class="c1"># (see Yuan et al. 2006)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;SCS&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">maxdepth</span> <span class="o">=</span> <span class="mi">300</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">min_epid</span> <span class="o">=</span> <span class="mi">50</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">max_epid</span> <span class="o">=</span> <span class="mi">75</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="mi">120</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="n">onsetS</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;SKS&#39;</span><span class="p">:</span>
             <span class="c1"># (see Zhang et. al. (2014))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">maxdepth</span> <span class="o">=</span> <span class="mi">300</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">min_epid</span> <span class="o">=</span> <span class="mi">90</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">max_epid</span> <span class="o">=</span> <span class="mi">120</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="mi">120</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tz</span> <span class="o">=</span> <span class="n">onsetS</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s1">&#39;The phase&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;is not valid or not</span>
 <span class="s2">                            implemented yet.&quot;&quot;&quot;</span><span class="p">)</span>

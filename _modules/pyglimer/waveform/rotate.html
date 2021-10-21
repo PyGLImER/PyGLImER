@@ -189,11 +189,14 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Saturday, 21st March 2020 07:26:03 pm</span>
-<span class="sd">Last Modified: Tuesday, 25th May 2021 05:18:07 pm</span>
+<span class="sd">Last Modified: Thursday, 21st October 2021 10:55:04 am</span>
 <span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">Stream</span>
 
+<span class="kn">from</span> <span class="nn">pyglimer.constants</span> <span class="kn">import</span> <span class="n">onsetS</span><span class="p">,</span> <span class="n">onsetP</span>
 <span class="kn">from</span> <span class="nn">..utils.createvmodel</span> <span class="kn">import</span> <span class="n">load_avvmodel</span>
 
 
@@ -273,7 +276,6 @@
         <span class="k">elif</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span>
             <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;H&quot;</span>
             <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">PSS</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-    <span class="c1"># PSvSh.normalize()</span>
     <span class="k">return</span> <span class="n">avp</span><span class="p">,</span> <span class="n">avs</span><span class="p">,</span> <span class="n">PSvSh</span></div>
 
 
@@ -298,10 +300,14 @@
 <span class="sd">        Should deviate from 1 as far as possible.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s1">&#39;This function is deprecated, use rotate_LQT_min instead!&#39;</span><span class="p">,</span>
+        <span class="ne">DeprecationWarning</span>
+    <span class="p">)</span>
     <span class="k">if</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
-        <span class="n">onset</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="n">onset</span> <span class="o">=</span> <span class="n">onsetP</span>
     <span class="k">elif</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
-        <span class="n">onset</span> <span class="o">=</span> <span class="mi">120</span>
+        <span class="n">onset</span> <span class="o">=</span> <span class="n">onsetS</span>
 
     <span class="n">dt</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span>  <span class="c1"># sampling interval</span>
 
@@ -413,9 +419,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
-        <span class="n">onset</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="n">onset</span> <span class="o">=</span> <span class="n">onsetP</span>
     <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
-        <span class="n">onset</span> <span class="o">=</span> <span class="mi">120</span>
+        <span class="n">onset</span> <span class="o">=</span> <span class="n">onsetS</span>
 
     <span class="n">dt</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span>
 
@@ -436,7 +442,7 @@
         <span class="n">ZR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stream</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">]])</span>
 
     <span class="c1"># calculate energy of the two components around zero</span>
-    <span class="n">ia</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>  <span class="c1"># incidence angle</span>
+    <span class="n">ia</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">91</span><span class="p">)</span>  <span class="c1"># incidence angle</span>
     <span class="n">E_L</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">ia</span><span class="p">:</span>
         <span class="n">A_rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ii</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ii</span><span class="p">)],</span>

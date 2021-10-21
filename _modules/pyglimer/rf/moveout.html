@@ -191,7 +191,7 @@
 <span class="sd">!The file is split and has a second copyright disclaimer!</span>
 
 <span class="sd">Created: Tuesday, 7th April 2020 10:08:30 am</span>
-<span class="sd">Last Modified: Thursday, 25th March 2021 03:51:18 pm</span>
+<span class="sd">Last Modified: Wednesday, 20th October 2021 01:01:39 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
@@ -380,10 +380,6 @@
             <span class="n">tckm2</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">splrep</span><span class="p">(</span><span class="n">zm2</span><span class="p">,</span> <span class="n">RFm2</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="n">multiple</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="c1"># u, c = np.unique(zm1, return_counts=True)</span>
-            <span class="c1"># dup = u[c &gt; 1]</span>
-            <span class="c1"># u, c = np.unique(zm2, return_counts=True)</span>
-            <span class="c1"># dup2 = u[c &gt; 1]</span>
             <span class="n">mes</span> <span class="o">=</span> <span class="s2">&quot;Interpolation error in multiples. Only primary conversion</span><span class="se">\</span>
 <span class="s2">                 will be used.&quot;</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">mes</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -531,11 +527,6 @@
 
     <span class="c1"># Numerical integration</span>
     <span class="k">for</span> <span class="n">kk</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">htab_f</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
-        <span class="c1"># ii = np.where(model.zf &gt; h)[0][0] - 1  # &gt;=</span>
-
-        <span class="c1"># # When there is elevation (velocity model starts at depth 0!)</span>
-        <span class="c1"># if ii == -1:</span>
-        <span class="c1">#     ii = 0</span>
 
         <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
             <span class="c1"># Catch Zerodivision warnings</span>
@@ -548,11 +539,6 @@
                 <span class="k">break</span>
 
         <span class="n">az</span> <span class="o">=</span> <span class="n">baz</span>
-
-        <span class="c1"># if np.isnan(delta[kk+1]) or q_a[ii] == 0 or q_b[ii] == 0:</span>
-        <span class="c1">#     # Supercritical</span>
-        <span class="c1">#     delta = delta[:kk+1]</span>
-        <span class="c1">#     break</span>
 
         <span class="n">coords</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="o">.</span><span class="n">WGS84</span><span class="o">.</span><span class="n">ArcDirect</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">delta</span><span class="p">[</span><span class="n">kk</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;lat2&#39;</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;lon2&#39;</span><span class="p">]</span>
@@ -580,7 +566,7 @@
 
     <span class="n">dt_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">dt_a</span><span class="p">)[:</span><span class="nb">len</span><span class="p">(</span><span class="n">delta</span><span class="p">)]</span>
     <span class="n">dt_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">dt_b</span><span class="p">)[:</span><span class="nb">len</span><span class="p">(</span><span class="n">delta</span><span class="p">)]</span>
-    <span class="n">dt</span> <span class="o">=</span> <span class="n">dt_b</span><span class="o">-</span><span class="n">dt_a</span>  <span class="c1"># Delay primary conversion</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">dt_b</span> <span class="o">-</span> <span class="n">dt_a</span>  <span class="c1"># Delay primary conversion</span>
 
     <span class="c1"># Find travel times for multiples</span>
     <span class="c1"># We will have to assume that the multiples don&#39;t cross into a different</span>
@@ -591,13 +577,10 @@
         <span class="c1"># mphase 1 is PPs for P and SSp for S</span>
         <span class="c1"># mphase 2 is PSs, and SPp, respectively</span>
         <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
-            <span class="c1"># dt_mphase1 = dt + 2*dt_a</span>
-            <span class="c1"># dt_mphase2 = dt + dt_b + dt_a</span>
-            <span class="c1"># The two are the same, first one just overly complicated</span>
             <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_b</span> <span class="o">+</span> <span class="n">dt_a</span>
             <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">dt_b</span>
+
             <span class="c1"># Truncate The travel time table for multiples</span>
-            <span class="c1"># if dt_mphase1.max() &gt; 100 or dt_mphase2.max() &gt; 100:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_mphase1</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase1</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
             <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
@@ -606,8 +589,7 @@
                 <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="n">dt_mphase2</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase2</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
             <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
                 <span class="k">pass</span>
-            <span class="c1"># elif dt_mphase2.max() &gt; 100:</span>
-            <span class="c1">#     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2&gt;=100)[0][0]]</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Reduce travel times for S since the data will be flipped</span>
             <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">dt_b</span>
@@ -748,9 +730,6 @@
                 <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="n">dt_mphase2</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase2</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
             <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
                 <span class="k">pass</span>
-            <span class="c1"># elif dt_mphase2.max() &gt; 100:</span>
-            <span class="c1">#     print(&#39;h2&#39;)</span>
-            <span class="c1">#     dt_mphase2 = dt_mphase2[:np.where(dt_mphase2&gt;=100)[0][0]]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Reduce travel times for S since the data will be flipped</span>
             <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">dt_b</span>
@@ -783,7 +762,7 @@
 <span class="sd">    dz : float</span>
 <span class="sd">        Vertical distance between two consecutive piercing points [km].</span>
 <span class="sd">    p : float</span>
-<span class="sd">        slowness in s/km.</span>
+<span class="sd">        Horizontal slowness in s/km.</span>
 <span class="sd">    phase : string</span>
 <span class="sd">        Either &quot;S&quot; or &quot;P&quot;.</span>
 
@@ -813,7 +792,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    maxz : int</span>
-<span class="sd">        Maximal intepolation depth [km]. Given at beginning of file.</span>
+<span class="sd">        Maximal interpolation depth [km]. Given at beginning of file.</span>
 <span class="sd">    z : np.array</span>
 <span class="sd">        Depth vector [km].</span>
 <span class="sd">    dz : np.array</span>
