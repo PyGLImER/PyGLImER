@@ -189,7 +189,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Friday, 12th February 2020 03:24:30 pm</span>
-<span class="sd">Last Modified: Saturday, 21st August 2021 07:41:42 am</span>
+<span class="sd">Last Modified: Thursday, 21st October 2021 03:57:25 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -312,7 +312,7 @@
                         <span class="nb">dir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;logs&#39;</span><span class="p">,</span> <span class="s1">&#39;StationDBase.log&#39;</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                        <span class="nb">dir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;logs&#39;</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="nb">dir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;logs&#39;</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                         <span class="nb">dir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;logs&#39;</span><span class="p">,</span> <span class="s1">&#39;StationDBase.log&#39;</span><span class="p">))</span>
@@ -348,9 +348,8 @@
 <span class="sd">        :rtype: pd.DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;network&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;station&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;lat&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;lon&#39;</span><span class="p">:</span> <span class="p">[],</span>
-                <span class="s1">&#39;elevation&#39;</span><span class="p">:</span> <span class="p">[]</span>
-            <span class="p">}</span>
+            <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;network&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;station&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;lat&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;lon&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;elevation&#39;</span><span class="p">:</span> <span class="p">[]}</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="p">,</span> <span class="s1">&#39;**&#39;</span><span class="p">,</span> <span class="s1">&#39;*.*.h5&#39;</span><span class="p">),</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
@@ -422,8 +421,7 @@
         <span class="c1"># Create data dictionary</span>
         <span class="n">dataP</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;network&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;station&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;lat&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;lon&#39;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s1">&#39;elevation&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;NP&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;NPret&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;NS&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;NSret&#39;</span><span class="p">:</span> <span class="p">[]</span>
-            <span class="p">}</span>
+            <span class="s1">&#39;elevation&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;NP&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;NPret&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;NS&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;NSret&#39;</span><span class="p">:</span> <span class="p">[]}</span>
         <span class="n">dataS</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">dataP</span><span class="p">)</span>
 
         <span class="c1"># Read in info files</span>

@@ -189,7 +189,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Thursday, 18th February 2021 02:26:03 pm</span>
-<span class="sd">Last Modified: Thursday, 21st October 2021 01:39:32 pm</span>
+<span class="sd">Last Modified: Thursday, 21st October 2021 03:41:46 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
@@ -461,8 +461,8 @@
             <span class="c1"># additional QC</span>
             <span class="k">if</span> <span class="n">ia</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">or</span> <span class="n">ia</span> <span class="o">&gt;</span> <span class="mi">75</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">SNRError</span><span class="p">(</span>
-                    <span class="s2">&quot;The estimated incidence angle is unrealistic with&quot;</span> <span class="o">+</span>
-                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> degree.&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ia</span><span class="p">))</span>
+                    <span class="s2">&quot;The estimated incidence angle is unrealistic with&quot;</span>
+                    <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> degree.&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ia</span><span class="p">))</span>
 
         <span class="k">elif</span> <span class="n">rot</span> <span class="o">==</span> <span class="s2">&quot;PSS&quot;</span><span class="p">:</span>
             <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">st</span> <span class="o">=</span> <span class="n">rotate_PSV</span><span class="p">(</span>
@@ -570,8 +570,7 @@
         <span class="p">[</span><span class="s1">&#39;rayp_s_deg&#39;</span><span class="p">,</span> <span class="n">rayp_s_deg</span><span class="p">],</span>
         <span class="p">[</span><span class="s1">&#39;onset&#39;</span><span class="p">,</span> <span class="n">first_arrival</span><span class="p">],</span>
         <span class="p">[</span><span class="s1">&#39;starttime&#39;</span><span class="p">,</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="p">],</span>
-        <span class="p">[</span><span class="s1">&#39;pol&#39;</span><span class="p">,</span> <span class="n">pol</span><span class="p">]</span>
-        <span class="p">]</span>
+        <span class="p">[</span><span class="s1">&#39;pol&#39;</span><span class="p">,</span> <span class="n">pol</span><span class="p">]]</span>
 
     <span class="c1"># Check if values are already in dict</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">append_inf</span><span class="p">:</span>

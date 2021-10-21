@@ -207,7 +207,7 @@
 <nav id="bd-toc-nav">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#pyglimer-rf-create">
+  <a class="reference internal nav-link" href="#module-pyglimer.rf.create">
    pyglimer.rf.create
   </a>
  </li>
@@ -217,7 +217,7 @@
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#pyglimer-rf-moveout">
+  <a class="reference internal nav-link" href="#module-pyglimer.rf.moveout">
    pyglimer.rf.moveout
   </a>
  </li>
@@ -251,8 +251,555 @@
                 
   <div class="section" id="pyglimer-rf">
 <h1>pyglimer.rf<a class="headerlink" href="#pyglimer-rf" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="pyglimer-rf-create">
-<h2>pyglimer.rf.create<a class="headerlink" href="#pyglimer-rf-create" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyglimer.rf.create">
+<span id="pyglimer-rf-create"></span><h2>pyglimer.rf.create<a class="headerlink" href="#module-pyglimer.rf.create" title="Permalink to this headline">¶</a></h2>
+<p>A toolset to create RFs and RF classes</p>
+<p>Database management and overview for the PyGLImER database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">copyright</dt>
+<dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
+</dd>
+<dt class="field-even">license</dt>
+<dd class="field-even"><p>GNU Lesser General Public License, Version 3
+(<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
+</dd>
+<dt class="field-odd">author</dt>
+<dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
+</dd>
+</dl>
+<p>Created: Friday, 12th February 2020 03:24:30 pm
+Last Modified: Thursday, 21st October 2021 04:03:37 pm</p>
+<p><strong>The file is split and has a second copyright disclaimer</strong>
+Some parts of this code are modified versions of the rf module by
+Tom Eulenfeld.</p>
+<dl class="py class">
+<dt id="pyglimer.rf.create.RFStream">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.rf.create.</span></code><code class="sig-name descname"><span class="pre">RFStream</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFStream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFStream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">obspy.core.stream.Stream</span></code></p>
+<p>Class providing the necessary functions for receiver function calculation.
+:param traces: list of traces, single trace or stream object
+To initialize a RFStream from a Stream object use
+&gt;&gt;&gt; rfstream = RFStream(stream)
+To initialize a RFStream from a file use
+&gt;&gt;&gt; rfstream = read_rf(‘test.SAC’)
+Format specific headers are loaded into the stats object of all traces.</p>
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFStream.bootstrap">
+<code class="sig-name descname"><span class="pre">bootstrap</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmodel_file</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'iasp91.dat'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFStream.bootstrap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFStream.bootstrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Monte Carlo Case resampling algorithm that creates b numbers of
+replacement resampled stacks of the moveout corrected receiver
+function.</p>
+<p>The returned list can be used to compute statistical measures like
+standard deviation, standard error, median, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>b</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of iterations that the algorithm is supposed to
+perform, defaults to 1000.</p></li>
+<li><p><strong>vmodel_file</strong> (<em>str</em>) – The velocity model to use for the depth migration.
+Defaults to ‘iasp91.dat’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of the bootstraped stacks.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFStream.dirty_ccp_stack">
+<code class="sig-name descname"><span class="pre">dirty_ccp_stack</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dlon</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_res</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-</span> <span class="pre">180.0,</span> <span class="pre">180.0,</span> <span class="pre">-</span> <span class="pre">90.0,</span> <span class="pre">90.0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">750</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmodel_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iasp91.dat'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFStream.dirty_ccp_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFStream.dirty_ccp_stack" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the simplest way of creating quick not really accurate
+CCP stacks.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>There are some things that the user should be aware of. The bins
+right at the poles may or may not have very different areas
+compared to the other bins, which is a side effect of the iterative
+computation of bin area correction. I have an idea on how to fix
+it, but it is not really necessary right now. If you are working
+with stations at the pole, and you want to CCP stack, I’d strongly
+advise against using this function anyways. The bins are just
+too narrow. This really is just a ‘dirty’ CCP stack and should only
+be used as a first order check if thing are ok.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dlon</strong> (<em>float</em><em>, </em><em>optional</em>) – stetp size in longitude, by default 1.0</p></li>
+<li><p><strong>z_res</strong> (<em>float</em><em>, </em><em>optional</em>) – depth resolution, by default 1.0</p></li>
+<li><p><strong>extent</strong> (<em>list</em><em>, </em><em>optional</em>) – list of bounds [minlon, maxlon, minlat, maxlat],
+by default [-180.0, 180.0, -90.0, 90.0]</p></li>
+<li><p><strong>maxz</strong> (<em>int</em><em>, </em><em>optional</em>) – maxz, by default 750</p></li>
+<li><p><strong>vmodel_file</strong> (<em>str</em><em>, </em><em>optional</em>) – velocity model file. IASP91 1-D model used as standard  since
+the assumption of rectangular bins is already a bit rough,
+by default ‘iasp91.dat’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>containing, vectors outlining the mesh illumination etc.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFStream.method">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">method</span></code><a class="headerlink" href="#pyglimer.rf.create.RFStream.method" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property for used rf method, ‘P’ or ‘S’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFStream.moveout">
+<code class="sig-name descname"><span class="pre">moveout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vmodel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFStream.moveout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFStream.moveout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Depth migration of all receiver functions given Stream.
+Also calculates piercing points and adds them to RFTrace.stats.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vmodel</strong> (<em>str</em>) – Velocity model located in /data/vmodel.
+Standard options are iasp91.dat and 3D (GYPSuM).</p></li>
+<li><p><strong>multiple</strong> (<em>bool</em><em>, </em><em>optional</em>) – Appends two multiple mode RFs to the returned
+RFStream.
+False by default.</p></li>
+<li><p><strong>latb</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – Tuple in Form (minlat, maxlat). To save RAM on 3D
+raytraycing. Will remain unused for 1D RT, defaults to None</p></li>
+<li><p><strong>lonb</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – Tuple in Form (minlon, maxlon), defaults to None</p></li>
+<li><p><strong>taper</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the last 10km of the RF will be tapered, which
+avoids jumps in station stacks. Should be False for CCP stacks,
+defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>1D np.ndarray containing depths and an
+object of type depth.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>1D np.ndarray, <a class="reference internal" href="#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFStream.plot">
+<code class="sig-name descname"><span class="pre">plot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'PRF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lim</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epilimits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalingfactor</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">matplotlib.axes._axes.Axes</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linewidth</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputdir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'pdf'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFStream.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFStream.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates plot of a receiver function section as a function
+of epicentral distance or single plot if len(RFStream)==1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lim</strong> (<em>list</em><em> or </em><em>tuple</em><em> or </em><em>None</em>) – y axis time limits in seconds (if self.stats.type==time)
+or depth in km (if self.stats==depth) (len(list)==2).
+If <cite>None</cite> full traces is plotted.
+Default None.</p></li>
+<li><p><strong>epilimits</strong> (<em>list</em><em> or </em><em>tuple</em><em> or </em><em>None = None</em><em>,</em>) – y axis time limits in seconds (len(list)==2).
+If <cite>None</cite> from 30 to 90 degrees plotted.
+Default None.</p></li>
+<li><p><strong>scalingfactor</strong> (<em>float</em>) – sets the scale for the traces. Could be automated in
+future functions(Something like mean distance between
+traces)
+Defaults to 2.0</p></li>
+<li><p><strong>line</strong> (<em>bool</em>) – plots black line of the actual RF
+Defaults to True</p></li>
+<li><p><strong>linewidth</strong> (<em>float</em>) – sets linewidth of individual traces</p></li>
+<li><p><strong>ax</strong> (<cite>matplotlib.pyplot.Axes</cite>, optional) – Can define an axes to plot the RF into. Defaults to None.
+If None, new figure is created.</p></li>
+<li><p><strong>outputdir</strong> (<em>str</em><em>, </em><em>optional</em>) – If set, saves a pdf of the plot to the directory.
+If None, plot will be shown instantly. Defaults to None.</p></li>
+<li><p><strong>clean</strong> (<em>bool</em>) – If True, clears out all axes and plots RF only.
+Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ax</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>matplotlib.pyplot.Axes</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFStream.plot_distribution">
+<code class="sig-name descname"><span class="pre">plot_distribution</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'P'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pdf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFStream.plot_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFStream.plot_distribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot back azimuth and rayparameter distributions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nbins</strong> (<em>int</em>) – Number of bins. Default</p></li>
+<li><p><strong>v</strong> (<em>float</em>) – assummed surface velocity for the computation of the
+incidence angle. Default 5.8 km/s.</p></li>
+<li><p><strong>outputfile</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to savefile. If None plot is not saved just shown.
+Defaults to None.</p></li>
+<li><p><strong>format</strong> (<em>str</em><em>, </em><em>optional</em>) – outputfile format</p></li>
+<li><p><strong>dpi</strong> (<em>int</em><em>, </em><em>optional</em>) – only used if file format is none vector.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFStream.ppoint">
+<code class="sig-name descname"><span class="pre">ppoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vmodel_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iasp91.dat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFStream.ppoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFStream.ppoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates piercing points for all receiver functions in given
+RFStream and adds them to self.stats in form of lat, lon and depth.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vmodel_file</strong> (<em>str</em><em>, </em><em>optional</em>) – velocity model located in /data/vmodel.
+The default is ‘iasp91.dat’.</p></li>
+<li><p><strong>latb</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple in Form (minlat, maxlat). To save RAM on 3D
+raytraycing. Will remain unused for 1D RT, defaults to None.</p></li>
+<li><p><strong>lonb</strong> (<em>tuple</em><em>, </em><em>optional.</em>) – Tuple in Form (minlon, maxlon), defaults to None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFStream.slice2">
+<code class="sig-name descname"><span class="pre">slice2</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reftime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_empty_traces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFStream.slice2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFStream.slice2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternative slice method accepting relative times.
+See <code class="xref py py-meth docutils literal notranslate"><span class="pre">slice()</span></code> and <cite>trim2()</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFStream.station_stack">
+<code class="sig-name descname"><span class="pre">station_stack</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vmodel_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iasp91.dat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFStream.station_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFStream.station_stack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a moveout correction and stacks all receiver functions
+in Stream. Make sure that Stream only contains RF from one station!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vmodel_file</strong> (<em>str</em><em>, </em><em>optional</em>) – 1D velocity model in data/vmodels.
+The default is ‘iasp91.dat’.</p></li>
+<li><p><strong>multiple</strong> (<em>bool</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Should RFs for multiples be calculated? If yes,
+the parameter has to be a string, providing the stacking mode;
+i.e. ‘linear’, ‘zk’ for a Zhu &amp; Kanamori approach, or ‘pws’ for
+a phase-weighted stacking.
+False by default.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>z : Depth Vector.
+stack : Object containing station stack.
+RF_mo : Object containing depth migrated traces.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>z : 1D np.ndarray
+stack : <a class="reference internal" href="#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a>
+RF_mo : <a class="reference internal" href="#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFStream.trim2">
+<code class="sig-name descname"><span class="pre">trim2</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reftime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFStream.trim2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFStream.trim2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternative trim method accepting relative times.
+See <code class="xref py py-meth docutils literal notranslate"><span class="pre">trim()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>starttime</strong> (<em>UTCDateTime</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – starttime as UTC or seconds relative to reftime</p></li>
+<li><p><strong>endtime</strong> (<em>UTCDateTime</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – endtime as UTC or seconds relative to reftime</p></li>
+<li><p><strong>reftime</strong> (<em>UTCDateTime</em><em>, </em><em>optional</em>) – reference time, can be an UTCDateTime object or a
+string. The string will be looked up in the stats dictionary
+(e.g. ‘starttime’, ‘endtime’, ‘onset’).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFStream.type">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">type</span></code><a class="headerlink" href="#pyglimer.rf.create.RFStream.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property for the type of stream, ‘rf’, ‘profile’ or None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFStream.write">
+<code class="sig-name descname"><span class="pre">write</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFStream.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFStream.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save stream to file including format specific headers.
+See <cite>Stream.write() &lt;obspy.core.stream.Stream.write&gt;</cite> in ObsPy.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pyglimer.rf.create.RFTrace">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.rf.create.</span></code><code class="sig-name descname"><span class="pre">RFTrace</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFTrace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">obspy.core.trace.Trace</span></code></p>
+<p>Class providing the Trace object for receiver function calculation.</p>
+<p>This object is a modified version of Tom Eulenfeld’s rf project’s RFStream
+class. License below.</p>
+<p>The MIT License (MIT)</p>
+<p>Copyright (c) 2013-2019 Tom Eulenfeld</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the “Software”),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.</p>
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFTrace.moveout">
+<code class="sig-name descname"><span class="pre">moveout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vmodel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFTrace.moveout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFTrace.moveout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Depth migration of the receiver function.
+Also calculates piercing points and adds them to RFTrace.stats.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vmodel</strong> (<em>str</em>) – Velocity model located in /data/vmodel.
+Standard options are iasp91.dat and 3D (GYPSuM).</p></li>
+<li><p><strong>multiple</strong> (<em>bool</em><em> , </em><em>optional</em>) – Should RFs from multiples be computed and returned?
+False by default.</p></li>
+<li><p><strong>latb</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – Tuple in Form (minlat, maxlat). To save RAM on 3D
+raytraycing. Will remain unused for 1D RT, defaults to None</p></li>
+<li><p><strong>lonb</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – Tuple in Form (minlon, maxlon), defaults to None</p></li>
+<li><p><strong>taper</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the last 10km of the RF will be tapered, which
+avoids jumps in station stacks. Should be False for CCP stacks,
+defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>1D np.ndarray containing depths and an
+RFTrace object of type depth.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>1D np.ndarray, <a class="reference internal" href="#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFTrace.plot">
+<code class="sig-name descname"><span class="pre">plot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lim</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">matplotlib.axes._axes.Axes</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputdir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'pdf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFTrace.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFTrace.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates plot of a single receiver function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lim</strong> (<em>list</em><em> or </em><em>tuple</em><em> or </em><em>None</em>) – x axis time limits in seconds or km (depth) (len(list)==2).
+If <cite>None</cite> full trace is plotted.
+Default None.</p></li>
+<li><p><strong>depth</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – 1D array of depths</p></li>
+<li><p><strong>ax</strong> (<cite>matplotlib.pyplot.Axes</cite>, optional) – Can define an axes to plot the RF into. Defaults to None.
+If None, new figure is created.</p></li>
+<li><p><strong>outputdir</strong> (<em>str</em><em>, </em><em>optional</em>) – If set, saves a pdf of the plot to the directory.
+If None, plot will be shown instantly. Defaults to None.</p></li>
+<li><p><strong>clean</strong> (<em>bool</em>) – If True, clears out all axes and plots RF only.
+Defaults to False.</p></li>
+<li><p><strong>std</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – <strong>Only if self.type == stastack</strong>. Plots the upper and lower
+limit of the standard deviation in the plot. Provide the std
+as a numpy array (can be easily computed from the output of
+<a class="reference internal" href="#pyglimer.rf.create.RFStream.bootstrap" title="pyglimer.rf.create.RFStream.bootstrap"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bootstrap()</span></code></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ax</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>matplotlib.pyplot.Axes</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFTrace.ppoint">
+<code class="sig-name descname"><span class="pre">ppoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vmodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFTrace.ppoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFTrace.ppoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates piercing points for receiver function in and adds them
+to self.stats in form of lat, lon and depth.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vmodel_file</strong> (<em>str</em><em>, </em><em>optional</em>) – velocity model located in /data/vmodel.
+The default is ‘iasp91.dat’.</p></li>
+<li><p><strong>latb</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple in Form (minlat, maxlat). To save RAM on 3D
+raytraycing. Will remain unused for 1D RT, defaults to None.</p></li>
+<li><p><strong>lonb</strong> (<em>tuple</em><em>, </em><em>optional.</em>) – Tuple in Form (minlon, maxlon), defaults to None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyglimer.rf.create.RFTrace.write">
+<code class="sig-name descname"><span class="pre">write</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#RFTrace.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.RFTrace.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save current trace into a file  including format specific headers.
+See <cite>Trace.write() &lt;obspy.core.trace.Trace.write&gt;</cite> in ObsPy.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.rf.create.createRF">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.rf.create.</span></code><code class="sig-name descname"><span class="pre">createRF</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st_in</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'v'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">onset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">obspy.core.utcdatetime.UTCDateTime</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'it'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#createRF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.createRF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a receiver function with the defined method from an obspy
+stream.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>st_in</strong> (<em>Stream</em>) – Stream of which components are to be deconvolved.</p></li>
+<li><p><strong>phase</strong> (<em>str</em>) – Either “P” or “S”.</p></li>
+<li><p><strong>pol</strong> (<em>str</em><em>, </em><em>optional</em>) – Polarisation to be deconvolved from. Only for phase = P,
+defaults to ‘v’</p></li>
+<li><p><strong>onset</strong> (<em>UTCDateTime</em><em>, </em><em>optional</em>) – Is used to shift function rather than shift if provided.
+If info is provided, it will be extracted from info file,
+defaults to None</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Deconvolution method, “waterlevel”, ‘dampedf’ for constant
+damping level, ‘it’ for iterative time domain deconvoltuion, ‘multit’
+for multitaper or ‘fqd’ for frequency dependently damped spectral
+division. The default is iterative time domain (‘it’).</p></li>
+<li><p><strong>trim</strong> (<em>tuple</em><em>, </em><em>optional</em>) – taper/truncate. Given as tuple (a, b) in s - left,right.
+The default is None.</p></li>
+<li><p><strong>event</strong> (<em>event</em><em>, </em><em>optional</em>) – Event File used to extract additional information about
+arrival. Provide either event and station or info dict. The default is
+None.</p></li>
+<li><p><strong>station</strong> (<em>'~obspy.core.station'</em><em>, </em><em>optional</em>) – Dictionary containing station information,
+defaults to None</p></li>
+<li><p><strong>info</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary containing information about the waveform, used to
+extract additional information for header. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>Exception</strong> – If deconvolution method is unknown.</p></li>
+<li><p><strong>Exception</strong> – For wrong trim input.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>RFTrace object containing receiver function.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.rf.create.obj2stats">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.rf.create.</span></code><code class="sig-name descname"><span class="pre">obj2stats</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#obj2stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.obj2stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map event and station object to stats with attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Event</span></code>, optional) – Event File. The default is None.</p></li>
+<li><p><strong>station</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Station</span></code>, optional) – Station file with attributes lat, lon, and elevation.
+The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Stats object with station and event attributes.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">AttribDict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.rf.create.read_by_station">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.rf.create.</span></code><code class="sig-name descname"><span class="pre">read_by_station</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfdir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#read_by_station"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.read_by_station" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method to read all available receiver functions of one station
+and a particular phase into one single stream. Subsequently, one could
+for instance do a station stack by using
+<a class="reference internal" href="#pyglimer.rf.create.RFStream.station_stack" title="pyglimer.rf.create.RFStream.station_stack"><code class="xref py py-func docutils literal notranslate"><span class="pre">station_stack()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network</strong> (<em>str</em>) – Network shortcut, two digits, e.g. “IU”.</p></li>
+<li><p><strong>station</strong> (<em>str</em>) – Station shortcut, three digits, e.g. “HRV”</p></li>
+<li><p><strong>phase</strong> (<em>str</em>) – Primary phase (“S” or “P”)</p></li>
+<li><p><strong>rfdir</strong> (<em>str</em>) – Parental directory, in that the RF database is located</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>RFStream object containing all receiver function of station x.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.rf.create.read_rf">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.rf.create.</span></code><code class="sig-name descname"><span class="pre">read_rf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathname_or_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#read_rf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.read_rf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read waveform files into RFStream object.
+See <code class="xref py py-func docutils literal notranslate"><span class="pre">read()</span></code> in ObsPy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pathname_or_url</strong> (<em>str</em>) – Path to file.</p></li>
+<li><p><strong>format</strong> (<em>e.g. &quot;MSEED&quot;</em><em> or </em><em>&quot;SAC&quot;. Will attempt to determine from ending
+if = None. The default is None.</em>) – str, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>RFStream object from file.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.rf.create.rfstats">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.rf.create.</span></code><code class="sig-name descname"><span class="pre">rfstats</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tt_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'IASP91'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/create.html#rfstats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.create.rfstats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a stats object for a RFTrace object. Provide an info dic and
+starttime or event and station object. Latter will take longer since
+computations are redone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phase</strong> (<em>str</em>) – Either “P” or “S” for main phase.</p></li>
+<li><p><strong>info</strong> (<em>dict</em>) – Dictionary containing information about waveform. Can be None
+if event and station are provided. Has to be given in combination with
+starttime, defaults to None.</p></li>
+<li><p><strong>starttime</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">UTCDateTime</span></code>, optional) – Starttime of first trace in stream, used as identifier in
+info dict. The default is None.</p></li>
+<li><p><strong>event</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Event</span></code>, optional) – Event file, provide together with station file if info=None.
+The default is None.</p></li>
+<li><p><strong>station</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Station</span></code>, optional) – Station inventory with attributes lat, lon, and elevation,
+defaults to None</p></li>
+<li><p><strong>tt_model</strong> (<em>str</em><em>, </em><em>optional</em>) – TauPy model to calculate arrival, only used if no info
+file is given. The default is “IASP91”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>Exception</strong> – For unavailable phases</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Stats file for a RFTrace object with event and station
+attributes, distance, back_azimuth, onset and
+ray parameter.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">AttribDict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-pyglimer.rf.deconvolve">
 <span id="pyglimer-rf-deconvolve"></span><h2>pyglimer.rf.deconvolve<a class="headerlink" href="#module-pyglimer.rf.deconvolve" title="Permalink to this headline">¶</a></h2>
@@ -408,8 +955,227 @@ longitudinal component.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="pyglimer-rf-moveout">
-<h2>pyglimer.rf.moveout<a class="headerlink" href="#pyglimer-rf-moveout" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyglimer.rf.moveout">
+<span id="pyglimer-rf-moveout"></span><h2>pyglimer.rf.moveout<a class="headerlink" href="#module-pyglimer.rf.moveout" title="Permalink to this headline">¶</a></h2>
+<p>Contains functions for moveout correction and station stacking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">copyright</dt>
+<dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
+</dd>
+<dt class="field-even">license</dt>
+<dd class="field-even"><p>GNU Lesser General Public License, Version 3
+(<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
+</dd>
+<dt class="field-odd">author</dt>
+<dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
+</dd>
+</dl>
+<p>!The file is split and has a second copyright disclaimer!</p>
+<p>Created: Tuesday, 7th April 2020 10:08:30 am
+Last Modified: Wednesday, 20th October 2021 01:01:39 pm</p>
+<dl class="py class">
+<dt id="pyglimer.rf.moveout.SimpleModel">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.rf.moveout.</span></code><code class="sig-name descname"><span class="pre">SimpleModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/moveout.html#SimpleModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.moveout.SimpleModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Simple 1D velocity model for move out and piercing point calculation.
+Calculated with Earth flattening algorithm as described by P. M. Shearer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>z</strong> – depths in km</p></li>
+<li><p><strong>vp</strong> – P wave velocities at provided depths in km/s</p></li>
+<li><p><strong>vs</strong> – S wave velocities at provided depths in km/s</p></li>
+<li><p><strong>n</strong> – number of support points between provided depths</p></li>
+</ul>
+</dd>
+</dl>
+<p>All arguments can be of type numpy.ndarray or list.
+taken from the RF module based on obspy by Tom Eulenfeld</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.rf.moveout.dt_table">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.rf.moveout.</span></code><code class="sig-name descname"><span class="pre">dt_table</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rayp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">el</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/moveout.html#dt_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.moveout.dt_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a phase delay table and calculates piercing points
+for a specific ray parameter,
+using the equation as in Rondenay 2009.
+For SRF: The length of the output vectors is determined by the depth, at
+which Sp conversion is supercritical (vertical slowness = complex).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rayp</strong> (<em>float</em>) – ray-parameter given in s/deg.</p></li>
+<li><p><strong>fname</strong> (<em>string</em>) – 1D velocity model, located in data/vmodels.</p></li>
+<li><p><strong>phase</strong> (<em>string</em>) – Either “S” for Sp or “P” for Ps.</p></li>
+<li><p><strong>el</strong> (<em>float</em>) – station elevation in m.</p></li>
+<li><p><strong>multiple</strong> (<em>bool</em>) – Compute conversion time for PPS and PSS.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, A Cartesioan rather than a spherical Earth is assumed. By
+default False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>htab</strong> (<em>np.array</em>) – Vector containing conversion depths.</p></li>
+<li><p><strong>dt</strong> (<em>np.array</em>) – Vector containing delay times between primary arrival and converted
+wave.</p></li>
+<li><p><strong>delta</strong> (<em>np.array</em>) – Vector containing angular distance of piercing point from the
+station at depth z.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.rf.moveout.dt_table_3D">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.rf.moveout.</span></code><code class="sig-name descname"><span class="pre">dt_table_3D</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rayp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">el</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/moveout.html#dt_table_3D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.moveout.dt_table_3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a phase delay table and calculates piercing points
+for a specific ray parameter,
+using the equation as in Rondenay 2009.
+For SRF: The length of the output vectors is determined by the depth, at
+which Sp conversion is supercritical (vertical slowness = complex).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rayp</strong> (<em>float</em>) – ray-parameter given in s/deg.</p></li>
+<li><p><strong>fname</strong> (<em>string</em>) – 1D velocity model, located in data/vmodels.</p></li>
+<li><p><strong>phase</strong> (<em>string</em>) – Either “S” for Sp or “P” for Ps.</p></li>
+<li><p><strong>el</strong> (<em>float</em>) – station elevation in m.</p></li>
+<li><p><strong>latb</strong> (<em>Tuple</em>) – Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
+Will remain unused for 1D RT.</p></li>
+<li><p><strong>lonb</strong> (<em>Tuple</em>) – Tuple in Form (minlon, maxlon)</p></li>
+<li><p><strong>test</strong> (<em>Bool</em>) – If True, the raysum 3D model is loaded.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>htab</strong> (<em>np.array</em>) – Vector containing conversion depths.</p></li>
+<li><p><strong>dt</strong> (<em>np.array</em>) – Vector containing delay times between primary arrival and converted
+wave.</p></li>
+<li><p><strong>delta</strong> (<em>np.array</em>) – Vector containing Euclidian distance of piercing point from the
+station at depth z.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.rf.moveout.earth_flattening">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.rf.moveout.</span></code><code class="sig-name descname"><span class="pre">earth_flattening</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/moveout.html#earth_flattening"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.moveout.earth_flattening" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a flat-earth approximated velocity model down to maxz as in
+Peter M. Shearer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>maxz</strong> (<em>int</em>) – Maximal interpolation depth [km]. Given at beginning of file.</p></li>
+<li><p><strong>z</strong> (<em>np.array</em>) – Depth vector [km].</p></li>
+<li><p><strong>dz</strong> (<em>np.array</em>) – Layer thicknesses in km.</p></li>
+<li><p><strong>vp</strong> (<em>np.array</em>) – P wave velocities [km/s].</p></li>
+<li><p><strong>vs</strong> (<em>np.array</em>) – S wave velocities [km/s].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>z</strong> (<em>np.array</em>) – Same as input, but shortened to maxz.</p></li>
+<li><p><strong>dz</strong> (<em>np.array</em>) – Same as input, but shortened to maxz.</p></li>
+<li><p><strong>zf</strong> (<em>np.array</em>) – Depths in a Cartesian coordinate system.</p></li>
+<li><p><strong>dzf</strong> (<em>np.array</em>) – Layer thicknesse in a Cartesian coordinate system.</p></li>
+<li><p><strong>vpf</strong> (<em>np.array</em>) – P wave velocities in a Cartesian coordinate system.</p></li>
+<li><p><strong>vsf</strong> (<em>np.array</em>) – S wave velocities in a Cartesian coordinate system.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.rf.moveout.load_model">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.rf.moveout.</span></code><code class="sig-name descname"><span class="pre">load_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iasp91.dat'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/moveout.html#load_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.moveout.load_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load 1D velocity model from file.
+The model file should have 4 columns with depth, vp, vs, n.
+The model file for iasp91 starts like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#IASP91 velocity model</span>
+<span class="c1">#depth  vp    vs   n</span>
+  <span class="mf">0.00</span>  <span class="mf">5.800</span> <span class="mf">3.360</span> <span class="mi">0</span>
+  <span class="mf">0.00</span>  <span class="mf">5.800</span> <span class="mf">3.360</span> <span class="mi">0</span>
+<span class="mf">10.00</span>  <span class="mf">5.800</span> <span class="mf">3.360</span> <span class="mi">4</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fname</strong> (<em>string</em><em>, </em><em>optional</em>) – filename of model in data or ‘iasp91’.
+The default is ‘iasp91.dat’.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns SimpleModel instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pyglimer.rf.moveout.SimpleModel" title="pyglimer.rf.moveout.SimpleModel">SimpleModel</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.rf.moveout.moveout">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.rf.moveout.</span></code><code class="sig-name descname"><span class="pre">moveout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.trace.Stats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/moveout.html#moveout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.moveout.moveout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Depth migration for RF.
+Corrects the for the moveout of a converted phase. Flips time axis
+and polarity of SRF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – Receiver Function.</p></li>
+<li><p><strong>st</strong> (<em>obspy.core.trace.Stats</em>) – Stream stats</p></li>
+<li><p><strong>fname</strong> (<em>str</em>) – 1D velocity model for moveout correction.
+Use ‘3D’ for a 3D raytracing.</p></li>
+<li><p><strong>latb</strong> (<em>tuple</em>) – Tuple in Form (minlat, maxlat). To save RAM on 3D raytraycing.
+Will remain unused for 1D RT.</p></li>
+<li><p><strong>lonb</strong> (<em>tuple</em>) – Tuple in Form (minlon, maxlon)</p></li>
+<li><p><strong>taper</strong> (<em>bool</em>) – If True, the last 10km of the RF will be tapered,
+which avoids jumps in station stacks. If False, the upper 5 km will be
+tapered. Should be False for CCP stacks.</p></li>
+<li><p><strong>multiple</strong> (<em>bool</em><em>, </em><em>optional</em>) – Either False (don’t include multiples), ‘linear’ for
+linear stack, ‘PWS’ (phase weighted stack or “zk” for a zhu &amp;
+kanamori approach). False by default., by default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>z2</strong> (<em>Arraylike</em>) – Depth vector in km.</p></li>
+<li><p><strong>RF2</strong> (<em>Arraylike</em>) – Vector containing the depth migrated RF.</p></li>
+<li><p><strong>delta</strong> (<em>Arraylike</em>) – Vector containing Euclidian distance of piercing point from the
+station at depth z.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.rf.moveout.ppoint">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.rf.moveout.</span></code><code class="sig-name descname"><span class="pre">ppoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q_a</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_b</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/rf/moveout.html#ppoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.rf.moveout.ppoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate spherical distance between piercing point and station.
+INPUT has to be in Cartesian/ flat Earth:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q_a</strong> (<em>float</em>) – Vertical P-wave slowness in s/km.</p></li>
+<li><p><strong>q_b</strong> (<em>float</em>) – Vertical S-wave slowness in s/km.</p></li>
+<li><p><strong>dz</strong> (<em>float</em>) – Vertical distance between two consecutive piercing points [km].</p></li>
+<li><p><strong>p</strong> (<em>float</em>) – Horizontal slowness in s/km.</p></li>
+<li><p><strong>phase</strong> (<em>string</em>) – Either “S” or “P”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>x_delta</strong> – Euclidean distance between station and piercing point.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 </div>
 

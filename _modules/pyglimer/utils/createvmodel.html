@@ -189,7 +189,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Friday, 01st May 2020 12:11:03</span>
-<span class="sd">Last Modified: Friday, 20th August 2021 11:15:35 am</span>
+<span class="sd">Last Modified: Thursday, 21st October 2021 03:48:11 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 
@@ -418,10 +418,9 @@
             <span class="n">isomin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">isomax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
             <span class="n">opacity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>  <span class="c1"># needs to be small to see through all surfaces</span>
-            <span class="n">surface_count</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span>
-            <span class="c1"># surface_count</span>
-            <span class="c1"># needs to be a large number for good volume rendering</span>
-            <span class="p">))</span>
+            <span class="n">surface_count</span><span class="o">=</span><span class="mi">21</span><span class="p">,))</span>
+        <span class="c1"># surface_count</span>
+        <span class="c1"># needs to be a large number for good volume rendering</span>
 
         <span class="n">figvs</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">Volume</span><span class="p">(</span>
             <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
@@ -431,9 +430,8 @@
             <span class="n">isomin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">isomax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
             <span class="n">opacity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>  <span class="c1"># needs to be small to see through all surfaces</span>
-            <span class="n">surface_count</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span>
-            <span class="c1"># needs to be a large number for good volume rendering</span>
-            <span class="p">))</span>
+            <span class="n">surface_count</span><span class="o">=</span><span class="mi">21</span><span class="p">,))</span>
+        <span class="c1"># needs to be a large number for good volume rendering</span>
         <span class="k">return</span> <span class="n">figvp</span><span class="p">,</span> <span class="n">figvs</span>
 
     <span class="c1"># program-specific Exceptions</span>
@@ -720,8 +718,8 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">_MODEL_CACHE</span><span class="p">[</span><span class="s1">&#39;gyps&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">latb</span><span class="p">:</span>
-            <span class="n">_MODEL_CACHE</span><span class="p">[</span><span class="s1">&#39;gyps&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">latb</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">lonb</span><span class="p">)]</span> <span class="o">=</span> <span class="n">model</span> <span class="o">=</span> \
-                    <span class="n">model</span><span class="o">.</span><span class="n">submodel</span><span class="p">(</span><span class="n">latb</span><span class="p">,</span> <span class="n">lonb</span><span class="p">)</span>
+            <span class="n">_MODEL_CACHE</span><span class="p">[</span><span class="s1">&#39;gyps&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">latb</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">lonb</span><span class="p">)]</span> <span class="o">=</span> <span class="n">model</span> \
+                <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">submodel</span><span class="p">(</span><span class="n">latb</span><span class="p">,</span> <span class="n">lonb</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">latb</span><span class="p">)</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">lonb</span><span class="p">),</span> <span class="n">folder</span><span class="o">=</span><span class="s1">&#39;tmp&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">model</span>

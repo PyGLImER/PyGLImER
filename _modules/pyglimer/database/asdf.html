@@ -189,7 +189,7 @@
 
 <span class="sd">Created: Friday, 12th February 2021 03:24:30 pm</span>
 
-<span class="sd">Last Modified: Wednesday, 20th October 2021 04:41:45 pm</span>
+<span class="sd">Last Modified: Thursday, 21st October 2021 03:56:17 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -319,8 +319,8 @@
                 <span class="n">ds</span><span class="o">.</span><span class="n">add_quakeml</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="s1">&#39;Event with event-id </span><span class="si">%s</span><span class="s1"> already in DB, skipping...&#39;</span>
-                    <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">evtid</span><span class="p">),</span> <span class="ne">UserWarning</span><span class="p">)</span>
+                <span class="s1">&#39;Event with event-id </span><span class="si">%s</span><span class="s1"> already in DB, skipping...&#39;</span>
+                <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">evtid</span><span class="p">),</span> <span class="ne">UserWarning</span><span class="p">)</span>
         <span class="n">ds</span><span class="o">.</span><span class="n">add_waveforms</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;raw_recording&#39;</span><span class="p">,</span> <span class="n">event_id</span><span class="o">=</span><span class="n">evtid</span><span class="p">)</span>
         <span class="n">ds</span><span class="o">.</span><span class="n">add_stationxml</span><span class="p">(</span><span class="n">statxml</span><span class="p">)</span></div>
 </pre></div>

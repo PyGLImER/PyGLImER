@@ -212,7 +212,7 @@
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#pyglimer-utils-createvmodel">
+  <a class="reference internal nav-link" href="#module-pyglimer.utils.createvmodel">
    pyglimer.utils.createvmodel
   </a>
  </li>
@@ -237,7 +237,7 @@
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#pyglimer-utils-utils">
+  <a class="reference internal nav-link" href="#module-pyglimer.utils.utils">
    pyglimer.utils.utils
   </a>
  </li>
@@ -317,8 +317,68 @@ Else has to be N=M**2. Were M is a natural number</p></li>
 </dd></dl>
 
 </div>
-<div class="section" id="pyglimer-utils-createvmodel">
-<h2>pyglimer.utils.createvmodel<a class="headerlink" href="#pyglimer-utils-createvmodel" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyglimer.utils.createvmodel">
+<span id="pyglimer-utils-createvmodel"></span><h2>pyglimer.utils.createvmodel<a class="headerlink" href="#module-pyglimer.utils.createvmodel" title="Permalink to this headline">¶</a></h2>
+<p>Create a 3D velocity model using Litho1.0</p>
+<dl class="field-list simple">
+<dt class="field-odd">copyright</dt>
+<dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
+</dd>
+<dt class="field-even">license</dt>
+<dd class="field-even"><p>GNU Lesser General Public License, Version 3
+(<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
+</dd>
+<dt class="field-odd">author</dt>
+<dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
+</dd>
+</dl>
+<p>Created: Friday, 01st May 2020 12:11:03
+Last Modified: Thursday, 21st October 2021 03:48:11 pm</p>
+<dl class="py function">
+<dt id="pyglimer.utils.createvmodel.load_avvmodel">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.createvmodel.</span></code><code class="sig-name descname"><span class="pre">load_avvmodel</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pyglimer.utils.createvmodel.AverageVelModel</span><a class="reference internal" href="../../_modules/pyglimer/utils/createvmodel.html#load_avvmodel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.createvmodel.load_avvmodel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a model over the average P and S-wave velocities in the upper
+crust. These are used by the P-SV-SH rotation algorithm. Model data
+is extracted from the Litho1.0 model (location provided above).
+The package is distributed with a readily compiled model.</p>
+<p>Litho1.0 must be installed and location must be set correct for a
+complete compilation! However, function will first look in RAM and then
+in data for a pickle file.</p>
+<p>Compiling takes up to one hour!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Model containing average velocities for upper crust.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.createvmodel.load_gyps">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.createvmodel.</span></code><code class="sig-name descname"><span class="pre">load_gyps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flatten</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pyglimer.utils.createvmodel.ComplexModel</span><a class="reference internal" href="../../_modules/pyglimer/utils/createvmodel.html#load_gyps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.createvmodel.load_gyps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiles the GyPSuM 3D-velocity object from included GyPSuM text files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>save</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Pickle the 3D velocity model after compiling it for the first time.
+This will allow for faster access to the model. Saving the model takes
+about 800 MB disk space.
+The default is False, as it lead to unstabilities with joblib.</p></li>
+<li><p><strong>latb</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – Creates a submodel from the full model. In form (minlat, maxlat).</p></li>
+<li><p><strong>lonb</strong> (<em>Tuple</em><em>, </em><em>optional</em>) – (minlon, maxlon)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object that can be queried for velocities.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ComplexModel object</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-pyglimer.utils.geo_utils">
 <span id="pyglimer-utils-geo-utils"></span><h2>pyglimer.utils.geo_utils<a class="headerlink" href="#module-pyglimer.utils.geo_utils" title="Permalink to this headline">¶</a></h2>
@@ -725,8 +785,145 @@ Else the signal will be interpolated (a lot slower).</p>
 </dd></dl>
 
 </div>
-<div class="section" id="pyglimer-utils-utils">
-<h2>pyglimer.utils.utils<a class="headerlink" href="#pyglimer-utils-utils" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyglimer.utils.utils">
+<span id="pyglimer-utils-utils"></span><h2>pyglimer.utils.utils<a class="headerlink" href="#module-pyglimer.utils.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">copyright</dt>
+<dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
+</dd>
+<dt class="field-even">license</dt>
+<dd class="field-even"><p>GNU Lesser General Public License, Version 3
+(<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
+</dd>
+<dt class="field-odd">author</dt>
+<dd class="field-odd"><p>Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)
+Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
+</dd>
+</dl>
+<p>Created: Tue May 26 2019 13:31:30
+Last Modified: Thursday, 21st October 2021 03:42:52 pm</p>
+<dl class="py function">
+<dt id="pyglimer.utils.utils.chunks">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">chunks</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">list</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#chunks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.chunks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yield successive n-sized chunks from lst. Useful for multi-threading</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.utils.create_bulk_str">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">create_bulk_str</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">networks</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#create_bulk_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.create_bulk_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to generate the input for the obspy functions:
+get_stations_bulk() and get_waveforms_bulk().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>networks</strong> (<em>str</em><em> or </em><em>List</em><em>[</em><em>str</em><em>]</em>) – The requested networks, can be str or List.</p></li>
+<li><p><strong>stations</strong> (<em>str</em><em> or </em><em>List</em><em>[</em><em>str</em><em>]</em>) – The requested stations, can be str or List.</p></li>
+<li><p><strong>location</strong> (<em>str</em>) – Location string</p></li>
+<li><p><strong>channel</strong> (<em>str</em>) – Channel string</p></li>
+<li><p><strong>t0</strong> (<em>UTCDateTime</em><em> or </em><em>str</em><em> or </em><em>List</em><em>[</em><em>UTCDateTime</em><em>]</em>) – starttimes</p></li>
+<li><p><strong>t1</strong> (<em>UTCDateTime</em><em> or </em><em>str</em><em> or </em><em>List</em><em>[</em><em>UTCDateTime</em><em>]</em>) – endtimes</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – For invalid input types or inputs</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The List to be used as input with the aforementioned functions.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List[tuple]</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All parameters accept wildcards.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.utils.download_full_inventory">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">download_full_inventory</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fdsn_client</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#download_full_inventory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.download_full_inventory" title="Permalink to this definition">¶</a></dt>
+<dd><p>This utility loops through statloc and redownloads the whole response
+(i.e., all channels and all times) for every station. Thus, overwriting
+the old xml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>statloc</strong> (<em>str</em>) – Folder in which the old stationxmls are saved</p></li>
+<li><p><strong>fdsn_client</strong> (<em>list</em>) – List of FDSN providers that should be queried.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.utils.dt_string">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">dt_string</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#dt_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.dt_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns Time elapsed string depending on how much time has passed.
+After a certain amount of seconds it returns minutes, and after a certain
+amount of minutes it returns the elapsed time in hours.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.utils.get_multiple_fdsn_clients">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">get_multiple_fdsn_clients</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clients</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">obspy.clients.fdsn.client.Client</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#get_multiple_fdsn_clients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.get_multiple_fdsn_clients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a tuple holding all the queried fdsn providers. Also finds
+all available fdsn providers if input is None. Will also sort the clients
+so the big providers (IRIS and ORFEUS) come last.</p>
+<p>Just a modified version of a code in the obspy mass downloader.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>clients</strong> (<em>List</em><em>[</em><em>str</em><em>] or </em><em>str</em><em> or </em><em>None</em>) – List of strings, each describing one client.
+Put None if you want to use all available.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tuple of the fdsn Client objects.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[Client]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.utils.save_raw">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">save_raw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">saved</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.inventory.inventory.Inventory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saveasdf</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#save_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.save_raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the raw waveform data in the desired format.
+The point of this function is mainly that the waveforms will be saved
+with the correct associations and at the correct locations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>saved</strong> (<em>dict</em>) – Dictionary holding information about the original streams
+to identify them afterwards.</p></li>
+<li><p><strong>st</strong> (<em>Stream</em>) – obspy stream holding all data (from various stations)</p></li>
+<li><p><strong>rawloc</strong> (<em>str</em>) – Parental directory (with phase) to save the files in.</p></li>
+<li><p><strong>inv</strong> (<em>Inventory</em>) – The inventory holding all the station information</p></li>
+<li><p><strong>saveasdf</strong> (<em>bool</em>) – If True the data will be saved in asdf format.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.utils.save_raw_mseed">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">save_raw_mseed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">threading.Event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slst</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#save_raw_mseed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.save_raw_mseed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves input stream in the correct location in mini seed format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>evt</strong> (<em>Event</em>) – event that is associated to the recording.</p></li>
+<li><p><strong>slst</strong> (<em>Stream</em>) – The selected stream. Should contain all components of one
+recording of a teleseismic event.</p></li>
+<li><p><strong>rawloc</strong> (<em>str</em>) – Location (with phase) to save the miniseed files in (will
+also create subfolders).</p></li>
+<li><p><strong>net</strong> (<em>str</em>) – Network code</p></li>
+<li><p><strong>stat</strong> (<em>str</em>) – Station Code</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 </div>
 

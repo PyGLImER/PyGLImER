@@ -189,7 +189,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Tuesday, 25th February 2020 07:28:30 pm</span>
-<span class="sd">Last Modified: Thursday, 19th August 2021 03:13:09 pm</span>
+<span class="sd">Last Modified: Thursday, 21st October 2021 03:57:51 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
@@ -405,8 +405,8 @@
                 <span class="n">ph_time</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">get_travel_times</span><span class="p">(</span>
                     <span class="n">evt_depth</span><span class="p">,</span> <span class="n">dis</span><span class="p">,</span> <span class="n">phase_list</span><span class="o">=</span><span class="n">phase</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
             <span class="n">ph_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;taup&#39;</span><span class="p">,</span> <span class="s1">&#39;iris&#39;</span><span class="p">,</span> <span class="s1">&#39;geodetics&#39;</span><span class="p">]</span>
-            <span class="n">ph_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ph_time</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span> <span class="o">+</span> <span class="n">onset</span> <span class="o">-</span>
-                                           <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">ot</span><span class="p">))</span>
+            <span class="n">ph_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ph_time</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span>
+                <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span> <span class="o">+</span> <span class="n">onset</span> <span class="o">-</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">ot</span><span class="p">))</span>
 
         <span class="c1"># waveform data</span>
         <span class="n">st</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
@@ -651,8 +651,9 @@
             <span class="n">st</span><span class="p">,</span> <span class="n">crit</span><span class="p">,</span> <span class="n">lf</span><span class="p">,</span> <span class="n">noisemat</span> <span class="o">=</span> <span class="n">qcp</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span><span class="p">,</span>
                                          <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="n">shelve</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">finddir</span><span class="p">(),</span> <span class="s1">&#39;ratings&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">network</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span>
-                         <span class="n">station</span> <span class="o">+</span> <span class="s2">&quot;rating&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">shelve</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">finddir</span><span class="p">(),</span> <span class="s1">&#39;ratings&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">network</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
+                <span class="o">+</span> <span class="n">station</span> <span class="o">+</span> <span class="s2">&quot;rating&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="p">[</span><span class="n">starttime</span> <span class="o">+</span> <span class="s2">&quot;_auto&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crit</span>
             <span class="k">if</span> <span class="n">starttime</span> <span class="ow">in</span> <span class="n">f</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="n">starttime</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">crit</span><span class="p">:</span>
                 <span class="n">diff</span> <span class="o">=</span> <span class="n">diff</span> <span class="o">+</span> <span class="mi">1</span>

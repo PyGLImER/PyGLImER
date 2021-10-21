@@ -227,7 +227,7 @@
   <div class="section" id="ccpstack-objects">
 <h1>CCPStack objects<a class="headerlink" href="#ccpstack-objects" title="Permalink to this headline">¶</a></h1>
 <p>In <strong>PyGLImER</strong>, the base class enabling CCP stacking is the
-<code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code> class. However, to understand how
+<a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> class. However, to understand how
 CCP-Stacking is implemented, we will have to have a small intermezzo about
 binning.</p>
 <div class="section" id="ccp-bins">
@@ -261,11 +261,11 @@ whole surface area.</p>
 <div class="section" id="creating-a-ccp-stack-in-pyglimer">
 <h2>Creating a CCP stack in PyGLImER<a class="headerlink" href="#creating-a-ccp-stack-in-pyglimer" title="Permalink to this headline">¶</a></h2>
 <p>CCP stacks in PyGLImER are usually not created by initialising the
-<code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code> class but by calling the
-<code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code> function, which, itself, initialises the
+<a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> class but by calling the
+<a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.init_ccp" title="pyglimer.ccp.ccp.init_ccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code></a> function, which, itself, initialises the
 aforementioned object.</p>
-<p>Using <code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code>, there are two ways to create a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code> object:</p>
+<p>Using <a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.init_ccp" title="pyglimer.ccp.ccp.init_ccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code></a>, there are two ways to create a
+<a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> object:</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li><p>By Creating a bingrid tailored to be used with data from predefined
@@ -273,18 +273,18 @@ networks and stations (i.e. onehas to know network and station codes for
 the desired stack.</p></li>
 <li><p>More commonly, one would like to create a CCP stack containing all
 available data for a given area. In order to that,
-<code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code> can be called
+<a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.init_ccp" title="pyglimer.ccp.ccp.init_ccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code></a> can be called
 with the <code class="docutils literal notranslate"><span class="pre">geocoords</span></code> parameter. Then, PyGLImER will automatically find
 all stations available in the given area and create a bingrid around
 those data.</p></li>
 </ol>
 </div></blockquote>
-<p><strong>Populating the CCP object</strong> is done by <code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code>
+<p><strong>Populating the CCP object</strong> is done by <a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.init_ccp" title="pyglimer.ccp.ccp.init_ccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code></a>
 if called using the <code class="docutils literal notranslate"><span class="pre">compute_stack=True</span></code> argument (recommended), else one will
-have to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">compute_stack()</span></code>.</p>
+have to call <a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.CCPStack.compute_stack" title="pyglimer.ccp.ccp.CCPStack.compute_stack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compute_stack()</span></code></a>.</p>
 <p><strong>Finalising the CCP object.</strong> Up to now data was only saved in the object and
 we have not created an actual CCP stack, yet. We can do just that by calling
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">conclude_ccp()</span></code>. Here, we can decide <strong>1.</strong>
+<a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.CCPStack.conclude_ccp" title="pyglimer.ccp.ccp.CCPStack.conclude_ccp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">conclude_ccp()</span></code></a>. Here, we can decide <strong>1.</strong>
 if we want to keep empty bins <strong>2.</strong> what should be the threshold for a minimum
 amount of data per bin <strong>3.</strong> Whether we want to discards bins that are on water
 surfaces or keep them.</p>

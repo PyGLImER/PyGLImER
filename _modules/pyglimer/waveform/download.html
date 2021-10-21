@@ -185,7 +185,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Tue May 26 2019 13:31:30</span>
-<span class="sd">Last Modified: Monday, 13th September 2021 11:58:53 am</span>
+<span class="sd">Last Modified: Thursday, 21st October 2021 03:39:37 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="c1"># !/usr/bin/env python3</span>
@@ -267,14 +267,14 @@
                 <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
                     <span class="c1"># occurs when there is no arrival of the phase at stat</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                        <span class="s1">&#39;No valid arrival found for station </span><span class="si">%s</span><span class="s1">,&#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span> <span class="o">+</span>
-                        <span class="s1">&#39;event </span><span class="si">%s</span><span class="s1">, and phase </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">phase</span><span class="p">))</span>
+                        <span class="s1">&#39;No valid arrival found for station </span><span class="si">%s</span><span class="s1">,&#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span>
+                        <span class="o">+</span> <span class="s1">&#39;event </span><span class="si">%s</span><span class="s1">, and phase </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">phase</span><span class="p">))</span>
                     <span class="k">continue</span>
                 <span class="c1"># We only do that if the epicentral distances are correct</span>
                 <span class="k">if</span> <span class="n">delta</span> <span class="o">&lt;</span> <span class="n">min_epid</span> <span class="ow">or</span> <span class="n">delta</span> <span class="o">&gt;</span> <span class="n">max_epid</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                        <span class="s1">&#39;No valid arrival found for station </span><span class="si">%s</span><span class="s1">, &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span> <span class="o">+</span>
-                        <span class="s1">&#39;event </span><span class="si">%s</span><span class="s1">, and phase </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">phase</span><span class="p">))</span>
+                        <span class="s1">&#39;No valid arrival found for station </span><span class="si">%s</span><span class="s1">, &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span>
+                        <span class="o">+</span> <span class="s1">&#39;event </span><span class="si">%s</span><span class="s1">, and phase </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">phase</span><span class="p">))</span>
                     <span class="k">continue</span>
                 <span class="c1"># Already in DB?</span>
                 <span class="k">if</span> <span class="n">saveasdf</span><span class="p">:</span>
@@ -282,8 +282,8 @@
                             <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">)))</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">evt</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">events</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                                <span class="s1">&#39;File already in database. </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span> <span class="o">+</span>
-                                <span class="s1">&#39;Event: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">)</span>
+                                <span class="s1">&#39;File already in database. </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span>
+                                <span class="o">+</span> <span class="s1">&#39;Event: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">)</span>
                             <span class="k">continue</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">o</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -296,8 +296,8 @@
                     <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.mseed&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">))</span>
                     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                            <span class="s1">&#39;File already in database. </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span> <span class="o">+</span>
-                            <span class="s1">&#39;Event: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">)</span>
+                            <span class="s1">&#39;File already in database. </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span>
+                            <span class="o">+</span> <span class="s1">&#39;Event: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">)</span>
                         <span class="k">continue</span>
                 <span class="c1"># It&#39;s new data, so add to request!</span>
                 <span class="n">d</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
