@@ -14,10 +14,10 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Wednesday, 20th October 2021 03:47:33 pm
+Last Modified: Thursday, 21st October 2021 10:20:33 am
 
 
-!The file is split and has a second copyright disclaimer!
+**The file is split and has a second copyright disclaimer**
 Some parts of this code are modified versions of the rf module by
 Tom Eulenfeld.
 
@@ -25,7 +25,6 @@ Tom Eulenfeld.
 from copy import deepcopy
 import json
 import logging
-from multiprocessing import Event
 from operator import itemgetter
 from typing import List, Tuple
 # from pkg_resources import resource_filename

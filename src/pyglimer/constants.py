@@ -15,3 +15,6 @@ KM2DEG = 1.0/DEG2KM
 maxz = 750  # maximum interpolation depth in km
 maxzm = 200  # maximum depth for multiple interpolation in km
 res = 1  # vertical resolution in km for interpolation and ccp bins
+# Time Window in seconds that should be downloaded before theoretical arrival
+onsetP = 30
+onsetS = 120

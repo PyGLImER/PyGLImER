@@ -9,7 +9,7 @@
     Lucas Sawade (lsawade@princeton.edu)
 
 Created: November 2019
-Last Modified: Wednesday, 20th October 2021 04:59:11 pm
+Last Modified: Thursday, 21st October 2021 10:05:06 am
 '''
 
 import logging
@@ -49,7 +49,6 @@ def fibonacci_sphere(epi: float = 1):
         y = ((i * offset) - 1) + (offset / 2)
         r = np.sqrt(1 - y ** 2)
         phi = ((i + 1) % samples) * increment
-        # print(phi)
         x = np.cos(phi) * r
         z = np.sin(phi) * r
         points.append([x, y, z])
