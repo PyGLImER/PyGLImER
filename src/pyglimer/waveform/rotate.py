@@ -12,10 +12,8 @@ Contains functions to rotate a stream into different domains
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Saturday, 21st March 2020 07:26:03 pm
-Last Modified: Friday, 22nd October 2021 02:49:33 pm
+Last Modified: Friday, 22nd October 2021 06:09:09 pm
 '''
-import warnings
-
 import numpy as np
 from obspy import Stream
 
