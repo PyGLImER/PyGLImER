@@ -12,17 +12,16 @@ Seismic Format (asdf).
 
 Created: Friday, 12th February 2021 03:24:30 pm
 
-Last Modified: Thursday, 21st October 2021 03:56:17 pm
+Last Modified: Friday, 22nd October 2021 03:20:13 pm
 '''
 
 import logging
 import os
 import shutil
-from threading import Event
 
 import obspy
 from obspy import read, read_inventory, UTCDateTime
-from obspy.core.event.catalog import read_events
+from obspy.core.event.catalog import read_events, Event
 from obspy.core.inventory.inventory import Inventory
 from obspy.core.stream import Stream
 from pyasdf import ASDFDataSet
@@ -65,8 +64,7 @@ def rewrite_to_hdf5(catfile: str, rawfolder: str, statloc: str):
             os.rmdir(evtdir)
         else:
             writeraw(event, evtdir, statloc, False, True)
-        logging.warn('removing event...')
-        print(event)
+        logging.warning('removing event...')
         del cat[0]
         # Overwrite old catalog, so we don't have to restart the whole
         # process over again afterwards
