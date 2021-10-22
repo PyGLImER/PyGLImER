@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = src/seismic
+source = src/pyglimer
 
 [report]
 exclude_lines =
