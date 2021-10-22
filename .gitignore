@@ -21,3 +21,4 @@ examples/database
 PyGLImER.egg-info/
 .idea/
 ccp*.pkl
+.coverage
