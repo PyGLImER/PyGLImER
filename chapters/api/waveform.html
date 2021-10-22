@@ -817,30 +817,7 @@ and columns the different criteria.</p></li>
 </dd>
 </dl>
 <p>Created: Saturday, 21st March 2020 07:26:03 pm
-Last Modified: Thursday, 21st October 2021 10:55:04 am</p>
-<dl class="py function">
-<dt id="pyglimer.waveform.rotate.rotate_LQT">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.rotate.</span></code><code class="sig-name descname"><span class="pre">rotate_LQT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="../../_modules/pyglimer/waveform/rotate.html#rotate_LQT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.rotate.rotate_LQT" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rotates a stream given in RTZ to LQT using Singular Value Decomposition
-Use rotate_LQT_min as it tends to deliver better results.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>st</strong> (<em>obspy.Stream</em>) – Input Stream in RTZ.</p></li>
-<li><p><strong>phase</strong> (<em>STRING</em><em>, </em><em>optional</em>) – “S” for Sp or “P” for Ps.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>LQT</strong> (<em>obspy.Stream</em>) – Output Stream in LQT.</p></li>
-<li><p><strong>QC</strong> (<em>FLOAT</em>) – Quality control criterion. Energy balance at first arrival for L and Q.
-Should deviate from 1 as far as possible.</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
+Last Modified: Friday, 22nd October 2021 06:09:09 pm</p>
 <dl class="py function">
 <dt id="pyglimer.waveform.rotate.rotate_LQT_min">
 <code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.rotate.</span></code><code class="sig-name descname"><span class="pre">rotate_LQT_min</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="../../_modules/pyglimer/waveform/rotate.html#rotate_LQT_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.rotate.rotate_LQT_min" title="Permalink to this definition">¶</a></dt>

@@ -189,17 +189,16 @@
 
 <span class="sd">Created: Friday, 12th February 2021 03:24:30 pm</span>
 
-<span class="sd">Last Modified: Thursday, 21st October 2021 03:56:17 pm</span>
+<span class="sd">Last Modified: Friday, 22nd October 2021 03:20:13 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Event</span>
 
 <span class="kn">import</span> <span class="nn">obspy</span>
 <span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">read</span><span class="p">,</span> <span class="n">read_inventory</span><span class="p">,</span> <span class="n">UTCDateTime</span>
-<span class="kn">from</span> <span class="nn">obspy.core.event.catalog</span> <span class="kn">import</span> <span class="n">read_events</span>
+<span class="kn">from</span> <span class="nn">obspy.core.event.catalog</span> <span class="kn">import</span> <span class="n">read_events</span><span class="p">,</span> <span class="n">Event</span>
 <span class="kn">from</span> <span class="nn">obspy.core.inventory.inventory</span> <span class="kn">import</span> <span class="n">Inventory</span>
 <span class="kn">from</span> <span class="nn">obspy.core.stream</span> <span class="kn">import</span> <span class="n">Stream</span>
 <span class="kn">from</span> <span class="nn">pyasdf</span> <span class="kn">import</span> <span class="n">ASDFDataSet</span>
@@ -242,8 +241,7 @@
             <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">evtdir</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">writeraw</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">evtdir</span><span class="p">,</span> <span class="n">statloc</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;removing event...&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;removing event...&#39;</span><span class="p">)</span>
         <span class="k">del</span> <span class="n">cat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="c1"># Overwrite old catalog, so we don&#39;t have to restart the whole</span>
         <span class="c1"># process over again afterwards</span>
