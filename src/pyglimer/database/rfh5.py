@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Monday, 25th October 2021 10:30:35 am
+Last Modified: Monday, 25th October 2021 11:14:40 am
 '''
 
 import fnmatch
