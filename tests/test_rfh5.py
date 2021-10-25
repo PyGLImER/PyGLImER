@@ -8,11 +8,11 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th October 2021 02:04:06 pm
-Last Modified: Thursday, 21st October 2021 03:34:18 pm
+Last Modified: Monday, 25th October 2021 11:13:34 am
 '''
 
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import call, patch, MagicMock
 import warnings
 
 from obspy import read, UTCDateTime
@@ -174,6 +174,48 @@ class TestDBHandler(unittest.TestCase):
         super_mock.return_value = None
         with self.assertRaises(IndexError):
             _ = rfh5.DBHandler('a', 'a', '9')
+
+    def test_add_known_waveform_data(self):
+        ret = ['a', 'b', 'c']
+        rej = ['z', 'y', 'x']
+        calls = [call('ret', str(ret)), call('rej', str(rej))]
+        with patch.object(self.dbh, 'create_dataset') as create_ds_mock:
+            self.dbh._add_known_waveform_data(ret, rej)
+            create_ds_mock.assert_called_once()
+            create_ds_mock().attrs.__setitem__.assert_has_calls(calls)
+
+    @patch('pyglimer.database.rfh5.h5py.File.__getitem__')
+    def test_add_known_waveform_data_att_exists(self, file_mock):
+        attrs_mock = MagicMock()
+        d = {'known': attrs_mock}
+        file_mock.side_effect = d.__getitem__
+        ret = ['a', 'b', 'c']
+        rej = ['z', 'y', 'x']
+        calls = [call('ret', str(ret)), call('rej', str(rej))]
+        with patch.object(self.dbh, 'create_dataset') as create_ds_mock:
+            create_ds_mock.side_effect = [ValueError('test'), attrs_mock]
+            self.dbh._add_known_waveform_data(ret, rej)
+            create_ds_mock.assert_called_once()
+            create_ds_mock().attrs.__setitem__.assert_has_calls(calls)
+
+    @patch('pyglimer.database.rfh5.h5py.File.__getitem__')
+    def test_get_known_waveforms(self, file_mock):
+        attrs_mock = MagicMock(name='attrs_mock')
+        d2 = {'rej': '["bla"]', 'ret': '["blub"]'}
+        attrs_mock.attrs = d2
+        d = {'known': attrs_mock}
+        file_mock.side_effect = d.__getitem__
+        ret, rej = self.dbh._get_known_waveforms()
+        self.assertEqual(rej, ['bla'])
+        self.assertEqual(ret, ['blub'])
+
+    @patch('pyglimer.database.rfh5.h5py.File.__getitem__')
+    def test_get_known_waveforms_no_ds(self, file_mock):
+        d = {}
+        file_mock.side_effect = d.__getitem__
+        ret, rej = self.dbh._get_known_waveforms()
+        self.assertEqual(ret, [])
+        self.assertEqual(rej, [])
 
     def test_add_already_available_data(self):
         st = self.rftr.stats

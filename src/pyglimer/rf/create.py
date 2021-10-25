@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Thursday, 21st October 2021 04:03:37 pm
+Last Modified: Monday, 25th October 2021 01:34:32 pm
 
 
 **The file is split and has a second copyright disclaimer**
@@ -40,6 +40,7 @@ from obspy.core import AttribDict
 from obspy.geodetics import gps2dist_azimuth
 from obspy.taup import TauPyModel
 from scipy.signal.windows import hann
+from pyglimer.data.finddir import finddir
 
 from pyglimer.rf.deconvolve import it, spectraldivision, multitaper
 from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table,\
@@ -379,7 +380,7 @@ _HEADER_CONVERSIONS = {'sac': {'onset': (__SAC2UTC, __UTC2SAC),
                                'event_time': (__SAC2UTC, __UTC2SAC)}}
 
 
-def read_rf(pathname_or_url, format=None, **kwargs):
+def read_rf(pathname_or_url: str = None, format: str = None, **kwargs):
     """
     Read waveform files into RFStream object.
     See :func:`~obspy.core.stream.read` in ObsPy.
@@ -392,13 +393,14 @@ def read_rf(pathname_or_url, format=None, **kwargs):
     :return: RFStream object from file.
     :rtype: :class:`~pyglimer.createRF.RFStream`
     """
-
+    if pathname_or_url is None:
+        pathname_or_url = os.path.join(finddir(), 'examples', 'PRF.sac')
     stream = read(pathname_or_url, format=format, **kwargs)
     stream = RFStream(stream)
     # Calculate piercing points for depth migrated RF
     for tr in stream:
         if tr.stats.type == "depth":
-            tr.ppoint()
+            tr.ppoint('iasp91.dat')
     return stream
 
 
@@ -1043,6 +1045,8 @@ class RFTrace(Trace):
         if trace is not None:
             data = trace.data
             header = trace.stats
+        elif data is None:
+            raise ValueError('You have to provide data.')
         super(RFTrace, self).__init__(data=data, header=header)
         st = self.stats
         if ('_format' in st and st._format.upper() == 'Q'
@@ -1173,7 +1177,7 @@ class RFTrace(Trace):
 
     def _seconds2utc(self, seconds, reftime=None):
         """Return UTCDateTime given as seconds relative to reftime"""
-        from collections import Iterable
+        from collections.abc import Iterable
         from obspy import UTCDateTime as UTC
         if isinstance(seconds, Iterable):
             return [self._seconds2utc(s, reftime=reftime) for s in seconds]
@@ -1223,13 +1227,6 @@ class RFTrace(Trace):
         st.pp_latitude = []
         st.pp_longitude = []
 
-        # if st.station_elevation > 0:
-        #     st.pp_depth = np.hstack(
-        #         (np.arange(-round(st.station_elevation/1000, 1), 0, .1),
-        #          np.arange(0, maxz + res)))[:len(delta)]
-        # else:
-        #     st.pp_depth = np.arange(-round(st.station_elevation/1000),
-        #                             maxz + res, res)[0:len(delta)]
         # as the other ones are filled with nans we can start here
         st.pp_depth = z
 
@@ -1283,13 +1280,13 @@ class RFTrace(Trace):
         st = self.stats
 
         if vmodel == '3D':
-            htab, _, delta = dt_table_3D(
+            htab, _, delta, _, _ = dt_table_3D(
                 st.slowness, st.phase, st.station_latitude,
                 st.station_longitude, st.back_azimuth, st.station_elevation,
                 latb, lonb, False)
 
         else:
-            htab, _, delta = dt_table(
+            htab, _, delta, _, _ = dt_table(
                 st.slowness, vmodel, st.phase, st.station_elevation, False)
 
         st.pp_depth = np.hstack(
