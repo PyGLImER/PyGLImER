@@ -11,7 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Thursday, 21st October 2021 03:42:52 pm
+Last Modified: Monday, 25th October 2021 05:22:27 pm
 '''
 
 import logging
@@ -92,7 +92,7 @@ def join_inv(invlist=List[Inventory]) -> Inventory:
     inv = invlist.pop(0)
     for ii in invlist:
         for net in ii:
-            inv.extend(net)
+            inv.extend([net])
     return inv
 
 
@@ -195,7 +195,7 @@ def save_raw(
             sst = st.select(network=net, station=stat)
             ssst = Stream()
             ii = 0
-            while ssst.count() < 3:
+            while ssst.count() > 3:
                 ssst = sst.select(location=sst[ii].stats.location)
             slst = ssst.slice(startt, endt)
             if saveasdf:

@@ -14,7 +14,7 @@ Contains functions for moveout correction and station stacking.
 !The file is split and has a second copyright disclaimer!
 
 Created: Tuesday, 7th April 2020 10:08:30 am
-Last Modified: Wednesday, 20th October 2021 01:01:39 pm
+Last Modified: Monday, 25th October 2021 04:33:14 pm
 '''
 
 import os
@@ -399,29 +399,29 @@ def dt_table_3D(
         # location possible weakspot! Maybe I should do a lookup?
         # mphase 1 is PPs for P and SSp for S
         # mphase 2 is PSs, and SPp, respectively
-        if phase == 'P':
-            dt_mphase1 = dt_b + dt_a
-            dt_mphase2 = 2*dt_b
+        # if phase == 'P':
+        dt_mphase1 = dt_b + dt_a
+        dt_mphase2 = 2*dt_b
 
-            # Truncate The travel time table for multiples
-            try:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 >= 100)[0][0]]
-            except IndexError:
-                pass
-            try:
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
-            except IndexError:
-                pass
+        # Truncate The travel time table for multiples
+        try:
+            dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 >= 100)[0][0]]
+        except IndexError:
+            pass
+        try:
+            dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
+        except IndexError:
+            pass
 
-        else:
-            # Reduce travel times for S since the data will be flipped
-            dt_mphase1 = dt - 2*dt_b
-            dt_mphase2 = dt - dt_b - dt_a
-            if dt_mphase2.min() < -50:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 <= -50)[0][0]]
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 <= -50)[0][0]]
-            elif dt_mphase1.min() < -50:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 <= -50)[0][0]]
+        # else:
+        #     # Reduce travel times for S since the data will be flipped
+        #     dt_mphase1 = dt - 2*dt_b
+        #     dt_mphase2 = dt - dt_b - dt_a
+        #     if dt_mphase2.min() < -50:
+        #         dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 <= -50)[0][0]]
+        #         dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 <= -50)[0][0]]
+        #     elif dt_mphase1.min() < -50:
+        #         dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 <= -50)[0][0]]
     else:
         dt_mphase1 = None
         dt_mphase2 = None
@@ -540,30 +540,30 @@ def dt_table(
         # location possible weakspot! Maybe I should do a lookup?
         # mphase 1 is PPs for P and SSp for S
         # mphase 2 is PSs, and SPp, respectively
-        if phase == 'P':
-            dt_mphase1 = dt_b + dt_a
-            dt_mphase2 = 2*dt_b
-            # Truncate The travel time table for multiples
-            # if dt_mphase1.max() > 100 or dt_mphase2.max() > 100:
-            try:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 >= 100)[0][0]]
-            except IndexError:
-                pass
-            try:
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
-            except IndexError:
-                pass
-        else:
-            # Reduce travel times for S since the data will be flipped
-            dt_mphase1 = dt - 2*dt_b
-            dt_mphase2 = dt - dt_b - dt_a
-            if dt_mphase2.min() < -50:
-                dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 <= -50)[0][0]]
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 <= -50)[0][0]]
-            elif dt_mphase1.min() < -50:
-                dt_mphase2 = dt_mphase2[:np.where(dt_mphase1 <= -50)[0][0]]
-        dt_mphase1 = dt_mphase1[:index]
-        dt_mphase2 = dt_mphase2[:index]
+        # if phase == 'P':
+        dt_mphase1 = dt_b + dt_a
+        dt_mphase2 = 2*dt_b
+        # Truncate The travel time table for multiples
+        # if dt_mphase1.max() > 100 or dt_mphase2.max() > 100:
+        try:
+            dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 >= 100)[0][0]]
+        except IndexError:
+            pass
+        try:
+            dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
+        except IndexError:
+            pass
+        # else:
+        #     # Reduce travel times for S since the data will be flipped
+        #     dt_mphase1 = dt - 2*dt_b
+        #     dt_mphase2 = dt - dt_b - dt_a
+        #     if dt_mphase2.min() < -50:
+        #         dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 <= -50)[0][0]]
+        #         dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 <= -50)[0][0]]
+        #     elif dt_mphase1.min() < -50:
+        #         dt_mphase2 = dt_mphase2[:np.where(dt_mphase1 <= -50)[0][0]]
+        # dt_mphase1 = dt_mphase1[:index]
+        # dt_mphase2 = dt_mphase2[:index]
     else:
         dt_mphase1 = None
         dt_mphase2 = None
@@ -755,8 +755,6 @@ class SimpleModel(object):
         dz = np.diff(z)
         self.z, self.dz, self.zf, self.dzf, self.vpf, self.vsf = \
             earth_flattening(maxz, z[:-1], dz, vp[:-1], vs[:-1])
-        # self.dz =
-        # self.z = z[:-1]
         self.vp = vp[:len(self.z)]
         self.vs = vs[:len(self.z)]
         self.t_ref = {}
