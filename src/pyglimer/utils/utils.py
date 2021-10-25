@@ -11,8 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Monday, 13th September 2021 03:46:30 pm
-
+Last Modified: Monday, 25th October 2021 05:22:27 pm
 '''
 
 import logging
@@ -93,7 +92,7 @@ def join_inv(invlist=List[Inventory]) -> Inventory:
     inv = invlist.pop(0)
     for ii in invlist:
         for net in ii:
-            inv.extend(net)
+            inv.extend([net])
     return inv
 
 
@@ -112,9 +111,8 @@ def __client__loop__(client: str or Client, statloc: str, bulk: list):
     :rtype: obspy.Inventory
     """
     logger = logging.getLogger('pyglimer.request')
-    
+
     try:
-    
         if not isinstance(client, Client):
             client = Client(client)
         stat_inv = client.get_stations_bulk(
@@ -197,7 +195,7 @@ def save_raw(
             sst = st.select(network=net, station=stat)
             ssst = Stream()
             ii = 0
-            while ssst.count() < 3:
+            while ssst.count() > 3:
                 ssst = sst.select(location=sst[ii].stats.location)
             slst = ssst.slice(startt, endt)
             if saveasdf:

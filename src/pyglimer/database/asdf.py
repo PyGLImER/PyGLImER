@@ -12,17 +12,16 @@ Seismic Format (asdf).
 
 Created: Friday, 12th February 2021 03:24:30 pm
 
-Last Modified: Wednesday, 22nd September 2021 03:18:12 pm
+Last Modified: Friday, 22nd October 2021 03:20:13 pm
 '''
 
 import logging
 import os
 import shutil
-from threading import Event
 
 import obspy
 from obspy import read, read_inventory, UTCDateTime
-from obspy.core.event.catalog import read_events
+from obspy.core.event.catalog import read_events, Event
 from obspy.core.inventory.inventory import Inventory
 from obspy.core.stream import Stream
 from pyasdf import ASDFDataSet
@@ -65,8 +64,7 @@ def rewrite_to_hdf5(catfile: str, rawfolder: str, statloc: str):
             os.rmdir(evtdir)
         else:
             writeraw(event, evtdir, statloc, False, True)
-        logging.warn('removing event...')
-        print(event)
+        logging.warning('removing event...')
         del cat[0]
         # Overwrite old catalog, so we don't have to restart the whole
         # process over again afterwards
@@ -134,7 +132,6 @@ def write_st(
     if resample:
         st.filter('lowpass_cheby_2', freq=4, maxorder=12)
         st = resample_or_decimate(st, 10, filter=False)
-
     with ASDFDataSet(os.path.join(outfolder, fname)) as ds:
         # Retrieve eventid - not the most elgant way, but works
         evtid = event.resource_id
@@ -143,7 +140,7 @@ def write_st(
                 ds.add_quakeml(event)
         except ValueError:
             logging.info(
-                    'Event with event-id %s already in DB, skipping...'
-                    % str(evtid), UserWarning)
+                'Event with event-id %s already in DB, skipping...'
+                % str(evtid), UserWarning)
         ds.add_waveforms(st, tag='raw_recording', event_id=evtid)
         ds.add_stationxml(statxml)

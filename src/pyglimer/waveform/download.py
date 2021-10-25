@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Monday, 13th September 2021 11:58:53 am
+Last Modified: Thursday, 21st October 2021 03:39:37 pm
 '''
 
 # !/usr/bin/env python3
@@ -90,14 +90,14 @@ def download_small_db(
                 except IndexError:
                     # occurs when there is no arrival of the phase at stat
                     logger.debug(
-                        'No valid arrival found for station %s,' % stat.code +
-                        'event %s, and phase %s' % (evt.resource_id, phase))
+                        'No valid arrival found for station %s,' % stat.code
+                        + 'event %s, and phase %s' % (evt.resource_id, phase))
                     continue
                 # We only do that if the epicentral distances are correct
                 if delta < min_epid or delta > max_epid:
                     logger.debug(
-                        'No valid arrival found for station %s, ' % stat.code +
-                        'event %s, and phase %s' % (evt.resource_id, phase))
+                        'No valid arrival found for station %s, ' % stat.code
+                        + 'event %s, and phase %s' % (evt.resource_id, phase))
                     continue
                 # Already in DB?
                 if saveasdf:
@@ -105,8 +105,8 @@ def download_small_db(
                             network, station))) as ds:
                         if evt in ds.events:
                             logger.info(
-                                'File already in database. %s ' % stat.code +
-                                'Event: %s' % evt.resource_id)
+                                'File already in database. %s ' % stat.code
+                                + 'Event: %s' % evt.resource_id)
                             continue
                 else:
                     o = (evt.preferred_origin() or evt.origins[0])
@@ -119,8 +119,8 @@ def download_small_db(
                     fn = os.path.join(folder, '%s.%s.mseed' % (net, stat))
                     if os.path.isfile(fn):
                         logger.info(
-                            'File already in database. %s ' % stat.code +
-                            'Event: %s' % evt.resource_id)
+                            'File already in database. %s ' % stat.code
+                            + 'Event: %s' % evt.resource_id)
                         continue
                 # It's new data, so add to request!
                 d['event'].append(evt)

@@ -12,11 +12,12 @@ Contains functions to rotate a stream into different domains
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Saturday, 21st March 2020 07:26:03 pm
-Last Modified: Tuesday, 25th May 2021 05:18:07 pm
+Last Modified: Friday, 22nd October 2021 06:09:09 pm
 '''
 import numpy as np
 from obspy import Stream
 
+from pyglimer.constants import onsetS, onsetP
 from ..utils.createvmodel import load_avvmodel
 
 
@@ -96,121 +97,7 @@ def rotate_PSV(
         elif tr.stats.channel[2] == "T":
             tr.stats.channel = tr.stats.channel[0:2] + "H"
             tr.data = PSS[2]
-    # PSvSh.normalize()
     return avp, avs, PSvSh
-
-
-def rotate_LQT(st: Stream, phase: str) -> tuple:
-    """
-    Rotates a stream given in RTZ to LQT using Singular Value Decomposition
-    Use rotate_LQT_min as it tends to deliver better results.
-
-    Parameters
-    ----------
-    st : obspy.Stream
-        Input Stream in RTZ.
-    phase : STRING, optional
-        "S" for Sp or "P" for Ps.
-
-    Returns
-    -------
-    LQT : obspy.Stream
-        Output Stream in LQT.
-    QC : FLOAT
-        Quality control criterion. Energy balance at first arrival for L and Q.
-        Should deviate from 1 as far as possible.
-
-    """
-    if phase[-1] == 'P':
-        onset = 30
-    elif phase[-1] == 'S':
-        onset = 120
-
-    dt = st[0].stats.delta  # sampling interval
-
-    # Deep copy stream
-    LQT = st.copy()
-    del st
-
-    # only check around phase-arrival
-    # window
-    if phase[-1] == "S":
-        ws = round((onset-3)/dt)
-        we = round((onset+5)/dt)
-    elif phase[-1] == "P":
-        ws = round((onset-5)/dt)
-        we = round((onset+5)/dt)
-
-    # 1. Find which component is which one and put them in a dict
-    stream = {
-        LQT[0].stats.channel[2]: LQT[0].data,
-        LQT[1].stats.channel[2]: LQT[1].data,
-        LQT[2].stats.channel[2]: LQT[2].data}
-
-    # create input matrix, Z component is sometimes called 3
-    if "Z" in stream:
-        A_in = np.array([stream["Z"][ws:we], stream["R"][ws:we]])
-        ZR = np.array([stream["Z"], stream["R"]])
-    elif "3" in stream:
-        A_in = np.array([stream["3"][ws:we], stream["R"][ws:we]])
-        ZR = np.array([stream["3"], stream["R"]])
-
-    # Work with energies instead of amplitudes
-    A_in = np.square(A_in)
-
-    # Conduct svd
-    u, s, _ = np.linalg.svd(A_in, full_matrices=False)
-
-    # 2. Now, find out which is L and which Q by finding out which one has
-    # the maximum energy around theoretical S-wave arrival - that one would
-    # be Q. Or for Ps: maximum energy around P-wave arrival on L
-
-    A_rot = np.linalg.inv(np.dot(u, np.diag(s)))
-
-    # When working with energies A_rot is ambiguous for 180 deg, so I will
-    # have to test here: element (2,1) is always negative, all others positive.
-    if A_rot[0, 0] < 0:
-        A_rot[0, :] = -A_rot[0, :]
-    if A_rot[1, 0] > 0:
-        A_rot[1, :] = -A_rot[1, :]
-
-    LQ = np.dot(A_rot, ZR)
-    # point of primary arrival
-    pp1 = round((onset-2)/dt)
-    pp2 = round((onset+10)/dt)
-    npp = pp2 - pp1
-    # point where converted Sp arrive
-    if phase[-1] == "S":
-        pc1 = round((onset-40)/dt)
-        pc2 = round((onset-15)/dt)
-    elif phase[-1] == "P":
-        # Point where PS arrives
-        pc1 = round((onset+20)/dt)
-        pc2 = round((onset+40)/dt)
-
-    npc = pc2 - pc1
-    a = np.sum(np.square(LQ[0][pp1:pp2])/npp) /\
-        np.sum(np.square(LQ[0][pc1:pc2])/npc)
-    b = np.sum(np.square(LQ[1][pp1:pp2])/npp) /\
-        np.sum(np.square(LQ[1][pc1:pc2])/npc)
-    if a > b and phase[-1] == "S" or a < b and phase[-1] == "P":
-        Q = LQ[0]
-        L = LQ[1]
-    elif a < b and phase[-1] == "S" or a > b and phase[-1] == "P":
-        Q = LQ[1]
-        L = LQ[0]
-
-    # 3. save L and Q trace and change the label of the stream
-    for tr in LQT:
-        if tr.stats.channel[2] == "R":
-            tr.stats.channel = tr.stats.channel[0:2] + "Q"
-            tr.data = Q
-        elif tr.stats.channel[2] == "Z" or tr.stats.channel[2] == "3":
-            tr.stats.channel = tr.stats.channel[0:2] + "L"
-            tr.data = L
-
-    QC = a/b
-    return LQT, QC
 
 
 def rotate_LQT_min(st: Stream, phase: str) -> tuple:
@@ -236,9 +123,9 @@ def rotate_LQT_min(st: Stream, phase: str) -> tuple:
     """
     phase = phase[-1]
     if phase == 'P':
-        onset = 30
+        onset = onsetP
     elif phase == 'S':
-        onset = 120
+        onset = onsetS
 
     dt = st[0].stats.delta
 
@@ -259,7 +146,7 @@ def rotate_LQT_min(st: Stream, phase: str) -> tuple:
         ZR = np.array([stream["3"], stream["R"]])
 
     # calculate energy of the two components around zero
-    ia = np.linspace(0, np.pi/2, num=90)  # incidence angle
+    ia = np.linspace(0, np.pi/2, num=91)  # incidence angle
     E_L = []
     for ii in ia:
         A_rot = np.array([[np.cos(ii), np.sin(ii)],

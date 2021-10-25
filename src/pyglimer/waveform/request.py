@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Monday, 13th September 2021 10:43:12 am
+Last Modified: Thursday, 21st October 2021 10:30:47 am
 '''
 import os
 from http.client import IncompleteRead
@@ -28,8 +28,8 @@ from obspy.clients.fdsn import Client as Webclient
 from obspy.core.utcdatetime import UTCDateTime
 from obspy.taup import TauPyModel
 from tqdm import tqdm
-# from obspy.clients.fdsn.client import FDSNException
 
+from pyglimer.constants import onsetP, onsetS
 from pyglimer.waveform.download import download_small_db, downloadwav
 from pyglimer.waveform.preprocess import preprocess
 from pyglimer.utils import utils as pu
@@ -211,24 +211,24 @@ class Request(object):
             self.maxdepth = None
             self.min_epid = 28.1
             self.max_epid = 95.8
-            self.tz = 30
+            self.tz = onsetP
         elif self.phase == 'S':
             self.maxdepth = 300
             self.min_epid = 55
             self.max_epid = 80
-            self.tz = 120
+            self.tz = onsetS
         # (see Yuan et al. 2006)
         elif self.phase.upper() == 'SCS':
             self.maxdepth = 300
             self.min_epid = 50
             self.max_epid = 75
-            self.tz = 120
+            self.tz = onsetS
         elif self.phase.upper() == 'SKS':
             # (see Zhang et. al. (2014))
             self.maxdepth = 300
             self.min_epid = 90
             self.max_epid = 120
-            self.tz = 120
+            self.tz = onsetS
         else:
             raise NameError('The phase', self.phase, """is not valid or not
                             implemented yet.""")

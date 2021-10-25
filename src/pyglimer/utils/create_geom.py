@@ -12,7 +12,7 @@ Automatic creation of raysum geom files
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 14th May 2020 10:23:03
-Last Modified: Thursday, 19th August 2021 03:15:31 pm
+Last Modified: Thursday, 21st October 2021 03:42:16 pm
 '''
 
 import os
@@ -96,8 +96,8 @@ def create_geom(
     # header
     lines.append('# Automatically created geometry file.\n')
     lines.append(
-        '# Note that one file cannot contain more than ' +
-        '200 traces (max for raysum).\n')
+        '# Note that one file cannot contain more than '
+        + '200 traces (max for raysum).\n')
 
     ntr = 0  # Number of traces counter
     fpi = []  # List with indices to split file

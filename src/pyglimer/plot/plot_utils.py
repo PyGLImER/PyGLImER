@@ -1,5 +1,4 @@
-"""
-
+'''
 Plot utilities not to modify plots or base plots.
 
 :copyright:
@@ -11,10 +10,10 @@ Plot utilities not to modify plots or base plots.
     Lucas Sawade (lsawade@princeton.edu)
     Peter Makus (makus@gfz-potsdam.de)
 
-Last Update: June 19, 2020
+Created: Wednesday, 20th October 2021 05:05:08 pm
+Last Modified: Thursday, 21st October 2021 09:38:25 am
+'''
 
-
-"""
 import os
 import numpy as np
 import matplotlib
@@ -26,43 +25,6 @@ from pyglimer.constants import maxz, res
 
 
 def set_mpl_params():
-    # params = {
-    #     # 'font.family': 'Avenir Next',
-    #     'pdf.fonttype': 42,
-    #     'font.weight': 'bold',
-    #     'figure.dpi': 150,
-    #     'axes.labelweight': 'bold',
-    #     'axes.linewidth': 1.5,
-    #     'axes.labelsize': 14,
-    #     'axes.titlesize': 18,
-    #     'axes.titleweight': 'bold',
-    #     'xtick.labelsize': 13,
-    #     'xtick.direction': 'in',
-    #     'xtick.top': True,  # draw label on the top
-    #     'xtick.bottom': True,  # draw label on the bottom
-    #     'xtick.minor.visible': True,
-    #     'xtick.major.top': True,  # draw x axis top major ticks
-    #     'xtick.major.bottom': True,  # draw x axis bottom major ticks
-    #     'xtick.minor.top': True,  # draw x axis top minor ticks
-    #     'xtick.minor.bottom': True,  # draw x axis bottom minor ticks
-    #     'ytick.labelsize': 13,
-    #     'ytick.direction': 'in',
-    #     'ytick.left': True,  # draw label on the top
-    #     'ytick.right': True,  # draw label on the bottom
-    #     'ytick.minor.visible': True,
-    #     'ytick.major.left': True,  # draw x axis top major ticks
-    #     'ytick.major.right': True,  # draw x axis bottom major ticks
-    #     'ytick.minor.left': True,  # draw x axis top minor ticks
-    #     'ytick.minor.right': True,  # draw x axis bottom minor ticks
-    #     'legend.fancybox': False,
-    #     'legend.frameon': False,
-    #     'legend.loc': 'upper left',
-    #     'legend.numpoints': 2,
-    #     'legend.fontsize': 'large',
-    #     'legend.framealpha': 1,
-    #     'legend.scatterpoints': 3,
-    #     'legend.edgecolor': 'inherit'
-    # }
     params = {
         'font.family': "Arial",
         'font.size': 12,
@@ -122,8 +84,6 @@ def set_mpl_params():
         'mathtext.bf': 'Arial:bold'
     }
     matplotlib.rcParams.update(params)
-    # 25/04/21 this function was depricated? Don't know what it did
-    # matplotlib.font_manager._rebuild()
 
 
 def remove_all(ax=None, top=False, bottom=False, left=False, right=False,

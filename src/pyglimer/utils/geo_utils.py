@@ -18,7 +18,6 @@ Last Update: November 2019
 
 from typing import Tuple
 import numpy as np
-from scipy.interpolate import interp1d
 from cartopy.geodesic import Geodesic
 from ..constants import R_EARTH
 
@@ -112,19 +111,19 @@ def gctrack(
                  importance for your work. Here this function is only used for
                  the purpose of making cross sections.
 
-    .. warning:: 
+    .. warning::
 
-        **``constantdist``** The reason for this option is the fact that two 
-        waypoints are most likely not a multiple of ``dist`` apart from each 
+        **``constantdist``** The reason for this option is the fact that two
+        waypoints are most likely not a multiple of ``dist`` apart from each
         other. A previous implementation included an interpolation between, but
         the interpolation of a parametric curve in 3D space is not as simple as
         I had hoped. The following explanation is for ``N`` segments defined by
-        ``N+1`` waypoints. 
-        ``constantdist`` sets the spacing constant, but the waypoint is most 
-        likely not exactly hit making the distance between the point before 
-        the (n+1)-th waypoint smaller than the the rest. This will be the 
+        ``N+1`` waypoints.
+        ``constantdist`` sets the spacing constant, but the waypoint is most
+        likely not exactly hit making the distance between the point before
+        the (n+1)-th waypoint smaller than the the rest. This will be the
         same in all segments between n and (n+1)th waypoints. The alternative
-        is to create linspace between the waypoints with 
+        is to create linspace between the waypoints with
         ``N = round(total_dist/dist) + 1`` points including ``n`` and
         ``(n+1)`` waypoints. This is essentially the more accurate way of
         defining the segments, but each segment has a different spacing that
@@ -141,9 +140,9 @@ def gctrack(
     dist : float
         distance in degrees
     constantdist: bool
-        Not really important for the enduser, but there are two ways of computing
-        a gctrack along a curve. for 2 points only the most accurate way
-        is to set ``constant_dist`` to ``False``. 
+        Not really important for the enduser, but there are two ways of
+        computing a gctrack along a curve. for 2 points only the most accurate
+        way is to set ``constant_dist`` to ``False``.
 
 
     Returns
@@ -168,7 +167,7 @@ def gctrack(
     # az = np.zeros(N-1)
 
     # Create Geodesic class
-    G = Geodesic(flattening=0.0)
+    # G = Geodesic(flattening=0.0)
 
     # Get tracks between segments that are far apart
     dists, az = geodiff(lat, lon)

@@ -16,7 +16,8 @@ import os
 
 def test_flake8():
     test_dir = os.path.dirname(__file__)
-    package_dir = os.path.join(os.path.dirname(test_dir), "pyglimer")
+    package_dir = os.path.join(
+        os.path.dirname(test_dir), "src", "pyglimer")
 
     # Possibility to ignore some files and paths.
     ignore_paths = [
@@ -45,6 +46,8 @@ def test_flake8():
     report = style_guide.check_files(files)
     assert report.get_statistics('E') == [], 'Flake8 found violations'
     assert report.total_errors == 0
+    if report.total_errors == 0:
+        print('No Errors found.')
 
 
 if __name__ == "__main__":

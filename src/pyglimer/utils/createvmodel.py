@@ -12,7 +12,7 @@ Create a 3D velocity model using Litho1.0
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 01st May 2020 12:11:03
-Last Modified: Friday, 20th August 2021 11:15:35 am
+Last Modified: Thursday, 21st October 2021 03:48:11 pm
 '''
 
 
@@ -241,10 +241,9 @@ class ComplexModel(object):
             isomin=0,
             isomax=10,
             opacity=0.3,  # needs to be small to see through all surfaces
-            surface_count=21,
-            # surface_count
-            # needs to be a large number for good volume rendering
-            ))
+            surface_count=21,))
+        # surface_count
+        # needs to be a large number for good volume rendering
 
         figvs = go.Figure(data=go.Volume(
             x=x.flatten(),
@@ -254,9 +253,8 @@ class ComplexModel(object):
             isomin=0,
             isomax=10,
             opacity=0.3,  # needs to be small to see through all surfaces
-            surface_count=21,
-            # needs to be a large number for good volume rendering
-            ))
+            surface_count=21,))
+        # needs to be a large number for good volume rendering
         return figvp, figvs
 
     # program-specific Exceptions
@@ -543,8 +541,8 @@ def load_gyps(
     try:
         model = _MODEL_CACHE['gyps']
         if latb:
-            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
-                    model.submodel(latb, lonb)
+            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model \
+                = model.submodel(latb, lonb)
             if save:
                 model.write(filename=str(latb)+str(lonb), folder='tmp')
         return model

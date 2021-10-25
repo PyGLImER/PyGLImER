@@ -12,7 +12,7 @@ Contains various functions used to evaluate the quality of RF and waveforms
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 25th February 2020 07:28:30 pm
-Last Modified: Thursday, 19th August 2021 03:13:09 pm
+Last Modified: Thursday, 21st October 2021 03:57:51 pm
 '''
 
 import os
@@ -228,8 +228,8 @@ def rate(network, phase, preproloc, station=None,
                 ph_time.append(model.get_travel_times(
                     evt_depth, dis, phase_list=phase)[0].time)
             ph_name = ['taup', 'iris', 'geodetics']
-            ph_time = np.array(ph_time) - (st[0].stats.starttime + onset -
-                                           UTCDateTime(ot))
+            ph_time = np.array(ph_time) - (
+                st[0].stats.starttime + onset - UTCDateTime(ot))
 
         # waveform data
         st.sort()
@@ -474,8 +474,9 @@ def automatic_rate(network, station, phase, preproloc):
             st, crit, lf, noisemat = qcp(st, st[0].stats.delta,
                                          st[0].stats.sampling_rate)
 
-        with shelve.open(os.path.join(finddir(), 'ratings') + network + "." +
-                         station + "rating") as f:
+        with shelve.open(
+            os.path.join(finddir(), 'ratings') + network + "."
+                + station + "rating") as f:
             f[starttime + "_auto"] = crit
             if starttime in f and int(f[starttime]) < 3 and crit:
                 diff = diff + 1

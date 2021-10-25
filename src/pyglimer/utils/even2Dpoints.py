@@ -52,7 +52,7 @@ def even2Dpoints(n, width, height, radius, seed=None):
     tuple
         x,y coordinates in 2D space
 
-    Does not really need a unit test, since its testing its distances 
+    Does not really need a unit test, since its testing its distances
     itself, and the distance function is really not a complicated thing...
     """
 
