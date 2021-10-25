@@ -191,7 +191,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Friday, 12th February 2020 03:24:30 pm</span>
-<span class="sd">Last Modified: Thursday, 21st October 2021 04:03:37 pm</span>
+<span class="sd">Last Modified: Monday, 25th October 2021 01:34:32 pm</span>
 
 
 <span class="sd">**The file is split and has a second copyright disclaimer**</span>
@@ -217,6 +217,7 @@
 <span class="kn">from</span> <span class="nn">obspy.geodetics</span> <span class="kn">import</span> <span class="n">gps2dist_azimuth</span>
 <span class="kn">from</span> <span class="nn">obspy.taup</span> <span class="kn">import</span> <span class="n">TauPyModel</span>
 <span class="kn">from</span> <span class="nn">scipy.signal.windows</span> <span class="kn">import</span> <span class="n">hann</span>
+<span class="kn">from</span> <span class="nn">pyglimer.data.finddir</span> <span class="kn">import</span> <span class="n">finddir</span>
 
 <span class="kn">from</span> <span class="nn">pyglimer.rf.deconvolve</span> <span class="kn">import</span> <span class="n">it</span><span class="p">,</span> <span class="n">spectraldivision</span><span class="p">,</span> <span class="n">multitaper</span>
 <span class="kn">from</span> <span class="nn">pyglimer.rf.moveout</span> <span class="kn">import</span> <span class="n">DEG2KM</span><span class="p">,</span> <span class="n">maxz</span><span class="p">,</span> <span class="n">maxzm</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">moveout</span><span class="p">,</span> <span class="n">dt_table</span><span class="p">,</span>\
@@ -556,7 +557,7 @@
                                <span class="s1">&#39;event_time&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">__SAC2UTC</span><span class="p">,</span> <span class="n">__UTC2SAC</span><span class="p">)}}</span>
 
 
-<div class="viewcode-block" id="read_rf"><a class="viewcode-back" href="../../../chapters/api/rf.html#pyglimer.rf.create.read_rf">[docs]</a><span class="k">def</span> <span class="nf">read_rf</span><span class="p">(</span><span class="n">pathname_or_url</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="read_rf"><a class="viewcode-back" href="../../../chapters/api/rf.html#pyglimer.rf.create.read_rf">[docs]</a><span class="k">def</span> <span class="nf">read_rf</span><span class="p">(</span><span class="n">pathname_or_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read waveform files into RFStream object.</span>
 <span class="sd">    See :func:`~obspy.core.stream.read` in ObsPy.</span>
@@ -569,13 +570,14 @@
 <span class="sd">    :return: RFStream object from file.</span>
 <span class="sd">    :rtype: :class:`~pyglimer.createRF.RFStream`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="k">if</span> <span class="n">pathname_or_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pathname_or_url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">finddir</span><span class="p">(),</span> <span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="s1">&#39;PRF.sac&#39;</span><span class="p">)</span>
     <span class="n">stream</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">pathname_or_url</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">stream</span> <span class="o">=</span> <span class="n">RFStream</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
     <span class="c1"># Calculate piercing points for depth migrated RF</span>
     <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;depth&quot;</span><span class="p">:</span>
-            <span class="n">tr</span><span class="o">.</span><span class="n">ppoint</span><span class="p">()</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">ppoint</span><span class="p">(</span><span class="s1">&#39;iasp91.dat&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">stream</span></div>
 
 
@@ -1220,6 +1222,8 @@
         <span class="k">if</span> <span class="n">trace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">data</span>
             <span class="n">header</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">stats</span>
+        <span class="k">elif</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;You have to provide data.&#39;</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">RFTrace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
         <span class="n">st</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span>
         <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;_format&#39;</span> <span class="ow">in</span> <span class="n">st</span> <span class="ow">and</span> <span class="n">st</span><span class="o">.</span><span class="n">_format</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Q&#39;</span>
@@ -1350,7 +1354,7 @@
 
     <span class="k">def</span> <span class="nf">_seconds2utc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="p">,</span> <span class="n">reftime</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return UTCDateTime given as seconds relative to reftime&quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Iterable</span>
+        <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
         <span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">UTCDateTime</span> <span class="k">as</span> <span class="n">UTC</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_seconds2utc</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">reftime</span><span class="o">=</span><span class="n">reftime</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">seconds</span><span class="p">]</span>
@@ -1400,13 +1404,6 @@
         <span class="n">st</span><span class="o">.</span><span class="n">pp_latitude</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">st</span><span class="o">.</span><span class="n">pp_longitude</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="c1"># if st.station_elevation &gt; 0:</span>
-        <span class="c1">#     st.pp_depth = np.hstack(</span>
-        <span class="c1">#         (np.arange(-round(st.station_elevation/1000, 1), 0, .1),</span>
-        <span class="c1">#          np.arange(0, maxz + res)))[:len(delta)]</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     st.pp_depth = np.arange(-round(st.station_elevation/1000),</span>
-        <span class="c1">#                             maxz + res, res)[0:len(delta)]</span>
         <span class="c1"># as the other ones are filled with nans we can start here</span>
         <span class="n">st</span><span class="o">.</span><span class="n">pp_depth</span> <span class="o">=</span> <span class="n">z</span>
 
@@ -1460,13 +1457,13 @@
         <span class="n">st</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span>
 
         <span class="k">if</span> <span class="n">vmodel</span> <span class="o">==</span> <span class="s1">&#39;3D&#39;</span><span class="p">:</span>
-            <span class="n">htab</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">dt_table_3D</span><span class="p">(</span>
+            <span class="n">htab</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">dt_table_3D</span><span class="p">(</span>
                 <span class="n">st</span><span class="o">.</span><span class="n">slowness</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">station_latitude</span><span class="p">,</span>
                 <span class="n">st</span><span class="o">.</span><span class="n">station_longitude</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">back_azimuth</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">station_elevation</span><span class="p">,</span>
                 <span class="n">latb</span><span class="p">,</span> <span class="n">lonb</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">htab</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">dt_table</span><span class="p">(</span>
+            <span class="n">htab</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">dt_table</span><span class="p">(</span>
                 <span class="n">st</span><span class="o">.</span><span class="n">slowness</span><span class="p">,</span> <span class="n">vmodel</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">station_elevation</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="n">st</span><span class="o">.</span><span class="n">pp_depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
