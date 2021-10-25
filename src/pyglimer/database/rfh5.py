@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Thursday, 21st October 2021 09:36:02 am
+Last Modified: Monday, 25th October 2021 10:30:35 am
 '''
 
 import fnmatch
@@ -73,8 +73,10 @@ class DBHandler(h5py.File):
         Known waveforms to receive. Is just a dictionary with two keys (each
         of which has a list as item with all retained or rejected waveforms).
 
-        :param known: dict{ret: List[str], rej: List[str]}
-        :type known: dict
+        :param ret: list of retained waveforms
+        :type ret: List[str]
+        :param rej: List of rejeccted waveforms
+        type rej: List[str]
         """
         try:
             ds = self.create_dataset('known', data=np.empty(1))
