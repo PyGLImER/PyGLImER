@@ -424,8 +424,7 @@ def plot_section(
             if rf.stats.phase[-1] == 'S':
                 times = np.flip(times)
         else:
-            z = np.hstack(
-                ((np.arange(-10, 0, .1)), np.arange(0, maxz+res, res)))
+            z = rf.stats.pp_depth
             times = z
 
         rftmp = rf.data * scalingfactor \
