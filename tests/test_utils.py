@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 19th August 2021 04:01:26 pm
-Last Modified: Tuesday, 26th October 2021 02:41:10 pm
+Last Modified: Tuesday, 26th October 2021 02:57:09 pm
 '''
 import os
 import unittest
@@ -186,6 +186,7 @@ class TestSaveRawMseed(unittest.TestCase):
         with patch.object(self.st, 'write') as write_mock:
             pu.save_raw_mseed(self.evt, self.st, 'rawloc', net, stat)
             write_mock.assert_called_once_with(fn, fmt='mseed')
+        mkdir_mock.assert_called_once_with(folder, exist_ok=True)
 
 
 class TestGetMultipleFDSNClients(unittest.TestCase):
