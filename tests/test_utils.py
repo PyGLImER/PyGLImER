@@ -8,17 +8,18 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 19th August 2021 04:01:26 pm
-Last Modified: Monday, 25th October 2021 05:40:46 pm
+Last Modified: Tuesday, 26th October 2021 02:41:10 pm
 '''
 import os
 import unittest
 from unittest.mock import MagicMock, call, patch, DEFAULT, ANY
 
 import numpy as np
-from obspy import read_inventory, Inventory, read
+from obspy import read_inventory, Inventory, read, read_events, UTCDateTime
 import obspy
 
 from pyglimer.utils import utils as pu
+from pyglimer.utils.roundhalf import roundhalf
 
 
 class TestDTString(unittest.TestCase):
@@ -128,9 +129,7 @@ class TestSaveRaw(unittest.TestCase):
             'event': ls, 'startt': ls, 'endt': ls, 'net': ls, 'stat': ls}
 
     @patch('pyglimer.utils.utils.save_raw_mseed')
-    def test_sav_mseed(self, sm_mock):
-        patch.multiple
-
+    def test_save_mseed(self, sm_mock):
         with patch.multiple(self.st, select=DEFAULT, slice=DEFAULT) as mocks:
             mocks['select'].return_value = self.st
             mocks['slice'].return_value = self.st
@@ -139,6 +138,248 @@ class TestSaveRaw(unittest.TestCase):
                 [call(network=ii, station=ii) for ii in range(3)])
             sm_mock.assert_has_calls([
                 call(ii, ANY, 'rawloc', ii, ii) for ii in range(3)])
+
+    @patch('pyglimer.utils.utils.write_st')
+    def test_save_asdf(self, write_st_mock):
+        inv = read_inventory()
+        with patch.multiple(self.st, select=DEFAULT, slice=DEFAULT) as mocks:
+            with patch.object(inv, 'select') as sel_mock:
+                mocks['select'].return_value = self.st
+                mocks['slice'].return_value = self.st
+                sel_mock.return_value = inv
+                pu.save_raw(self.saved, self.st, 'rawloc', inv, True)
+                mocks['select'].assert_has_calls(
+                    [call(network=ii, station=ii) for ii in range(3)])
+                write_st_mock.assert_has_calls([
+                    call(ANY, ii, 'rawloc', inv) for ii in range(3)])
+                sel_mock.assert_has_calls(
+                    [call(ii, ii, starttime=ii, endtime=ii) for ii in range(3)]
+                )
+
+    def test_exception(self):
+        inv = read_inventory()
+        with patch.object(self.st, 'select') as sel_mock:
+            sel_mock.side_effect = Exception('Test')
+            with self.assertLogs("", level='ERROR') as cm:
+                pu.save_raw(self.saved, self.st, 'rawloc', inv, True)
+                self.assertEqual(
+                    cm.output,
+                    ['ERROR:root:Test', 'ERROR:root:Test', 'ERROR:root:Test'])
+
+
+class TestSaveRawMseed(unittest.TestCase):
+    def setUp(self):
+        self.evt = read_events()[0]
+        self.st = read()
+
+    @patch('pyglimer.utils.utils.os.makedirs')
+    def test_func(self, mkdir_mock):
+        o = (self.evt.preferred_origin() or self.evt.origins[0])
+        ot_loc = UTCDateTime(o.time, precision=-1).format_fissures()[:-6]
+        evtlat_loc = str(roundhalf(o.latitude))
+        evtlon_loc = str(roundhalf(o.longitude))
+        folder = os.path.join(
+            'rawloc', '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
+        net = 'bla'
+        stat = 'blub'
+        fn = os.path.join(folder, '%s.%s.mseed' % (net, stat))
+        with patch.object(self.st, 'write') as write_mock:
+            pu.save_raw_mseed(self.evt, self.st, 'rawloc', net, stat)
+            write_mock.assert_called_once_with(fn, fmt='mseed')
+
+
+class TestGetMultipleFDSNClients(unittest.TestCase):
+    def test_with_None(self):
+        exp = (
+            'BGR',
+            'EMSC',
+            'ETH',
+            'GEONET',
+            'GFZ',
+            'ICGC',
+            'INGV',
+            'IPGP',
+            'ISC',
+            'KNMI',
+            'KOERI',
+            'LMU',
+            'NCEDC',
+            'NIEP',
+            'NOA',
+            'RESIF',
+            'SCEDC',
+            'TEXNET',
+            'UIB-NORSAR',
+            'USGS',
+            'USP',
+            'ORFEUS',
+            'IRIS')
+        self.assertTupleEqual(exp, pu.get_multiple_fdsn_clients(None))
+
+    def test_create_list(self):
+        self.assertListEqual(['bla'], pu.get_multiple_fdsn_clients('bla'))
+
+
+class TestCreateBulkStr(unittest.TestCase):
+    def test_netstatstr(self):
+        exp = [('bla', 'bla', '00', 'BHZ', '*', '*')]
+        self.assertListEqual(
+            exp, pu.create_bulk_str('bla', 'bla', '00', 'BHZ', '*', '*'))
+
+    def test_netstatstr2(self):
+        exp = [(
+            'bla', 'blub', '00', 'BHZ', UTCDateTime(2016, 8, 1, 0, 0, 1),
+            UTCDateTime(2015, 8, 1, 0, 0, 1)), (
+            'bla', 'blub', '00', 'BHZ', UTCDateTime(2015, 8, 1, 0, 0, 1),
+            UTCDateTime(2016, 8, 1, 0, 0, 1))]
+        self.assertListEqual(
+            exp, pu.create_bulk_str(
+                'bla', 'blub', '00', 'BHZ',
+                [UTCDateTime(2016, 8, 1, 0, 0, 1),
+                    UTCDateTime(2015, 8, 1, 0, 0, 1)],
+                [UTCDateTime(2015, 8, 1, 0, 0, 1),
+                    UTCDateTime(2016, 8, 1, 0, 0, 1)]))
+
+    def test_all_len_x(self):
+        exp = [(
+            'bla', 'bla', '00', 'BHZ', UTCDateTime(2015, 8, 1, 0, 0, 1),
+            UTCDateTime(2016, 8, 1, 0, 0, 1))]*3
+        inp = [[
+            'bla']*3, ['bla']*3, '00', 'BHZ',
+            ['2015-08-1 00:00:01.0']*3, ['2016-08-1 00:00:01.0']*3]
+        self.assertListEqual(
+            exp, pu.create_bulk_str(*inp))
+
+    def test_all_len_x2(self):
+        exp = [(
+            'bla', 'blo', '00', 'BHZ', '*', '*')]*2
+        self.assertListEqual(
+            exp, pu.create_bulk_str(
+                ['bla', 'bla'], ['blo', 'blo'], '00', 'BHZ', '*', '*'))
+
+    def test_net_str_stat_list(self):
+        exp = [(
+            'bla', 'blub', '00', 'BHZ', '*', '*'), (
+            'bla', 'blib', '00', 'BHZ', '*', '*')]
+        self.assertListEqual(
+            exp, pu.create_bulk_str(
+                'bla', ['blub', 'blib'], '00', 'BHZ', '*', '*'))
+
+    def test_net_str_stat_list2(self):
+        exp = [(
+            'bla', 'blub', '00', 'BHZ', UTCDateTime(2015, 8, 1, 0, 0, 1),
+            UTCDateTime(2016, 8, 1, 0, 0, 1)), (
+            'bla', 'blib', '00', 'BHZ', UTCDateTime(2015, 8, 1, 0, 0, 1),
+            UTCDateTime(2016, 8, 1, 0, 0, 1))]
+        self.assertListEqual(
+            exp, pu.create_bulk_str(
+                'bla', ['blub', 'blib'], '00', 'BHZ',
+                [UTCDateTime(2015, 8, 1, 0, 0, 1),
+                    UTCDateTime(2015, 8, 1, 0, 0, 1)],
+                [UTCDateTime(2016, 8, 1, 0, 0, 1),
+                    UTCDateTime(2016, 8, 1, 0, 0, 1)]))
+
+    def test_net_list_stat_str(self):
+        exp = [(
+            'bla', '*', '00', 'BHZ', '*', '*'), (
+            'blub', '*', '00', 'BHZ', '*', '*')]
+        self.assertListEqual(
+            exp, pu.create_bulk_str(
+                ['bla', 'blub'], '*', '00', 'BHZ', '*', '*'))
+
+    def test_net_list_stat_str2(self):
+        exp = [(
+            'bla', '*', '00', 'BHZ', UTCDateTime(2015, 8, 1, 0, 0, 1),
+            UTCDateTime(2016, 8, 1, 0, 0, 1)), (
+            'blub', '*', '00', 'BHZ', UTCDateTime(2015, 8, 1, 0, 0, 1),
+            UTCDateTime(2016, 8, 1, 0, 0, 1))]
+        self.assertListEqual(
+            exp, pu.create_bulk_str(
+                ['bla', 'blub'], '*', '00', 'BHZ',
+                [UTCDateTime(2015, 8, 1, 0, 0, 1),
+                    UTCDateTime(2015, 8, 1, 0, 0, 1)],
+                [UTCDateTime(2016, 8, 1, 0, 0, 1),
+                    UTCDateTime(2016, 8, 1, 0, 0, 1)]))
+
+    def test_net_stat_list_diff_len(self):
+        with self.assertRaises(ValueError):
+            pu.create_bulk_str(
+                ['bla', 1], ['blub', 'blib', 0], '00', 'BHZ', '*', '*')
+
+    def test_t_lists_diff_len(self):
+        with self.assertRaises(ValueError):
+            pu.create_bulk_str(
+                'a', 'b', '00', 'BHZ',
+                [UTCDateTime(2015, 8, 1, 0, 0, 1),
+                    UTCDateTime(2016, 8, 1, 0, 0, 1)], '*')
+
+    def test_t_lists_diff_len2(self):
+        with self.assertRaises(ValueError):
+            pu.create_bulk_str(
+                'a', ['b', 'c'], '00', 'BHZ',
+                [UTCDateTime(2015, 8, 1, 0, 0, 1),
+                    UTCDateTime(2016, 8, 1, 0, 0, 1)], '*')
+
+    def test_t_lists_diff_len3(self):
+        with self.assertRaises(ValueError):
+            pu.create_bulk_str(
+                ['a', 'b'], ['b', 'c'], '00', 'BHZ',
+                [UTCDateTime(2015, 8, 1, 0, 0, 1),
+                    UTCDateTime(2016, 8, 1, 0, 0, 1)], '*')
+
+    def test_t_lists_diff_len4(self):
+        with self.assertRaises(ValueError):
+            pu.create_bulk_str(
+                ['a', 'b'], '*', '00', 'BHZ',
+                [UTCDateTime(2015, 8, 1, 0, 0, 1),
+                    UTCDateTime(2016, 8, 1, 0, 0, 1)], '*')
+
+    def test_t_lists_diff_len5(self):
+        with self.assertRaises(ValueError):
+            pu.create_bulk_str(
+                ['a', 'b'], '*', '00', 'BHZ',
+                [UTCDateTime(2015, 8, 1, 0, 0, 1),
+                    UTCDateTime(2016, 8, 1, 0, 0, 1)], [
+                        UTCDateTime(2015, 8, 1, 0, 0, 1),
+                        UTCDateTime(2016, 8, 1, 0, 0, 1),
+                        UTCDateTime(2016, 8, 1, 0, 0, 1)])
+
+    def test_t_lists_diff_len6(self):
+        with self.assertRaises(ValueError):
+            pu.create_bulk_str(
+                ['a', 'b'], ['b', 'c'], '00', 'BHZ',
+                [UTCDateTime(2015, 8, 1, 0, 0, 1),
+                    UTCDateTime(2016, 8, 1, 0, 0, 1)], [
+                        UTCDateTime(2015, 8, 1, 0, 0, 1),
+                        UTCDateTime(2016, 8, 1, 0, 0, 1),
+                        UTCDateTime(2016, 8, 1, 0, 0, 1)])
+
+    def test_t_lists_diff_len7(self):
+        with self.assertRaises(ValueError):
+            pu.create_bulk_str(
+                'a', ['b', 'c'], '00', 'BHZ',
+                [UTCDateTime(2015, 8, 1, 0, 0, 1),
+                    UTCDateTime(2016, 8, 1, 0, 0, 1)], [
+                        UTCDateTime(2015, 8, 1, 0, 0, 1),
+                        UTCDateTime(2016, 8, 1, 0, 0, 1),
+                        UTCDateTime(2016, 8, 1, 0, 0, 1)])
+
+    def test_t_lists_diff_len8(self):
+        with self.assertRaises(ValueError):
+            pu.create_bulk_str(
+                'a', 'c', '00', 'BHZ',
+                [UTCDateTime(2015, 8, 1, 0, 0, 1),
+                    UTCDateTime(2016, 8, 1, 0, 0, 1)], [
+                        UTCDateTime(2015, 8, 1, 0, 0, 1),
+                        UTCDateTime(2016, 8, 1, 0, 0, 1),
+                        UTCDateTime(2016, 8, 1, 0, 0, 1)])
+
+    def test_other_error(self):
+        with self.assertRaises(ValueError):
+            pu.create_bulk_str(
+                ['a', 'b'], 'c', '00', 'BHZ', '*', '*')
+
+
 
 
 if __name__ == "__main__":
