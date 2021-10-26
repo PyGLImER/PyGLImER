@@ -28,7 +28,7 @@ wheel
 # cartopy
 
 # For documentation
-sphinx<4.0
+sphinx<5.0
 pydata-sphinx-theme
 sphinx-copybutton
 
