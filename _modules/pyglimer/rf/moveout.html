@@ -191,7 +191,7 @@
 <span class="sd">!The file is split and has a second copyright disclaimer!</span>
 
 <span class="sd">Created: Tuesday, 7th April 2020 10:08:30 am</span>
-<span class="sd">Last Modified: Wednesday, 20th October 2021 01:01:39 pm</span>
+<span class="sd">Last Modified: Monday, 25th October 2021 04:33:14 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
@@ -576,29 +576,29 @@
         <span class="c1"># location possible weakspot! Maybe I should do a lookup?</span>
         <span class="c1"># mphase 1 is PPs for P and SSp for S</span>
         <span class="c1"># mphase 2 is PSs, and SPp, respectively</span>
-        <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
-            <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_b</span> <span class="o">+</span> <span class="n">dt_a</span>
-            <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">dt_b</span>
+        <span class="c1"># if phase == &#39;P&#39;:</span>
+        <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_b</span> <span class="o">+</span> <span class="n">dt_a</span>
+        <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">dt_b</span>
 
-            <span class="c1"># Truncate The travel time table for multiples</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_mphase1</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase1</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                <span class="k">pass</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="n">dt_mphase2</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase2</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                <span class="k">pass</span>
+        <span class="c1"># Truncate The travel time table for multiples</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_mphase1</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase1</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="n">dt_mphase2</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase2</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">pass</span>
 
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Reduce travel times for S since the data will be flipped</span>
-            <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">dt_b</span>
-            <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">-</span> <span class="n">dt_b</span> <span class="o">-</span> <span class="n">dt_a</span>
-            <span class="k">if</span> <span class="n">dt_mphase2</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">50</span><span class="p">:</span>
-                <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_mphase1</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase1</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">50</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-                <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="n">dt_mphase2</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase2</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">50</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-            <span class="k">elif</span> <span class="n">dt_mphase1</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">50</span><span class="p">:</span>
-                <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_mphase1</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase1</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">50</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     # Reduce travel times for S since the data will be flipped</span>
+        <span class="c1">#     dt_mphase1 = dt - 2*dt_b</span>
+        <span class="c1">#     dt_mphase2 = dt - dt_b - dt_a</span>
+        <span class="c1">#     if dt_mphase2.min() &lt; -50:</span>
+        <span class="c1">#         dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 &lt;= -50)[0][0]]</span>
+        <span class="c1">#         dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 &lt;= -50)[0][0]]</span>
+        <span class="c1">#     elif dt_mphase1.min() &lt; -50:</span>
+        <span class="c1">#         dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 &lt;= -50)[0][0]]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="kc">None</span>
@@ -717,30 +717,30 @@
         <span class="c1"># location possible weakspot! Maybe I should do a lookup?</span>
         <span class="c1"># mphase 1 is PPs for P and SSp for S</span>
         <span class="c1"># mphase 2 is PSs, and SPp, respectively</span>
-        <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
-            <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_b</span> <span class="o">+</span> <span class="n">dt_a</span>
-            <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">dt_b</span>
-            <span class="c1"># Truncate The travel time table for multiples</span>
-            <span class="c1"># if dt_mphase1.max() &gt; 100 or dt_mphase2.max() &gt; 100:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_mphase1</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase1</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                <span class="k">pass</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="n">dt_mphase2</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase2</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                <span class="k">pass</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Reduce travel times for S since the data will be flipped</span>
-            <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">dt_b</span>
-            <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">-</span> <span class="n">dt_b</span> <span class="o">-</span> <span class="n">dt_a</span>
-            <span class="k">if</span> <span class="n">dt_mphase2</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">50</span><span class="p">:</span>
-                <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_mphase1</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase1</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">50</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-                <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="n">dt_mphase2</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase2</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">50</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-            <span class="k">elif</span> <span class="n">dt_mphase1</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">50</span><span class="p">:</span>
-                <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="n">dt_mphase2</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase1</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">50</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-        <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_mphase1</span><span class="p">[:</span><span class="n">index</span><span class="p">]</span>
-        <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="n">dt_mphase2</span><span class="p">[:</span><span class="n">index</span><span class="p">]</span>
+        <span class="c1"># if phase == &#39;P&#39;:</span>
+        <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_b</span> <span class="o">+</span> <span class="n">dt_a</span>
+        <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">dt_b</span>
+        <span class="c1"># Truncate The travel time table for multiples</span>
+        <span class="c1"># if dt_mphase1.max() &gt; 100 or dt_mphase2.max() &gt; 100:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="n">dt_mphase1</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase1</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="n">dt_mphase2</span><span class="p">[:</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt_mphase2</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     # Reduce travel times for S since the data will be flipped</span>
+        <span class="c1">#     dt_mphase1 = dt - 2*dt_b</span>
+        <span class="c1">#     dt_mphase2 = dt - dt_b - dt_a</span>
+        <span class="c1">#     if dt_mphase2.min() &lt; -50:</span>
+        <span class="c1">#         dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 &lt;= -50)[0][0]]</span>
+        <span class="c1">#         dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 &lt;= -50)[0][0]]</span>
+        <span class="c1">#     elif dt_mphase1.min() &lt; -50:</span>
+        <span class="c1">#         dt_mphase2 = dt_mphase2[:np.where(dt_mphase1 &lt;= -50)[0][0]]</span>
+        <span class="c1"># dt_mphase1 = dt_mphase1[:index]</span>
+        <span class="c1"># dt_mphase2 = dt_mphase2[:index]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">dt_mphase1</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">dt_mphase2</span> <span class="o">=</span> <span class="kc">None</span>
@@ -932,8 +932,6 @@
         <span class="n">dz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dzf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vsf</span> <span class="o">=</span> \
             <span class="n">earth_flattening</span><span class="p">(</span><span class="n">maxz</span><span class="p">,</span> <span class="n">z</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dz</span><span class="p">,</span> <span class="n">vp</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">vs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="c1"># self.dz =</span>
-        <span class="c1"># self.z = z[:-1]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vp</span> <span class="o">=</span> <span class="n">vp</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vs</span> <span class="o">=</span> <span class="n">vs</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">t_ref</span> <span class="o">=</span> <span class="p">{}</span></div>
