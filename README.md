@@ -38,12 +38,12 @@ PyGLImER comes with a few tutorials (Jupyter notebooks). You can find those in t
 ## What it looks like
 With PyGLImER, we facilitate processing extremely large amounts of teleseismic data. This enables us to create large scale CCP sections as shown for P-to-S and S-to-P receiver function data in the plot below:
 
-<img src="docs/chapters/figures/map_w_ccp_sections.png" alt="Map With CCP sections" width="600"/>
+<img src="docs/chapters/figures/map_w_ccp_sections.png" alt="Map With CCP sections" width="600"
 *Seismic broadband stations with available receiver
 functions are plotted as downward-pointing red triangles. The locations of the shown cross-sections are demarked as
 bold black lines. Cross-sections A, B, and D are created from S receiver functions stacked by common conversion
 point, whereas cross-section C shows a slice through a P receiver function common conversion point stack. Data
-begin to fade to grey if the respective gridpoint is hit by fewer than 25 rays. Note that the vertical exaggeration varies from panel to panel.*
+begin to fade to grey if the respective gridpoint is hit by fewer than 25 rays. Note that the vertical exaggeration varies from panel to panel.*/>
 
 PyGLImER also comes with a toolset to create publication ready figures:
 
