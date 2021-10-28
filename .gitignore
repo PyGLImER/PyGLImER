@@ -3,7 +3,6 @@ figures*
 gypsum.pkl
 *.xml
 *cache*
-*.png
 *info*
 output*
 *.csv
