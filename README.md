@@ -44,13 +44,13 @@ With PyGLImER, we facilitate processing extremely large amounts of teleseismic d
 
 PyGLImER also comes with a toolset to create publication ready figures:
 
-| <img src="docs/chapters/figures/combined.jpg" alt="Combined Stack and Section" width="600"/> |
+| <img src="docs/chapters/figures/combined.jpg" alt="Combined Stack and Section" width="400"/> |
 |:--:|
 | *FIG: Single station stack and receiver functions sorted by epicentral distance from P receiver function for station IU.HRV.* |
 
-| <img src="docs/chapters/figures/distr.jpg" alt="Distribution of back-azimuth and rayparameters" width="600"/> |
+| <img src="docs/chapters/figures/distr.jpg" alt="Distribution of back-azimuth and rayparameters" width="400"/> |
 |:--:|
-| *FIG: Distribution of back-azimuth and rayparameter for the receiver functions above.* |
+| *FIG: Distribution of back-azimuth and rayparameter for the P receiver functions from IU.HRV as shown above.* |
 
 ## Reporting Bugs / Contact the developers
 This version is an early release. If you encounter any issues or unexpected behaviour, please [open an issue](https://github.com/PeterMakus/PyGLImER/issues/new) here on GitHub or [contact the developers](mailto:makus@gfz-potsdam.de).
