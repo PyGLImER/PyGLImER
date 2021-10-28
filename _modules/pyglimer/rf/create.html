@@ -191,7 +191,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Friday, 12th February 2020 03:24:30 pm</span>
-<span class="sd">Last Modified: Monday, 25th October 2021 01:34:32 pm</span>
+<span class="sd">Last Modified: Thursday, 28th October 2021 11:47:23 am</span>
 
 
 <span class="sd">**The file is split and has a second copyright disclaimer**</span>
@@ -805,7 +805,7 @@
         <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="n">tr</span><span class="o">.</span><span class="n">ppoint</span><span class="p">(</span><span class="n">vmodel</span><span class="o">=</span><span class="n">vmodel_file</span><span class="p">,</span> <span class="n">latb</span><span class="o">=</span><span class="n">latb</span><span class="p">,</span> <span class="n">lonb</span><span class="o">=</span><span class="n">lonb</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="RFStream.station_stack"><a class="viewcode-back" href="../../../chapters/api/rf.html#pyglimer.rf.create.RFStream.station_stack">[docs]</a>    <span class="k">def</span> <span class="nf">station_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vmodel_file</span><span class="o">=</span><span class="s1">&#39;iasp91.dat&#39;</span><span class="p">,</span> <span class="n">multiple</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="RFStream.station_stack"><a class="viewcode-back" href="../../../chapters/api/rf.html#pyglimer.rf.create.RFStream.station_stack">[docs]</a>    <span class="k">def</span> <span class="nf">station_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vmodel_file</span><span class="o">=</span><span class="s1">&#39;iasp91.dat&#39;</span><span class="p">,</span> <span class="n">multiple</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs a moveout correction and stacks all receiver functions</span>
 <span class="sd">        in Stream. Make sure that Stream only contains RF from one station!</span>
@@ -1496,7 +1496,7 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">lim</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">depth</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">outputdir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="n">clean</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="n">std</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">std</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">flipxy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates plot of a single receiver function</span>
 
 <span class="sd">        Parameters</span>
@@ -1521,6 +1521,9 @@
 <span class="sd">            limit of the standard deviation in the plot. Provide the std</span>
 <span class="sd">            as a numpy array (can be easily computed from the output of</span>
 <span class="sd">            :meth:`~pyglimer.rf.create.RFStream.bootstrap`)</span>
+<span class="sd">        flipxy: bool, optional</span>
+<span class="sd">            Plot Depth/Time on the Y-Axis and amplitude on the x-axis. Defaults</span>
+<span class="sd">            to False.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1528,7 +1531,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_single_rf</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">lim</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">outputdir</span><span class="o">=</span><span class="n">outputdir</span><span class="p">,</span> <span class="n">clean</span><span class="o">=</span><span class="n">clean</span><span class="p">,</span>
-            <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="n">std</span><span class="p">)</span>
+            <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="n">std</span><span class="p">,</span> <span class="n">flipxy</span><span class="o">=</span><span class="n">flipxy</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ax</span></div>
 
 <div class="viewcode-block" id="RFTrace.write"><a class="viewcode-back" href="../../../chapters/api/rf.html#pyglimer.rf.create.RFTrace.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
