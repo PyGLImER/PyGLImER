@@ -11,10 +11,11 @@ Plot utilities not to modify plots or base plots.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 05:05:08 pm
-Last Modified: Thursday, 28th October 2021 02:11:51 pm
+Last Modified: Thursday, 28th October 2021 03:39:49 pm
 '''
 
 import os
+from typing import Tuple
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -254,10 +255,10 @@ def plot_single_rf(
         else:
             ax.fill_betweenx(
                 times, 0, ydata, where=ydata > 0,
-                interpolate=True, color=(0.9, 0.2, 0.2))
+                interpolate=True, color=(0.9, 0.2, 0.2), alpha=.8)
             ax.fill_betweenx(
                 times, 0, ydata, where=ydata < 0,
-                interpolate=True, color=(0.2, 0.2, 0.7))
+                interpolate=True, color=(0.2, 0.2, 0.7), alpha=.8)
         ax.plot(ydata, times, 'k', lw=0.75)
 
         # Set limits
@@ -278,14 +279,14 @@ def plot_single_rf(
             ax.plot(times, ydata-std, 'k--', lw=0.75)
             ax.plot(times, ydata+std, 'k--', lw=0.75)
             ax.fill_between(times, 0, ydata, where=ydata > 0,
-                            interpolate=True, color=(0.9, 0.2, 0.2), alpha=.5)
+                            interpolate=True, color=(0.9, 0.2, 0.2), alpha=.8)
             ax.fill_between(times, 0, ydata, where=ydata < 0,
-                            interpolate=True, color=(0.2, 0.2, 0.7), alpha=.5)
+                            interpolate=True, color=(0.2, 0.2, 0.7), alpha=.8)
         else:
             ax.fill_between(times, 0, ydata, where=ydata > 0,
-                            interpolate=True, color=(0.9, 0.2, 0.2))
+                            interpolate=True, color=(0.9, 0.2, 0.2), alpha=.8)
             ax.fill_between(times, 0, ydata, where=ydata < 0,
-                            interpolate=True, color=(0.2, 0.2, 0.7))
+                            interpolate=True, color=(0.2, 0.2, 0.7), alpha=.8)
         ax.plot(times, ydata, 'k', lw=0.75)
 
         # Set limits
@@ -410,7 +411,7 @@ def plot_section(
     ax : `matplotlib.pyplot.Axes`
 
     """
-    # set_mpl_params()
+    set_mpl_params()
 
     # Create figure if no axes is specified
     if ax is None:
@@ -442,11 +443,11 @@ def plot_section(
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
                          where=rftmp < rf.stats.distance,
                          interpolate=True, color=(0.2, 0.2, 0.7),
-                         zorder=-_i)
+                         zorder=-_i, alpha=.8)
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
                          where=rftmp > rf.stats.distance,
                          interpolate=True, color=(0.9, 0.2, 0.2),
-                         zorder=-_i - 0.1)
+                         zorder=-_i - 0.1, alpha=.8)
         if line:
             ax.plot(rftmp, times, 'k', lw=linewidth, zorder=-_i + 0.1)
 
@@ -476,16 +477,55 @@ def plot_section(
 
     # Set title
     if title is not None:
-        plt.title(title + " - %s" % channel)
+        plt.title(title)
     else:
         plt.title("%s component" % channel)
 
     # Set output directory
-    if outputfile is None:
-        plt.show()
-    else:
+    if outputfile:
         plt.savefig(outputfile, dpi=300, transparent=True, format=format)
+    elif show:
+        plt.show()
     return ax
+
+
+def combined_single_station_plot(
+    rfst, stack, ylim: Tuple[float, float] = None, std: np.ndarray = None,
+        outputfile: str = None, fmt: str = None):
+    set_mpl_params()
+
+    plt.subplots(1, 2, gridspec_kw={'width_ratios': [1, 2]}, figsize=(10, 10))
+
+    # no space between panels
+    plt.subplots_adjust(wspace=0, hspace=0)
+
+    ax0 = plt.subplot(121)
+    plot_single_rf(stack, flipxy=True, std=std, ax=ax0)
+    plt.title('Stack')
+
+    # Full Box
+    ax0.spines['right'].set_visible(True)
+    ax0.spines['top'].set_visible(True)
+
+    # Only show ticks on the left ticks
+    ax0.yaxis.set_ticks_position('left')
+    ax0.set_xlabel(None)
+    ax0.set_xticklabels([])
+    ax0.set_xticks([])
+    for txt in ax0.texts:
+        txt.remove()
+
+    # Section plot
+    ax1 = plt.subplot(122, sharey=ax0)
+    ax1 = plot_section(
+        rfst, line=False, scalingfactor=6, timelimits=ylim, ax=ax1, show=False,
+        title='Individual RFs')
+    ax1.tick_params(
+        axis='both', which='both', right=False, top=False, labelleft=False,
+        direction='inout')
+    plt.ylabel(None)
+    if outputfile is not None:
+        plt.savefig(outputfile, transparent=True, format=fmt)
 
 
 def baz_hist(az, nbins):
