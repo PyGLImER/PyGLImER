@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Monday, 25th October 2021 01:34:32 pm
+Last Modified: Thursday, 28th October 2021 11:47:23 am
 
 
 **The file is split and has a second copyright disclaimer**
@@ -628,7 +628,7 @@ class RFStream(Stream):
         for tr in self:
             tr.ppoint(vmodel=vmodel_file, latb=latb, lonb=lonb)
 
-    def station_stack(self, vmodel_file='iasp91.dat', multiple=False):
+    def station_stack(self, vmodel_file='iasp91.dat', multiple=False) -> tuple:
         """
         Performs a moveout correction and stacks all receiver functions
         in Stream. Make sure that Stream only contains RF from one station!
@@ -1319,7 +1319,7 @@ class RFTrace(Trace):
         self, lim: list or tuple or None = None,
         depth: np.ndarray or None = None, ax: plt.Axes = None,
         outputdir: str = None, format: str = 'pdf', clean: bool = False,
-            std: np.ndarray = None):
+            std: np.ndarray = None, flipxy: bool = False):
         """Creates plot of a single receiver function
 
         Parameters
@@ -1344,6 +1344,9 @@ class RFTrace(Trace):
             limit of the standard deviation in the plot. Provide the std
             as a numpy array (can be easily computed from the output of
             :meth:`~pyglimer.rf.create.RFStream.bootstrap`)
+        flipxy: bool, optional
+            Plot Depth/Time on the Y-Axis and amplitude on the x-axis. Defaults
+            to False.
 
         Returns
         -------
@@ -1351,7 +1354,7 @@ class RFTrace(Trace):
         """
         ax = plot_single_rf(
             self, lim, depth=depth, ax=ax, outputdir=outputdir, clean=clean,
-            format=format, std=std)
+            format=format, std=std, flipxy=flipxy)
         return ax
 
     def write(self, filename, format, **kwargs):
