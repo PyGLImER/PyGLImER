@@ -48,7 +48,7 @@ PyGLImER also comes with a toolset to create publication ready figures:
 |:--:|
 | *FIG: Single station stack and receiver functions sorted by epicentral distance from P receiver function for station IU.HRV.* |
 
-| <img src="docs/chapters/figures/distr.jpg" alt="Distribution of back-azimuth and rayparameters" width="400"/> |
+| <img src="docs/chapters/figures/distr.jpg" alt="Distribution of back-azimuth and rayparameters" width="600"/> |
 |:--:|
 | *FIG: Distribution of back-azimuth and rayparameter for the P receiver functions from IU.HRV as shown above.* |
 
