@@ -11,7 +11,7 @@ Plot utilities not to modify plots or base plots.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 05:05:08 pm
-Last Modified: Thursday, 21st October 2021 09:38:25 am
+Last Modified: Thursday, 28th October 2021 02:11:51 pm
 '''
 
 import os
@@ -163,7 +163,7 @@ def plot_single_rf(
     depth: np.ndarray or None = None, ax: plt.Axes = None,
     outputdir: str = None, pre_fix: str = None,
     post_fix: str = None, format: str = 'pdf', clean: bool = False,
-        std: np.ndarray = None):
+        std: np.ndarray = None, flipxy: bool = False):
     """Creates plot of a single receiver function
 
     Parameters
@@ -189,7 +189,7 @@ def plot_single_rf(
         prepend filename
     post_fix : str, optional
         append to filename
-    clean: bool
+    clean: bool, optional
         If True, clears out all axes and plots RF only.
         Defaults to False.
     std: np.ndarray, optional
@@ -197,6 +197,9 @@ def plot_single_rf(
             limit of the standard deviation in the plot. Provide the std
             as a numpy array (can be easily computed from the output of
             :meth:`~pyglimer.rf.create.RFStream.bootstrap`)
+    flipxy: bool, optional
+        Plot Depth/Time on the Y-Axis and amplitude on the x-axis. Defaults
+        to False.
 
      Returns
     -------
@@ -206,7 +209,10 @@ def plot_single_rf(
 
     # Get figure/axes dimensions
     if ax is None:
-        width, height = 10, 2.5
+        if flipxy:
+            height, width = 8, 3
+        else:
+            width, height = 10, 2.5
         fig = plt.figure(figsize=(width, height))
         ax = plt.axes(zorder=9999999)
         axtmp = None
@@ -235,31 +241,65 @@ def plot_single_rf(
         times = z
 
     # Plot stuff into axes
-    if std is not None:
-        ax.plot(times, ydata-std, 'k--', lw=0.75)
-        ax.plot(times, ydata+std, 'k--', lw=0.75)
-        ax.fill_between(times, 0, ydata, where=ydata > 0,
-                        interpolate=True, color=(0.9, 0.2, 0.2), alpha=.5)
-        ax.fill_between(times, 0, ydata, where=ydata < 0,
-                        interpolate=True, color=(0.2, 0.2, 0.7), alpha=.5)
-    else:
-        ax.fill_between(times, 0, ydata, where=ydata > 0,
-                        interpolate=True, color=(0.9, 0.2, 0.2))
-        ax.fill_between(times, 0, ydata, where=ydata < 0,
-                        interpolate=True, color=(0.2, 0.2, 0.7))
-    ax.plot(times, ydata, 'k', lw=0.75)
+    if flipxy:
+        if std is not None:
+            ax.plot(ydata-std, times, 'k--', lw=0.75)
+            ax.plot(ydata+std, times, 'k--', lw=0.75)
+            ax.fill_betweenx(
+                times, 0, ydata, where=ydata > 0,
+                interpolate=True, color=(0.9, 0.2, 0.2), alpha=.8)
+            ax.fill_betweenx(
+                times, 0, ydata, where=ydata < 0,
+                interpolate=True, color=(0.2, 0.2, 0.7), alpha=.8)
+        else:
+            ax.fill_betweenx(
+                times, 0, ydata, where=ydata > 0,
+                interpolate=True, color=(0.9, 0.2, 0.2))
+            ax.fill_betweenx(
+                times, 0, ydata, where=ydata < 0,
+                interpolate=True, color=(0.2, 0.2, 0.7))
+        ax.plot(ydata, times, 'k', lw=0.75)
 
-    # Set limits
-    if tlim is None:
-        ax.set_xlim(0, times[-1])  # don't really wanna see the stuff before
-    else:
-        ax.set_xlim(tlim)
+        # Set limits
+        if tlim is None:
+            # don't really wanna see the stuff before
+            ax.set_ylim(0, times[-1])
+        else:
+            ax.set_ylim(tlim)
 
-    if ylim is None:
-        absmax = 1.1 * np.max(np.abs(ydata))
-        ax.set_ylim([-absmax, absmax])
+        if ylim is None:
+            absmax = 1.1 * np.max(np.abs(ydata))
+            ax.set_xlim([-absmax, absmax])
+        else:
+            ax.set_xlim(ylim)
+        ax.invert_yaxis()
     else:
-        ax.set_ylim(ylim)
+        if std is not None:
+            ax.plot(times, ydata-std, 'k--', lw=0.75)
+            ax.plot(times, ydata+std, 'k--', lw=0.75)
+            ax.fill_between(times, 0, ydata, where=ydata > 0,
+                            interpolate=True, color=(0.9, 0.2, 0.2), alpha=.5)
+            ax.fill_between(times, 0, ydata, where=ydata < 0,
+                            interpolate=True, color=(0.2, 0.2, 0.7), alpha=.5)
+        else:
+            ax.fill_between(times, 0, ydata, where=ydata > 0,
+                            interpolate=True, color=(0.9, 0.2, 0.2))
+            ax.fill_between(times, 0, ydata, where=ydata < 0,
+                            interpolate=True, color=(0.2, 0.2, 0.7))
+        ax.plot(times, ydata, 'k', lw=0.75)
+
+        # Set limits
+        if tlim is None:
+            ax.set_xlim(0, times[-1])
+            # don't really wanna see the stuff before
+        else:
+            ax.set_xlim(tlim)
+
+        if ylim is None:
+            absmax = 1.1 * np.max(np.abs(ydata))
+            ax.set_ylim([-absmax, absmax])
+        else:
+            ax.set_ylim(ylim)
 
     # Removes top/right axes spines. If you want the whole thing, comment
     # or remove
@@ -270,10 +310,20 @@ def plot_single_rf(
         remove_all()
     else:
         if rf.stats.type == 'time':
-            ax.set_xlabel("Conversion Time [s]")
+            if flipxy:
+                ax.set_ylabel("Conversion Time [s]", rotation=90)
+            else:
+                ax.set_xlabel("Conversion Time [s]")
         else:
-            ax.set_xlabel("Conversion Depth [km]")
-        ax.set_ylabel("A    ", rotation=0)
+            if flipxy:
+                ax.set_ylabel("Conversion Depth [km]", rotation=90)
+            else:
+                ax.set_xlabel("Conversion Depth [km]")
+        if flipxy:
+            ax.set_xlabel("A    ", rotation=0)
+        else:
+            ax.set_ylabel("A    ", rotation=0)
+
         # Start time in station stack does not make sense
         if rf.stats.type == 'stastack':
             text = rf.get_id()
