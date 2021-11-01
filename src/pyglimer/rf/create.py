@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Thursday, 28th October 2021 11:47:23 am
+Last Modified: Monday, 1st November 2021 10:01:13 am
 
 
 **The file is split and has a second copyright disclaimer**
@@ -795,8 +795,9 @@ class RFStream(Stream):
                 ax=ax, outputfile=outputfile, channel=channel, format=format)
         return ax
 
-    def plot_distribution(self, nbins=50, phase="P",
-                          outputfile=None, format="pdf", dpi=300):
+    def plot_distribution(
+        self, nbins=50, phase="P", outputfile=None, format="pdf", dpi=300,
+            title: str = None):
         """
         Plot back azimuth and rayparameter distributions.
 
@@ -843,8 +844,9 @@ class RFStream(Stream):
                 'No Receiver Functions of Phase %s found,\
                     did you choose the right phase?' % phase)
 
-        stream_dist(np.array(rayp), np.array(baz), nbins=nbins, v=v,
-                    outputfile=outputfile, format=format,  dpi=dpi)
+        stream_dist(
+            np.array(rayp), np.array(baz), nbins=nbins, v=v,
+            outputfile=outputfile, format=format,  dpi=dpi, title=title)
 
     def dirty_ccp_stack(
             self, dlon: float = 1.0, z_res: float = 1.0,

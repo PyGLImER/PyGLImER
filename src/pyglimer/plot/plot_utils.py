@@ -11,7 +11,7 @@ Plot utilities not to modify plots or base plots.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 05:05:08 pm
-Last Modified: Thursday, 28th October 2021 03:39:49 pm
+Last Modified: Monday, 1st November 2021 09:59:29 am
 '''
 
 import os
@@ -491,10 +491,13 @@ def plot_section(
 
 def combined_single_station_plot(
     rfst, stack, ylim: Tuple[float, float] = None, std: np.ndarray = None,
-        outputfile: str = None, fmt: str = None):
+        outputfile: str = None, fmt: str = None, title: str = None):
     set_mpl_params()
 
-    plt.subplots(1, 2, gridspec_kw={'width_ratios': [1, 2]}, figsize=(10, 10))
+    fig, _ = plt.subplots(
+        1, 2, gridspec_kw={'width_ratios': [1, 2]}, figsize=(10, 10))
+    if title:
+        fig.suptitle(title, fontsize=16, fontweight='bold')
 
     # no space between panels
     plt.subplots_adjust(wspace=0, hspace=0)
@@ -519,7 +522,8 @@ def combined_single_station_plot(
     ax1 = plt.subplot(122, sharey=ax0)
     ax1 = plot_section(
         rfst, line=False, scalingfactor=6, timelimits=ylim, ax=ax1, show=False,
-        title='Individual RFs')
+        title='Individual Receiver Functions')
+    ax1.set_xlabel(r'"Epicentral Distance, $\Delta$ [$^{\circ}$]"')
     ax1.tick_params(
         axis='both', which='both', right=False, top=False, labelleft=False,
         direction='inout')
@@ -569,6 +573,7 @@ def baz_hist(az, nbins):
     ax.set_xticks(np.arange(0, 2*np.pi, 2*np.pi/8))
     ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
     labels = ax.get_xticklabels()
+    plt.title('Backazimuth')
     for label in labels:
         pos = label.get_position()
         label.set_position([pos[0], pos[1]-0.02])
@@ -632,6 +637,7 @@ def rayp_hist(rayp, nbins, v=5.8):
     ax.set_thetamin(7.5)
     ax.set_thetamax(35)
     labels = ax.get_xticklabels()
+    plt.title('Incident Angle')
     for label in labels:
         pos = label.get_position()
         label.set_position([pos[0], pos[1]-0.02])
@@ -642,7 +648,7 @@ def rayp_hist(rayp, nbins, v=5.8):
 def stream_dist(rayp: list or np.array, baz: list or np.array,
                 nbins: float = 50, v: float = 5.8, phase: str = 'P',
                 outputfile: None or str = None, format: str = "pdf",
-                dpi: int = 300):
+                dpi: int = 300, title: str = None):
     """Uses backazimuth and rayparameter histogram plotting tools to create
     combined overview over the Distribution of incident waves.
 
@@ -670,8 +676,9 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
         only used if file format is none vector.
 
     """
-
-    plt.figure(figsize=(10, 4.5))
+    fig = plt.figure(figsize=(10, 4.5))
+    if title:
+        fig.suptitle(title, fontsize=19, fontweight='bold')
     plt.subplots_adjust(wspace=0.05)
     plt.subplot(121, projection="polar")
     baz_hist(baz, nbins)
