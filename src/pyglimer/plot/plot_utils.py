@@ -11,7 +11,7 @@ Plot utilities not to modify plots or base plots.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 05:05:08 pm
-Last Modified: Monday, 1st November 2021 09:59:29 am
+Last Modified: Monday, 1st November 2021 11:01:50 am
 '''
 
 import os
@@ -523,7 +523,7 @@ def combined_single_station_plot(
     ax1 = plot_section(
         rfst, line=False, scalingfactor=6, timelimits=ylim, ax=ax1, show=False,
         title='Individual Receiver Functions')
-    ax1.set_xlabel(r'"Epicentral Distance, $\Delta$ [$^{\circ}$]"')
+    ax1.set_xlabel(r'Epicentral Distance, $\Delta$ [$^{\circ}$]')
     ax1.tick_params(
         axis='both', which='both', right=False, top=False, labelleft=False,
         direction='inout')
@@ -685,9 +685,7 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
     plt.subplot(122, projection="polar")
     rayp_hist(rayp, nbins, v=v)
 
-    if outputfile is None:
-        plt.show()
-    else:
+    if outputfile:
         if format in ["pdf", "epsg", "svg", "ps"]:
             dpi = None
         plt.savefig(outputfile, format=format, dpi=dpi)
