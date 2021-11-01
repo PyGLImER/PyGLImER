@@ -62,7 +62,7 @@ html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 
 html_title = ""
-html_logo = "chapters/figures/logo.png"
+html_logo = "chapters/figures/logo_horizontal_colour.png"
 # html_favicon = "chapters/figures/favicon.ico"
 
 html_context = {

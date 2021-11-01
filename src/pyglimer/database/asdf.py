@@ -12,7 +12,7 @@ Seismic Format (asdf).
 
 Created: Friday, 12th February 2021 03:24:30 pm
 
-Last Modified: Friday, 22nd October 2021 03:20:13 pm
+Last Modified: Thursday, 28th October 2021 05:06:27 pm
 '''
 
 import logging
@@ -97,7 +97,13 @@ def writeraw(
 
     # 2021/08/03
     # Let's create one file per station
-    for fi in os.listdir(rawfolder):
+    try:
+        files = os.listdir(rawfolder)
+    except FileNotFoundError:
+        # No clue why that happens
+        os.makedirs(rawfolder, exist_ok=True)
+        files = os.listdir(rawfolder)
+    for fi in files:
         code = '.'.join(fi.split('.')[:-1])
 
         try:
