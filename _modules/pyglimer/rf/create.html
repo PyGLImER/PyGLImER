@@ -55,7 +55,7 @@
     
 
 <a class="navbar-brand" href="../../../index.html">
-  <img src="../../../_static/logo.png" class="logo" alt="logo">
+  <img src="../../../_static/logo_horizontal_colour.png" class="logo" alt="logo">
 </a>
 
 
@@ -191,7 +191,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Friday, 12th February 2020 03:24:30 pm</span>
-<span class="sd">Last Modified: Thursday, 28th October 2021 11:47:23 am</span>
+<span class="sd">Last Modified: Monday, 1st November 2021 10:01:13 am</span>
 
 
 <span class="sd">**The file is split and has a second copyright disclaimer**</span>
@@ -972,8 +972,9 @@
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">outputfile</span><span class="o">=</span><span class="n">outputfile</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ax</span></div>
 
-<div class="viewcode-block" id="RFStream.plot_distribution"><a class="viewcode-back" href="../../../chapters/api/rf.html#pyglimer.rf.create.RFStream.plot_distribution">[docs]</a>    <span class="k">def</span> <span class="nf">plot_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="s2">&quot;P&quot;</span><span class="p">,</span>
-                          <span class="n">outputfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pdf&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+<div class="viewcode-block" id="RFStream.plot_distribution"><a class="viewcode-back" href="../../../chapters/api/rf.html#pyglimer.rf.create.RFStream.plot_distribution">[docs]</a>    <span class="k">def</span> <span class="nf">plot_distribution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="n">outputfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pdf&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+            <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot back azimuth and rayparameter distributions.</span>
 
@@ -1020,8 +1021,9 @@
                 <span class="s1">&#39;No Receiver Functions of Phase </span><span class="si">%s</span><span class="s1"> found,</span><span class="se">\</span>
 <span class="s1">                    did you choose the right phase?&#39;</span> <span class="o">%</span> <span class="n">phase</span><span class="p">)</span>
 
-        <span class="n">stream_dist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rayp</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">baz</span><span class="p">),</span> <span class="n">nbins</span><span class="o">=</span><span class="n">nbins</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">v</span><span class="p">,</span>
-                    <span class="n">outputfile</span><span class="o">=</span><span class="n">outputfile</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>  <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span></div>
+        <span class="n">stream_dist</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rayp</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">baz</span><span class="p">),</span> <span class="n">nbins</span><span class="o">=</span><span class="n">nbins</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">v</span><span class="p">,</span>
+            <span class="n">outputfile</span><span class="o">=</span><span class="n">outputfile</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>  <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RFStream.dirty_ccp_stack"><a class="viewcode-back" href="../../../chapters/api/rf.html#pyglimer.rf.create.RFStream.dirty_ccp_stack">[docs]</a>    <span class="k">def</span> <span class="nf">dirty_ccp_stack</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">dlon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">z_res</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>

@@ -55,7 +55,7 @@
     
 
 <a class="navbar-brand" href="../../../index.html">
-  <img src="../../../_static/logo.png" class="logo" alt="logo">
+  <img src="../../../_static/logo_horizontal_colour.png" class="logo" alt="logo">
 </a>
 
 
@@ -189,7 +189,7 @@
 
 <span class="sd">Created: Friday, 12th February 2021 03:24:30 pm</span>
 
-<span class="sd">Last Modified: Friday, 22nd October 2021 03:20:13 pm</span>
+<span class="sd">Last Modified: Thursday, 28th October 2021 05:06:27 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -274,7 +274,13 @@
 
     <span class="c1"># 2021/08/03</span>
     <span class="c1"># Let&#39;s create one file per station</span>
-    <span class="k">for</span> <span class="n">fi</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">rawfolder</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">rawfolder</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="c1"># No clue why that happens</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">rawfolder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">rawfolder</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">fi</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
         <span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fi</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="k">try</span><span class="p">:</span>
