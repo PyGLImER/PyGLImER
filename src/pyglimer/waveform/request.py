@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Monday, 15th November 2021 09:57:10 am
+Last Modified: Monday, 15th November 2021 01:42:47 pm
 '''
 import os
 from http.client import IncompleteRead
@@ -332,8 +332,7 @@ class Request(object):
 
         os.makedirs(self.evtloc, exist_ok=True)
         self.evtfile = os.path.join(
-                self.evtloc,
-                datetime.now().strftime("%Y%m%dT%H%M%S"))
+            self.evtloc, datetime.now().strftime("%Y%m%dT%H%M%S"))
         self.evtcat.write(self.evtfile, format="QUAKEML")
         msg = 'Successfully obtained %s events' % str(self.evtcat.count())
         self.logger.info(msg)
