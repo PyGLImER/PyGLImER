@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Thursday, 28th October 2021 05:03:14 pm
+Last Modified: Monday, 15th November 2021 09:56:19 am
 '''
 
 # !/usr/bin/env python3
@@ -150,9 +150,10 @@ def download_small_db(
 def downloadwav(
     phase: str, min_epid: float, max_epid: float, model: TauPyModel,
     event_cat: Catalog, tz: float, ta: float, statloc: str,
-    rawloc: str, clients: list, network: str = None, station: str = None,
-    saveasdf: bool = False, log_fh: logging.FileHandler = None,
-        loglvl: int = logging.WARNING, verbose: bool = False):
+    rawloc: str, clients: list, evtfile: str, network: str = None,
+    station: str = None, saveasdf: bool = False,
+    log_fh: logging.FileHandler = None, loglvl: int = logging.WARNING,
+        verbose: bool = False, fast_redownload: bool = False):
     """
     Downloads the waveforms for all events in the catalogue
      for a circular domain around the epicentre with defined epicentral
@@ -244,7 +245,7 @@ def downloadwav(
     ####
     # Loop over each event
     global event
-    for event in tqdm(event_cat):
+    for ii, event in enumerate(tqdm(event_cat)):
         # fetch event-data
         origin_time = event.origins[0].time
         ot_fiss = UTCDateTime(origin_time).format_fissures()
@@ -326,6 +327,9 @@ def downloadwav(
 
             # If that works, we will be deleting the cached mseeds here
             shutil.rmtree(tmp.folder)
+
+        if fast_redownload:
+            event_cat[ii:].write(evtfile, format="QUAKEML")
 
     if not saveasdf:
         download_full_inventory(statloc, clients)

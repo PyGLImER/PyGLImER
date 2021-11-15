@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Thursday, 21st October 2021 10:30:47 am
+Last Modified: Monday, 15th November 2021 09:57:10 am
 '''
 import os
 from http.client import IncompleteRead
@@ -47,8 +47,8 @@ class Request(object):
         endtime: UTCDateTime or str, pol: str = 'v',
         minmag: float or int = 5.5, event_coords: tuple = None,
         network: str = None, station: str = None,
-        waveform_client: list = None, evtcat: Catalog = None,
-        loglvl: int = logging.WARNING,
+        waveform_client: list = None, evtcat: str = None,
+        continue_download: bool = False, loglvl: int = logging.WARNING,
             format: str = 'hdf5'):
         """
         Create object that is used to start the receiver function
@@ -127,6 +127,12 @@ class Request(object):
             in evtloc. If None a new catalogue will be downloaded (with the
             parameters defined before), by default None, defaults to None
         :type evtcat: str, optional
+        :param continue_download: Will delete already used events from the
+            event catalogue, so that the download will continue at the same
+            place after being interrupted. Will make the continuation faster,
+            but then old database will not be updated. Only makes sense if you
+            define an old catalogue. Defaults to False.
+        :type continue_download: bool, optional.
         :param loglvl: Level for the loggers. One of the following:
             CRITICAL, ERROR, WARNING, INFO,or DEBUG
             If the level is DEBUG, joblib will fall back to using only
@@ -244,9 +250,11 @@ class Request(object):
             # yaml files don't accept None
             evtcat = None
         if evtcat:
-            self.evtcat = read_events(os.path.join(self.evtloc, evtcat))
+            self.evtfile = os.path.join(self.evtloc, evtcat)
+            self.evtcat = read_events(self.evtfile)
         else:
             self.download_eventcat()
+        self.continue_download = continue_download
 
     def download_eventcat(self):
         """
@@ -279,7 +287,7 @@ class Request(object):
 
             # Query
             self.evtcat = Catalog()
-            # We convert the iterator to a list, so tqdm work properly
+            # We convert the iterator to a list, so tqdm workii properly
             for st, et in tqdm(list(zip(starttimes, endtimes))):
                 event_cat_done = False
                 while not event_cat_done:
@@ -323,11 +331,10 @@ class Request(object):
                     continue
 
         os.makedirs(self.evtloc, exist_ok=True)
-        # check if there is a better format for event catalog
-        self.evtcat.write(
-            os.path.join(
+        self.evtfile = os.path.join(
                 self.evtloc,
-                datetime.now().strftime("%Y%m%dT%H%M%S")), format="QUAKEML")
+                datetime.now().strftime("%Y%m%dT%H%M%S"))
+        self.evtcat.write(self.evtfile, format="QUAKEML")
         msg = 'Successfully obtained %s events' % str(self.evtcat.count())
         self.logger.info(msg)
 
@@ -350,8 +357,9 @@ class Request(object):
         downloadwav(
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
-            network=self.network, station=self.station, log_fh=self.fh,
-            loglvl=self.loglvl, verbose=verbose, saveasdf=self.h5)
+            self.evtfile, network=self.network, station=self.station,
+            log_fh=self.fh, loglvl=self.loglvl, verbose=verbose,
+            saveasdf=self.h5, fast_redownload=self.continue_download)
 
     def download_waveforms_small_db(self, channel: str):
         """
