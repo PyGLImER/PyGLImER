@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Monday, 15th November 2021 01:42:47 pm
+Last Modified: Monday, 13th December 2021 10:12:21 am
 '''
 import os
 from http.client import IncompleteRead
@@ -271,7 +271,7 @@ class Request(object):
         # :NOTE: perhaps it would be smart to save each year as a file?
         # BUt then again, they have different requirements...
         # Check length of request and split if longer than a year.
-        a = 365.25*24*3600  # one yr in seconds
+        a = 10*365.25*24*3600  # ten yrs in seconds
         if self.endtime-self.starttime > a:
             # Request is too big, break it down ito several requests
 
