@@ -15,13 +15,14 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Monday, 13th December 2021 10:12:21 am
+Last Modified: Monday, 13th December 2021 05:10:41 pm
 '''
 import os
 from http.client import IncompleteRead
 from datetime import datetime
 import logging
 import warnings
+import time
 
 from obspy import read_events, Catalog
 from obspy.clients.fdsn import Client as Webclient
@@ -291,6 +292,8 @@ class Request(object):
             for st, et in tqdm(list(zip(starttimes, endtimes))):
                 event_cat_done = False
                 while not event_cat_done:
+                    # Else the server could refuse the connection
+                    time.sleep(0.2)
                     try:
                         self.evtcat.extend(
                             self.webclient.get_events(
@@ -313,6 +316,8 @@ class Request(object):
 
         else:
             while not event_cat_done:
+                # Else the server could refuse the connection
+                time.sleep(0.2)
                 try:
                     self.evtcat = self.webclient.get_events(
                         starttime=self.starttime, endtime=self.endtime,
