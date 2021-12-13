@@ -12,7 +12,7 @@ Seismic Format (asdf).
 
 Created: Friday, 12th February 2021 03:24:30 pm
 
-Last Modified: Thursday, 28th October 2021 05:06:27 pm
+Last Modified: Monday, 13th December 2021 09:15:45 am
 '''
 
 import logging
@@ -112,6 +112,7 @@ def writeraw(
         # Start out by adding the event, which later will be associated to
         # each of the waveforms
             write_st(st, event, outfolder, statxml, resample)
+            del st, statxml
         except Exception as e:
             logger.error(e)
 
@@ -150,3 +151,4 @@ def write_st(
                 % str(evtid), UserWarning)
         ds.add_waveforms(st, tag='raw_recording', event_id=evtid)
         ds.add_stationxml(statxml)
+        del st, statxml
