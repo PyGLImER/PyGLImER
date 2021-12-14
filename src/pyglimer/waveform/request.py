@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Monday, 13th December 2021 05:10:41 pm
+Last Modified: Tuesday, 14th December 2021 08:10:25 am
 '''
 import os
 from http.client import IncompleteRead
@@ -272,7 +272,7 @@ class Request(object):
         # :NOTE: perhaps it would be smart to save each year as a file?
         # BUt then again, they have different requirements...
         # Check length of request and split if longer than a year.
-        a = 10*365.25*24*3600  # ten yrs in seconds
+        a = 2*365.25*24*3600  # two yrs in seconds
         if self.endtime-self.starttime > a:
             # Request is too big, break it down ito several requests
 
@@ -292,8 +292,8 @@ class Request(object):
             for st, et in tqdm(list(zip(starttimes, endtimes))):
                 event_cat_done = False
                 while not event_cat_done:
-                    # Else the server could refuse the connection
-                    time.sleep(0.2)
+                    # IRIS has a restriction of ten connections /second
+                    time.sleep(0.12)
                     try:
                         self.evtcat.extend(
                             self.webclient.get_events(
@@ -316,8 +316,8 @@ class Request(object):
 
         else:
             while not event_cat_done:
-                # Else the server could refuse the connection
-                time.sleep(0.2)
+                # IRIS has a restriction of ten connections /second
+                time.sleep(0.12)
                 try:
                     self.evtcat = self.webclient.get_events(
                         starttime=self.starttime, endtime=self.endtime,
