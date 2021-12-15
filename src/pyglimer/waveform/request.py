@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Wednesday, 15th December 2021 10:39:14 am
+Last Modified: Wednesday, 15th December 2021 03:01:49 pm
 '''
 import os
 from http.client import IncompleteRead
@@ -26,6 +26,7 @@ import time
 
 from obspy import read_events, Catalog
 from obspy.clients.fdsn import Client as Webclient
+from obspy.clients.fdsn.header import FDSNException
 from obspy.core.utcdatetime import UTCDateTime
 from obspy.taup import TauPyModel
 from tqdm import tqdm
@@ -305,7 +306,7 @@ class Request(object):
                                 minmagnitude=self.minmag,
                                 maxmagnitude=10, maxdepth=self.maxdepth))
                         event_cat_done = True
-                    except IncompleteRead as e:
+                    except (IncompleteRead, FDSNException) as e:
                         # Server interrupted connection, just try again
                         # This usually happens with enormeous requests, we
                         # should reduce a
@@ -327,7 +328,7 @@ class Request(object):
                         minmagnitude=self.minmag, maxmagnitude=10,
                         maxdepth=self.maxdepth)
                     event_cat_done = True
-                except IncompleteRead:
+                except (IncompleteRead, FDSNException):
                     # Server interrupted connection, just try again
                     # This usually happens with enormeous requests, we should
                     # reduce a
