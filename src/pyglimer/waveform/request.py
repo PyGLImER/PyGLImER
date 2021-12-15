@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Tuesday, 14th December 2021 08:10:25 am
+Last Modified: Wednesday, 15th December 2021 10:39:14 am
 '''
 import os
 from http.client import IncompleteRead
@@ -293,7 +293,7 @@ class Request(object):
                 event_cat_done = False
                 while not event_cat_done:
                     # IRIS has a restriction of ten connections /second
-                    time.sleep(0.12)
+                    time.sleep(0.2)
                     try:
                         self.evtcat.extend(
                             self.webclient.get_events(
@@ -305,13 +305,14 @@ class Request(object):
                                 minmagnitude=self.minmag,
                                 maxmagnitude=10, maxdepth=self.maxdepth))
                         event_cat_done = True
-                    except IncompleteRead:
+                    except IncompleteRead as e:
                         # Server interrupted connection, just try again
                         # This usually happens with enormeous requests, we
                         # should reduce a
-                        msg = "Server interrupted connection, \
-                            restarting download..."
+                        msg = \
+                            "Server interrupted connection, retrying..."
                         self.logger.warning(msg)
+                        self.logger.warning(e)
                         continue
 
         else:

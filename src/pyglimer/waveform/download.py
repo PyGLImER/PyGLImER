@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Monday, 15th November 2021 09:56:19 am
+Last Modified: Wednesday, 15th December 2021 09:19:10 am
 '''
 
 # !/usr/bin/env python3
@@ -20,6 +20,7 @@ import logging
 import os
 import shutil
 from tqdm import tqdm
+import sys
 
 from joblib import Parallel, delayed
 from obspy import read
@@ -326,10 +327,24 @@ def downloadwav(
             writeraw(event, tmp.folder, statloc, verbose, True)
 
             # If that works, we will be deleting the cached mseeds here
-            shutil.rmtree(tmp.folder)
+            try:
+                shutil.rmtree(tmp.folder)
+            except FileNotFoundError:
+                # This does not make much sense, but for some reason it occurs
+                # even if the folder exists? However, we will not want the
+                # whole process to stop because of this
+                pass
 
         if fast_redownload:
             event_cat[ii:].write(evtfile, format="QUAKEML")
+
+        local_vars = list(locals().items())
+        print('Checking size of variables...')
+        for var, obj in local_vars:
+            size = sys.getsizeof(obj)/(1024)**2
+            if size > 1/1024:
+                print(var, size)
+        print('...done')
 
     if not saveasdf:
         download_full_inventory(statloc, clients)
