@@ -12,7 +12,7 @@ Seismic Format (asdf).
 
 Created: Friday, 12th February 2021 03:24:30 pm
 
-Last Modified: Monday, 13th December 2021 09:15:45 am
+Last Modified: Friday, 24th December 2021 12:16:46 pm
 '''
 
 import logging
@@ -112,7 +112,6 @@ def writeraw(
         # Start out by adding the event, which later will be associated to
         # each of the waveforms
             write_st(st, event, outfolder, statxml, resample)
-            del st, statxml
         except Exception as e:
             logger.error(e)
 
@@ -140,15 +139,8 @@ def write_st(
         st.filter('lowpass_cheby_2', freq=4, maxorder=12)
         st = resample_or_decimate(st, 10, filter=False)
     with ASDFDataSet(os.path.join(outfolder, fname)) as ds:
-        # Retrieve eventid - not the most elgant way, but works
-        evtid = event.resource_id
-        try:
-            if st.count() >= 3:
-                ds.add_quakeml(event)
-        except ValueError:
-            logging.info(
-                'Event with event-id %s already in DB, skipping...'
-                % str(evtid), UserWarning)
-        ds.add_waveforms(st, tag='raw_recording', event_id=evtid)
-        ds.add_stationxml(statxml)
-        del st, statxml
+        # Events should not be added because it will read the whole
+        # catalogue every single time!
+        ds.add_waveforms(st, tag='raw_recording')
+        ds.add_stationxml(statxml)  # If there are still problems, we will have
+        # to check whether they are similar probelms to add event

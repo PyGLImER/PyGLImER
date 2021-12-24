@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 15th December 2021 09:19:10 am
+Last Modified: Friday, 24th December 2021 11:15:01 am
 '''
 
 # !/usr/bin/env python3
@@ -338,14 +338,6 @@ def downloadwav(
         if fast_redownload:
             event_cat[ii:].write(evtfile, format="QUAKEML")
 
-        local_vars = list(locals().items())
-        print('Checking size of variables...')
-        for var, obj in local_vars:
-            size = sys.getsizeof(obj)/(1024)**2
-            if size > 1/1024:
-                print(var, size)
-        print('...done')
-
     if not saveasdf:
         download_full_inventory(statloc, clients)
     tmp.folder = "finished"  # removes the restriction for preprocess.py
@@ -411,37 +403,40 @@ def wav_in_db(
     else:
         return False
 
+# That takes incredibly long. Reading and writing those huge event catalogues
+# def wav_in_asdf(
+#     network: str, station: str, location: str, channel: str,
+#         starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
+#     """Is the waveform already in the asdf database?
+#     Based on the assumption that the file is there if the event is there.
+#     Has the advantage that files that are trimmed differently will not be down-
+#     loaded again"""
+#     asdf_file = os.path.join(tmp.folder, os.pardir, '%s.%s.h5' % (
+#         network, station))
+
+#     with ASDFDataSet(asdf_file) as ds:
+#         return event in ds.events
+
 
 def wav_in_asdf(
     network: str, station: str, location: str, channel: str,
         starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
-    """Is the waveform already in the asdf database?
-    Based on the assumption that the file is there if the event is there.
-    Has the advantage that files that are trimmed differently will not be down-
-    loaded again"""
+    """Is the waveform already in the asdf database?"""
     asdf_file = os.path.join(tmp.folder, os.pardir, '%s.%s.h5' % (
         network, station))
 
+    # Change precision of start and endtime
+    # Pyasdf rounds with a precision of 1 for the starttime and 0 for endtime
+    starttime = UTCDateTime(
+        starttime, precision=1).format_iris_web_service()[:-4]
+    endtime = endtime.format_iris_web_service()[:-4]
+
+    # Waveforms are saved in pyasdf with filenames akin to:
+    nametag = "%s.%s.%s.%s__%s__%s__raw_recording"\
+        % (network, station, location, channel, starttime, endtime)
+
     with ASDFDataSet(asdf_file) as ds:
-        return event in ds.events
-
-
-# def wav_in_asdf(
-#     network: str, station: str, location: str, channel: str,
-#         starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
-#     """Is the waveform already in the asdf database?"""
-#     asdf_file = os.path.join(tmp.folder, os.pardir, '%s.%s.h5' % (
-#         network, station))
-
-#     # Change precision of start and endtime
-#     # Pyasdf rounds with a precision of 1 for the starttime and 0 for endtime
-#     starttime = UTCDateTime(
-#         starttime, precision=1).format_iris_web_service()[:-4]
-#     endtime = endtime.format_iris_web_service()[:-4]
-
-#     # Waveforms are saved in pyasdf with filenames akin to:
-#     nametag = "%s.%s.%s.%s__%s__%s__raw_recording"\
-#         % (network, station, location, channel, starttime, endtime)
-
-#     with ASDFDataSet(asdf_file) as ds:
-#         return nametag in ds.waveforms['%s.%s' % (network, station)]:
+        # Note .list only checks the names not the actual traces and is
+        # therefore way faster!
+        return nametag in ds.waveforms['%s.%s' % (network, station)].list()
+        # print(ds.waveforms['GE.APE'].list())
