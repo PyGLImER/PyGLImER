@@ -185,7 +185,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Tue May 26 2019 13:31:30</span>
-<span class="sd">Last Modified: Friday, 24th December 2021 11:15:01 am</span>
+<span class="sd">Last Modified: Friday, 24th December 2021 12:55:00 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="c1"># !/usr/bin/env python3</span>
@@ -197,7 +197,6 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
 <span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">read</span>
@@ -586,8 +585,8 @@
 <span class="c1">#         starttime: UTCDateTime, endtime: UTCDateTime) -&gt; bool:</span>
 <span class="c1">#     &quot;&quot;&quot;Is the waveform already in the asdf database?</span>
 <span class="c1">#     Based on the assumption that the file is there if the event is there.</span>
-<span class="c1">#     Has the advantage that files that are trimmed differently will not be down-</span>
-<span class="c1">#     loaded again&quot;&quot;&quot;</span>
+<span class="c1">#     Has the advantage that files that are trimmed differently will not be</span>
+<span class="c1">#     downloaded again&quot;&quot;&quot;</span>
 <span class="c1">#     asdf_file = os.path.join(tmp.folder, os.pardir, &#39;%s.%s.h5&#39; % (</span>
 <span class="c1">#         network, station))</span>
 
