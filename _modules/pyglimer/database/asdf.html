@@ -189,7 +189,7 @@
 
 <span class="sd">Created: Friday, 12th February 2021 03:24:30 pm</span>
 
-<span class="sd">Last Modified: Thursday, 28th October 2021 05:06:27 pm</span>
+<span class="sd">Last Modified: Friday, 24th December 2021 12:16:46 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -316,17 +316,11 @@
         <span class="n">st</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;lowpass_cheby_2&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">maxorder</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
         <span class="n">st</span> <span class="o">=</span> <span class="n">resample_or_decimate</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">ASDFDataSet</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outfolder</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
-        <span class="c1"># Retrieve eventid - not the most elgant way, but works</span>
-        <span class="n">evtid</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">resource_id</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">ds</span><span class="o">.</span><span class="n">add_quakeml</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s1">&#39;Event with event-id </span><span class="si">%s</span><span class="s1"> already in DB, skipping...&#39;</span>
-                <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">evtid</span><span class="p">),</span> <span class="ne">UserWarning</span><span class="p">)</span>
-        <span class="n">ds</span><span class="o">.</span><span class="n">add_waveforms</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;raw_recording&#39;</span><span class="p">,</span> <span class="n">event_id</span><span class="o">=</span><span class="n">evtid</span><span class="p">)</span>
-        <span class="n">ds</span><span class="o">.</span><span class="n">add_stationxml</span><span class="p">(</span><span class="n">statxml</span><span class="p">)</span></div>
+        <span class="c1"># Events should not be added because it will read the whole</span>
+        <span class="c1"># catalogue every single time!</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">add_waveforms</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;raw_recording&#39;</span><span class="p">)</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">add_stationxml</span><span class="p">(</span><span class="n">statxml</span><span class="p">)</span>  <span class="c1"># If there are still problems, we will have</span></div>
+        <span class="c1"># to check whether they are similar probelms to add event</span>
 </pre></div>
 
               </div>
