@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 24th December 2021 11:15:01 am
+Last Modified: Friday, 24th December 2021 12:55:00 pm
 '''
 
 # !/usr/bin/env python3
@@ -20,7 +20,6 @@ import logging
 import os
 import shutil
 from tqdm import tqdm
-import sys
 
 from joblib import Parallel, delayed
 from obspy import read
@@ -409,8 +408,8 @@ def wav_in_db(
 #         starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
 #     """Is the waveform already in the asdf database?
 #     Based on the assumption that the file is there if the event is there.
-#     Has the advantage that files that are trimmed differently will not be down-
-#     loaded again"""
+#     Has the advantage that files that are trimmed differently will not be
+#     downloaded again"""
 #     asdf_file = os.path.join(tmp.folder, os.pardir, '%s.%s.h5' % (
 #         network, station))
 
