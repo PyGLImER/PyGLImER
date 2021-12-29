@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Thursday, 21st October 2021 03:41:46 pm
+Last Modified: Wednesday, 29th December 2021 10:03:57 am
 '''
 
 from glob import glob
@@ -224,15 +224,16 @@ def compute_toa(
         the back azimuth, the distance between station and event in deg]
     :rtype: Tuple[UTCDateTime, float, float, float]
     """
-    origin = (evt.preferred_origin() or evt.origins[0])
+    origin = evt.preferred_origin() or evt.origins[0]
     distance, baz, _ = gps2dist_azimuth(
         slat, slon, origin.latitude,
         origin.longitude)
     distance = kilometer2degrees(distance/1000)
 
     # compute time of first arrival & ray parameter
+    odepth = origin.depth or 10000  # Some events have no depth information
     arrival = model.get_travel_times(
-        source_depth_in_km=origin.depth / 1000, distance_in_degree=distance,
+        source_depth_in_km=odepth / 1000, distance_in_degree=distance,
         phase_list=[phase])[0]
     rayp_s_deg = arrival.ray_param_sec_degree
     rayp = rayp_s_deg / 111319.9  # apparent slowness
