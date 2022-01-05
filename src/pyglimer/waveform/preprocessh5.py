@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Wednesday, 29th December 2021 10:03:57 am
+Last Modified: Wednesday, 5th January 2022 09:23:20 am
 '''
 
 from glob import glob
@@ -172,13 +172,22 @@ def _preprocessh5_single(
         rej = []
     with ASDFDataSet(f, mode='r') as ds:
         # get station inventory
-        inv = ds.waveforms[code].StationXML
+        try:
+            inv = ds.waveforms[code].StationXML
+        except KeyError:
+            logger.exception(
+                f'Could not find station inventory for Station {net}.{stat}')
         rf = RFStream()
         for evt in tqdm(ds.events):
             toa, rayp, rayp_s_deg, baz, distance = compute_toa(
                 evt, inv[0][0].latitude, inv[0][0].longitude, phase, model)
             st = ds.get_waveforms(
                 net, stat, '*', '*', toa-tz, toa+ta, 'raw_recording')
+            if not st.count():
+                logger.debug(
+                    f'No traces found for Station {net}.{stat} and arrival'
+                    + 'time {toa}')
+                continue
             rf_temp = __station_process__(
                 st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
                 ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
