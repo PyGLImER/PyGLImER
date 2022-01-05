@@ -8,13 +8,14 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 24th December 2021 12:55:00 pm
+Last Modified: Wednesday, 5th January 2022 04:47:10 pm
 '''
 
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 
+import fnmatch
 from http.client import IncompleteRead
 import logging
 import os
@@ -324,7 +325,6 @@ def downloadwav(
         # 2021.02.15 Here, we write everything to asdf
         if saveasdf:
             writeraw(event, tmp.folder, statloc, verbose, True)
-
             # If that works, we will be deleting the cached mseeds here
             try:
                 shutil.rmtree(tmp.folder)
@@ -333,7 +333,6 @@ def downloadwav(
                 # even if the folder exists? However, we will not want the
                 # whole process to stop because of this
                 pass
-
         if fast_redownload:
             event_cat[ii:].write(evtfile, format="QUAKEML")
 
@@ -402,20 +401,6 @@ def wav_in_db(
     else:
         return False
 
-# That takes incredibly long. Reading and writing those huge event catalogues
-# def wav_in_asdf(
-#     network: str, station: str, location: str, channel: str,
-#         starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
-#     """Is the waveform already in the asdf database?
-#     Based on the assumption that the file is there if the event is there.
-#     Has the advantage that files that are trimmed differently will not be
-#     downloaded again"""
-#     asdf_file = os.path.join(tmp.folder, os.pardir, '%s.%s.h5' % (
-#         network, station))
-
-#     with ASDFDataSet(asdf_file) as ds:
-#         return event in ds.events
-
 
 def wav_in_asdf(
     network: str, station: str, location: str, channel: str,
@@ -424,18 +409,34 @@ def wav_in_asdf(
     asdf_file = os.path.join(tmp.folder, os.pardir, '%s.%s.h5' % (
         network, station))
 
+    if not os.path.isfile(asdf_file):
+        logging.debug(f'{asdf_file} not found')
+        return False
+
     # Change precision of start and endtime
     # Pyasdf rounds with a precision of 1 for the starttime and 0 for endtime
     starttime = UTCDateTime(
-        starttime, precision=1).format_iris_web_service()[:-4]
-    endtime = endtime.format_iris_web_service()[:-4]
+        starttime, precision=1).format_iris_web_service()[:-6]
+    endtime = endtime.format_iris_web_service()[:-6]
+    # make them patterns for the cases where it downloads a slightly different
+    # time window
+    starttime += '??'
+    endtime += '??'
 
     # Waveforms are saved in pyasdf with filenames akin to:
     nametag = "%s.%s.%s.%s__%s__%s__raw_recording"\
         % (network, station, location, channel, starttime, endtime)
 
-    with ASDFDataSet(asdf_file) as ds:
+    with ASDFDataSet(asdf_file, mode='r') as ds:
         # Note .list only checks the names not the actual traces and is
         # therefore way faster!
-        return nametag in ds.waveforms['%s.%s' % (network, station)].list()
-        # print(ds.waveforms['GE.APE'].list())
+        try:
+            exists = len(fnmatch.filter(ds.waveforms[
+                '%s.%s' % (network, station)].list(), nametag)) > 0
+            # exists = nametag in ds.waveforms[
+            #     '%s.%s' % (network, station)].list()
+            if exists:
+                logging.debug(f'{nametag} already exists!')
+            return exists
+        except KeyError:
+            return False
