@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Wednesday, 5th January 2022 09:23:20 am
+Last Modified: Wednesday, 5th January 2022 09:52:45 am
 '''
 
 from glob import glob
@@ -170,7 +170,7 @@ def _preprocessh5_single(
     else:
         ret = []
         rej = []
-    with ASDFDataSet(f, mode='r') as ds:
+    with ASDFDataSet(f, mode='r', mpi=False) as ds:
         # get station inventory
         try:
             inv = ds.waveforms[code].StationXML
