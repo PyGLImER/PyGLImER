@@ -363,62 +363,62 @@ is to create a <em>yaml</em> file with the parameters. An example comes with thi
 <span class="normal">53</span>
 <span class="normal">54</span>
 <span class="normal">55</span>
-<span class="normal">56</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># This file is used to define the parameters used for PyGLImER</span>
-<span class="c1">#### Project wide parameters</span>
-<span class="c1"># lowest level project directory</span>
-<span class="nt">proj_dir </span><span class="p">:</span> <span class="s">&#39;database&#39;</span>
-<span class="c1"># raw waveforms</span>
-<span class="nt">raw_subdir</span><span class="p">:</span> <span class="s">&#39;waveforms/raw&#39;</span>
-<span class="c1"># preprocessed subdir, only in use if fileformat = &#39;mseed&#39;</span>
-<span class="nt">prepro_subdir</span><span class="p">:</span> <span class="s">&#39;waveforms/preprocessed&#39;</span>
-<span class="c1"># receiver function subdir</span>
-<span class="nt">rf_subdir</span><span class="p">:</span> <span class="s">&#39;waveforms/RF&#39;</span>
-<span class="c1"># statxml subdir</span>
-<span class="nt">statloc_subdir</span><span class="p">:</span> <span class="s">&#39;stations&#39;</span>
-<span class="c1"># subdir for event catalogues</span>
-<span class="nt">evt_subdir</span><span class="p">:</span> <span class="s">&#39;event_catalogs&#39;</span>
-<span class="c1"># directory for logging information</span>
-<span class="nt">log_subdir </span><span class="p">:</span> <span class="s">&#39;log&#39;</span>
-<span class="c1"># levels:</span>
-<span class="c1"># &#39;DEBUG&#39;, &#39;INFO&#39;, &#39;WARNING&#39;, &#39;ERROR&#39;, or &#39;CRITICAL&#39;</span>
-<span class="nt">loglvl</span><span class="p">:</span> <span class="s">&#39;DEBUG&#39;</span>
-<span class="c1"># format, either mseed or hdf5</span>
-<span class="nt">format</span><span class="p">:</span> <span class="s">&#39;hdf5&#39;</span>
+<span class="normal">56</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># This file is used to define the parameters used for PyGLImER</span><span class="w"></span>
+<span class="c1">#### Project wide parameters</span><span class="w"></span>
+<span class="c1"># lowest level project directory</span><span class="w"></span>
+<span class="nt">proj_dir </span><span class="p">:</span><span class="w"> </span><span class="s">&#39;database&#39;</span><span class="w"></span>
+<span class="c1"># raw waveforms</span><span class="w"></span>
+<span class="nt">raw_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;waveforms/raw&#39;</span><span class="w"></span>
+<span class="c1"># preprocessed subdir, only in use if fileformat = &#39;mseed&#39;</span><span class="w"></span>
+<span class="nt">prepro_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;waveforms/preprocessed&#39;</span><span class="w"></span>
+<span class="c1"># receiver function subdir</span><span class="w"></span>
+<span class="nt">rf_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;waveforms/RF&#39;</span><span class="w"></span>
+<span class="c1"># statxml subdir</span><span class="w"></span>
+<span class="nt">statloc_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;stations&#39;</span><span class="w"></span>
+<span class="c1"># subdir for event catalogues</span><span class="w"></span>
+<span class="nt">evt_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;event_catalogs&#39;</span><span class="w"></span>
+<span class="c1"># directory for logging information</span><span class="w"></span>
+<span class="nt">log_subdir </span><span class="p">:</span><span class="w"> </span><span class="s">&#39;log&#39;</span><span class="w"></span>
+<span class="c1"># levels:</span><span class="w"></span>
+<span class="c1"># &#39;DEBUG&#39;, &#39;INFO&#39;, &#39;WARNING&#39;, &#39;ERROR&#39;, or &#39;CRITICAL&#39;</span><span class="w"></span>
+<span class="nt">loglvl</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;DEBUG&#39;</span><span class="w"></span>
+<span class="c1"># format, either mseed or hdf5</span><span class="w"></span>
+<span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;hdf5&#39;</span><span class="w"></span>
 
-<span class="c1"># The teleseismic phase to use (P or S or also more exotic ones like SKS, PKP, ScS)</span>
-<span class="nt">phase</span><span class="p">:</span> <span class="s">&#39;S&#39;</span>
+<span class="c1"># The teleseismic phase to use (P or S or also more exotic ones like SKS, PKP, ScS)</span><span class="w"></span>
+<span class="nt">phase</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;S&#39;</span><span class="w"></span>
 
-<span class="c1">### Request parameters</span>
-<span class="c1">## First, everything concerning the download</span>
-<span class="c1"># waveform client, list of strings</span>
-<span class="c1"># use None if you want to download from all available FDSN servers</span>
-<span class="nt">waveform_client</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;IRIS&#39;</span><span class="p p-Indicator">]</span>
-<span class="c1"># Use an already downloaded event catalog</span>
-<span class="c1"># If so insert path+filename here.</span>
-<span class="nt">evtcat</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="c1"># earliest event</span>
-<span class="nt">starttime</span><span class="p">:</span> <span class="s">&#39;2009-01-1</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span>
-<span class="c1"># latest event</span>
-<span class="nt">endtime</span><span class="p">:</span> <span class="s">&#39;2011-12-31</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span>
-<span class="c1"># Minumum Magnitude</span>
-<span class="nt">minmag</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5.5</span>
-<span class="c1"># Network and station to use, unix-style wildcards are allowed</span>
-<span class="c1"># if you use the Request.download_waveforms_small_db method,</span>
-<span class="c1"># you can also provide a list of networks and/or a list of stations</span>
-<span class="nt">network</span><span class="p">:</span> <span class="s">&#39;YP&#39;</span>
-<span class="nt">station</span><span class="p">:</span> <span class="s">&#39;*&#39;</span>
+<span class="c1">### Request parameters</span><span class="w"></span>
+<span class="c1">## First, everything concerning the download</span><span class="w"></span>
+<span class="c1"># waveform client, list of strings</span><span class="w"></span>
+<span class="c1"># use None if you want to download from all available FDSN servers</span><span class="w"></span>
+<span class="nt">waveform_client</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;IRIS&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="c1"># Use an already downloaded event catalog</span><span class="w"></span>
+<span class="c1"># If so insert path+filename here.</span><span class="w"></span>
+<span class="nt">evtcat</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span><span class="w"></span>
+<span class="c1"># earliest event</span><span class="w"></span>
+<span class="nt">starttime</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2009-01-1</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span><span class="w"></span>
+<span class="c1"># latest event</span><span class="w"></span>
+<span class="nt">endtime</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2011-12-31</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span><span class="w"></span>
+<span class="c1"># Minumum Magnitude</span><span class="w"></span>
+<span class="nt">minmag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.5</span><span class="w"></span>
+<span class="c1"># Network and station to use, unix-style wildcards are allowed</span><span class="w"></span>
+<span class="c1"># if you use the Request.download_waveforms_small_db method,</span><span class="w"></span>
+<span class="c1"># you can also provide a list of networks and/or a list of stations</span><span class="w"></span>
+<span class="nt">network</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;YP&#39;</span><span class="w"></span>
+<span class="nt">station</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;*&#39;</span><span class="w"></span>
 
-<span class="c1">## concerning preprocessing</span>
-<span class="c1"># Coordinate system to rotate the seismogram to before deconvolution</span>
-<span class="c1"># RTZ, LQT, or PSS</span>
-<span class="nt">rot</span><span class="p">:</span> <span class="s">&#39;PSS&#39;</span>
-<span class="c1"># Polarisation, use v for v/q receiver functions</span>
-<span class="c1"># and h for transverse (SH)</span>
-<span class="nt">pol</span><span class="p">:</span> <span class="s">&#39;v&#39;</span>
-<span class="c1"># Deconvolution method to use</span>
-<span class="c1"># Iterative time domain: &#39;it&#39;</span>
-<span class="c1"># Waterlevel Spectral Division: &#39;waterlevel&#39;</span>
-<span class="nt">deconmeth</span><span class="p">:</span> <span class="s">&#39;it&#39;</span>
+<span class="c1">## concerning preprocessing</span><span class="w"></span>
+<span class="c1"># Coordinate system to rotate the seismogram to before deconvolution</span><span class="w"></span>
+<span class="c1"># RTZ, LQT, or PSS</span><span class="w"></span>
+<span class="nt">rot</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;PSS&#39;</span><span class="w"></span>
+<span class="c1"># Polarisation, use v for v/q receiver functions</span><span class="w"></span>
+<span class="c1"># and h for transverse (SH)</span><span class="w"></span>
+<span class="nt">pol</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;v&#39;</span><span class="w"></span>
+<span class="c1"># Deconvolution method to use</span><span class="w"></span>
+<span class="c1"># Iterative time domain: &#39;it&#39;</span><span class="w"></span>
+<span class="c1"># Waterlevel Spectral Division: &#39;waterlevel&#39;</span><span class="w"></span>
+<span class="nt">deconmeth</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;it&#39;</span><span class="w"></span>
 </pre></div>
 </td></tr></table></div>
 <p>You can then read the yaml file using <em>pyyaml</em> like so:</p>

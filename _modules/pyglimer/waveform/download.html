@@ -185,13 +185,14 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Tue May 26 2019 13:31:30</span>
-<span class="sd">Last Modified: Friday, 24th December 2021 12:55:00 pm</span>
+<span class="sd">Last Modified: Wednesday, 5th January 2022 04:47:10 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="c1"># !/usr/bin/env python3</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
 
 
+<span class="kn">import</span> <span class="nn">fnmatch</span>
 <span class="kn">from</span> <span class="nn">http.client</span> <span class="kn">import</span> <span class="n">IncompleteRead</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -501,7 +502,6 @@
         <span class="c1"># 2021.02.15 Here, we write everything to asdf</span>
         <span class="k">if</span> <span class="n">saveasdf</span><span class="p">:</span>
             <span class="n">writeraw</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">statloc</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-
             <span class="c1"># If that works, we will be deleting the cached mseeds here</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">)</span>
@@ -510,7 +510,6 @@
                 <span class="c1"># even if the folder exists? However, we will not want the</span>
                 <span class="c1"># whole process to stop because of this</span>
                 <span class="k">pass</span>
-
         <span class="k">if</span> <span class="n">fast_redownload</span><span class="p">:</span>
             <span class="n">event_cat</span><span class="p">[</span><span class="n">ii</span><span class="p">:]</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">evtfile</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;QUAKEML&quot;</span><span class="p">)</span>
 
@@ -579,20 +578,6 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
-<span class="c1"># That takes incredibly long. Reading and writing those huge event catalogues</span>
-<span class="c1"># def wav_in_asdf(</span>
-<span class="c1">#     network: str, station: str, location: str, channel: str,</span>
-<span class="c1">#         starttime: UTCDateTime, endtime: UTCDateTime) -&gt; bool:</span>
-<span class="c1">#     &quot;&quot;&quot;Is the waveform already in the asdf database?</span>
-<span class="c1">#     Based on the assumption that the file is there if the event is there.</span>
-<span class="c1">#     Has the advantage that files that are trimmed differently will not be</span>
-<span class="c1">#     downloaded again&quot;&quot;&quot;</span>
-<span class="c1">#     asdf_file = os.path.join(tmp.folder, os.pardir, &#39;%s.%s.h5&#39; % (</span>
-<span class="c1">#         network, station))</span>
-
-<span class="c1">#     with ASDFDataSet(asdf_file) as ds:</span>
-<span class="c1">#         return event in ds.events</span>
-
 
 <div class="viewcode-block" id="wav_in_asdf"><a class="viewcode-back" href="../../../chapters/api/waveform.html#pyglimer.waveform.download.wav_in_asdf">[docs]</a><span class="k">def</span> <span class="nf">wav_in_asdf</span><span class="p">(</span>
     <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -601,21 +586,37 @@
     <span class="n">asdf_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.h5&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">))</span>
 
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">asdf_file</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">asdf_file</span><span class="si">}</span><span class="s1"> not found&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
     <span class="c1"># Change precision of start and endtime</span>
     <span class="c1"># Pyasdf rounds with a precision of 1 for the starttime and 0 for endtime</span>
     <span class="n">starttime</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span>
-        <span class="n">starttime</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">format_iris_web_service</span><span class="p">()[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span>
-    <span class="n">endtime</span> <span class="o">=</span> <span class="n">endtime</span><span class="o">.</span><span class="n">format_iris_web_service</span><span class="p">()[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">starttime</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">format_iris_web_service</span><span class="p">()[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
+    <span class="n">endtime</span> <span class="o">=</span> <span class="n">endtime</span><span class="o">.</span><span class="n">format_iris_web_service</span><span class="p">()[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
+    <span class="c1"># make them patterns for the cases where it downloads a slightly different</span>
+    <span class="c1"># time window</span>
+    <span class="n">starttime</span> <span class="o">+=</span> <span class="s1">&#39;??&#39;</span>
+    <span class="n">endtime</span> <span class="o">+=</span> <span class="s1">&#39;??&#39;</span>
 
     <span class="c1"># Waveforms are saved in pyasdf with filenames akin to:</span>
     <span class="n">nametag</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">__</span><span class="si">%s</span><span class="s2">__</span><span class="si">%s</span><span class="s2">__raw_recording&quot;</span>\
         <span class="o">%</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">starttime</span><span class="p">,</span> <span class="n">endtime</span><span class="p">)</span>
 
-    <span class="k">with</span> <span class="n">ASDFDataSet</span><span class="p">(</span><span class="n">asdf_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">ASDFDataSet</span><span class="p">(</span><span class="n">asdf_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
         <span class="c1"># Note .list only checks the names not the actual traces and is</span>
         <span class="c1"># therefore way faster!</span>
-        <span class="k">return</span> <span class="n">nametag</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">waveforms</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">)]</span><span class="o">.</span><span class="n">list</span><span class="p">()</span></div>
-        <span class="c1"># print(ds.waveforms[&#39;GE.APE&#39;].list())</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exists</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fnmatch</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">waveforms</span><span class="p">[</span>
+                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">)]</span><span class="o">.</span><span class="n">list</span><span class="p">(),</span> <span class="n">nametag</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="c1"># exists = nametag in ds.waveforms[</span>
+            <span class="c1">#     &#39;%s.%s&#39; % (network, station)].list()</span>
+            <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">nametag</span><span class="si">}</span><span class="s1"> already exists!&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">exists</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
 </pre></div>
 
               </div>

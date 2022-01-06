@@ -189,7 +189,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Thursday, 18th February 2021 02:26:03 pm</span>
-<span class="sd">Last Modified: Thursday, 21st October 2021 03:41:46 pm</span>
+<span class="sd">Last Modified: Wednesday, 5th January 2022 09:52:45 am</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
@@ -347,15 +347,24 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">rej</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">with</span> <span class="n">ASDFDataSet</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">ASDFDataSet</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">mpi</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
         <span class="c1"># get station inventory</span>
-        <span class="n">inv</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">waveforms</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">StationXML</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">inv</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">waveforms</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">StationXML</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Could not find station inventory for Station </span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">rf</span> <span class="o">=</span> <span class="n">RFStream</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">events</span><span class="p">):</span>
             <span class="n">toa</span><span class="p">,</span> <span class="n">rayp</span><span class="p">,</span> <span class="n">rayp_s_deg</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">compute_toa</span><span class="p">(</span>
                 <span class="n">evt</span><span class="p">,</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
             <span class="n">st</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">get_waveforms</span><span class="p">(</span>
                 <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">toa</span><span class="o">-</span><span class="n">tz</span><span class="p">,</span> <span class="n">toa</span><span class="o">+</span><span class="n">ta</span><span class="p">,</span> <span class="s1">&#39;raw_recording&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">st</span><span class="o">.</span><span class="n">count</span><span class="p">():</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;No traces found for Station </span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1"> and arrival&#39;</span>
+                    <span class="o">+</span> <span class="s1">&#39;time </span><span class="si">{toa}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
             <span class="n">rf_temp</span> <span class="o">=</span> <span class="n">__station_process__</span><span class="p">(</span>
                 <span class="n">st</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span>
                 <span class="n">ta</span><span class="p">,</span> <span class="n">deconmeth</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span>
@@ -401,15 +410,16 @@
 <span class="sd">        the back azimuth, the distance between station and event in deg]</span>
 <span class="sd">    :rtype: Tuple[UTCDateTime, float, float, float]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">origin</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">distance</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">gps2dist_azimuth</span><span class="p">(</span>
         <span class="n">slat</span><span class="p">,</span> <span class="n">slon</span><span class="p">,</span> <span class="n">origin</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
         <span class="n">origin</span><span class="o">.</span><span class="n">longitude</span><span class="p">)</span>
     <span class="n">distance</span> <span class="o">=</span> <span class="n">kilometer2degrees</span><span class="p">(</span><span class="n">distance</span><span class="o">/</span><span class="mi">1000</span><span class="p">)</span>
 
     <span class="c1"># compute time of first arrival &amp; ray parameter</span>
+    <span class="n">odepth</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">depth</span> <span class="ow">or</span> <span class="mi">10000</span>  <span class="c1"># Some events have no depth information</span>
     <span class="n">arrival</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_travel_times</span><span class="p">(</span>
-        <span class="n">source_depth_in_km</span><span class="o">=</span><span class="n">origin</span><span class="o">.</span><span class="n">depth</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">distance_in_degree</span><span class="o">=</span><span class="n">distance</span><span class="p">,</span>
+        <span class="n">source_depth_in_km</span><span class="o">=</span><span class="n">odepth</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">distance_in_degree</span><span class="o">=</span><span class="n">distance</span><span class="p">,</span>
         <span class="n">phase_list</span><span class="o">=</span><span class="p">[</span><span class="n">phase</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">rayp_s_deg</span> <span class="o">=</span> <span class="n">arrival</span><span class="o">.</span><span class="n">ray_param_sec_degree</span>
     <span class="n">rayp</span> <span class="o">=</span> <span class="n">rayp_s_deg</span> <span class="o">/</span> <span class="mf">111319.9</span>  <span class="c1"># apparent slowness</span>
