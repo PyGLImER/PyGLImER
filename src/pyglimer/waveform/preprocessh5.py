@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Thursday, 21st October 2021 03:41:46 pm
+Last Modified: Wednesday, 5th January 2022 09:52:45 am
 '''
 
 from glob import glob
@@ -170,15 +170,24 @@ def _preprocessh5_single(
     else:
         ret = []
         rej = []
-    with ASDFDataSet(f, mode='r') as ds:
+    with ASDFDataSet(f, mode='r', mpi=False) as ds:
         # get station inventory
-        inv = ds.waveforms[code].StationXML
+        try:
+            inv = ds.waveforms[code].StationXML
+        except KeyError:
+            logger.exception(
+                f'Could not find station inventory for Station {net}.{stat}')
         rf = RFStream()
         for evt in tqdm(ds.events):
             toa, rayp, rayp_s_deg, baz, distance = compute_toa(
                 evt, inv[0][0].latitude, inv[0][0].longitude, phase, model)
             st = ds.get_waveforms(
                 net, stat, '*', '*', toa-tz, toa+ta, 'raw_recording')
+            if not st.count():
+                logger.debug(
+                    f'No traces found for Station {net}.{stat} and arrival'
+                    + 'time {toa}')
+                continue
             rf_temp = __station_process__(
                 st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
                 ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
@@ -224,15 +233,16 @@ def compute_toa(
         the back azimuth, the distance between station and event in deg]
     :rtype: Tuple[UTCDateTime, float, float, float]
     """
-    origin = (evt.preferred_origin() or evt.origins[0])
+    origin = evt.preferred_origin() or evt.origins[0]
     distance, baz, _ = gps2dist_azimuth(
         slat, slon, origin.latitude,
         origin.longitude)
     distance = kilometer2degrees(distance/1000)
 
     # compute time of first arrival & ray parameter
+    odepth = origin.depth or 10000  # Some events have no depth information
     arrival = model.get_travel_times(
-        source_depth_in_km=origin.depth / 1000, distance_in_degree=distance,
+        source_depth_in_km=odepth / 1000, distance_in_degree=distance,
         phase_list=[phase])[0]
     rayp_s_deg = arrival.ray_param_sec_degree
     rayp = rayp_s_deg / 111319.9  # apparent slowness

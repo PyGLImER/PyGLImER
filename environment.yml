@@ -9,7 +9,7 @@ dependencies:
   - geographiclib
   - joblib
   - matplotlib
-  - numpy
+  - numpy<1.22.0
   - obspy
   - OWSLib
   - pandas
