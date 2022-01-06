@@ -1,7 +1,7 @@
 # This file contains reuqirements for automatic deployment on CIs
 # To obtain install requirements, check setup.cfg or environment.yml
 global-land-mask
-numpy
+numpy<1.22.0
 OWSLib
 colorama
 cython # caropy
