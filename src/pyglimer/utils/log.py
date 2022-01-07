@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 13th September 2021 10:38:53 am
-Last Modified: Wednesday, 5th January 2022 10:20:36 am
+Last Modified: Friday, 7th January 2022 11:05:39 am
 '''
 
 import logging
@@ -29,8 +29,13 @@ def start_logger_if_necessary(
     :rtype: logging.Logger
     """
     logger = logging.getLogger(name)
-    while logger.hasHandlers():
-        logger.removeHandler(logger.handlers[0])
+    # remove all old handlers: Note that the hasHandlers function can lead
+    # to problems if there are several loggers already in the system?
+    while 1:
+        try:
+            logger.removeHandler(logger.handlers[0])
+        except IndexError:
+            break
     logger.setLevel(loglvl)
     sh = logging.StreamHandler()
     sh.setFormatter(logging.Formatter(

@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Thursday, 21st October 2021 03:38:49 pm
+Last Modified: Friday, 7th January 2022 11:19:07 am
 '''
 
 import fnmatch
@@ -117,7 +117,7 @@ def preprocess(
         preprocessh5(
             phase, rot, pol, taper_perc, model, taper_type, tz, ta,
             rawloc, rfloc, deconmeth, hc_filt, netrestr,
-            statrestr, logger, rflogger, client)
+            statrestr, logger, rflogger, client, event_cat)
         return
     # else:
     # Here, we work with all available cores to speed things up
