@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Friday, 7th January 2022 12:03:45 pm
+Last Modified: Friday, 7th January 2022 01:23:00 pm
 '''
 
 from glob import glob
@@ -187,8 +187,14 @@ def _preprocessh5_single(
         # At least only compute theoretical arrival if the distance is within
         # thresholds
         for evt in tqdm(evtcat):
-            # Skip events that are outside of operational window of station
+            # Already processed?
             ot = (evt.preferred_origin() or evt.origins[0]).time
+            ot_fiss = UTCDateTime(ot).format_fissures()
+            if ot_fiss in rej or ot_fiss in ret:
+                rflogger.debug('RF with ot %s already processed.' % ot_fiss)
+                return
+
+            # Skip events that are outside of operational window of station
             c_date = inv[0][0].creation_date
             t_date = inv[0][0].termination_date
             if (c_date and ot < c_date) or (t_date and t_date < ot):
@@ -294,9 +300,6 @@ def __station_process__(
     origin = (evt.preferred_origin() or evt.origins[0])
     ot_fiss = UTCDateTime(origin.time).format_fissures()
     ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]
-    if ot_fiss in rej or ot_fiss in ret:
-        rflogger.debug('RF with ot %s already processed.' % ot_fiss)
-        return
 
     # Remove repsonse
     st.attach_response(inv)
