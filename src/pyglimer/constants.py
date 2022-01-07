@@ -17,8 +17,6 @@ maxzm = 200  # maximum depth for multiple interpolation in km
 res = 1  # vertical resolution in km for interpolation and ccp bins
 # Time Window in seconds that should be downloaded before theoretical arrival
 onset = {'P': 30, 'S': 120}
-onsetP = 30
-onsetS = 120
 
 # Set event depth and min/max epicentral distances
 # according to phase
