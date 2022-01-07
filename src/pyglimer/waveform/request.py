@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Wednesday, 15th December 2021 03:01:49 pm
+Last Modified: Friday, 7th January 2022 11:18:40 am
 '''
 import os
 from http.client import IncompleteRead
@@ -31,7 +31,7 @@ from obspy.core.utcdatetime import UTCDateTime
 from obspy.taup import TauPyModel
 from tqdm import tqdm
 
-from pyglimer.constants import onsetP, onsetS
+from pyglimer import constants
 from pyglimer.waveform.download import download_small_db, downloadwav
 from pyglimer.waveform.preprocess import preprocess
 from pyglimer.utils import utils as pu
@@ -215,31 +215,14 @@ class Request(object):
         # according to phase (see Wilson et. al., 2006)
         # and time window before (tz) and after (ta) first arrival
         self.ta = 120
-        if self.phase == 'P':
-            self.maxdepth = None
-            self.min_epid = 28.1
-            self.max_epid = 95.8
-            self.tz = onsetP
-        elif self.phase == 'S':
-            self.maxdepth = 300
-            self.min_epid = 55
-            self.max_epid = 80
-            self.tz = onsetS
-        # (see Yuan et al. 2006)
-        elif self.phase.upper() == 'SCS':
-            self.maxdepth = 300
-            self.min_epid = 50
-            self.max_epid = 75
-            self.tz = onsetS
-        elif self.phase.upper() == 'SKS':
-            # (see Zhang et. al. (2014))
-            self.maxdepth = 300
-            self.min_epid = 90
-            self.max_epid = 120
-            self.tz = onsetS
-        else:
-            raise NameError('The phase', self.phase, """is not valid or not
-                            implemented yet.""")
+        try:
+            self.maxdepth = constants.maxdepth[phase.upper()]
+            self.min_epid = constants.min_epid[phase.upper()]
+            self.max_epid = constants.max_epid[phase.upper()]
+            self.tz = constants.onset[phase.upper()]
+        except KeyError:
+            raise NotImplementedError(
+                f'The phase {self.phase} is not valid or not implemented yet.')
 
         # network and station filters
         self.network = network

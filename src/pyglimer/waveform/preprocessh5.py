@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Wednesday, 5th January 2022 09:52:45 am
+Last Modified: Friday, 7th January 2022 01:23:00 pm
 '''
 
 from glob import glob
@@ -28,6 +28,7 @@ from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pyasdf import ASDFDataSet
 from tqdm.std import tqdm
 
+from pyglimer import constants
 from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.utils.log import create_mpi_logger
 from .qc import qcp, qcs
@@ -65,7 +66,7 @@ def preprocessh5(
     model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
     rawloc: str, rfloc: str, deconmeth: str, hc_filt: float, netrestr: str,
     statrestr: str, logger: logging.Logger, rflogger: logging.Logger,
-        client: str):
+        client: str, evtcat: obspy.Catalog):
     """
     Preprocess files saved in hdf5 (pyasdf) format. Will save the computed
     receiver functions in hdf5 format as well.
@@ -107,6 +108,8 @@ def preprocessh5(
     :type rflogger: logging.Logger
     :param client: Multiprocessing Backend to use
     :type client: str
+    :param evtcat: event Catalogue
+    :type evtcat: obspy.catalog
     :raises NotImplementedError: For uknowns multiprocessing backends.
     """
     os.makedirs(rfloc, exist_ok=True)
@@ -127,16 +130,16 @@ def preprocessh5(
         # get new MPI compatible loggers
         logger = create_mpi_logger(logger, rank)
         rflogger = logging.getLogger("%s.RF" % logger.name)
-        for ii in tqdm(ind):
+        for ii in ind:
             _preprocessh5_single(
                 phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, logger, rflogger, flist[ii]
+                deconmeth, hc_filt, logger, rflogger, flist[ii], evtcat
             )
     elif client.lower() == 'joblib':
         Parallel(n_jobs=-1)(delayed(_preprocessh5_single)(
             phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
             deconmeth, hc_filt, logger, rflogger,
-            f) for f in tqdm(flist))
+            f, evtcat) for f in tqdm(flist))
     else:
         raise NotImplementedError(
             'Unknown multiprocessing backend %s.' % client
@@ -148,7 +151,7 @@ def _preprocessh5_single(
     model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
     rfloc: str, deconmeth: str, hc_filt: float,
     logger: logging.Logger, rflogger: logging.Logger,
-        hdf5_file: str):
+        hdf5_file: str, evtcat: obspy.Catalog):
     """
     Single core processing of one single hdf5 file.
 
@@ -170,6 +173,7 @@ def _preprocessh5_single(
     else:
         ret = []
         rej = []
+    rflogger.info(f'Processing Station {code}')
     with ASDFDataSet(f, mode='r', mpi=False) as ds:
         # get station inventory
         try:
@@ -178,15 +182,38 @@ def _preprocessh5_single(
             logger.exception(
                 f'Could not find station inventory for Station {net}.{stat}')
         rf = RFStream()
-        for evt in tqdm(ds.events):
-            toa, rayp, rayp_s_deg, baz, distance = compute_toa(
-                evt, inv[0][0].latitude, inv[0][0].longitude, phase, model)
+        # There has to be a smarter way to do this. Only some events
+        # have a corresponding waveform
+        # At least only compute theoretical arrival if the distance is within
+        # thresholds
+        for evt in tqdm(evtcat):
+            # Already processed?
+            ot = (evt.preferred_origin() or evt.origins[0]).time
+            ot_fiss = UTCDateTime(ot).format_fissures()
+            if ot_fiss in rej or ot_fiss in ret:
+                rflogger.debug('RF with ot %s already processed.' % ot_fiss)
+                return
+
+            # Skip events that are outside of operational window of station
+            c_date = inv[0][0].creation_date
+            t_date = inv[0][0].termination_date
+            if (c_date and ot < c_date) or (t_date and t_date < ot):
+                rflogger.debug('Event outside operational window of station.')
+                continue
+            try:
+                toa, rayp, rayp_s_deg, baz, distance = compute_toa(
+                    evt, inv[0][0].latitude, inv[0][0].longitude, phase, model)
+            except IndexError:
+                rflogger.debug('Phase not viable for epicentral distance')
+            except ValueError as e:
+                rflogger.debug(e)
+                continue
             st = ds.get_waveforms(
                 net, stat, '*', '*', toa-tz, toa+ta, 'raw_recording')
             if not st.count():
-                logger.debug(
-                    f'No traces found for Station {net}.{stat} and arrival'
-                    + 'time {toa}')
+                logger.info(
+                    f'No traces found for Station {net}.{stat} and arrival '
+                    + f'time {toa}')
                 continue
             rf_temp = __station_process__(
                 st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
@@ -241,6 +268,17 @@ def compute_toa(
 
     # compute time of first arrival & ray parameter
     odepth = origin.depth or 10000  # Some events have no depth information
+
+    # Throw out events that should not be used for RFs
+    if (constants.maxdepth[phase]
+        and constants.maxdepth[phase] < odepth/1000) \
+        or not (
+            constants.min_epid[phase]
+            <= distance <= constants.max_epid[phase]):
+        raise ValueError(
+            f'Distance {distance} deg or origin depth {odepth}m should not be '
+            + 'used for RFs')
+
     arrival = model.get_travel_times(
         source_depth_in_km=odepth / 1000, distance_in_degree=distance,
         phase_list=[phase])[0]
@@ -262,9 +300,6 @@ def __station_process__(
     origin = (evt.preferred_origin() or evt.origins[0])
     ot_fiss = UTCDateTime(origin.time).format_fissures()
     ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]
-    if ot_fiss in rej or ot_fiss in ret:
-        rflogger.debug('RF with ot %s already processed.' % ot_fiss)
-        return
 
     # Remove repsonse
     st.attach_response(inv)
