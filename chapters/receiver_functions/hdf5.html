@@ -352,7 +352,7 @@ save the data afterwards. You can do that like below:</p>
 <span class="c1"># that has a header with all the station information</span>
 
 <span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="s1">&#39;/path/to/myfile.h5&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
-    <span class="n">rfst</span> <span class="o">=</span> <span class="n">rfdb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+    <span class="n">rfst</span> <span class="o">=</span> <span class="n">rfdb</span><span class="o">.</span><span class="n">add_rf</span><span class="p">(</span>
         <span class="n">rf</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;rf_with_my_funny_processing_idea&#39;</span><span class="p">)</span>
 </pre></div>
 </td></tr></table></div>

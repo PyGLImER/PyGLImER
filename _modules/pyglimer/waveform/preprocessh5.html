@@ -189,7 +189,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Thursday, 18th February 2021 02:26:03 pm</span>
-<span class="sd">Last Modified: Wednesday, 5th January 2022 09:52:45 am</span>
+<span class="sd">Last Modified: Friday, 7th January 2022 01:23:00 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
@@ -205,6 +205,7 @@
 <span class="kn">from</span> <span class="nn">pyasdf</span> <span class="kn">import</span> <span class="n">ASDFDataSet</span>
 <span class="kn">from</span> <span class="nn">tqdm.std</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
+<span class="kn">from</span> <span class="nn">pyglimer</span> <span class="kn">import</span> <span class="n">constants</span>
 <span class="kn">from</span> <span class="nn">pyglimer.database.rfh5</span> <span class="kn">import</span> <span class="n">RFDataBase</span>
 <span class="kn">from</span> <span class="nn">pyglimer.utils.log</span> <span class="kn">import</span> <span class="n">create_mpi_logger</span>
 <span class="kn">from</span> <span class="nn">.qc</span> <span class="kn">import</span> <span class="n">qcp</span><span class="p">,</span> <span class="n">qcs</span>
@@ -242,7 +243,7 @@
     <span class="n">model</span><span class="p">:</span> <span class="n">obspy</span><span class="o">.</span><span class="n">taup</span><span class="o">.</span><span class="n">TauPyModel</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ta</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rfloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">deconmeth</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">netrestr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">statrestr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span>
-        <span class="n">client</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">client</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">evtcat</span><span class="p">:</span> <span class="n">obspy</span><span class="o">.</span><span class="n">Catalog</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Preprocess files saved in hdf5 (pyasdf) format. Will save the computed</span>
 <span class="sd">    receiver functions in hdf5 format as well.</span>
@@ -284,6 +285,8 @@
 <span class="sd">    :type rflogger: logging.Logger</span>
 <span class="sd">    :param client: Multiprocessing Backend to use</span>
 <span class="sd">    :type client: str</span>
+<span class="sd">    :param evtcat: event Catalogue</span>
+<span class="sd">    :type evtcat: obspy.catalog</span>
 <span class="sd">    :raises NotImplementedError: For uknowns multiprocessing backends.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">rfloc</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -304,16 +307,16 @@
         <span class="c1"># get new MPI compatible loggers</span>
         <span class="n">logger</span> <span class="o">=</span> <span class="n">create_mpi_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">rank</span><span class="p">)</span>
         <span class="n">rflogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.RF&quot;</span> <span class="o">%</span> <span class="n">logger</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">ind</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">ind</span><span class="p">:</span>
             <span class="n">_preprocessh5_single</span><span class="p">(</span>
                 <span class="n">phase</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span> <span class="n">ta</span><span class="p">,</span> <span class="n">rfloc</span><span class="p">,</span>
-                <span class="n">deconmeth</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">,</span> <span class="n">flist</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+                <span class="n">deconmeth</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">,</span> <span class="n">flist</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">evtcat</span>
             <span class="p">)</span>
     <span class="k">elif</span> <span class="n">client</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;joblib&#39;</span><span class="p">:</span>
         <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">_preprocessh5_single</span><span class="p">)(</span>
             <span class="n">phase</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span> <span class="n">ta</span><span class="p">,</span> <span class="n">rfloc</span><span class="p">,</span>
             <span class="n">deconmeth</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">,</span>
-            <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">flist</span><span class="p">))</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">evtcat</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">flist</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="s1">&#39;Unknown multiprocessing backend </span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="n">client</span>
@@ -325,7 +328,7 @@
     <span class="n">model</span><span class="p">:</span> <span class="n">obspy</span><span class="o">.</span><span class="n">taup</span><span class="o">.</span><span class="n">TauPyModel</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ta</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">rfloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">deconmeth</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span>
-        <span class="n">hdf5_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">hdf5_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">evtcat</span><span class="p">:</span> <span class="n">obspy</span><span class="o">.</span><span class="n">Catalog</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Single core processing of one single hdf5 file.</span>
 
@@ -347,6 +350,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">rej</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Processing Station </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">ASDFDataSet</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">mpi</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
         <span class="c1"># get station inventory</span>
         <span class="k">try</span><span class="p">:</span>
@@ -355,15 +359,38 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;Could not find station inventory for Station </span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">rf</span> <span class="o">=</span> <span class="n">RFStream</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">events</span><span class="p">):</span>
-            <span class="n">toa</span><span class="p">,</span> <span class="n">rayp</span><span class="p">,</span> <span class="n">rayp_s_deg</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">compute_toa</span><span class="p">(</span>
-                <span class="n">evt</span><span class="p">,</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+        <span class="c1"># There has to be a smarter way to do this. Only some events</span>
+        <span class="c1"># have a corresponding waveform</span>
+        <span class="c1"># At least only compute theoretical arrival if the distance is within</span>
+        <span class="c1"># thresholds</span>
+        <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">evtcat</span><span class="p">):</span>
+            <span class="c1"># Already processed?</span>
+            <span class="n">ot</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">time</span>
+            <span class="n">ot_fiss</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">ot</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">ot_fiss</span> <span class="ow">in</span> <span class="n">rej</span> <span class="ow">or</span> <span class="n">ot_fiss</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">:</span>
+                <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;RF with ot </span><span class="si">%s</span><span class="s1"> already processed.&#39;</span> <span class="o">%</span> <span class="n">ot_fiss</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="c1"># Skip events that are outside of operational window of station</span>
+            <span class="n">c_date</span> <span class="o">=</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">creation_date</span>
+            <span class="n">t_date</span> <span class="o">=</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">termination_date</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">c_date</span> <span class="ow">and</span> <span class="n">ot</span> <span class="o">&lt;</span> <span class="n">c_date</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">t_date</span> <span class="ow">and</span> <span class="n">t_date</span> <span class="o">&lt;</span> <span class="n">ot</span><span class="p">):</span>
+                <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Event outside operational window of station.&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">toa</span><span class="p">,</span> <span class="n">rayp</span><span class="p">,</span> <span class="n">rayp_s_deg</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">compute_toa</span><span class="p">(</span>
+                    <span class="n">evt</span><span class="p">,</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Phase not viable for epicentral distance&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">continue</span>
             <span class="n">st</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">get_waveforms</span><span class="p">(</span>
                 <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">toa</span><span class="o">-</span><span class="n">tz</span><span class="p">,</span> <span class="n">toa</span><span class="o">+</span><span class="n">ta</span><span class="p">,</span> <span class="s1">&#39;raw_recording&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">st</span><span class="o">.</span><span class="n">count</span><span class="p">():</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;No traces found for Station </span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1"> and arrival&#39;</span>
-                    <span class="o">+</span> <span class="s1">&#39;time </span><span class="si">{toa}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;No traces found for Station </span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1"> and arrival &#39;</span>
+                    <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;time </span><span class="si">{</span><span class="n">toa</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="k">continue</span>
             <span class="n">rf_temp</span> <span class="o">=</span> <span class="n">__station_process__</span><span class="p">(</span>
                 <span class="n">st</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span>
@@ -418,6 +445,17 @@
 
     <span class="c1"># compute time of first arrival &amp; ray parameter</span>
     <span class="n">odepth</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">depth</span> <span class="ow">or</span> <span class="mi">10000</span>  <span class="c1"># Some events have no depth information</span>
+
+    <span class="c1"># Throw out events that should not be used for RFs</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">maxdepth</span><span class="p">[</span><span class="n">phase</span><span class="p">]</span>
+        <span class="ow">and</span> <span class="n">constants</span><span class="o">.</span><span class="n">maxdepth</span><span class="p">[</span><span class="n">phase</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">odepth</span><span class="o">/</span><span class="mi">1000</span><span class="p">)</span> \
+        <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="n">constants</span><span class="o">.</span><span class="n">min_epid</span><span class="p">[</span><span class="n">phase</span><span class="p">]</span>
+            <span class="o">&lt;=</span> <span class="n">distance</span> <span class="o">&lt;=</span> <span class="n">constants</span><span class="o">.</span><span class="n">max_epid</span><span class="p">[</span><span class="n">phase</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Distance </span><span class="si">{</span><span class="n">distance</span><span class="si">}</span><span class="s1"> deg or origin depth </span><span class="si">{</span><span class="n">odepth</span><span class="si">}</span><span class="s1">m should not be &#39;</span>
+            <span class="o">+</span> <span class="s1">&#39;used for RFs&#39;</span><span class="p">)</span>
+
     <span class="n">arrival</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_travel_times</span><span class="p">(</span>
         <span class="n">source_depth_in_km</span><span class="o">=</span><span class="n">odepth</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">distance_in_degree</span><span class="o">=</span><span class="n">distance</span><span class="p">,</span>
         <span class="n">phase_list</span><span class="o">=</span><span class="p">[</span><span class="n">phase</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
@@ -439,9 +477,6 @@
     <span class="n">origin</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">ot_fiss</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">origin</span><span class="o">.</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()</span>
     <span class="n">ot_loc</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">origin</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">precision</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">ot_fiss</span> <span class="ow">in</span> <span class="n">rej</span> <span class="ow">or</span> <span class="n">ot_fiss</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">:</span>
-        <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;RF with ot </span><span class="si">%s</span><span class="s1"> already processed.&#39;</span> <span class="o">%</span> <span class="n">ot_fiss</span><span class="p">)</span>
-        <span class="k">return</span>
 
     <span class="c1"># Remove repsonse</span>
     <span class="n">st</span><span class="o">.</span><span class="n">attach_response</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
