@@ -189,7 +189,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Thursday, 18th February 2021 02:26:03 pm</span>
-<span class="sd">Last Modified: Friday, 7th January 2022 01:23:00 pm</span>
+<span class="sd">Last Modified: Monday, 10th January 2022 04:37:41 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
@@ -363,25 +363,32 @@
         <span class="c1"># have a corresponding waveform</span>
         <span class="c1"># At least only compute theoretical arrival if the distance is within</span>
         <span class="c1"># thresholds</span>
+
+        <span class="c1"># Which times are available as raw data?</span>
+        <span class="n">t_raw</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span> <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">waveforms</span><span class="p">[</span><span class="n">code</span><span class="p">][</span>
+                <span class="s1">&#39;raw_recording&#39;</span><span class="p">]]</span>
+        <span class="n">t_raw_min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">t_raw</span><span class="p">)</span> <span class="o">-</span> <span class="mi">600</span>
+        <span class="n">t_raw_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">t_raw</span><span class="p">)</span> <span class="o">+</span> <span class="mi">600</span>
+        <span class="c1"># c_date = inv[0][0].creation_date</span>
+        <span class="c1"># t_date = inv[0][0].termination_date</span>
         <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">evtcat</span><span class="p">):</span>
             <span class="c1"># Already processed?</span>
             <span class="n">ot</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">time</span>
             <span class="n">ot_fiss</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">ot</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">ot_fiss</span> <span class="ow">in</span> <span class="n">rej</span> <span class="ow">or</span> <span class="n">ot_fiss</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">:</span>
                 <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;RF with ot </span><span class="si">%s</span><span class="s1"> already processed.&#39;</span> <span class="o">%</span> <span class="n">ot_fiss</span><span class="p">)</span>
-                <span class="k">return</span>
-
-            <span class="c1"># Skip events that are outside of operational window of station</span>
-            <span class="n">c_date</span> <span class="o">=</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">creation_date</span>
-            <span class="n">t_date</span> <span class="o">=</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">termination_date</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">c_date</span> <span class="ow">and</span> <span class="n">ot</span> <span class="o">&lt;</span> <span class="n">c_date</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">t_date</span> <span class="ow">and</span> <span class="n">t_date</span> <span class="o">&lt;</span> <span class="n">ot</span><span class="p">):</span>
-                <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Event outside operational window of station.&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c1"># Skip events with no data.</span>
+            <span class="k">if</span> <span class="n">ot</span> <span class="o">&lt;</span> <span class="n">t_raw_min</span> <span class="ow">or</span> <span class="n">t_raw_max</span> <span class="o">&lt;</span> <span class="n">ot</span><span class="p">:</span>
+                <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No raw data for event </span><span class="si">{</span><span class="n">ot_fiss</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
                 <span class="k">continue</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">toa</span><span class="p">,</span> <span class="n">rayp</span><span class="p">,</span> <span class="n">rayp_s_deg</span><span class="p">,</span> <span class="n">baz</span><span class="p">,</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">compute_toa</span><span class="p">(</span>
                     <span class="n">evt</span><span class="p">,</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
                 <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Phase not viable for epicentral distance&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">rflogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
                 <span class="k">continue</span>
@@ -399,18 +406,18 @@
             <span class="k">if</span> <span class="n">rf_temp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">rf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rf_temp</span><span class="p">)</span>
             <span class="c1"># Write regularly to not clutter too much into the RAM</span>
-            <span class="k">if</span> <span class="n">rf</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">30</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rf</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">20</span><span class="p">:</span>
+                <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Writing to file </span><span class="si">%s</span><span class="s1">....&#39;</span> <span class="o">%</span> <span class="n">outf</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="n">outf</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
-                    <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Writing to file </span><span class="si">%s</span><span class="s1">....&#39;</span> <span class="o">%</span> <span class="n">outf</span><span class="p">)</span>
                     <span class="n">rfdb</span><span class="o">.</span><span class="n">add_rf</span><span class="p">(</span><span class="n">rf</span><span class="p">)</span>
                     <span class="n">rfdb</span><span class="o">.</span><span class="n">_add_known_waveform_data</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">rej</span><span class="p">)</span>
-                    <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;..written.&#39;</span><span class="p">)</span>
+                <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;..written.&#39;</span><span class="p">)</span>
                 <span class="n">rf</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Writing to file </span><span class="si">%s</span><span class="s1">....&#39;</span> <span class="o">%</span> <span class="n">outf</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">RFDataBase</span><span class="p">(</span><span class="n">outf</span><span class="p">)</span> <span class="k">as</span> <span class="n">rfdb</span><span class="p">:</span>
-        <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Writing to file </span><span class="si">%s</span><span class="s1">....&#39;</span> <span class="o">%</span> <span class="n">outf</span><span class="p">)</span>
         <span class="n">rfdb</span><span class="o">.</span><span class="n">add_rf</span><span class="p">(</span><span class="n">rf</span><span class="p">)</span>
         <span class="n">rfdb</span><span class="o">.</span><span class="n">_add_known_waveform_data</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">rej</span><span class="p">)</span>
-        <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;..written.&#39;</span><span class="p">)</span>
+    <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;..written.&#39;</span><span class="p">)</span>
     <span class="n">rf</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
 
@@ -476,7 +483,7 @@
     <span class="c1"># Is the data already processed?</span>
     <span class="n">origin</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">ot_fiss</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">origin</span><span class="o">.</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()</span>
-    <span class="n">ot_loc</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">origin</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">precision</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
+    <span class="c1"># ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]</span>
 
     <span class="c1"># Remove repsonse</span>
     <span class="n">st</span><span class="o">.</span><span class="n">attach_response</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
@@ -531,13 +538,15 @@
         <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ot_fiss</span><span class="p">)</span>
 
     <span class="k">except</span> <span class="n">SNRError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">rflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">ot_fiss</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">rej</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ot_fiss</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RF creation failed&quot;</span><span class="p">)</span>
-        <span class="n">rflogger</span><span class="o">.</span><span class="n">exception</span><span class="p">([</span><span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">ot_loc</span><span class="p">,</span> <span class="n">e</span><span class="p">])</span>
+        <span class="n">rflogger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+            <span class="s1">&#39;RF Creation failed. Waveform Data:</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ot_fiss</span><span class="si">}</span><span class="se">\n</span><span class="s1">original error:</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="n">RF</span>
@@ -629,7 +638,7 @@
     <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statlon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span>
     <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">elevation</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stream accepted. Preprocessing successful&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stream accepted </span><span class="si">{</span><span class="n">ot_fiss</span><span class="si">}</span><span class="s2">. Preprocessing successful&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">st</span><span class="p">,</span> <span class="n">crit</span><span class="p">,</span> <span class="n">infodict</span>
 </pre></div>
