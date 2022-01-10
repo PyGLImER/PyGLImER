@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Monday, 10th January 2022 04:33:40 pm
+Last Modified: Monday, 10th January 2022 04:37:41 pm
 '''
 
 from glob import glob
@@ -229,7 +229,7 @@ def _preprocessh5_single(
             if rf_temp is not None:
                 rf.append(rf_temp)
             # Write regularly to not clutter too much into the RAM
-            if rf.count() >= 2:  # 30
+            if rf.count() >= 20:
                 rflogger.info('Writing to file %s....' % outf)
                 with RFDataBase(outf) as rfdb:
                     rfdb.add_rf(rf)
