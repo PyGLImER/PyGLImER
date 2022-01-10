@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Friday, 7th January 2022 01:23:00 pm
+Last Modified: Monday, 10th January 2022 04:33:40 pm
 '''
 
 from glob import glob
@@ -186,25 +186,32 @@ def _preprocessh5_single(
         # have a corresponding waveform
         # At least only compute theoretical arrival if the distance is within
         # thresholds
+
+        # Which times are available as raw data?
+        t_raw = [
+            tr.stats.starttime for tr in ds.waveforms[code][
+                'raw_recording']]
+        t_raw_min = min(t_raw) - 600
+        t_raw_max = max(t_raw) + 600
+        # c_date = inv[0][0].creation_date
+        # t_date = inv[0][0].termination_date
         for evt in tqdm(evtcat):
             # Already processed?
             ot = (evt.preferred_origin() or evt.origins[0]).time
             ot_fiss = UTCDateTime(ot).format_fissures()
             if ot_fiss in rej or ot_fiss in ret:
                 rflogger.debug('RF with ot %s already processed.' % ot_fiss)
-                return
-
-            # Skip events that are outside of operational window of station
-            c_date = inv[0][0].creation_date
-            t_date = inv[0][0].termination_date
-            if (c_date and ot < c_date) or (t_date and t_date < ot):
-                rflogger.debug('Event outside operational window of station.')
+                continue
+            # Skip events with no data.
+            if ot < t_raw_min or t_raw_max < ot:
+                rflogger.debug(f'No raw data for event {ot_fiss}.')
                 continue
             try:
                 toa, rayp, rayp_s_deg, baz, distance = compute_toa(
                     evt, inv[0][0].latitude, inv[0][0].longitude, phase, model)
             except IndexError:
                 rflogger.debug('Phase not viable for epicentral distance')
+                continue
             except ValueError as e:
                 rflogger.debug(e)
                 continue
@@ -222,18 +229,18 @@ def _preprocessh5_single(
             if rf_temp is not None:
                 rf.append(rf_temp)
             # Write regularly to not clutter too much into the RAM
-            if rf.count() >= 30:
+            if rf.count() >= 2:  # 30
+                rflogger.info('Writing to file %s....' % outf)
                 with RFDataBase(outf) as rfdb:
-                    rflogger.info('Writing to file %s....' % outf)
                     rfdb.add_rf(rf)
                     rfdb._add_known_waveform_data(ret, rej)
-                    rflogger.info('..written.')
+                rflogger.info('..written.')
                 rf.clear()
+    rflogger.info('Writing to file %s....' % outf)
     with RFDataBase(outf) as rfdb:
-        rflogger.info('Writing to file %s....' % outf)
         rfdb.add_rf(rf)
         rfdb._add_known_waveform_data(ret, rej)
-        rflogger.info('..written.')
+    rflogger.info('..written.')
     rf.clear()
 
 
@@ -299,7 +306,7 @@ def __station_process__(
     # Is the data already processed?
     origin = (evt.preferred_origin() or evt.origins[0])
     ot_fiss = UTCDateTime(origin.time).format_fissures()
-    ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]
+    # ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]
 
     # Remove repsonse
     st.attach_response(inv)
@@ -354,13 +361,15 @@ def __station_process__(
         ret.append(ot_fiss)
 
     except SNRError as e:
-        rflogger.info(e)
+        rflogger.info(f'{e} {ot_fiss}')
         rej.append(ot_fiss)
         return None
 
     except Exception as e:
-        print("RF creation failed")
-        rflogger.exception([net, stat, ot_loc, e])
+        rflogger.exception(
+            'RF Creation failed. Waveform Data:\n'
+            + f'{net}.{stat}.{ot_fiss}\noriginal error:\n'
+            + f'{e}')
         return None
 
     return RF
@@ -452,6 +461,6 @@ def __rotate_qc(
     infodict['statlon'] = station_inv[0][0][0].longitude
     infodict['statel'] = station_inv[0][0][0].elevation
 
-    logger.info("Stream accepted. Preprocessing successful")
+    logger.info(f"Stream accepted {ot_fiss}. Preprocessing successful")
 
     return st, crit, infodict
