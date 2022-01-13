@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Monday, 10th January 2022 04:37:41 pm
+Last Modified: Thursday, 13th January 2022 09:15:00 am
 '''
 
 from glob import glob
@@ -222,10 +222,17 @@ def _preprocessh5_single(
                     f'No traces found for Station {net}.{stat} and arrival '
                     + f'time {toa}')
                 continue
-            rf_temp = __station_process__(
-                st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
-                ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
-                distance, rayp, rayp_s_deg, toa, rej, ret)
+            try:
+                rf_temp = __station_process__(
+                    st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
+                    ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
+                    distance, rayp, rayp_s_deg, toa, rej, ret)
+            except Exception as e:
+                rflogger.exception(
+                    'RF Creation failed. Waveform Data:\n'
+                    + f'{net}.{stat}.{ot_fiss}\noriginal error:\n'
+                    + f'{e}')
+                continue
             if rf_temp is not None:
                 rf.append(rf_temp)
             # Write regularly to not clutter too much into the RAM
