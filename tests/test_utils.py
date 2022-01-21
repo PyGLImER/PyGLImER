@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 19th August 2021 04:01:26 pm
-Last Modified: Thursday, 20th January 2022 04:17:09 pm
+Last Modified: Friday, 21st January 2022 08:58:53 am
 '''
 import os
 import unittest
@@ -398,8 +398,9 @@ class TestCosTaperSt(unittest.TestCase):
         exp = Stream(trcs)
         out = pu.cos_taper_st(self.st.copy(), 5, True)
         calls = [
-            mock.call(self.st[0], 5, True), mock.call(self.st[1], 5, True),
-            mock.call(self.st[2], 5, True)]
+            mock.call(self.st[0], 5, True, 'both'),
+            mock.call(self.st[1], 5, True, 'both'),
+            mock.call(self.st[2], 5, True, 'both')]
         cos_taper_mock.assert_has_calls(calls)
         for tr, tro in zip(exp, out):
             np.testing.assert_array_equal(tr.data, tro.data)
@@ -412,7 +413,7 @@ class TestCosTaperSt(unittest.TestCase):
             out = pu.cos_taper_st(intr, 5, True)
             self.assertEqual(len(w), 1)
         calls = [
-            mock.call(intr, 5, True)]
+            mock.call(intr, 5, True, 'both')]
         cos_taper_mock.assert_has_calls(calls)
         self.assertEqual(out, Stream([intr]))
 
@@ -425,6 +426,9 @@ class TestCosTaper(unittest.TestCase):
         tl = np.random.randint(1, high=20)
         self.tls = tl * self.sr  # taper len in samples
         self.tr_res = pu.cos_taper(self.testtr.copy(), tl, False)
+        self.tr_resl = pu.cos_taper(self.testtr.copy(), tl, False, side='left')
+        self.tr_resr = pu.cos_taper(
+            self.testtr.copy(), tl, False, side='right')
 
     def test_in_place(self):
         self.sr = 10  # sampling rate
@@ -438,20 +442,33 @@ class TestCosTaper(unittest.TestCase):
     def test_ends(self):
         # Check that ends reduce to 0
         self.assertAlmostEqual(self.tr_res.data[0], 0)
+        self.assertAlmostEqual(self.tr_resl.data[0], 0)
         self.assertAlmostEqual(self.tr_res.data[-1], 0)
+        self.assertAlmostEqual(self.tr_resr.data[-1], 0)
+        # one-sided taper
+        self.assertAlmostEqual(self.tr_resl.data[-1], 1)
+        self.assertAlmostEqual(self.tr_resr.data[0], 1)
 
     def test_middle(self):
         # Assert that the rest (in the middle) stayed the same
         self.assertTrue(np.array_equal(
             self.testtr[self.tls:-self.tls], self.tr_res[self.tls:-self.tls]))
+        self.assertTrue(np.array_equal(
+            self.testtr[self.tls:-self.tls], self.tr_resr[self.tls:-self.tls]))
+        self.assertTrue(np.array_equal(
+            self.testtr[self.tls:-self.tls], self.tr_resl[self.tls:-self.tls]))
 
     def test_up_down(self):
         # Everything else should be between 1 and 0
         # up
         self.assertTrue(np.all(self.tr_res[1:-1] > 0))
+        self.assertTrue(np.all(self.tr_resr[1:-1] > 0))
+        self.assertTrue(np.all(self.tr_resl[1:-1] > 0))
         self.assertTrue(np.all(self.tr_res[1:self.tls] < 1))
+        self.assertTrue(np.all(self.tr_resl[1:self.tls] < 1))
         # down
         self.assertTrue(np.all(self.tr_res[-self.tls:-1] < 1))
+        self.assertTrue(np.all(self.tr_resr[-self.tls:-1] < 1))
 
     def test_empty_trace(self):
         testtr = Trace(np.array([]), header=self.testtr.stats)
