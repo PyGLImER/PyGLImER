@@ -11,7 +11,7 @@ Plot utilities not to modify plots or base plots.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 05:05:08 pm
-Last Modified: Monday, 1st November 2021 11:01:50 am
+Last Modified: Friday, 21st January 2022 08:44:08 am
 '''
 
 import os
@@ -491,7 +491,8 @@ def plot_section(
 
 def combined_single_station_plot(
     rfst, stack, ylim: Tuple[float, float] = None, std: np.ndarray = None,
-        outputfile: str = None, fmt: str = None, title: str = None):
+    scalingfactor: float = 6, outputfile: str = None, fmt: str = None,
+        title: str = None):
     set_mpl_params()
 
     fig, _ = plt.subplots(
@@ -521,8 +522,8 @@ def combined_single_station_plot(
     # Section plot
     ax1 = plt.subplot(122, sharey=ax0)
     ax1 = plot_section(
-        rfst, line=False, scalingfactor=6, timelimits=ylim, ax=ax1, show=False,
-        title='Individual Receiver Functions')
+        rfst, line=False, scalingfactor=scalingfactor, timelimits=ylim, ax=ax1,
+        show=False, title='Individual Receiver Functions')
     ax1.set_xlabel(r'Epicentral Distance, $\Delta$ [$^{\circ}$]')
     ax1.tick_params(
         axis='both', which='both', right=False, top=False, labelleft=False,
