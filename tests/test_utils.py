@@ -8,14 +8,18 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 19th August 2021 04:01:26 pm
-Last Modified: Tuesday, 26th October 2021 02:57:09 pm
+Last Modified: Thursday, 20th January 2022 04:17:09 pm
 '''
 import os
 import unittest
 from unittest.mock import MagicMock, call, patch, DEFAULT, ANY
+from unittest import mock
+import warnings
 
 import numpy as np
-from obspy import read_inventory, Inventory, read, read_events, UTCDateTime
+from obspy import read_inventory, Inventory, read, read_events, UTCDateTime,\
+    Trace, Stream
+from obspy.core import AttribDict
 import obspy
 
 from pyglimer.utils import utils as pu
@@ -381,6 +385,102 @@ class TestCreateBulkStr(unittest.TestCase):
                 ['a', 'b'], 'c', '00', 'BHZ', '*', '*')
 
 
+class TestCosTaperSt(unittest.TestCase):
+    def setUp(self) -> None:
+        self.st = read()
+
+    @mock.patch('pyglimer.utils.utils.cos_taper')
+    def test_result(self, cos_taper_mock):
+        trcs = [
+            Trace(np.zeros((10,))), Trace(np.ones((10,))),
+            Trace(2*np.ones((10,)))]
+        cos_taper_mock.side_effect = trcs
+        exp = Stream(trcs)
+        out = pu.cos_taper_st(self.st.copy(), 5, True)
+        calls = [
+            mock.call(self.st[0], 5, True), mock.call(self.st[1], 5, True),
+            mock.call(self.st[2], 5, True)]
+        cos_taper_mock.assert_has_calls(calls)
+        for tr, tro in zip(exp, out):
+            np.testing.assert_array_equal(tr.data, tro.data)
+
+    @mock.patch('pyglimer.utils.utils.cos_taper')
+    def test_trace_cannot_be_tapered(self, cos_taper_mock):
+        intr = Trace(np.zeros((10,)))
+        cos_taper_mock.side_effect = ValueError
+        with warnings.catch_warnings(record=True) as w:
+            out = pu.cos_taper_st(intr, 5, True)
+            self.assertEqual(len(w), 1)
+        calls = [
+            mock.call(intr, 5, True)]
+        cos_taper_mock.assert_has_calls(calls)
+        self.assertEqual(out, Stream([intr]))
+
+
+class TestCosTaper(unittest.TestCase):
+    def setUp(self):
+        self.sr = 10  # sampling rate
+        st = AttribDict({'sampling_rate': self.sr})
+        self.testtr = Trace(np.ones(1000), header=st)
+        tl = np.random.randint(1, high=20)
+        self.tls = tl * self.sr  # taper len in samples
+        self.tr_res = pu.cos_taper(self.testtr.copy(), tl, False)
+
+    def test_in_place(self):
+        self.sr = 10  # sampling rate
+        st = AttribDict({'sampling_rate': self.sr})
+        testtro = Trace(np.ones(1000), header=st)
+        testtr = testtro.copy()
+        self.assertEqual(testtr, testtro)
+        pu.cos_taper(testtr, 5, False)
+        self.assertNotEqual(testtr, testtro)
+
+    def test_ends(self):
+        # Check that ends reduce to 0
+        self.assertAlmostEqual(self.tr_res.data[0], 0)
+        self.assertAlmostEqual(self.tr_res.data[-1], 0)
+
+    def test_middle(self):
+        # Assert that the rest (in the middle) stayed the same
+        self.assertTrue(np.array_equal(
+            self.testtr[self.tls:-self.tls], self.tr_res[self.tls:-self.tls]))
+
+    def test_up_down(self):
+        # Everything else should be between 1 and 0
+        # up
+        self.assertTrue(np.all(self.tr_res[1:-1] > 0))
+        self.assertTrue(np.all(self.tr_res[1:self.tls] < 1))
+        # down
+        self.assertTrue(np.all(self.tr_res[-self.tls:-1] < 1))
+
+    def test_empty_trace(self):
+        testtr = Trace(np.array([]), header=self.testtr.stats)
+        with self.assertRaises(ValueError):
+            pu.cos_taper(testtr, 10, False)
+
+    def test_invalid_taper_len(self):
+        with self.assertRaises(ValueError):
+            pu.cos_taper(
+                self.testtr.copy(), np.random.randint(-100, 0), False)
+        with self.assertRaises(ValueError):
+            pu.cos_taper(self.testtr.copy(), 501*self.sr, False)
+
+    def test_masked_value(self):
+        tr0 = read()[0]
+        tr1 = tr0.copy()
+        tr1.stats.starttime += 240
+        st = Stream([tr0, tr1])
+        tr = st.merge()[0]
+        tl = np.random.randint(1, high=5)
+        ttr = pu.cos_taper(tr, tl, True)
+        # Check that ends reduce to 0
+        self.assertAlmostEqual(ttr.data[0], 0)
+        self.assertAlmostEqual(ttr.data[-1], 0)
+        self.assertAlmostEqual(ttr.data[tr0.count()-1], 0)
+        self.assertAlmostEqual(ttr.data[-tr1.count()], 0)
+        # Also the mask should be retained
+        self.assertEqual(
+            len(ttr.data[ttr.data.mask]), ttr.count()-tr0.count()-tr1.count())
 
 
 if __name__ == "__main__":
