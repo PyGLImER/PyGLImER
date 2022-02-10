@@ -8,11 +8,13 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 19th August 2021 04:27:03 pm
-Last Modified: Friday, 20th August 2021 11:20:12 am
+Last Modified: Thursday, 10th February 2022 04:47:15 pm
 '''
 
 import unittest
+from unittest import mock
 from copy import deepcopy
+import os
 
 import numpy as np
 
@@ -71,6 +73,13 @@ class TestComplexModel(unittest.TestCase):
         self.assertAlmostEqual(vp*6371/(6371-z), vpf)
         self.assertAlmostEqual(vs*6371/(6371-z), vsf)
 
+    @mock.patch('pyglimer.utils.createvmodel.pickle.dump')
+    def test_write(self, pickle_mock):
+        # open_mock.return_value = 'blablafile'
+        with mock.patch("builtins.open", mock.mock_open()) as mf:
+            self.model.write('thisfile')
+            pickle_mock.assert_called_once_with(self.model, mf(), mock.ANY)
+
 
 class TestAVVModel(unittest.TestCase):
     def setUp(self):
@@ -89,6 +98,16 @@ class TestAVVModel(unittest.TestCase):
         vps, vss = self.model.query(lat, lon, 'S')
         self.assertGreater(vps, vpp)
         self.assertGreater(vss, vsp)
+
+    @mock.patch('pyglimer.utils.createvmodel.os.makedirs')
+    @mock.patch('pyglimer.utils.createvmodel.np.savez')
+    def test_write(self, savez_mock, mkdir_mock):
+        self.model.write('this_file')
+        self.assertIn(
+            os.path.join(
+                'PyGLImER', 'src', 'pyglimer', 'data', 'velocity_models',
+                'this_file'), mkdir_mock.call_args_list[-1][0][0])
+        mkdir_mock.assert_called_once_with(mock.ANY, exist_ok=True)
 
 
 if __name__ == "__main__":
