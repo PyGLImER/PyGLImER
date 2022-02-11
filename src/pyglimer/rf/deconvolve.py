@@ -13,7 +13,7 @@ Various Deconvolution approaches used for the RF technique.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 16th October 2019 02:24:30 pm
-Last Modified: Thursday, 21st October 2021 03:59:20 pm
+Last Modified: Friday, 11th February 2022 03:50:37 pm
 
 '''
 
@@ -282,8 +282,9 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
             rfq[i] = rfq[i]*fac
 
     # back transformation
-    v = np.arange(0, nf/2+1)*2*np.pi/(nf*ndt)
-    v = np.concatenate((v, -np.flip(v[1:-1])))
+    # v = np.arange(0, nf/2+1)*2*np.pi/(nf*ndt)
+    # v = np.concatenate((v, -np.flip(v[1:-1])))
+    v = np.fft.fftfreq(nf, 1/ndt)
     x = np.exp(-1j*v*tshift)
     rfq = np.multiply(rfq, x)
     rfl = np.multiply(rfl, x)
