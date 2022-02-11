@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Friday, 21st January 2022 02:06:54 pm
+Last Modified: Friday, 11th February 2022 01:06:08 pm
 '''
 
 import fnmatch
@@ -345,13 +345,13 @@ def all_traces_recursive(
         elif not fnmatch.fnmatch(v.name, pattern) and v.name not in pattern:
             continue
         else:
-            try:
-                stream.append(
-                    RFTrace(np.array(v), header=read_hdf5_header(v)))
-            except ValueError:
-                warnings.warn(
-                    'Header could not be converted. Attributes are: %s' % (
-                        str(v.attrs)))
+            # try:
+            stream.append(
+                RFTrace(np.array(v), header=read_hdf5_header(v)))
+            # except ValueError:
+            #     warnings.warn(
+            #         'Header could not be converted. Attributes are: %s' % (
+            #             str(v.attrs)))
     return stream
 
 
@@ -394,7 +394,17 @@ def read_hdf5_header(dataset: h5py.Dataset) -> Stats:
     header = {}
     for key in attrs:
         if key in time_keys:
-            header[key] = UTCDateTime(attrs[key])
+            try:
+                header[key] = UTCDateTime(attrs[key])
+            except ValueError as e:
+                # temporary fix of obspy's UTCDateTime issue. SHould be removed
+                # as soon as they release version 1.23
+                if attrs[key][4:8] == '360T':
+                    new = list(attrs[key])
+                    new[6] = '1'
+                    header[key] = UTCDateTime(''.join(new)) - 86400
+                else:
+                    raise e
         elif key == 'processing':
             header[key] = list(attrs[key])
         else:
