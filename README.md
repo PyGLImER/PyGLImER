@@ -17,8 +17,14 @@ successor of the [GLImER](http://stephanerondenay.com/glimer-web.html) project.
 A few simple steps:
 
 ```bash
+# Download via wget or web-browser
+wget https://github.com/PeterMakus/PyGLImER/archive/refs/heads/master.zip
+
+# unzip the package
+unzip master.zip
+
 # Change directory to the same directory that this repo is in (i.e., same directory as setup.py)
-cd $PathToThisRepo$
+cd PyGLImER-master  # That's the standard name the folder should have
 
 # Create the conda environment and install dependencies
 conda env create -f environment.yml
