@@ -190,22 +190,25 @@
 
 
 <span class="sd">Created: Tue May 26 2019 13:31:30</span>
-<span class="sd">Last Modified: Tuesday, 26th October 2021 02:40:15 pm</span>
+<span class="sd">Last Modified: Thursday, 20th January 2022 04:22:08 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Event</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
 <span class="kn">from</span> <span class="nn">obspy.clients.fdsn</span> <span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">header</span>
 <span class="kn">from</span> <span class="nn">obspy.clients.fdsn.header</span> <span class="kn">import</span> <span class="n">URL_MAPPINGS</span>
 <span class="kn">from</span> <span class="nn">obspy.core.inventory.inventory</span> <span class="kn">import</span> <span class="n">Inventory</span>
-<span class="kn">from</span> <span class="nn">obspy.core.stream</span> <span class="kn">import</span> <span class="n">Stream</span>
+<span class="kn">from</span> <span class="nn">obspy.core.stream</span> <span class="kn">import</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">Trace</span>
 <span class="kn">from</span> <span class="nn">obspy.core.utcdatetime</span> <span class="kn">import</span> <span class="n">UTCDateTime</span>
 
 <span class="kn">from</span> <span class="nn">pyglimer.database.asdf</span> <span class="kn">import</span> <span class="n">write_st</span>
+<span class="kn">from</span> <span class="nn">pyglimer.rf.create</span> <span class="kn">import</span> <span class="n">RFStream</span><span class="p">,</span> <span class="n">RFTrace</span>
 
 <span class="kn">from</span> <span class="nn">.roundhalf</span> <span class="kn">import</span> <span class="n">roundhalf</span>
 
@@ -566,6 +569,83 @@
 <span class="s1">length?</span><span class="se">\n\t</span><span class="s1">2. If stations is a string and not a wildcard (i.e., *), networks </span><span class="se">\</span>
 <span class="s1">has to be a string as well.&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">bulk</span></div>
+
+
+<div class="viewcode-block" id="cos_taper_st"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.cos_taper_st">[docs]</a><span class="k">def</span> <span class="nf">cos_taper_st</span><span class="p">(</span>
+    <span class="n">st</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">taper_len</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">taper_at_masked</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">side</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;both&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stream</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies a cosine taper to the input Stream.</span>
+
+<span class="sd">    :param tr: Input Stream</span>
+<span class="sd">    :type tr: :class:`~obspy.core.stream.Stream`</span>
+<span class="sd">    :param taper_len: Length of the taper per side</span>
+<span class="sd">    :type taper_len: float</span>
+<span class="sd">    :param taper_at_masked: applies a split to each trace and merges again</span>
+<span class="sd">        afterwards</span>
+<span class="sd">    :type taper_at_masked: bool</span>
+<span class="sd">    :return: Tapered Stream</span>
+<span class="sd">    :rtype: :class:`~obspy.core.stream.Stream`</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        This action is performed in place. If you want to keep the</span>
+<span class="sd">        original data use :func:`~obspy.core.stream.Stream.copy`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">Trace</span><span class="p">):</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">Stream</span><span class="p">([</span><span class="n">st</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">RFTrace</span><span class="p">):</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">RFStream</span><span class="p">([</span><span class="n">st</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">st</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">st</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">cos_taper</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">taper_len</span><span class="p">,</span> <span class="n">taper_at_masked</span><span class="p">,</span> <span class="n">side</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, corresponding trace not tapered.&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">st</span></div>
+
+
+<div class="viewcode-block" id="cos_taper"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.cos_taper">[docs]</a><span class="k">def</span> <span class="nf">cos_taper</span><span class="p">(</span>
+    <span class="n">tr</span><span class="p">:</span> <span class="n">Trace</span><span class="p">,</span> <span class="n">taper_len</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">taper_at_masked</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">side</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;both&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trace</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies a cosine taper to the input trace.</span>
+
+<span class="sd">    :param tr: Input Trace</span>
+<span class="sd">    :type tr: Trace</span>
+<span class="sd">    :param taper_len: Length of the taper per side in seconds</span>
+<span class="sd">    :type taper_len: float</span>
+<span class="sd">    :param taper_at_masked: applies a split to each trace and merges again</span>
+<span class="sd">        afterwards</span>
+<span class="sd">    :type taper_at_masked: bool</span>
+<span class="sd">    :return: Tapered Trace</span>
+<span class="sd">    :rtype: Trace</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        This action is performed in place. If you want to keep the</span>
+<span class="sd">        original data use :func:`~obspy.core.trace.Trace.copy`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">taper_len</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Taper length must be larger than 0 s&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">taper_at_masked</span><span class="p">:</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">cos_taper_st</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">taper_len</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">merge</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">count</span><span class="p">():</span>
+            <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+            <span class="k">return</span> <span class="n">tr</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Taper length must be larger than 0 s&#39;</span><span class="p">)</span>
+    <span class="n">taper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">tl_n</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">taper_len</span><span class="o">*</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tl_n</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">npts</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Taper Length * 2 has to be smaller or equal to trace</span><span class="se">\&#39;</span><span class="s1">s length.&#39;</span><span class="p">)</span>
+    <span class="n">tap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">tl_n</span><span class="o">*</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;both&#39;</span><span class="p">]:</span>
+        <span class="n">taper</span><span class="p">[:</span><span class="n">tl_n</span><span class="p">]</span> <span class="o">=</span> <span class="n">tap</span><span class="p">[:</span><span class="n">tl_n</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;both&#39;</span><span class="p">]:</span>
+        <span class="n">taper</span><span class="p">[</span><span class="o">-</span><span class="n">tl_n</span><span class="p">:]</span> <span class="o">=</span> <span class="n">tap</span><span class="p">[</span><span class="o">-</span><span class="n">tl_n</span><span class="p">:]</span>
+    <span class="n">tr</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">taper</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tr</span></div>
 </pre></div>
 
               </div>
@@ -587,7 +667,7 @@
     
     <div class="footer-item">
       <p class="copyright">
-    &copy; Copyright 2021, the PyGLImER development team.<br>
+    &copy; Copyright 2022, the PyGLImER development team.<br>
 </p>
     </div>
     

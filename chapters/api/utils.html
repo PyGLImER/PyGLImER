@@ -803,11 +803,65 @@ Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-
 </dd>
 </dl>
 <p>Created: Tue May 26 2019 13:31:30
-Last Modified: Tuesday, 26th October 2021 02:40:15 pm</p>
+Last Modified: Thursday, 20th January 2022 04:22:08 pm</p>
 <dl class="py function">
 <dt id="pyglimer.utils.utils.chunks">
 <code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">chunks</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">list</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#chunks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.chunks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Yield successive n-sized chunks from lst. Useful for multi-threading</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.utils.cos_taper">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">cos_taper</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tr</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.trace.Trace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_len</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_at_masked</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'both'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">obspy.core.trace.Trace</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#cos_taper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.cos_taper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a cosine taper to the input trace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tr</strong> (<em>Trace</em>) – Input Trace</p></li>
+<li><p><strong>taper_len</strong> (<em>float</em>) – Length of the taper per side in seconds</p></li>
+<li><p><strong>taper_at_masked</strong> (<em>bool</em>) – applies a split to each trace and merges again
+afterwards</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tapered Trace</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Trace</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This action is performed in place. If you want to keep the
+original data use <code class="xref py py-func docutils literal notranslate"><span class="pre">copy()</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyglimer.utils.utils.cos_taper_st">
+<code class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></code><code class="sig-name descname"><span class="pre">cos_taper_st</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_len</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_at_masked</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'both'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">obspy.core.stream.Stream</span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#cos_taper_st"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.cos_taper_st" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a cosine taper to the input Stream.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Stream</span></code>) – Input Stream</p></li>
+<li><p><strong>taper_len</strong> (<em>float</em>) – Length of the taper per side</p></li>
+<li><p><strong>taper_at_masked</strong> (<em>bool</em>) – applies a split to each trace and merges again
+afterwards</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tapered Stream</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Stream</span></code></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This action is performed in place. If you want to keep the
+original data use <code class="xref py py-func docutils literal notranslate"><span class="pre">copy()</span></code>.</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -963,7 +1017,7 @@ also create subfolders).</p></li>
     
     <div class="footer-item">
       <p class="copyright">
-    &copy; Copyright 2021, the PyGLImER development team.<br>
+    &copy; Copyright 2022, the PyGLImER development team.<br>
 </p>
     </div>
     
