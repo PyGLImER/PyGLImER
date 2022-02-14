@@ -10,7 +10,7 @@ Tests the pyglimer.rf.deconvolve module
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th March 2021 10:13:35 am
-Last Modified: Thursday, 21st October 2021 03:28:53 pm
+Last Modified: Monday, 14th February 2022 11:21:24 am
 '''
 import unittest
 
@@ -105,43 +105,54 @@ class TestSpectralDivision(unittest.TestCase):
 
     def test_by_self_con_P(self):
         v = np.zeros((200,))
-        v[50:] = np.random.random((150,))
-        qrf, lrf = spectraldivision(v, v, 0.1, 5, 'con', 'P')
-        self.assertTrue(np.allclose(qrf, lrf))
-        self.assertTrue(np.argmax(qrf), 50)
+        # pre-event noise
+        v[:50] = np.random.random((50,))*.5
+        v[50:] = np.random.random((150,))*10
+        qrf, lrf = spectraldivision(v, v, .1, 0, 'con', 'P')
+        np.testing.assert_allclose(qrf, lrf)
+        self.assertEqual(np.argmax(qrf), 0)
+
+    def test_shift_con_P(self):
+        v = np.zeros((200,))
+        # pre-event noise
+        v[:50] = np.random.random((50,))*.5
+        v[50:] = np.random.random((150,))*10
+        qrf, lrf = spectraldivision(v, v, .1, 5, 'con', 'P')
+        np.testing.assert_allclose(qrf, lrf)
+        self.assertEqual(np.argmax(qrf), 50)
 
     def test_by_self_wat_P(self):
         v = np.zeros((200,))
         v[50:] = np.random.random((150,))
-        qrf, lrf = spectraldivision(v, v, 0.1, 5, 'wat', 'P')
-        self.assertTrue(np.allclose(qrf, lrf))
-        self.assertTrue(np.argmax(qrf), 50)
+        qrf, lrf = spectraldivision(v, v, 0.5, 5, 'wat', 'P')
+        np.testing.assert_allclose(qrf, lrf)
+        self.assertEqual(np.argmax(qrf), 10)
 
     def test_by_self_fqd_P(self):
         v = np.zeros((200,))
         v[50:] = np.random.random((150,))
         qrf, _ = spectraldivision(v, v, 0.1, 5, 'fqd', 'P')
-        self.assertTrue(np.argmax(qrf), 50)
+        self.assertEqual(np.argmax(qrf), 50)
 
     def test_by_self_con_S(self):
         v = np.zeros((200,))
         v[50:] = np.random.random((150,))
-        qrf, lrf = spectraldivision(v, v, 0.1, 5, 'con', 'S')
-        self.assertTrue(np.allclose(qrf, lrf))
-        self.assertTrue(np.argmax(qrf), 50)
+        qrf, lrf = spectraldivision(v, v, 0.1, 10, 'con', 'S')
+        np.testing.assert_allclose(qrf, lrf)
+        self.assertEqual(np.argmax(qrf), 100)
 
     def test_by_self_wat_S(self):
         v = np.zeros((200,))
         v[50:] = np.random.random((150,))
         qrf, lrf = spectraldivision(v, v, 0.1, 5, 'wat', 'S')
-        self.assertTrue(np.allclose(qrf, lrf))
-        self.assertTrue(np.argmax(qrf), 50)
+        np.testing.assert_allclose(qrf, lrf)
+        self.assertEqual(np.argmax(qrf), 50)
 
     def test_by_self_fqd_S(self):
         v = np.zeros((200,))
         v[50:] = np.random.random((150,))
-        qrf, _ = spectraldivision(v, v, 0.1, 5, 'fqd', 'S')
-        self.assertTrue(np.argmax(qrf), 50)
+        qrf, _ = spectraldivision(v, v, 2, 16, 'fqd', 'S')
+        self.assertEqual(np.argmax(qrf), 8)
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Sunday, 20th October 2019 10:31:03 am
-Last Modified: Thursday, 26th August 2021 08:32:29 am
+Last Modified: Monday, 14th February 2022 11:19:41 am
 '''
 
 import numpy as np
@@ -232,10 +232,7 @@ def sshift(s: np.ndarray, N2: int, dt: float, shift: float) -> np.ndarray:
 
     S = np.fft.fft(s, n=N2)
 
-    k = round(shift/dt)  # discrete shift
-    p = 2*np.pi*np.arange(1, N2+1, 1, dtype=float)*k/N2  # phase shift
-    S = S*(np.cos(p) - 1j*np.sin(p))
-
-    s_out = np.real(np.fft.ifft(S, N2))/np.cos(2*np.pi*k/N2)  # correct scaling
-
-    return s_out
+    # Omega
+    phshift = np.exp(-1j*shift*np.fft.fftfreq(N2, dt)*2*np.pi)
+    s_out = np.real(np.fft.ifft(phshift*S))
+    return s_out[:len(s)]

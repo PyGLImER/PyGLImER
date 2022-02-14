@@ -13,7 +13,7 @@ Various Deconvolution approaches used for the RF technique.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 16th October 2019 02:24:30 pm
-Last Modified: Friday, 11th February 2022 03:50:37 pm
+Last Modified: Monday, 14th February 2022 11:16:53 am
 
 '''
 
@@ -103,7 +103,8 @@ def it(P, H, dt, shift=0, width=2.5, omega_min=0.5, it_max=200):
 
     # shift and truncate RF
     if shift:  # only if shift !=0
-        rf = sptb.sshift(rf, N2, dt, shift)
+        # rf = sptb.sshift(rf, N2, dt, shift)
+        rf = np.roll(rf, round(shift/dt))
     rf = rf[0:N]
 
     return rf, it, IR
@@ -284,10 +285,11 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
     # back transformation
     # v = np.arange(0, nf/2+1)*2*np.pi/(nf*ndt)
     # v = np.concatenate((v, -np.flip(v[1:-1])))
-    v = np.fft.fftfreq(nf, 1/ndt)
-    x = np.exp(-1j*v*tshift)
-    rfq = np.multiply(rfq, x)
-    rfl = np.multiply(rfl, x)
+    v = np.fft.fftfreq(nf, ndt)*2*np.pi
+    # Re-Introduce Time shift
+    dt = np.exp(-1j*v*tshift)  # /ndt
+    rfq = np.multiply(rfq, dt)
+    rfl = np.multiply(rfl, dt)
 
     qrft = np.fft.ifft(rfq, n=nf)
     qrf = qrft.real
