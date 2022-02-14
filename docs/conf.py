@@ -19,11 +19,11 @@ sys.path.insert(0, os.path.abspath('../src'))
 # -- Project information -----------------------------------------------------
 
 project = 'PyGLImER'
-copyright = '2021, the PyGLImER development team'
+copyright = '2022, the PyGLImER development team'
 author = 'Peter Makus, Lucas Sawade'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.5'
+release = '0.1.9'
 
 
 # -- General configuration ---------------------------------------------------
