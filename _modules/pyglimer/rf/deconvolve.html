@@ -192,7 +192,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Wednesday, 16th October 2019 02:24:30 pm</span>
-<span class="sd">Last Modified: Friday, 11th February 2022 03:50:37 pm</span>
+<span class="sd">Last Modified: Monday, 14th February 2022 11:16:53 am</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 
@@ -282,7 +282,8 @@
 
     <span class="c1"># shift and truncate RF</span>
     <span class="k">if</span> <span class="n">shift</span><span class="p">:</span>  <span class="c1"># only if shift !=0</span>
-        <span class="n">rf</span> <span class="o">=</span> <span class="n">sptb</span><span class="o">.</span><span class="n">sshift</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">N2</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">shift</span><span class="p">)</span>
+        <span class="c1"># rf = sptb.sshift(rf, N2, dt, shift)</span>
+        <span class="n">rf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">shift</span><span class="o">/</span><span class="n">dt</span><span class="p">))</span>
     <span class="n">rf</span> <span class="o">=</span> <span class="n">rf</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">rf</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">IR</span></div>
@@ -463,10 +464,11 @@
     <span class="c1"># back transformation</span>
     <span class="c1"># v = np.arange(0, nf/2+1)*2*np.pi/(nf*ndt)</span>
     <span class="c1"># v = np.concatenate((v, -np.flip(v[1:-1])))</span>
-    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">ndt</span><span class="p">)</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">tshift</span><span class="p">)</span>
-    <span class="n">rfq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rfq</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-    <span class="n">rfl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rfl</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="n">ndt</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="c1"># Re-Introduce Time shift</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">tshift</span><span class="p">)</span>  <span class="c1"># /ndt</span>
+    <span class="n">rfq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rfq</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+    <span class="n">rfl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rfl</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
 
     <span class="n">qrft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">rfq</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nf</span><span class="p">)</span>
     <span class="n">qrf</span> <span class="o">=</span> <span class="n">qrft</span><span class="o">.</span><span class="n">real</span>
