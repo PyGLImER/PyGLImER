@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Friday, 7th January 2022 11:19:07 am
+Last Modified: Tuesday, 15th February 2022 01:43:54 pm
 '''
 
 import fnmatch
@@ -24,7 +24,6 @@ from joblib import Parallel, delayed, cpu_count
 import obspy
 from obspy import read, read_inventory, Stream, UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
-from pathlib import Path
 from tqdm.std import tqdm
 
 from pyglimer.utils.log import create_mpi_logger
@@ -704,8 +703,7 @@ def __rotate_qc(
 
 def __file_in_db(loc: str, filename: str) -> bool:
     """Checks if file "filename" is already in location "loc"."""
-    path = Path(os.path.join(loc, filename))
-    if path.is_file():
+    if os.path.isfile(os.path.join(loc, filename)):
         return True
     else:
         return False

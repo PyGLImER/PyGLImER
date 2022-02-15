@@ -13,7 +13,6 @@ dependencies:
   - obspy
   - OWSLib
   - pandas
-  - pathlib
   - pip
   - plotly
   - prov
