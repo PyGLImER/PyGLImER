@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Tuesday, 15th February 2022 01:44:23 pm
+Last Modified: Monday, 21st February 2022 12:52:27 pm
 '''
 
 # !/usr/bin/env python3
@@ -101,13 +101,11 @@ def download_small_db(
                     continue
                 # Already in DB?
                 if saveasdf:
-                    with ASDFDataSet(os.path.join(rawloc, '%s.%s.h5' % (
-                            network, station))) as ds:
-                        if evt in ds.events:
-                            logger.info(
-                                'File already in database. %s ' % stat.code
-                                + 'Event: %s' % evt.resource_id)
-                            continue
+                    if wav_in_asdf(net, stat, '*', channel, toa-tz, toa+ta):
+                        logger.info(
+                            'File already in database. %s ' % stat.code
+                            + 'Event: %s' % evt.resource_id)
+                        continue
                 else:
                     o = (evt.preferred_origin() or evt.origins[0])
                     ot_loc = UTCDateTime(
