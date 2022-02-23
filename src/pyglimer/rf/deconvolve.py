@@ -185,7 +185,8 @@ def damped(P, H, mu=10):
 #     return h, var
 
 
-def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
+def spectraldivision(v, u, ndt, tshift, regul, phase, test=False,
+                     waterlevel=None):
     """
     Function spectraldivision(v,u,ndt,tshift,regul) is a standard spectral
     division frequency domain deconvolution.
@@ -204,9 +205,12 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
     :type regul: str
     :param phase: Phase either "P" for Ps or "S" for Sp.
     :type phase: str
+    :type waterlevel: float
+    :param waterlevel:
+        Manually selected waterlevel, leave as None to automatically evaluate.
     :raises Exception: for uknown regulisations
     :return: qrf : Receiver function.
-        lrf : Output of deoncolution of source wavelet estimation from
+        lrf : Output of deconvolution of source wavelet estimation from
         longitudinal component.
     :rtype: 1D np.ndarray
     """
@@ -262,6 +266,8 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
     # waterlevel regularization
     elif water:
         eps = max(noise.real)
+        if waterlevel:
+            eps = waterlevel
         den[den.real < eps] = eps
 
     # numerator
@@ -303,7 +309,8 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
 
 def multitaper(
         P: np.ndarray, D: np.ndarray, dt: float, tshift: int or float,
-        regul: str):
+        regul: str, bandwidth=4, n_tapers=3, const_reg_value=None,
+        win_len=None):
     """
     Output has to be filtered (Noise appears in high-frequency)!
     multitaper: takes Ved-Kathrins code and changes inputs to
@@ -343,6 +350,9 @@ def multitaper(
     regul : str
         Regularization, either 'fqd' for frequency dependentor 'con' for
         constant.
+    const_reg_value: float
+        Manually selected value for constant regularization. Leave as None to
+        automatically evaluate.
 
     Raises
     ------
@@ -363,16 +373,17 @@ def multitaper(
     """
 
     # wavelet always in the center of the window
-    # Original from Ved's
-    # win_len = tshift*2;
-    # Modification to get P&L
-    # win_len = length(P)*dt;
-    # Modificaiton to get Helffrich
-    win_len = 50
+    if not win_len:
+        # Original from Ved's
+        # win_len = tshift*2;
+        # Modification to get P&L
+        # win_len = len(P)*dt
+        # Modification to get Helffrich
+        win_len = 50
 
     Nwin = round(win_len/dt)
 
-    # Fraction of overlap overlap between moving time windows. As your TB
+    # Fraction of overlap between moving time windows. As your TB
     # increases, the frequency smearing gets worse, which means that the RFs
     # degrate at shorter and shorter lag times. Therefore, as you increase TB,
     # you should also increase Poverlap.
@@ -387,8 +398,10 @@ def multitaper(
     # #NT=2*TB-1; #4 tapers
     # NT=3;
     TB = 4
+    TB = bandwidth
     # NT=2*TB-1; #4 tapers
     NT = 3
+    NR = n_tapers
 
     # Create moving time windowed slepians
     starts = np.arange(0, nh-Nwin+1, round((1-Poverlap)*Nwin))
@@ -476,6 +489,8 @@ def multitaper(
     elif const:
         # ordinary regularisation with adding only a constant value
         eps = DEN_noise.real.max() + 1
+        if const_reg_value:
+            eps = const_reg_value
         tmpp = np.divide(np.sum(np.multiply(ESTP.conj(), ESTD), axis=0),
                          np.sum(np.multiply(ESTP.conj(), ESTP)+eps,
                                 axis=0))*1/dt
