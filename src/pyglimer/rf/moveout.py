@@ -14,16 +14,13 @@ Contains functions for moveout correction and station stacking.
 !The file is split and has a second copyright disclaimer!
 
 Created: Tuesday, 7th April 2020 10:08:30 am
-Last Modified: Monday, 25th October 2021 04:33:14 pm
+Last Modified: Tuesday, 15th February 2022 01:45:26 pm
 '''
 
 import os
-# from pathlib import Path
-# import shelve
 import warnings
 
 import numpy as np
-# from obspy import read
 import obspy
 from obspy.signal.filter import lowpass
 from geographiclib.geodesic import Geodesic

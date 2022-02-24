@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 5th January 2022 04:47:10 pm
+Last Modified: Monday, 21st February 2022 12:52:27 pm
 '''
 
 # !/usr/bin/env python3
@@ -29,7 +29,6 @@ from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
 from obspy.core.event.catalog import Catalog
 from obspy.taup import TauPyModel
-from pathlib import Path
 from pyasdf import ASDFDataSet
 
 from pyglimer.database.asdf import writeraw
@@ -102,13 +101,11 @@ def download_small_db(
                     continue
                 # Already in DB?
                 if saveasdf:
-                    with ASDFDataSet(os.path.join(rawloc, '%s.%s.h5' % (
-                            network, station))) as ds:
-                        if evt in ds.events:
-                            logger.info(
-                                'File already in database. %s ' % stat.code
-                                + 'Event: %s' % evt.resource_id)
-                            continue
+                    if wav_in_asdf(net, stat, '*', channel, toa-tz, toa+ta):
+                        logger.info(
+                            'File already in database. %s ' % stat.code
+                            + 'Event: %s' % evt.resource_id)
+                        continue
                 else:
                     o = (evt.preferred_origin() or evt.origins[0])
                     ot_loc = UTCDateTime(
@@ -362,12 +359,6 @@ def get_mseed_storage(
 
 def get_stationxml_storage(network: str, station: str, statloc: str):
 
-    # available_channels = []
-
-    # missing_channels = []
-
-    # path = Path(statloc, "%s.%s.xml" % (network, station))
-
     filename = os.path.join(statloc, "%s.%s.xml" % (network, station))
 
     return {
@@ -383,10 +374,10 @@ def wav_in_db(
     network: str, station: str, location: str, channel: str,
         starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
     """Checks if waveform is already downloaded."""
-    path = Path(tmp.folder, "%s.%s.mseed" % (network, station))
+    path = os.path.join(tmp.folder, "%s.%s.mseed" % (network, station))
 
-    if path.is_file():
-        st = read(os.path.join(tmp.folder, network + "." + station + '.mseed'))
+    if os.path.isfile(path):
+        st = read(path)
         # '.' + location +
     else:
         return False
