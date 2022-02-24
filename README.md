@@ -37,7 +37,7 @@ pip install -e .
 ```
 
 ## Getting started
-Access PyGLImER's documentation [here](https://petermakus.github.io/PyGLImER/).
+Access PyGLImER's documentation [here](https://pyglimer.github.io/PyGLImER/).
 
 PyGLImER comes with a few tutorials (Jupyter notebooks). You can find those in the `examples/` directory.
 
@@ -59,7 +59,7 @@ PyGLImER also comes with a toolset to create publication ready figures:
 | *FIG: Distribution of back-azimuth and rayparameter for the P receiver functions from IU.HRV as shown above.* |
 
 ## Reporting Bugs / Contact the developers
-This version is an early release. If you encounter any issues or unexpected behaviour, please [open an issue](https://github.com/PeterMakus/PyGLImER/issues/new) here on GitHub or [contact the developers](mailto:makus@gfz-potsdam.de).
+This version is an early release. If you encounter any issues or unexpected behaviour, please [open an issue](https://github.com/PyGLImER/PyGLImER/issues/new) here on GitHub or [contact the developers](mailto:makus@gfz-potsdam.de).
 
 ## Citing PyGLImER
 If you use PyGLImER to produce content for your publication, please consider citing us. For the time being, please cite our [AGU abstract](https://www.essoar.org/doi/10.1002/essoar.10506417.1).
