@@ -187,7 +187,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Tue May 26 2019 13:31:30</span>
-<span class="sd">Last Modified: Wednesday, 5th January 2022 04:47:10 pm</span>
+<span class="sd">Last Modified: Monday, 21st February 2022 12:52:27 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="c1"># !/usr/bin/env python3</span>
@@ -208,7 +208,6 @@
     <span class="n">Restrictions</span><span class="p">,</span> <span class="n">MassDownloader</span>
 <span class="kn">from</span> <span class="nn">obspy.core.event.catalog</span> <span class="kn">import</span> <span class="n">Catalog</span>
 <span class="kn">from</span> <span class="nn">obspy.taup</span> <span class="kn">import</span> <span class="n">TauPyModel</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">pyasdf</span> <span class="kn">import</span> <span class="n">ASDFDataSet</span>
 
 <span class="kn">from</span> <span class="nn">pyglimer.database.asdf</span> <span class="kn">import</span> <span class="n">writeraw</span>
@@ -281,13 +280,11 @@
                     <span class="k">continue</span>
                 <span class="c1"># Already in DB?</span>
                 <span class="k">if</span> <span class="n">saveasdf</span><span class="p">:</span>
-                    <span class="k">with</span> <span class="n">ASDFDataSet</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rawloc</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.h5&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">)))</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">evt</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">events</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                                <span class="s1">&#39;File already in database. </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span>
-                                <span class="o">+</span> <span class="s1">&#39;Event: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">)</span>
-                            <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">wav_in_asdf</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">toa</span><span class="o">-</span><span class="n">tz</span><span class="p">,</span> <span class="n">toa</span><span class="o">+</span><span class="n">ta</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s1">&#39;File already in database. </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span>
+                            <span class="o">+</span> <span class="s1">&#39;Event: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">)</span>
+                        <span class="k">continue</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">o</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="n">ot_loc</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span>
@@ -541,12 +538,6 @@
 
 <span class="k">def</span> <span class="nf">get_stationxml_storage</span><span class="p">(</span><span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 
-    <span class="c1"># available_channels = []</span>
-
-    <span class="c1"># missing_channels = []</span>
-
-    <span class="c1"># path = Path(statloc, &quot;%s.%s.xml&quot; % (network, station))</span>
-
     <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">statloc</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.xml&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="p">{</span>
@@ -562,10 +553,10 @@
     <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">starttime</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">,</span> <span class="n">endtime</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Checks if waveform is already downloaded.&quot;&quot;&quot;</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.mseed&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">))</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.mseed&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-        <span class="n">st</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">network</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">station</span> <span class="o">+</span> <span class="s1">&#39;.mseed&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="c1"># &#39;.&#39; + location +</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
