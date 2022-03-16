@@ -9,7 +9,7 @@ dill
 geographiclib
 joblib 
 matplotlib
-obspy
+obspy>=1.3
 pandas
 pip
 plotly
