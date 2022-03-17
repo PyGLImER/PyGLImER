@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 25th October 2021 11:17:56 am
-Last Modified: Monday, 25th October 2021 03:39:58 pm
+Last Modified: Wednesday, 16th March 2022 05:01:47 pm
 '''
 from copy import deepcopy
 import os
@@ -81,7 +81,7 @@ class TestRFTrace(unittest.TestCase):
 
     def test_moveout_values(self):
         _, prfz2, _, _ = self.prft.moveout('iasp91.dat')
-        npt.assert_allclose(prfz2.data, self.prfz.data)
+        npt.assert_allclose(prfz2.data, self.prfz.data, atol=1e-8)
         self.assertEqual(prfz2.stats.type, 'depth')
 
 

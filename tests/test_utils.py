@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 19th August 2021 04:01:26 pm
-Last Modified: Friday, 21st January 2022 08:58:53 am
+Last Modified: Wednesday, 16th March 2022 04:20:32 pm
 '''
 import os
 import unittest
@@ -21,6 +21,7 @@ from obspy import read_inventory, Inventory, read, read_events, UTCDateTime,\
     Trace, Stream
 from obspy.core import AttribDict
 import obspy
+from obspy.clients.fdsn.header import URL_MAPPINGS
 
 from pyglimer.utils import utils as pu
 from pyglimer.utils.roundhalf import roundhalf
@@ -195,31 +196,11 @@ class TestSaveRawMseed(unittest.TestCase):
 
 class TestGetMultipleFDSNClients(unittest.TestCase):
     def test_with_None(self):
-        exp = (
-            'BGR',
-            'EMSC',
-            'ETH',
-            'GEONET',
-            'GFZ',
-            'ICGC',
-            'INGV',
-            'IPGP',
-            'ISC',
-            'KNMI',
-            'KOERI',
-            'LMU',
-            'NCEDC',
-            'NIEP',
-            'NOA',
-            'RESIF',
-            'SCEDC',
-            'TEXNET',
-            'UIB-NORSAR',
-            'USGS',
-            'USP',
-            'ORFEUS',
-            'IRIS')
-        self.assertTupleEqual(exp, pu.get_multiple_fdsn_clients(None))
+        exp = sorted(dict(URL_MAPPINGS.items()))
+        out = pu.get_multiple_fdsn_clients(None)
+        self.assertGreater(len(out), 5)
+        for el in out:
+            self.assertIn(el, exp)
 
     def test_create_list(self):
         self.assertListEqual(['bla'], pu.get_multiple_fdsn_clients('bla'))
