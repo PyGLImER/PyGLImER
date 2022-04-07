@@ -11,22 +11,25 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Monday, 25th October 2021 05:22:27 pm
+Last Modified: Thursday, 20th January 2022 04:22:08 pm
 '''
 
 import logging
 import os
 from threading import Event
 from typing import List, Tuple
+from warnings import warn
 
+import numpy as np
 from joblib import Parallel, delayed
 from obspy.clients.fdsn import Client, header
 from obspy.clients.fdsn.header import URL_MAPPINGS
 from obspy.core.inventory.inventory import Inventory
-from obspy.core.stream import Stream
+from obspy.core.stream import Stream, Trace
 from obspy.core.utcdatetime import UTCDateTime
 
 from pyglimer.database.asdf import write_st
+from pyglimer.rf.create import RFStream, RFTrace
 
 from .roundhalf import roundhalf
 
@@ -320,13 +323,24 @@ def create_bulk_str(
     """
     # request object
     bulk = []
+    if isinstance(t0, str) and t0 != '*':
+        t0 = UTCDateTime(t0)
+    elif isinstance(t0, list):
+        t0 = [UTCDateTime(t) for t in t0]
+    if isinstance(t1, str) and t1 != '*':
+        t1 = UTCDateTime(t1)
+    elif isinstance(t1, list):
+        t1 = [UTCDateTime(t) for t in t1]
+
     if isinstance(networks, list) and isinstance(stations, list):
         if len(networks) != len(stations):
             raise ValueError(
                 'If network and station are provided as lists, they have to\
  have the same length!')
-        if isinstance(t1, list) and isinstance(t0, list):
-            if len(networks) != len(t1) or len(t1) != len(t0):
+        if (isinstance(t1, list) and isinstance(t0, list)) \
+                or type(t1) != type(t0):
+            if len(stations) != len(t1) or len(t1) != len(t0) \
+                    or type(t1) != type(t0):
                 raise ValueError('Time Lists have to have same length!')
             for net, stat, st, et in zip(networks, stations, t0, t1):
                 bulk.append((net, stat, location, channel, st, et))
@@ -335,9 +349,11 @@ def create_bulk_str(
                 t1, (str, UTCDateTime)):
             for net, stat in zip(networks, stations):
                 bulk.append((net, stat, location, channel, t0, t1))
-    if isinstance(networks, list) and stations == '*':
-        if isinstance(t1, list) and isinstance(t0, list):
-            if len(networks) != len(t1) or len(t1) != len(t0):
+    elif isinstance(networks, list) and stations == '*':
+        if (isinstance(t1, list) and isinstance(t0, list)) \
+                or type(t1) != type(t0):
+            if len(networks) != len(t1) or len(t1) != len(t0) \
+                    or type(t1) != type(t0):
                 raise ValueError('Time Lists have to have same length!')
             for net, st, et in zip(networks, t0, t1):
                 bulk.append((net, stations, location, channel, st, et))
@@ -347,8 +363,10 @@ def create_bulk_str(
             for net in networks:
                 bulk.append((net, stations, location, channel, t0, t1))
     elif isinstance(stations, list) and isinstance(networks, str):
-        if isinstance(t1, list) and isinstance(t0, list):
-            if len(stations) != len(t1) or len(t1) != len(t0):
+        if (isinstance(t1, list) and isinstance(t0, list)) \
+                or type(t0) != type(t1):
+            if len(stations) != len(t1) or len(t1) != len(t0) \
+                    or type(t0) != type(t1):
                 raise ValueError('Time Lists have to have same length!')
             for stat, st, et in zip(stations, t0, t1):
                 bulk.append((networks, stat, location, channel, st, et))
@@ -357,8 +375,9 @@ def create_bulk_str(
             for stat in stations:
                 bulk.append((networks, stat, location, channel, t0, t1))
     elif isinstance(stations, str) and isinstance(networks, str):
-        if isinstance(t1, list) and isinstance(t0, list):
-            if len(t1) != len(t0):
+        if (isinstance(t1, list) and isinstance(t0, list)) \
+                or type(t1) != type(t0):
+            if len(t1) != len(t0) or type(t1) != type(t0):
                 raise ValueError('Time Lists have to have same length!')
             for st, et in zip(t0, t1):
                 bulk.append((networks, stations, location, channel, st, et))
@@ -366,8 +385,85 @@ def create_bulk_str(
                 t1, (str, UTCDateTime)):
             bulk.append((networks, stations, location, channel, t0, t1))
     else:
-        raise ValueError('Invalid comobination of input types or input length.\
+        raise ValueError('Invalid combination of input types or input length.\
 \nCheck the following:\n\t1. If all inputs are lists, do they have the same \
 length?\n\t2. If stations is a string and not a wildcard (i.e., *), networks \
 has to be a string as well.')
     return bulk
+
+
+def cos_taper_st(
+    st: Stream, taper_len: float, taper_at_masked: bool,
+        side: str = 'both') -> Stream:
+    """
+    Applies a cosine taper to the input Stream.
+
+    :param tr: Input Stream
+    :type tr: :class:`~obspy.core.stream.Stream`
+    :param taper_len: Length of the taper per side
+    :type taper_len: float
+    :param taper_at_masked: applies a split to each trace and merges again
+        afterwards
+    :type taper_at_masked: bool
+    :return: Tapered Stream
+    :rtype: :class:`~obspy.core.stream.Stream`
+
+    .. note::
+        This action is performed in place. If you want to keep the
+        original data use :func:`~obspy.core.stream.Stream.copy`.
+    """
+    if isinstance(st, Trace):
+        st = Stream([st])
+    elif isinstance(st, RFTrace):
+        st = RFStream([st])
+    for ii, _ in enumerate(st):
+        try:
+            st[ii] = cos_taper(st[ii], taper_len, taper_at_masked, side)
+        except ValueError as e:
+            warn('%s, corresponding trace not tapered.' % e)
+    return st
+
+
+def cos_taper(
+    tr: Trace, taper_len: float, taper_at_masked: bool,
+        side: str = 'both') -> Trace:
+    """
+    Applies a cosine taper to the input trace.
+
+    :param tr: Input Trace
+    :type tr: Trace
+    :param taper_len: Length of the taper per side in seconds
+    :type taper_len: float
+    :param taper_at_masked: applies a split to each trace and merges again
+        afterwards
+    :type taper_at_masked: bool
+    :return: Tapered Trace
+    :rtype: Trace
+
+    .. note::
+        This action is performed in place. If you want to keep the
+        original data use :func:`~obspy.core.trace.Trace.copy`.
+    """
+    if taper_len <= 0:
+        raise ValueError('Taper length must be larger than 0 s')
+    if taper_at_masked:
+        st = tr.split()
+        st = cos_taper_st(st, taper_len, False)
+        st = st.merge()
+        if st.count():
+            tr.data = st[0].data
+            return tr
+        else:
+            raise ValueError('Taper length must be larger than 0 s')
+    taper = np.ones_like(tr.data)
+    tl_n = round(taper_len*tr.stats.sampling_rate)
+    if tl_n * 2 > tr.stats.npts:
+        raise ValueError(
+            'Taper Length * 2 has to be smaller or equal to trace\'s length.')
+    tap = np.sin(np.linspace(0, np.pi, tl_n*2))
+    if side in ['left', 'both']:
+        taper[:tl_n] = tap[:tl_n]
+    if side in ['right', 'both']:
+        taper[-tl_n:] = tap[-tl_n:]
+    tr.data = np.multiply(tr.data, taper)
+    return tr

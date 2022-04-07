@@ -12,7 +12,7 @@ Contains quality control for waveforms used for receiver function creation.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 11:38:40 am
-Last Modified: Friday, 20th August 2021 03:01:14 pm
+Last Modified: Thursday, 28th October 2021 10:03:35 am
 '''
 
 import numpy as np
@@ -24,7 +24,7 @@ from obspy import Stream
 # filter frequencies for SNR check, all in Hz
 lowco = [.03, .1, .5]  # only for PRF
 
-lowcoS = .01  # Changed 18.05 to compare with Hopper et. al. 2018
+lowcoS = .01
 highco = np.linspace(.33, .175, 4)  # For SRFs, 16.06.2020 from .175 to .25 Hz
 
 # SNR criteria for QC

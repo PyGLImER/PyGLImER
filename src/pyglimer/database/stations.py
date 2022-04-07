@@ -12,7 +12,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Thursday, 21st October 2021 03:57:25 pm
+Last Modified: Tuesday, 15th February 2022 01:40:24 pm
 '''
 
 import logging
@@ -25,7 +25,6 @@ import glob
 from joblib import Parallel, delayed
 from obspy.clients.fdsn import Client, header
 import pandas as pd
-from pathlib import Path
 
 from pyglimer.data import finddir
 from pyglimer.database.rfh5 import RFDataBase
@@ -152,7 +151,7 @@ class StationDB(object):
         # Check if there is already a saved database
         oloc = os.path.join(finddir(), 'database.csv')
 
-        if use_old and Path(oloc).is_file():
+        if use_old and os.path.isfile(oloc):
             self.db = pd.read_csv(oloc)
         elif hdf5:
             self.db = self._create_from_hdf5()

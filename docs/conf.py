@@ -19,11 +19,11 @@ sys.path.insert(0, os.path.abspath('../src'))
 # -- Project information -----------------------------------------------------
 
 project = 'PyGLImER'
-copyright = '2021, the PyGLImER development team'
+copyright = '2022, the PyGLImER development team'
 author = 'Peter Makus, Lucas Sawade'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1'
+release = '0.1.11'
 
 
 # -- General configuration ---------------------------------------------------
@@ -62,7 +62,7 @@ html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 
 html_title = ""
-html_logo = "chapters/figures/logo.png"
+html_logo = "chapters/figures/logo_horizontal_colour.png"
 # html_favicon = "chapters/figures/favicon.ico"
 
 html_context = {

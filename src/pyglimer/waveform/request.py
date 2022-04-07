@@ -15,21 +15,23 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Thursday, 21st October 2021 10:30:47 am
+Last Modified: Friday, 7th January 2022 11:18:40 am
 '''
 import os
 from http.client import IncompleteRead
 from datetime import datetime
 import logging
 import warnings
+import time
 
 from obspy import read_events, Catalog
 from obspy.clients.fdsn import Client as Webclient
+from obspy.clients.fdsn.header import FDSNException
 from obspy.core.utcdatetime import UTCDateTime
 from obspy.taup import TauPyModel
 from tqdm import tqdm
 
-from pyglimer.constants import onsetP, onsetS
+from pyglimer import constants
 from pyglimer.waveform.download import download_small_db, downloadwav
 from pyglimer.waveform.preprocess import preprocess
 from pyglimer.utils import utils as pu
@@ -47,8 +49,8 @@ class Request(object):
         endtime: UTCDateTime or str, pol: str = 'v',
         minmag: float or int = 5.5, event_coords: tuple = None,
         network: str = None, station: str = None,
-        waveform_client: list = None, evtcat: Catalog = None,
-        loglvl: int = logging.WARNING,
+        waveform_client: list = None, evtcat: str = None,
+        continue_download: bool = False, loglvl: int = logging.WARNING,
             format: str = 'hdf5'):
         """
         Create object that is used to start the receiver function
@@ -127,6 +129,12 @@ class Request(object):
             in evtloc. If None a new catalogue will be downloaded (with the
             parameters defined before), by default None, defaults to None
         :type evtcat: str, optional
+        :param continue_download: Will delete already used events from the
+            event catalogue, so that the download will continue at the same
+            place after being interrupted. Will make the continuation faster,
+            but then old database will not be updated. Only makes sense if you
+            define an old catalogue. Defaults to False.
+        :type continue_download: bool, optional.
         :param loglvl: Level for the loggers. One of the following:
             CRITICAL, ERROR, WARNING, INFO,or DEBUG
             If the level is DEBUG, joblib will fall back to using only
@@ -207,31 +215,14 @@ class Request(object):
         # according to phase (see Wilson et. al., 2006)
         # and time window before (tz) and after (ta) first arrival
         self.ta = 120
-        if self.phase == 'P':
-            self.maxdepth = None
-            self.min_epid = 28.1
-            self.max_epid = 95.8
-            self.tz = onsetP
-        elif self.phase == 'S':
-            self.maxdepth = 300
-            self.min_epid = 55
-            self.max_epid = 80
-            self.tz = onsetS
-        # (see Yuan et al. 2006)
-        elif self.phase.upper() == 'SCS':
-            self.maxdepth = 300
-            self.min_epid = 50
-            self.max_epid = 75
-            self.tz = onsetS
-        elif self.phase.upper() == 'SKS':
-            # (see Zhang et. al. (2014))
-            self.maxdepth = 300
-            self.min_epid = 90
-            self.max_epid = 120
-            self.tz = onsetS
-        else:
-            raise NameError('The phase', self.phase, """is not valid or not
-                            implemented yet.""")
+        try:
+            self.maxdepth = constants.maxdepth[phase.upper()]
+            self.min_epid = constants.min_epid[phase.upper()]
+            self.max_epid = constants.max_epid[phase.upper()]
+            self.tz = constants.onset[phase.upper()]
+        except KeyError:
+            raise NotImplementedError(
+                f'The phase {self.phase} is not valid or not implemented yet.')
 
         # network and station filters
         self.network = network
@@ -244,9 +235,11 @@ class Request(object):
             # yaml files don't accept None
             evtcat = None
         if evtcat:
-            self.evtcat = read_events(os.path.join(self.evtloc, evtcat))
+            self.evtfile = os.path.join(self.evtloc, evtcat)
+            self.evtcat = read_events(self.evtfile)
         else:
             self.download_eventcat()
+        self.continue_download = continue_download
 
     def download_eventcat(self):
         """
@@ -263,7 +256,7 @@ class Request(object):
         # :NOTE: perhaps it would be smart to save each year as a file?
         # BUt then again, they have different requirements...
         # Check length of request and split if longer than a year.
-        a = 365.25*24*3600  # one yr in seconds
+        a = 2*365.25*24*3600  # two yrs in seconds
         if self.endtime-self.starttime > a:
             # Request is too big, break it down ito several requests
 
@@ -279,10 +272,12 @@ class Request(object):
 
             # Query
             self.evtcat = Catalog()
-            # We convert the iterator to a list, so tqdm work properly
+            # We convert the iterator to a list, so tqdm workii properly
             for st, et in tqdm(list(zip(starttimes, endtimes))):
                 event_cat_done = False
                 while not event_cat_done:
+                    # IRIS has a restriction of ten connections /second
+                    time.sleep(0.2)
                     try:
                         self.evtcat.extend(
                             self.webclient.get_events(
@@ -294,17 +289,20 @@ class Request(object):
                                 minmagnitude=self.minmag,
                                 maxmagnitude=10, maxdepth=self.maxdepth))
                         event_cat_done = True
-                    except IncompleteRead:
+                    except (IncompleteRead, FDSNException) as e:
                         # Server interrupted connection, just try again
                         # This usually happens with enormeous requests, we
                         # should reduce a
-                        msg = "Server interrupted connection, \
-                            restarting download..."
+                        msg = \
+                            "Server interrupted connection, retrying..."
                         self.logger.warning(msg)
+                        self.logger.warning(e)
                         continue
 
         else:
             while not event_cat_done:
+                # IRIS has a restriction of ten connections /second
+                time.sleep(0.12)
                 try:
                     self.evtcat = self.webclient.get_events(
                         starttime=self.starttime, endtime=self.endtime,
@@ -313,7 +311,7 @@ class Request(object):
                         minmagnitude=self.minmag, maxmagnitude=10,
                         maxdepth=self.maxdepth)
                     event_cat_done = True
-                except IncompleteRead:
+                except (IncompleteRead, FDSNException):
                     # Server interrupted connection, just try again
                     # This usually happens with enormeous requests, we should
                     # reduce a
@@ -323,11 +321,9 @@ class Request(object):
                     continue
 
         os.makedirs(self.evtloc, exist_ok=True)
-        # check if there is a better format for event catalog
-        self.evtcat.write(
-            os.path.join(
-                self.evtloc,
-                datetime.now().strftime("%Y%m%dT%H%M%S")), format="QUAKEML")
+        self.evtfile = os.path.join(
+            self.evtloc, datetime.now().strftime("%Y%m%dT%H%M%S"))
+        self.evtcat.write(self.evtfile, format="QUAKEML")
         msg = 'Successfully obtained %s events' % str(self.evtcat.count())
         self.logger.info(msg)
 
@@ -350,8 +346,9 @@ class Request(object):
         downloadwav(
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
-            network=self.network, station=self.station, log_fh=self.fh,
-            loglvl=self.loglvl, verbose=verbose, saveasdf=self.h5)
+            self.evtfile, network=self.network, station=self.station,
+            log_fh=self.fh, loglvl=self.loglvl, verbose=verbose,
+            saveasdf=self.h5, fast_redownload=self.continue_download)
 
     def download_waveforms_small_db(self, channel: str):
         """

@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 13th September 2021 10:38:53 am
-Last Modified: Thursday, 21st October 2021 10:22:31 am
+Last Modified: Friday, 7th January 2022 11:05:39 am
 '''
 
 import logging
@@ -29,16 +29,22 @@ def start_logger_if_necessary(
     :rtype: logging.Logger
     """
     logger = logging.getLogger(name)
-    if not logger.hasHandlers():
-        logger.setLevel(loglvl)
-        sh = logging.StreamHandler()
-        sh.setFormatter(logging.Formatter(
-            "%(asctime)s %(levelname)-8s %(message)s"))
-        fh = logging.FileHandler(logfile, mode='w')
-        fh.setFormatter(logging.Formatter(
-            "%(asctime)s %(levelname)-8s %(message)s"))
-        logger.addHandler(sh)
-        logger.addHandler(fh)
+    # remove all old handlers: Note that the hasHandlers function can lead
+    # to problems if there are several loggers already in the system?
+    while 1:
+        try:
+            logger.removeHandler(logger.handlers[0])
+        except IndexError:
+            break
+    logger.setLevel(loglvl)
+    sh = logging.StreamHandler()
+    sh.setFormatter(logging.Formatter(
+        "%(asctime)s %(levelname)-8s %(message)s"))
+    fh = logging.FileHandler(logfile, mode='w')
+    fh.setFormatter(logging.Formatter(
+        "%(asctime)s %(levelname)-8s %(message)s"))
+    logger.addHandler(sh)
+    logger.addHandler(fh)
     return logger
 
 
@@ -55,12 +61,20 @@ def create_mpi_logger(logger: logging.Logger, rank: int) -> logging.Logger:
     lvl = logger.level
     rankstr = str(rank).zfill(3)
     name = '%srank%s' % (logger.name, rankstr)
+    while not logger.hasHandlers() or not (
+            any(hasattr(h, 'baseFilename') for h in logger.handlers)):
+        if logger.name == 'root':
+            raise ValueError(
+                'The logger used as input has to have a configured'
+                + 'FileHandler.')
+        logger = logger.parent
     for h in logger.handlers:
         if hasattr(h, 'baseFilename'):
-            fn = '%srank%s' % (h.baseFilename, rankstr)
+            fn = '%srank%s.log' % (h.baseFilename.split('.')[0], rankstr)
     try:
         return start_logger_if_necessary(name, fn, lvl)
-    except UnboundLocalError:
+    except UnboundLocalError as e:
+        print(e)
         raise ValueError(
             'The logger used as input has to have a configured FileHandler.'
         )

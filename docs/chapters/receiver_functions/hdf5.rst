@@ -108,7 +108,7 @@ save the data afterwards. You can do that like below:
     # that has a header with all the station information
 
     with RFDataBase('/path/to/myfile.h5') as rfdb:
-        rfst = rfdb.get_data(
+        rfst = rfdb.add_rf(
             rf, tag='rf_with_my_funny_processing_idea')
 
 We can retrieve the :class:`~pyglimer.rf.create.RFStream` as shown above.

@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 03:50:35 pm
-Last Modified: Friday, 22nd October 2021 05:59:00 pm
+Last Modified: Friday, 24th December 2021 12:41:45 pm
 '''
 import os
 import unittest
@@ -74,10 +74,8 @@ class TestWriteSt(unittest.TestCase):
         asdf.write_st(self.st, self.evt[0], 'bla', self.inv, False)
         ds_mock.assert_called_once_with(os.path.join('bla', '%s.%s.h5' % (
             self.st[0].stats.network, self.st[0].stats.station)))
-        ds_mock().__enter__().add_quakeml.assert_called_once_with(self.evt[0])
         ds_mock().__enter__().add_waveforms.assert_called_once_with(
-            self.st, tag='raw_recording', event_id=self.evt[0].resource_id
-        )
+            self.st, tag='raw_recording')
         ds_mock().__enter__().add_stationxml.assert_called_once_with(
             self.inv
         )
@@ -87,8 +85,7 @@ class TestWriteSt(unittest.TestCase):
         asdf.write_st(self.st[:-1], self.evt[0], 'bla', self.inv, False)
         ds_mock().__enter__().add_quakeml.assert_not_called()
         ds_mock().__enter__().add_waveforms.assert_called_once_with(
-            self.st[:-1], tag='raw_recording', event_id=self.evt[0].resource_id
-        )
+            self.st[:-1], tag='raw_recording')
         ds_mock().__enter__().add_stationxml.assert_called_once_with(
             self.inv)
 
@@ -101,7 +98,8 @@ class TestRewriteToHDF5(unittest.TestCase):
         self.writeraw_calls = []
         for event in self.evtcat:
             origin_time = event.origins[0].time
-            ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
+            ot_loc = UTCDateTime(
+                origin_time, precision=-1).format_fissures()[:-6]
             evtlat = event.origins[0].latitude
             evtlon = event.origins[0].longitude
             evtlat_loc = str(roundhalf(evtlat))

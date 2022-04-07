@@ -12,13 +12,13 @@ Contains functions to rotate a stream into different domains
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Saturday, 21st March 2020 07:26:03 pm
-Last Modified: Friday, 22nd October 2021 06:09:09 pm
+Last Modified: Thursday, 10th February 2022 03:53:30 pm
 '''
 import numpy as np
 from obspy import Stream
 
-from pyglimer.constants import onsetS, onsetP
-from ..utils.createvmodel import load_avvmodel
+from pyglimer import constants
+from pyglimer.utils.createvmodel import load_avvmodel
 
 
 def rotate_PSV(
@@ -52,7 +52,6 @@ def rotate_PSV(
         Stream in P-Sv-Sh.
 
     """
-
     model = load_avvmodel()
     avp, avs = model.query(statlat, statlon, phase)
 
@@ -122,10 +121,7 @@ def rotate_LQT_min(st: Stream, phase: str) -> tuple:
 
     """
     phase = phase[-1]
-    if phase == 'P':
-        onset = onsetP
-    elif phase == 'S':
-        onset = onsetS
+    onset = constants.onset[phase.upper()]
 
     dt = st[0].stats.delta
 
