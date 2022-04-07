@@ -13,7 +13,7 @@ Various Deconvolution approaches used for the RF technique.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 16th October 2019 02:24:30 pm
-Last Modified: Monday, 13th September 2021 04:31:00 pm
+Last Modified: Monday, 14th February 2022 11:16:53 am
 
 '''
 
@@ -92,8 +92,9 @@ def it(P, H, dt, shift=0, width=2.5, omega_min=0.5, it_max=200):
 
         # compute residual for ongoing iteration it
         r_new = H - est
-        omega = abs((np.linalg.norm(r)**2 - np.linalg.norm(r_new)**2) /
-                    np.linalg.norm(r)**2)
+        omega = abs((
+            np.linalg.norm(r)**2 - np.linalg.norm(r_new)**2)
+            / np.linalg.norm(r)**2)
         r = r_new
 
     # Create receiver function
@@ -102,7 +103,8 @@ def it(P, H, dt, shift=0, width=2.5, omega_min=0.5, it_max=200):
 
     # shift and truncate RF
     if shift:  # only if shift !=0
-        rf = sptb.sshift(rf, N2, dt, shift)
+        # rf = sptb.sshift(rf, N2, dt, shift)
+        rf = np.roll(rf, round(shift/dt))
     rf = rf[0:N]
 
     return rf, it, IR
@@ -240,9 +242,9 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
 
     if not freqdep and not const and not water:
         raise ValueError(
-            "Regularization not defined (your input: regul=%s. " % regul +
-            'Use either "fqd" for frequency-dependent or "con" for constant ' +
-            "value regularization or 'wat' for water-level.")
+            "Regularization not defined (your input: regul=%s. " % regul
+            + 'Use either "fqd" for frequency-dependent or "con" for constant '
+            + "value regularization or 'wat' for water-level.")
 
     # constant damping factor regularization
     if test:
@@ -260,8 +262,6 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
     # waterlevel regularization
     elif water:
         eps = max(noise.real)
-        # eps = 10
-        # eps = 100  # constant wl to reproduce Rychert et al
         den[den.real < eps] = eps
 
     # numerator
@@ -283,11 +283,13 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
             rfq[i] = rfq[i]*fac
 
     # back transformation
-    v = np.arange(0, nf/2+1)*2*np.pi/(nf*ndt)
-    v = np.concatenate((v, -np.flip(v[1:-1])))
-    x = np.exp(-1j*v*tshift)
-    rfq = np.multiply(rfq, x)
-    rfl = np.multiply(rfl, x)
+    # v = np.arange(0, nf/2+1)*2*np.pi/(nf*ndt)
+    # v = np.concatenate((v, -np.flip(v[1:-1])))
+    v = np.fft.fftfreq(nf, ndt)*2*np.pi
+    # Re-Introduce Time shift
+    dt = np.exp(-1j*v*tshift)  # /ndt
+    rfq = np.multiply(rfq, dt)
+    rfl = np.multiply(rfl, dt)
 
     qrft = np.fft.ifft(rfq, n=nf)
     qrf = qrft.real

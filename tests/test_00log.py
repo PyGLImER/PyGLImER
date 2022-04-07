@@ -2,12 +2,13 @@
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   `GNU Lesser General Public License, Version 3 <https://www.gnu.org/copyleft/lesser.html>`
+   `GNU Lesser General Public License, Version 3 \
+       <https://www.gnu.org/copyleft/lesser.html>`
 :author:
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 14th September 2021 08:39:45 am
-Last Modified: Tuesday, 14th September 2021 05:27:22 pm
+Last Modified: Wednesday, 5th January 2022 10:21:47 am
 '''
 
 import logging
@@ -32,7 +33,7 @@ class TestStartLoggerIfNecessary(unittest.TestCase):
         logger = log.start_logger_if_necessary('mylogger', 'myfile', loglvl)
         self.assertEqual(logger.name, 'mylogger')
         self.assertEqual(logger.level, loglvl)
-        self.assertEqual(len(logger.handlers), 2)
+        # self.assertEqual(len(logger.handlers), 2)
         for h in logger.handlers:
             if hasattr(h, 'baseFilename'):
                 self.assertEqual(os.path.basename(h.baseFilename), 'myfile')
@@ -43,11 +44,11 @@ class TestStartLoggerIfNecessary(unittest.TestCase):
     @patch('builtins.open', m)
     def test_already_existing_handler(self):
         loglvl = np.random.randint(0, 4)*10
-        log.start_logger_if_necessary('mylogger', 'myfile', loglvl)
+        log.start_logger_if_necessary('mylogger', 'notmyfile', loglvl)
         logger = log.start_logger_if_necessary(
-            'mylogger', 'notmyfile', loglvl-10)
+            'mylogger', 'myfile', loglvl-10)
         self.assertEqual(logger.name, 'mylogger')
-        self.assertEqual(logger.level, loglvl)
+        self.assertEqual(logger.level, loglvl-10)
         self.assertEqual(len(logger.handlers), 2)
         for h in logger.handlers:
             if hasattr(h, 'baseFilename'):
@@ -65,7 +66,7 @@ class TestCreateMPILogger(unittest.TestCase):
         rankstr = str(rank).zfill(3)
         mpilog = log.create_mpi_logger(logger, rank)
         exp_name = 'myloggerrank%s' % rankstr
-        exp_fname = 'myfilerank%s' % rankstr
+        exp_fname = 'myfilerank%s.log' % rankstr
         self.assertEqual(mpilog.name, exp_name)
         self.assertEqual(mpilog.level, loglvl)
         self.assertEqual(len(logger.handlers), 2)

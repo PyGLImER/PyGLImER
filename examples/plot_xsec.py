@@ -1,8 +1,11 @@
 from matplotlib.colors import LogNorm
-from pyglimer.ccp.ccp import read_ccp
-from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.cm import ScalarMappable
+import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
+import numpy as np
+
+from pyglimer.ccp.ccp import read_ccp
+
 
 # Load Stack
 ccp = read_ccp("US_P_0.58_minrad_3D_it_f2.pkl")
@@ -23,8 +26,8 @@ zalpha = np.where(zqill == 0, 0, 0.5)
 
 # Define norms
 # Define norms
-vmin=-0.25
-vmax=0.25
+vmin = -0.25
+vmax = 0.25
 
 snorm = Normalize(vmin=0, vmax=sdists[-1])
 rfnorm = MidpointNormalize(vmin=vmin, vmax=vmax, midpoint=0.0)
@@ -38,7 +41,7 @@ alpha = np.where(alpha >= 1, 1.0, alpha)
 
 
 # ############### Plot map ###################
-figure()
+plt.figure()
 geoax = axes(projection=ccrs.PlateCarree())
 plot_map(fill=False)
 geoax.tick_params(labelright=False, labeltop=False)

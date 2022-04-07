@@ -10,15 +10,14 @@ Tests the pyglimer.rf.deconvolve module
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th March 2021 10:13:35 am
-Last Modified: Monday, 13th September 2021 04:31:07 pm
+Last Modified: Monday, 14th February 2022 11:21:24 am
 '''
 import unittest
 
 import numpy as np
-from numpy import testing
 from scipy.signal.windows import gaussian
 
-from pyglimer.rf.deconvolve import it, spectraldivision, multitaper
+from pyglimer.rf.deconvolve import it, spectraldivision
 
 
 class TestIt(unittest.TestCase):
@@ -93,8 +92,67 @@ class TestIt(unittest.TestCase):
         self.assertTrue(np.allclose(r, r2[0:len(r)], atol=0.0001))
 
 
-# class TestSpectralDivision(unittest.TestCase):
-    
+class TestSpectralDivision(unittest.TestCase):
+    def test_unknown_regul(self):
+        with self.assertRaises(ValueError):
+            spectraldivision(
+                np.empty((25,)), np.empty((25,)), 1, 0, 'blabla', 'P')
+
+    def test_unknown_phase(self):
+        with self.assertRaises(ValueError):
+            spectraldivision(
+                np.empty((25,)), np.empty((25,)), 1, 0, 'wat', 'XX')
+
+    def test_by_self_con_P(self):
+        v = np.zeros((200,))
+        # pre-event noise
+        v[:50] = np.random.random((50,))*.5
+        v[50:] = np.random.random((150,))*10
+        qrf, lrf = spectraldivision(v, v, .1, 0, 'con', 'P')
+        np.testing.assert_allclose(qrf, lrf)
+        self.assertEqual(np.argmax(qrf), 0)
+
+    def test_shift_con_P(self):
+        v = np.zeros((200,))
+        # pre-event noise
+        v[:50] = np.random.random((50,))*.5
+        v[50:] = np.random.random((150,))*10
+        qrf, lrf = spectraldivision(v, v, .1, 5, 'con', 'P')
+        np.testing.assert_allclose(qrf, lrf)
+        self.assertEqual(np.argmax(qrf), 50)
+
+    def test_by_self_wat_P(self):
+        v = np.zeros((200,))
+        v[50:] = np.random.random((150,))
+        qrf, lrf = spectraldivision(v, v, 0.5, 5, 'wat', 'P')
+        np.testing.assert_allclose(qrf, lrf)
+        self.assertEqual(np.argmax(qrf), 10)
+
+    def test_by_self_fqd_P(self):
+        v = np.zeros((200,))
+        v[50:] = np.random.random((150,))
+        qrf, _ = spectraldivision(v, v, 0.1, 5, 'fqd', 'P')
+        self.assertEqual(np.argmax(qrf), 50)
+
+    def test_by_self_con_S(self):
+        v = np.zeros((200,))
+        v[50:] = np.random.random((150,))
+        qrf, lrf = spectraldivision(v, v, 0.1, 10, 'con', 'S')
+        np.testing.assert_allclose(qrf, lrf)
+        self.assertEqual(np.argmax(qrf), 100)
+
+    def test_by_self_wat_S(self):
+        v = np.zeros((200,))
+        v[50:] = np.random.random((150,))
+        qrf, lrf = spectraldivision(v, v, 0.1, 5, 'wat', 'S')
+        np.testing.assert_allclose(qrf, lrf)
+        self.assertEqual(np.argmax(qrf), 50)
+
+    def test_by_self_fqd_S(self):
+        v = np.zeros((200,))
+        v[50:] = np.random.random((150,))
+        qrf, _ = spectraldivision(v, v, 2, 16, 'fqd', 'S')
+        self.assertEqual(np.argmax(qrf), 8)
 
 
 if __name__ == "__main__":

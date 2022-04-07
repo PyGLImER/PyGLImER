@@ -140,8 +140,8 @@ class VolumePlot:
 
         # Colormap settings
         self.vmin0, self.vmax0 = [-0.05, 0.05]
-        # Due to the interpolation the above valuers are not easily identifiable
-        # by distribution
+        # Due to the interpolation the above valuers are not easily
+        # identifiable by distribution
         self.vmin, self.vmax = self.vmin0, self.vmax0
         self.norm = matcolors.TwoSlopeNorm(
             vmin=self.vmin, vcenter=0.0, vmax=self.vmax)
@@ -442,8 +442,10 @@ class VolumeExploration:
                                             valinit=self.vp.minV)
         plt.subplots_adjust(hspace=2)
 
-        # Slider(slidercmin, 'ColorMin', -3 * np.max(np.abs(RF_PLOT)), 0, valinit=vmin, valfmt='%1.2E')
-        # Slider(slidercmin, 'ColorMin', -3 * np.max(np.abs(RF_PLOT)), 0, valinit=vmin, valfmt='%1.2E')
+        # Slider(slidercmin, 'ColorMin', -3 * np.max(np.abs(RF_PLOT)),
+        # 0, valinit=vmin, valfmt='%1.2E')
+        # Slider(slidercmin, 'ColorMin', -3 * np.max(np.abs(RF_PLOT)),
+        # 0, valinit=vmin, valfmt='%1.2E')
         # self.cmap['z']['ax'] = self.cp.add_subplot(self.gs[6, :])
 
     def activate_slicers(self):

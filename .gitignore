@@ -1,10 +1,8 @@
 *.log
-figures*
+./figures*
 gypsum.pkl
 *.xml
-*.mseed
 *cache*
-*.png
 *info*
 output*
 *.csv
@@ -13,7 +11,6 @@ ccps.py
 config.py
 GLImER.py
 .ipynb_checkpoints
-*.sac
 examples/database
 .vscode
 *.pdf
@@ -21,3 +18,4 @@ examples/database
 PyGLImER.egg-info/
 .idea/
 ccp*.pkl
+.coverage

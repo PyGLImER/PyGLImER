@@ -12,22 +12,18 @@
 #
 import os
 import sys
-# sys.path.insert(0, os.path.abspath('..'))
-# sys.path.insert(0, os.path.abspath('../src'))
+
 sys.path.insert(0, os.path.abspath('../src'))
-# sys.path.insert(0, os.path.abspath('..'))
-# sys.path.insert(0, os.path.abspath('.'))
-# sys.path.insert(0, os.path.abspath('../'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'PyGLImER'
-copyright = '2021, the PyGLImER development team'
+copyright = '2022, the PyGLImER development team'
 author = 'Peter Makus, Lucas Sawade'
 
 # The full version, including alpha/beta/rc tags
-release = '0.01'
+release = '0.1.11'
 
 
 # -- General configuration ---------------------------------------------------
@@ -66,11 +62,11 @@ html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 
 html_title = ""
-html_logo = "chapters/figures/logo.png"
+html_logo = "chapters/figures/logo_horizontal_colour.png"
 # html_favicon = "chapters/figures/favicon.ico"
 
 html_context = {
-    # "github_url": "https://github.com", # or your GitHub Enterprise interprise
+    # "github_url": "https://github.com", # or your GitHub Enterprise
     "github_user": 'PeterMakus',
     "github_repo": 'PyGLImER',
     "github_version": "master",
@@ -79,7 +75,8 @@ html_context = {
 
 html_theme_options = {
     "external_links": [
-        {"url": "http://www.stephanerondenay.com/glimer-web.html", "name": "GLImER"}
+        {"url": "http://www.stephanerondenay.com/glimer-web.html",
+            "name": "GLImER"}
     ],
     "github_url": "https://github.com/PeterMakus/PyGLImER",
     "use_edit_page_button": True,

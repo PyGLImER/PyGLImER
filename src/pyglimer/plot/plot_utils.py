@@ -1,5 +1,4 @@
-"""
-
+'''
 Plot utilities not to modify plots or base plots.
 
 :copyright:
@@ -11,11 +10,12 @@ Plot utilities not to modify plots or base plots.
     Lucas Sawade (lsawade@princeton.edu)
     Peter Makus (makus@gfz-potsdam.de)
 
-Last Update: June 19, 2020
+Created: Wednesday, 20th October 2021 05:05:08 pm
+Last Modified: Friday, 21st January 2022 08:44:08 am
+'''
 
-
-"""
 import os
+from typing import Tuple
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -26,43 +26,6 @@ from pyglimer.constants import maxz, res
 
 
 def set_mpl_params():
-    # params = {
-    #     # 'font.family': 'Avenir Next',
-    #     'pdf.fonttype': 42,
-    #     'font.weight': 'bold',
-    #     'figure.dpi': 150,
-    #     'axes.labelweight': 'bold',
-    #     'axes.linewidth': 1.5,
-    #     'axes.labelsize': 14,
-    #     'axes.titlesize': 18,
-    #     'axes.titleweight': 'bold',
-    #     'xtick.labelsize': 13,
-    #     'xtick.direction': 'in',
-    #     'xtick.top': True,  # draw label on the top
-    #     'xtick.bottom': True,  # draw label on the bottom
-    #     'xtick.minor.visible': True,
-    #     'xtick.major.top': True,  # draw x axis top major ticks
-    #     'xtick.major.bottom': True,  # draw x axis bottom major ticks
-    #     'xtick.minor.top': True,  # draw x axis top minor ticks
-    #     'xtick.minor.bottom': True,  # draw x axis bottom minor ticks
-    #     'ytick.labelsize': 13,
-    #     'ytick.direction': 'in',
-    #     'ytick.left': True,  # draw label on the top
-    #     'ytick.right': True,  # draw label on the bottom
-    #     'ytick.minor.visible': True,
-    #     'ytick.major.left': True,  # draw x axis top major ticks
-    #     'ytick.major.right': True,  # draw x axis bottom major ticks
-    #     'ytick.minor.left': True,  # draw x axis top minor ticks
-    #     'ytick.minor.right': True,  # draw x axis bottom minor ticks
-    #     'legend.fancybox': False,
-    #     'legend.frameon': False,
-    #     'legend.loc': 'upper left',
-    #     'legend.numpoints': 2,
-    #     'legend.fontsize': 'large',
-    #     'legend.framealpha': 1,
-    #     'legend.scatterpoints': 3,
-    #     'legend.edgecolor': 'inherit'
-    # }
     params = {
         'font.family': "Arial",
         'font.size': 12,
@@ -122,8 +85,6 @@ def set_mpl_params():
         'mathtext.bf': 'Arial:bold'
     }
     matplotlib.rcParams.update(params)
-    # 25/04/21 this function was depricated? Don't know what it did
-    # matplotlib.font_manager._rebuild()
 
 
 def remove_all(ax=None, top=False, bottom=False, left=False, right=False,
@@ -203,7 +164,7 @@ def plot_single_rf(
     depth: np.ndarray or None = None, ax: plt.Axes = None,
     outputdir: str = None, pre_fix: str = None,
     post_fix: str = None, format: str = 'pdf', clean: bool = False,
-        std: np.ndarray = None):
+        std: np.ndarray = None, flipxy: bool = False):
     """Creates plot of a single receiver function
 
     Parameters
@@ -229,7 +190,7 @@ def plot_single_rf(
         prepend filename
     post_fix : str, optional
         append to filename
-    clean: bool
+    clean: bool, optional
         If True, clears out all axes and plots RF only.
         Defaults to False.
     std: np.ndarray, optional
@@ -237,6 +198,9 @@ def plot_single_rf(
             limit of the standard deviation in the plot. Provide the std
             as a numpy array (can be easily computed from the output of
             :meth:`~pyglimer.rf.create.RFStream.bootstrap`)
+    flipxy: bool, optional
+        Plot Depth/Time on the Y-Axis and amplitude on the x-axis. Defaults
+        to False.
 
      Returns
     -------
@@ -246,7 +210,10 @@ def plot_single_rf(
 
     # Get figure/axes dimensions
     if ax is None:
-        width, height = 10, 2.5
+        if flipxy:
+            height, width = 8, 3
+        else:
+            width, height = 10, 2.5
         fig = plt.figure(figsize=(width, height))
         ax = plt.axes(zorder=9999999)
         axtmp = None
@@ -275,31 +242,65 @@ def plot_single_rf(
         times = z
 
     # Plot stuff into axes
-    if std is not None:
-        ax.plot(times, ydata-std, 'k--', lw=0.75)
-        ax.plot(times, ydata+std, 'k--', lw=0.75)
-        ax.fill_between(times, 0, ydata, where=ydata > 0,
-                        interpolate=True, color=(0.9, 0.2, 0.2), alpha=.5)
-        ax.fill_between(times, 0, ydata, where=ydata < 0,
-                        interpolate=True, color=(0.2, 0.2, 0.7), alpha=.5)
-    else:
-        ax.fill_between(times, 0, ydata, where=ydata > 0,
-                        interpolate=True, color=(0.9, 0.2, 0.2))
-        ax.fill_between(times, 0, ydata, where=ydata < 0,
-                        interpolate=True, color=(0.2, 0.2, 0.7))
-    ax.plot(times, ydata, 'k', lw=0.75)
+    if flipxy:
+        if std is not None:
+            ax.plot(ydata-std, times, 'k--', lw=0.75)
+            ax.plot(ydata+std, times, 'k--', lw=0.75)
+            ax.fill_betweenx(
+                times, 0, ydata, where=ydata > 0,
+                interpolate=True, color=(0.9, 0.2, 0.2), alpha=.8)
+            ax.fill_betweenx(
+                times, 0, ydata, where=ydata < 0,
+                interpolate=True, color=(0.2, 0.2, 0.7), alpha=.8)
+        else:
+            ax.fill_betweenx(
+                times, 0, ydata, where=ydata > 0,
+                interpolate=True, color=(0.9, 0.2, 0.2), alpha=.8)
+            ax.fill_betweenx(
+                times, 0, ydata, where=ydata < 0,
+                interpolate=True, color=(0.2, 0.2, 0.7), alpha=.8)
+        ax.plot(ydata, times, 'k', lw=0.75)
 
-    # Set limits
-    if tlim is None:
-        ax.set_xlim(0, times[-1])  # don't really wanna see the stuff before
-    else:
-        ax.set_xlim(tlim)
+        # Set limits
+        if tlim is None:
+            # don't really wanna see the stuff before
+            ax.set_ylim(0, times[-1])
+        else:
+            ax.set_ylim(tlim)
 
-    if ylim is None:
-        absmax = 1.1 * np.max(np.abs(ydata))
-        ax.set_ylim([-absmax, absmax])
+        if ylim is None:
+            absmax = 1.1 * np.max(np.abs(ydata))
+            ax.set_xlim([-absmax, absmax])
+        else:
+            ax.set_xlim(ylim)
+        ax.invert_yaxis()
     else:
-        ax.set_ylim(ylim)
+        if std is not None:
+            ax.plot(times, ydata-std, 'k--', lw=0.75)
+            ax.plot(times, ydata+std, 'k--', lw=0.75)
+            ax.fill_between(times, 0, ydata, where=ydata > 0,
+                            interpolate=True, color=(0.9, 0.2, 0.2), alpha=.8)
+            ax.fill_between(times, 0, ydata, where=ydata < 0,
+                            interpolate=True, color=(0.2, 0.2, 0.7), alpha=.8)
+        else:
+            ax.fill_between(times, 0, ydata, where=ydata > 0,
+                            interpolate=True, color=(0.9, 0.2, 0.2), alpha=.8)
+            ax.fill_between(times, 0, ydata, where=ydata < 0,
+                            interpolate=True, color=(0.2, 0.2, 0.7), alpha=.8)
+        ax.plot(times, ydata, 'k', lw=0.75)
+
+        # Set limits
+        if tlim is None:
+            ax.set_xlim(0, times[-1])
+            # don't really wanna see the stuff before
+        else:
+            ax.set_xlim(tlim)
+
+        if ylim is None:
+            absmax = 1.1 * np.max(np.abs(ydata))
+            ax.set_ylim([-absmax, absmax])
+        else:
+            ax.set_ylim(ylim)
 
     # Removes top/right axes spines. If you want the whole thing, comment
     # or remove
@@ -310,10 +311,20 @@ def plot_single_rf(
         remove_all()
     else:
         if rf.stats.type == 'time':
-            ax.set_xlabel("Conversion Time [s]")
+            if flipxy:
+                ax.set_ylabel("Conversion Time [s]", rotation=90)
+            else:
+                ax.set_xlabel("Conversion Time [s]")
         else:
-            ax.set_xlabel("Conversion Depth [km]")
-        ax.set_ylabel("A    ", rotation=0)
+            if flipxy:
+                ax.set_ylabel("Conversion Depth [km]", rotation=90)
+            else:
+                ax.set_xlabel("Conversion Depth [km]")
+        if flipxy:
+            ax.set_xlabel("A    ", rotation=0)
+        else:
+            ax.set_ylabel("A    ", rotation=0)
+
         # Start time in station stack does not make sense
         if rf.stats.type == 'stastack':
             text = rf.get_id()
@@ -400,7 +411,7 @@ def plot_section(
     ax : `matplotlib.pyplot.Axes`
 
     """
-    # set_mpl_params()
+    set_mpl_params()
 
     # Create figure if no axes is specified
     if ax is None:
@@ -432,11 +443,11 @@ def plot_section(
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
                          where=rftmp < rf.stats.distance,
                          interpolate=True, color=(0.2, 0.2, 0.7),
-                         zorder=-_i)
+                         zorder=-_i, alpha=.8)
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
                          where=rftmp > rf.stats.distance,
                          interpolate=True, color=(0.9, 0.2, 0.2),
-                         zorder=-_i - 0.1)
+                         zorder=-_i - 0.1, alpha=.8)
         if line:
             ax.plot(rftmp, times, 'k', lw=linewidth, zorder=-_i + 0.1)
 
@@ -466,16 +477,60 @@ def plot_section(
 
     # Set title
     if title is not None:
-        plt.title(title + " - %s" % channel)
+        plt.title(title)
     else:
         plt.title("%s component" % channel)
 
     # Set output directory
-    if outputfile is None:
-        plt.show()
-    else:
+    if outputfile:
         plt.savefig(outputfile, dpi=300, transparent=True, format=format)
+    elif show:
+        plt.show()
     return ax
+
+
+def combined_single_station_plot(
+    rfst, stack, ylim: Tuple[float, float] = None, std: np.ndarray = None,
+    scalingfactor: float = 6, outputfile: str = None, fmt: str = None,
+        title: str = None):
+    set_mpl_params()
+
+    fig, _ = plt.subplots(
+        1, 2, gridspec_kw={'width_ratios': [1, 2]}, figsize=(10, 10))
+    if title:
+        fig.suptitle(title, fontsize=16, fontweight='bold')
+
+    # no space between panels
+    plt.subplots_adjust(wspace=0, hspace=0)
+
+    ax0 = plt.subplot(121)
+    plot_single_rf(stack, flipxy=True, std=std, ax=ax0)
+    plt.title('Stack')
+
+    # Full Box
+    ax0.spines['right'].set_visible(True)
+    ax0.spines['top'].set_visible(True)
+
+    # Only show ticks on the left ticks
+    ax0.yaxis.set_ticks_position('left')
+    ax0.set_xlabel(None)
+    ax0.set_xticklabels([])
+    ax0.set_xticks([])
+    for txt in ax0.texts:
+        txt.remove()
+
+    # Section plot
+    ax1 = plt.subplot(122, sharey=ax0)
+    ax1 = plot_section(
+        rfst, line=False, scalingfactor=scalingfactor, timelimits=ylim, ax=ax1,
+        show=False, title='Individual Receiver Functions')
+    ax1.set_xlabel(r'Epicentral Distance, $\Delta$ [$^{\circ}$]')
+    ax1.tick_params(
+        axis='both', which='both', right=False, top=False, labelleft=False,
+        direction='inout')
+    plt.ylabel(None)
+    if outputfile is not None:
+        plt.savefig(outputfile, transparent=True, format=fmt)
 
 
 def baz_hist(az, nbins):
@@ -519,6 +574,7 @@ def baz_hist(az, nbins):
     ax.set_xticks(np.arange(0, 2*np.pi, 2*np.pi/8))
     ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
     labels = ax.get_xticklabels()
+    plt.title('Backazimuth')
     for label in labels:
         pos = label.get_position()
         label.set_position([pos[0], pos[1]-0.02])
@@ -582,6 +638,7 @@ def rayp_hist(rayp, nbins, v=5.8):
     ax.set_thetamin(7.5)
     ax.set_thetamax(35)
     labels = ax.get_xticklabels()
+    plt.title('Incident Angle')
     for label in labels:
         pos = label.get_position()
         label.set_position([pos[0], pos[1]-0.02])
@@ -592,7 +649,7 @@ def rayp_hist(rayp, nbins, v=5.8):
 def stream_dist(rayp: list or np.array, baz: list or np.array,
                 nbins: float = 50, v: float = 5.8, phase: str = 'P',
                 outputfile: None or str = None, format: str = "pdf",
-                dpi: int = 300):
+                dpi: int = 300, title: str = None):
     """Uses backazimuth and rayparameter histogram plotting tools to create
     combined overview over the Distribution of incident waves.
 
@@ -620,17 +677,16 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
         only used if file format is none vector.
 
     """
-
-    plt.figure(figsize=(10, 4.5))
+    fig = plt.figure(figsize=(10, 4.5))
+    if title:
+        fig.suptitle(title, fontsize=19, fontweight='bold')
     plt.subplots_adjust(wspace=0.05)
     plt.subplot(121, projection="polar")
     baz_hist(baz, nbins)
     plt.subplot(122, projection="polar")
     rayp_hist(rayp, nbins, v=v)
 
-    if outputfile is None:
-        plt.show()
-    else:
+    if outputfile:
         if format in ["pdf", "epsg", "svg", "ps"]:
             dpi = None
         plt.savefig(outputfile, format=format, dpi=dpi)

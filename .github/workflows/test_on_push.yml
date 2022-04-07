@@ -31,3 +31,7 @@ jobs:
         run: |
             conda install pytest
             pytest tests -p no:logging
+      - name: Lint
+        shell: bash -l {0}
+        run: |
+            pytest formatting_test/test_code_formatting.py

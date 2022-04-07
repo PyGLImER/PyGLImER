@@ -12,7 +12,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Saturday, 21st August 2021 07:41:42 am
+Last Modified: Tuesday, 15th February 2022 01:40:24 pm
 '''
 
 import logging
@@ -25,7 +25,6 @@ import glob
 from joblib import Parallel, delayed
 from obspy.clients.fdsn import Client, header
 import pandas as pd
-from pathlib import Path
 
 from pyglimer.data import finddir
 from pyglimer.database.rfh5 import RFDataBase
@@ -135,7 +134,7 @@ class StationDB(object):
                         dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
             except FileNotFoundError:
                 os.makedirs(os.path.join(
-                        dir, os.pardir, os.pardir, 'logs'), exist_ok=True)
+                    dir, os.pardir, os.pardir, 'logs'), exist_ok=True)
                 fh = logging.FileHandler(
                     os.path.join(
                         dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
@@ -152,7 +151,7 @@ class StationDB(object):
         # Check if there is already a saved database
         oloc = os.path.join(finddir(), 'database.csv')
 
-        if use_old and Path(oloc).is_file():
+        if use_old and os.path.isfile(oloc):
             self.db = pd.read_csv(oloc)
         elif hdf5:
             self.db = self._create_from_hdf5()
@@ -171,9 +170,8 @@ class StationDB(object):
         :rtype: pd.DataFrame
         """
         data = {
-                'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
-                'elevation': []
-            }
+            'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
+            'elevation': []}
         for f in glob.glob(os.path.join(
                 self.dir, '**', '*.*.h5'), recursive=True):
             net, stat, _ = os.path.basename(f).split('.')
@@ -245,8 +243,7 @@ class StationDB(object):
         # Create data dictionary
         dataP = {
             'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
-            'elevation': [], 'NP': [], 'NPret': [], 'NS': [], 'NSret': []
-            }
+            'elevation': [], 'NP': [], 'NPret': [], 'NS': [], 'NSret': []}
         dataS = deepcopy(dataP)
 
         # Read in info files

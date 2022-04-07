@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 25th August 2021 11:54:15 am
-Last Modified: Tuesday, 14th September 2021 08:38:30 am
+Last Modified: Monday, 14th February 2022 11:19:28 am
 '''
 
 import unittest
@@ -16,6 +16,7 @@ import unittest
 import numpy as np
 from obspy import read
 import scipy
+from scipy.fftpack import next_fast_len
 
 from pyglimer.utils import signalproc as sptb
 
@@ -93,23 +94,22 @@ class TestGaussian(unittest.TestCase):
 
 class TestSShift(unittest.TestCase):
     def test_result_forwards(self):
-        s = np.random.rand(np.random.randint(100, 150))
+        s = np.random.rand(np.random.randint(500, 600))
         phi = np.random.randint(-50, 50)
         out = sptb.sshift(s, len(s), 1, phi)
-
-        self.assertTrue(np.allclose(out, np.roll(s, phi)))
+        np.testing.assert_allclose(out, np.roll(s, phi))
 
     def test_shift_0(self):
         s = np.random.rand(np.random.randint(100, 150))
         phi = 0
-        out = sptb.sshift(s, len(s), 1, phi)
+        out = sptb.sshift(s, next_fast_len(len(s)), 1, phi)
         self.assertTrue(np.allclose(out, s))
 
     def test_empty_array(self):
         s = np.array([])
         phi = 0
         with self.assertRaises(ValueError):
-            sptb.sshift(s, len(s), 1, phi)
+            sptb.sshift(s, next_fast_len(len(s)), 1, phi)
 
 
 if __name__ == "__main__":

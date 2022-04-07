@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Monday, 4th October 2021 03:29:24 pm
+Last Modified: Thursday, 13th January 2022 09:15:00 am
 '''
 
 from glob import glob
@@ -28,6 +28,7 @@ from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from pyasdf import ASDFDataSet
 from tqdm.std import tqdm
 
+from pyglimer import constants
 from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.utils.log import create_mpi_logger
 from .qc import qcp, qcs
@@ -65,12 +66,12 @@ def preprocessh5(
     model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
     rawloc: str, rfloc: str, deconmeth: str, hc_filt: float, netrestr: str,
     statrestr: str, logger: logging.Logger, rflogger: logging.Logger,
-        client: str):
+        client: str, evtcat: obspy.Catalog):
     """
     Preprocess files saved in hdf5 (pyasdf) format. Will save the computed
     receiver functions in hdf5 format as well.
 
-    Processing is done via a multiprocessing backend (either joblb or mpi).
+    Processing is done via a multiprocessing backend (either joblib or mpi).
 
     :param phase: The Teleseismic phase to consider
     :type phase: str
@@ -107,6 +108,8 @@ def preprocessh5(
     :type rflogger: logging.Logger
     :param client: Multiprocessing Backend to use
     :type client: str
+    :param evtcat: event Catalogue
+    :type evtcat: obspy.catalog
     :raises NotImplementedError: For uknowns multiprocessing backends.
     """
     os.makedirs(rfloc, exist_ok=True)
@@ -127,16 +130,16 @@ def preprocessh5(
         # get new MPI compatible loggers
         logger = create_mpi_logger(logger, rank)
         rflogger = logging.getLogger("%s.RF" % logger.name)
-        for ii in tqdm(ind):
+        for ii in ind:
             _preprocessh5_single(
                 phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, logger, rflogger, flist[ii]
+                deconmeth, hc_filt, logger, rflogger, flist[ii], evtcat
             )
     elif client.lower() == 'joblib':
         Parallel(n_jobs=-1)(delayed(_preprocessh5_single)(
             phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
             deconmeth, hc_filt, logger, rflogger,
-            f) for f in tqdm(flist))
+            f, evtcat) for f in tqdm(flist))
     else:
         raise NotImplementedError(
             'Unknown multiprocessing backend %s.' % client
@@ -148,7 +151,7 @@ def _preprocessh5_single(
     model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
     rfloc: str, deconmeth: str, hc_filt: float,
     logger: logging.Logger, rflogger: logging.Logger,
-        hdf5_file: str):
+        hdf5_file: str, evtcat: obspy.Catalog):
     """
     Single core processing of one single hdf5 file.
 
@@ -170,34 +173,81 @@ def _preprocessh5_single(
     else:
         ret = []
         rej = []
-    with ASDFDataSet(f, mode='r') as ds:
+    rflogger.info(f'Processing Station {code}')
+    with ASDFDataSet(f, mode='r', mpi=False) as ds:
         # get station inventory
-        inv = ds.waveforms[code].StationXML
+        try:
+            inv = ds.waveforms[code].StationXML
+        except KeyError:
+            logger.exception(
+                f'Could not find station inventory for Station {net}.{stat}')
         rf = RFStream()
-        for evt in tqdm(ds.events):
-            toa, rayp, rayp_s_deg, baz, distance = compute_toa(
-                evt, inv[0][0].latitude, inv[0][0].longitude, phase, model)
+        # There has to be a smarter way to do this. Only some events
+        # have a corresponding waveform
+        # At least only compute theoretical arrival if the distance is within
+        # thresholds
+
+        # Which times are available as raw data?
+        t_raw = [
+            tr.stats.starttime for tr in ds.waveforms[code][
+                'raw_recording']]
+        t_raw_min = min(t_raw) - 600
+        t_raw_max = max(t_raw) + 600
+        # c_date = inv[0][0].creation_date
+        # t_date = inv[0][0].termination_date
+        for evt in tqdm(evtcat):
+            # Already processed?
+            ot = (evt.preferred_origin() or evt.origins[0]).time
+            ot_fiss = UTCDateTime(ot).format_fissures()
+            if ot_fiss in rej or ot_fiss in ret:
+                rflogger.debug('RF with ot %s already processed.' % ot_fiss)
+                continue
+            # Skip events with no data.
+            if ot < t_raw_min or t_raw_max < ot:
+                rflogger.debug(f'No raw data for event {ot_fiss}.')
+                continue
+            try:
+                toa, rayp, rayp_s_deg, baz, distance = compute_toa(
+                    evt, inv[0][0].latitude, inv[0][0].longitude, phase, model)
+            except IndexError:
+                rflogger.debug('Phase not viable for epicentral distance')
+                continue
+            except ValueError as e:
+                rflogger.debug(e)
+                continue
             st = ds.get_waveforms(
                 net, stat, '*', '*', toa-tz, toa+ta, 'raw_recording')
-            rf_temp = __station_process__(
-                st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
-                ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
-                distance, rayp, rayp_s_deg, toa, rej, ret)
+            if not st.count():
+                logger.info(
+                    f'No traces found for Station {net}.{stat} and arrival '
+                    + f'time {toa}')
+                continue
+            try:
+                rf_temp = __station_process__(
+                    st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
+                    ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
+                    distance, rayp, rayp_s_deg, toa, rej, ret)
+            except Exception as e:
+                rflogger.exception(
+                    'RF Creation failed. Waveform Data:\n'
+                    + f'{net}.{stat}.{ot_fiss}\noriginal error:\n'
+                    + f'{e}')
+                continue
             if rf_temp is not None:
                 rf.append(rf_temp)
             # Write regularly to not clutter too much into the RAM
-            if rf.count() >= 30:
+            if rf.count() >= 20:
+                rflogger.info('Writing to file %s....' % outf)
                 with RFDataBase(outf) as rfdb:
-                    rflogger.info('Writing to file %s....' % outf)
                     rfdb.add_rf(rf)
                     rfdb._add_known_waveform_data(ret, rej)
-                    rflogger.info('..written.')
+                rflogger.info('..written.')
                 rf.clear()
+    rflogger.info('Writing to file %s....' % outf)
     with RFDataBase(outf) as rfdb:
-        rflogger.info('Writing to file %s....' % outf)
         rfdb.add_rf(rf)
         rfdb._add_known_waveform_data(ret, rej)
-        rflogger.info('..written.')
+    rflogger.info('..written.')
     rf.clear()
 
 
@@ -224,15 +274,27 @@ def compute_toa(
         the back azimuth, the distance between station and event in deg]
     :rtype: Tuple[UTCDateTime, float, float, float]
     """
-    origin = (evt.preferred_origin() or evt.origins[0])
+    origin = evt.preferred_origin() or evt.origins[0]
     distance, baz, _ = gps2dist_azimuth(
         slat, slon, origin.latitude,
         origin.longitude)
     distance = kilometer2degrees(distance/1000)
 
     # compute time of first arrival & ray parameter
+    odepth = origin.depth or 10000  # Some events have no depth information
+
+    # Throw out events that should not be used for RFs
+    if (constants.maxdepth[phase]
+        and constants.maxdepth[phase] < odepth/1000) \
+        or not (
+            constants.min_epid[phase]
+            <= distance <= constants.max_epid[phase]):
+        raise ValueError(
+            f'Distance {distance} deg or origin depth {odepth}m should not be '
+            + 'used for RFs')
+
     arrival = model.get_travel_times(
-        source_depth_in_km=origin.depth / 1000, distance_in_degree=distance,
+        source_depth_in_km=odepth / 1000, distance_in_degree=distance,
         phase_list=[phase])[0]
     rayp_s_deg = arrival.ray_param_sec_degree
     rayp = rayp_s_deg / 111319.9  # apparent slowness
@@ -251,10 +313,7 @@ def __station_process__(
     # Is the data already processed?
     origin = (evt.preferred_origin() or evt.origins[0])
     ot_fiss = UTCDateTime(origin.time).format_fissures()
-    ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]
-    if ot_fiss in rej or ot_fiss in ret:
-        rflogger.debug('RF with ot %s already processed.' % ot_fiss)
-        return
+    # ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]
 
     # Remove repsonse
     st.attach_response(inv)
@@ -283,8 +342,9 @@ def __station_process__(
             st, ia = rotate_LQT_min(st, phase)
             # additional QC
             if ia < 5 or ia > 75:
-                raise SNRError("""The estimated incidence angle is
-                                unrealistic with """ + str(ia) + 'degree.')
+                raise SNRError(
+                    "The estimated incidence angle is unrealistic with"
+                    + '%s degree.' % str(ia))
 
         elif rot == "PSS":
             _, _, st = rotate_PSV(
@@ -308,13 +368,15 @@ def __station_process__(
         ret.append(ot_fiss)
 
     except SNRError as e:
-        rflogger.info(e)
+        rflogger.info(f'{e} {ot_fiss}')
         rej.append(ot_fiss)
         return None
 
     except Exception as e:
-        print("RF creation failed")
-        rflogger.exception([net, stat, ot_loc, e])
+        rflogger.exception(
+            'RF Creation failed. Waveform Data:\n'
+            + f'{net}.{stat}.{ot_fiss}\noriginal error:\n'
+            + f'{e}')
         return None
 
     return RF
@@ -324,11 +386,9 @@ def __rotate_qc(
     phase, st, station_inv, network, station, baz, distance, ot_fiss,
     event, evtlat, evtlon, depth, rayp_s_deg, first_arrival, logger, infodict,
         tz, pol):
-    """REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
-    Bugs occur here due to station inventories without response information
-    Looks like the bulk downloader sometimes donwnloads
-    station inventories without response files. I could fix that here by
-    redownloading the response file (alike to the 3 traces problem)"""
+    """
+    REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
+    """
 
     st.rotate(method='->ZNE', inventory=station_inv)
 
@@ -377,7 +437,6 @@ def __rotate_qc(
             raise SNRError('QC rejected %s' % np.array2string(noisemat))
 
     # WRITE AN INFO FILE
-    # append_info: [key,value]
     append_inf = [
         ['magnitude', (
             event.preferred_magnitude() or event.magnitudes[0])['mag']],
@@ -395,8 +454,7 @@ def __rotate_qc(
         ['rayp_s_deg', rayp_s_deg],
         ['onset', first_arrival],
         ['starttime', st[0].stats.starttime],
-        ['pol', pol]
-        ]
+        ['pol', pol]]
 
     # Check if values are already in dict
     for key, value in append_inf:
@@ -410,6 +468,6 @@ def __rotate_qc(
     infodict['statlon'] = station_inv[0][0][0].longitude
     infodict['statel'] = station_inv[0][0][0].elevation
 
-    logger.info("Stream accepted. Preprocessing successful")
+    logger.info(f"Stream accepted {ot_fiss}. Preprocessing successful")
 
     return st, crit, infodict

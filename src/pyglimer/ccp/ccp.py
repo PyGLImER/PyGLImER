@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 4th October 2021 05:08:14 pm
+Last Modified: Thursday, 21st October 2021 03:52:16 pm
 '''
 
 # !/usr/bin/env python3
@@ -812,8 +812,8 @@ code if you want to filter by station")
             N_splits = int(np.ceil(mem_needed/mem.total))
             split_size = int(np.ceil(len(streams)/N_splits))
             print(
-                'Splitting RFs into %s chunks due to insufficient memory.' +
-                'Each progressbar will only show the progress per chunk.' %
+                'Splitting RFs into %s chunks due to insufficient memory.'
+                + 'Each progressbar will only show the progress per chunk.' %
                 str(N_splits))
         else:
             split_size = len(streams)
@@ -1032,8 +1032,9 @@ code if you want to filter by station")
             except AttributeError as e:
                 # for Interpolationerrors
                 self.logger.exception(
-                    'Error in multiple computation. Mostly caused by issue' +
-                    'during the interpolation. Origninal Error message below.')
+                    'Error in multiple computation. Mostly caused by issue '
+                    + 'during the interpolation. Origninal Error message '
+                    + 'below.')
                 self.logger.exception(e)
                 lm1 = None
                 lm2 = None
@@ -1079,18 +1080,17 @@ code if you want to filter by station")
         if multiple == 'linear':
 
             self.ccp = np.hstack(((
-                np.divide(self.bins[:, :endi], self.illum[:, :endi]+1) +
-                np.divide(
-                    self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
-                np.divide(
+                np.divide(self.bins[:, :endi], self.illum[:, :endi]+1)
+                + np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1)
+                + np.divide(
                     self.bins_m2[:, :endi], self.illumm[:, :endi]+1))/3,
                 np.zeros(self.bins[:, endi:].shape)))
         elif multiple == 'zk':
-            # self.ccp = np.divide(self.bins, self.illum+1)
             self.ccp = np.hstack((
-                .7*np.divide(self.bins[:, :endi], self.illum[:, :endi]+1) +
-                .2*np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1) +
-                .1*np.divide(self.bins_m2[:, :endi], self.illumm[:, :endi]+1),
+                .7*np.divide(self.bins[:, :endi], self.illum[:, :endi]+1)
+                + .2*np.divide(self.bins_m1[:, :endi], self.illumm[:, :endi]+1)
+                + .1*np.divide(
+                    self.bins_m2[:, :endi], self.illumm[:, :endi]+1),
                 np.zeros(self.bins[:, endi:].shape)))
         elif multiple == 'm1':
             self.ccp = np.hstack((
@@ -1322,10 +1322,10 @@ misspelled or not yet implemented')
 
         # smaller/larger is fine as the extent was fixed.
         cpos = np.where(
-            (self.coords_new[0] > minlat) &
-            (self.coords_new[0] < maxlat) &
-            (self.coords_new[1] > minlon) &
-            (self.coords_new[1] < maxlon)
+            (self.coords_new[0] > minlat)
+            & (self.coords_new[0] < maxlat)
+            & (self.coords_new[1] > minlon)
+            & (self.coords_new[1] < maxlon)
         )[1]
 
         # Get interpolation weights and rows.
@@ -1364,8 +1364,8 @@ misspelled or not yet implemented')
             if _i % int((Nz/10)) == 0:
                 sys.stdout.write("\033[F")  # back to previous line
                 sys.stdout.write("\033[K")
-                verboseprint(maintext +
-                             f"--->  {_i+1:0{len(str(Nz))}d}/{Nz:d}")
+                verboseprint(
+                    maintext + f"--->  {_i+1:0{len(str(Nz))}d}/{Nz:d}")
             qccp[:, :, _i] = ccp_interpolator(_ccpcol).T
             qill[:, :, _i] = ill_interpolator(_illumcol).T
         verboseprint("... done.")
@@ -1421,8 +1421,9 @@ misspelled or not yet implemented')
         # Filter ccpstacks if not none
         if bbox is None:
             bbox = [-180, 180, -90, 90]
-        pos = np.where(((bbox[0] <= lon) & (lon <= bbox[1]) &
-                        (bbox[2] <= lat) & (lat <= bbox[3])))[0]
+        pos = np.where(((
+            bbox[0] <= lon) & (lon <= bbox[1])
+            & (bbox[2] <= lat) & (lat <= bbox[3])))[0]
         lat = lat[pos]
         lon = lon[pos]
 
@@ -1691,9 +1692,9 @@ misspelled or not yet implemented')
             z = self.z[depth[0]:depth[1]][ccp_short.argmin(axis=1)]
         else:
             raise ValueError(
-                'Choose either \'+\' to return the highest ' +
-                'positive velocity gradient or \'-\' to return the ' +
-                'highest negative velocity gradient.')
+                'Choose either \'+\' to return the highest '
+                + 'positive velocity gradient or \'-\' to return the '
+                + 'highest negative velocity gradient.')
 
         p_phase = PhasePick(coords, a, pol, z, depth)
         return p_phase

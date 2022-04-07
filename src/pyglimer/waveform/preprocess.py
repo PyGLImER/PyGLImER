@@ -8,11 +8,8 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Monday, 13th September 2021 12:21:11 pm
+Last Modified: Tuesday, 15th February 2022 01:43:54 pm
 '''
-
-# !/usr/bin/env python3d
-# -*- coding: utf-8 -*-
 
 import fnmatch
 import logging
@@ -26,19 +23,16 @@ import numpy as np
 from joblib import Parallel, delayed, cpu_count
 import obspy
 from obspy import read, read_inventory, Stream, UTCDateTime
-# from obspy.clients.iris import Client
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
-from pathlib import Path
 from tqdm.std import tqdm
 
 from pyglimer.utils.log import create_mpi_logger
 from pyglimer.waveform.preprocessh5 import preprocessh5
-from pyglimer import tmp
 from pyglimer.utils.signalproc import resample_or_decimate
 from .errorhandler import redownload, redownload_statxml, \
-    NoMatchingResponseHandler  # , NotLinearlyIndependentHandler
+    NoMatchingResponseHandler
 from .qc import qcp, qcs
-from .rotate import rotate_LQT_min, rotate_PSV  # , rotate_LQT
+from .rotate import rotate_LQT_min, rotate_PSV
 from ..rf.create import createRF
 from ..utils.roundhalf import roundhalf
 from ..utils.utils import dt_string, chunks
@@ -122,7 +116,7 @@ def preprocess(
         preprocessh5(
             phase, rot, pol, taper_perc, model, taper_type, tz, ta,
             rawloc, rfloc, deconmeth, hc_filt, netrestr,
-            statrestr, logger, rflogger, client)
+            statrestr, logger, rflogger, client, event_cat)
         return
     # else:
     # Here, we work with all available cores to speed things up
@@ -147,12 +141,12 @@ def preprocess(
 
         if client.lower() == 'joblib':
             out = Parallel(n_jobs=-1, backend='multiprocessing')(
-                    delayed(__event_loop)(
-                        phase, rot, pol, event, taper_perc,
-                        taper_type, model, logger, rflogger, eh, tz,
-                        ta, statloc, rawloc, preproloc, rfloc, deconmeth,
-                        hc_filt, netrestr, statrestr)
-                    for event in tqdm(evtcat))
+                delayed(__event_loop)(
+                    phase, rot, pol, event, taper_perc,
+                    taper_type, model, logger, rflogger, eh, tz,
+                    ta, statloc, rawloc, preproloc, rfloc, deconmeth,
+                    hc_filt, netrestr, statrestr)
+                for event in tqdm(evtcat))
         elif client.lower() == 'mpi':
             from mpi4py import MPI
             comm = MPI.COMM_WORLD
@@ -243,19 +237,14 @@ def __event_loop(
     evtlat_loc = str(roundhalf(evtlat))
     evtlon_loc = str(roundhalf(evtlon))
     by_event = os.path.join(
-        preproloc, 'by_event', ot_loc + '_' + evtlat_loc
-        + '_' + evtlon_loc)
+        preproloc, 'by_event', '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
 
     # make folder that will contain softlinks
     os.makedirs(by_event, exist_ok=True)
 
     # Folder, in which the preprocessing is actually happening
     prepro_folder = os.path.join(
-        rawloc, ot_loc + '_' + evtlat_loc + '_' + evtlon_loc)
-
-    while prepro_folder == tmp.folder or tmp.folder == "not_started":
-        print('preprocessing suspended, awaiting download')
-        time.sleep(2.5)
+        rawloc, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
 
     try:  # If one event has no folder it interrupts else
         # Remove empty folders in the raw directory
@@ -271,7 +260,7 @@ def __event_loop(
     # Preprocessing just for some stations?
     # Then skip files that should not be preprocessed
     if netrestr:
-        pattern = netrestr + '.' + (statrestr or '') + '*'
+        pattern = '%s.%s*' % (netrestr, statrestr or '')
         files = fnmatch.filter(os.listdir(prepro_folder), pattern)
     else:
         files = os.listdir(prepro_folder)
@@ -327,9 +316,9 @@ def __waveform_loop(
 
     ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
 
-    outf = os.path.join(outdir, network+'.'+station+'.'+ot_loc+'.mseed')
+    outf = os.path.join(outdir, '%s.%s.%s.mseed' % (network, station, ot_loc))
 
-    statfile = os.path.join(statloc, network + '.' + station + '.xml')
+    statfile = os.path.join(statloc, '%s.%s.xml' % (network, station))
 
     # Create directory for preprocessed file
     os.makedirs(outdir, exist_ok=True)
@@ -350,20 +339,19 @@ def __waveform_loop(
                         st, network, station, statfile)
                 else:
                     raise FileNotFoundError(
-                        ["Station XML not available for station",
-                         network, station])
+                        "Station XML not available for station %s.%s" % (
+                            network, station))
 
             # compute theoretical arrival
-
-            distance, baz, _ = gps2dist_azimuth(station_inv[0][0].latitude,
-                                                station_inv[0][0].longitude,
-                                                evtlat, evtlon)
+            distance, baz, _ = gps2dist_azimuth(
+                station_inv[0][0].latitude, station_inv[0][0].longitude,
+                evtlat, evtlon)
             distance = kilometer2degrees(distance/1000)
 
             # compute time of first arrival & ray parameter
-            arrival = model.get_travel_times(source_depth_in_km=depth / 1000,
-                                             distance_in_degree=distance,
-                                             phase_list=[phase])[0]
+            arrival = model.get_travel_times(
+                source_depth_in_km=depth/1000, distance_in_degree=distance,
+                phase_list=[phase])[0]
             rayp_s_deg = arrival.ray_param_sec_degree
             rayp = rayp_s_deg / 111319.9  # apparent slowness
             first_arrival = origin_time + arrival.time
@@ -374,9 +362,9 @@ def __waveform_loop(
 
             # Check if step is already done
             if st[0].stats.sampling_rate != 10:
-                st = __cut_resample(st, logger, first_arrival, network,
-                                    station, prepro_folder, filestr,
-                                    taper_perc, taper_type, eh, tz, ta)
+                st = __cut_resample(
+                    st, logger, first_arrival, network, station, prepro_folder,
+                    filestr, taper_perc, taper_type, eh, tz, ta)
 
             # Finalise preprocessing
             st, crit, infodict = __rotate_qc(
@@ -388,8 +376,8 @@ def __waveform_loop(
         # Exceptions & logging
 
         except SNRError as e:  # QR rejections
-            logger.debug([filestr, "QC was not met, SNR ratios are",
-                          e])
+            logger.debug(
+                [filestr, "QC was not met, SNR ratios are", e])
 
             if __file_in_db(outdir, 'info.dat'):
                 with shelve.open(infof, flag='r') as info:
@@ -411,9 +399,9 @@ def __waveform_loop(
         finally:
             end = time.time()
             logger.info(
-                "File preprocessed.\n" +
-                "Station %s.%s\n" % (network, station) +
-                "Event %s" % event.resource_id)
+                "File preprocessed.\n"
+                + "Station %s.%s\n" % (network, station)
+                + "Event %s" % event.resource_id)
             logger.debug(dt_string(end-start))
 
     else:  # The file was already processed
@@ -434,9 +422,9 @@ def __waveform_loop(
 
     # Check if RF was already computed and if it should be
     # computed at all, and if the waveform was retained (SNR)
-    if deconmeth and not\
-        __file_in_db(os.path.join(rfloc, network, station), network +
-                     '.' + station + '.' + ot_loc + '.sac') and crit:
+    if deconmeth and not __file_in_db(
+        os.path.join(rfloc, network, station), '%s.%s.%s.sac' % (
+            network, station, ot_loc)) and crit:
 
         # 21.04.2020 Second highcut filter
         if hc_filt:
@@ -453,8 +441,8 @@ def __waveform_loop(
                 if ia < 5 or ia > 75:
                     crit = False
                     raise SNRError(
-                        "The estimated incidence angle is " +
-                        "unrealistic with %s degree." % str(ia))
+                        "The estimated incidence angle is "
+                        + "unrealistic with %s degree." % str(ia))
 
             elif rot == "PSS":
                 _, _, st = rotate_PSV(
@@ -490,21 +478,21 @@ def __waveform_loop(
 
             os.makedirs(rfdir, exist_ok=True)
 
-            RF.write(os.path.join(rfdir, network + '.' + station + '.' + ot_loc
-                     + '.sac'), format='SAC')
+            RF.write(os.path.join(
+                rfdir, '%s.%s.%s.sac' % (network, station, ot_loc)),
+                format='SAC')
 
             end = time.time()
             rflogger.info(
-                "RF created.\n" +
-                'Station %s.%s\n' % (network, station) +
-                'Event: %s' % event.resource_id)
+                "RF created.\n"
+                + 'Station %s.%s\n' % (network, station)
+                + 'Event: %s' % event.resource_id)
             rflogger.debug(dt_string(end-start))
 
         # Exception that occured in the RF creation
         # Usually don't happen
         except SNRError as e:
             rflogger.info(e)
-            # return infodict
 
         except Exception as e:
             print("RF creation failed")
@@ -519,8 +507,6 @@ def __waveform_loop(
                 infodict = None
             else:  # The multicore case
                 return infodict
-
-    # return infodict
 
 
 def __cut_resample(
@@ -680,22 +666,23 @@ def __rotate_qc(
 
     # WRITE AN INFO FILE
     # append_info: [key,value]
-    append_inf = [['magnitude', (event.preferred_magnitude() or
-                                 event.magnitudes[0])['mag']],
-                  ['magnitude_type', (
-                      event.preferred_magnitude() or event.magnitudes[0])[
-                          'magnitude_type']],
-                  ['evtlat', evtlat], ['evtlon', evtlon],
-                  ['ot_ret', ot_fiss], ['ot_all', ot_fiss],
-                  ['evt_depth', depth],
-                  ['evt_id', event.get('resource_id')],
-                  ['noisemat', noisemat],
-                  ['co_f', f], ['npts', st[1].stats.npts],
-                  ['rbaz', baz],
-                  ['rdelta', distance],
-                  ['rayp_s_deg', rayp_s_deg],
-                  ['onset', first_arrival],
-                  ['starttime', st[0].stats.starttime]]
+    append_inf = [
+        ['magnitude', (
+            event.preferred_magnitude() or event.magnitudes[0])['mag']],
+        ['magnitude_type', (
+            event.preferred_magnitude() or event.magnitudes[0])[
+                'magnitude_type']],
+        ['evtlat', evtlat], ['evtlon', evtlon],
+        ['ot_ret', ot_fiss], ['ot_all', ot_fiss],
+        ['evt_depth', depth],
+        ['evt_id', event.get('resource_id')],
+        ['noisemat', noisemat],
+        ['co_f', f], ['npts', st[1].stats.npts],
+        ['rbaz', baz],
+        ['rdelta', distance],
+        ['rayp_s_deg', rayp_s_deg],
+        ['onset', first_arrival],
+        ['starttime', st[0].stats.starttime]]
 
     # Check if values are already in dict
     for key, value in append_inf:
@@ -716,8 +703,7 @@ def __rotate_qc(
 
 def __file_in_db(loc: str, filename: str) -> bool:
     """Checks if file "filename" is already in location "loc"."""
-    path = Path(os.path.join(loc, filename))
-    if path.is_file():
+    if os.path.isfile(os.path.join(loc, filename)):
         return True
     else:
         return False

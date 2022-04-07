@@ -1,9 +1,6 @@
-<img src="docs/chapters/figures/logo.png" alt="drawing" width="400"/>
+<img src="docs/chapters/figures/logo_horizontal_colour.png" alt="PyGLImER logo" width="600"/>
 
-[![Build Status](https://github.com/PeterMakus/PyGLImER/actions/workflows/test_on_push.yml/badge.svg?branch=master)](https://github.com/PeterMakus/PyGLImER/actions/workflows/test_on_push.yml) [![Documentation Status](https://github.com/PeterMakus/PyGLImER/actions/workflows/deploy_gh_pages.yml/badge.svg)](https://github.com/PeterMakus/PyGLImER/actions/workflows/deploy_gh_pages.yml) [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
-
-
-Pythonic Global Lithospheric Imaging using Earthquake Recordings
+[![Build Status](https://github.com/PyGLImER/PyGLImER/actions/workflows/test_on_push.yml/badge.svg?branch=master)](https://github.com/PyGLImER/PyGLImER/actions/workflows/test_on_push.yml) [![Documentation Status](https://github.com/PyGLImER/PyGLImER/actions/workflows/deploy_gh_pages.yml/badge.svg)](https://github.com/PyGLImER/PyGLImER/actions/workflows/deploy_gh_pages.yml) [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0) [![codecov](https://codecov.io/gh/PyGLImER/PyGLImER/branch/master/graph/badge.svg?token=9WK7ZKIZ6N)](https://codecov.io/gh/PyGLImER/PyGLImER)
 
 ---
 
@@ -20,8 +17,14 @@ successor of the [GLImER](http://stephanerondenay.com/glimer-web.html) project.
 A few simple steps:
 
 ```bash
+# Download via wget or web-browser
+wget https://github.com/PyGLImER/PyGLImER/archive/refs/heads/master.zip
+
+# unzip the package
+unzip master.zip
+
 # Change directory to the same directory that this repo is in (i.e., same directory as setup.py)
-cd $PathToThisRepo$
+cd PyGLImER-master  # That's the standard name the folder should have
 
 # Create the conda environment and install dependencies
 conda env create -f environment.yml
@@ -34,12 +37,29 @@ pip install -e .
 ```
 
 ## Getting started
-Access PyGLImER's documentation [here](https://petermakus.github.io/PyGLImER/).
+Access PyGLImER's documentation [here](https://pyglimer.github.io/PyGLImER/).
 
 PyGLImER comes with a few tutorials (Jupyter notebooks). You can find those in the `examples/` directory.
 
+## What it looks like
+With PyGLImER, we facilitate processing extremely large amounts of teleseismic data. This enables us to create large scale CCP sections as shown for P-to-S and S-to-P receiver function data in the plot below:
+
+| <img src="docs/chapters/figures/map_w_ccp_sections.png" alt="Map With CCP sections" width="600"/> |
+|:--:| 
+| *FIG: Seismic broadband stations with available receiver functions are plotted as downward-pointing red triangles. The locations of the shown cross-sections are demarked as bold black lines. Cross-sections A, B, and D are created from S receiver functions stacked by common conversion point, whereas cross-section C shows a slice through a P receiver function common conversion point stack. Data begin to fade to grey if the respective gridpoint is hit by fewer than 25 rays. Note that the vertical exaggeration varies from panel to panel.* |
+
+PyGLImER also comes with a toolset to create publication ready figures:
+
+| <img src="docs/chapters/figures/combined.jpg" alt="Combined Stack and Section" width="400"/> |
+|:--:|
+| *FIG: Single station stack and receiver functions sorted by epicentral distance from P receiver function for station IU.HRV.* |
+
+| <img src="docs/chapters/figures/distr.jpg" alt="Distribution of back-azimuth and rayparameters" width="600"/> |
+|:--:|
+| *FIG: Distribution of back-azimuth and rayparameter for the P receiver functions from IU.HRV as shown above.* |
+
 ## Reporting Bugs / Contact the developers
-This version is an early release. If you encounter any issues or unexpected behaviour, please [open an issue](https://github.com/PeterMakus/PyGLImER/issues/new) here on GitHub or [contact the developers](mailto:makus@gfz-potsdam.de).
+This version is an early release. If you encounter any issues or unexpected behaviour, please [open an issue](https://github.com/PyGLImER/PyGLImER/issues/new) here on GitHub or [contact the developers](mailto:makus@gfz-potsdam.de).
 
 ## Citing PyGLImER
 If you use PyGLImER to produce content for your publication, please consider citing us. For the time being, please cite our [AGU abstract](https://www.essoar.org/doi/10.1002/essoar.10506417.1).

@@ -2,13 +2,13 @@
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   `GNU Lesser General Public License, Version 3
-   <https://www.gnu.org/copyleft/lesser.html>`
+   GNU Lesser General Public License, Version 3
+   (https://www.gnu.org/copyleft/lesser.html)
 :author:
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Monday, 4th October 2021 03:28:36 pm
+Last Modified: Friday, 11th February 2022 01:06:08 pm
 '''
 
 import fnmatch
@@ -73,8 +73,10 @@ class DBHandler(h5py.File):
         Known waveforms to receive. Is just a dictionary with two keys (each
         of which has a list as item with all retained or rejected waveforms).
 
-        :param known: dict{ret: List[str], rej: List[str]}
-        :type known: dict
+        :param ret: list of retained waveforms
+        :type ret: List[str]
+        :param rej: List of rejeccted waveforms
+        type rej: List[str]
         """
         try:
             ds = self.create_dataset('known', data=np.empty(1))
@@ -133,7 +135,7 @@ omitted." % path, category=UserWarning)
 
         .. note::
 
-            Wildcards are allowed for all parameters.
+            `Wildcards are allowed for all parameters`.
 
         :param network: network code, e.g., IU
         :type network: str
@@ -151,9 +153,10 @@ omitted." % path, category=UserWarning)
             data.
         :rtype: RFStream
         """
-        if isinstance(evt_time, UTCDateTime):
+        try:
+            evt_time = UTCDateTime(evt_time)
             evt_time = evt_time.format_fissures()
-        else:
+        except TypeError:
             evt_time = '*'
 
         path = hierarchy.format(
@@ -167,21 +170,15 @@ omitted." % path, category=UserWarning)
         # Now, we need to differ between the fnmatch pattern and the actually
         # acessed path
         pattern = path.replace('/*', '*')
-        if evt_time == '*':
-            if pol == '*':
-                if phase == '*':
-                    if station == '*':
-                        if network == '*':
-                            path = tag
-                        else:
-                            path = '/'.join(path.split('/')[:-4])
-                    else:
-                        path = '/'.join(path.split('/')[:-3])
-                else:
-                    path = '/'.join(path.split('/')[:-2])
-            else:
-                path = '/'.join(path.split('/')[:-1])
-        return all_traces_recursive(self[path], RFStream(), pattern)
+        path = path.split('*')[0]
+        try:
+            return all_traces_recursive(self[path], RFStream(), pattern)
+        except KeyError:
+            warnings.warn(
+                f'Could not find data from {network}.{station} for phase '
+                + f'{phase}, tag {tag}, polarisation {pol}, and time '
+                + f'{evt_time}. Returning empty Stream.')
+            return RFStream()
 
     def get_coords(
         self, network: str, station: str, phase: str = None,
@@ -343,18 +340,18 @@ def all_traces_recursive(
     :rtype: CorrStream
     """
     for v in group.values():
-        if not fnmatch.fnmatch(v.name, pattern) and v.name not in pattern:
-            continue
         if isinstance(v, h5py._hl.group.Group):
             all_traces_recursive(v, stream, pattern)
+        elif not fnmatch.fnmatch(v.name, pattern) and v.name not in pattern:
+            continue
         else:
-            try:
-                stream.append(
-                    RFTrace(np.array(v), header=read_hdf5_header(v)))
-            except ValueError:
-                warnings.warn(
-                    'Header could not be converted. Attributes are: %s' % (
-                        str(v.attrs)))
+            # try:
+            stream.append(
+                RFTrace(np.array(v), header=read_hdf5_header(v)))
+            # except ValueError:
+            #     warnings.warn(
+            #         'Header could not be converted. Attributes are: %s' % (
+            #             str(v.attrs)))
     return stream
 
 
@@ -397,7 +394,17 @@ def read_hdf5_header(dataset: h5py.Dataset) -> Stats:
     header = {}
     for key in attrs:
         if key in time_keys:
-            header[key] = UTCDateTime(attrs[key])
+            try:
+                header[key] = UTCDateTime(attrs[key])
+            except ValueError as e:
+                # temporary fix of obspy's UTCDateTime issue. SHould be removed
+                # as soon as they release version 1.23
+                if attrs[key][4:8] == '360T':
+                    new = list(attrs[key])
+                    new[6] = '1'
+                    header[key] = UTCDateTime(''.join(new)) - 86400
+                else:
+                    raise e
         elif key == 'processing':
             header[key] = list(attrs[key])
         else:

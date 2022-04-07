@@ -14,10 +14,10 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Monday, 27th September 2021 03:42:20 pm
+Last Modified: Monday, 1st November 2021 10:01:13 am
 
 
-!The file is split and has a second copyright disclaimer!
+**The file is split and has a second copyright disclaimer**
 Some parts of this code are modified versions of the rf module by
 Tom Eulenfeld.
 
@@ -25,7 +25,6 @@ Tom Eulenfeld.
 from copy import deepcopy
 import json
 import logging
-from multiprocessing import Event
 from operator import itemgetter
 from typing import List, Tuple
 # from pkg_resources import resource_filename
@@ -41,6 +40,7 @@ from obspy.core import AttribDict
 from obspy.geodetics import gps2dist_azimuth
 from obspy.taup import TauPyModel
 from scipy.signal.windows import hann
+from pyglimer.data.finddir import finddir
 
 from pyglimer.rf.deconvolve import it, spectraldivision, multitaper
 from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table,\
@@ -107,8 +107,9 @@ def createRF(
     elif onset:
         shift = onset - st_in[0].stats.starttime
     else:
-        raise ValueError('Provide either info dict as input or give data\
-            manually (see docstring).')
+        raise ValueError(
+            'Provide either info dict as input or give args manually '
+            + '(see docstring).')
 
     # sampling interval
     dt = st_in[0].stats.delta
@@ -125,9 +126,10 @@ def createRF(
     # taper traces
     if trim:
         if not type(trim) == list and len(trim) != 2:
-            raise Exception("""Trim has to be given as list with two elements
-                            [a, b]. Where a and b are the taper length in s
-                            on the left and right side, respectively.""")
+            raise Exception(
+                """Trim has to be given as list with two elements
+                [a, b]. Where a and b are the taper length in s
+                on the left and right side, respectively.""")
         # Hann taper with 7.5s taper window
         tap = hann(round(15 / dt))
         taper = np.ones(st[0].stats.npts)
@@ -220,8 +222,9 @@ def createRF(
         # I could probably create another QC here and check if fact is
         # the maximum of RF[0].data or even close to the maximum. Let's try:
         if abs(fact) < abs(lrf).max()/2:
-            raise ValueError('The noise level of the created receiver function\
-                is too high.')
+            raise ValueError(
+                'The noise level of the created receiver function is '
+                + 'too high.')
 
     # create RFTrace object
     # create stats
@@ -348,12 +351,13 @@ _EVENT_GETTER = (
 
 # header values which will be written to waveform formats (SAC and Q)
 # H5 simply writes all stats entries
-_HEADERS = (tuple(zip(*_STATION_GETTER))[0] +
-            tuple(zip(*_EVENT_GETTER))[0][:-1] + (  # do not write event_id
-            'onset', 'type', 'phase', 'moveout',
-            'distance', 'back_azimuth', 'inclination', 'slowness',
-            'pp_latitude', 'pp_longitude', 'pp_depth',
-            'box_pos', 'box_length'))
+_HEADERS = (
+    tuple(zip(*_STATION_GETTER))[0]
+    + tuple(zip(*_EVENT_GETTER))[0][:-1] + (  # do not write event_id
+        'onset', 'type', 'phase', 'moveout',
+        'distance', 'back_azimuth', 'inclination', 'slowness',
+        'pp_latitude', 'pp_longitude', 'pp_depth',
+        'box_pos', 'box_length'))
 
 # The corresponding header fields in the format
 # The following headers can at the moment only be stored for H5:
@@ -375,16 +379,8 @@ _FORMATHEADERS = {'sac': ('stla', 'stlo', 'stel', 'evla', 'evlo',
 _HEADER_CONVERSIONS = {'sac': {'onset': (__SAC2UTC, __UTC2SAC),
                                'event_time': (__SAC2UTC, __UTC2SAC)}}
 
-_TF = '.datetime:%Y-%m-%dT%H:%M:%S'
 
-_H5INDEX = {
-    'rf': ('waveforms/{network}.{station}.{location}/{event_time%s}/' % _TF +
-           '{channel}_{starttime%s}_{endtime%s}' % (_TF, _TF)),
-    'profile': 'waveforms/{channel[2]}_{box_pos}'
-}
-
-
-def read_rf(pathname_or_url, format=None, **kwargs):
+def read_rf(pathname_or_url: str = None, format: str = None, **kwargs):
     """
     Read waveform files into RFStream object.
     See :func:`~obspy.core.stream.read` in ObsPy.
@@ -397,13 +393,14 @@ def read_rf(pathname_or_url, format=None, **kwargs):
     :return: RFStream object from file.
     :rtype: :class:`~pyglimer.createRF.RFStream`
     """
-
+    if pathname_or_url is None:
+        pathname_or_url = os.path.join(finddir(), 'examples', 'PRF.sac')
     stream = read(pathname_or_url, format=format, **kwargs)
     stream = RFStream(stream)
     # Calculate piercing points for depth migrated RF
     for tr in stream:
         if tr.stats.type == "depth":
-            tr.ppoint()
+            tr.ppoint('iasp91.dat')
     return stream
 
 
@@ -478,14 +475,9 @@ class RFStream(Stream):
             tr._write_format_specific_header(format)
             if format.upper() == 'Q':
                 tr.stats.station = tr.id
-        # if format.upper() == 'H5':
-        #     index = self.type
-        #     if index is None and 'event_time' in self[0].stats:
-        #         index = 'rf'
-        #     if index:
-        #         import obspyh5
-        #         old_index = obspyh5._INDEX
-        #         obspyh5.set_index(_H5INDEX[index])
+        if format.upper() == 'H5':
+            raise ValueError(
+                'Use the rfh5 module to add rfs to h5 file.')
         super(RFStream, self).write(filename, format, **kwargs)
         # if format.upper() == 'H5' and index:
         #     obspyh5.set_index(old_index)
@@ -522,8 +514,8 @@ class RFStream(Stream):
             latb = (st.station_latitude-10, st.station_latitude+10)
             lonb = (st.station_longitude-20, st.station_longitude+20)
 
-        z, RF_mo = self.moveout(
-                vmodel=vmodel_file, latb=latb, lonb=lonb, multiple=False)
+        _, RF_mo = self.moveout(
+            vmodel=vmodel_file, latb=latb, lonb=lonb, multiple=False)
         data = np.empty((RF_mo.count(), RF_mo[0].count()))
         for ii, tr in enumerate(RF_mo):
             data[ii] = tr.data
@@ -636,7 +628,7 @@ class RFStream(Stream):
         for tr in self:
             tr.ppoint(vmodel=vmodel_file, latb=latb, lonb=lonb)
 
-    def station_stack(self, vmodel_file='iasp91.dat', multiple=False):
+    def station_stack(self, vmodel_file='iasp91.dat', multiple=False) -> tuple:
         """
         Performs a moveout correction and stacks all receiver functions
         in Stream. Make sure that Stream only contains RF from one station!
@@ -803,8 +795,9 @@ class RFStream(Stream):
                 ax=ax, outputfile=outputfile, channel=channel, format=format)
         return ax
 
-    def plot_distribution(self, nbins=50, phase="P",
-                          outputfile=None, format="pdf", dpi=300):
+    def plot_distribution(
+        self, nbins=50, phase="P", outputfile=None, format="pdf", dpi=300,
+            title: str = None):
         """
         Plot back azimuth and rayparameter distributions.
 
@@ -851,8 +844,9 @@ class RFStream(Stream):
                 'No Receiver Functions of Phase %s found,\
                     did you choose the right phase?' % phase)
 
-        stream_dist(np.array(rayp), np.array(baz), nbins=nbins, v=v,
-                    outputfile=outputfile, format=format,  dpi=dpi)
+        stream_dist(
+            np.array(rayp), np.array(baz), nbins=nbins, v=v,
+            outputfile=outputfile, format=format,  dpi=dpi, title=title)
 
     def dirty_ccp_stack(
             self, dlon: float = 1.0, z_res: float = 1.0,
@@ -920,8 +914,9 @@ class RFStream(Stream):
         A = dlon**2 * (DEG2KM**2)
 
         # Get value of degree resolution in kilometers for a given latitude
-        def Dlon(theta): return dlon * np.pi * a * np.cos(theta/180*np.pi) / \
-            (180 * np.sqrt(1 - e**2 * np.sin(theta/180*np.pi)**2))
+        def Dlon(theta):
+            return dlon * np.pi * a * np.cos(theta/180*np.pi) \
+                / (180 * np.sqrt(1 - e**2 * np.sin(theta/180*np.pi)**2))
 
         # Correct the latitudinal spacing by iteratively walk to the pole
         lat = [0.0]
@@ -939,17 +934,17 @@ class RFStream(Stream):
         lat = np.append(lat, 90.0)
 
         # Get how many "rings"
-        fdlat = lat[-1] - lat[-2]
+        # fdlat = lat[-1] - lat[-2]
 
         # Compute cap area
-        cap_theta = lat[-2]
-        area_per_dlon = 2*np.pi * a**2 * \
-            (1-np.cos(cap_theta/180*np.pi)) / (360/dlon)
+        # cap_theta = lat[-2]
+        # area_per_dlon = 2*np.pi * a**2 * \
+        #     (1-np.cos(cap_theta/180*np.pi)) / (360/dlon)
 
         # Number of longitude bins at the pol that correspond to one equatorial
         # bin
         # Not used anymore
-        ndlon = int(np.ceil(A/area_per_dlon))
+        # ndlon = int(np.ceil(A/area_per_dlon))
 
         # Create binedges
         blat = np.hstack((-lat[::-1], 0, lat))
@@ -1052,10 +1047,12 @@ class RFTrace(Trace):
         if trace is not None:
             data = trace.data
             header = trace.stats
+        elif data is None:
+            raise ValueError('You have to provide data.')
         super(RFTrace, self).__init__(data=data, header=header)
         st = self.stats
-        if ('_format' in st and st._format.upper() == 'Q' and
-                st.station.count('.') > 0):
+        if ('_format' in st and st._format.upper() == 'Q'
+                and st.station.count('.') > 0):
             st.network, st.station, st.location = st.station.split('.')[:3]
         self._read_format_specific_header()
 
@@ -1182,7 +1179,7 @@ class RFTrace(Trace):
 
     def _seconds2utc(self, seconds, reftime=None):
         """Return UTCDateTime given as seconds relative to reftime"""
-        from collections import Iterable
+        from collections.abc import Iterable
         from obspy import UTCDateTime as UTC
         if isinstance(seconds, Iterable):
             return [self._seconds2utc(s, reftime=reftime) for s in seconds]
@@ -1232,13 +1229,6 @@ class RFTrace(Trace):
         st.pp_latitude = []
         st.pp_longitude = []
 
-        # if st.station_elevation > 0:
-        #     st.pp_depth = np.hstack(
-        #         (np.arange(-round(st.station_elevation/1000, 1), 0, .1),
-        #          np.arange(0, maxz + res)))[:len(delta)]
-        # else:
-        #     st.pp_depth = np.arange(-round(st.station_elevation/1000),
-        #                             maxz + res, res)[0:len(delta)]
         # as the other ones are filled with nans we can start here
         st.pp_depth = z
 
@@ -1292,13 +1282,13 @@ class RFTrace(Trace):
         st = self.stats
 
         if vmodel == '3D':
-            htab, _, delta = dt_table_3D(
+            htab, _, delta, _, _ = dt_table_3D(
                 st.slowness, st.phase, st.station_latitude,
                 st.station_longitude, st.back_azimuth, st.station_elevation,
                 latb, lonb, False)
 
         else:
-            htab, _, delta = dt_table(
+            htab, _, delta, _, _ = dt_table(
                 st.slowness, vmodel, st.phase, st.station_elevation, False)
 
         st.pp_depth = np.hstack(
@@ -1331,7 +1321,7 @@ class RFTrace(Trace):
         self, lim: list or tuple or None = None,
         depth: np.ndarray or None = None, ax: plt.Axes = None,
         outputdir: str = None, format: str = 'pdf', clean: bool = False,
-            std: np.ndarray = None):
+            std: np.ndarray = None, flipxy: bool = False):
         """Creates plot of a single receiver function
 
         Parameters
@@ -1356,6 +1346,9 @@ class RFTrace(Trace):
             limit of the standard deviation in the plot. Provide the std
             as a numpy array (can be easily computed from the output of
             :meth:`~pyglimer.rf.create.RFStream.bootstrap`)
+        flipxy: bool, optional
+            Plot Depth/Time on the Y-Axis and amplitude on the x-axis. Defaults
+            to False.
 
         Returns
         -------
@@ -1363,7 +1356,7 @@ class RFTrace(Trace):
         """
         ax = plot_single_rf(
             self, lim, depth=depth, ax=ax, outputdir=outputdir, clean=clean,
-            format=format, std=std)
+            format=format, std=std, flipxy=flipxy)
         return ax
 
     def write(self, filename, format, **kwargs):
