@@ -81,8 +81,7 @@ def geodiff(lat, lon):
             np.array((lon[1:], lat[1:])).T
         )
     )
-
-    dists = mat[:, 0] / (2.0 * R_EARTH * np.pi / 360.0)
+    dists = mat[:, 0] / R_EARTH / 1000.0 / np.pi * 180 
     az = mat[:, 1]
 
     return dists, az
@@ -216,13 +215,13 @@ def gctrack(
 
     # Get tracks
     utrack = np.hstack(tracks).T
-
+    
     # Remove duplicates if there are any
     _, idx = np.unique(utrack, return_index=True, axis=0)
     utrack = utrack[np.sort(idx), :]
 
     # Get distances along the new track
-    udists, _ = geodiff(utrack[:, 1], utrack[:, 0])
+    udists, _ = geodiff(utrack[:, 0], utrack[:, 1])
 
     # Compute cumulative distance
     M = len(utrack[:, 0])
@@ -230,7 +229,7 @@ def gctrack(
     cdists[1:] = np.cumsum(udists)
 
     if constantdist:
-        return utrack[:, 0], utrack[:, 1], cdists
+        return utrack[:, 0], utrack[:, 1], cdists, sdists
     else:
         return utrack[:, 0], utrack[:, 1], cdists, updated_dist
 

@@ -1,5 +1,7 @@
 # Basic
 from typing import Optional, Union, Iterable
+from global_land_mask.globe import is_land
+import matplotlib
 
 # External
 import numpy as np
@@ -11,6 +13,7 @@ import cartopy.crs as ccrs
 from cartopy.mpl.geoaxes import GeoAxes, GeoAxesSubplot
 
 # Internal
+from pyglimer.utils.geo_utils import fix_map_extent
 from pyglimer.ccp.plot_utils.plot_map import plot_map
 from pyglimer.ccp.plot_utils.plot_line_buffer import plot_line_buffer
 from pyglimer.ccp.plot_utils.midpointcolornorm import MidpointNormalize
@@ -123,6 +126,8 @@ def plot_cross_section(
 
     """
 
+    matplotlib.rcParams.update({'font.family': 'Arial'})
+    
     # Get Cross section
     slat, slon, sdists, qlat, qlon, qdists, qz, qillum, qccp, epi_area = \
         ccp.get_profile(lat, lon)
@@ -151,6 +156,7 @@ def plot_cross_section(
             geoax = plt.axes(projection=ccrs.PlateCarree())
             if mapextent is not None:
                 geoax.set_extent(mapextent)
+            
             plot_map(geoax)
             geoax.tick_params(labelright=False, labeltop=False)
 
@@ -165,18 +171,18 @@ def plot_cross_section(
                 illumnorm = mcolors.LogNorm(vmin=1, vmax=zqill.max())
                 illumcmap = 'magma_r'
 
+                sc = ScalarMappable(cmap=plt.get_cmap(illumcmap), norm=illumnorm)
                 geoax.imshow(
-                    zqill, alpha=zalpha,
+                    sc.to_rgba(zqill), alpha=zalpha,
                     extent=zextent, origin='lower',
-                    transform=ccrs.PlateCarree(),
-                    cmap=illumcmap, norm=illumnorm)
+                    transform=ccrs.PlateCarree(), zorder=3
+                    )
 
                 # Create colorbar from artifical scalarmappable (alpha is
                 # problematic)
                 c = plt.colorbar(
-                    ScalarMappable(cmap=plt.get_cmap(
-                        illumcmap), norm=illumnorm),
-                    orientation='vertical', aspect=40)
+                    sc,
+                    orientation='vertical', aspect=40, pad=0.025, fraction=0.05)
                 c.set_label("Hitcount")
 
                 # Set colormap alpha manually
@@ -192,6 +198,13 @@ def plot_cross_section(
             marker='o', edgecolor='k',
             transform=ccrs.PlateCarree(),
             zorder=11)
+
+        # Plot Stations used
+        geoax.scatter(
+            ccp.bingrid.longitude, ccp.bingrid.latitude, s=0.25,
+            marker='o', edgecolor='k', facecolor='w',
+            transform=ccrs.PlateCarree(),
+            zorder=4)
 
         # Plot buffer that shows where we got cross section stuff from
         _ = plot_line_buffer(
@@ -233,7 +246,7 @@ def plot_cross_section(
         minz = np.min(qz)
 
     # Plot section
-    plt.imshow(
+    rfim = plt.imshow(
         qccp,
         cmap=rfcmap, norm=rfnorm,
         extent=[0, np.max(qdists), np.max(qz), np.min(qz)],
@@ -247,6 +260,9 @@ def plot_cross_section(
         marker='o', edgecolor='k',
         zorder=10, clip_on=False)
 
+    c = plt.colorbar(
+        rfim, orientation='vertical', aspect=40, pad=0.025, fraction=0.05)
+    c.set_label("A", rotation=0, font='Arial')
     plt.xlabel('Offset [$^\circ$]')
     plt.ylabel('Depth [km]')
 

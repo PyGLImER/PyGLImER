@@ -290,7 +290,7 @@ class CCPStack(object):
 
         # Get evenly distributed points
         qlat, qlon, qdists, sdists = gctrack(slat, slon, self.bingrid.edist/4)
-
+        
         # Get interpolation weights and rows.
         # Create SphericalNN kdtree
         snn = SphericalNN(self.coords_new[0], self.coords_new[1])
