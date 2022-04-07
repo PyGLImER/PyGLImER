@@ -11,7 +11,7 @@ Created: Tue May 26 2019 13:31:30
 Last Modified: Monday, 21st February 2022 12:52:27 pm
 '''
 
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 
@@ -87,12 +87,22 @@ def download_small_db(
                 try:
                     toa, _, _, _, delta = compute_toa(
                         evt, stat.latitude, stat.longitude, phase, model)
+
                 except IndexError:
                     # occurs when there is no arrival of the phase at stat
                     logger.debug(
                         'No valid arrival found for station %s,' % stat.code
                         + 'event %s, and phase %s' % (evt.resource_id, phase))
                     continue
+
+                except ValueError:
+                    # occurs when the computed toa is outside the
+                    # Normal RF range
+                    logger.debug(
+                        'No valid arrival found for station %s,' % stat.code
+                        + 'event %s, and phase %s' % (evt.resource_id, phase))
+                    continue
+
                 # We only do that if the epicentral distances are correct
                 if delta < min_epid or delta > max_epid:
                     logger.debug(
@@ -127,9 +137,11 @@ def download_small_db(
                 d['net'].append(net.code)
                 d['stat'].append(stat.code)
 
+    
     # Create waveform download bulk list
     bulk_wav = pu.create_bulk_str(
         d['net'], d['stat'], '*', channel, d['startt'], d['endt'])
+
 
     if len(bulk_wav) == 0:
         logger.info('No new data found.')
