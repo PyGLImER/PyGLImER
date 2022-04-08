@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 8th April 2022 01:28:54 pm
+Last Modified: Friday, 8th April 2022 02:01:42 pm
 '''
 
 # !/usr/bin/env python3
@@ -95,13 +95,7 @@ def download_small_db(
                         'No valid arrival found for station %s,' % stat.code
                         + 'event %s, and phase %s' % (evt.resource_id, phase))
                     continue
-                # We only do that if the epicentral distances are correct
-                # This is already done in compute_toa
-                # if delta < min_epid or delta > max_epid:
-                #     logger.debug(
-                #         'No valid arrival found for station %s, ' % stat.code
-                #         + 'event %s, and phase %s' % (evt.resource_id, phase))
-                #     continue
+
                 # Already in DB?
                 if saveasdf:
                     if wav_in_asdf(net, stat, '*', channel, toa-tz, toa+ta):
