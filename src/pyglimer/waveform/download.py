@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 8th April 2022 02:01:42 pm
+Last Modified: Friday, 8th April 2022 02:47:54 pm
 '''
 
 # !/usr/bin/env python3
@@ -136,11 +136,13 @@ def download_small_db(
     # RAM with the downloaded mseeds
     logger.info('Initialising waveform download.')
     logger.debug(f'The request string looks like this:\n\n{bulk_wav}\n')
-
-    Parallel(n_jobs=1, prefer='threads')(
-        delayed(pu.__client__loop_wav__)(
-            client, rawloc, bulk_wav, d, saveasdf, inv)
-        for client in clients)
+    if len(clients) == 1:
+        pu.__client__loop_wav__(clients[0], rawloc, bulk_wav, d, saveasdf, inv)
+    else:
+        Parallel(n_jobs=-1, prefer='threads')(
+            delayed(pu.__client__loop_wav__)(
+                client, rawloc, bulk_wav, d, saveasdf, inv)
+            for client in clients)
 
 
 def downloadwav(
