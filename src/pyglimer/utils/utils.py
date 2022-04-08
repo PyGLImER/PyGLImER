@@ -11,7 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Thursday, 20th January 2022 04:22:08 pm
+Last Modified: Friday, 8th April 2022 01:58:57 pm
 '''
 
 import logging
@@ -166,6 +166,7 @@ def __client__loop_wav__(
         logger.warning(str(e))
         return  # wrong client
         # ValueError is raised for querying a client without station service
+    logger.info(f'Downloaded {st.count()} traces from Client {str(client)}.')
     save_raw(saved, st, rawloc, inv, saveasdf)
 
 
@@ -196,16 +197,16 @@ def save_raw(
         # to have several, so let's just keep one
         try:
             sst = st.select(network=net, station=stat)
-            ssst = Stream()
-            ii = 0
-            while ssst.count() > 3:
-                ssst = sst.select(location=sst[ii].stats.location)
-            slst = ssst.slice(startt, endt)
+            slst = sst.slice(startt, endt)
+            # Only write the prevelant location
+            locs = [tr.stats.location for tr in sst]
+            filtloc = max(set(locs), key=locs.count)
+            sslst = slst.select(location=filtloc)
             if saveasdf:
                 sinv = inv.select(net, stat, starttime=startt, endtime=endt)
-                write_st(slst, evt, rawloc, sinv)
+                write_st(sslst, evt, rawloc, sinv)
             else:
-                save_raw_mseed(evt, slst, rawloc, net, stat)
+                save_raw_mseed(evt, sslst, rawloc, net, stat)
         except Exception as e:
             logging.error(e)
 

@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Monday, 21st February 2022 12:52:27 pm
+Last Modified: Friday, 8th April 2022 01:28:54 pm
 '''
 
 # !/usr/bin/env python3
@@ -68,6 +68,8 @@ def download_small_db(
     logger.debug('Bulk stat parameters: %s' % str(bulk_stat))
 
     logger.info('Initialising station response download.')
+    # create output folder
+    os.makedirs(statloc, exist_ok=True)
     out = Parallel(n_jobs=-1, prefer='threads')(
         delayed(pu.__client__loop__)(client, statloc, bulk_stat)
         for client in clients)
@@ -87,18 +89,19 @@ def download_small_db(
                 try:
                     toa, _, _, _, delta = compute_toa(
                         evt, stat.latitude, stat.longitude, phase, model)
-                except IndexError:
+                except (IndexError, ValueError):
                     # occurs when there is no arrival of the phase at stat
                     logger.debug(
                         'No valid arrival found for station %s,' % stat.code
                         + 'event %s, and phase %s' % (evt.resource_id, phase))
                     continue
                 # We only do that if the epicentral distances are correct
-                if delta < min_epid or delta > max_epid:
-                    logger.debug(
-                        'No valid arrival found for station %s, ' % stat.code
-                        + 'event %s, and phase %s' % (evt.resource_id, phase))
-                    continue
+                # This is already done in compute_toa
+                # if delta < min_epid or delta > max_epid:
+                #     logger.debug(
+                #         'No valid arrival found for station %s, ' % stat.code
+                #         + 'event %s, and phase %s' % (evt.resource_id, phase))
+                #     continue
                 # Already in DB?
                 if saveasdf:
                     if wav_in_asdf(net, stat, '*', channel, toa-tz, toa+ta):
@@ -138,8 +141,9 @@ def download_small_db(
     # This does almost certainly need to be split up, so we don't overload the
     # RAM with the downloaded mseeds
     logger.info('Initialising waveform download.')
+    logger.debug(f'The request string looks like this:\n\n{bulk_wav}\n')
 
-    Parallel(n_jobs=-1, prefer='threads')(
+    Parallel(n_jobs=1, prefer='threads')(
         delayed(pu.__client__loop_wav__)(
             client, rawloc, bulk_wav, d, saveasdf, inv)
         for client in clients)
