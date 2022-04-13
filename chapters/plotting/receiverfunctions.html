@@ -7,27 +7,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Plotting Plain Receiver Functions</title>
     
-    <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-  
+
     
-    <link rel="stylesheet"
-      href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
-  
-    
-      
-  
-    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/styles/pydata-sphinx-theme.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     
-    <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
-  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
@@ -45,7 +43,7 @@
     <!-- Google Analytics -->
     
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
     <div class="container-fluid" id="banner"></div>
 
@@ -182,7 +180,7 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage pt-5 pb-3">
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
 
@@ -227,9 +225,9 @@
               <div>
                 
   <div class="section" id="plotting-plain-receiver-functions">
-<h1>Plotting Plain Receiver Functions<a class="headerlink" href="#plotting-plain-receiver-functions" title="Permalink to this headline">¶</a></h1>
+<h1>Plotting Plain Receiver Functions<a class="headerlink" href="#plotting-plain-receiver-functions" title="Permalink to this headline">#</a></h1>
 <div class="section" id="single-receiver-function">
-<h2>Single Receiver Function<a class="headerlink" href="#single-receiver-function" title="Permalink to this headline">¶</a></h2>
+<h2>Single Receiver Function<a class="headerlink" href="#single-receiver-function" title="Permalink to this headline">#</a></h2>
 <p>Given the data downloaded using the example notebook for data collection, we
 can simply read and plot them using</p>
 <div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
@@ -272,7 +270,7 @@ can simply read and plot them using</p>
 <p>which removes all labels, axes etc.</p>
 <img alt="../../_images/IU.HRV.00.PRF_timelimit.svg" src="../../_images/IU.HRV.00.PRF_timelimit.svg" /></div>
 <div class="section" id="receiver-function-section">
-<h2>Receiver Function Section<a class="headerlink" href="#receiver-function-section" title="Permalink to this headline">¶</a></h2>
+<h2>Receiver Function Section<a class="headerlink" href="#receiver-function-section" title="Permalink to this headline">#</a></h2>
 <p>We can plot all receiver functions in an <code class="docutils literal notranslate"><span class="pre">RFStream</span></code> into a section depending
 on epicentral distance.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot section</span>
@@ -326,8 +324,9 @@ on epicentral distance.</p>
       </div>
     </div>
   
-    <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
   <div class="container">
     
     <div class="footer-item">

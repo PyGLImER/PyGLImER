@@ -7,27 +7,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>The Request Class</title>
     
-    <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-  
+
     
-    <link rel="stylesheet"
-      href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
-  
-    
-      
-  
-    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/styles/pydata-sphinx-theme.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     
-    <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
-  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
@@ -45,7 +43,7 @@
     <!-- Google Analytics -->
     
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
     <div class="container-fluid" id="banner"></div>
 
@@ -177,7 +175,7 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage pt-5 pb-3">
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
 
@@ -232,14 +230,14 @@
               <div>
                 
   <div class="section" id="the-request-class">
-<h1>The Request Class<a class="headerlink" href="#the-request-class" title="Permalink to this headline">¶</a></h1>
+<h1>The Request Class<a class="headerlink" href="#the-request-class" title="Permalink to this headline">#</a></h1>
 <p>The <a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> class handles all steps from download, over preprocessing,
 to deconvolution (i.e. the creation of a time domain receiver function).
 Since PyGLImER-v0.1.0 the database can be saved in two different formats - <em>MSEED</em> (raw waveforms), <em>SAC</em>
 (receiver functions), and <em>XML</em> (station response and event database) <strong>OR</strong> in <em>hdf5</em> (hierachical data format).
 Both options have advantages and downsides (see below).</p>
 <div class="section" id="mseed-sac-database">
-<h2>MSEED/SAC Database<a class="headerlink" href="#mseed-sac-database" title="Permalink to this headline">¶</a></h2>
+<h2>MSEED/SAC Database<a class="headerlink" href="#mseed-sac-database" title="Permalink to this headline">#</a></h2>
 <p>If the user chooses this option, the <a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> object will create
 a folder structure as defined by the user. Those contain raw (i.e. unprocessed, but downsampled)
 waveform files in miniseed format, preprocessed (3 component in RTZ coordinate system, and filtered/discarded
@@ -255,7 +253,7 @@ potentially overload your file system.</p>
 </div>
 </div>
 <div class="section" id="hdf5-database">
-<h2>HDF5 Database<a class="headerlink" href="#hdf5-database" title="Permalink to this headline">¶</a></h2>
+<h2>HDF5 Database<a class="headerlink" href="#hdf5-database" title="Permalink to this headline">#</a></h2>
 <p>Your second option is to save data in <em>hdf5</em> format. In this case, only two directories will be created;
 one for the downsampled raw-data and another one for the final time-domain receiver functions. The raw data
 management is based on <a class="reference external" href="https://seismicdata.github.io/pyasdf/">PyASDF</a> (head there to
@@ -275,7 +273,7 @@ formats!</p>
 </div>
 </div>
 <div class="section" id="methods-of-the-request-class">
-<h2>Methods of the Request class<a class="headerlink" href="#methods-of-the-request-class" title="Permalink to this headline">¶</a></h2>
+<h2>Methods of the Request class<a class="headerlink" href="#methods-of-the-request-class" title="Permalink to this headline">#</a></h2>
 <p>A Request object has four public methods:</p>
 <table class="hlist"><tr><td><ul class="simple">
 <li><p><a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request.download_eventcat" title="pyglimer.waveform.request.Request.download_eventcat"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_eventcat()</span></code></a></p></li>
@@ -306,7 +304,7 @@ utilises the <a class="reference external" href="https://docs.obspy.org/packages
 </div>
 </div>
 <div class="section" id="setting-the-parameters-for-your-request">
-<h2>Setting the parameters for your request<a class="headerlink" href="#setting-the-parameters-for-your-request" title="Permalink to this headline">¶</a></h2>
+<h2>Setting the parameters for your request<a class="headerlink" href="#setting-the-parameters-for-your-request" title="Permalink to this headline">#</a></h2>
 <p>The parameters for preprocessing and download are set when initialising the
 <a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> object. Probably the most convenient way to define them
 is to create a <em>yaml</em> file with the parameters. An example comes with this repository in <cite>params.yaml</cite>:</p>
@@ -467,8 +465,9 @@ object.</p>
       </div>
     </div>
   
-    <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
   <div class="container">
     
     <div class="footer-item">

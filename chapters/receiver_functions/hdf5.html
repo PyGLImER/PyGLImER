@@ -7,27 +7,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Receiver functions stored in hdf5 format</title>
     
-    <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-  
+
     
-    <link rel="stylesheet"
-      href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
-  
-    
-      
-  
-    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/styles/pydata-sphinx-theme.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     
-    <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
-  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
@@ -45,7 +43,7 @@
     <!-- Google Analytics -->
     
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
     <div class="container-fluid" id="banner"></div>
 
@@ -187,7 +185,7 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage pt-5 pb-3">
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
 
@@ -249,7 +247,7 @@
               <div>
                 
   <div class="section" id="receiver-functions-stored-in-hdf5-format">
-<h1>Receiver functions stored in hdf5 format<a class="headerlink" href="#receiver-functions-stored-in-hdf5-format" title="Permalink to this headline">¶</a></h1>
+<h1>Receiver functions stored in hdf5 format<a class="headerlink" href="#receiver-functions-stored-in-hdf5-format" title="Permalink to this headline">#</a></h1>
 <p>If you saved your receiver functions in <em>hdf5</em> format, you can use the
 <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.RFDataBase" title="pyglimer.database.rfh5.RFDataBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code></a> class to access and manipulate
 your database.</p>
@@ -290,7 +288,7 @@ receiver functions in a subset defined by the provided arguments</p></li>
 </ul>
 </td></tr></table>
 <div class="section" id="reading-data">
-<h2>Reading data<a class="headerlink" href="#reading-data" title="Permalink to this headline">¶</a></h2>
+<h2>Reading data<a class="headerlink" href="#reading-data" title="Permalink to this headline">#</a></h2>
 <p>The most common usecase is probably that you will want to access receciver
 functions that <strong>PyGLImER</strong> computed for you (as shown earlier). To do so, you
 can use the <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler.get_data" title="pyglimer.database.rfh5.DBHandler.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a> method:</p>
@@ -316,13 +314,13 @@ time (<code class="docutils literal notranslate"><span class="pre">evt_time='*'<
 </div>
 </div>
 <div class="section" id="tags">
-<h2>Tags<a class="headerlink" href="#tags" title="Permalink to this headline">¶</a></h2>
+<h2>Tags<a class="headerlink" href="#tags" title="Permalink to this headline">#</a></h2>
 <p><strong>PyGLImER</strong> uses tags to identify your data. You could for example use
 different tags for differently processed data. <code class="docutils literal notranslate"><span class="pre">rf</span></code> is the standard tag for
 receiver function data.</p>
 </div>
 <div class="section" id="getting-an-overview-over-available-data">
-<h2>Getting an overview over available data<a class="headerlink" href="#getting-an-overview-over-available-data" title="Permalink to this headline">¶</a></h2>
+<h2>Getting an overview over available data<a class="headerlink" href="#getting-an-overview-over-available-data" title="Permalink to this headline">#</a></h2>
 <p>You can <strong>Access the DBHandler like a dictionary</strong>: Just like in h5py, it is
 possible to access the <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler" title="pyglimer.database.rfh5.DBHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code></a> like a
 dictionary. The logic works as follows:</p>
@@ -338,7 +336,7 @@ tags as follows:</p>
 </div>
 </div>
 <div class="section" id="writing-data-to-hdf5">
-<h1>Writing data to hdf5<a class="headerlink" href="#writing-data-to-hdf5" title="Permalink to this headline">¶</a></h1>
+<h1>Writing data to hdf5<a class="headerlink" href="#writing-data-to-hdf5" title="Permalink to this headline">#</a></h1>
 <p>If you postprocess your receiver functions (e.g., stacking), you might want to
 save the data afterwards. You can do that like below:</p>
 <div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
@@ -391,8 +389,9 @@ header and used to identify and locate the data.</p>
       </div>
     </div>
   
-    <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
   <div class="container">
     
     <div class="footer-item">

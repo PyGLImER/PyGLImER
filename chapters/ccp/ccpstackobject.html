@@ -7,27 +7,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CCPStack objects</title>
     
-    <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-  
+
     
-    <link rel="stylesheet"
-      href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
-  
-    
-      
-  
-    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/styles/pydata-sphinx-theme.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     
-    <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
-  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
@@ -45,7 +43,7 @@
     <!-- Google Analytics -->
     
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
     <div class="container-fluid" id="banner"></div>
 
@@ -182,7 +180,7 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage pt-5 pb-3">
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
 
@@ -227,13 +225,13 @@
               <div>
                 
   <div class="section" id="ccpstack-objects">
-<h1>CCPStack objects<a class="headerlink" href="#ccpstack-objects" title="Permalink to this headline">¶</a></h1>
+<h1>CCPStack objects<a class="headerlink" href="#ccpstack-objects" title="Permalink to this headline">#</a></h1>
 <p>In <strong>PyGLImER</strong>, the base class enabling CCP stacking is the
 <a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> class. However, to understand how
 CCP-Stacking is implemented, we will have to have a small intermezzo about
 binning.</p>
 <div class="section" id="ccp-bins">
-<h2>CCP bins<a class="headerlink" href="#ccp-bins" title="Permalink to this headline">¶</a></h2>
+<h2>CCP bins<a class="headerlink" href="#ccp-bins" title="Permalink to this headline">#</a></h2>
 <p>In <strong>PyGLImER</strong>, CCP bins are round in mapview (cylindric in
 3D). If a piercing point of a receiver function is inside of a bin, it will be
 added to this bin (i.e. there is one “station” stack in each bin). As such the
@@ -261,7 +259,7 @@ whole surface area.</p>
 </div>
 </div>
 <div class="section" id="creating-a-ccp-stack-in-pyglimer">
-<h2>Creating a CCP stack in PyGLImER<a class="headerlink" href="#creating-a-ccp-stack-in-pyglimer" title="Permalink to this headline">¶</a></h2>
+<h2>Creating a CCP stack in PyGLImER<a class="headerlink" href="#creating-a-ccp-stack-in-pyglimer" title="Permalink to this headline">#</a></h2>
 <p>CCP stacks in PyGLImER are usually not created by initialising the
 <a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a> class but by calling the
 <a class="reference internal" href="../api/ccp.html#pyglimer.ccp.ccp.init_ccp" title="pyglimer.ccp.ccp.init_ccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_ccp()</span></code></a> function, which, itself, initialises the
@@ -337,8 +335,9 @@ recommend using the <em>npz</em> format to do so.</p>
       </div>
     </div>
   
-    <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
   <div class="container">
     
     <div class="footer-item">
