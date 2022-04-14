@@ -31,7 +31,7 @@ information. Let's look at the expected information:
 # First let's get a path where to create the data.
 
 # Some needed Imports
-import os, logging
+import os
 from obspy import UTCDateTime
 from pyglimer.waveform.request import Request
 
@@ -60,7 +60,7 @@ request_dict = {
     "deconmeth": "waterlevel",    # Deconvolution method
     "starttime": UTCDateTime(2021, 1, 1, 0, 0, 0), # Starttime of database.
                                                    # Here, starttime of HRV
-    "endtime": UTCDateTime.now(), # Endtimetime of database
+    "endtime": UTCDateTime(2021, 7, 1, 0, 0, 0), # Endtimetime of database
     # kwargs below
     "pol": 'v',                   # Source wavelet polaristion. Def. "v" --> SV
     "minmag": 5.5,                # Earthquake minimum magnitude. Def. 5.5
@@ -122,9 +122,6 @@ print(f"There are {len(R.evtcat)} available events")
 # ***NOTE:*** This might take a while.
 # 
 
-# Station dir 
-station_dir = os.path.join(proj_dir, 'stations')
-if not os.path.exists(station_dir): os.mkdir()
 
 print('downloading')
 R.download_waveforms_small_db(channel='BH?')
