@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 25th August 2021 11:54:15 am
-Last Modified: Monday, 14th February 2022 11:19:28 am
+Last Modified: Wednesday, 13th April 2022 02:56:36 pm
 '''
 
 import unittest
@@ -43,6 +43,17 @@ class TestResampleOrDecimate(unittest.TestCase):
         freq_new = st[0].stats.sampling_rate+5
         with self.assertRaises(ValueError):
             _ = sptb.resample_or_decimate(st, freq_new, filter=False)
+
+    def test_st_differing_sr(self):
+        st = read()
+        st[0].decimate(2)
+        st[1].decimate(4)
+        freq_new = st[0].stats.sampling_rate
+        with self.assertWarns(UserWarning):
+            st_out = sptb.resample_or_decimate(st, freq_new, filter=False)
+        self.assertEqual(st_out[2].stats.sampling_rate, freq_new)
+        self.assertEqual(st_out[0].stats.sampling_rate, freq_new)
+        self.assertEqual(st_out[1].stats.sampling_rate, freq_new/2)
 
 
 class TestConvf(unittest.TestCase):
