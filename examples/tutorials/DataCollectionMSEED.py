@@ -30,6 +30,7 @@ information. Let's look at the expected information:
 # %%
 # First let's get a path where to create the data.
 
+
 # Some needed Imports
 import os
 from obspy import UTCDateTime
@@ -59,7 +60,7 @@ request_dict = {
     "rot": "RTZ",                 # Coordinate system to rotate to
     "deconmeth": "waterlevel",    # Deconvolution method
     "starttime": UTCDateTime(2021, 1, 1, 0, 0, 0), # Starttime of database.
-                                                   # Here, starttime of HRV
+                                                # Here, starttime of HRV
     "endtime": UTCDateTime(2021, 7, 1, 0, 0, 0), # Endtimetime of database
     # kwargs below
     "pol": 'v',                   # Source wavelet polaristion. Def. "v" --> SV
@@ -69,7 +70,7 @@ request_dict = {
     "station": "HRV",             # Restricts stations. Def. None
     "waveform_client": ["IRIS"],  # FDSN server client (s. obspy). Def. None
     "evtcat": None,               # If you have already downloaded a set of
-                                  # events previously, you can use them here
+                                # events previously, you can use them here
     "loglvl": 'DEBUG'
 }
 
@@ -196,6 +197,7 @@ print(f"Number of RFs: {len(rfstream)}")
 
 # %% 
 # PyGLImER is based on Obspy, but to handle RFs we need some more attributes: 
+
 from pprint import pprint
 
 rftrace = rfstream[0]
@@ -219,6 +221,7 @@ pprint(rftrace.stats)
 # Below we show how to plot the receiver function
 # as a function of time, and the clean option, which plots
 # the receiver function without any axes or text.
+
 from pyglimer.plot.plot_utils import set_mpl_params
 
 # Plot RF

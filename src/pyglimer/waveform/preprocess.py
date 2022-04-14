@@ -125,7 +125,7 @@ def preprocess(
     # i.e. every 100 events
 
     # Number of cores is usally a power of 2 (therefore 128)
-    n_split = int(np.ceil(event_cat.count()/128))
+    n_split = int(np.ceil(event_cat.count()/3))
 
     # All error handlers rely on download via IRIS webservice.
     # However, there is a maximum number for connections (3).

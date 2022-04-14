@@ -139,9 +139,13 @@ def download_small_db(
     # RAM with the downloaded mseeds
     logger.info('Initialising waveform download.')
     logger.debug(f'The request string looks like this:\n\n{bulk_wav}\n')
+
+    print('clients:', clients)
     if len(clients) == 1:
+        print('how many?', len(clients))
         pu.__client__loop_wav__(clients[0], rawloc, bulk_wav, d, saveasdf, inv)
     else:
+        print('how many?', len(clients))
         Parallel(n_jobs=-1, prefer='threads')(
             delayed(pu.__client__loop_wav__)(
                 client, rawloc, bulk_wav, d, saveasdf, inv)
