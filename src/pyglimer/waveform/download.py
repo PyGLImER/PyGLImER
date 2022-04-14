@@ -11,7 +11,7 @@ Created: Tue May 26 2019 13:31:30
 Last Modified: Friday, 8th April 2022 02:47:54 pm
 '''
 
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 
@@ -90,6 +90,7 @@ def download_small_db(
                     toa, _, _, _, delta = compute_toa(
                         evt, stat.latitude, stat.longitude, phase, model)
                 except (IndexError, ValueError):
+
                     # occurs when there is no arrival of the phase at stat
                     logger.debug(
                         'No valid arrival found for station %s,' % stat.code
@@ -124,9 +125,11 @@ def download_small_db(
                 d['net'].append(net.code)
                 d['stat'].append(stat.code)
 
+    
     # Create waveform download bulk list
     bulk_wav = pu.create_bulk_str(
         d['net'], d['stat'], '*', channel, d['startt'], d['endt'])
+
 
     if len(bulk_wav) == 0:
         logger.info('No new data found.')

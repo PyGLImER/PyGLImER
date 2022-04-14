@@ -131,6 +131,7 @@ def __client__loop__(client: str or Client, statloc: str, bulk: list):
             statcode = station.code
             logger.debug(f"{netcode}.{statcode}")
             out = os.path.join(statloc, '%s.%s.xml' % (netcode, statcode))
+            print(out)
             stat_inv.select(network=netcode, station=statcode).write(
                 out, format="STATIONXML")
     return stat_inv

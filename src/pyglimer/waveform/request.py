@@ -51,7 +51,7 @@ class Request(object):
         network: str = None, station: str = None,
         waveform_client: list = None, evtcat: str = None,
         continue_download: bool = False, loglvl: int = logging.WARNING,
-            format: str = 'hdf5'):
+        format: str = 'hdf5'):
         """
         Create object that is used to start the receiver function
         workflow.
