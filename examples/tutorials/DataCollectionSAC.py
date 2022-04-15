@@ -1,7 +1,7 @@
 #!/bin/env python
 """
-Collection Data in the MSEED 
-============================
+SAC Database
+============
 
 In this Tutorial we are going to get all good receiver functions for the year
 2018 for station IU-HRV ([Adam Dziewonski
@@ -139,8 +139,9 @@ data_storage = os.path.join(
 print(f"Number of downloaded waveforms: {len(glob(data_storage))}")
 
 # %%
-# The final step to get you receiver function data is the preprocessing. Although it is hidden in a single function, which
-# is :function:`:func:`pyglimer.waveform.request.Request.preprocess`
+# The final step to get you receiver function data is the preprocessing. 
+# Although it is hidden in a single function, which
+# is :func:`pyglimer.waveform.request.Request.preprocess`
 # A lot of decisions are being made:
 #
 # Processing steps:
@@ -149,20 +150,20 @@ print(f"Number of downloaded waveforms: {len(glob(data_storage))}")
 # 2. Demean & Detrend
 # 3. Tapering
 # 4. Remove Instrument response, convert to velocity &
-#    simulate havard station
+# simulate havard station
 # 5. Rotation to NEZ and, subsequently, to RTZ.
 # 6. Compute SNR for highpass filtered waveforms (highpass f defined in 
-#    qc.lowco) If SNR lower than in qc.SNR_criteria for all filters, rejects w
-#    aveform.
+# qc.lowco) If SNR lower than in qc.SNR_criteria for all filters, rejects 
+# waveform.
 # 7. Write finished and filtered waveforms to folder
-#    specified in qc.outputloc.
+# specified in qc.outputloc.
 # 8. Write info file with shelf containing station,
-#    event and waveform information.
+# event and waveform information.
 # 9. (Optional) If we had chosen a different coordinate system in ``rot``
-#    than RTZ, it would now cast the preprocessed waveforms information
-#    that very coordinate system.
+# than RTZ, it would now cast the preprocessed waveforms information
+# that very coordinate system.
 # 10. Deconvolution with method ``deconmeth`` from our dict is perfomed.
-#    
+#
 # It again uses the request class to perform this. The ``if __name__ ...``
 # expression is needed for running this examples
 
