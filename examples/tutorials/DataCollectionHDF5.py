@@ -1,27 +1,16 @@
+#!/bin/env python
 """
-Collection Data in the MSEED 
-============================
+Collection Data in the HDF5 
+===========================
 
-In this Tutorial we are going to get all good receiver functions for the year
-2018 for station IU-HRV ([Adam Dziewonski
-Observatory](http://www.seismology.harvard.edu/hrv.html)).
-
-To Compute the receiver function we need to download and organize the observed
-data. PyGLImER will automatically take car of these things for you in the
-background, but do check out the 'Database Docs' if you aren't familiar.
+This example is nearly identical to the MSEED tutorial except the fact that we
+are specifying a different data format in the request dictionary.
 
 Downloading Event & Station Metadata
 ------------------------------------
 
-To download the data we use the :class:`pyglimer.waveform.request.Request`
-class. The first method from this class that we are going to use is the download
-event catalog public method
-:func:`pyglimer.waveform.request.Request.download_evtcat`, to get a set
-of events that contains all wanted earthquakes. This method is launched
-automatically upon initialization.
-
-To initialize said `class` we setup a parameter dictionary, with all the needed
-information. Let's look at the expected information:
+In this section, the only difference is the ``format`` ``key`` in the
+``request_dict`` that is set to ``hdf5``.
 
 """
 # sphinx_gallery_thumbnail_number = 1
@@ -33,6 +22,7 @@ information. Let's look at the expected information:
 
 # Some needed Imports
 import os
+from typing import NewType
 from obspy import UTCDateTime
 from pyglimer.waveform.request import Request
 
@@ -41,9 +31,11 @@ try: db_base_path = ipynb_path
 except NameError: db_base_path = os.getcwd()
 
 # Define file locations
-proj_dir = os.path.join(db_base_path, 'database')
+proj_dir = os.path.join(db_base_path, 'database_hdf5')
 
-
+# Define network and station to download RFs for
+network = 'IU'
+station = 'HRV'
 
 request_dict = {
     # Necessary arguments
@@ -55,7 +47,7 @@ request_dict = {
     'evt_subdir': 'events',       # Directory of the events
     'log_subdir': 'log',          # Directory for the logs
     'loglvl': 'WARNING',          # logging level
-    'format': 'sac',              # Format to save database in
+    'format': 'hdf5',              # Format to save database in
     "phase": "P",                 # 'P' or 'S' receiver functions
     "rot": "RTZ",                 # Coordinate system to rotate to
     "deconmeth": "waterlevel",    # Deconvolution method
@@ -66,8 +58,8 @@ request_dict = {
     "pol": 'v',                   # Source wavelet polaristion. Def. "v" --> SV
     "minmag": 5.5,                # Earthquake minimum magnitude. Def. 5.5
     "event_coords": None,         # Specific event?. Def. None
-    "network": "IU",              # Restricts networks. Def. None
-    "station": "HRV",             # Restricts stations. Def. None
+    "network": network,              # Restricts networks. Def. None
+    "station": station,             # Restricts stations. Def. None
     "waveform_client": ["IRIS"],  # FDSN server client (s. obspy). Def. None
     "evtcat": None,               # If you have already downloaded a set of
                                 # events previously, you can use them here
@@ -100,62 +92,60 @@ plot_catalog(R.evtcat)
 
 print(f"There are {len(R.evtcat)} available events")
 
-# %%
-# Downloading waveform data and station information
+# %% Downloading waveform data and station information
 # -------------------------------------------------
 #
-# The next step on our journey to receiver functions is retrieving
-# the corresponding waveform data.
-# To retrieve the waveform data, we can two different public methods
-# of `Request`: `download_waveforms()` or, as in this case `download_waveforms_small_db()`.
-# 
-# Both methods use the station and event locations to get viable
-# records of receiver function depending on epicentral distance and
-# traveltimes.
-# 
-# `download_waveforms()` relies on obspy's massdownloader and is best suited for
-# extremely large databases (i.e., from many different networks and stations).
-# `download_waveforms_small_db()` is faster for downloads from few stations and, additionally,
-# has the advantage that the desired networks and stations can be defined as lists and not only
-# as strings. Note that this method requires you to define the channels, you'd like to download
-# (as a string, wildcards allowed).
-# 
-# ***NOTE:*** This might take a while.
-# 
+# Again, this section does not really change, because the ``request_dict``
+# parsed all needed information to :class:`pyglimer.waveform.request.Request`.
 
-
-print('downloading')
 R.download_waveforms_small_db(channel='BH?')
 
-# %%
-# Let's have a quick look at how many miniseeds we actually downloaded.
+# %% Let's have a quick look at how many traces we actually downloaded. So, now,
+# there is indeed a change in the code because we saved the raw data in form of
+# ``ASDFDataset``s and we need to actually access the ``hdf5`` file that we
+# to count how many traces it contains.
 
-from glob import glob
+# Import ASDFDataset
+from pyasdf import ASDFDataSet
 
 # Path to the where the miniseeds are stored
 data_storage = os.path.join(
-    proj_dir, 'waveforms','raw','P','**', '*.mseed')
+    proj_dir, 'waveforms', 'raw', 'P', f'{network}.{station}.h5')
+
+# Read the data from the station ``h5`` file
+with ASDFDataSet(data_storage, mode='r', mpi=False) as ds:
+
+    # Perform waveform query on ASDFDataSet
+    stream = ds.get_waveforms(
+        network,
+        station,
+        '*', # Location
+        '*', # Channel
+        request_dict['starttime']-1000,  # Starttime 
+        request_dict['endtime']+1000,    # Endtime
+        'raw_recording')
 
 # Print output
-print(f"Number of downloaded waveforms: {len(glob(data_storage))}")
+print(f"Number of downloaded waveforms: {len(stream)}")
+
 
 # %%
-# The final step to get you receiver function data is the preprocessing. Although it is hidden in a single function, which
+# The final step to get you receiver function data is the preprocessing. 
+# Although it is hidden in a single function, which
 # is :function:`:func:`pyglimer.waveform.request.Request.preprocess`
 # A lot of decisions are being made:
 #
 # Processing steps:
-# 1. Clips waveform to the right length
-#    (tz before and ta after theorethical arrival.)
+# 1. Clips waveform to the right length (tz before and ta after theorethical 
+# arrival.)
 # 2. Demean & Detrend
 # 3. Tapering
 # 4. Remove Instrument response, convert to velocity &
 #    simulate havard station
 # 5. Rotation to NEZ and, subsequently, to RTZ.
-# 6. Compute SNR for highpass filtered waveforms
-#    (highpass f defined in qc.lowco)
-#    If SNR lower than in qc.SNR_criteria for all filters,
-#    rejects waveform.
+# 6. Compute SNR for highpass filtered waveforms (highpass f defined in 
+#    qc.lowco) If SNR lower than in qc.SNR_criteria for all filters, rejects w
+#    aveform.
 # 7. Write finished and filtered waveforms to folder
 #    specified in qc.outputloc.
 # 8. Write info file with shelf containing station,
@@ -165,38 +155,41 @@ print(f"Number of downloaded waveforms: {len(glob(data_storage))}")
 #    that very coordinate system.
 # 10. Deconvolution with method ``deconmeth`` from our dict is perfomed.
 #    
-# It again uses the request class to perform this.
+# It again uses the request class to perform this. The ``if __name__ ...``
+# expression is needed for running this examples
+R.preprocess(hc_filt=1.5, client='single')
 
-R.preprocess(hc_filt=1.5)
-
-# %%
-# First Receiver functions
-# ------------------------
-# 
-# The following few section show how to plot 
-# 
-# 1. Single raw RFs
-# 2. A set of raw RFs
-# 3. A move-out corrected RF
-# 4. A set of move-out corrected RFs
-#
-# 
-# Read the IU-HRV receiver functions as a Receiver function stream
+# %% Read the IU-HRV receiver functions as a Receiver function stream
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
-# Let's read a receiver function set and see what it's all about! 
-# (i.e. let's look at what data a Receiver function trace contains
-# and how we can use it!)
+# Here, again we have a change between the ``SAC`` workflow and the ``HDF5``
+# workflow because the RFs are saved in form of
+# :class:`pyglimer.database.rfh5.RFDataBase`s. It is important to note that the
+# ``RFDataBase`` is an abstraction of an ``HDF5`` file that contains RF specific 
+# Header info that cannot be saved in ASDF. So, we import the database class
+# and query for the P receiver functions we computed. and output a stream.
 
-from pyglimer.rf.create import read_rf
+from pyglimer.database.rfh5 import RFDataBase
 
-path_to_rf = os.path.join(proj_dir, 'waveforms','RF','P','IU','HRV','*.sac')
-rfstream = read_rf(path_to_rf)
+network = request_dict['network']
+station = request_dict['station']
 
+path_to_rf = os.path.join(proj_dir, 'waveforms','RF','P', f'{network}.{station}.h5')
+
+# Open RF Database
+with RFDataBase(path_to_rf, 'r') as rfdb:
+
+    # Query database for specific RFs
+    rfstream = rfdb.get_data('IU', 'HRV', 'P', '*', 'rf')
+
+# Print number of RFs queried
 print(f"Number of RFs: {len(rfstream)}")
 
 # %% 
-# PyGLImER is based on Obspy, but to handle RFs we need some more attributes: 
+# PyGLImER is based on Obspy and hence, similar to ``obspy``, we can access
+# the ``Stats`` of a ``RFTrace`` in a ``RFStream``. The abstraction from obspy
+# follows a need for more (SAC) header information to handle RFs. Let's take
+# a look at the attributes.
 
 from pprint import pprint
 

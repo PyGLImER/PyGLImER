@@ -117,6 +117,8 @@ def preprocessh5(
     # Open ds
     fpattern = '%s.%s.h5' % (netrestr or '*', statrestr or '*')
     flist = list(glob(os.path.join(rawloc, fpattern)))
+
+    # Perform processing depending on client
     if client.lower() == 'mpi':
         from mpi4py import MPI
         comm = MPI.COMM_WORLD
@@ -133,13 +135,20 @@ def preprocessh5(
         for ii in ind:
             _preprocessh5_single(
                 phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, logger, rflogger, flist[ii], evtcat
-            )
+                deconmeth, hc_filt, logger, rflogger, flist[ii], evtcat)
+
     elif client.lower() == 'joblib':
         Parallel(n_jobs=-1)(delayed(_preprocessh5_single)(
             phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
             deconmeth, hc_filt, logger, rflogger,
             f, evtcat) for f in tqdm(flist))
+
+    elif client.lower() == 'single':
+        for f in tqdm(flist):
+            _preprocessh5_single(
+                phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
+                deconmeth, hc_filt, logger, rflogger,
+                f, evtcat) 
     else:
         raise NotImplementedError(
             'Unknown multiprocessing backend %s.' % client

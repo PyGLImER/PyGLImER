@@ -19,3 +19,5 @@ PyGLImER.egg-info/
 .idea/
 ccp*.pkl
 .coverage
+examples/tutorials/database_hdf5
+examples/tutorials/database_sac

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 '''
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
@@ -10,9 +12,6 @@
 Created: Tue May 26 2019 13:31:30
 Last Modified: Friday, 8th April 2022 02:47:54 pm
 '''
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 
 import fnmatch
@@ -68,8 +67,11 @@ def download_small_db(
     logger.debug('Bulk stat parameters: %s' % str(bulk_stat))
 
     logger.info('Initialising station response download.')
-    # create output folder
+
+    # Create Station Output folder
     os.makedirs(statloc, exist_ok=True)
+
+    # Run parallel station loop.
     out = Parallel(n_jobs=-1, prefer='threads')(
         delayed(pu.__client__loop__)(client, statloc, bulk_stat)
         for client in clients)
@@ -130,22 +132,26 @@ def download_small_db(
     bulk_wav = pu.create_bulk_str(
         d['net'], d['stat'], '*', channel, d['startt'], d['endt'])
 
-
     if len(bulk_wav) == 0:
         logger.info('No new data found.')
         return
 
+    # Sort bulk request
+    bulk_wav.sort()
+
     # This does almost certainly need to be split up, so we don't overload the
     # RAM with the downloaded mseeds
     logger.info('Initialising waveform download.')
-    logger.debug(f'The request string looks like this:\n\n{bulk_wav}\n')
+    logger.debug('The request string looks like this:')
+    for _bw in bulk_wav:
+        logger.debug(f"{_bw}")
 
-    print('clients:', clients)
+    # Create waveform directories
+    os.makedirs(rawloc, exist_ok=True)
+
     if len(clients) == 1:
-        print('how many?', len(clients))
         pu.__client__loop_wav__(clients[0], rawloc, bulk_wav, d, saveasdf, inv)
     else:
-        print('how many?', len(clients))
         Parallel(n_jobs=-1, prefer='threads')(
             delayed(pu.__client__loop_wav__)(
                 client, rawloc, bulk_wav, d, saveasdf, inv)
