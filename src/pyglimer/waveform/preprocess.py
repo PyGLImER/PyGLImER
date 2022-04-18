@@ -127,7 +127,6 @@ def preprocess(
     # Number of cores is usally a power of 2 (therefore 128)
     n_split = int(np.ceil(event_cat.count()/128))
 
-    # 
     # All error handlers rely on download via IRIS webservice.
     # However, there is a maximum number for connections (3).
     # So I don't really want to flood everything with exceptions.
@@ -166,15 +165,17 @@ def preprocess(
                     phase, rot, pol, evtcat[ii], taper_perc, taper_type,
                     model, logger, rflogger, eh, tz, ta, statloc, rawloc,
                     preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr)
-        
+
         # Use single core only
         elif client.lower() == 'single':
             out = []
             for event in tqdm(evtcat):
-                out.append(__event_loop(phase, rot, pol, event, taper_perc,
-                    taper_type, model, logger, rflogger, eh, tz,
-                    ta, statloc, rawloc, preproloc, rfloc, deconmeth,
-                    hc_filt, netrestr, statrestr))
+                out.append(
+                    __event_loop(
+                        phase, rot, pol, event, taper_perc,
+                        taper_type, model, logger, rflogger, eh, tz,
+                        ta, statloc, rawloc, preproloc, rfloc, deconmeth,
+                        hc_filt, netrestr, statrestr))
 
         else:
             raise NotImplementedError('Unknown client %s' % client)

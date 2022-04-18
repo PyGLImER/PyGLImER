@@ -127,7 +127,6 @@ def download_small_db(
                 d['net'].append(net.code)
                 d['stat'].append(stat.code)
 
-    
     # Create waveform download bulk list
     bulk_wav = pu.create_bulk_str(
         d['net'], d['stat'], '*', channel, d['startt'], d['endt'])

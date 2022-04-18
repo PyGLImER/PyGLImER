@@ -148,7 +148,7 @@ def preprocessh5(
             _preprocessh5_single(
                 phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
                 deconmeth, hc_filt, logger, rflogger,
-                f, evtcat) 
+                f, evtcat)
     else:
         raise NotImplementedError(
             'Unknown multiprocessing backend %s.' % client
