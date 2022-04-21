@@ -165,6 +165,18 @@ def preprocess(
                     phase, rot, pol, evtcat[ii], taper_perc, taper_type,
                     model, logger, rflogger, eh, tz, ta, statloc, rawloc,
                     preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr)
+
+        # Use single core only
+        elif client.lower() == 'single':
+            out = []
+            for event in tqdm(evtcat):
+                out.append(
+                    __event_loop(
+                        phase, rot, pol, event, taper_perc,
+                        taper_type, model, logger, rflogger, eh, tz,
+                        ta, statloc, rawloc, preproloc, rfloc, deconmeth,
+                        hc_filt, netrestr, statrestr))
+
         else:
             raise NotImplementedError('Unknown client %s' % client)
 

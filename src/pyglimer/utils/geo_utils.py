@@ -80,7 +80,7 @@ def geodiff(lat, lon):
             np.array((lon[1:], lat[1:])).T
         )
     )
-    dists = mat[:, 0] / R_EARTH / 1000.0 / np.pi * 180 
+    dists = mat[:, 0] / R_EARTH / 1000.0 / np.pi * 180
     az = mat[:, 1]
 
     return dists, az
@@ -214,7 +214,7 @@ def gctrack(
 
     # Get tracks
     utrack = np.hstack(tracks).T
-    
+
     # Remove duplicates if there are any
     _, idx = np.unique(utrack, return_index=True, axis=0)
     utrack = utrack[np.sort(idx), :]
