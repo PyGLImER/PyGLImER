@@ -162,7 +162,7 @@ class CCPStack(object):
         # Else just initialise an empty object
         # Loggers for the CCP script
         self.logger = logging.getLogger('pyglimer.ccp.ccp')
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
 
         # Create handler to the log
         if not logdir:
@@ -1884,7 +1884,7 @@ def init_ccp(
         subset = db.geo_boundary(lat, lon, phase=phase)
     else:
         subset = db.db
-
+        
     net = list(subset['network'])
     stat = list(subset['station'])
     codes = list(subset['code'])
@@ -1926,7 +1926,7 @@ def init_ccp(
     logdir = os.path.join(
         os.path.dirname(os.path.dirname(
             os.path.abspath(rfloc))), 'logs')
-
+    print(lats, lons)
     ccp = CCPStack(
         lats, lons, spacing, phase=phase, verbose=verbose, logdir=logdir)
 
