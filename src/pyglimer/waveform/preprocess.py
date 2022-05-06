@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 15th February 2022 01:43:54 pm
+Last Modified: Friday, 6th May 2022 11:58:54 am
 '''
 
 import fnmatch
@@ -44,7 +44,7 @@ def preprocess(
     taper_type: str, tz: int, ta: int, statloc: str, rawloc: str,
     preproloc: str, rfloc: str, deconmeth: str, hc_filt: float or None,
     saveasdf: bool = False, netrestr=None, statrestr=None,
-        client: str = 'joblib'):
+        client: str = 'joblib', remove_response: bool = True):
     """
      Preprocesses waveforms to create receiver functions
 
@@ -116,7 +116,7 @@ def preprocess(
         preprocessh5(
             phase, rot, pol, taper_perc, model, taper_type, tz, ta,
             rawloc, rfloc, deconmeth, hc_filt, netrestr,
-            statrestr, logger, rflogger, client, event_cat)
+            statrestr, logger, rflogger, client, event_cat, remove_response)
         return
     # else:
     # Here, we work with all available cores to speed things up
@@ -145,7 +145,7 @@ def preprocess(
                     phase, rot, pol, event, taper_perc,
                     taper_type, model, logger, rflogger, eh, tz,
                     ta, statloc, rawloc, preproloc, rfloc, deconmeth,
-                    hc_filt, netrestr, statrestr)
+                    hc_filt, netrestr, statrestr, remove_response)
                 for event in tqdm(evtcat))
         elif client.lower() == 'mpi':
             from mpi4py import MPI
@@ -164,7 +164,8 @@ def preprocess(
                 __event_loop(
                     phase, rot, pol, evtcat[ii], taper_perc, taper_type,
                     model, logger, rflogger, eh, tz, ta, statloc, rawloc,
-                    preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr)
+                    preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr,
+                    remove_response)
 
         # Use single core only
         elif client.lower() == 'single':
@@ -175,7 +176,7 @@ def preprocess(
                         phase, rot, pol, event, taper_perc,
                         taper_type, model, logger, rflogger, eh, tz,
                         ta, statloc, rawloc, preproloc, rfloc, deconmeth,
-                        hc_filt, netrestr, statrestr))
+                        hc_filt, netrestr, statrestr, remove_response))
 
         else:
             raise NotImplementedError('Unknown client %s' % client)
@@ -227,7 +228,8 @@ def __event_loop(
     taper_perc: float, taper_type: str, model: obspy.taup.TauPyModel,
     logger: logging.Logger, rflogger: logging.Logger, eh: bool, tz: float,
     ta: float, statloc: str, rawloc: str, preproloc: str, rfloc: str,
-        deconmeth: str, hc_filt: float, netrestr: str, statrestr: str):
+    deconmeth: str, hc_filt: float, netrestr: str, statrestr: str,
+        remove_response: bool):
     """
     Loops over each event in the event catalogue
     """
@@ -283,7 +285,7 @@ def __event_loop(
                 phase, rot, pol, filestr, taper_perc, taper_type,
                 model, origin_time, ot_fiss, evtlat, evtlon, depth,
                 prepro_folder, event, logger, rflogger, by_event, eh, tz, ta,
-                statloc, preproloc, rfloc, deconmeth, hc_filt)
+                statloc, preproloc, rfloc, deconmeth, hc_filt, remove_response)
             infolist.append(info)
         except Exception as e:
             # Unhandled exceptions should not cause the loop to quit
@@ -301,7 +303,7 @@ def __waveform_loop(
     prepro_folder: str, event: obspy.core.event.event.Event,
     logger: logging.Logger, rflogger: logging.Logger, by_event, eh: bool,
     tz: float, ta: float, statloc: str, preproloc: str, rfloc: str,
-        deconmeth: str, hc_filt: float):
+        deconmeth: str, hc_filt: float, remove_response: bool):
     """
     Loops over each waveform for a specific event and a specific station
     """
@@ -383,7 +385,7 @@ def __waveform_loop(
                 phase, st, station_inv, network, station, baz,
                 distance, outf, ot_fiss, event, evtlat, evtlon, depth,
                 rayp_s_deg, first_arrival, infof, logger, infodict, by_event,
-                eh, tz, statloc)
+                eh, tz, statloc, remove_response)
 
         # Exceptions & logging
 
@@ -591,29 +593,26 @@ def __rotate_qc(
     event: obspy.core.event.event.Event, evtlat: float, evtlon: float,
     depth: float, rayp_s_deg: float, first_arrival: UTCDateTime, infof: str,
     logger: logging.Logger, infodict: dict, by_event, eh: bool, tz: float,
-        statloc: str) -> Tuple[Stream, bool, dict]:
+        statloc: str, remove_response: bool) -> Tuple[Stream, bool, dict]:
     """REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
     Bugs occur here due to station inventories without response information
     Looks like the bulk downloader sometimes donwnloads
     station inventories without response files. I could fix that here by
     redownloading the response file (alike to the 3 traces problem)"""
+    if remove_response:
+        try:
+            st.attach_response(station_inv)
+            st.remove_response()
+        except ValueError:
+            # Occurs for "No matching response file found"
 
-    try:
-        # 19/02/2021
-        # Experience shows that it is generally more stable to first execute
-        # attach_response and, then, remove_response
-        st.attach_response(station_inv)
-        st.remove_response()
-    except ValueError:
-        # Occurs for "No matching response file found"
+            if eh:
+                station_inv, st = NoMatchingResponseHandler(
+                    st, network, station, statloc)
 
-        if eh:
-            station_inv, st = NoMatchingResponseHandler(
-                st, network, station, statloc)
-
-        if not eh or not station_inv:
-            raise ValueError(
-                ["No matching response file found for", network, station])
+            if not eh or not station_inv:
+                raise ValueError(
+                    ["No matching response file found for", network, station])
 
     st.rotate(method='->ZNE', inventory=station_inv)
 

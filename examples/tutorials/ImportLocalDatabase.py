@@ -1,28 +1,32 @@
 #!/bin/env python
 """
-SAC Database
-============
+Import from Local DataBase
+==========================
 
-In this Tutorial we are going to get all good receiver functions for the year
-2018 for station IU-HRV ([Adam Dziewonski
-Observatory](http://www.seismology.harvard.edu/hrv.html)).
+This Tutorial illustrates how to import waveform data from a local database
+of continuous waveforms into PyGLImER.
 
-To Compute the receiver function we need to download and organize the observed
-data. PyGLImER will automatically take care of these things for you in the
-background, but do check out the 'Database Docs' if you aren't familiar.
+As we don't have actual offline data available, we will download some
+continuous data from two stations:
+station IU-HRV ([Adam Dziewonski
+Observatory](http://www.seismology.harvard.edu/hrv.html)) and the Dutch
+station NL-HGN.
 
-Downloading Event & Station Metadata
-------------------------------------
+This data will then be sliced into times, when arrivals from teleseismic
+events are expected, which PyGLiMER determines in a previous step.
 
-To download the data we use the :class:`pyglimer.waveform.request.Request`
+Downloading Event Catalogue & Feed in offline data
+--------------------------------------------------
+
+Here, we will again use the :class:`pyglimer.waveform.request.Request`
 class. The first method from this class that we are going to use is the
 download event catalog public method
 :func:`pyglimer.waveform.request.Request.download_evtcat`, to get a set
 of events that contains all wanted earthquakes. This method is launched
-automatically upon initialization.
+automatically upon initialization. (Same as in the download tutorials)
 
-To initialize said `class` we setup a parameter dictionary, with all the needed
-information. Let's look at the expected information:
+To initialize said `class` we set up a parameter dictionary, with all the
+needed information. Let's look at the expected information:
 
 """
 # sphinx_gallery_thumbnail_number = 1
@@ -34,7 +38,9 @@ information. Let's look at the expected information:
 
 # Some needed Imports
 import os
+from typing import List
 from obspy import UTCDateTime
+import obspy
 from pyglimer.waveform.request import Request
 
 # Get notebook path for future reference of the database:
@@ -45,11 +51,10 @@ except NameError: db_base_path = os.getcwd()
 proj_dir = os.path.join(db_base_path, 'database_sac')
 
 
-
 request_dict = {
     # Necessary arguments
     'proj_dir': proj_dir,
-    'raw_subdir': 'waveforms/raw', # Directory of the waveforms
+    'raw_subdir': 'waveforms/raw',# Directory of the waveforms
     'prepro_subdir': 'waveforms/preprocessed',  # Directory of the preprocessed waveforms
     'rf_subdir': 'waveforms/RF',  # Directory of the receiver functions
     'statloc_subdir': 'stations', # Directory stations
@@ -60,31 +65,28 @@ request_dict = {
     "phase": "P",                 # 'P' or 'S' receiver functions
     "rot": "RTZ",                 # Coordinate system to rotate to
     "deconmeth": "waterlevel",    # Deconvolution method
-    "starttime": UTCDateTime(2021, 1, 1, 0, 0, 0), # Starttime of database.
-                                                # Here, starttime of HRV
-    "endtime": UTCDateTime(2021, 7, 1, 0, 0, 0), # Endtimetime of database
+    "starttime": UTCDateTime(2019, 1, 1, 0, 0, 0), # Starttime of your data.
+    "endtime": UTCDateTime(2019, 1, 2, 0, 0, 0), # Endtimetime of your data
     # kwargs below
     "pol": 'v',                   # Source wavelet polaristion. Def. "v" --> SV
-    "minmag": 5.5,                # Earthquake minimum magnitude. Def. 5.5
+    "minmag": 5.0,                # Earthquake minimum magnitude. Def. 5.5
     "event_coords": None,         # Specific event?. Def. None
-    "network": "IU",              # Restricts networks. Def. None
-    "station": "HRV",             # Restricts stations. Def. None
-    "waveform_client": ["IRIS"],  # FDSN server client (s. obspy). Def. None
     "evtcat": None,               # If you have already downloaded a set of
                                   # events previously, you can use them here
-    "loglvl": 'DEBUG'
+    "loglvl": 'INFO'              # Will show a lot of info, you could use
+                                  # WARNING for only a few messages
 }
 
 # %%
-# Now that all parameters are in place, let's initialize the 
+# Now that all parameters are in place, let's initialize the
 # :class:`pyglimer.waveform.request.Request`
 
 # Initializing the Request class and downloading the data
 R = Request(**request_dict)
 
 # %%
-# The initialization will look for all events for which data is available. To see 
-# whether the events make sense we plot a map of the events:
+# The initialization will look for all events for which data is available. To
+# see whether the events make sense we plot a map of the events:
 
 import matplotlib.pyplot as plt
 from pyglimer.plot.plot_utils import plot_catalog
@@ -102,32 +104,91 @@ plot_catalog(R.evtcat)
 print(f"There are {len(R.evtcat)} available events")
 
 # %%
-# Downloading waveform data and station information
-# -------------------------------------------------
+# Preliminary steps
+# -----------------
 #
-# The next step on our journey to receiver functions is retrieving
-# the corresponding waveform data.
-# To retrieve the waveform data, we can two different public methods
-# of `Request`: `download_waveforms()` or, as in this case `download_waveforms_small_db()`.
-# 
-# Both methods use the station and event locations to get viable
-# records of receiver function depending on epicentral distance and
-# traveltimes.
-# 
-# `download_waveforms()` relies on obspy's massdownloader and is best suited for
-# extremely large databases (i.e., from many different networks and stations).
-# `download_waveforms_small_db()` is faster for downloads from few stations and, additionally,
-# has the advantage that the desired networks and stations can be defined as lists and not only
-# as strings. Note that this method requires you to define the channels, you'd like to download
-# (as a string, wildcards allowed).
-# 
-# ***NOTE:*** This might take a while.
-# 
+# This will be the most complex step because it requires you to write two
+# functions: 1. A function that yields Obspy Streams. 2. A function that yields
+# obspy inventories.
+#
+# ***WARNING:*** both have to yield information for the same station. So both
+# Generators also need to have the same length.
+#
+# These functions could for example look like this:
 
-R.download_waveforms_small_db(channel='BH?')
+
+def yield_st_dummy(list_of_waveform_files: List[os.PathLike]):
+    for file in list_of_waveform_files:
+        yield obspy.read(file)
+
+
+def yield_inventory_dummy(list_of_station_files: List[os.PathLike]):
+    for file in list_of_station_files:
+        yield obspy.read_inventory(file)
+
 
 # %%
-# Let's have a quick look at how many miniseeds we actually downloaded.
+# ***NOTE:*** This also requires you to convert/compile your information
+# Into formats that obspy can read.
+# To create StationXMLs follow the following tutorial:
+# `<https://docs.obspy.org/tutorial/code_snippets/stationxml_file_from_scratch.html>`_
+# The StationXML needs to contain the following information:
+# 1. Network and Station Code
+# 2. Latitude, Longitude, and Elevation
+# 3. Azimuth of Channel/Location to do the Rotation.
+# 4. (Optional/if you set remove_response=True) Station response information.
+#
+# The header of the traces need to contain the following:
+# 1. sampling_rate
+# 2. start_time, end_time
+# 3. Network, Station, and Channel Code (Location code arbitrary)
+# To convert seismic data from unusual formats to mseed or sac, we recommend
+# using PyROCKO or obspy.
+#
+# As we actually don't have any waveforms available, we will have to define
+# our functions a little differently.
+
+from obspy.clients.fdsn import Client
+
+
+def yield_st():
+    c = Client('IRIS')
+    networks = ['IU', 'NL']
+    stations = ['HRV', 'HGN']
+    for net, stat in zip(networks, stations):
+        st = c.get_waveforms(
+            net, stat, '*', 'BH?', request_dict['starttime'],
+            request_dict['endtime'])
+        yield st
+
+
+def yield_inv():
+    c = Client('IRIS')
+    networks = ['IU', 'NL']
+    stations = ['HRV', 'HGN']
+    for net, stat in zip(networks, stations):
+        yield c.get_stations(
+            network=net, station=stat, location='*', channel='BH?',
+            starttime=request_dict['starttime'],
+            endtime=request_dict['endtime'], level='response')
+
+
+# %%
+# Import waveform data and station information
+# --------------------------------------------
+#
+# The hard part is done! The actual import into PyGLImER is easy now:
+# To do so, we use the public method of `Request`: `import_database()`
+# This method will do the following:
+# 1. Find times with teleseismic arrivals of our desired phase.
+# 2. Slice time windows around this arrivals.
+# 3. Do a first fast preprocessing.
+# 4. Save Traces and station information in desired `format` (mseed or asdf)
+
+R.import_database(yield_st, yield_inv)
+
+# %%
+# Let's just check how many teleseismic arrivals were found in this one week.
 
 from glob import glob
 
@@ -139,6 +200,7 @@ data_storage = os.path.join(
 print(f"Number of downloaded waveforms: {len(glob(data_storage))}")
 
 # %%
+# ***NOTE*** From here on, the steps are identical to the download tutorials
 # The final step to get you receiver function data is the preprocessing. 
 # Although it is hidden in a single function, which
 # is :func:`pyglimer.waveform.request.Request.preprocess`
@@ -190,7 +252,7 @@ R.preprocess(hc_filt=1.5, client='single')
 
 from pyglimer.rf.create import read_rf
 
-path_to_rf = os.path.join(proj_dir, 'waveforms','RF','P','IU','HRV','*.sac')
+path_to_rf = os.path.join(proj_dir, 'waveforms','RF','P','*','*','*.sac')
 rfstream = read_rf(path_to_rf)
 
 print(f"Number of RFs: {len(rfstream)}")
