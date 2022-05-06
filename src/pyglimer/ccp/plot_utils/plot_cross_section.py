@@ -58,7 +58,7 @@ def get_ax_coor(ax, lat, lon):
 
 
 def plot_cross_section(
-        ccp, lat, lon,
+        ccp, lat, lon, ddeg: float,
         z0: Optional[float] = None,
         ax: Optional[Axes] = None,
         geoax: Optional[Union[GeoAxes, GeoAxesSubplot]] = None,
@@ -81,6 +81,8 @@ def plot_cross_section(
         Latitudes of the waypoints defining the cross section
     lon : Arraylike
         Longitudes of the waypoints defining the cross section
+    ddeg : float
+        lateral spacing of the cross section
     z0 : Optional[float], optional
         if given the map will be plotted with an illumination map at the given
         depth, by default None
@@ -128,7 +130,7 @@ def plot_cross_section(
 
     # Get Cross section
     slat, slon, sdists, qlat, qlon, qdists, qz, qillum, qccp, epi_area = \
-        ccp.get_profile(lat, lon)
+        ccp.get_profile(lat, lon, ddeg=ddeg)
 
     # Define norms
     if vmin is None:

@@ -193,7 +193,7 @@ class VolumePlot:
             ax=[self.ax['z'], self.ax['m']['main'],
                 self.ax['y'], self.ax['x']])
         if self.show:
-            plt.show()
+            plt.show(block=False)
 
     def plot_xsl(self):
         self.slice['x'] = self.ax['x'].imshow(

@@ -93,4 +93,4 @@ def plot_bins(stations, bins, ax=None, kwargsS=None, kwargsB=None):
     plt.connect('motion_notify_event', mouse_move)
 
     if show:
-        plt.show(block=True)
+        plt.show(block=False)

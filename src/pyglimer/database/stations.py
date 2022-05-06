@@ -156,7 +156,6 @@ class StationDB(object):
         elif hdf5:
             self.db = self._create_from_hdf5()
         else:
-            print('hello')
             self.db = self._create_from_info()
 
         # Save Database, don't save if only one phase is requested newly
@@ -216,7 +215,6 @@ class StationDB(object):
 
             # Check data availability
             for root, _, files in os.walk(folder):
-                print(files)
                 if 'info.db' not in files:
                     continue  # Skip parent folders
                 infof = (os.path.join(root, 'info'))
