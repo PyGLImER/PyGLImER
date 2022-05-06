@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Thursday, 13th January 2022 09:15:00 am
+Last Modified: Friday, 6th May 2022 12:00:07 pm
 '''
 
 from glob import glob
@@ -66,7 +66,7 @@ def preprocessh5(
     model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
     rawloc: str, rfloc: str, deconmeth: str, hc_filt: float, netrestr: str,
     statrestr: str, logger: logging.Logger, rflogger: logging.Logger,
-        client: str, evtcat: obspy.Catalog):
+        client: str, evtcat: obspy.Catalog, remove_response: bool):
     """
     Preprocess files saved in hdf5 (pyasdf) format. Will save the computed
     receiver functions in hdf5 format as well.
@@ -135,20 +135,21 @@ def preprocessh5(
         for ii in ind:
             _preprocessh5_single(
                 phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, logger, rflogger, flist[ii], evtcat)
+                deconmeth, hc_filt, logger, rflogger, flist[ii], evtcat,
+                remove_response)
 
     elif client.lower() == 'joblib':
         Parallel(n_jobs=-1)(delayed(_preprocessh5_single)(
             phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
             deconmeth, hc_filt, logger, rflogger,
-            f, evtcat) for f in tqdm(flist))
+            f, evtcat, remove_response) for f in tqdm(flist))
 
     elif client.lower() == 'single':
         for f in tqdm(flist):
             _preprocessh5_single(
                 phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
                 deconmeth, hc_filt, logger, rflogger,
-                f, evtcat)
+                f, evtcat, remove_response)
     else:
         raise NotImplementedError(
             'Unknown multiprocessing backend %s.' % client
@@ -160,7 +161,7 @@ def _preprocessh5_single(
     model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
     rfloc: str, deconmeth: str, hc_filt: float,
     logger: logging.Logger, rflogger: logging.Logger,
-        hdf5_file: str, evtcat: obspy.Catalog):
+        hdf5_file: str, evtcat: obspy.Catalog, remove_response: bool):
     """
     Single core processing of one single hdf5 file.
 
@@ -235,7 +236,7 @@ def _preprocessh5_single(
                 rf_temp = __station_process__(
                     st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
                     ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
-                    distance, rayp, rayp_s_deg, toa, rej, ret)
+                    distance, rayp, rayp_s_deg, toa, rej, ret, remove_response)
             except Exception as e:
                 rflogger.exception(
                     'RF Creation failed. Waveform Data:\n'
@@ -315,7 +316,8 @@ def compute_toa(
 def __station_process__(
     st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz, ta,  deconmeth,
     hc_filt, logger, rflogger, net, stat, baz, distance, rayp,
-        rayp_s_deg, toa, rej: List[str], ret: List[str]):
+    rayp_s_deg, toa, rej: List[str], ret: List[str],
+        remove_response: bool):
     """
     Processing that is equal for each waveform recorded on one station
     """
@@ -325,8 +327,9 @@ def __station_process__(
     # ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]
 
     # Remove repsonse
-    st.attach_response(inv)
-    st.remove_response()
+    if remove_response:
+        st.attach_response(inv)
+        st.remove_response()
 
     # DEMEAN AND DETREND #
     st.detrend(type='demean')

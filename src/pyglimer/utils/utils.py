@@ -11,7 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 8th April 2022 01:58:57 pm
+Last Modified: Friday, 6th May 2022 01:18:05 pm
 '''
 
 import logging
@@ -131,7 +131,6 @@ def __client__loop__(client: str or Client, statloc: str, bulk: list):
             statcode = station.code
             logger.debug(f"{netcode}.{statcode}")
             out = os.path.join(statloc, '%s.%s.xml' % (netcode, statcode))
-            print(out)
             stat_inv.select(network=netcode, station=statcode).write(
                 out, format="STATIONXML")
     return stat_inv
@@ -198,6 +197,10 @@ def save_raw(
         # to have several, so let's just keep one
         try:
             sst = st.select(network=net, station=stat)
+            # This might actually be empty if so, let's just skip
+            if sst.count() == 0:
+                logging.debug(f'No trace of {net}.{stat} in Stream.')
+                continue
             slst = sst.slice(startt, endt)
             # Only write the prevelant location
             locs = [tr.stats.location for tr in sst]
