@@ -162,7 +162,7 @@ class CCPStack(object):
         # Else just initialise an empty object
         # Loggers for the CCP script
         self.logger = logging.getLogger('pyglimer.ccp.ccp')
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
 
         # Create handler to the log
         if not logdir:
@@ -283,13 +283,13 @@ class CCPStack(object):
 
         return qlat, qlon, qill, qccp, extent, z0
 
-    def get_profile(self, slat, slon):
+    def get_profile(self, slat, slon, ddeg=0.1):
 
         # Area considered around profile points
         area = 2 * self.binrad
 
         # Get evenly distributed points
-        qlat, qlon, qdists, sdists = gctrack(slat, slon, self.bingrid.edist/4)
+        qlat, qlon, qdists, sdists = gctrack(slat, slon, dist=ddeg)
 
         # Get interpolation weights and rows.
         # Create SphericalNN kdtree
@@ -629,7 +629,7 @@ code if you want to filter by station")
         """
         # note that streams are actually files - confusing variable name
         if mc_backend.lower() == 'joblib':
-            out = Parallel(n_jobs=1, backend='multiprocess')(
+            out = Parallel(n_jobs=1, backend='multiprocessing')(
                 delayed(self._create_ccp_from_hdf5)(
                     f, multiple, append_pp, n_closest_points, vel_model,
                     latb, lonb, filt)
@@ -828,7 +828,7 @@ code if you want to filter by station")
                     len_split = int(np.ceil(len_split/(len_split/10)))
             num_split = int(np.ceil(len(stream_chunk)/len_split))
 
-            out = Parallel(n_jobs=num_cores, backend='multiprocess')(
+            out = Parallel(n_jobs=num_cores, backend='multiprocessing')(
                 delayed(self.multicore_stack)(
                     st, append_pp, n_closest_points, vel_model,
                     latb, lonb, filt, multiple)
@@ -1926,7 +1926,6 @@ def init_ccp(
     logdir = os.path.join(
         os.path.dirname(os.path.dirname(
             os.path.abspath(rfloc))), 'logs')
-
     ccp = CCPStack(
         lats, lons, spacing, phase=phase, verbose=verbose, logdir=logdir)
 

@@ -215,7 +215,7 @@ class StationDB(object):
 
             # Check data availability
             for root, _, files in os.walk(folder):
-                if 'info.dat' not in files:
+                if 'info.db' not in files:
                     continue  # Skip parent folders
                 infof = (os.path.join(root, 'info'))
 
