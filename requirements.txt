@@ -27,7 +27,7 @@ wheel
 # cartopy
 
 # For documentation
-sphinx<4.0
+sphinx<6.0
 pydata-sphinx-theme
 sphinx-copybutton
 jinja2<3.1
