@@ -14,7 +14,7 @@ GLImER functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 1st April 2020 01:51:30 pm
-Last Modified: Thursday, 19th August 2021 03:14:24 pm
+Last Modified: Monday, 30th May 2022 02:57:40 pm
 '''
 
 import os
@@ -277,7 +277,10 @@ def rf_test(
             stats = Stats()
             stats.npts = N
             stats.delta = dt
-            stats.starttime = UTCDateTime(0)
+            stats.st    # if old:
+    #     ax[2].text(0, 1, old,
+    #                bbox=dict(facecolor='green', alpha=0.5))
+    #     ax[2].set_xlabel(['time in s, old rating', old])arttime = UTCDateTime(0)
             stats.channel = ch[j]
             stats.network = 'RS'
             stats.station = str(dip)
