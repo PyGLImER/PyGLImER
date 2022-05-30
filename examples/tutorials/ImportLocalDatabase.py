@@ -44,28 +44,31 @@ import obspy
 from pyglimer.waveform.request import Request
 
 # Get notebook path for future reference of the database:
-db_base_path = os.path.dirname(os.path.realpath(__file__))
+try: db_base_path = ipynb_path
+except NameError:
+    try: db_base_path = os.path.dirname(os.path.realpath(__file__))
+    except NameError: db_base_path = os.getcwd()
 
 # Define file locations
-proj_dir = os.path.join(db_base_path, 'tmp', 'database_sac')
+proj_dir = os.path.join(db_base_path, 'tmp', 'database_sac_import')
 
 
 request_dict = {
     # Necessary arguments
     'proj_dir': proj_dir,
-    'raw_subdir': 'waveforms/raw',# Directory of the waveforms
-    'prepro_subdir': 'waveforms/preprocessed',  # Directory of the preprocessed waveforms
-    'rf_subdir': 'waveforms/RF',  # Directory of the receiver functions
+    'raw_subdir': os.path.join('waveforms', 'raw'),# Directory of the waveforms
+    'prepro_subdir': os.path.join('waveforms', 'preprocessed'),  # Directory of the preprocessed waveforms
+    'rf_subdir': os.path.join('waveforms', 'RF'),  # Directory of the receiver functions
     'statloc_subdir': 'stations', # Directory stations
     'evt_subdir': 'events',       # Directory of the events
     'log_subdir': 'log',          # Directory for the logs
-    'loglvl': 'WARNING',          # logging level, for more info use 'INFO' or 'DEBUG'
+    'loglvl': 'DEBUG',          # logging level, for more info use 'INFO' or 'DEBUG'
     'format': 'sac',              # Format to save database in
     "phase": "P",                 # 'P' or 'S' receiver functions
     "rot": "RTZ",                 # Coordinate system to rotate to
     "deconmeth": "waterlevel",    # Deconvolution method
-    "starttime": UTCDateTime(2021, 1, 10, 0, 0, 0), # Starttime of your data.
-    "endtime": UTCDateTime(2021, 1, 11, 0, 0, 0), # Endtimetime of your data
+    "starttime": UTCDateTime(2021, 1, 10, 3, 0, 0), # Starttime of your data.
+    "endtime": UTCDateTime(2021, 1, 10, 5, 0, 0), # Endtimetime of your data
     # kwargs below
     "pol": 'v',                   # Source wavelet polaristion. Def. "v" --> SV
     "minmag": 5.0,                # Earthquake minimum magnitude. Def. 5.5
@@ -189,7 +192,7 @@ data_storage = os.path.join(
     proj_dir, 'waveforms', 'raw', 'P', '**', '*.mseed')
 
 # Print output
-print(f"Number of downloaded waveforms: {len(glob(data_storage))}")
+print(f"Number of found teleseismic arrivals: {len(glob(data_storage))}")
 
 # %%
 # ***NOTE*** From here on, the steps are identical to the download tutorials
@@ -284,8 +287,7 @@ rftrace.plot()
 # %% 
 # Let's zoom into the first 20 seconds (~200km)
 
-rftrace.plot(lim=[0,20])
-plt.show()
+rftrace.plot(lim=[0, 20])
 
 # %% 
 # Plot RF section

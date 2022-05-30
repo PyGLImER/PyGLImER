@@ -2,7 +2,6 @@
 ./figures*
 gypsum.pkl
 *cache*
-*info*
 output*
 *.csv
 tmp/*
@@ -21,3 +20,5 @@ ccp*.pkl
 examples/tutorials/database_hdf5
 examples/tutorials/database_sac
 **/tmp/**
+docs/_build
+docs/tutorials
