@@ -38,11 +38,10 @@ from obspy import UTCDateTime
 from pyglimer.waveform.request import Request
 
 # Get notebook path for future reference of the database:
-try: db_base_path = ipynb_path
-except NameError: db_base_path = os.getcwd()
+db_base_path = os.path.dirname(os.path.realpath(__file__))
 
 # Define file locations
-proj_dir = os.path.join(db_base_path, 'database_sac')
+proj_dir = os.path.join(db_base_path, 'tmp', 'database_sac')
 
 
 
@@ -72,7 +71,6 @@ request_dict = {
     "waveform_client": ["IRIS"],  # FDSN server client (s. obspy). Def. None
     "evtcat": None,               # If you have already downloaded a set of
                                   # events previously, you can use them here
-    "loglvl": 'DEBUG'
 }
 
 # %%

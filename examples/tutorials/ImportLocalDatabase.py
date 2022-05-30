@@ -39,16 +39,15 @@ needed information. Let's look at the expected information:
 # Some needed Imports
 import os
 from typing import List
-from obspy import UTCDateTime
+from obspy import UTCDateTime, read, read_inventory
 import obspy
 from pyglimer.waveform.request import Request
 
 # Get notebook path for future reference of the database:
-try: db_base_path = ipynb_path
-except NameError: db_base_path = os.getcwd()
+db_base_path = os.path.dirname(os.path.realpath(__file__))
 
 # Define file locations
-proj_dir = os.path.join(db_base_path, 'database_sac')
+proj_dir = os.path.join(db_base_path, 'tmp', 'database_sac')
 
 
 request_dict = {
@@ -60,21 +59,19 @@ request_dict = {
     'statloc_subdir': 'stations', # Directory stations
     'evt_subdir': 'events',       # Directory of the events
     'log_subdir': 'log',          # Directory for the logs
-    'loglvl': 'WARNING',          # logging level
+    'loglvl': 'WARNING',          # logging level, for more info use 'INFO' or 'DEBUG'
     'format': 'sac',              # Format to save database in
     "phase": "P",                 # 'P' or 'S' receiver functions
     "rot": "RTZ",                 # Coordinate system to rotate to
     "deconmeth": "waterlevel",    # Deconvolution method
-    "starttime": UTCDateTime(2019, 1, 1, 0, 0, 0), # Starttime of your data.
-    "endtime": UTCDateTime(2019, 1, 2, 0, 0, 0), # Endtimetime of your data
+    "starttime": UTCDateTime(2021, 1, 10, 0, 0, 0), # Starttime of your data.
+    "endtime": UTCDateTime(2021, 1, 11, 0, 0, 0), # Endtimetime of your data
     # kwargs below
     "pol": 'v',                   # Source wavelet polaristion. Def. "v" --> SV
     "minmag": 5.0,                # Earthquake minimum magnitude. Def. 5.5
     "event_coords": None,         # Specific event?. Def. None
     "evtcat": None,               # If you have already downloaded a set of
                                   # events previously, you can use them here
-    "loglvl": 'INFO'              # Will show a lot of info, you could use
-                                  # WARNING for only a few messages
 }
 
 # %%
@@ -145,32 +142,27 @@ def yield_inventory_dummy(list_of_station_files: List[os.PathLike]):
 # To convert seismic data from unusual formats to mseed or sac, we recommend
 # using PyROCKO or obspy.
 #
-# As we actually don't have any waveforms available, we will have to define
-# our functions a little differently.
-
-from obspy.clients.fdsn import Client
+# We will use two hours of data that come with PyGLImER
 
 
 def yield_st():
-    c = Client('IRIS')
-    networks = ['IU', 'NL']
-    stations = ['HRV', 'HGN']
+    static = os.path.join(
+        db_base_path, 'static_data', 'database_sac', 'waveforms', 'local_db')
+    networks = ['IU']
+    stations = ['HRV']
     for net, stat in zip(networks, stations):
-        st = c.get_waveforms(
-            net, stat, '*', 'BH?', request_dict['starttime'],
-            request_dict['endtime'])
+        st = read(os.path.join(static, net, stat, 'hrv10.mseed'))
         yield st
 
 
 def yield_inv():
-    c = Client('IRIS')
-    networks = ['IU', 'NL']
-    stations = ['HRV', 'HGN']
+    static = os.path.join(
+        db_base_path, 'static_data', 'database_sac', 'waveforms', 'local_db')
+    networks = ['IU']
+    stations = ['HRV']
     for net, stat in zip(networks, stations):
-        yield c.get_stations(
-            network=net, station=stat, location='*', channel='BH?',
-            starttime=request_dict['starttime'],
-            endtime=request_dict['endtime'], level='response')
+        st = read_inventory(os.path.join(static, net, stat, 'hrv_stat.xml'))
+        yield st
 
 
 # %%
@@ -194,7 +186,7 @@ from glob import glob
 
 # Path to the where the miniseeds are stored
 data_storage = os.path.join(
-    proj_dir, 'waveforms','raw','P','**', '*.mseed')
+    proj_dir, 'waveforms', 'raw', 'P', '**', '*.mseed')
 
 # Print output
 print(f"Number of downloaded waveforms: {len(glob(data_storage))}")
@@ -234,18 +226,18 @@ R.preprocess(hc_filt=1.5, client='single')
 # %%
 # First Receiver functions
 # ------------------------
-# 
+#
 # The following few section show how to plot 
-# 
+#
 # 1. Single raw RFs
 # 2. A set of raw RFs
 # 3. A move-out corrected RF
 # 4. A set of move-out corrected RFs
 #
-# 
+#
 # Read the IU-HRV receiver functions as a Receiver function stream
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# 
+#
 # Let's read a receiver function set and see what it's all about! 
 # (i.e. let's look at what data a Receiver function trace contains
 # and how we can use it!)
@@ -293,6 +285,7 @@ rftrace.plot()
 # Let's zoom into the first 20 seconds (~200km)
 
 rftrace.plot(lim=[0,20])
+plt.show()
 
 # %% 
 # Plot RF section
