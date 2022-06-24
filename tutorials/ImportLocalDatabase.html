@@ -1,0 +1,728 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Import from Local DataBase</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="HDF5 Database" href="DataCollectionHDF5.html" />
+    <link rel="prev" title="SAC Database" href="DataCollectionSAC.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    <img src="../_static/logo_horizontal_colour.png" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/logo_horizontal_colour.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../chapters/introduction/introduction.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../chapters/introduction/installation.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="index.html">
+  Tutorials
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../chapters/creation/index.html">
+  Receiver Functions
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../chapters/receiver_functions/index.html">
+  RF Handling
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../chapters/ccp/index.html">
+  CCP
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../chapters/plotting/index.html">
+  Plotting
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../chapters/api/index.html">
+  API
+ </a>
+</li>
+
+    
+    <li class="nav-item">
+        <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+    </li>
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/PeterMakus/PyGLImER" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="nc_CCPStack_SingleStation.html">
+   Common Conversion Point Stack of a Single Station
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="DataCollectionSAC.html">
+   SAC Database
+  </a>
+ </li>
+</ul>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Import from Local DataBase
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="DataCollectionHDF5.html">
+   HDF5 Database
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#downloading-event-catalogue-feed-in-offline-data">
+   Downloading Event Catalogue &amp; Feed in offline data
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#preliminary-steps">
+   Preliminary steps
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#import-waveform-data-and-station-information">
+   Import waveform data and station information
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#first-receiver-functions">
+   First Receiver functions
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#read-the-iu-hrv-receiver-functions-as-a-receiver-function-stream">
+     Read the IU-HRV receiver functions as a Receiver function stream
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#first-receiver-function-plots">
+   First Receiver function plots
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#plot-single-rf">
+     Plot single RF
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#plot-rf-section">
+     Plot RF section
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/PeterMakus/PyGLImER/edit/master/docs/tutorials/ImportLocalDatabase.rst">
+        <i class="fas fa-pencil-alt"></i> Edit this page
+    </a>
+</div>
+
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-tutorials-importlocaldatabase-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="import-from-local-database">
+<span id="sphx-glr-tutorials-importlocaldatabase-py"></span><h1>Import from Local DataBase<a class="headerlink" href="#import-from-local-database" title="Permalink to this heading">#</a></h1>
+<p>This Tutorial illustrates how to import waveform data from a local database
+of continuous waveforms into PyGLImER.</p>
+<p>As we don’t have actual offline data available, we will download some
+continuous data from two stations:
+station IU-HRV ([Adam Dziewonski
+Observatory](<a class="reference external" href="http://www.seismology.harvard.edu/hrv.html">http://www.seismology.harvard.edu/hrv.html</a>)) and the Dutch
+station NL-HGN.</p>
+<p>This data will then be sliced into times, when arrivals from teleseismic
+events are expected, which PyGLiMER determines in a previous step.</p>
+<section id="downloading-event-catalogue-feed-in-offline-data">
+<h2>Downloading Event Catalogue &amp; Feed in offline data<a class="headerlink" href="#downloading-event-catalogue-feed-in-offline-data" title="Permalink to this heading">#</a></h2>
+<p>Here, we will again use the <a class="reference internal" href="../chapters/api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyglimer.waveform.request.Request</span></code></a>
+class. The first method from this class that we are going to use is the
+download event catalog public method
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pyglimer.waveform.request.Request.download_evtcat()</span></code>, to get a set
+of events that contains all wanted earthquakes. This method is launched
+automatically upon initialization. (Same as in the download tutorials)</p>
+<p>To initialize said <cite>class</cite> we set up a parameter dictionary, with all the
+needed information. Let’s look at the expected information:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
+<span class="c1"># sphinx_gallery_dummy_images = 1</span>
+</pre></div>
+</div>
+<p>First let’s get a path where to create the data.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Some needed Imports</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">UTCDateTime</span><span class="p">,</span> <span class="n">read</span><span class="p">,</span> <span class="n">read_inventory</span>
+<span class="kn">import</span> <span class="nn">obspy</span>
+<span class="kn">from</span> <span class="nn">pyglimer.waveform.request</span> <span class="kn">import</span> <span class="n">Request</span>
+
+<span class="c1"># Get notebook path for future reference of the database:</span>
+<span class="k">try</span><span class="p">:</span> <span class="n">db_base_path</span> <span class="o">=</span> <span class="n">ipynb_path</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span> <span class="n">db_base_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span> <span class="n">db_base_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+<span class="c1"># Define file locations</span>
+<span class="n">proj_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db_base_path</span><span class="p">,</span> <span class="s1">&#39;tmp&#39;</span><span class="p">,</span> <span class="s1">&#39;database_sac_import&#39;</span><span class="p">)</span>
+
+
+<span class="n">request_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># Necessary arguments</span>
+    <span class="s1">&#39;proj_dir&#39;</span><span class="p">:</span> <span class="n">proj_dir</span><span class="p">,</span>
+    <span class="s1">&#39;raw_subdir&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;waveforms&#39;</span><span class="p">,</span> <span class="s1">&#39;raw&#39;</span><span class="p">),</span><span class="c1"># Directory of the waveforms</span>
+    <span class="s1">&#39;prepro_subdir&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;waveforms&#39;</span><span class="p">,</span> <span class="s1">&#39;preprocessed&#39;</span><span class="p">),</span>  <span class="c1"># Directory of the preprocessed waveforms</span>
+    <span class="s1">&#39;rf_subdir&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;waveforms&#39;</span><span class="p">,</span> <span class="s1">&#39;RF&#39;</span><span class="p">),</span>  <span class="c1"># Directory of the receiver functions</span>
+    <span class="s1">&#39;statloc_subdir&#39;</span><span class="p">:</span> <span class="s1">&#39;stations&#39;</span><span class="p">,</span> <span class="c1"># Directory stations</span>
+    <span class="s1">&#39;evt_subdir&#39;</span><span class="p">:</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span>       <span class="c1"># Directory of the events</span>
+    <span class="s1">&#39;log_subdir&#39;</span><span class="p">:</span> <span class="s1">&#39;log&#39;</span><span class="p">,</span>          <span class="c1"># Directory for the logs</span>
+    <span class="s1">&#39;loglvl&#39;</span><span class="p">:</span> <span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span>          <span class="c1"># logging level, for more info use &#39;INFO&#39; or &#39;DEBUG&#39;</span>
+    <span class="s1">&#39;format&#39;</span><span class="p">:</span> <span class="s1">&#39;sac&#39;</span><span class="p">,</span>              <span class="c1"># Format to save database in</span>
+    <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span>                 <span class="c1"># &#39;P&#39; or &#39;S&#39; receiver functions</span>
+    <span class="s2">&quot;rot&quot;</span><span class="p">:</span> <span class="s2">&quot;RTZ&quot;</span><span class="p">,</span>                 <span class="c1"># Coordinate system to rotate to</span>
+    <span class="s2">&quot;deconmeth&quot;</span><span class="p">:</span> <span class="s2">&quot;waterlevel&quot;</span><span class="p">,</span>    <span class="c1"># Deconvolution method</span>
+    <span class="s2">&quot;starttime&quot;</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="mi">2021</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="c1"># Starttime of your data.</span>
+    <span class="s2">&quot;endtime&quot;</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="mi">2021</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="c1"># Endtimetime of your data</span>
+    <span class="c1"># kwargs below</span>
+    <span class="s2">&quot;pol&quot;</span><span class="p">:</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span>                   <span class="c1"># Source wavelet polaristion. Def. &quot;v&quot; --&gt; SV</span>
+    <span class="s2">&quot;minmag&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>                <span class="c1"># Earthquake minimum magnitude. Def. 5.5</span>
+    <span class="s2">&quot;event_coords&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>         <span class="c1"># Specific event?. Def. None</span>
+    <span class="s2">&quot;evtcat&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>               <span class="c1"># If you have already downloaded a set of</span>
+                                  <span class="c1"># events previously, you can use them here</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Now that all parameters are in place, let’s initialize the
+<a class="reference internal" href="../chapters/api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyglimer.waveform.request.Request</span></code></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Initializing the Request class and downloading the data</span>
+<span class="n">R</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="o">**</span><span class="n">request_dict</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-06-24 12:22:53,671 - INFO - Successfully obtained 1 events
+</pre></div>
+</div>
+<p>The initialization will look for all events for which data is available. To
+see whether the events make sense we plot a map of the events:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">plot_catalog</span>
+<span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">set_mpl_params</span>
+
+<span class="c1"># Setting plotting parameters</span>
+<span class="n">set_mpl_params</span><span class="p">()</span>
+
+<span class="c1"># Plotting the catalog</span>
+<span class="n">plot_catalog</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">evtcat</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_ImportLocalDatabase_001.png" srcset="../_images/sphx_glr_ImportLocalDatabase_001.png" alt="ImportLocalDatabase" class = "sphx-glr-single-img"/><p>We can also quickly check how many events we gathered.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;There are </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">evtcat</span><span class="p">)</span><span class="si">}</span><span class="s2"> available events&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>There are 1 available events
+</pre></div>
+</div>
+</section>
+<section id="preliminary-steps">
+<h2>Preliminary steps<a class="headerlink" href="#preliminary-steps" title="Permalink to this heading">#</a></h2>
+<p>This will be the most complex step because it requires you to write two
+functions: 1. A function that yields Obspy Streams. 2. A function that yields
+obspy inventories.</p>
+<p><strong>*WARNING:*</strong> both have to yield information for the same station. So both
+Generators also need to have the same length.</p>
+<p>These functions could for example look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">yield_st_dummy</span><span class="p">(</span><span class="n">list_of_waveform_files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">list_of_waveform_files</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">obspy</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">yield_inventory_dummy</span><span class="p">(</span><span class="n">list_of_station_files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">list_of_station_files</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">obspy</span><span class="o">.</span><span class="n">read_inventory</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>*NOTE:*</strong> This also requires you to convert/compile your information
+Into formats that obspy can read.
+To create StationXMLs follow the following tutorial:
+<a class="reference external" href="https://docs.obspy.org/tutorial/code_snippets/stationxml_file_from_scratch.html">https://docs.obspy.org/tutorial/code_snippets/stationxml_file_from_scratch.html</a>
+The StationXML needs to contain the following information:
+1. Network and Station Code
+2. Latitude, Longitude, and Elevation
+3. Azimuth of Channel/Location to do the Rotation.
+4. (Optional/if you set remove_response=True) Station response information.</p>
+<p>The header of the traces need to contain the following:
+1. sampling_rate
+2. start_time, end_time
+3. Network, Station, and Channel Code (Location code arbitrary)
+To convert seismic data from unusual formats to mseed or sac, we recommend
+using PyROCKO or obspy.</p>
+<p>We will use two hours of data that come with PyGLImER</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">yield_st</span><span class="p">():</span>
+    <span class="n">static</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">db_base_path</span><span class="p">,</span> <span class="s1">&#39;static_data&#39;</span><span class="p">,</span> <span class="s1">&#39;database_sac&#39;</span><span class="p">,</span> <span class="s1">&#39;waveforms&#39;</span><span class="p">,</span> <span class="s1">&#39;local_db&#39;</span><span class="p">)</span>
+    <span class="n">networks</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IU&#39;</span><span class="p">]</span>
+    <span class="n">stations</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;HRV&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">net</span><span class="p">,</span> <span class="n">stat</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">networks</span><span class="p">,</span> <span class="n">stations</span><span class="p">):</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">static</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="s1">&#39;hrv10.mseed&#39;</span><span class="p">))</span>
+        <span class="k">yield</span> <span class="n">st</span>
+
+
+<span class="k">def</span> <span class="nf">yield_inv</span><span class="p">():</span>
+    <span class="n">static</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">db_base_path</span><span class="p">,</span> <span class="s1">&#39;static_data&#39;</span><span class="p">,</span> <span class="s1">&#39;database_sac&#39;</span><span class="p">,</span> <span class="s1">&#39;waveforms&#39;</span><span class="p">,</span> <span class="s1">&#39;local_db&#39;</span><span class="p">)</span>
+    <span class="n">networks</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IU&#39;</span><span class="p">]</span>
+    <span class="n">stations</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;HRV&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">net</span><span class="p">,</span> <span class="n">stat</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">networks</span><span class="p">,</span> <span class="n">stations</span><span class="p">):</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">read_inventory</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">static</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="s1">&#39;hrv_stat.xml&#39;</span><span class="p">))</span>
+        <span class="k">yield</span> <span class="n">st</span>
+</pre></div>
+</div>
+</section>
+<section id="import-waveform-data-and-station-information">
+<h2>Import waveform data and station information<a class="headerlink" href="#import-waveform-data-and-station-information" title="Permalink to this heading">#</a></h2>
+<p>The hard part is done! The actual import into PyGLImER is easy now:
+To do so, we use the public method of <cite>Request</cite>: <cite>import_database()</cite>
+This method will do the following:
+1. Find times with teleseismic arrivals of our desired phase.
+2. Slice time windows around this arrivals.
+3. Do a first fast preprocessing.
+4. Save Traces and station information in desired <cite>format</cite> (mseed or asdf)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">R</span><span class="o">.</span><span class="n">import_database</span><span class="p">(</span><span class="n">yield_st</span><span class="p">,</span> <span class="n">yield_inv</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-06-24 12:22:53,953 - INFO - Computing theoretical times of arrival. Save Inventories
+2022-06-24 12:22:53,960 - INFO - Checking IU.HRV
+2022-06-24 12:22:53,960 - DEBUG - IU.HRV
+2022-06-24 12:22:53,982 - INFO - Slice data in chunks and save them into PyGLImER database.
+</pre></div>
+</div>
+<p>Let’s just check how many teleseismic arrivals were found in this one week.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+
+<span class="c1"># Path to the where the miniseeds are stored</span>
+<span class="n">data_storage</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">proj_dir</span><span class="p">,</span> <span class="s1">&#39;waveforms&#39;</span><span class="p">,</span> <span class="s1">&#39;raw&#39;</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="s1">&#39;**&#39;</span><span class="p">,</span> <span class="s1">&#39;*.mseed&#39;</span><span class="p">)</span>
+
+<span class="c1"># Print output</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of found teleseismic arrivals: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="n">data_storage</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Number of found teleseismic arrivals: 1
+</pre></div>
+</div>
+<p><strong>*NOTE*</strong> From here on, the steps are identical to the download tutorials
+The final step to get you receiver function data is the preprocessing.
+Although it is hidden in a single function, which
+is <a class="reference internal" href="../chapters/api/waveform.html#pyglimer.waveform.request.Request.preprocess" title="pyglimer.waveform.request.Request.preprocess"><code class="xref py py-func docutils literal notranslate"><span class="pre">pyglimer.waveform.request.Request.preprocess()</span></code></a>
+A lot of decisions are being made:</p>
+<p>Processing steps:
+1. Clips waveform to the right length (tz before and ta after theorethical
+arrival.)
+2. Demean &amp; Detrend
+3. Tapering
+4. Remove Instrument response, convert to velocity &amp;
+simulate havard station
+5. Rotation to NEZ and, subsequently, to RTZ.
+6. Compute SNR for highpass filtered waveforms (highpass f defined in
+qc.lowco) If SNR lower than in qc.SNR_criteria for all filters, rejects
+waveform.
+7. Write finished and filtered waveforms to folder
+specified in qc.outputloc.
+8. Write info file with shelf containing station,
+event and waveform information.
+9. (Optional) If we had chosen a different coordinate system in <code class="docutils literal notranslate"><span class="pre">rot</span></code>
+than RTZ, it would now cast the preprocessed waveforms information
+that very coordinate system.
+10. Deconvolution with method <code class="docutils literal notranslate"><span class="pre">deconmeth</span></code> from our dict is perfomed.</p>
+<p>It again uses the request class to perform this. The <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">__name__</span> <span class="pre">...</span></code>
+expression is needed for running this examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">R</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">hc_filt</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="s1">&#39;single&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-06-24 12:22:54,002 - INFO -
+
+
+...Preprocessing initialiased...
+
+
+  0%|          | 0/1 [00:00&lt;?, ?it/s]2022-06-24 12:22:54,003 - INFO - Processing waveforms for event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293.
+2022-06-24 12:22:54,017 - DEBUG - Before cut and resample
+2022-06-24 12:22:54,017 - DEBUG -    Time elapsed: 0.0 s
+2022-06-24 12:22:54,041 - INFO - Stream accepted. Preprocessing successful
+2022-06-24 12:22:54,041 - INFO - File preprocessed.
+Station IU.HRV
+Event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293
+2022-06-24 12:22:54,041 - DEBUG -    Time elapsed: 0.0 s
+2022-06-24 12:22:54,051 - INFO - RF created.
+Station IU.HRV
+Event: smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293
+2022-06-24 12:22:54,052 - DEBUG -    Time elapsed: 0.0 s
+
+100%|##########| 1/1 [00:00&lt;00:00, 19.60it/s]
+2022-06-24 12:22:54,054 - INFO - Preprocessing finished.
+</pre></div>
+</div>
+</section>
+<section id="first-receiver-functions">
+<h2>First Receiver functions<a class="headerlink" href="#first-receiver-functions" title="Permalink to this heading">#</a></h2>
+<p>The following few section show how to plot</p>
+<ol class="arabic simple">
+<li><p>Single raw RFs</p></li>
+<li><p>A set of raw RFs</p></li>
+<li><p>A move-out corrected RF</p></li>
+<li><p>A set of move-out corrected RFs</p></li>
+</ol>
+<section id="read-the-iu-hrv-receiver-functions-as-a-receiver-function-stream">
+<h3>Read the IU-HRV receiver functions as a Receiver function stream<a class="headerlink" href="#read-the-iu-hrv-receiver-functions-as-a-receiver-function-stream" title="Permalink to this heading">#</a></h3>
+<p>Let’s read a receiver function set and see what it’s all about!
+(i.e. let’s look at what data a Receiver function trace contains
+and how we can use it!)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglimer.rf.create</span> <span class="kn">import</span> <span class="n">read_rf</span>
+
+<span class="n">path_to_rf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">proj_dir</span><span class="p">,</span> <span class="s1">&#39;waveforms&#39;</span><span class="p">,</span><span class="s1">&#39;RF&#39;</span><span class="p">,</span><span class="s1">&#39;P&#39;</span><span class="p">,</span><span class="s1">&#39;*&#39;</span><span class="p">,</span><span class="s1">&#39;*&#39;</span><span class="p">,</span><span class="s1">&#39;*.sac&#39;</span><span class="p">)</span>
+<span class="n">rfstream</span> <span class="o">=</span> <span class="n">read_rf</span><span class="p">(</span><span class="n">path_to_rf</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of RFs: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rfstream</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Number of RFs: 1
+</pre></div>
+</div>
+<p>PyGLImER is based on Obspy, but to handle RFs we need some more attributes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="n">rftrace</span> <span class="o">=</span> <span class="n">rfstream</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">pprint</span><span class="p">(</span><span class="n">rftrace</span><span class="o">.</span><span class="n">stats</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Stats({&#39;sampling_rate&#39;: 10.0, &#39;delta&#39;: 0.1, &#39;starttime&#39;: UTCDateTime(2021, 1, 10, 4, 4, 10, 319538), &#39;endtime&#39;: UTCDateTime(2021, 1, 10, 4, 6, 40, 319538), &#39;npts&#39;: 1501, &#39;calib&#39;: 1.0, &#39;network&#39;: &#39;IU&#39;, &#39;station&#39;: &#39;HRV&#39;, &#39;location&#39;: &#39;00&#39;, &#39;channel&#39;: &#39;PRF&#39;, &#39;sac&#39;: AttribDict({&#39;delta&#39;: 0.1, &#39;depmin&#39;: -0.49419916, &#39;depmax&#39;: 0.6758249, &#39;scale&#39;: 1.0, &#39;b&#39;: 0.000538, &#39;e&#39;: 150.00053, &#39;o&#39;: -595.836, &#39;a&#39;: 29.97507, &#39;stla&#39;: 42.5064, &#39;stlo&#39;: -71.5583, &#39;stel&#39;: 200.0, &#39;evla&#39;: -24.0412, &#39;evlo&#39;: -66.5729, &#39;evdp&#39;: 217000.0, &#39;mag&#39;: 6.1, &#39;user1&#39;: 6.337349, &#39;baz&#39;: 175.01988, &#39;gcarc&#39;: 66.419815, &#39;depmen&#39;: -2.0729383e-05, &#39;nzyear&#39;: 2021, &#39;nzjday&#39;: 10, &#39;nzhour&#39;: 4, &#39;nzmin&#39;: 4, &#39;nzsec&#39;: 10, &#39;nzmsec&#39;: 319, &#39;nvhdr&#39;: 6, &#39;npts&#39;: 1501, &#39;iftype&#39;: 1, &#39;iztype&#39;: 9, &#39;leven&#39;: 1, &#39;lpspol&#39;: 1, &#39;lovrok&#39;: 1, &#39;lcalda&#39;: 0, &#39;kstnm&#39;: &#39;HRV&#39;, &#39;khole&#39;: &#39;00&#39;, &#39;kuser0&#39;: &#39;time&#39;, &#39;kuser1&#39;: &#39;P&#39;, &#39;kcmpnm&#39;: &#39;PRF&#39;, &#39;knetwk&#39;: &#39;IU&#39;}), &#39;_format&#39;: &#39;SAC&#39;, &#39;station_latitude&#39;: 42.5064, &#39;station_longitude&#39;: -71.5583, &#39;station_elevation&#39;: 200.0, &#39;event_latitude&#39;: -24.0412, &#39;event_longitude&#39;: -66.5729, &#39;event_depth&#39;: 217000.0, &#39;event_magnitude&#39;: 6.1, &#39;event_time&#39;: UTCDateTime(2021, 1, 10, 3, 54, 14, 483001), &#39;onset&#39;: UTCDateTime(2021, 1, 10, 4, 4, 40, 294071), &#39;type&#39;: &#39;time&#39;, &#39;phase&#39;: &#39;P&#39;, &#39;distance&#39;: 66.419815, &#39;back_azimuth&#39;: 175.01988, &#39;slowness&#39;: 6.337349})
+</pre></div>
+</div>
+</section>
+</section>
+<section id="first-receiver-function-plots">
+<h2>First Receiver function plots<a class="headerlink" href="#first-receiver-function-plots" title="Permalink to this heading">#</a></h2>
+<p>If the Receiver functions haven’t been further processed,
+they are plotted as a function of time. A single receiver
+function in the stream will be plotted as function of time
+only. A full stream can make use of the distance measure saved
+in the sac-header and plot an entire section as a function of
+time and epicentral distance.</p>
+<section id="plot-single-rf">
+<h3>Plot single RF<a class="headerlink" href="#plot-single-rf" title="Permalink to this heading">#</a></h3>
+<p>Below we show how to plot the receiver function
+as a function of time, and the clean option, which plots
+the receiver function without any axes or text.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">set_mpl_params</span>
+
+<span class="c1"># Plot RF</span>
+<span class="n">rftrace</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_ImportLocalDatabase_002.png" srcset="../_images/sphx_glr_ImportLocalDatabase_002.png" alt="ImportLocalDatabase" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:xlabel=&#39;Conversion Time [s]&#39;, ylabel=&#39;A    &#39;&gt;
+</pre></div>
+</div>
+<p>Let’s zoom into the first 20 seconds (~200km)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rftrace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_ImportLocalDatabase_003.png" srcset="../_images/sphx_glr_ImportLocalDatabase_003.png" alt="ImportLocalDatabase" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:xlabel=&#39;Conversion Time [s]&#39;, ylabel=&#39;A    &#39;&gt;
+</pre></div>
+</div>
+</section>
+<section id="plot-rf-section">
+<h3>Plot RF section<a class="headerlink" href="#plot-rf-section" title="Permalink to this heading">#</a></h3>
+<p>Since we have an entire stream of receiver functions at hand,
+we can plot a section</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rfstream</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">scalingfactor</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_ImportLocalDatabase_004.png" srcset="../_images/sphx_glr_ImportLocalDatabase_004.png" alt="ImportLocalDatabase" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:xlabel=&#39;Conversion Time [s]&#39;, ylabel=&#39;A    &#39;&gt;
+</pre></div>
+</div>
+<p>Similar to the single RF plot we can provide time and
+epicentral distance limits:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">timelimits</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>  <span class="c1"># seconds</span>
+<span class="n">epilimits</span> <span class="o">=</span> <span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">36</span><span class="p">)</span>  <span class="c1"># epicentral distance</span>
+<span class="n">rfstream</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">scalingfactor</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">lim</span><span class="o">=</span><span class="n">timelimits</span><span class="p">,</span> <span class="n">epilimits</span><span class="o">=</span><span class="n">epilimits</span><span class="p">,</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_ImportLocalDatabase_005.png" srcset="../_images/sphx_glr_ImportLocalDatabase_005.png" alt="ImportLocalDatabase" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:xlabel=&#39;Conversion Time [s]&#39;, ylabel=&#39;A    &#39;&gt;
+</pre></div>
+</div>
+<p>By increasing the scaling factor and removing the plotted lines, we can
+already see trends:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rfstream</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">scalingfactor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">lim</span><span class="o">=</span><span class="n">timelimits</span><span class="p">,</span> <span class="n">epilimits</span><span class="o">=</span><span class="n">epilimits</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_ImportLocalDatabase_006.png" srcset="../_images/sphx_glr_ImportLocalDatabase_006.png" alt="ImportLocalDatabase" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:xlabel=&#39;Conversion Time [s]&#39;, ylabel=&#39;A    &#39;&gt;
+</pre></div>
+</div>
+<p>As simple as that you can create your own receiver functions with
+just a single smalle script.</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.167 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-importlocaldatabase-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/4d512cc35b7f72391f450a9b384a4ad4/ImportLocalDatabase.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">ImportLocalDatabase.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/b03b56c0d2d92a35247dee4381fab3a5/ImportLocalDatabase.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">ImportLocalDatabase.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="DataCollectionSAC.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">SAC Database</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="DataCollectionHDF5.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">HDF5 Database</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, the PyGLImER development team.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

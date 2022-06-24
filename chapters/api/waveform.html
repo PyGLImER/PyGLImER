@@ -1,17 +1,22 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyglimer.waveform</title>
-    
-  <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    
+    <title>pyglimer.waveform</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
   <link rel="stylesheet"
     href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
   <link rel="preload" as="font" type="font/woff2" crossorigin
@@ -19,16 +24,20 @@
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
 
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/styles/pydata-sphinx-theme.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
-    
-  <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
 
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script src="../../_static/clipboard.min.js"></script>
     <script src="../../_static/copybutton.js"></script>
@@ -36,34 +45,41 @@
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="pyglimer.rf" href="rf.html" />
     <link rel="prev" title="API" href="index.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="None">
-    
-
-    <!-- Google Analytics -->
-    
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
-    
-    <div class="container-fluid" id="banner"></div>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
 
     
-    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
 
   <div id="navbar-start">
     
     
+  
 
-<a class="navbar-brand" href="../../index.html">
-  <img src="../../_static/logo_horizontal_colour.png" class="logo" alt="logo">
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    <img src="../../_static/logo_horizontal_colour.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/logo_horizontal_colour.png" class="logo__image only-dark" alt="Logo image">
+  
+  
 </a>
-
-
     
   </div>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
+    <span class="fas fa-bars"></span>
   </button>
 
   
@@ -81,6 +97,12 @@
 <li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../introduction/installation.html">
   Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../tutorials/index.html">
+  Tutorials
  </a>
 </li>
 
@@ -127,6 +149,14 @@
     <div id="navbar-end">
       
       <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
         <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
         <li class="nav-item">
           <a class="nav-link" href="https://github.com/PeterMakus/PyGLImER" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
@@ -141,13 +171,13 @@
     </nav>
     
 
-    <div class="container-xl">
-      <div class="row">
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
           
-            
-            <!-- Only show if we have sidebars configured, else just a small margin  -->
-            <div class="col-12 col-md-3 bd-sidebar">
-              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
   <i class="icon fas fa-search"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
@@ -187,19 +217,20 @@
 
   </div>
 </nav>
-              </div>
-              <div class="sidebar-end-items">
-              </div>
-            </div>
-            
-          
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
 
           
-          <div class="d-none d-xl-block col-xl-2 bd-toc">
-            
-              
-              <div class="toc-item">
-                
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
 <div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
@@ -244,10 +275,10 @@
 </ul>
 
 </nav>
-              </div>
-              
-              <div class="toc-item">
-                
+    </div>
+    
+    <div class="toc-item">
+      
 
 <div class="tocsection editthispage">
     <a href="https://github.com/PeterMakus/PyGLImER/edit/master/docs/chapters/api/waveform.rst">
@@ -255,45 +286,43 @@
     </a>
 </div>
 
-              </div>
-              
-            
-          </div>
-          
+    </div>
+    
+  
+</div>
+
 
           
           
-            
-          
-          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+          <div class="bd-content col-12 col-md-9 col-xl-7">
               
-              <div>
+              <article class="bd-article" role="main">
                 
-  <div class="section" id="pyglimer-waveform">
-<h1>pyglimer.waveform<a class="headerlink" href="#pyglimer-waveform" title="Permalink to this headline">#</a></h1>
+  <section id="pyglimer-waveform">
+<h1>pyglimer.waveform<a class="headerlink" href="#pyglimer-waveform" title="Permalink to this heading">#</a></h1>
 <p>Waveform download and preprocess</p>
-<div class="section" id="module-pyglimer.waveform.request">
-<span id="pyglimer-waveform-request"></span><h2>pyglimer.waveform.request<a class="headerlink" href="#module-pyglimer.waveform.request" title="Permalink to this headline">#</a></h2>
+<section id="module-pyglimer.waveform.request">
+<span id="pyglimer-waveform-request"></span><h2>pyglimer.waveform.request<a class="headerlink" href="#module-pyglimer.waveform.request" title="Permalink to this heading">#</a></h2>
 <p>Contains the request class that is used to initialise the FDSN request for
 the waveforms, the preprocessing of the waveforms, and the creation of
 time domain receiver functions.</p>
 <dl class="field-list simple">
-<dt class="field-odd">copyright</dt>
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GNU Lesser General Public License, Version 3
 (<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
 </dd>
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
 </dd>
 </dl>
 <p>Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Friday, 7th January 2022 11:18:40 am</p>
+Last Modified: Friday, 6th May 2022 02:19:37 pm</p>
 <dl class="py class">
-<dt id="pyglimer.waveform.request.Request">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.request.</span></code><code class="sig-name descname"><span class="pre">Request</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_dir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_subdir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepro_subdir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rf_subdir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc_subdir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evt_subdir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_subdir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deconmeth</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'v'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minmag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">5.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_coords</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_client</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evtcat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continue_download</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loglvl</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'hdf5'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/request.html#Request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.request.Request" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.request.Request">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.request.</span></span><span class="sig-name descname"><span class="pre">Request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_subdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepro_subdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rf_subdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc_subdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evt_subdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_subdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deconmeth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'v'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minmag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evtcat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continue_download</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loglvl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'hdf5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/request.html#Request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.request.Request" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>“Initialises the FDSN request for
 the waveforms, the preprocessing of the waveforms, and the creation of
@@ -301,7 +330,7 @@ time domain receiver functions.</p>
 <p>Create object that is used to start the receiver function
 workflow.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>proj_dir</strong> (<em>str</em>) – parental directory that all project files
 will be saved in (as subfolders).</p></li>
@@ -367,27 +396,30 @@ CRITICAL, ERROR, WARNING, INFO,or DEBUG
 If the level is DEBUG, joblib will fall back to using only
 few cores and downloads will be retried,
 by default WARNING.</p></li>
+<li><p><strong>remove_response</strong> (<em>bool</em><em>, </em><em>optional</em>) – Correct the traces for station response.
+You might want to set this to False if you imported data and don’t
+have access to response information. Defaults to True.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>NameError</strong> – For invalid phases.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="pyglimer.waveform.request.Request.download_eventcat">
-<code class="sig-name descname"><span class="pre">download_eventcat</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/request.html#Request.download_eventcat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.request.Request.download_eventcat" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.request.Request.download_eventcat">
+<span class="sig-name descname"><span class="pre">download_eventcat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/request.html#Request.download_eventcat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.request.Request.download_eventcat" title="Permalink to this definition">#</a></dt>
 <dd><p>Download the event catalogue from IRIS DMC.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.waveform.request.Request.download_waveforms">
-<code class="sig-name descname"><span class="pre">download_waveforms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/request.html#Request.download_waveforms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.request.Request.download_waveforms" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.request.Request.download_waveforms">
+<span class="sig-name descname"><span class="pre">download_waveforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/request.html#Request.download_waveforms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.request.Request.download_waveforms" title="Permalink to this definition">#</a></dt>
 <dd><p>Start the download of waveforms and response files.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>verbose</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Set True if you wish to log the output of the obspy MassDownloader.</p></li>
-<li><p><strong>seealso::</strong> (<em>.</em>) – You should check whether the method
+<li><p><strong>seealso::</strong> (<em>..</em>) – You should check whether the method
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms_small</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">_db()</span></code> might be better suited for your needs.
 Both methods offer unique advantages.</p></li>
 </ul>
@@ -396,8 +428,8 @@ Both methods offer unique advantages.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.waveform.request.Request.download_waveforms_small_db">
-<code class="sig-name descname"><span class="pre">download_waveforms_small_db</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/request.html#Request.download_waveforms_small_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.request.Request.download_waveforms_small_db" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.request.Request.download_waveforms_small_db">
+<span class="sig-name descname"><span class="pre">download_waveforms_small_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/request.html#Request.download_waveforms_small_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.request.Request.download_waveforms_small_db" title="Permalink to this definition">#</a></dt>
 <dd><p>A different method to download raw waveform data. This method will
 be faster than
 <a class="reference internal" href="#pyglimer.waveform.request.Request.download_waveforms" title="pyglimer.waveform.request.Request.download_waveforms"><code class="xref py py-meth docutils literal notranslate"><span class="pre">download_waveforms()</span></code></a> for
@@ -405,7 +437,7 @@ small databases (e.g., single networks or stations). Another
 advantage of this method is that the attributes network and station
 in <code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code> can be lists.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>channel</strong> (<em>str</em>) – The channel you will want to download, accepts
 unix style wildcards.</p>
 </dd>
@@ -420,11 +452,51 @@ advantages.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.waveform.request.Request.preprocess">
-<code class="sig-name descname"><span class="pre">preprocess</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'joblib'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hc_filt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/request.html#Request.preprocess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.request.Request.preprocess" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.request.Request.import_database">
+<span class="sig-name descname"><span class="pre">import_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yield_st</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Stream</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yield_inv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Inventory</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/request.html#Request.import_database"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.request.Request.import_database" title="Permalink to this definition">#</a></dt>
+<dd><p>Import a local database to PyGLImER. This can, for example, be
+continuous raw waveform data that you collected in an own experiment.
+Data is fed in as Generator function for an obspy type Inventory and
+obspy type streams.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you don’t have Response information for your stations make
+sure to set <code class="docutils literal notranslate"><span class="pre">Request.remove_response</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Follow the obspy documentation to create StationXMLs. This
+<a class="reference external" href="https://docs.obspy.org/tutorial/code_snippets/stationxml_file_from_scratch.html">Tutorial</a>
+The StationXML needs to contain the following information:
+1. Network and Station Code
+2. Latitude, Longitude, and Elevation
+3. Azimuth of Channel/Location to do the Rotation.
+4. (Optional) Station response information.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Make sure that the Traces in the Stream contain the following
+information in their header:
+1. sampling_rate
+2. start_time, end_time
+3. Network, Station, and Channel Code (Location code arbitrary)</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>yield_st</strong> (<em>Generator</em><em>[</em><em>Stream</em><em>]</em>) – _description_</p></li>
+<li><p><strong>yield_inv</strong> (<em>Generator</em><em>[</em><em>Inventory</em><em>]</em>) – _description_</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyglimer.waveform.request.Request.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'joblib'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hc_filt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/request.html#Request.preprocess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.request.Request.preprocess" title="Permalink to this definition">#</a></dt>
 <dd><p>Preprocess an existing database. With parameters defined in self.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>hc_filt</strong> (<em>float</em><em> or </em><em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Highcut frequency to filter with right before deconvolution.
 Recommended if time domain deconvolution is used. For spectral
 division, filtering can still be done after deconvolution (i.e.
@@ -437,32 +509,32 @@ than .4 Hz, by default None.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyglimer.waveform.download">
-<span id="pyglimer-waveform-download"></span><h2>pyglimer.waveform.download<a class="headerlink" href="#module-pyglimer.waveform.download" title="Permalink to this headline">#</a></h2>
+</section>
+<section id="module-pyglimer.waveform.download">
+<span id="pyglimer-waveform-download"></span><h2>pyglimer.waveform.download<a class="headerlink" href="#module-pyglimer.waveform.download" title="Permalink to this heading">#</a></h2>
 <dl class="field-list simple">
-<dt class="field-odd">copyright</dt>
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GNU Lesser General Public License, Version 3
 (<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
 </dd>
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
 </dd>
 </dl>
 <p>Created: Tue May 26 2019 13:31:30
-Last Modified: Monday, 21st February 2022 12:52:27 pm</p>
+Last Modified: Friday, 8th April 2022 02:47:54 pm</p>
 <dl class="py function">
-<dt id="pyglimer.waveform.download.download_small_db">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.download.</span></code><code class="sig-name descname"><span class="pre">download_small_db</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_epid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_epid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.taup.tau.TauPyModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_cat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.event.catalog.Catalog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clients</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saveasdf</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/download.html#download_small_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.download.download_small_db" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.download.download_small_db">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.download.</span></span><span class="sig-name descname"><span class="pre">download_small_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_epid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_epid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TauPyModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_cat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Catalog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clients</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saveasdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/download.html#download_small_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.download.download_small_db" title="Permalink to this definition">#</a></dt>
 <dd><p>see corresponding method <code class="xref py py-meth docutils literal notranslate">&#160;&#160;&#160; <span class="pre">download_waveforms_small_db()</span></code></p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.waveform.download.downloadwav">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.download.</span></code><code class="sig-name descname"><span class="pre">downloadwav</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_epid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_epid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.taup.tau.TauPyModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_cat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.event.catalog.Catalog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clients</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evtfile</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saveasdf</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_fh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">logging.FileHandler</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loglvl</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast_redownload</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/download.html#downloadwav"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.download.downloadwav" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.download.downloadwav">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.download.</span></span><span class="sig-name descname"><span class="pre">downloadwav</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_epid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_epid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TauPyModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_cat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Catalog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clients</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evtfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saveasdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_fh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">FileHandler</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loglvl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast_redownload</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/download.html#downloadwav"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.download.downloadwav" title="Permalink to this definition">#</a></dt>
 <dd><dl class="simple">
 <dt>Downloads the waveforms for all events in the catalogue</dt><dd><p>for a circular domain around the epicentre with defined epicentral
 distances from Clients defined in clients. Also Station
@@ -470,7 +542,7 @@ xmls for corresponding stations are downloaded.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>phase</strong> (<em>string</em>) – Arrival phase to be used. P, S, SKS, or ScS.</p></li>
 <li><p><strong>min_epid</strong> (<em>float</em>) – Minimal epicentral distance to be downloaded.</p></li>
@@ -496,67 +568,64 @@ Else, one will be left with .mseeds.</p></li>
 obspy MassDownloader will be logged in download.log.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>None</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.waveform.download.get_mseed_storage">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.download.</span></code><code class="sig-name descname"><span class="pre">get_mseed_storage</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="../../_modules/pyglimer/waveform/download.html#get_mseed_storage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.download.get_mseed_storage" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.download.get_mseed_storage">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.download.</span></span><span class="sig-name descname"><span class="pre">get_mseed_storage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UTCDateTime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/pyglimer/waveform/download.html#get_mseed_storage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.download.get_mseed_storage" title="Permalink to this definition">#</a></dt>
 <dd><p>Stores the files and checks if files are already downloaded</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.waveform.download.wav_in_asdf">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.download.</span></code><code class="sig-name descname"><span class="pre">wav_in_asdf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="reference internal" href="../../_modules/pyglimer/waveform/download.html#wav_in_asdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.download.wav_in_asdf" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.download.wav_in_asdf">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.download.</span></span><span class="sig-name descname"><span class="pre">wav_in_asdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UTCDateTime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/pyglimer/waveform/download.html#wav_in_asdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.download.wav_in_asdf" title="Permalink to this definition">#</a></dt>
 <dd><p>Is the waveform already in the asdf database?</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.waveform.download.wav_in_db">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.download.</span></code><code class="sig-name descname"><span class="pre">wav_in_db</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.utcdatetime.UTCDateTime</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="reference internal" href="../../_modules/pyglimer/waveform/download.html#wav_in_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.download.wav_in_db" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.download.wav_in_db">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.download.</span></span><span class="sig-name descname"><span class="pre">wav_in_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UTCDateTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UTCDateTime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/pyglimer/waveform/download.html#wav_in_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.download.wav_in_db" title="Permalink to this definition">#</a></dt>
 <dd><p>Checks if waveform is already downloaded.</p>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyglimer.waveform.preprocess">
-<span id="pyglimer-waveform-preprocess"></span><h2>pyglimer.waveform.preprocess<a class="headerlink" href="#module-pyglimer.waveform.preprocess" title="Permalink to this headline">#</a></h2>
+</section>
+<section id="module-pyglimer.waveform.preprocess">
+<span id="pyglimer-waveform-preprocess"></span><h2>pyglimer.waveform.preprocess<a class="headerlink" href="#module-pyglimer.waveform.preprocess" title="Permalink to this heading">#</a></h2>
 <dl class="field-list simple">
-<dt class="field-odd">copyright</dt>
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GNU Lesser General Public License, Version 3
 (<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
 </dd>
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
 </dd>
 </dl>
 <p>Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 15th February 2022 01:43:54 pm</p>
+Last Modified: Friday, 6th May 2022 11:58:54 am</p>
 <dl class="py exception">
-<dt id="pyglimer.waveform.preprocess.SNRError">
-<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocess.</span></code><code class="sig-name descname"><span class="pre">SNRError</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocess.html#SNRError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocess.SNRError" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.preprocess.SNRError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocess.</span></span><span class="sig-name descname"><span class="pre">SNRError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocess.html#SNRError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocess.SNRError" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 <p>raised when the SNR is too high</p>
 </dd></dl>
 
 <dl class="py exception">
-<dt id="pyglimer.waveform.preprocess.StreamLengthError">
-<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocess.</span></code><code class="sig-name descname"><span class="pre">StreamLengthError</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocess.html#StreamLengthError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocess.StreamLengthError" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.preprocess.StreamLengthError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocess.</span></span><span class="sig-name descname"><span class="pre">StreamLengthError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocess.html#StreamLengthError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocess.StreamLengthError" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 <p>raised when stream has fewer than 3 components</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.waveform.preprocess.preprocess">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocess.</span></code><code class="sig-name descname"><span class="pre">preprocess</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_perc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_cat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.event.catalog.Catalog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.taup.tau.TauPyModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deconmeth</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hc_filt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saveasdf</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netrestr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statrestr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'joblib'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocess.html#preprocess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocess.preprocess" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.preprocess.preprocess">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocess.</span></span><span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_perc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_cat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Catalog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TauPyModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deconmeth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hc_filt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saveasdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netrestr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statrestr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'joblib'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocess.html#preprocess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocess.preprocess" title="Permalink to this definition">#</a></dt>
 <dd><blockquote>
 <div><p>Preprocesses waveforms to create receiver functions</p>
 <blockquote>
@@ -583,7 +652,7 @@ Creates info file to save parameters.</p>
 </div></blockquote>
 </div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>phase</strong> (<em>string</em>) – “P” or “S”</p></li>
 <li><p><strong>rot</strong> (<em>string</em>) – Coordinate system to cast seismogram in before deconvolution.
@@ -599,78 +668,72 @@ Options are “RTZ”, “LQT”, or “PSS”.</p></li>
 <li><p><strong>loglvl</strong> (<em>int</em><em>, </em><em>optional</em>) – Set logger to this level.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>None.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.waveform.preprocess.write_info">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocess.</span></code><code class="sig-name descname"><span class="pre">write_info</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocess.html#write_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocess.write_info" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.preprocess.write_info">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocess.</span></span><span class="sig-name descname"><span class="pre">write_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocess.html#write_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocess.write_info" title="Permalink to this definition">#</a></dt>
 <dd><p>Writes information dictionary in shelve format in each of the station
 folders.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>network</strong> (<em>str</em>) – Network Code.</p></li>
 <li><p><strong>station</strong> (<em>str</em>) – Station code.</p></li>
 <li><p><strong>dictionary</strong> (<em>dict</em>) – Dictionary containing the information.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>None.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyglimer.waveform.preprocessh5">
-<span id="pyglimer-waveform-preprocessh5"></span><h2>pyglimer.waveform.preprocessh5<a class="headerlink" href="#module-pyglimer.waveform.preprocessh5" title="Permalink to this headline">#</a></h2>
+</section>
+<section id="module-pyglimer.waveform.preprocessh5">
+<span id="pyglimer-waveform-preprocessh5"></span><h2>pyglimer.waveform.preprocessh5<a class="headerlink" href="#module-pyglimer.waveform.preprocessh5" title="Permalink to this heading">#</a></h2>
 <p>This is a newer version of preprocess.py meant to be used with pyasdf.
 Now, we will have to work in a very different manner than for .mseed files
 and process files station wise rather than event wise.</p>
 <dl class="field-list simple">
-<dt class="field-odd">copyright</dt>
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GNU Lesser General Public License, Version 3
 (<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
 </dd>
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
 </dd>
 </dl>
 <p>Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Thursday, 13th January 2022 09:15:00 am</p>
+Last Modified: Friday, 6th May 2022 12:00:07 pm</p>
 <dl class="py exception">
-<dt id="pyglimer.waveform.preprocessh5.SNRError">
-<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocessh5.</span></code><code class="sig-name descname"><span class="pre">SNRError</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocessh5.html#SNRError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocessh5.SNRError" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.preprocessh5.SNRError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocessh5.</span></span><span class="sig-name descname"><span class="pre">SNRError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocessh5.html#SNRError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocessh5.SNRError" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 <p>raised when the SNR is too high</p>
 </dd></dl>
 
 <dl class="py exception">
-<dt id="pyglimer.waveform.preprocessh5.StreamLengthError">
-<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocessh5.</span></code><code class="sig-name descname"><span class="pre">StreamLengthError</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocessh5.html#StreamLengthError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocessh5.StreamLengthError" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.preprocessh5.StreamLengthError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocessh5.</span></span><span class="sig-name descname"><span class="pre">StreamLengthError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocessh5.html#StreamLengthError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocessh5.StreamLengthError" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 <p>raised when stream has fewer than 3 components</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.waveform.preprocessh5.compute_toa">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocessh5.</span></code><code class="sig-name descname"><span class="pre">compute_toa</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.event.event.Event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slon</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.taup.tau.TauPyModel</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">obspy.core.utcdatetime.UTCDateTime</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocessh5.html#compute_toa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocessh5.compute_toa" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.preprocessh5.compute_toa">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocessh5.</span></span><span class="sig-name descname"><span class="pre">compute_toa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TauPyModel</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">UTCDateTime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocessh5.html#compute_toa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocessh5.compute_toa" title="Permalink to this definition">#</a></dt>
 <dd><p>Compute time of theoretical arrival for teleseismic events and a given
 teleseismic phase at the provided station.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>evt</strong> (<em>obspy.core.event.Event</em>) – Event to compute the arrival for.</p></li>
 <li><p><strong>slat</strong> (<em>float</em>) – station latitude</p></li>
@@ -679,25 +742,25 @@ teleseismic phase at the provided station.</p>
 <li><p><strong>model</strong> (<em>obspy.taup.TauPyModel</em>) – Taupymodel to use</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A Tuple holding: [the time of theoretical arrival (UTC),
 the apparent slowness in s/km, the ray parameter in s/deg,
 the back azimuth, the distance between station and event in deg]</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tuple[UTCDateTime, float, float, float]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.waveform.preprocessh5.preprocessh5">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocessh5.</span></code><code class="sig-name descname"><span class="pre">preprocessh5</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_perc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.taup.tau.TauPyModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deconmeth</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hc_filt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netrestr</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statrestr</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">logging.Logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rflogger</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">logging.Logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evtcat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.event.catalog.Catalog</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocessh5.html#preprocessh5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocessh5.preprocessh5" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.preprocessh5.preprocessh5">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.preprocessh5.</span></span><span class="sig-name descname"><span class="pre">preprocessh5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_perc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TauPyModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taper_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deconmeth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hc_filt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netrestr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statrestr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rflogger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evtcat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Catalog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/preprocessh5.html#preprocessh5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.preprocessh5.preprocessh5" title="Permalink to this definition">#</a></dt>
 <dd><p>Preprocess files saved in hdf5 (pyasdf) format. Will save the computed
 receiver functions in hdf5 format as well.</p>
 <p>Processing is done via a multiprocessing backend (either joblib or mpi).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>phase</strong> (<em>str</em>) – The Teleseismic phase to consider</p></li>
 <li><p><strong>rot</strong> (<em>str</em>) – The Coordinate system that the seismogram should be rotated to.</p></li>
@@ -720,37 +783,37 @@ horizontal).</p></li>
 <li><p><strong>evtcat</strong> (<em>obspy.catalog</em>) – event Catalogue</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>NotImplementedError</strong> – For uknowns multiprocessing backends.</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyglimer.waveform.qc">
-<span id="pyglimer-waveform-qc"></span><h2>pyglimer.waveform.qc<a class="headerlink" href="#module-pyglimer.waveform.qc" title="Permalink to this headline">#</a></h2>
+</section>
+<section id="module-pyglimer.waveform.qc">
+<span id="pyglimer-waveform-qc"></span><h2>pyglimer.waveform.qc<a class="headerlink" href="#module-pyglimer.waveform.qc" title="Permalink to this heading">#</a></h2>
 <p>Contains quality control for waveforms used for receiver function creation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">copyright</dt>
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GNU Lesser General Public License, Version 3
 (<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
 </dd>
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
 </dd>
 </dl>
 <p>Created: Friday, 10th April 2020 11:38:40 am
 Last Modified: Thursday, 28th October 2021 10:03:35 am</p>
 <dl class="py function">
-<dt id="pyglimer.waveform.qc.qcp">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.qc.</span></code><code class="sig-name descname"><span class="pre">qcp</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_f</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">onset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="../../_modules/pyglimer/waveform/qc.html#qcp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.qc.qcp" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.qc.qcp">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.qc.</span></span><span class="sig-name descname"><span class="pre">qcp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">onset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="../../_modules/pyglimer/waveform/qc.html#qcp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.qc.qcp" title="Permalink to this definition">#</a></dt>
 <dd><p>Quality control for the downloaded waveforms that are used to create
 PRFS. Works with various filters and SNR criteria</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>st</strong> (<em>'~obspy.Stream'</em>) – Input stream.</p></li>
 <li><p><strong>dt</strong> (<em>FLOAT</em>) – Sampling interval [s].</p></li>
@@ -758,7 +821,7 @@ PRFS. Works with various filters and SNR criteria</p>
 <li><p><strong>onset</strong> (<em>float</em>) – Onset in seconds after trace’s start.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>st</strong> (<em>‘~obspy.Stream’</em>) – Output stream. If stream was accepted, then this will contain the
 filtered stream, filtered with the broadest accepted filter.</p></li>
@@ -774,13 +837,13 @@ and columns the different criteria.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.waveform.qc.qcs">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.qc.</span></code><code class="sig-name descname"><span class="pre">qcs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_f</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">onset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="../../_modules/pyglimer/waveform/qc.html#qcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.qc.qcs" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.qc.qcs">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.qc.</span></span><span class="sig-name descname"><span class="pre">qcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">onset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="../../_modules/pyglimer/waveform/qc.html#qcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.qc.qcs" title="Permalink to this definition">#</a></dt>
 <dd><p>Quality control for waveforms that are used to produce SRF. In contrast
 to the ones used for PRF this is a very rigid criterion and will reject
 &gt;95% of the waveforms.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>st</strong> (<em>'~obspy.Stream'</em>) – Input stream.</p></li>
 <li><p><strong>dt</strong> (<em>FLOAT</em>) – Sampling interval [s].</p></li>
@@ -788,7 +851,7 @@ to the ones used for PRF this is a very rigid criterion and will reject
 <li><p><strong>onset</strong> (<em>float</em>) – Onset in seconds after trace’s start.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>st</strong> (<em>‘~obspy.Stream’</em>) – Output stream. If stream was accepted, then this will contain the
 filtered stream, filtered with the broadest accepted filter.</p></li>
@@ -803,38 +866,38 @@ and columns the different criteria.</p></li>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyglimer.waveform.rotate">
-<span id="pyglimer-waveform-rotate"></span><h2>pyglimer.waveform.rotate<a class="headerlink" href="#module-pyglimer.waveform.rotate" title="Permalink to this headline">#</a></h2>
+</section>
+<section id="module-pyglimer.waveform.rotate">
+<span id="pyglimer-waveform-rotate"></span><h2>pyglimer.waveform.rotate<a class="headerlink" href="#module-pyglimer.waveform.rotate" title="Permalink to this heading">#</a></h2>
 <p>Contains functions to rotate a stream into different domains</p>
 <dl class="field-list simple">
-<dt class="field-odd">copyright</dt>
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GNU Lesser General Public License, Version 3
 (<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
 </dd>
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
 </dd>
 </dl>
 <p>Created: Saturday, 21st March 2020 07:26:03 pm
 Last Modified: Thursday, 10th February 2022 03:53:30 pm</p>
 <dl class="py function">
-<dt id="pyglimer.waveform.rotate.rotate_LQT_min">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.rotate.</span></code><code class="sig-name descname"><span class="pre">rotate_LQT_min</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="../../_modules/pyglimer/waveform/rotate.html#rotate_LQT_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.rotate.rotate_LQT_min" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.rotate.rotate_LQT_min">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.rotate.</span></span><span class="sig-name descname"><span class="pre">rotate_LQT_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="../../_modules/pyglimer/waveform/rotate.html#rotate_LQT_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.rotate.rotate_LQT_min" title="Permalink to this definition">#</a></dt>
 <dd><p>Rotates stream to LQT by minimising the energy of the S-wave primary
 arrival on the L component (SRF) or maximising the primary arrival
 energy on L (PRF).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>st</strong> (<em>obspy.Stream</em>) – Input stream in RTZ.</p></li>
 <li><p><strong>phase</strong> (<em>STRING</em><em>, </em><em>optional</em>) – “P” for Ps or “S” for Sp.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>LQT</strong> (<em>obspy.Stream</em>) – Output stream in LQT.</p></li>
 <li><p><strong>ia</strong> (<em>float</em>) – Computed incidence angle in degree. Can serve as QC criterion.</p></li>
@@ -845,13 +908,13 @@ energy on L (PRF).</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.waveform.rotate.rotate_PSV">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.rotate.</span></code><code class="sig-name descname"><span class="pre">rotate_PSV</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statlat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statlon</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rayp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">obspy.core.stream.Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="../../_modules/pyglimer/waveform/rotate.html#rotate_PSV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.rotate.rotate_PSV" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.rotate.rotate_PSV">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.rotate.</span></span><span class="sig-name descname"><span class="pre">rotate_PSV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statlat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statlon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rayp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="../../_modules/pyglimer/waveform/rotate.html#rotate_PSV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.rotate.rotate_PSV" title="Permalink to this definition">#</a></dt>
 <dd><p>Finds the incidence angle of an incoming ray with the weighted average
 of the lithosphere’s P velocity with a velocity model compiled from
 Litho1.0.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>statlat</strong> (<em>FLOAT</em>) – station latitude.</p></li>
 <li><p><strong>statlon</strong> (<em>FLOAT</em>) – station longitude.</p></li>
@@ -860,7 +923,7 @@ Litho1.0.</p>
 <li><p><strong>phase</strong> (<em>str</em>) – Primary phase, either P or S.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>avp</strong> (<em>FLOAT</em>) – Average P-wave velocity.</p></li>
 <li><p><strong>avs</strong> (<em>FLOAT</em>) – Average S-wave velocity.</p></li>
@@ -871,92 +934,96 @@ Litho1.0.</p>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyglimer.waveform.errorhandler">
-<span id="pyglimer-waveform-errorhandler"></span><h2>pyglimer.waveform.errorhandler<a class="headerlink" href="#module-pyglimer.waveform.errorhandler" title="Permalink to this headline">#</a></h2>
+</section>
+<section id="module-pyglimer.waveform.errorhandler">
+<span id="pyglimer-waveform-errorhandler"></span><h2>pyglimer.waveform.errorhandler<a class="headerlink" href="#module-pyglimer.waveform.errorhandler" title="Permalink to this heading">#</a></h2>
 <p>Files contains all Errorhandler for the Glimer to obspy project</p>
 <dl class="field-list simple">
-<dt class="field-odd">copyright</dt>
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GNU Lesser General Public License, Version 3
 (<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
 </dd>
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
 </dd>
 </dl>
 <p>Created: Saturday, 21th March 2020 19:16:41
 Last Modified: Thursday, 25th March 2021 04:02:16 pm</p>
 <dl class="py function">
-<dt id="pyglimer.waveform.errorhandler.NoMatchingResponseHandler">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.errorhandler.</span></code><code class="sig-name descname"><span class="pre">NoMatchingResponseHandler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/errorhandler.html#NoMatchingResponseHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.errorhandler.NoMatchingResponseHandler" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.errorhandler.NoMatchingResponseHandler">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.errorhandler.</span></span><span class="sig-name descname"><span class="pre">NoMatchingResponseHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/errorhandler.html#NoMatchingResponseHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.errorhandler.NoMatchingResponseHandler" title="Permalink to this definition">#</a></dt>
 <dd><p>Error handler for when the No matching response found error occurs.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.waveform.errorhandler.redownload">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.errorhandler.</span></code><code class="sig-name descname"><span class="pre">redownload</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">st</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/errorhandler.html#redownload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.errorhandler.redownload" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.errorhandler.redownload">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.errorhandler.</span></span><span class="sig-name descname"><span class="pre">redownload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starttime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endtime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">st</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/errorhandler.html#redownload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.errorhandler.redownload" title="Permalink to this definition">#</a></dt>
 <dd><p>Errorhandler that Redownloads the stream for the given input.
 Used when the stream has less than three channels.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.waveform.errorhandler.redownload_statxml">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.waveform.errorhandler.</span></code><code class="sig-name descname"><span class="pre">redownload_statxml</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/errorhandler.html#redownload_statxml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.errorhandler.redownload_statxml" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.waveform.errorhandler.redownload_statxml">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.waveform.errorhandler.</span></span><span class="sig-name descname"><span class="pre">redownload_statxml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/waveform/errorhandler.html#redownload_statxml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.waveform.errorhandler.redownload_statxml" title="Permalink to this definition">#</a></dt>
 <dd><p>Errorhandler: Redownload station xml in case that it is not found.</p>
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
-              </div>
+              </article>
               
+
               
-              <!-- Previous / next buttons -->
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="index.html" title="previous page">
-        <i class="fas fa-angle-left"></i>
-        <div class="prev-next-info">
-            <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">API</p>
-        </div>
-    </a>
-    <a class='right-next' id="next-link" href="rf.html" title="next page">
-    <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">pyglimer.rf</p>
-    </div>
-    <i class="fas fa-angle-right"></i>
-    </a>
+  <a class='left-prev' id="prev-link" href="index.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">API</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="rf.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">pyglimer.rf</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
 </div>
+              </footer>
               
-          </main>
+          </div>
           
-
       </div>
     </div>
+
+  
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-<footer class="footer mt-5 mt-md-0">
-  <div class="container">
-    
-    <div class="footer-item">
-      <p class="copyright">
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
     &copy; Copyright 2022, the PyGLImER development team.<br>
 </p>
-    </div>
-    
-    <div class="footer-item">
-      <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br>
-</p>
-    </div>
-    
   </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+</p>
+  </div>
+  
+</div>
 </footer>
   </body>
 </html>

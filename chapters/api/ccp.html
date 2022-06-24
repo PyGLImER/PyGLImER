@@ -1,17 +1,22 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyglimer.ccp</title>
-    
-  <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    
+    <title>pyglimer.ccp</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
   <link rel="stylesheet"
     href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
   <link rel="preload" as="font" type="font/woff2" crossorigin
@@ -19,50 +24,61 @@
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
 
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/styles/pydata-sphinx-theme.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
-    
-  <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
 
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script src="../../_static/clipboard.min.js"></script>
     <script src="../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="prev" title="pyglimer.utils" href="utils.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="None">
-    
-
-    <!-- Google Analytics -->
-    
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
-    
-    <div class="container-fluid" id="banner"></div>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
 
     
-    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
 
   <div id="navbar-start">
     
     
+  
 
-<a class="navbar-brand" href="../../index.html">
-  <img src="../../_static/logo_horizontal_colour.png" class="logo" alt="logo">
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    <img src="../../_static/logo_horizontal_colour.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/logo_horizontal_colour.png" class="logo__image only-dark" alt="Logo image">
+  
+  
 </a>
-
-
     
   </div>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
+    <span class="fas fa-bars"></span>
   </button>
 
   
@@ -80,6 +96,12 @@
 <li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../introduction/installation.html">
   Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../tutorials/index.html">
+  Tutorials
  </a>
 </li>
 
@@ -126,6 +148,14 @@
     <div id="navbar-end">
       
       <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
         <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
         <li class="nav-item">
           <a class="nav-link" href="https://github.com/PeterMakus/PyGLImER" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
@@ -140,13 +170,13 @@
     </nav>
     
 
-    <div class="container-xl">
-      <div class="row">
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
           
-            
-            <!-- Only show if we have sidebars configured, else just a small margin  -->
-            <div class="col-12 col-md-3 bd-sidebar">
-              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
   <i class="icon fas fa-search"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
@@ -186,19 +216,20 @@
 
   </div>
 </nav>
-              </div>
-              <div class="sidebar-end-items">
-              </div>
-            </div>
-            
-          
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
 
           
-          <div class="d-none d-xl-block col-xl-2 bd-toc">
-            
-              
-              <div class="toc-item">
-                
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
 <div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
@@ -238,10 +269,10 @@
 </ul>
 
 </nav>
-              </div>
-              
-              <div class="toc-item">
-                
+    </div>
+    
+    <div class="toc-item">
+      
 
 <div class="tocsection editthispage">
     <a href="https://github.com/PeterMakus/PyGLImER/edit/master/docs/chapters/api/ccp.rst">
@@ -249,49 +280,47 @@
     </a>
 </div>
 
-              </div>
-              
-            
-          </div>
-          
+    </div>
+    
+  
+</div>
+
 
           
           
-            
-          
-          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+          <div class="bd-content col-12 col-md-9 col-xl-7">
               
-              <div>
+              <article class="bd-article" role="main">
                 
-  <div class="section" id="pyglimer-ccp">
-<h1>pyglimer.ccp<a class="headerlink" href="#pyglimer-ccp" title="Permalink to this headline">#</a></h1>
-<div class="section" id="module-pyglimer.ccp.ccp">
-<span id="pyglimer-ccp-ccp"></span><h2>pyglimer.ccp.ccp<a class="headerlink" href="#module-pyglimer.ccp.ccp" title="Permalink to this headline">#</a></h2>
+  <section id="pyglimer-ccp">
+<h1>pyglimer.ccp<a class="headerlink" href="#pyglimer-ccp" title="Permalink to this heading">#</a></h1>
+<section id="module-pyglimer.ccp.ccp">
+<span id="pyglimer-ccp-ccp"></span><h2>pyglimer.ccp.ccp<a class="headerlink" href="#module-pyglimer.ccp.ccp" title="Permalink to this heading">#</a></h2>
 <p>Module for the Common Conversion Stack Computation and handling of the
 objects resulting from such.</p>
 <dl class="field-list simple">
-<dt class="field-odd">copyright</dt>
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GNU Lesser General Public License, Version 3
 (<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
 </dd>
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
 </dd>
 </dl>
 <p>Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 21st October 2021 03:52:16 pm</p>
+Last Modified: Monday, 30th May 2022 04:17:33 pm</p>
 <dl class="py class">
-<dt id="pyglimer.ccp.ccp.CCPStack">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.ccp.</span></code><code class="sig-name descname"><span class="pre">CCPStack</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_load</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.ccp.</span></span><span class="sig-name descname"><span class="pre">CCPStack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Is a CCP Stack matrix. Its size depends upon stations that are used as
 input.</p>
 <p>Creates an empy object template for a CCP stack.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>latitude</strong> (<em>1-D numpy.ndarray</em>) – Latitudes of all seismic stations.</p></li>
 <li><p><strong>longitude</strong> (<em>1-D numpy.ndarray</em>) – Longitudes of all seismic stations.</p></li>
@@ -308,13 +337,13 @@ binary numpy file. Then, this passes a filename.</p></li>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.compute_kdtree_volume">
-<code class="sig-name descname"><span class="pre">compute_kdtree_volume</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlon</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zmax</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.compute_kdtree_volume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.compute_kdtree_volume" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.compute_kdtree_volume">
+<span class="sig-name descname"><span class="pre">compute_kdtree_volume</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.compute_kdtree_volume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.compute_kdtree_volume" title="Permalink to this definition">#</a></dt>
 <dd><p>Using the CCP kdtree, we get the closest few points and compute
 the weighting using a distance metric. if points are too far away,
 they aren’t weighted</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>qlon</strong> (<em>np.ndarray</em><em> or </em><em>list</em>) – grid defining array for longitude</p></li>
 <li><p><strong>qlat</strong> (<em>np.ndarray</em><em> or </em><em>list</em>) – grid defining array for latitude</p></li>
@@ -324,22 +353,22 @@ they aren’t weighted</p>
 everything below is downweighted by the square reciprocal</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>[description]</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>[type]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.compute_stack">
-<code class="sig-name descname"><span class="pre">compute_stack</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vel_model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_format</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'hdf5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geocoords</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binrad</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.5773502691896258</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append_pp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mc_backend</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'joblib'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.compute_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.compute_stack" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.compute_stack">
+<span class="sig-name descname"><span class="pre">compute_stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vel_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'hdf5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geocoords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binrad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5773502691896258</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append_pp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mc_backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'joblib'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.compute_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.compute_stack" title="Permalink to this definition">#</a></dt>
 <dd><p>Computes a ccp stack in self.ccp, using the data from rfloc.
 The stack can be limited to some networks and stations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>vel_model</strong> (<em>str</em>) – Velocity model located in data. Either <cite>iasp91.dat</cite>
 for 1D raytracing or <cite>3D</cite> for 3D raytracing with GYPSuM model.
@@ -387,7 +416,7 @@ Can be either <cite>“joblib”</cite> (multiprocessing) or <cite>“MPI”</ci
 MPI compatibility is only implemented with hdf5 files.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>ValueError</strong> – For wrong inputs</p>
 </dd>
 </dl>
@@ -414,15 +443,15 @@ and stations. Best to create the CCPStack object by using
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.conclude_ccp">
-<code class="sig-name descname"><span class="pre">conclude_ccp</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_empty</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_water</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_multiple</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.conclude_ccp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.conclude_ccp" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.conclude_ccp">
+<span class="sig-name descname"><span class="pre">conclude_ccp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_empty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_water</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_multiple</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.conclude_ccp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.conclude_ccp" title="Permalink to this definition">#</a></dt>
 <dd><p>Averages the CCP-bin and populates empty cells with average of
 neighbouring cells. No matter which option is
 chosen for the parameters, data is never lost entirely. One can always
 execute a new conclude_ccp() command. However, decisions that are
 taken here will affect the .mat output and plotting outputs.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>keep_empty</strong> (<em>bool</em><em>, </em><em>optional</em>) – Keep entirely empty bins. The default is False.</p></li>
 <li><p><strong>keep_water</strong> (<em>bool</em><em>, </em><em>optional</em>) – For False all bins that are on water-covered areas
@@ -446,11 +475,11 @@ By default 200 km.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.create_vtk_mesh">
-<code class="sig-name descname"><span class="pre">create_vtk_mesh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.create_vtk_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.create_vtk_mesh" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.create_vtk_mesh">
+<span class="sig-name descname"><span class="pre">create_vtk_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.create_vtk_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.create_vtk_mesh" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates a mesh with given bounding box s</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>geo</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag whether the output mesh is in geographical coordinates or
 meters, by default True</p></li>
@@ -462,18 +491,18 @@ plotting tool or, e.g., Paraview. If None, no file is written.
 By default, None.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>outputs a vtk mesh that can be opened in, e.g., Paraview.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>VTK.UnstructuredGrid</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.explore">
-<code class="sig-name descname"><span class="pre">explore</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlon</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zmax</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.explore" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.explore">
+<span class="sig-name descname"><span class="pre">explore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.explore" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates a volume exploration window set. One window is for all
 plots, and the other window is generated with sliders such that one
 can explore how future plots should be generated. It technically does
@@ -482,7 +511,7 @@ create a meshgrid fitting to the bin distance distribution.
 One can however set a factor by which to divide the bin distance for a
 finer grid.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Bingrid epicentral distance multiplier to refine grid.
 Defaults to 0.5.</p></li>
@@ -493,21 +522,18 @@ everything below is downweighted by the square reciprocal</p></li>
 <li><p><strong>extent</strong> (<em>list</em><em> or </em><em>tuple</em><em> or </em><em>Non</em><em>, </em><em>optional</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>VolumeExploration</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>VolumeExploration</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.map_plot">
-<code class="sig-name descname"><span class="pre">map_plot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_stations</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_bins</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_illum</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_direct</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputfile</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'pdf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geology</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.map_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.map_plot" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.map_plot">
+<span class="sig-name descname"><span class="pre">map_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_stations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_illum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_direct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pdf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geology</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.map_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.map_plot" title="Permalink to this definition">#</a></dt>
 <dd><p>Create a map plot of the CCP Stack containing user-defined information.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>plot_stations</strong> (<em>bool</em><em>, </em><em>optional</em>) – Plot the station locations, by default False</p></li>
 <li><p><strong>plot_bins</strong> (<em>bool</em><em>, </em><em>optional</em>) – Plot bin location, by default False</p></li>
@@ -530,11 +556,11 @@ lower left and upper right corner, by default True</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.multicore_stack">
-<code class="sig-name descname"><span class="pre">multicore_stack</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append_pp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_closest_points</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmodel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.multicore_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.multicore_stack" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.multicore_stack">
+<span class="sig-name descname"><span class="pre">multicore_stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append_pp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_closest_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmodel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latb</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonb</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.multicore_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.multicore_stack" title="Permalink to this definition">#</a></dt>
 <dd><p>Takes in chunks of data to be processed on one core.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stream</strong> (<em>list</em>) – List of file locations.</p></li>
 <li><p><strong>append_pp</strong> (<em>Bool</em>) – Should piercing points be appended?.</p></li>
@@ -550,64 +576,64 @@ raytraycing. Will remain unused for 1D RT</p></li>
 If so, provide (lowcof, highcof).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Three lists containing indices and rf-data.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list, list, list</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.pick_phase">
-<code class="sig-name descname"><span class="pre">pick_phase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'+'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[None,</span> <span class="pre">None]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pyglimer.ccp.ccp.PhasePick" title="pyglimer.ccp.ccp.PhasePick"><span class="pre">pyglimer.ccp.ccp.PhasePick</span></a><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.pick_phase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.pick_phase" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.pick_phase">
+<span class="sig-name descname"><span class="pre">pick_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'+'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[None,</span> <span class="pre">None]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyglimer.ccp.ccp.PhasePick" title="pyglimer.ccp.ccp.PhasePick"><span class="pre">PhasePick</span></a></span></span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.pick_phase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.pick_phase" title="Permalink to this definition">#</a></dt>
 <dd><p>Pick the strongest negative or strongest positive gradient from a
 predefined depth-range.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pol</strong> (<em>str</em><em>, </em><em>optional</em>) – Either ‘+’ for positive velocity gradient or ‘-‘ for negative
+<li><p><strong>pol</strong> (<em>str</em><em>, </em><em>optional</em>) – Either ‘+’ for positive velocity gradient or ‘-’ for negative
 gradient, by default ‘+’</p></li>
 <li><p><strong>depth</strong> (<em>list</em><em>, </em><em>optional</em>) – List with two elements [minz, maxz], defines in which depth window
 the phase picker is gonna look for maxima and minima,
 by default [None, None]</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A phasepick object, which subsequently can be plotted.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pyglimer.ccp.ccp.PhasePick" title="pyglimer.ccp.ccp.PhasePick">PhasePick</a></p>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>ValueError</strong> – For errandeous inputs.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.plot_bins">
-<code class="sig-name descname"><span class="pre">plot_bins</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.plot_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.plot_bins" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.plot_bins">
+<span class="sig-name descname"><span class="pre">plot_bins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.plot_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.plot_bins" title="Permalink to this definition">#</a></dt>
 <dd><p>A simple map view of the bins.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.plot_cross_section">
-<code class="sig-name descname"><span class="pre">plot_cross_section</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.plot_cross_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.plot_cross_section" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.plot_cross_section">
+<span class="sig-name descname"><span class="pre">plot_cross_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.plot_cross_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.plot_cross_section" title="Permalink to this definition">#</a></dt>
 <dd><p>See documentation for
 <a class="reference internal" href="#pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section" title="pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot_cross_section()</span></code></a></p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.plot_volume_sections">
-<code class="sig-name descname"><span class="pre">plot_volume_sections</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlon</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zmax</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonsl</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latsl</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zsl</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minillum</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.plot_volume_sections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.plot_volume_sections" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.plot_volume_sections">
+<span class="sig-name descname"><span class="pre">plot_volume_sections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonsl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latsl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zsl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minillum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.plot_volume_sections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.plot_volume_sections" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates the same plot as the <cite>explore</cite> tool, but(!) statically and
 with more options left to the user.</p>
 <p>!!! IT IS IMPORTANT for the plotting function that the input arrays
 are monotonically increasing!!!</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>qlon</strong> (<em>np.ndarray</em>) – Monotonically increasing ndarray. No failsafes implemented.</p></li>
 <li><p><strong>qlat</strong> (<em>np.ndarray</em>) – Monotonically increasing ndarray. No failsafes implemented.</p></li>
@@ -625,44 +651,44 @@ everything below is downweighted by the square reciprocal</p></li>
 <li><p><strong>show</strong> (<em>bool</em><em>, </em><em>optional</em>) – whether to make figure window visible, default True</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>[description]</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>VolumePlot</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.query_bin_tree">
-<code class="sig-name descname"><span class="pre">query_bin_tree</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_closest_points</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.query_bin_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.query_bin_tree" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.query_bin_tree">
+<span class="sig-name descname"><span class="pre">query_bin_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_closest_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.query_bin_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.query_bin_tree" title="Permalink to this definition">#</a></dt>
 <dd><p>Find closest bins for provided latitude and longitude.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>latitude</strong> (<em>1-D numpy.ndarray</em>) – Latitudes of piercing points.</p></li>
 <li><p><strong>longitude</strong> (<em>1-D numpy.ndarray</em>) – Longitudes of piercing points.</p></li>
 <li><p><strong>n_closest_points</strong> (<em>int</em>) – Number of closest points to be found.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>bin index k and depth index j</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.CCPStack.write">
-<code class="sig-name descname"><span class="pre">write</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.write" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack.write" title="Permalink to this definition">#</a></dt>
 <dd><p>Saves the CCPStream file as pickle or matlab file. Only save
 as Matlab file for exporting, as not all information can be
 preserved!</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em><em>, </em><em>optional</em>) – Name as which to save, file extensions aren’t
 necessary.</p></li>
@@ -671,7 +697,7 @@ necessary.</p></li>
 defaults to “pickle”.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>ValueError</strong> – For unknown formats.</p>
 </dd>
 </dl>
@@ -700,17 +726,17 @@ recommended anymore).</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="pyglimer.ccp.ccp.PhasePick">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.ccp.</span></code><code class="sig-name descname"><span class="pre">PhasePick</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitudes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depthrange</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[None,</span> <span class="pre">None]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#PhasePick"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.PhasePick" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.PhasePick">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.ccp.</span></span><span class="sig-name descname"><span class="pre">PhasePick</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitudes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depthrange</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[None,</span> <span class="pre">None]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#PhasePick"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.PhasePick" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A phasepick object, just created for more convenient plotting.</p>
 <p>Initialise object</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coords</strong> (<em>np.ndarray</em>) – 2-d array containing latitudes and longitudes.</p></li>
 <li><p><strong>amplitudes</strong> (<em>np.ndarray</em>) – 1-D array containg amplitude values of each bin</p></li>
-<li><p><strong>polarity</strong> (<em>str</em>) – Either ‘+’ for positive velocity gradients or ‘-‘ for negative</p></li>
+<li><p><strong>polarity</strong> (<em>str</em>) – Either ‘+’ for positive velocity gradients or ‘-’ for negative</p></li>
 <li><p><strong>z</strong> (<em>np.ndarray</em>) – 1D array containing depth of maxima/minima per bin</p></li>
 <li><p><strong>depthrange</strong> (<em>list</em><em>, </em><em>optional</em>) – list containing depth restrictions in form of [zmin, zmax],
 by default [None, None]</p></li>
@@ -718,11 +744,11 @@ by default [None, None]</p></li>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="pyglimer.ccp.ccp.PhasePick.plot">
-<code class="sig-name descname"><span class="pre">plot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_amplitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputfile</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'pdf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'gist_rainbow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geology</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#PhasePick.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.PhasePick.plot" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.PhasePick.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_amplitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pdf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gist_rainbow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geology</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#PhasePick.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.PhasePick.plot" title="Permalink to this definition">#</a></dt>
 <dd><p>Plot heatmap containing depth or amplitude of picked phase.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>plot_amplitude</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True amplitude instead of depths is plotted, by default False</p></li>
 <li><p><strong>outputfile</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Write Figure to file, by default None</p></li>
@@ -739,13 +765,13 @@ by default [None, None]</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.ccp.ccp.init_ccp">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.ccp.</span></code><code class="sig-name descname"><span class="pre">init_ccp</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rfloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geocoords</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_stack</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binrad</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.8660254037844386</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append_pp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'hdf5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mc_backend</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'joblib'</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><span class="pre">pyglimer.ccp.ccp.CCPStack</span></a><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#init_ccp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.init_ccp" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.init_ccp">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.ccp.</span></span><span class="sig-name descname"><span class="pre">init_ccp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rfloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preproloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geocoords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_stack</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binrad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8660254037844386</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append_pp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'hdf5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mc_backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'joblib'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><span class="pre">CCPStack</span></a></span></span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#init_ccp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.init_ccp" title="Permalink to this definition">#</a></dt>
 <dd><p>Computes a ccp stack in self.ccp using data from statloc and rfloc.
 The stack can be limited to some networks and
 stations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>rfloc</strong> (<em>str</em>) – Parental directory in that the RFs are saved.</p></li>
 <li><p><strong>spacing</strong> (<em>float</em>) – Angular distance between each bingrid point.</p></li>
@@ -794,13 +820,13 @@ Can be either <cite>“joblib”</cite> (multiprocessing) or <cite>“MPI”</ci
 compatibility is only implemented with hdf5 files.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>TypeError</strong> – For wrong inputs.</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>CCPStack object.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPstack</span></code></p>
 </dd>
 </dl>
@@ -816,11 +842,11 @@ via mpirun.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.ccp.ccp.read_ccp">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.ccp.</span></code><code class="sig-name descname"><span class="pre">read_ccp</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><span class="pre">pyglimer.ccp.ccp.CCPStack</span></a><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#read_ccp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.read_ccp" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.ccp.read_ccp">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.ccp.</span></span><span class="sig-name descname"><span class="pre">read_ccp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><span class="pre">CCPStack</span></a></span></span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#read_ccp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.read_ccp" title="Permalink to this definition">#</a></dt>
 <dd><p>Read CCP-Stack class file from input folder.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em><em>, </em><em>optional</em>) – Filename of the input file with file ending.
 The default is ‘ccp.pkl’.</p></li>
@@ -828,13 +854,13 @@ The default is ‘ccp.pkl’.</p></li>
 possible options are <cite>“pickle”</cite> or <cite>“npz”</cite>. The default is None.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>ValueError</strong> – For unknown formats</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>CCPStack object</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">CCPStack</span></code></a></p>
 </dd>
 </dl>
@@ -845,107 +871,104 @@ recomputations are necessary.</p>
 </div>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyglimer.ccp.io">
-<span id="pyglimer-ccp-io"></span><h2>pyglimer.ccp.io<a class="headerlink" href="#module-pyglimer.ccp.io" title="Permalink to this headline">#</a></h2>
+</section>
+<section id="module-pyglimer.ccp.io">
+<span id="pyglimer-ccp-io"></span><h2>pyglimer.ccp.io<a class="headerlink" href="#module-pyglimer.ccp.io" title="Permalink to this heading">#</a></h2>
 <p>This module will handle file IO. The problematic functions here are the
 incoming <cite>.mat</cite> files that are produced by the GLImER database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">copyright</dt>
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GNU Lesser General Public License, Version 3
 (<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
 </dd>
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)</p>
 </dd>
 </dl>
 <dl class="py function">
-<dt id="pyglimer.ccp.io.load_rawrf">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.io.</span></code><code class="sig-name descname"><span class="pre">load_rawrf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/io.html#load_rawrf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.io.load_rawrf" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.io.load_rawrf">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.io.</span></span><span class="sig-name descname"><span class="pre">load_rawrf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/io.html#load_rawrf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.io.load_rawrf" title="Permalink to this definition">#</a></dt>
 <dd><p>Loads a matlab raw RF file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – filename of the receiver function <code class="docutils literal notranslate"><span class="pre">.mat</span></code>-file to be loaded. The
 <code class="docutils literal notranslate"><span class="pre">.mat</span></code>-file is expected to contain following parameters. See Notes
 below for required content of matlab rawRf file.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Set of RF variables</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>rfs, baz, rayp, lat, lon, elev, dt</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
 <p>File content</p>
 <dl class="field-list simple">
-<dt class="field-odd">Crfs</dt>
+<dt class="field-odd">Crfs<span class="colon">:</span></dt>
 <dd class="field-odd"><p>MxN matrix of M Receiver Functions and N elements</p>
 </dd>
-<dt class="field-even">Cbaz</dt>
+<dt class="field-even">Cbaz<span class="colon">:</span></dt>
 <dd class="field-even"><p>M elements long vector with back azimuth values corresponding to
 Receiver functions</p>
 </dd>
-<dt class="field-odd">Crayp</dt>
+<dt class="field-odd">Crayp<span class="colon">:</span></dt>
 <dd class="field-odd"><p>M elements long vector with ray parameter values corresponding to
 Receiver functions</p>
 </dd>
-<dt class="field-even">Cslat</dt>
+<dt class="field-even">Cslat<span class="colon">:</span></dt>
 <dd class="field-even"><p>M elements long vector with station latitude corresponding to
 Receiver functions</p>
 </dd>
-<dt class="field-odd">Cslon</dt>
+<dt class="field-odd">Cslon<span class="colon">:</span></dt>
 <dd class="field-odd"><p>M elements long vector with station longitude corresponding to
 Receiver functions</p>
 </dd>
-<dt class="field-even">Celev</dt>
+<dt class="field-even">Celev<span class="colon">:</span></dt>
 <dd class="field-even"><p>M elements long vector with station elevation</p>
 </dd>
-<dt class="field-odd">Dt</dt>
+<dt class="field-odd">Dt<span class="colon">:</span></dt>
 <dd class="field-odd"><p>sampling interval</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.ccp.io.load_tracefile">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.io.</span></code><code class="sig-name descname"><span class="pre">load_tracefile</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/io.html#load_tracefile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.io.load_tracefile" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.io.load_tracefile">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.io.</span></span><span class="sig-name descname"><span class="pre">load_tracefile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/io.html#load_tracefile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.io.load_tracefile" title="Permalink to this definition">#</a></dt>
 <dd><p>Loading an RF file that has been raytraced.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.ccp.io.load_velocity_model">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.io.</span></code><code class="sig-name descname"><span class="pre">load_velocity_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/io.html#load_velocity_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.io.load_velocity_model" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.io.load_velocity_model">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.io.</span></span><span class="sig-name descname"><span class="pre">load_velocity_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/io.html#load_velocity_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.io.load_velocity_model" title="Permalink to this definition">#</a></dt>
 <dd><p>Loads velocity model and outputs velocities and corresponding
 parameters.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>filename</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>vlat, vlon, vdep, vp, vs</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>vlat, vlon, vdep, vp, vs</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyglimer.ccp.compute.bin">
-<span id="pyglimer-ccp-compute-bin"></span><h2>pyglimer.ccp.compute.bin<a class="headerlink" href="#module-pyglimer.ccp.compute.bin" title="Permalink to this headline">#</a></h2>
+</section>
+<section id="module-pyglimer.ccp.compute.bin">
+<span id="pyglimer-ccp-compute-bin"></span><h2>pyglimer.ccp.compute.bin<a class="headerlink" href="#module-pyglimer.ccp.compute.bin" title="Permalink to this heading">#</a></h2>
 <dl class="field-list simple">
-<dt class="field-odd">copyright</dt>
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
 </dd>
-<dt class="field-even">license</dt>
+<dt class="field-even">license<span class="colon">:</span></dt>
 <dd class="field-even"><p>GNU Lesser General Public License, Version 3
 (<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
 </dd>
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)
 Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)</p>
 </dd>
@@ -953,14 +976,14 @@ Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;p
 <p>Created: November 2019
 Last Modified: Thursday, 21st October 2021 10:05:06 am</p>
 <dl class="py class">
-<dt id="pyglimer.ccp.compute.bin.BinGrid">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.compute.bin.</span></code><code class="sig-name descname"><span class="pre">BinGrid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#BinGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.BinGrid" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.compute.bin.BinGrid">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.compute.bin.</span></span><span class="sig-name descname"><span class="pre">BinGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#BinGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.BinGrid" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Creates Bingrid object from parameters</p>
 <p>BinGrid object that can be used to find closest neighbours to
 stations and CCP bins</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>latitude</strong> (1-D <cite>numpy.array</cite>) – Latitudes</p></li>
 <li><p><strong>longitude</strong> (1-D <cite>numpy.array</cite>) – Longitudes</p></li>
@@ -974,18 +997,18 @@ However, “P” is computationally more efficient.</p></li>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="pyglimer.ccp.compute.bin.BinGrid.compute_bins">
-<code class="sig-name descname"><span class="pre">compute_bins</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#BinGrid.compute_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.BinGrid.compute_bins" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.compute.bin.BinGrid.compute_bins">
+<span class="sig-name descname"><span class="pre">compute_bins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#BinGrid.compute_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.BinGrid.compute_bins" title="Permalink to this definition">#</a></dt>
 <dd><p>Computes bins close to all stations</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.compute.bin.BinGrid.query_bin_tree">
-<code class="sig-name descname"><span class="pre">query_bin_tree</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binrad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#BinGrid.query_bin_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.BinGrid.query_bin_tree" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.compute.bin.BinGrid.query_bin_tree">
+<span class="sig-name descname"><span class="pre">query_bin_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binrad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#BinGrid.query_bin_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.BinGrid.query_bin_tree" title="Permalink to this definition">#</a></dt>
 <dd><p>Uses the query function of the KDTree but takes geolocations as
 input.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>latitude</strong> (1-D <cite>numpy.ndarray</cite>) – latitudes to be queried</p></li>
 <li><p><strong>longitude</strong> (1-D <cite>numpy.ndarray</cite>) – longitudes to be queried</p></li>
@@ -996,108 +1019,109 @@ Equals the radius of the bin, higher = more averaging -&gt;
 depends on the ratio of deltabin/binrad.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Indices of next neighbour.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>1D np.array</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.compute.bin.BinGrid.query_station_tree">
-<code class="sig-name descname"><span class="pre">query_station_tree</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#BinGrid.query_station_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.BinGrid.query_station_tree" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.compute.bin.BinGrid.query_station_tree">
+<span class="sig-name descname"><span class="pre">query_station_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#BinGrid.query_station_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.BinGrid.query_station_tree" title="Permalink to this definition">#</a></dt>
 <dd><p>Uses the query function of the KDTree but takes geolocations as
 input.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>latitude</strong> (1D <cite>numpy.ndarray</cite>) – latitudes to be queried</p></li>
 <li><p><strong>longitude</strong> (1D <cite>numpy.ndarray</cite>) – longitudes to be queried</p></li>
 <li><p><strong>maxdist</strong> (<em>float</em>) – maximum  distance to be queried in degree</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Euclidian distances to next point, indices of next neighbour.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tuple with 2 1D <cite>numpy.ndarray</cite></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyglimer.ccp.compute.bin.BinGrid.station_tree">
-<code class="sig-name descname"><span class="pre">station_tree</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#BinGrid.station_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.BinGrid.station_tree" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.compute.bin.BinGrid.station_tree">
+<span class="sig-name descname"><span class="pre">station_tree</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#BinGrid.station_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.BinGrid.station_tree" title="Permalink to this definition">#</a></dt>
 <dd><p>Using the input</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.ccp.compute.bin.fibonacci_sphere">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.compute.bin.</span></code><code class="sig-name descname"><span class="pre">fibonacci_sphere</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epi</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#fibonacci_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.fibonacci_sphere" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.compute.bin.fibonacci_sphere">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.compute.bin.</span></span><span class="sig-name descname"><span class="pre">fibonacci_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/compute/bin.html#fibonacci_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.compute.bin.fibonacci_sphere" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates a Fibonacci sphere, which is a reasonable approximaton for equal
 distance points on a sphere.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>epi</strong> (<em>float</em><em>, </em><em>optional</em>) – distance between the closest points in degree, defaults to 1</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a one dimensional array containing the cartesian points
 [x, y, z] for each index.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray[List[float]]</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyglimer.ccp.plot_utils.plot_cross_section">
-<span id="pyglimer-ccp-plot-utils-plot-cross-section"></span><h2>pyglimer.ccp.plot_utils.plot_cross_section<a class="headerlink" href="#module-pyglimer.ccp.plot_utils.plot_cross_section" title="Permalink to this headline">#</a></h2>
+</section>
+<section id="module-pyglimer.ccp.plot_utils.plot_cross_section">
+<span id="pyglimer-ccp-plot-utils-plot-cross-section"></span><h2>pyglimer.ccp.plot_utils.plot_cross_section<a class="headerlink" href="#module-pyglimer.ccp.plot_utils.plot_cross_section" title="Permalink to this heading">#</a></h2>
 <dl class="py function">
-<dt id="pyglimer.ccp.plot_utils.plot_cross_section.get_ax_coor">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.plot_utils.plot_cross_section.</span></code><code class="sig-name descname"><span class="pre">get_ax_coor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/plot_utils/plot_cross_section.html#get_ax_coor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.plot_utils.plot_cross_section.get_ax_coor" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.plot_utils.plot_cross_section.get_ax_coor">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.plot_utils.plot_cross_section.</span></span><span class="sig-name descname"><span class="pre">get_ax_coor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/plot_utils/plot_cross_section.html#get_ax_coor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.plot_utils.plot_cross_section.get_ax_coor" title="Permalink to this definition">#</a></dt>
 <dd><p>Just a way to get axes coordinates</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ax</strong> (<em>axes</em>) – Givenn axes</p></li>
 <li><p><strong>lat</strong> (<em>float</em>) – Latitude</p></li>
 <li><p><strong>lon</strong> (<em>float</em>) – Longitude</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Axes coordinates for a given set of lat, lon.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tuple</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
 <dl class="field-list simple">
-<dt class="field-odd">Authors</dt>
+<dt class="field-odd">Authors<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)</p>
 </dd>
-<dt class="field-even">Last Modified</dt>
+<dt class="field-even">Last Modified<span class="colon">:</span></dt>
 <dd class="field-even"><p>2021.08.20 11.00 (Lucas Sawade)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.plot_utils.plot_cross_section.</span></code><code class="sig-name descname"><span class="pre">plot_cross_section</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ccp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z0</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">matplotlib.axes._axes.Axes</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geoax</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">cartopy.mpl.geoaxes.GeoAxes</span><span class="p"><span class="pre">,</span> </span><span class="pre">cartopy.mpl.geoaxes.GeoAxesSubplot</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapplot</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minillum</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfcmap</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'seismic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depthextent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Iterable</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapextent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Iterable</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/plot_utils/plot_cross_section.html#plot_cross_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.plot_utils.plot_cross_section.</span></span><span class="sig-name descname"><span class="pre">plot_cross_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ccp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddeg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geoax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">GeoAxes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">GeoAxesSubplot</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapplot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minillum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfcmap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'seismic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depthextent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Iterable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapextent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Iterable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/plot_utils/plot_cross_section.html#plot_cross_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section" title="Permalink to this definition">#</a></dt>
 <dd><p>Plots a cross section for given waypoints. If no axes are given, the
 function will also create figures for the map and the cross section.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ccp</strong> (<a class="reference internal" href="#pyglimer.ccp.ccp.CCPStack" title="pyglimer.ccp.ccp.CCPStack"><em>CCPStack</em></a>) – CCPStack as computed using the cpp module</p></li>
 <li><p><strong>lat</strong> (<em>Arraylike</em>) – Latitudes of the waypoints defining the cross section</p></li>
 <li><p><strong>lon</strong> (<em>Arraylike</em>) – Longitudes of the waypoints defining the cross section</p></li>
+<li><p><strong>ddeg</strong> (<em>float</em>) – lateral spacing of the cross section</p></li>
 <li><p><strong>z0</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – if given the map will be plotted with an illumination map at the given
 depth, by default None</p></li>
 <li><p><strong>ax</strong> (<em>Optional</em><em>[</em><em>Axes</em><em>]</em><em>, </em><em>optional</em>) – Axes to plot the cross section in, by default None</p></li>
@@ -1114,138 +1138,142 @@ cross section waypoints on the map, by default None</p></li>
 by default None</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>ax, geoax</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tuple</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
 <dl class="field-list simple">
-<dt class="field-odd">Authors</dt>
+<dt class="field-odd">Authors<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)</p>
 </dd>
-<dt class="field-even">Last Modified</dt>
+<dt class="field-even">Last Modified<span class="colon">:</span></dt>
 <dd class="field-even"><p>2021.04.21 20.00 (Lucas Sawade)</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyglimer.ccp.plot_utils.plot_line_buffer">
-<span id="pyglimer-ccp-plot-utils-plot-line-buffer"></span><h2>pyglimer.ccp.plot_utils.plot_line_buffer<a class="headerlink" href="#module-pyglimer.ccp.plot_utils.plot_line_buffer" title="Permalink to this headline">#</a></h2>
+</section>
+<section id="module-pyglimer.ccp.plot_utils.plot_line_buffer">
+<span id="pyglimer-ccp-plot-utils-plot-line-buffer"></span><h2>pyglimer.ccp.plot_utils.plot_line_buffer<a class="headerlink" href="#module-pyglimer.ccp.plot_utils.plot_line_buffer" title="Permalink to this heading">#</a></h2>
 <dl class="py function">
-<dt id="pyglimer.ccp.plot_utils.plot_line_buffer.plot_line_buffer">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.plot_utils.plot_line_buffer.</span></code><code class="sig-name descname"><span class="pre">plot_line_buffer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/plot_utils/plot_line_buffer.html#plot_line_buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.plot_utils.plot_line_buffer.plot_line_buffer" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.plot_utils.plot_line_buffer.plot_line_buffer">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.plot_utils.plot_line_buffer.</span></span><span class="sig-name descname"><span class="pre">plot_line_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/plot_utils/plot_line_buffer.html#plot_line_buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.plot_utils.plot_line_buffer.plot_line_buffer" title="Permalink to this definition">#</a></dt>
 <dd><p>Takes in lat, lon points and creates circular polygons around it. Merges
 the polygons of possible</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>lat</strong> (<em>np.ndarray</em>) – latitudes of a line</p></li>
 <li><p><strong>lon</strong> (<em>np.ndarray</em>) – longitudes of a line</p></li>
 <li><p><strong>delta</strong> (<em>float</em><em>, </em><em>optional</em>) – epicentral distance of the buffer, by default 1</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>(patch, artist)</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
 <dl class="field-list simple">
-<dt class="field-odd">Authors</dt>
+<dt class="field-odd">Authors<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)</p>
 </dd>
-<dt class="field-even">Last Modified</dt>
+<dt class="field-even">Last Modified<span class="colon">:</span></dt>
 <dd class="field-even"><p>2021.04.21 20.00 (Lucas Sawade)</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyglimer.ccp.plot_utils.line_buffer">
-<span id="pyglimer-ccp-plot-utils-line-buffer"></span><h2>pyglimer.ccp.plot_utils.line_buffer<a class="headerlink" href="#module-pyglimer.ccp.plot_utils.line_buffer" title="Permalink to this headline">#</a></h2>
+</section>
+<section id="module-pyglimer.ccp.plot_utils.line_buffer">
+<span id="pyglimer-ccp-plot-utils-line-buffer"></span><h2>pyglimer.ccp.plot_utils.line_buffer<a class="headerlink" href="#module-pyglimer.ccp.plot_utils.line_buffer" title="Permalink to this heading">#</a></h2>
 <dl class="py function">
-<dt id="pyglimer.ccp.plot_utils.line_buffer.line_buffer">
-<code class="sig-prename descclassname"><span class="pre">pyglimer.ccp.plot_utils.line_buffer.</span></code><code class="sig-name descname"><span class="pre">line_buffer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/plot_utils/line_buffer.html#line_buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.plot_utils.line_buffer.line_buffer" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pyglimer.ccp.plot_utils.line_buffer.line_buffer">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.plot_utils.line_buffer.</span></span><span class="sig-name descname"><span class="pre">line_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/plot_utils/line_buffer.html#line_buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.plot_utils.line_buffer.line_buffer" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates buffer around geographical line using from pole rotated cap
 outlines. This is far from perfect, but it does “a” job. There isn’t much
 more that one can and be spherically accurate. As long as the amount of
 points in the line is fair this should have no problem to immitate a true
 buffer.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>lat</strong> (<em>np.ndarray</em>) – latitudes</p></li>
 <li><p><strong>lon</strong> (<em>np.ndarray</em>) – longitudes</p></li>
 <li><p><strong>delta</strong> (<em>float</em><em>, </em><em>optional</em>) – epicentral distance to line, by default 1.0</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Nx2 matrix with coordinates of a polygon that forms a buffer around
 the line</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
 <dl class="field-list simple">
-<dt class="field-odd">Authors</dt>
+<dt class="field-odd">Authors<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)</p>
 </dd>
-<dt class="field-even">Last Modified</dt>
+<dt class="field-even">Last Modified<span class="colon">:</span></dt>
 <dd class="field-even"><p>2021.04.21 20.00 (Lucas Sawade)</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
-              </div>
+              </article>
               
+
               
-              <!-- Previous / next buttons -->
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="utils.html" title="previous page">
-        <i class="fas fa-angle-left"></i>
-        <div class="prev-next-info">
-            <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">pyglimer.utils</p>
-        </div>
-    </a>
+  <a class='left-prev' id="prev-link" href="utils.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">pyglimer.utils</p>
+      </div>
+  </a>
 </div>
+              </footer>
               
-          </main>
+          </div>
           
-
       </div>
     </div>
+
+  
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-<footer class="footer mt-5 mt-md-0">
-  <div class="container">
-    
-    <div class="footer-item">
-      <p class="copyright">
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
     &copy; Copyright 2022, the PyGLImER development team.<br>
 </p>
-    </div>
-    
-    <div class="footer-item">
-      <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br>
-</p>
-    </div>
-    
   </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+</p>
+  </div>
+  
+</div>
 </footer>
   </body>
 </html>
