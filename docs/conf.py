@@ -23,7 +23,7 @@ copyright = '2022, the PyGLImER development team'
 author = 'Peter Makus, Lucas Sawade'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.11'
+release = '0.2.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,8 +35,25 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
               'sphinx.ext.githubpages',
               'sphinx.ext.napoleon',
-              'sphinx_copybutton'
+              'sphinx_copybutton',
+              'sphinx_gallery.gen_gallery',
               ]
+
+# --------------------------------
+# Sphinx Gallery config
+sphinx_gallery_conf = {
+    # path to your example scripts
+    'examples_dirs': ['../examples/tutorials'],
+    # path to where to save gallery generated output
+    'gallery_dirs': ["tutorials"],
+    # Checks matplotlib for figure creation
+    'image_scrapers': ('matplotlib'),
+    # Which files to include
+    'filename_pattern': r"\.py"
+}
+
+#---------------------------------
+
 
 # For docstring __init__ documentation
 autoclass_content = 'both'

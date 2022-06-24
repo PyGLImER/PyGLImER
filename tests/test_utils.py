@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 19th August 2021 04:01:26 pm
-Last Modified: Wednesday, 16th March 2022 04:20:32 pm
+Last Modified: Friday, 8th April 2022 02:07:31 pm
 '''
 import os
 import unittest
@@ -120,10 +120,10 @@ class TestClientLoopWav(unittest.TestCase):
         c = MagicMock(spec=obspy.clients.fdsn.Client)
         bulkl = ['my', 'nonesense']
         rawloc = 'should not exist'
-        c.get_waveforms_bulk.return_value = 'this could be a stream'
+        c.get_waveforms_bulk.return_value = read()
         pu.__client__loop_wav__(c, rawloc, bulkl, {}, False, 'inventory')
         save_raw_mock.assert_called_once_with(
-            {}, 'this could be a stream', rawloc, 'inventory', False)
+            {}, read(), rawloc, 'inventory', False)
 
 
 class TestSaveRaw(unittest.TestCase):
@@ -140,7 +140,8 @@ class TestSaveRaw(unittest.TestCase):
             mocks['slice'].return_value = self.st
             pu.save_raw(self.saved, self.st, 'rawloc', 'inv', False)
             mocks['select'].assert_has_calls(
-                [call(network=ii, station=ii) for ii in range(3)])
+                    [call(network=ii, station=ii) for ii in range(3)],
+                    [call(location='') for ii in range(3)])
             sm_mock.assert_has_calls([
                 call(ii, ANY, 'rawloc', ii, ii) for ii in range(3)])
 
@@ -154,7 +155,8 @@ class TestSaveRaw(unittest.TestCase):
                 sel_mock.return_value = inv
                 pu.save_raw(self.saved, self.st, 'rawloc', inv, True)
                 mocks['select'].assert_has_calls(
-                    [call(network=ii, station=ii) for ii in range(3)])
+                    [call(network=ii, station=ii) for ii in range(3)],
+                    [call(location='') for ii in range(3)])
                 write_st_mock.assert_has_calls([
                     call(ANY, ii, 'rawloc', inv) for ii in range(3)])
                 sel_mock.assert_has_calls(

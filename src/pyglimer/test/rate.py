@@ -12,7 +12,7 @@ Contains various functions used to evaluate the quality of RF and waveforms
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 25th February 2020 07:28:30 pm
-Last Modified: Thursday, 21st October 2021 03:57:51 pm
+Last Modified: Monday, 30th May 2022 02:57:23 pm
 '''
 
 import os
@@ -297,10 +297,7 @@ def __draw_plot(starttime, t, y, ph_time, ph_name, ch, noisemat, RF, old,
         x.set_ylabel('Amplitude')
         if test_tt_calculation:
             x.set_xlim(-10, 10)
-    # if old:
-    #     ax[2].text(0, 1, old,
-    #                bbox=dict(facecolor='green', alpha=0.5))
-    #     ax[2].set_xlabel(['time in s, old rating', old])
+
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     ax[2].text(0.05, 0.95, str(noisemat), transform=ax[2].transAxes,
                fontsize=10, verticalalignment='top', bbox=props)

@@ -17,6 +17,7 @@ This is the documentation for the PyGLImER repository, available at:
 
    chapters/introduction/introduction
    chapters/introduction/installation
+   tutorials/index
 
 **Waveform Download, Preprocessing, and Receiver Function Creation** *Tools to
 get from 0 to Receiver-Function-Hero.*

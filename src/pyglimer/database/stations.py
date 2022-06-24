@@ -12,9 +12,10 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Tuesday, 15th February 2022 01:40:24 pm
+Last Modified: Monday, 30th May 2022 04:29:39 pm
 '''
 
+import fnmatch
 import logging
 import os
 import shelve
@@ -215,7 +216,7 @@ class StationDB(object):
 
             # Check data availability
             for root, _, files in os.walk(folder):
-                if 'info.dat' not in files:
+                if len(fnmatch.filter(files, 'info.*')) == 0:
                     continue  # Skip parent folders
                 infof = (os.path.join(root, 'info'))
 

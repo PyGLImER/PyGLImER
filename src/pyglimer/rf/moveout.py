@@ -14,7 +14,7 @@ Contains functions for moveout correction and station stacking.
 !The file is split and has a second copyright disclaimer!
 
 Created: Tuesday, 7th April 2020 10:08:30 am
-Last Modified: Tuesday, 15th February 2022 01:45:26 pm
+Last Modified: Monday, 30th May 2022 02:56:38 pm
 '''
 
 import os
@@ -168,7 +168,6 @@ def moveout(
             dtm1 = dtm1[:np.where(htab >= maxzm)[0][0]]
         if htab[len(dtm2)-1] > maxzm:
             dtm2 = dtm2[:np.where(htab >= maxzm)[0][0]]
-        # if phase == 'P':
         tqm1 = np.arange(0, round(max(dtm1)+st.delta, 1), st.delta)
         tqm2 = np.arange(0, round(max(dtm2)+st.delta, 1), st.delta)
         zm1 = np.interp(tqm1, dtm1, htab[:len(dtm1)])
@@ -176,22 +175,7 @@ def moveout(
         # truncate RF
         RFm1 = data[:len(zm1)]
         RFm2 = data[:len(zm2)]
-        # else:
-        #     # For SRFs that's a bit more complicated as multiples arrive
-        #     # after first arrival, whereas conversions arrive before
-        #     tqm1 = np.arange(round(min(dtm1), 1), st.delta/2, st.delta)
-        #     tqm2 = np.arange(round(min(dtm2), 1), st.delta/2, st.delta)
-        #     zm1 = np.interp(tqm1, np.flip(dtm1), np.flip(htab[:len(dtm1)]))
-        #     zm2 = np.interp(tqm2, np.flip(dtm2), np.flip(htab[:len(dtm2)]))
-        #     # truncate RFs
-        #     RFm1 = data[-len(zm1):tas]
-        #     RFm2 = data[tas-len(zm2):tas]
-        #     # Now they need to be flipped again, so the deepest depth are at
-        #     # the end
-        #     zm1 = np.flip(zm1)
-        #     zm2 = np.flip(zm2)
-        #     RFm1 = np.flip(RFm1)
-        #     RFm2 = np.flip(RFm2)
+
         # lowpass filter see Tauzin et. al. (2016)
         RFm1 = lowpass(RFm1, .25, st.sampling_rate, zerophase=True)
         RFm2 = lowpass(RFm2, .25, st.sampling_rate, zerophase=True)
@@ -309,9 +293,6 @@ def dt_table_3D(
 
     p = rayp/DEG2KM  # convert to s/km
 
-    # if test:
-    #     model = raysum3D(test)
-    # else:
     model = load_gyps(latb=latb, lonb=lonb)
 
     # hypothetical conversion depth tables
@@ -394,9 +375,8 @@ def dt_table_3D(
     if multiple:
         # This assumes that the elevation is the same as at the station
         # location possible weakspot! Maybe I should do a lookup?
-        # mphase 1 is PPs for P and SSp for S
-        # mphase 2 is PSs, and SPp, respectively
-        # if phase == 'P':
+        # mphase 1 is PPs for P
+        # mphase 2 is PSs
         dt_mphase1 = dt_b + dt_a
         dt_mphase2 = 2*dt_b
 
@@ -409,16 +389,6 @@ def dt_table_3D(
             dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
         except IndexError:
             pass
-
-        # else:
-        #     # Reduce travel times for S since the data will be flipped
-        #     dt_mphase1 = dt - 2*dt_b
-        #     dt_mphase2 = dt - dt_b - dt_a
-        #     if dt_mphase2.min() < -50:
-        #         dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 <= -50)[0][0]]
-        #         dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 <= -50)[0][0]]
-        #     elif dt_mphase1.min() < -50:
-        #         dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 <= -50)[0][0]]
     else:
         dt_mphase1 = None
         dt_mphase2 = None
@@ -535,13 +505,11 @@ def dt_table(
     if multiple:
         # This assumes that the elevation is the same as at the station
         # location possible weakspot! Maybe I should do a lookup?
-        # mphase 1 is PPs for P and SSp for S
-        # mphase 2 is PSs, and SPp, respectively
-        # if phase == 'P':
+        # mphase 1 is PPs for P
+        # mphase 2 is PSs
         dt_mphase1 = dt_b + dt_a
         dt_mphase2 = 2*dt_b
         # Truncate The travel time table for multiples
-        # if dt_mphase1.max() > 100 or dt_mphase2.max() > 100:
         try:
             dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 >= 100)[0][0]]
         except IndexError:
@@ -550,17 +518,6 @@ def dt_table(
             dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
         except IndexError:
             pass
-        # else:
-        #     # Reduce travel times for S since the data will be flipped
-        #     dt_mphase1 = dt - 2*dt_b
-        #     dt_mphase2 = dt - dt_b - dt_a
-        #     if dt_mphase2.min() < -50:
-        #         dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 <= -50)[0][0]]
-        #         dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 <= -50)[0][0]]
-        #     elif dt_mphase1.min() < -50:
-        #         dt_mphase2 = dt_mphase2[:np.where(dt_mphase1 <= -50)[0][0]]
-        # dt_mphase1 = dt_mphase1[:index]
-        # dt_mphase2 = dt_mphase2[:index]
     else:
         dt_mphase1 = None
         dt_mphase2 = None

@@ -27,8 +27,9 @@ dependencies:
   - pyyaml
   - pip:
     - global-land-mask
-    - sphinx<4.0
+    - sphinx<6.0
     - pydata-sphinx-theme
     - sphinx-copybutton
+    - sphinx-gallery
     - jinja2<3.1
     - -e .

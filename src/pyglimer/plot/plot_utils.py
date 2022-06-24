@@ -11,7 +11,7 @@ Plot utilities not to modify plots or base plots.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 05:05:08 pm
-Last Modified: Friday, 21st January 2022 08:44:08 am
+Last Modified: Monday, 30th May 2022 03:18:09 pm
 '''
 
 import os
@@ -356,10 +356,12 @@ def plot_single_rf(
             outputdir,
             pre_fix
             + rf.get_id() + "_"
-            + rf.stats.starttime._strftime_replacement('%Y%m%dT%H%M%S')
+            + rf.stats.starttime.strftime('%Y%m%dT%H%M%S')
             + post_fix
             + f".{format}")
         plt.savefig(filename, format=format, transparent=True)
+    else:
+        plt.show()
 
     return ax
 

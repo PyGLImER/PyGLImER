@@ -15,16 +15,17 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Friday, 7th January 2022 11:18:40 am
+Last Modified: Friday, 6th May 2022 02:19:37 pm
 '''
 import os
 from http.client import IncompleteRead
 from datetime import datetime
 import logging
+from typing import Iterable, Tuple
 import warnings
 import time
 
-from obspy import read_events, Catalog
+from obspy import Stream, read_events, Catalog, Inventory
 from obspy.clients.fdsn import Client as Webclient
 from obspy.clients.fdsn.header import FDSNException
 from obspy.core.utcdatetime import UTCDateTime
@@ -34,6 +35,7 @@ from tqdm import tqdm
 from pyglimer import constants
 from pyglimer.waveform.download import download_small_db, downloadwav
 from pyglimer.waveform.preprocess import preprocess
+from pyglimer.waveform.filesystem import import_database
 from pyglimer.utils import utils as pu
 
 
@@ -44,14 +46,15 @@ class Request(object):
 
     def __init__(
         self, proj_dir: str, raw_subdir: str, prepro_subdir: str,
-        rf_subdir: str, statloc_subdir: str, evt_subdir: str, log_subdir: str,
-        phase: str, rot: str, deconmeth: str, starttime: UTCDateTime or str,
-        endtime: UTCDateTime or str, pol: str = 'v',
-        minmag: float or int = 5.5, event_coords: tuple = None,
+        rf_subdir: str, statloc_subdir: str, evt_subdir: str,
+        log_subdir: str, phase: str, rot: str, deconmeth: str,
+        starttime: UTCDateTime or str, endtime: UTCDateTime or str,
+        pol: str = 'v', minmag: float or int = 5.5,
+        event_coords: Tuple[float, float, float, float] = None,
         network: str = None, station: str = None,
         waveform_client: list = None, evtcat: str = None,
         continue_download: bool = False, loglvl: int = logging.WARNING,
-            format: str = 'hdf5'):
+            format: str = 'hdf5', remove_response: bool = True):
         """
         Create object that is used to start the receiver function
         workflow.
@@ -141,6 +144,10 @@ class Request(object):
             few cores and downloads will be retried,
             by default WARNING.
         :type loglvl: str, optional
+        :param remove_response: Correct the traces for station response.
+            You might want to set this to False if you imported data and don't
+            have access to response information. Defaults to True.
+        :type remove_response: bool, optional
         :raises NameError: For invalid phases.
         """
 
@@ -156,6 +163,7 @@ class Request(object):
             raise NotImplementedError(
                 'Output format %s is unknown.' % format)
 
+        self.remove_response = remove_response
         # Set velocity model
         self.model = TauPyModel('iasp91')
 
@@ -375,6 +383,48 @@ class Request(object):
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
             self.network, self.station, channel, self.h5)
 
+    def import_database(
+        self, yield_st: Iterable[Stream],
+            yield_inv: Iterable[Inventory]):
+        """
+        Import a local database to PyGLImER. This can, for example, be
+        continuous raw waveform data that you collected in an own experiment.
+        Data is fed in as Generator function for an obspy type Inventory and
+        obspy type streams.
+
+        .. note::
+
+            If you don't have Response information for your stations make
+            sure to set ``Request.remove_response`` to ``False``
+
+        .. note::
+
+            Follow the obspy documentation to create StationXMLs. This
+            `Tutorial <https://docs.obspy.org/tutorial/code_snippets/\
+                stationxml_file_from_scratch.html>`_
+            The StationXML needs to contain the following information:
+            1. Network and Station Code
+            2. Latitude, Longitude, and Elevation
+            3. Azimuth of Channel/Location to do the Rotation.
+            4. (Optional) Station response information.
+
+        .. note::
+
+            Make sure that the Traces in the Stream contain the following
+            information in their header:
+            1. sampling_rate
+            2. start_time, end_time
+            3. Network, Station, and Channel Code (Location code arbitrary)
+
+        :param yield_st: _description_
+        :type yield_st: Generator[Stream]
+        :param yield_inv: _description_
+        :type yield_inv: Generator[Inventory]
+        """
+        import_database(
+            self.phase, self.model, self.evtcat, self.tz, self.ta,
+            self.statloc, self.rawloc, self.h5, yield_inv, yield_st)
+
     def preprocess(
         self, client: str = 'joblib',
             hc_filt: float or int or None = None):
@@ -396,4 +446,4 @@ class Request(object):
             'hann', self.tz, self.ta, self.statloc, self.rawloc,
             self.preproloc, self.rfloc, self.deconmeth, hc_filt,
             netrestr=self.network, statrestr=self.station, client=client,
-            saveasdf=self.h5)
+            saveasdf=self.h5, remove_response=self.remove_response)

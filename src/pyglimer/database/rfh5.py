@@ -286,7 +286,7 @@ class RFDataBase(object):
 
             **Access only through a context manager (see below):**
 
-            >>> with RFDataBase(myfile.h5) as rfdb:
+            >>> with RFDataBase('myfile.h5') as rfdb:
             >>>     type(rfdb)  # This is a DBHandler
             <class 'pyglimer.database.rfh5.DBHandler'>
 

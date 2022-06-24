@@ -12,11 +12,12 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Sunday, 20th October 2019 10:31:03 am
-Last Modified: Monday, 14th February 2022 11:19:41 am
+Last Modified: Wednesday, 13th April 2022 02:55:06 pm
 '''
+import warnings
 
 import numpy as np
-from obspy import Stream
+from obspy import Stream, Trace
 
 
 def resample_or_decimate(
@@ -34,7 +35,23 @@ def resample_or_decimate(
     :return: The resampled stream
     :rtype: Stream
     """
-    sr = data[0].stats.sampling_rate
+    if isinstance(data, Stream):
+        sr = data[0].stats.sampling_rate
+        srl = [tr.stats.sampling_rate for tr in data]
+        if len(set(srl)) != 1:
+            # differing sampling rates in stream
+            for tr in data:
+                try:
+                    tr = resample_or_decimate(tr, sampling_rate_new, filter)
+                except ValueError:
+                    warnings.warn(
+                        f'Trace {tr} not downsampled. Sampling rate is lower'
+                        + ' than requested sampling rate.')
+            return data
+    elif isinstance(data, Trace):
+        sr = data.stats.sampling_rate
+    else:
+        raise TypeError('Data has to be an obspy Stream or Trace.')
     srn = sampling_rate_new
 
     if srn > sr:

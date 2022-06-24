@@ -53,7 +53,7 @@ class TestReckon(unittest.TestCase):
         lon, lat = e2D(10, 340, 160, mind)
 
         # Compute GCTrack
-        qlat, qlon, qdists = gu.gctrack(lat, lon, d)
+        qlat, qlon, qdists, _ = gu.gctrack(lat, lon, d)
 
         # Find locations of waypoints
         pos = []
@@ -88,7 +88,7 @@ class TestReckon(unittest.TestCase):
         lon, lat = e2D(2, 340, 160, mind)
 
         # Compute GCTrack
-        qlat, qlon, qdists, updated_dists = gu.gctrack(
+        qlat, qlon, qdists, _ = gu.gctrack(
             lat, lon, d, constantdist=False)
 
         # print("Updated:")
