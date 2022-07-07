@@ -39,19 +39,22 @@ from pyglimer.waveform.request import Request
 
 # Get notebook path for future reference of the database:
 try: db_base_path = ipynb_path
-except NameError: db_base_path = os.getcwd()
+except NameError:
+    try: db_base_path = os.path.dirname(os.path.realpath(__file__))
+    except NameError: db_base_path = os.getcwd()
+
 
 # Define file locations
-proj_dir = os.path.join(db_base_path, 'database_sac')
+proj_dir = os.path.join(db_base_path, 'tmp', 'database_sac')
 
 
 
 request_dict = {
     # Necessary arguments
     'proj_dir': proj_dir,
-    'raw_subdir': 'waveforms/raw', # Directory of the waveforms
-    'prepro_subdir': 'waveforms/preprocessed',  # Directory of the preprocessed waveforms
-    'rf_subdir': 'waveforms/RF',  # Directory of the receiver functions
+    'raw_subdir': os.path.join('waveforms', 'raw'),# Directory of the waveforms
+    'prepro_subdir': os.path.join('waveforms', 'preprocessed'),  # Directory of the preprocessed waveforms
+    'rf_subdir': os.path.join('waveforms', 'RF'),  # Directory of the receiver functions
     'statloc_subdir': 'stations', # Directory stations
     'evt_subdir': 'events',       # Directory of the events
     'log_subdir': 'log',          # Directory for the logs
@@ -72,7 +75,6 @@ request_dict = {
     "waveform_client": ["IRIS"],  # FDSN server client (s. obspy). Def. None
     "evtcat": None,               # If you have already downloaded a set of
                                   # events previously, you can use them here
-    "loglvl": 'DEBUG'
 }
 
 # %%

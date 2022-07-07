@@ -11,7 +11,7 @@ TO use this feed in a function that yields obspy streams.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 8th April 2022 02:27:30 pm
-Last Modified: Friday, 6th May 2022 02:28:59 pm
+Last Modified: Monday, 30th May 2022 01:30:48 pm
 '''
 
 import logging
@@ -82,5 +82,5 @@ def import_database(
 
     logger.info('Slice data in chunks and save them into PyGLImER database.')
     os.makedirs(rawloc, exist_ok=True)
-    for st, inv in (yield_st(), yield_inv()):
+    for st, inv in zip(yield_st(), yield_inv()):
         pu.save_raw(d, st, rawloc, inv, saveasdf)

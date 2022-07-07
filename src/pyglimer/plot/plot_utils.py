@@ -11,7 +11,7 @@ Plot utilities not to modify plots or base plots.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 05:05:08 pm
-Last Modified: Tuesday, 26th April 2022 04:43:09 pm
+Last Modified: Monday, 30th May 2022 03:18:09 pm
 '''
 
 import os
@@ -360,6 +360,8 @@ def plot_single_rf(
             + post_fix
             + f".{format}")
         plt.savefig(filename, format=format, transparent=True)
+    else:
+        plt.show()
 
     return ax
 

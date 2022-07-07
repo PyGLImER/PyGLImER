@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Monday, 1st November 2021 10:01:13 am
+Last Modified: Monday, 30th May 2022 02:35:04 pm
 
 
 **The file is split and has a second copyright disclaimer**
@@ -563,8 +563,9 @@ class RFStream(Stream):
         return self.__class__(traces)
 
     def moveout(
-        self, vmodel: str, multiple: bool = False, latb: tuple or None = None,
-            lonb: tuple or None = None, taper: bool = True):
+        self, vmodel: str = 'iasp91.dat', multiple: bool = False,
+        latb: tuple or None = None, lonb: tuple or None = None,
+            taper: bool = True):
         """
         Depth migration of all receiver functions given Stream.
         Also calculates piercing points and adds them to RFTrace.stats.

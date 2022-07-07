@@ -24,16 +24,23 @@ Load the Receiver functions
 
 # %%
 # So, first load the receiver functions into a `RFStream`.
-
+import os
 import matplotlib.pyplot as plt
 from pyglimer.rf.create import read_rf
 from pyglimer.plot.plot_utils import set_mpl_params
 set_mpl_params()
 
 # Define the location of the database
-databaselocation = "static_data/database_sac"  # or "database_hdf5"
+databaselocation = os.path.join('static_data', 'database_sac')  # or "database_hdf5"
 
-rfst = read_rf(f"{databaselocation}/waveforms/RF/P/IU/HRV/*.sac")
+try: db_base_path = ipynb_path
+except NameError:
+    try: db_base_path = os.path.dirname(os.path.realpath(__file__))
+    except NameError: db_base_path = os.getcwd()
+databaselocation = os.path.join(db_base_path, databaselocation)
+
+rfst = read_rf(os.path.join(
+    databaselocation, 'waveforms', 'RF', 'P', 'IU', 'HRV', '*.sac'))
 
 # Check traces
 print("Number of loaded RFs: ", len(rfst))
@@ -86,7 +93,7 @@ ccpstack.plot_bins()
 
 # %% 
 # Use the ``CCPStack`` object to image the subsurface
-# +++++++++++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 # Given a ``CCPStack`` object there are multiple ways of getting an image of 
 # the subsurface. You could either compute a three-dimensional volume and plot 

@@ -13,7 +13,7 @@ Various Deconvolution approaches used for the RF technique.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 16th October 2019 02:24:30 pm
-Last Modified: Monday, 14th February 2022 11:16:53 am
+Last Modified: Monday, 30th May 2022 02:54:32 pm
 
 '''
 
@@ -108,81 +108,6 @@ def it(P, H, dt, shift=0, width=2.5, omega_min=0.5, it_max=200):
     rf = rf[0:N]
 
     return rf, it, IR
-
-
-def damped(P, H, mu=10):
-    """Outdated use function spectraldivision instead!
-    A simple damped deconvolution. I just used it to benchmark
-
-    Parameters
-    ----------
-    P : Arraylike
-        denominator (t-domain)
-    H : Arraylike
-        enumerator (t-domain)
-    mu : float
-        damping factor
-
-    Returns
-    -------
-    Inverted signal
-
-    """
-    P = np.array(P, dtype=float)
-    H = np.array(H, dtype=float)
-    N = len(H)
-    N2 = next_fast_len(N)
-    # cast source wavelet estimation into frequency domain
-    P_ft = np.fft.fft(P, n=N2)
-    H_ft = np.fft.fft(H, n=N2)
-
-    IR_ft = H_ft*np.conj(P_ft)/(np.conj(P_ft)*P_ft+mu)
-    IR = np.real(np.fft.ifft(IR_ft))[0:N]
-    return IR
-
-
-# def multitaper_bak(P, H, mu, k=3, p=2.5):
-#     """Suspended, use multitaper instead.
-#     Multitaper deconvolution (Park & Levis (2000)).
-#     I should also implement the newer version from 2006
-#     INPUT:
-#         P: denominator (t-domain)
-#         H: enumerator (t-domain)
-#         p: time bandwidth product
-#         k: use kth Slepian sequence"""
-#     # create Slepian taper
-#     P = np.array(P, float)
-#     H = np.array(H, float)
-#     N = len(H)
-#     N2 = nextPowerOf2(N)
-#     # P_ft = np.fft.fft(P,n=N2)
-#     # H_ft = np.fft.fft(H,n=N2)
-#     # slep= np.array([],float)
-#     Y_H = np.array([0]*N2, float)
-#     Y_P = np.array([0]*N2, float)
-#
-#     slep = spectrum.dpss(N, p, k)  # create Slepian
-#
-#     for ii in range(k):
-#         Y_H = np.vstack((Y_H, np.fft.fft(slep[0][:, ii]*H, n=N2)))
-#         Y_P = np.vstack((Y_P, np.fft.fft(slep[0][:, ii]*P, n=N2)))
-#
-#     u = sum(np.conj(Y_H)*Y_P)  # enumerator
-#     v = np.sqrt(sum(np.conj(Y_H)*Y_H)*sum(np.conj(Y_P)*Y_P))  # denominator
-#     C = u/v  # coherence estimate in f-domain, used for variance
-#
-#     # receiver function
-#     # where mu is a spectrum damping factor and should be a function of g
-#     v = sum(np.conj(Y_P)*Y_P) + mu
-#     H = u/v
-#
-#     h = np.real(np.fft.ifft(H, n=N2))  # back to time domain
-#     # h should technically be truncated
-#
-#     # calculate variance
-#     var = (1-np.power(C, 2))/((k-1)*np.power(C, 2))*np.power(H, 2)
-#
-#     return h, var
 
 
 def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
@@ -283,8 +208,6 @@ def spectraldivision(v, u, ndt, tshift, regul, phase, test=False):
             rfq[i] = rfq[i]*fac
 
     # back transformation
-    # v = np.arange(0, nf/2+1)*2*np.pi/(nf*ndt)
-    # v = np.concatenate((v, -np.flip(v[1:-1])))
     v = np.fft.fftfreq(nf, ndt)*2*np.pi
     # Re-Introduce Time shift
     dt = np.exp(-1j*v*tshift)  # /ndt

@@ -12,34 +12,13 @@ Automatic creation of raysum geom files
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 14th May 2020 10:23:03
-Last Modified: Thursday, 21st October 2021 03:42:16 pm
+Last Modified: Monday, 30th May 2022 02:58:04 pm
 '''
 
 import os
 import numpy as np
 
 from pyglimer.data import finddir
-
-
-# I used those for figures in the thesis. Can probably be deleted?
-# def geom3D():
-#     N = 21
-#     bazv = np.arange(0, 360, 20)
-#     raypv = np.linspace(0.000040541, 0.000081081, 8)
-#     # for P:0.000040541,0.000081081 S:0.00009009, 0.00011982
-#     shift_max = 55660/2  # 55660
-#     filename = '3D'
-#     create_geom(N, bazv, raypv, shift_max, filename)
-
-
-# def geom3D_even():
-#     N = 100
-#     bazv = np.arange(0, 360, 20)
-#     # raypv = np.arange(.1e-5, .11e-4, .25e-5)
-#     raypv = np.linspace(0.000040541, 0.000081081, 8)
-#     shift_max = 55660
-#     filename = '3D'
-#     create_geom(N, bazv, raypv, shift_max, filename, shape='even')
 
 
 def create_geom(

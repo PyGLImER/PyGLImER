@@ -23,7 +23,7 @@ copyright = '2022, the PyGLImER development team'
 author = 'Peter Makus, Lucas Sawade'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.12'
+release = '0.2.0'
 
 
 # -- General configuration ---------------------------------------------------
