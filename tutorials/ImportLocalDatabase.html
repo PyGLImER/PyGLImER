@@ -376,7 +376,7 @@ needed information. Let’s look at the expected information:</p>
 <span class="n">R</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="o">**</span><span class="n">request_dict</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-08-11 12:06:49,359 - INFO - Successfully obtained 1 events
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-08-11 12:06:49,224 - INFO - Successfully obtained 1 events
 </pre></div>
 </div>
 <p>The initialization will look for all events for which data is available. To
@@ -467,10 +467,10 @@ This method will do the following:
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">R</span><span class="o">.</span><span class="n">import_database</span><span class="p">(</span><span class="n">yield_st</span><span class="p">,</span> <span class="n">yield_inv</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-08-11 12:06:49,637 - INFO - Computing theoretical times of arrival. Save Inventories
-2022-08-11 12:06:49,644 - INFO - Checking IU.HRV
-2022-08-11 12:06:49,644 - DEBUG - IU.HRV
-2022-08-11 12:06:49,666 - INFO - Slice data in chunks and save them into PyGLImER database.
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-08-11 12:06:49,499 - INFO - Computing theoretical times of arrival. Save Inventories
+2022-08-11 12:06:49,507 - INFO - Checking IU.HRV
+2022-08-11 12:06:49,507 - DEBUG - IU.HRV
+2022-08-11 12:06:49,528 - INFO - Slice data in chunks and save them into PyGLImER database.
 </pre></div>
 </div>
 <p>Let’s just check how many teleseismic arrivals were found in this one week.</p>
@@ -516,27 +516,27 @@ expression is needed for running this examples</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">R</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">hc_filt</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="s1">&#39;single&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-08-11 12:06:49,686 - INFO -
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-08-11 12:06:49,547 - INFO -
 
 
 ...Preprocessing initialiased...
 
 
-  0%|          | 0/1 [00:00&lt;?, ?it/s]2022-08-11 12:06:49,686 - INFO - Processing waveforms for event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293.
-2022-08-11 12:06:49,701 - DEBUG - Before cut and resample
-2022-08-11 12:06:49,701 - DEBUG -    Time elapsed: 0.0 s
-2022-08-11 12:06:49,728 - INFO - Stream accepted. Preprocessing successful
-2022-08-11 12:06:49,728 - INFO - File preprocessed.
+  0%|          | 0/1 [00:00&lt;?, ?it/s]2022-08-11 12:06:49,548 - INFO - Processing waveforms for event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293.
+2022-08-11 12:06:49,563 - DEBUG - Before cut and resample
+2022-08-11 12:06:49,563 - DEBUG -    Time elapsed: 0.0 s
+2022-08-11 12:06:49,587 - INFO - Stream accepted. Preprocessing successful
+2022-08-11 12:06:49,587 - INFO - File preprocessed.
 Station IU.HRV
 Event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293
-2022-08-11 12:06:49,728 - DEBUG -    Time elapsed: 0.0 s
-2022-08-11 12:06:49,739 - INFO - RF created.
+2022-08-11 12:06:49,587 - DEBUG -    Time elapsed: 0.0 s
+2022-08-11 12:06:49,598 - INFO - RF created.
 Station IU.HRV
 Event: smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293
-2022-08-11 12:06:49,739 - DEBUG -    Time elapsed: 0.0 s
+2022-08-11 12:06:49,598 - DEBUG -    Time elapsed: 0.0 s
 
-100%|##########| 1/1 [00:00&lt;00:00, 17.95it/s]
-2022-08-11 12:06:49,742 - INFO - Preprocessing finished.
+100%|##########| 1/1 [00:00&lt;00:00, 18.99it/s]
+2022-08-11 12:06:49,601 - INFO - Preprocessing finished.
 </pre></div>
 </div>
 </section>
@@ -641,7 +641,7 @@ already see trends:</p>
 </div>
 <p>As simple as that you can create your own receiver functions with
 just a single smalle script.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.011 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.023 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-importlocaldatabase-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/4d512cc35b7f72391f450a9b384a4ad4/ImportLocalDatabase.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">ImportLocalDatabase.py</span></code></a></p>
