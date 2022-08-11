@@ -13,7 +13,7 @@ Various Deconvolution approaches used for the RF technique.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 16th October 2019 02:24:30 pm
-Last Modified: Monday, 30th May 2022 02:54:32 pm
+Last Modified: Wednesday, 20th July 2022 02:55:20 pm
 
 '''
 
@@ -370,8 +370,8 @@ def multitaper(
             # pre-event noise
             # always stick to first time window
             tmp1n = np.fft.fft(np.multiply(E[n, :], Pn))
-            DEN_noise[k, :] = DEN_noise[k, :] +\
-                np.multiply(lambdas[k]*tmp1n.conj(), tmp1n)
+            DEN_noise[k, :] = DEN_noise[k, :] \
+                + np.multiply(lambdas[k]*tmp1n.conj(), tmp1n)
             n = n + 1
 
     # max_imag_ep = max(abs(np.imag(np.fft.ifft(sum(ESTP)))))
