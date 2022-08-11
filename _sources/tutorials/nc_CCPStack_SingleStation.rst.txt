@@ -92,8 +92,6 @@ So, first load the receiver functions into a `RFStream`.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     Number of loaded RFs:  7
@@ -147,11 +145,9 @@ This is similar to the single station stacks.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]    100%|##########| 2/2 [00:00<00:00, 21.71it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|#####     | 1/2 [00:00<00:00,  9.33it/s]    100%|##########| 2/2 [00:00<00:00, 18.43it/s]
 
 
 
@@ -245,8 +241,6 @@ some slices.
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -459,28 +453,23 @@ as the 'clean' stacking.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  31.965 seconds)
+   **Total running time of the script:** ( 0 minutes  34.312 seconds)
 
 
 .. _sphx_glr_download_tutorials_nc_CCPStack_SingleStation.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: nc_CCPStack_SingleStation.py <nc_CCPStack_SingleStation.py>`
 
-     :download:`Download Python source code: nc_CCPStack_SingleStation.py <nc_CCPStack_SingleStation.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: nc_CCPStack_SingleStation.ipynb <nc_CCPStack_SingleStation.ipynb>`
+      :download:`Download Jupyter notebook: nc_CCPStack_SingleStation.ipynb <nc_CCPStack_SingleStation.ipynb>`
 
 
 .. only:: html

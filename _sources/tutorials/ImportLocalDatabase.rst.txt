@@ -137,11 +137,9 @@ Now that all parameters are in place, let's initialize the
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    2022-06-24 12:33:09,044 - INFO - Successfully obtained 1 events
+    2022-08-11 12:06:49,359 - INFO - Successfully obtained 1 events
 
 
 
@@ -194,8 +192,6 @@ We can also quickly check how many events we gathered.
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -321,14 +317,12 @@ This method will do the following:
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    2022-06-24 12:33:09,341 - INFO - Computing theoretical times of arrival. Save Inventories
-    2022-06-24 12:33:09,348 - INFO - Checking IU.HRV
-    2022-06-24 12:33:09,348 - DEBUG - IU.HRV
-    2022-06-24 12:33:09,376 - INFO - Slice data in chunks and save them into PyGLImER database.
+    2022-08-11 12:06:49,637 - INFO - Computing theoretical times of arrival. Save Inventories
+    2022-08-11 12:06:49,644 - INFO - Checking IU.HRV
+    2022-08-11 12:06:49,644 - DEBUG - IU.HRV
+    2022-08-11 12:06:49,666 - INFO - Slice data in chunks and save them into PyGLImER database.
 
 
 
@@ -356,8 +350,6 @@ Let's just check how many teleseismic arrivals were found in this one week.
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -410,29 +402,27 @@ expression is needed for running this examples
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    2022-06-24 12:33:09,400 - INFO - 
+    2022-08-11 12:06:49,686 - INFO - 
 
 
     ...Preprocessing initialiased...
 
-      0%|          | 0/1 [00:00<?, ?it/s]2022-06-24 12:33:09,401 - INFO - Processing waveforms for event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293.
-    2022-06-24 12:33:09,417 - DEBUG - Before cut and resample
-    2022-06-24 12:33:09,417 - DEBUG -    Time elapsed: 0.0 s
-    2022-06-24 12:33:09,445 - INFO - Stream accepted. Preprocessing successful
-    2022-06-24 12:33:09,445 - INFO - File preprocessed.
+      0%|          | 0/1 [00:00<?, ?it/s]2022-08-11 12:06:49,686 - INFO - Processing waveforms for event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293.
+    2022-08-11 12:06:49,701 - DEBUG - Before cut and resample
+    2022-08-11 12:06:49,701 - DEBUG -    Time elapsed: 0.0 s
+    2022-08-11 12:06:49,728 - INFO - Stream accepted. Preprocessing successful
+    2022-08-11 12:06:49,728 - INFO - File preprocessed.
     Station IU.HRV
     Event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293
-    2022-06-24 12:33:09,446 - DEBUG -    Time elapsed: 0.0 s
-    2022-06-24 12:33:09,458 - INFO - RF created.
+    2022-08-11 12:06:49,728 - DEBUG -    Time elapsed: 0.0 s
+    2022-08-11 12:06:49,739 - INFO - RF created.
     Station IU.HRV
     Event: smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293
-    2022-06-24 12:33:09,458 - DEBUG -    Time elapsed: 0.0 s
-    100%|##########| 1/1 [00:00<00:00, 16.44it/s]
-    2022-06-24 12:33:09,462 - INFO - Preprocessing finished.
+    2022-08-11 12:06:49,739 - DEBUG -    Time elapsed: 0.0 s
+    100%|##########| 1/1 [00:00<00:00, 17.95it/s]
+    2022-08-11 12:06:49,742 - INFO - Preprocessing finished.
 
 
 
@@ -475,8 +465,6 @@ and how we can use it!)
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     Number of RFs: 1
@@ -504,8 +492,6 @@ PyGLImER is based on Obspy, but to handle RFs we need some more attributes:
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -554,8 +540,6 @@ the receiver function without any axes or text.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -584,8 +568,6 @@ Let's zoom into the first 20 seconds (~200km)
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -619,8 +601,6 @@ we can plot a section
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -656,8 +636,6 @@ epicentral distance limits:
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -691,8 +669,6 @@ already see trends:
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -708,28 +684,23 @@ just a single smalle script.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.199 seconds)
+   **Total running time of the script:** ( 0 minutes  2.011 seconds)
 
 
 .. _sphx_glr_download_tutorials_ImportLocalDatabase.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: ImportLocalDatabase.py <ImportLocalDatabase.py>`
 
-     :download:`Download Python source code: ImportLocalDatabase.py <ImportLocalDatabase.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: ImportLocalDatabase.ipynb <ImportLocalDatabase.ipynb>`
+      :download:`Download Jupyter notebook: ImportLocalDatabase.ipynb <ImportLocalDatabase.ipynb>`
 
 
 .. only:: html

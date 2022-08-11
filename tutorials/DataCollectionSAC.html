@@ -4,7 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>SAC Database</title>
 <script>
@@ -182,28 +182,22 @@
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
   <div class="bd-toc-item active">
-    <ul class="nav bd-sidenav">
+    <ul class="current nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="nc_CCPStack_SingleStation.html">
    Common Conversion Point Stack of a Single Station
   </a>
  </li>
-</ul>
-<ul class="current nav bd-sidenav">
  <li class="toctree-l1 current active">
   <a class="current reference internal" href="#">
    SAC Database
   </a>
  </li>
-</ul>
-<ul class="nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="ImportLocalDatabase.html">
    Import from Local DataBase
   </a>
  </li>
-</ul>
-<ul class="nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="DataCollectionHDF5.html">
    HDF5 Database
@@ -395,7 +389,6 @@ whether the events make sense we plot a map of the events:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;There are </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">evtcat</span><span class="p">)</span><span class="si">}</span><span class="s2"> available events&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>There are 289 available events
 </pre></div>
 </div>
@@ -430,7 +423,6 @@ as strings. Note that this method requires you to define the channels, you’d l
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of downloaded waveforms: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="n">data_storage</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Number of downloaded waveforms: 71
 </pre></div>
 </div>
@@ -462,363 +454,362 @@ expression is needed for running this examples</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">R</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">hc_filt</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="s1">&#39;single&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  5.60it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 16.73it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  5.89it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 17.59it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.08it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.19it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  9.54it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.32it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.50it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  9.84it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4677.66it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5433.04it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4672.45it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6598.28it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4759.04it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6808.94it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 11.83it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 17.70it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.47it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.34it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  7.38it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  6.99it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  7.06it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.07it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  9.90it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 12.99it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.43it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.30it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.88it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4441.55it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4705.65it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.38it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.00it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.27it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  6.20it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  9.29it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.34it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.94it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.62it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.39it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  9.82it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.08it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  9.57it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 3830.41it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  7.12it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.65it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.00it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.43it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 12.11it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  9.46it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4469.95it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.69it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.98it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4806.31it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 12.99it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.42it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.37it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.35it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4583.94it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.21it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  6.15it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  6.27it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  6.24it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 12.82it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.17it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 3878.83it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.19it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 18.49it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4705.65it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4869.55it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4875.21it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.75it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  7.02it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  6.98it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 12.66it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 18.93it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 3915.03it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.38it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.35it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.86it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.83it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.37it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.02it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.08it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  9.71it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.44it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.09it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4725.09it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.57it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.62it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4751.85it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4826.59it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4841.44it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4832.15it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 3683.52it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4791.66it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4884.67it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4529.49it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4425.93it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4493.90it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4620.97it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4882.78it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4884.67it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 3327.05it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4587.28it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4878.99it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4940.29it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.37it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  6.38it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  9.55it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4469.95it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.76it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  6.77it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.14it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 11.29it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 11.28it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 3791.18it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.49it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.39it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.70it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.01it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.14it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 12.78it/s]
 100%|##########| 3/3 [00:00&lt;00:00, 19.11it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 3256.45it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.97it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.81it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.48it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.45it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  7.40it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  7.22it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  7.25it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.85it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.36it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.53it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.21it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.67it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.42it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6043.67it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6364.65it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.99it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.90it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.83it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  6.65it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  9.99it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 14.10it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 21.07it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.89it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.95it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.33it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.63it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.25it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 4896.07it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  7.53it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 11.27it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.88it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.74it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.08it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.14it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 4815.50it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.83it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.39it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5893.64it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.73it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.52it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 21.05it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 21.01it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5437.73it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.63it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  6.79it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  6.84it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  6.80it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.71it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.49it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5637.51it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.84it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.41it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5604.86it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6509.53it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6397.01it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.84it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.59it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.03it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  7.34it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.99it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5313.73it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.78it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.74it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.70it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.66it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.71it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.04it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.74it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.39it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.93it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.82it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5774.63it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.82it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.37it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5650.16it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6516.27it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6750.49it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6728.83it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6102.29it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6587.91it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6710.89it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6765.01it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6746.87it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6721.64it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6685.93it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6526.41it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6743.25it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6449.47it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6682.37it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6872.15it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6849.71it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.76it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  6.90it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.30it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5774.63it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.99it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  6.96it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.43it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.96it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.91it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5275.85it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.90it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.59it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  3.74it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 11.18it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.37it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.33it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5144.28it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.77it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.73it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.97it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.82it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5667.98it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6332.62it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6615.62it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5693.63it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6226.08it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6129.04it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 12.61it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 18.85it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5809.29it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.94it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.90it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5280.28it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.47it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.74it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.06it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.99it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.86it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
  33%|###3      | 1/3 [00:00&lt;00:00,  6.80it/s]
 100%|##########| 3/3 [00:00&lt;00:00, 20.31it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4726.86it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5386.52it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4580.60it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.85it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  6.90it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  6.05it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  6.25it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4897.98it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  3.64it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  5.04it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  5.74it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  5.30it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 3904.10it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.79it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.27it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4580.60it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 12.15it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  9.63it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4167.91it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.89it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  6.89it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.32it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.34it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.95it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.83it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.66it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4644.85it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.41it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.16it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.81it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.77it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6198.48it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 3944.49it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.07it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.24it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  9.58it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.72it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.07it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.48it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.33it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4614.20it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.39it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  4.03it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  4.38it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  4.45it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.23it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  6.40it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  6.44it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  6.41it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.21it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 18.54it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 11.59it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  9.15it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.20it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  6.31it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  9.43it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.45it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.10it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  5.95it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 17.76it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 4084.04it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 3742.69it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 6257.04it/s]
 
   0%|          | 0/1 [00:00&lt;?, ?it/s]
-100%|##########| 1/1 [00:00&lt;00:00,  6.59it/s]
-100%|##########| 1/1 [00:00&lt;00:00,  6.58it/s]
+100%|##########| 1/1 [00:00&lt;00:00,  6.93it/s]
+100%|##########| 1/1 [00:00&lt;00:00,  6.92it/s]
 </pre></div>
 </div>
 </section>
@@ -844,7 +835,6 @@ and how we can use it!)</p>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of RFs: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rfstream</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Number of RFs: 7
 </pre></div>
 </div>
@@ -855,8 +845,7 @@ and how we can use it!)</p>
 <span class="n">pprint</span><span class="p">(</span><span class="n">rftrace</span><span class="o">.</span><span class="n">stats</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Stats({&#39;sampling_rate&#39;: 10.0, &#39;delta&#39;: 0.1, &#39;starttime&#39;: UTCDateTime(2021, 1, 10, 4, 4, 10, 294538), &#39;endtime&#39;: UTCDateTime(2021, 1, 10, 4, 6, 40, 194538), &#39;npts&#39;: 1500, &#39;calib&#39;: 1.0, &#39;network&#39;: &#39;IU&#39;, &#39;station&#39;: &#39;HRV&#39;, &#39;location&#39;: &#39;60&#39;, &#39;channel&#39;: &#39;PRF&#39;, &#39;sac&#39;: AttribDict({&#39;delta&#39;: 0.1, &#39;depmin&#39;: -0.5170056, &#39;depmax&#39;: 0.6425919, &#39;scale&#39;: 1.0, &#39;b&#39;: 0.000538, &#39;e&#39;: 149.90054, &#39;o&#39;: -595.811, &#39;a&#39;: 30.00007, &#39;stla&#39;: 42.5064, &#39;stlo&#39;: -71.5583, &#39;stel&#39;: 200.0, &#39;evla&#39;: -24.0412, &#39;evlo&#39;: -66.5729, &#39;evdp&#39;: 217000.0, &#39;mag&#39;: 6.1, &#39;user1&#39;: 6.337349, &#39;baz&#39;: 175.01988, &#39;gcarc&#39;: 66.419815, &#39;depmen&#39;: 6.35307e-09, &#39;nzyear&#39;: 2021, &#39;nzjday&#39;: 10, &#39;nzhour&#39;: 4, &#39;nzmin&#39;: 4, &#39;nzsec&#39;: 10, &#39;nzmsec&#39;: 294, &#39;nvhdr&#39;: 6, &#39;npts&#39;: 1500, &#39;iftype&#39;: 1, &#39;iztype&#39;: 9, &#39;leven&#39;: 1, &#39;lpspol&#39;: 1, &#39;lovrok&#39;: 1, &#39;lcalda&#39;: 0, &#39;kstnm&#39;: &#39;HRV&#39;, &#39;khole&#39;: &#39;60&#39;, &#39;kuser0&#39;: &#39;time&#39;, &#39;kuser1&#39;: &#39;P&#39;, &#39;kcmpnm&#39;: &#39;PRF&#39;, &#39;knetwk&#39;: &#39;IU&#39;}), &#39;_format&#39;: &#39;SAC&#39;, &#39;station_latitude&#39;: 42.5064, &#39;station_longitude&#39;: -71.5583, &#39;station_elevation&#39;: 200.0, &#39;event_latitude&#39;: -24.0412, &#39;event_longitude&#39;: -66.5729, &#39;event_depth&#39;: 217000.0, &#39;event_magnitude&#39;: 6.1, &#39;event_time&#39;: UTCDateTime(2021, 1, 10, 3, 54, 14, 483026), &#39;onset&#39;: UTCDateTime(2021, 1, 10, 4, 4, 40, 294071), &#39;type&#39;: &#39;time&#39;, &#39;phase&#39;: &#39;P&#39;, &#39;distance&#39;: 66.419815, &#39;back_azimuth&#39;: 175.01988, &#39;slowness&#39;: 6.337349})
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Stats({&#39;sampling_rate&#39;: 10.0, &#39;delta&#39;: 0.1, &#39;starttime&#39;: UTCDateTime(2021, 1, 10, 4, 4, 10, 294538), &#39;endtime&#39;: UTCDateTime(2021, 1, 10, 4, 6, 40, 194538), &#39;npts&#39;: 1500, &#39;calib&#39;: 1.0, &#39;network&#39;: &#39;IU&#39;, &#39;station&#39;: &#39;HRV&#39;, &#39;location&#39;: &#39;10&#39;, &#39;channel&#39;: &#39;PRF&#39;, &#39;sac&#39;: AttribDict({&#39;delta&#39;: 0.1, &#39;depmin&#39;: -0.50730354, &#39;depmax&#39;: 0.62682194, &#39;scale&#39;: 1.0, &#39;b&#39;: 0.000538, &#39;e&#39;: 149.90054, &#39;o&#39;: -595.811, &#39;a&#39;: 30.00007, &#39;stla&#39;: 42.5064, &#39;stlo&#39;: -71.5583, &#39;stel&#39;: 200.0, &#39;evla&#39;: -24.0412, &#39;evlo&#39;: -66.5729, &#39;evdp&#39;: 217000.0, &#39;mag&#39;: 6.1, &#39;user1&#39;: 6.337349, &#39;baz&#39;: 175.01988, &#39;gcarc&#39;: 66.419815, &#39;depmen&#39;: 2.4325653e-08, &#39;nzyear&#39;: 2021, &#39;nzjday&#39;: 10, &#39;nzhour&#39;: 4, &#39;nzmin&#39;: 4, &#39;nzsec&#39;: 10, &#39;nzmsec&#39;: 294, &#39;nvhdr&#39;: 6, &#39;npts&#39;: 1500, &#39;iftype&#39;: 1, &#39;iztype&#39;: 9, &#39;leven&#39;: 1, &#39;lpspol&#39;: 1, &#39;lovrok&#39;: 1, &#39;lcalda&#39;: 0, &#39;kstnm&#39;: &#39;HRV&#39;, &#39;khole&#39;: &#39;10&#39;, &#39;kuser0&#39;: &#39;time&#39;, &#39;kuser1&#39;: &#39;P&#39;, &#39;kcmpnm&#39;: &#39;PRF&#39;, &#39;knetwk&#39;: &#39;IU&#39;}), &#39;_format&#39;: &#39;SAC&#39;, &#39;station_latitude&#39;: 42.5064, &#39;station_longitude&#39;: -71.5583, &#39;station_elevation&#39;: 200.0, &#39;event_latitude&#39;: -24.0412, &#39;event_longitude&#39;: -66.5729, &#39;event_depth&#39;: 217000.0, &#39;event_magnitude&#39;: 6.1, &#39;event_time&#39;: UTCDateTime(2021, 1, 10, 3, 54, 14, 483026), &#39;onset&#39;: UTCDateTime(2021, 1, 10, 4, 4, 40, 294071), &#39;type&#39;: &#39;time&#39;, &#39;phase&#39;: &#39;P&#39;, &#39;distance&#39;: 66.419815, &#39;back_azimuth&#39;: 175.01988, &#39;slowness&#39;: 6.337349})
 </pre></div>
 </div>
 </section>
@@ -880,16 +869,14 @@ the receiver function without any axes or text.</p>
 <span class="n">rftrace</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_DataCollectionSAC_002.png" srcset="../_images/sphx_glr_DataCollectionSAC_002.png" alt="DataCollectionSAC" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:xlabel=&#39;Conversion Time [s]&#39;, ylabel=&#39;A    &#39;&gt;
+<img src="../_images/sphx_glr_DataCollectionSAC_002.png" srcset="../_images/sphx_glr_DataCollectionSAC_002.png" alt="DataCollectionSAC" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:xlabel=&#39;Conversion Time [s]&#39;, ylabel=&#39;A    &#39;&gt;
 </pre></div>
 </div>
 <p>Let’s zoom into the first 20 seconds (~200km)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rftrace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">])</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_DataCollectionSAC_003.png" srcset="../_images/sphx_glr_DataCollectionSAC_003.png" alt="DataCollectionSAC" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:xlabel=&#39;Conversion Time [s]&#39;, ylabel=&#39;A    &#39;&gt;
+<img src="../_images/sphx_glr_DataCollectionSAC_003.png" srcset="../_images/sphx_glr_DataCollectionSAC_003.png" alt="DataCollectionSAC" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:xlabel=&#39;Conversion Time [s]&#39;, ylabel=&#39;A    &#39;&gt;
 </pre></div>
 </div>
 </section>
@@ -900,8 +887,7 @@ we can plot a section</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rfstream</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">scalingfactor</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_DataCollectionSAC_004.png" srcset="../_images/sphx_glr_DataCollectionSAC_004.png" alt="PRF component" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:title={&#39;center&#39;:&#39;PRF component&#39;}, xlabel=&#39;$\\Delta$ [$^{\\circ}$]&#39;, ylabel=&#39;Time [s]&#39;&gt;
+<img src="../_images/sphx_glr_DataCollectionSAC_004.png" srcset="../_images/sphx_glr_DataCollectionSAC_004.png" alt="PRF component" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:title={&#39;center&#39;:&#39;PRF component&#39;}, xlabel=&#39;$\\Delta$ [$^{\\circ}$]&#39;, ylabel=&#39;Time [s]&#39;&gt;
 </pre></div>
 </div>
 <p>Similar to the single RF plot we can provide time and
@@ -913,8 +899,7 @@ epicentral distance limits:</p>
     <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_DataCollectionSAC_005.png" srcset="../_images/sphx_glr_DataCollectionSAC_005.png" alt="PRF component" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:title={&#39;center&#39;:&#39;PRF component&#39;}, xlabel=&#39;$\\Delta$ [$^{\\circ}$]&#39;, ylabel=&#39;Time [s]&#39;&gt;
+<img src="../_images/sphx_glr_DataCollectionSAC_005.png" srcset="../_images/sphx_glr_DataCollectionSAC_005.png" alt="PRF component" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:title={&#39;center&#39;:&#39;PRF component&#39;}, xlabel=&#39;$\\Delta$ [$^{\\circ}$]&#39;, ylabel=&#39;Time [s]&#39;&gt;
 </pre></div>
 </div>
 <p>By increasing the scaling factor and removing the plotted lines, we can
@@ -924,14 +909,13 @@ already see trends:</p>
     <span class="n">line</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_DataCollectionSAC_006.png" srcset="../_images/sphx_glr_DataCollectionSAC_006.png" alt="PRF component" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:title={&#39;center&#39;:&#39;PRF component&#39;}, xlabel=&#39;$\\Delta$ [$^{\\circ}$]&#39;, ylabel=&#39;Time [s]&#39;&gt;
+<img src="../_images/sphx_glr_DataCollectionSAC_006.png" srcset="../_images/sphx_glr_DataCollectionSAC_006.png" alt="PRF component" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:title={&#39;center&#39;:&#39;PRF component&#39;}, xlabel=&#39;$\\Delta$ [$^{\\circ}$]&#39;, ylabel=&#39;Time [s]&#39;&gt;
 </pre></div>
 </div>
 <p>As simple as that you can create your own receiver functions with
 just a single smalle script.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  0.268 seconds)</p>
-<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-datacollectionsac-py">
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  56.582 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-datacollectionsac-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/c88afcc07a6e8aa6f6d30f44c5104cd8/DataCollectionSAC.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">DataCollectionSAC.py</span></code></a></p>
 </div>
@@ -989,7 +973,7 @@ just a single smalle script.</p>
   
   <div class="footer-item">
     <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
 </p>
   </div>
   

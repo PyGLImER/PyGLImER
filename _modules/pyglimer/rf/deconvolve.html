@@ -218,7 +218,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Wednesday, 16th October 2019 02:24:30 pm</span>
-<span class="sd">Last Modified: Monday, 30th May 2022 02:54:32 pm</span>
+<span class="sd">Last Modified: Wednesday, 20th July 2022 02:55:20 pm</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 
@@ -575,8 +575,8 @@
             <span class="c1"># pre-event noise</span>
             <span class="c1"># always stick to first time window</span>
             <span class="n">tmp1n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:],</span> <span class="n">Pn</span><span class="p">))</span>
-            <span class="n">DEN_noise</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">DEN_noise</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span>\
-                <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">lambdas</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">tmp1n</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">tmp1n</span><span class="p">)</span>
+            <span class="n">DEN_noise</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">DEN_noise</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> \
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">lambdas</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">tmp1n</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">tmp1n</span><span class="p">)</span>
             <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span>
 
     <span class="c1"># max_imag_ep = max(abs(np.imag(np.fft.ifft(sum(ESTP)))))</span>
@@ -673,7 +673,7 @@
   
   <div class="footer-item">
     <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
 </p>
   </div>
   

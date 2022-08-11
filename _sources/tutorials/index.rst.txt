@@ -1,9 +1,5 @@
 :orphan:
 
-
-
-.. _sphx_glr_tutorials:
-
 Tutorials
 ---------
 
@@ -12,14 +8,76 @@ A set of tutorials to make you familiar with the package.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="The following notebook carries you through how to get from  a set of receiver functions of a si...">
 
 .. only:: html
 
- .. figure:: /tutorials/images/thumb/sphx_glr_nc_CCPStack_SingleStation_thumb.png
-     :alt: Common Conversion Point Stack of a Single Station
+  .. image:: /tutorials/images/thumb/sphx_glr_nc_CCPStack_SingleStation_thumb.png
+    :alt: Common Conversion Point Stack of a Single Station
 
-     :ref:`sphx_glr_tutorials_nc_CCPStack_SingleStation.py`
+  :ref:`sphx_glr_tutorials_nc_CCPStack_SingleStation.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Common Conversion Point Stack of a Single Station</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this Tutorial we are going to get all good receiver functions for the year 2018 for station ...">
+
+.. only:: html
+
+  .. image:: /tutorials/images/thumb/sphx_glr_DataCollectionSAC_thumb.png
+    :alt: SAC Database
+
+  :ref:`sphx_glr_tutorials_DataCollectionSAC.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">SAC Database</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This Tutorial illustrates how to import waveform data from a local database of continuous wavef...">
+
+.. only:: html
+
+  .. image:: /tutorials/images/thumb/sphx_glr_ImportLocalDatabase_thumb.png
+    :alt: Import from Local DataBase
+
+  :ref:`sphx_glr_tutorials_ImportLocalDatabase.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Import from Local DataBase</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example is nearly identical to the MSEED tutorial except the fact that we are specifying a...">
+
+.. only:: html
+
+  .. image:: /tutorials/images/thumb/sphx_glr_DataCollectionHDF5_thumb.png
+    :alt: HDF5 Database
+
+  :ref:`sphx_glr_tutorials_DataCollectionHDF5.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">HDF5 Database</div>
+    </div>
+
 
 .. raw:: html
 
@@ -30,90 +88,22 @@ A set of tutorials to make you familiar with the package.
    :hidden:
 
    /tutorials/nc_CCPStack_SingleStation
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="In this Tutorial we are going to get all good receiver functions for the year 2018 for station ...">
-
-.. only:: html
-
- .. figure:: /tutorials/images/thumb/sphx_glr_DataCollectionSAC_thumb.png
-     :alt: SAC Database
-
-     :ref:`sphx_glr_tutorials_DataCollectionSAC.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
    /tutorials/DataCollectionSAC
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="This Tutorial illustrates how to import waveform data from a local database of continuous wavef...">
-
-.. only:: html
-
- .. figure:: /tutorials/images/thumb/sphx_glr_ImportLocalDatabase_thumb.png
-     :alt: Import from Local DataBase
-
-     :ref:`sphx_glr_tutorials_ImportLocalDatabase.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
    /tutorials/ImportLocalDatabase
+   /tutorials/DataCollectionHDF5
 
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="This example is nearly identical to the MSEED tutorial except the fact that we are specifying a...">
 
 .. only:: html
 
- .. figure:: /tutorials/images/thumb/sphx_glr_DataCollectionHDF5_thumb.png
-     :alt: HDF5 Database
+  .. container:: sphx-glr-footer sphx-glr-footer-gallery
 
-     :ref:`sphx_glr_tutorials_DataCollectionHDF5.py`
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-.. raw:: html
+      :download:`Download all examples in Python source code: tutorials_python.zip </tutorials/tutorials_python.zip>`
 
-    </div>
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-.. toctree::
-   :hidden:
-
-   /tutorials/DataCollectionHDF5
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-gallery
-
-
-  .. container:: sphx-glr-download sphx-glr-download-python
-
-    :download:`Download all examples in Python source code: tutorials_python.zip </tutorials/tutorials_python.zip>`
-
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-    :download:`Download all examples in Jupyter notebooks: tutorials_jupyter.zip </tutorials/tutorials_jupyter.zip>`
+      :download:`Download all examples in Jupyter notebooks: tutorials_jupyter.zip </tutorials/tutorials_jupyter.zip>`
 
 
 .. only:: html
