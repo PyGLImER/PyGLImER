@@ -72,7 +72,7 @@ def resample_or_decimate(
     if sr/srn == sr//srn:
         return data.decimate(int(sr//srn), no_filter=True)
     else:
-        return data.resample(srn)
+        return data.resample(srn, window='hann')
 
 
 def convf(u: np.ndarray, v: np.ndarray, nf: int, dt: float) -> np.ndarray:
