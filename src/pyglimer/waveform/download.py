@@ -19,6 +19,8 @@ from http.client import IncompleteRead
 import logging
 import os
 import shutil
+from functools import partial
+from itertools import compress
 from tqdm import tqdm
 
 from joblib import Parallel, delayed
@@ -27,6 +29,8 @@ from obspy import UTCDateTime
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
 from obspy.core.event.catalog import Catalog
+from obspy.core.inventory.station import Station
+from obspy.core.inventory.network import Network
 from obspy.taup import TauPyModel
 from pyasdf import ASDFDataSet
 
@@ -34,8 +38,83 @@ from pyglimer.database.asdf import writeraw
 from pyglimer import tmp
 from pyglimer.utils.roundhalf import roundhalf
 from pyglimer.utils import utils as pu
-from pyglimer.utils.utils import download_full_inventory
+from pyglimer.utils.utils import download_full_inventory, chunks
 from pyglimer.waveform.preprocessh5 import compute_toa
+
+def __download_small_db_sub(
+    event_cat: Catalog, channel: str,
+    rawloc: str, tz: float, ta: float, phase: str, model: TauPyModel,
+    logger: logging.Logger, saveasdf: bool, net: Network, stat: Station) -> dict:
+
+    d = {'event': [], 'startt': [], 'endt': [], 'net': [], 'stat': []}
+    logger.info(f"Checking {net.code}.{stat.code}")
+    for evt in event_cat:
+        try:
+            toa, _, _, _, delta = compute_toa(
+                evt, stat.latitude, stat.longitude, phase, model)
+        except (IndexError, ValueError):
+
+            # occurs when there is no arrival of the phase at stat
+            logger.debug(
+                'No valid arrival found for station %s,' % stat.code
+                + 'event %s, and phase %s' % (evt.resource_id, phase))
+            continue
+
+        # Already in DB?
+        if saveasdf:
+            if wav_in_asdf(net, stat, '*', channel, toa-tz, toa+ta):
+                logger.info(
+                    'File already in database. %s ' % stat.code
+                    + 'Event: %s' % evt.resource_id)
+                continue
+        else:
+            o = (evt.preferred_origin() or evt.origins[0])
+            ot_loc = UTCDateTime(
+                o.time, precision=-1).format_fissures()[:-6]
+            evtlat_loc = str(roundhalf(o.latitude))
+            evtlon_loc = str(roundhalf(o.longitude))
+            folder = os.path.join(
+                rawloc, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
+            fn = os.path.join(folder, '%s.%s.mseed' % (net, stat))
+            if os.path.isfile(fn):
+                logger.info(
+                    'File already in database. %s ' % stat.code
+                    + 'Event: %s' % evt.resource_id)
+                continue
+        # It's new data, so add to request!
+        d['event'].append(evt)
+        d['startt'].append(toa-tz)
+        d['endt'].append(toa+ta)
+        d['net'].append(net.code)
+        d['stat'].append(stat.code)
+
+    # Check the dictionary for overlaps
+    # Filtering overlaps
+    dd = filter_overlapping_times(d)
+    logger.info(f'Found {len(d["net"])-len(dd["net"])} overlaps '
+                f'at {net.code}.{stat.code}')
+
+    return dd
+
+
+def filter_overlapping_times(d):
+    """Filters the found dictionary for overlapping windows.
+    Dictionary looks as follows:
+    ``d = {'event': [], 'startt': [], 'endt': [], 'net': [], 'stat': []}``.
+    """
+
+    # Check overlapping windows and set checkovelap to False if there is overlap
+    checkoverlap = pu.check_UTC_overlap(d['startt'], d['endt'])
+
+    # Create filtered dictionary
+    dfilt = dict()
+    dfilt['event'] = list(compress(d['event'], checkoverlap))
+    dfilt['net'] = list(compress(d['net'], checkoverlap))
+    dfilt['stat'] = list(compress(d['stat'], checkoverlap))
+    dfilt['startt'] = list(compress(d['startt'], checkoverlap))
+    dfilt['endt'] = list(compress(d['endt'], checkoverlap))
+
+    return dfilt
 
 
 def download_small_db(
@@ -72,10 +151,13 @@ def download_small_db(
     os.makedirs(statloc, exist_ok=True)
 
     # Run parallel station loop.
-    out = Parallel(n_jobs=-1, prefer='threads')(
-        delayed(pu.__client__loop__)(client, statloc, bulk_stat)
-        for client in clients)
-    inv = pu.join_inv([inv for inv in out])
+    if len(clients) == 1:
+        inv = pu.__client__loop__(clients[0], statloc, bulk_stat)
+    else:
+        out = Parallel(n_jobs=-1, prefer='')(
+            delayed(pu.__client__loop__)(client, statloc, bulk_stat)
+            for client in clients)
+        inv = pu.join_inv([inv for inv in out])
 
     logger.info(
         'Computing theoretical times of arrival and checking available data.')
@@ -83,78 +165,110 @@ def download_small_db(
     # Now we compute the theoretical arrivals using the events and the station
     # information
     # We make a list of dicts akin to
-    d = {'event': [], 'startt': [], 'endt': [], 'net': [], 'stat': []}
+    networks, stations = [], []
     for net in inv:
         for stat in net:
-            logger.info(f"Checking {net.code}.{stat.code}")
-            for evt in event_cat:
-                try:
-                    toa, _, _, _, delta = compute_toa(
-                        evt, stat.latitude, stat.longitude, phase, model)
-                except (IndexError, ValueError):
+            networks.append(net)
+            stations.append(stat)
 
-                    # occurs when there is no arrival of the phase at stat
-                    logger.debug(
-                        'No valid arrival found for station %s,' % stat.code
-                        + 'event %s, and phase %s' % (evt.resource_id, phase))
-                    continue
+    # Get bulk string for a single station
+    if len(networks) == 1:
+        d = __download_small_db_sub(
+            event_cat, channel, rawloc, tz, ta, phase, model,
+            logger, saveasdf, networks[0], stations[0])
 
-                # Already in DB?
-                if saveasdf:
-                    if wav_in_asdf(net, stat, '*', channel, toa-tz, toa+ta):
-                        logger.info(
-                            'File already in database. %s ' % stat.code
-                            + 'Event: %s' % evt.resource_id)
-                        continue
-                else:
-                    o = (evt.preferred_origin() or evt.origins[0])
-                    ot_loc = UTCDateTime(
-                        o.time, precision=-1).format_fissures()[:-6]
-                    evtlat_loc = str(roundhalf(o.latitude))
-                    evtlon_loc = str(roundhalf(o.longitude))
-                    folder = os.path.join(
-                        rawloc, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
-                    fn = os.path.join(folder, '%s.%s.mseed' % (net, stat))
-                    if os.path.isfile(fn):
-                        logger.info(
-                            'File already in database. %s ' % stat.code
-                            + 'Event: %s' % evt.resource_id)
-                        continue
-                # It's new data, so add to request!
-                d['event'].append(evt)
-                d['startt'].append(toa-tz)
-                d['endt'].append(toa+ta)
-                d['net'].append(net.code)
-                d['stat'].append(stat.code)
+        # Hi bulk
+        netsta_bulk = pu.create_bulk_str(
+            d['net'], d['stat'], '*', channel, d['startt'], d['endt'])
 
-    # Create waveform download bulk list
-    bulk_wav = pu.create_bulk_str(
-        d['net'], d['stat'], '*', channel, d['startt'], d['endt'])
+        # Sort bulk request
+        netsta_bulk.sort()
 
-    if len(bulk_wav) == 0:
+        # Create lists
+        netsta_bulk = [netsta_bulk, ]
+        netsta_d = [d, ]
+
+    # Get bulk string for a one station at a time in parallel
+    else:
+        # Create partial function
+        dsub = partial(
+            __download_small_db_sub,
+            event_cat, channel, rawloc, tz, ta, phase, model,
+            logger, saveasdf)
+
+        # Run partial function in parallel, resulting in one
+        # dictionary per net/sta combo
+        netsta_d = Parallel(n_jobs=20, backend='multiprocessing')(
+            delayed(dsub)(_net, _sta,)for _net, _sta in zip(networks, stations))
+
+        # Create one request per station over all events.
+        # This makes writing an asdf file per station much easier
+        netsta_bulk = []
+        for _net, _sta, _d in zip(networks, stations, netsta_d):
+            # Get bulk stuff
+            mini_bulk = pu.create_bulk_str(
+                _d['net'], _d['stat'], '*', channel, _d['startt'], _d['endt'])
+
+            # Sort bulk request
+            mini_bulk.sort()
+
+            # Add minibulk to overall request
+            netsta_bulk.append(mini_bulk)
+
+
+    if len(netsta_bulk) == 0:
         logger.info('No new data found.')
         return
-
-    # Sort bulk request
-    bulk_wav.sort()
 
     # This does almost certainly need to be split up, so we don't overload the
     # RAM with the downloaded mseeds
     logger.info('Initialising waveform download.')
     logger.debug('The request string looks like this:')
-    for _bw in bulk_wav:
-        logger.debug(f"{_bw}")
+    for _bulkd in netsta_bulk:
+        for _bw in _bulkd:
+            logger.debug(f"{_bw}")
 
     # Create waveform directories
     os.makedirs(rawloc, exist_ok=True)
 
     if len(clients) == 1:
-        pu.__client__loop_wav__(clients[0], rawloc, bulk_wav, d, saveasdf, inv)
+        # Length of request
+        N = len(netsta_bulk)
+
+        # Number of digits
+        Nd = len(str(N))
+
+        # Download station chunks chunks
+        for _i, (_net, _sta, _bulk, _netsta_d) in enumerate(zip(networks, stations, netsta_bulk, netsta_d)):
+            # Provide status
+            logger.info(f"Downloading ... {_i:{Nd}d}/{N:d}")
+
+            # Download
+            pu.__client__loop_wav__(clients[0], rawloc, _bulk, _netsta_d, saveasdf, inv, network=_net.code, station=_sta.code)
+
+            logger.info(f"Downloaded {_i:{Nd}d}/{N:d}")
+        # logger.info(f"Downloaded {N:d}/{N:d} Stations")
+
     else:
-        Parallel(n_jobs=-1, prefer='threads')(
-            delayed(pu.__client__loop_wav__)(
-                client, rawloc, bulk_wav, d, saveasdf, inv)
-            for client in clients)
+        # Length of request
+        N = len(netsta_bulk)
+
+        # Number of digits
+        Nd = len(str(N))
+
+        # Download station chunks chunks
+        for _i, (_net, _sta, _bulk, _netsta_d) in enumerate(zip(networks, stations, netsta_bulk, netsta_d)):
+            # Provide status
+            logger.info(f"Downloading ... {_i:{Nd}d}/{N:d}")
+
+            # Download
+            Parallel(n_jobs=-1, prefer='threads')(
+                delayed(pu.__client__loop_wav__)(
+                    client, rawloc, _bulk, _netsta_d, saveasdf, inv, network=_net.code, station=_sta.code)
+                    for client in clients)
+
+            logger.info(f"Downloaded {_i:{Nd}d}/{N:d}")
+
 
 
 def downloadwav(

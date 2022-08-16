@@ -70,6 +70,26 @@ class TestJoinInv(unittest.TestCase):
         # Just testing the test
         self.assertNotEqual(inv0, inv1)
 
+class TestCheckOverlap(unittest.TestCase):
+    def test_result(self):
+
+        startarray = [1,   5, 16, 35, 40]
+        endarray = [10, 15, 30, 40, 45]
+
+        # Random starttime
+        utctime = UTCDateTime(2022,2,2,12,0,30)
+
+        # Make array of UTCDatetime as a test
+        start = [utctime + _i for _i in startarray]
+        end = [utctime + _i for _i in endarray]
+
+        # Check results
+        result = [False, False, True, True, True]
+        check = pu.check_UTC_overlap(start, end)
+
+        # Testing the two arrays
+        np.testing.assert_array_equal(result, check)
+
 
 class TestDownloadFullInventory(unittest.TestCase):
     @patch('pyglimer.utils.utils.os.listdir')
