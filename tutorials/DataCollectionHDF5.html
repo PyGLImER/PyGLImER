@@ -7,22 +7,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>HDF5 Database</title>
-<script>
-  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
-</script>
-
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+  <link href="../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
 
-
+  
   <link rel="stylesheet"
-    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+    href="../_static/vendor/fontawesome/6.1.2/css/all.min.css">
   <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
@@ -30,9 +30,9 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css" />
-
+  
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -41,24 +41,44 @@
     <script src="../_static/doctools.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/DataCollectionHDF5';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Receiver Functions" href="../chapters/creation/index.html" />
     <link rel="prev" title="Import from Local DataBase" href="ImportLocalDatabase.html" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="docsearch:language" content="en">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
   </head>
   
   
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
-    <div class="bd-header-announcement container-fluid" id="banner">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
       
-
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
     </div>
+  </div>
 
-    
-    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
-
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fas fa-bars"></span>
+  </label>
   <div id="navbar-start">
     
     
@@ -66,9 +86,15 @@
 
 
 <a class="navbar-brand logo" href="../index.html">
+
   
   
   
+  
+  
+  
+  
+
   
     <img src="../_static/logo_horizontal_colour.png" class="logo__image only-light" alt="Logo image">
     <img src="../_static/logo_horizontal_colour.png" class="logo__image only-dark" alt="Logo image">
@@ -78,78 +104,100 @@
     
   </div>
 
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="fas fa-bars"></span>
-  </button>
-
   
-  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+  <div class="col-lg-9 navbar-header-items">
     <div id="navbar-center" class="mr-auto">
       
       <div class="navbar-center-item">
-        <ul id="navbar-main-elements" class="navbar-nav">
-    <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/introduction/introduction.html">
-  Introduction
- </a>
-</li>
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/introduction/introduction.html">
+                        Introduction
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/introduction/installation.html">
-  Installation
- </a>
-</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/introduction/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 current active nav-item">
- <a class="reference internal nav-link" href="index.html">
-  Tutorials
- </a>
-</li>
+                <li class="nav-item current active">
+                    <a class="nav-link" href="index.html">
+                        Tutorials
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/creation/index.html">
-  Receiver Functions
- </a>
-</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/creation/index.html">
+                        Receiver Functions
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/receiver_functions/index.html">
-  RF Handling
- </a>
-</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/receiver_functions/index.html">
+                        RF Handling
+                    </a>
+                </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/ccp/index.html">
+                        CCP
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/ccp/index.html">
-  CCP
- </a>
-</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/plotting/index.html">
+                        Plotting
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/plotting/index.html">
-  Plotting
- </a>
-</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/api/index.html">
+                        API
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/api/index.html">
-  API
- </a>
-</li>
-
-    
-    <li class="nav-item">
-        <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
-    </li>
-    
-</ul>
+            <li class="nav-item">
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+            </li>
+                </div>
+            </div>
+            
+    </ul>
+</nav>
       </div>
       
     </div>
 
     <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+      </div>
       
       <div class="navbar-end-item">
-        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
     <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
     <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
     <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
@@ -159,7 +207,13 @@
       <div class="navbar-end-item">
         <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
         <li class="nav-item">
-          <a class="nav-link" href="https://github.com/PeterMakus/PyGLImER" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -167,21 +221,155 @@
       
     </div>
   </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fas fa-outdent"></span>
+  </label>
+  
+
 </div>
-    </nav>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/introduction/introduction.html">
+                        Introduction
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/introduction/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="index.html">
+                        Tutorials
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/creation/index.html">
+                        Receiver Functions
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/receiver_functions/index.html">
+                        RF Handling
+                    </a>
+                </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/ccp/index.html">
+                        CCP
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/plotting/index.html">
+                        Plotting
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/api/index.html">
+                        API
+                    </a>
+                </li>
+                
+
+            <li class="nav-item">
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+            </li>
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+      </div>
     
 
-    <div class="bd-container container-xl">
-      <div class="bd-container__inner row">
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
           
+          
+          
+          
+          
+          
+          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
 
-<!-- Only show if we have sidebars configured, else just a small margin  -->
-<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
-  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
-  <i class="icon fas fa-search"></i>
-  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
-</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
-  <div class="bd-toc-item active">
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
     <ul class="current nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="nc_CCPStack_SingleStation.html">
@@ -207,74 +395,30 @@
 
   </div>
 </nav>
-  </div>
-  <div class="sidebar-end-items">
-  </div>
-</div>
-
-
-          
-
-
-<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
-  
-    
-    <div class="toc-item">
-      
-<div class="tocsection onthispage mt-5 pt-1 pb-3">
-    <i class="fas fa-list"></i> On this page
-</div>
-
-<nav id="bd-toc-nav">
-    <ul class="visible nav section-nav flex-column">
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#downloading-event-station-metadata">
-   Downloading Event &amp; Station Metadata
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#first-receiver-function-plots">
-   First Receiver function plots
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#plot-single-rf">
-     Plot single RF
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#plot-rf-section">
-     Plot RF section
-    </a>
-   </li>
-  </ul>
- </li>
-</ul>
-
-</nav>
     </div>
-    
-    <div class="toc-item">
-      
-
-<div class="tocsection editthispage">
-    <a href="https://github.com/PeterMakus/PyGLImER/edit/master/docs/tutorials/DataCollectionHDF5.rst">
-        <i class="fas fa-pencil-alt"></i> Edit this page
-    </a>
-</div>
-
-    </div>
-    
+  </div>
   
-</div>
 
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
 
-          
-          
-          <div class="bd-content col-12 col-md-9 col-xl-7">
-              
-              <article class="bd-article" role="main">
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
                 
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p>Click <a class="reference internal" href="#sphx-glr-download-tutorials-datacollectionhdf5-py"><span class="std std-ref">here</span></a>
@@ -535,18 +679,6 @@ parsed all needed information to <a class="reference internal" href="../chapters
 /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.60.BH2__2021-04-18T06:54:22__2021-04-18T06:56:51__raw_recording&#39; already exists in file. Will not be added!
   warnings.warn(msg, ASDFWarning)
 /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.60.BHZ__2021-04-18T06:54:22__2021-04-18T06:56:51__raw_recording&#39; already exists in file. Will not be added!
-  warnings.warn(msg, ASDFWarning)
-/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.60.BH1__2021-04-18T00:42:09__2021-04-18T00:44:39__raw_recording&#39; already exists in file. Will not be added!
-  warnings.warn(msg, ASDFWarning)
-/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.60.BH2__2021-04-18T00:42:09__2021-04-18T00:44:39__raw_recording&#39; already exists in file. Will not be added!
-  warnings.warn(msg, ASDFWarning)
-/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.60.BHZ__2021-04-18T00:42:09__2021-04-18T00:44:39__raw_recording&#39; already exists in file. Will not be added!
-  warnings.warn(msg, ASDFWarning)
-/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.60.BH1__2021-04-18T00:41:53__2021-04-18T00:44:23__raw_recording&#39; already exists in file. Will not be added!
-  warnings.warn(msg, ASDFWarning)
-/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.60.BH2__2021-04-18T00:41:53__2021-04-18T00:44:23__raw_recording&#39; already exists in file. Will not be added!
-  warnings.warn(msg, ASDFWarning)
-/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.60.BHZ__2021-04-18T00:41:53__2021-04-18T00:44:23__raw_recording&#39; already exists in file. Will not be added!
   warnings.warn(msg, ASDFWarning)
 /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.60.BH1__2021-04-14T04:41:40__2021-04-14T04:44:10__raw_recording&#39; already exists in file. Will not be added!
   warnings.warn(msg, ASDFWarning)
@@ -829,7 +961,7 @@ to count how many traces it contains.</p>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of downloaded waveforms: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Number of downloaded waveforms: 213
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Number of downloaded waveforms: 207
 </pre></div>
 </div>
 <p>The final step to get you receiver function data is the preprocessing.
@@ -862,152 +994,96 @@ that very coordinate system.
 
   0%|          | 0/289 [00:00&lt;?, ?it/s]
 
-  0%|          | 1/289 [00:00&lt;00:35,  8.20it/s]
+  0%|          | 1/289 [00:00&lt;00:41,  6.87it/s]
 
-  1%|1         | 4/289 [00:00&lt;00:16, 17.61it/s]
+  1%|1         | 4/289 [00:00&lt;00:19, 14.46it/s]
 
-  2%|2         | 6/289 [00:00&lt;00:16, 17.29it/s]
+  2%|2         | 6/289 [00:00&lt;00:19, 14.18it/s]
 
-  6%|5         | 17/289 [00:00&lt;00:06, 44.94it/s]
+  6%|5         | 17/289 [00:00&lt;00:07, 37.05it/s]
 
-  8%|7         | 22/289 [00:00&lt;00:06, 44.00it/s]
+  7%|7         | 21/289 [00:00&lt;00:07, 34.79it/s]
 
-  9%|9         | 27/289 [00:01&lt;00:12, 21.83it/s]
+  9%|8         | 25/289 [00:01&lt;00:10, 24.49it/s]
 
- 11%|#         | 31/289 [00:01&lt;00:10, 24.07it/s]
+ 10%|9         | 28/289 [00:01&lt;00:13, 18.92it/s]
 
- 12%|#2        | 35/289 [00:01&lt;00:09, 26.13it/s]
+ 11%|#         | 31/289 [00:01&lt;00:13, 19.42it/s]
 
- 14%|#4        | 41/289 [00:01&lt;00:07, 32.00it/s]
+ 12%|#1        | 34/289 [00:01&lt;00:12, 19.77it/s]
 
- 16%|#5        | 45/289 [00:01&lt;00:09, 25.69it/s]
+ 14%|#4        | 41/289 [00:01&lt;00:08, 28.11it/s]
 
- 17%|#6        | 49/289 [00:01&lt;00:10, 22.59it/s]
+ 16%|#5        | 45/289 [00:01&lt;00:11, 22.14it/s]
 
- 18%|#7        | 52/289 [00:02&lt;00:10, 23.26it/s]
+ 17%|#6        | 48/289 [00:02&lt;00:10, 21.98it/s]
 
- 19%|#9        | 55/289 [00:02&lt;00:12, 19.37it/s]
+ 18%|#7        | 51/289 [00:02&lt;00:13, 17.67it/s]
 
- 20%|##        | 59/289 [00:02&lt;00:10, 22.41it/s]
+ 19%|#8        | 54/289 [00:02&lt;00:15, 15.25it/s]
 
- 21%|##1       | 62/289 [00:02&lt;00:09, 23.06it/s]
+ 20%|##        | 59/289 [00:02&lt;00:11, 19.70it/s]
 
- 22%|##2       | 65/289 [00:02&lt;00:09, 23.35it/s]
+ 21%|##1       | 62/289 [00:02&lt;00:11, 19.91it/s]
 
- 24%|##3       | 68/289 [00:02&lt;00:09, 24.03it/s]
+ 22%|##2       | 65/289 [00:03&lt;00:11, 19.86it/s]
 
- 25%|##4       | 71/289 [00:02&lt;00:08, 24.47it/s]
+ 24%|##3       | 68/289 [00:03&lt;00:11, 20.08it/s]
 
- 27%|##6       | 77/289 [00:02&lt;00:06, 31.88it/s]
+ 25%|##4       | 71/289 [00:03&lt;00:10, 20.10it/s]
 
- 28%|##8       | 81/289 [00:03&lt;00:06, 32.75it/s]
+ 27%|##6       | 77/289 [00:03&lt;00:08, 26.07it/s]
 
- 29%|##9       | 85/289 [00:03&lt;00:06, 32.67it/s]2022-08-11 12:07:57,947 - ERROR - RF Creation failed. Waveform Data:
-IU.HRV.2021108T002925.0380Z
-original error:
-Unexpected behavior in rotation. Please file a bug report on github.
-Traceback (most recent call last):
-  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 346, in __station_process__
-    st, _, infodict = __rotate_qc(
-  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 405, in __rotate_qc
-    st.rotate(method=&#39;-&gt;ZNE&#39;, inventory=station_inv)
-  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 2733, in rotate
-    return self._rotate_to_zne(inventory, **kwargs)
-  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3469, in _rotate_to_zne
-    self._rotate_specific_channels_to_zne(
-  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3542, in _rotate_specific_channels_to_zne
-    raise NotImplementedError(msg)
-NotImplementedError: Unexpected behavior in rotation. Please file a bug report on github.
-ERROR:pyglimer.request.preprocess.RF:RF Creation failed. Waveform Data:
-IU.HRV.2021108T002925.0380Z
-original error:
-Unexpected behavior in rotation. Please file a bug report on github.
-Traceback (most recent call last):
-  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 346, in __station_process__
-    st, _, infodict = __rotate_qc(
-  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 405, in __rotate_qc
-    st.rotate(method=&#39;-&gt;ZNE&#39;, inventory=station_inv)
-  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 2733, in rotate
-    return self._rotate_to_zne(inventory, **kwargs)
-  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3469, in _rotate_to_zne
-    self._rotate_specific_channels_to_zne(
-  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3542, in _rotate_specific_channels_to_zne
-    raise NotImplementedError(msg)
-NotImplementedError: Unexpected behavior in rotation. Please file a bug report on github.
-2022-08-11 12:07:58,149 - ERROR - RF Creation failed. Waveform Data:
-IU.HRV.2021108T002912.4990Z
-original error:
-Unexpected behavior in rotation. Please file a bug report on github.
-Traceback (most recent call last):
-  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 346, in __station_process__
-    st, _, infodict = __rotate_qc(
-  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 405, in __rotate_qc
-    st.rotate(method=&#39;-&gt;ZNE&#39;, inventory=station_inv)
-  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 2733, in rotate
-    return self._rotate_to_zne(inventory, **kwargs)
-  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3469, in _rotate_to_zne
-    self._rotate_specific_channels_to_zne(
-  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3542, in _rotate_specific_channels_to_zne
-    raise NotImplementedError(msg)
-NotImplementedError: Unexpected behavior in rotation. Please file a bug report on github.
-ERROR:pyglimer.request.preprocess.RF:RF Creation failed. Waveform Data:
-IU.HRV.2021108T002912.4990Z
-original error:
-Unexpected behavior in rotation. Please file a bug report on github.
-Traceback (most recent call last):
-  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 346, in __station_process__
-    st, _, infodict = __rotate_qc(
-  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 405, in __rotate_qc
-    st.rotate(method=&#39;-&gt;ZNE&#39;, inventory=station_inv)
-  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 2733, in rotate
-    return self._rotate_to_zne(inventory, **kwargs)
-  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3469, in _rotate_to_zne
-    self._rotate_specific_channels_to_zne(
-  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3542, in _rotate_specific_channels_to_zne
-    raise NotImplementedError(msg)
-NotImplementedError: Unexpected behavior in rotation. Please file a bug report on github.
+ 28%|##8       | 81/289 [00:03&lt;00:07, 26.62it/s]
 
+ 29%|##9       | 85/289 [00:03&lt;00:07, 26.55it/s]
 
- 31%|###       | 89/289 [00:03&lt;00:12, 16.54it/s]
+ 30%|###       | 88/289 [00:04&lt;00:09, 21.08it/s]
 
- 33%|###2      | 94/289 [00:03&lt;00:09, 21.00it/s]
+ 31%|###1      | 91/289 [00:04&lt;00:09, 21.48it/s]
 
- 37%|###6      | 106/289 [00:03&lt;00:04, 36.93it/s]
+ 33%|###2      | 94/289 [00:04&lt;00:09, 21.26it/s]
 
- 39%|###8      | 112/289 [00:04&lt;00:05, 32.59it/s]
+ 37%|###6      | 106/289 [00:04&lt;00:04, 39.56it/s]
 
- 40%|####      | 117/289 [00:04&lt;00:04, 34.71it/s]
+ 38%|###8      | 111/289 [00:04&lt;00:05, 29.93it/s]
 
- 42%|####2     | 122/289 [00:04&lt;00:05, 29.75it/s]
+ 40%|####      | 117/289 [00:04&lt;00:05, 32.88it/s]
 
- 44%|####3     | 126/289 [00:04&lt;00:06, 25.52it/s]
+ 42%|####1     | 121/289 [00:05&lt;00:06, 25.50it/s]
 
- 45%|####4     | 130/289 [00:04&lt;00:05, 27.31it/s]
+ 43%|####3     | 125/289 [00:05&lt;00:06, 26.51it/s]
 
- 46%|####6     | 134/289 [00:05&lt;00:05, 28.86it/s]
+ 45%|####4     | 129/289 [00:05&lt;00:07, 21.98it/s]
 
- 65%|######4   | 187/289 [00:05&lt;00:00, 126.56it/s]
+ 46%|####6     | 133/289 [00:05&lt;00:06, 23.58it/s]
 
- 70%|######9   | 202/289 [00:05&lt;00:01, 64.26it/s]
+ 65%|######4   | 187/289 [00:05&lt;00:00, 109.64it/s]
 
- 74%|#######3  | 213/289 [00:05&lt;00:01, 59.70it/s]
+ 69%|######9   | 200/289 [00:06&lt;00:01, 61.08it/s]
 
- 77%|#######6  | 222/289 [00:06&lt;00:01, 54.02it/s]
+ 73%|#######2  | 210/289 [00:06&lt;00:01, 47.28it/s]
 
- 83%|########2 | 239/289 [00:06&lt;00:00, 68.75it/s]
+ 75%|#######5  | 218/289 [00:07&lt;00:01, 41.90it/s]
 
- 86%|########6 | 249/289 [00:06&lt;00:00, 71.79it/s]
+ 83%|########2 | 239/289 [00:07&lt;00:00, 59.67it/s]
 
- 90%|########9 | 259/289 [00:06&lt;00:00, 45.43it/s]
+ 86%|########5 | 248/289 [00:07&lt;00:00, 61.25it/s]
 
- 92%|#########2| 267/289 [00:07&lt;00:00, 26.68it/s]
+ 89%|########8 | 257/289 [00:07&lt;00:00, 37.86it/s]
 
- 94%|#########4| 273/289 [00:08&lt;00:00, 23.90it/s]
+ 91%|#########1| 264/289 [00:08&lt;00:00, 27.99it/s]
 
- 96%|#########6| 278/289 [00:08&lt;00:00, 21.36it/s]
+ 93%|#########3| 269/289 [00:08&lt;00:00, 20.70it/s]
 
- 98%|#########7| 282/289 [00:08&lt;00:00, 22.68it/s]
-100%|##########| 289/289 [00:08&lt;00:00, 34.04it/s]
+ 94%|#########4| 273/289 [00:09&lt;00:00, 19.17it/s]
+
+ 96%|#########5| 276/289 [00:09&lt;00:00, 17.40it/s]
+
+ 97%|#########6| 279/289 [00:09&lt;00:00, 18.17it/s]
+
+ 98%|#########7| 282/289 [00:09&lt;00:00, 18.44it/s]
+100%|##########| 289/289 [00:09&lt;00:00, 29.41it/s]
 /home/runner/work/PyGLImER/PyGLImER/src/pyglimer/database/rfh5.py:376: UserWarning: The header contains an item of type &lt;class &#39;obspy.core.util.attribdict.AttribDict&#39;&gt;. Information            of this type cannot be written to an hdf5 file.
   warnings.warn(
 /home/runner/work/PyGLImER/PyGLImER/src/pyglimer/database/rfh5.py:376: UserWarning: The header contains an item of type &lt;class &#39;obspy.core.inventory.response.Response&#39;&gt;. Information            of this type cannot be written to an hdf5 file.
@@ -1015,8 +1091,8 @@ NotImplementedError: Unexpected behavior in rotation. Please file a bug report o
 /home/runner/work/PyGLImER/PyGLImER/src/pyglimer/database/rfh5.py:376: UserWarning: The header contains an item of type &lt;class &#39;obspy.core.event.resourceid.ResourceIdentifier&#39;&gt;. Information            of this type cannot be written to an hdf5 file.
   warnings.warn(
 
-100%|##########| 1/1 [00:08&lt;00:00,  8.66s/it]
-100%|##########| 1/1 [00:08&lt;00:00,  8.66s/it]
+100%|##########| 1/1 [00:10&lt;00:00, 10.02s/it]
+100%|##########| 1/1 [00:10&lt;00:00, 10.02s/it]
 </pre></div>
 </div>
 <hr class="docutils" />
@@ -1124,7 +1200,7 @@ already see trends:</p>
 </div>
 <p>As simple as that you can create your own receiver functions with
 just a single smalle script.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  14.427 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  23.463 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-datacollectionhdf5-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/2d66953dda8e36d9559e64d07e0d09e0/DataCollectionHDF5.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">DataCollectionHDF5.py</span></code></a></p>
@@ -1139,12 +1215,12 @@ just a single smalle script.</p>
 </section>
 
 
-              </article>
-              
-
-              
-              <footer class="bd-footer-article">
-                  <!-- Previous / next buttons -->
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
 <div class='prev-next-area'>
   <a class='left-prev' id="prev-link" href="ImportLocalDatabase.html" title="previous page">
       <i class="fas fa-angle-left"></i>
@@ -1161,33 +1237,109 @@ just a single smalle script.</p>
   <i class="fas fa-angle-right"></i>
   </a>
 </div>
-              </footer>
-              
+            </footer>
+            
           </div>
           
-      </div>
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fas fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#downloading-event-station-metadata">
+   Downloading Event &amp; Station Metadata
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#first-receiver-function-plots">
+   First Receiver function plots
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#plot-single-rf">
+     Plot single RF
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#plot-rf-section">
+     Plot RF section
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/PeterMakus/PyGLImER/edit/master/docs/tutorials/DataCollectionHDF5.rst">
+        <i class="fas fa-pencil-alt"></i> Edit this page
+    </a>
+</div>
+
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="../_sources/tutorials/DataCollectionHDF5.rst.txt">
+        <i class="fas fa-file-alt"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
     </div>
+  </div>
 
   
-  
+    
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
 
-<footer class="bd-footer"><div class="bd-footer__inner container">
+  <footer class="bd-footer"><div class="bd-footer__inner container">
   
   <div class="footer-item">
-    <p class="copyright">
+    
+<p class="copyright">
+
     &copy; Copyright 2022, the PyGLImER development team.<br>
+
 </p>
+
   </div>
   
   <div class="footer-item">
-    <p class="sphinx-version">
+    
+<p class="sphinx-version">
 Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
 </p>
+
   </div>
   
 </div>
-</footer>
+  </footer>
   </body>
 </html>

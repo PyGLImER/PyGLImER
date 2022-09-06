@@ -7,22 +7,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>SAC Database</title>
-<script>
-  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
-</script>
-
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+  <link href="../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
 
-
+  
   <link rel="stylesheet"
-    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+    href="../_static/vendor/fontawesome/6.1.2/css/all.min.css">
   <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
@@ -30,9 +30,9 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css" />
-
+  
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -41,24 +41,44 @@
     <script src="../_static/doctools.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/DataCollectionSAC';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Import from Local DataBase" href="ImportLocalDatabase.html" />
     <link rel="prev" title="Common Conversion Point Stack of a Single Station" href="nc_CCPStack_SingleStation.html" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="docsearch:language" content="en">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
   </head>
   
   
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
-    <div class="bd-header-announcement container-fluid" id="banner">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
       
-
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
     </div>
+  </div>
 
-    
-    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
-
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fas fa-bars"></span>
+  </label>
   <div id="navbar-start">
     
     
@@ -66,9 +86,15 @@
 
 
 <a class="navbar-brand logo" href="../index.html">
+
   
   
   
+  
+  
+  
+  
+
   
     <img src="../_static/logo_horizontal_colour.png" class="logo__image only-light" alt="Logo image">
     <img src="../_static/logo_horizontal_colour.png" class="logo__image only-dark" alt="Logo image">
@@ -78,78 +104,100 @@
     
   </div>
 
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="fas fa-bars"></span>
-  </button>
-
   
-  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+  <div class="col-lg-9 navbar-header-items">
     <div id="navbar-center" class="mr-auto">
       
       <div class="navbar-center-item">
-        <ul id="navbar-main-elements" class="navbar-nav">
-    <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/introduction/introduction.html">
-  Introduction
- </a>
-</li>
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/introduction/introduction.html">
+                        Introduction
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/introduction/installation.html">
-  Installation
- </a>
-</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/introduction/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 current active nav-item">
- <a class="reference internal nav-link" href="index.html">
-  Tutorials
- </a>
-</li>
+                <li class="nav-item current active">
+                    <a class="nav-link" href="index.html">
+                        Tutorials
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/creation/index.html">
-  Receiver Functions
- </a>
-</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/creation/index.html">
+                        Receiver Functions
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/receiver_functions/index.html">
-  RF Handling
- </a>
-</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/receiver_functions/index.html">
+                        RF Handling
+                    </a>
+                </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/ccp/index.html">
+                        CCP
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/ccp/index.html">
-  CCP
- </a>
-</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/plotting/index.html">
+                        Plotting
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/plotting/index.html">
-  Plotting
- </a>
-</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/api/index.html">
+                        API
+                    </a>
+                </li>
+                
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../chapters/api/index.html">
-  API
- </a>
-</li>
-
-    
-    <li class="nav-item">
-        <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
-    </li>
-    
-</ul>
+            <li class="nav-item">
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+            </li>
+                </div>
+            </div>
+            
+    </ul>
+</nav>
       </div>
       
     </div>
 
     <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+      </div>
       
       <div class="navbar-end-item">
-        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
     <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
     <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
     <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
@@ -159,7 +207,13 @@
       <div class="navbar-end-item">
         <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
         <li class="nav-item">
-          <a class="nav-link" href="https://github.com/PeterMakus/PyGLImER" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -167,21 +221,155 @@
       
     </div>
   </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fas fa-outdent"></span>
+  </label>
+  
+
 </div>
-    </nav>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/introduction/introduction.html">
+                        Introduction
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/introduction/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="index.html">
+                        Tutorials
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/creation/index.html">
+                        Receiver Functions
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/receiver_functions/index.html">
+                        RF Handling
+                    </a>
+                </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/ccp/index.html">
+                        CCP
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/plotting/index.html">
+                        Plotting
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../chapters/api/index.html">
+                        API
+                    </a>
+                </li>
+                
+
+            <li class="nav-item">
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+            </li>
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+      </div>
     
 
-    <div class="bd-container container-xl">
-      <div class="bd-container__inner row">
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
           
+          
+          
+          
+          
+          
+          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
 
-<!-- Only show if we have sidebars configured, else just a small margin  -->
-<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
-  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
-  <i class="icon fas fa-search"></i>
-  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
-</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
-  <div class="bd-toc-item active">
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
     <ul class="current nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="nc_CCPStack_SingleStation.html">
@@ -207,91 +395,30 @@
 
   </div>
 </nav>
-  </div>
-  <div class="sidebar-end-items">
-  </div>
-</div>
-
-
-          
-
-
-<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
-  
-    
-    <div class="toc-item">
-      
-<div class="tocsection onthispage mt-5 pt-1 pb-3">
-    <i class="fas fa-list"></i> On this page
-</div>
-
-<nav id="bd-toc-nav">
-    <ul class="visible nav section-nav flex-column">
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#downloading-event-station-metadata">
-   Downloading Event &amp; Station Metadata
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#downloading-waveform-data-and-station-information">
-   Downloading waveform data and station information
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#first-receiver-functions">
-   First Receiver functions
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#read-the-iu-hrv-receiver-functions-as-a-receiver-function-stream">
-     Read the IU-HRV receiver functions as a Receiver function stream
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#first-receiver-function-plots">
-   First Receiver function plots
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#plot-single-rf">
-     Plot single RF
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#plot-rf-section">
-     Plot RF section
-    </a>
-   </li>
-  </ul>
- </li>
-</ul>
-
-</nav>
     </div>
-    
-    <div class="toc-item">
-      
-
-<div class="tocsection editthispage">
-    <a href="https://github.com/PeterMakus/PyGLImER/edit/master/docs/tutorials/DataCollectionSAC.rst">
-        <i class="fas fa-pencil-alt"></i> Edit this page
-    </a>
-</div>
-
-    </div>
-    
+  </div>
   
-</div>
 
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
 
-          
-          
-          <div class="bd-content col-12 col-md-9 col-xl-7">
-              
-              <article class="bd-article" role="main">
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
                 
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p>Click <a class="reference internal" href="#sphx-glr-download-tutorials-datacollectionsac-py"><span class="std std-ref">here</span></a>
@@ -423,7 +550,7 @@ as strings. Note that this method requires you to define the channels, you’d l
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of downloaded waveforms: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="n">data_storage</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Number of downloaded waveforms: 71
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Number of downloaded waveforms: 69
 </pre></div>
 </div>
 <p>The final step to get you receiver function data is the preprocessing.
@@ -455,361 +582,358 @@ expression is needed for running this examples</p>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  5.95it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 17.79it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  5.45it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 16.27it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.50it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.74it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.07it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  5.83it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  9.62it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  9.02it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5685.91it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 4473.13it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6696.60it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5647.63it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6682.37it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5910.25it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 12.92it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.32it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 11.29it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 16.88it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  7.06it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 21.08it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.76it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.18it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  7.45it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  7.24it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  7.28it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 12.98it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  9.69it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.84it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.41it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.42it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  9.71it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.78it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.59it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 12.60it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 18.82it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.82it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.66it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  5.49it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  8.21it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5971.96it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5398.07it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6703.74it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5893.64it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 14.03it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.96it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.85it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.68it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.91it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  6.72it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.11it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.84it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  6.36it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  9.62it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 14.03it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.97it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.19it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.72it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.91it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 11.04it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.40it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.75it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.66it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.06it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.83it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.40it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 12.41it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  9.81it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5123.34it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 4798.97it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  7.38it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 11.05it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.90it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.75it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.81it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.64it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 12.75it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.05it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.07it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.15it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 11.84it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  9.19it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5470.83it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 4696.87it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.91it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.64it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.29it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 18.78it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6123.07it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5426.01it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.86it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.70it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  5.93it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  8.88it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 21.02it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.98it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.26it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.22it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5470.83it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 4741.11it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.61it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  6.79it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  6.86it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  6.82it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.12it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 18.26it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.87it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.72it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.58it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.29it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6029.19it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5343.06it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.94it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.72it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.44it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.21it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5838.94it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5379.61it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6703.74it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5709.13it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6707.31it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  7.06it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.78it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.23it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  7.41it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 11.09it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5828.12it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.98it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.94it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.71it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.67it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.81it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.33it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.78it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.42it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 13.97it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.88it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5904.70it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5706.54it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
  33%|###3      | 1/3 [00:00&lt;00:00,  6.92it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.65it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.61it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.06it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5963.47it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 12.64it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 18.87it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6502.80it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5049.32it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6707.31it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 18.98it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 18.94it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6489.38it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.08it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.04it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6629.56it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.78it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.21it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6728.83it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 14.11it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  6.12it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6657.63it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 12.70it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 18.95it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6944.21it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5343.06it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6797.90it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.75it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.13it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 7061.12it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5379.61it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6849.71it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5660.33it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6710.89it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5803.93it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6917.49it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5758.77it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6845.98it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5743.00it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6816.31it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5801.25it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6587.91it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5857.97it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 7080.99it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5444.79it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.91it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  6.97it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.42it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5652.70it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6061.13it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5809.29it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  7.01it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  7.02it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.51it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5803.93it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 21.06it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 21.02it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5817.34it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5543.13it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5857.97it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.95it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.74it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5727.32it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  3.72it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 11.13it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5793.24it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.73it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.69it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5841.65it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5506.74it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5516.40it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 21.11it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 21.07it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.86it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  7.03it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.49it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5227.63it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  7.20it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  6.75it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.20it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.90it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.86it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 4739.33it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.83it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.37it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
  33%|###3      | 1/3 [00:00&lt;00:00,  6.98it/s]
 100%|##########| 3/3 [00:00&lt;00:00, 20.83it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5983.32it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.57it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.53it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6725.23it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 4498.72it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6757.74it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.52it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.48it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6355.01it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.43it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.20it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6557.02it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5395.76it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6567.28it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5709.13it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 14.02it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.95it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5077.85it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5980.47it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5735.15it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 21.04it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 21.00it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5660.33it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 5518.82it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5365.85it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.51it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.77it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.10it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 14.23it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 21.26it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  7.03it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 21.00it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5269.23it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.94it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  8.83it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  8.82it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 4588.95it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  5.97it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.46it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  9.72it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  7.11it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 21.21it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.40it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 19.08it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5499.52it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.47it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  6.30it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  5.44it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  5.65it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.28it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  6.60it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  6.48it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  6.47it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.95it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 20.71it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 11.13it/s]
+100%|##########| 3/3 [00:00&lt;00:00,  5.73it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  6.79it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00,  6.86it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 10.25it/s]
+
+  0%|          | 0/3 [00:00&lt;?, ?it/s]
+ 67%|######6   | 2/3 [00:00&lt;00:00, 13.88it/s]
 100%|##########| 3/3 [00:00&lt;00:00, 20.72it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6026.30it/s]
+ 33%|###3      | 1/3 [00:00&lt;00:00,  5.84it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 17.42it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.96it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  7.00it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  6.09it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  6.31it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5540.69it/s]
 
   0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  3.70it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  5.09it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  5.78it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  5.36it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.84it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.44it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 12.33it/s]
-100%|##########| 3/3 [00:00&lt;00:00,  9.77it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.59it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00,  6.77it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 10.10it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 67%|######6   | 2/3 [00:00&lt;00:00, 14.05it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 20.99it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
- 33%|###3      | 1/3 [00:00&lt;00:00,  6.42it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 19.19it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6204.59it/s]
-
-  0%|          | 0/3 [00:00&lt;?, ?it/s]
-100%|##########| 3/3 [00:00&lt;00:00, 6775.94it/s]
+100%|##########| 3/3 [00:00&lt;00:00, 5673.09it/s]
 
   0%|          | 0/1 [00:00&lt;?, ?it/s]
-100%|##########| 1/1 [00:00&lt;00:00,  6.93it/s]
-100%|##########| 1/1 [00:00&lt;00:00,  6.91it/s]
+100%|##########| 1/1 [00:00&lt;00:00,  6.75it/s]
+100%|##########| 1/1 [00:00&lt;00:00,  6.73it/s]
 </pre></div>
 </div>
 </section>
@@ -914,7 +1038,7 @@ already see trends:</p>
 </div>
 <p>As simple as that you can create your own receiver functions with
 just a single smalle script.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  15.730 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 3 minutes  3.724 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-datacollectionsac-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/c88afcc07a6e8aa6f6d30f44c5104cd8/DataCollectionSAC.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">DataCollectionSAC.py</span></code></a></p>
@@ -929,12 +1053,12 @@ just a single smalle script.</p>
 </section>
 
 
-              </article>
-              
-
-              
-              <footer class="bd-footer-article">
-                  <!-- Previous / next buttons -->
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
 <div class='prev-next-area'>
   <a class='left-prev' id="prev-link" href="nc_CCPStack_SingleStation.html" title="previous page">
       <i class="fas fa-angle-left"></i>
@@ -951,33 +1075,126 @@ just a single smalle script.</p>
   <i class="fas fa-angle-right"></i>
   </a>
 </div>
-              </footer>
-              
+            </footer>
+            
           </div>
           
-      </div>
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fas fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#downloading-event-station-metadata">
+   Downloading Event &amp; Station Metadata
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#downloading-waveform-data-and-station-information">
+   Downloading waveform data and station information
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#first-receiver-functions">
+   First Receiver functions
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#read-the-iu-hrv-receiver-functions-as-a-receiver-function-stream">
+     Read the IU-HRV receiver functions as a Receiver function stream
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#first-receiver-function-plots">
+   First Receiver function plots
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#plot-single-rf">
+     Plot single RF
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#plot-rf-section">
+     Plot RF section
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/PeterMakus/PyGLImER/edit/master/docs/tutorials/DataCollectionSAC.rst">
+        <i class="fas fa-pencil-alt"></i> Edit this page
+    </a>
+</div>
+
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="../_sources/tutorials/DataCollectionSAC.rst.txt">
+        <i class="fas fa-file-alt"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
     </div>
+  </div>
 
   
-  
+    
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
 
-<footer class="bd-footer"><div class="bd-footer__inner container">
+  <footer class="bd-footer"><div class="bd-footer__inner container">
   
   <div class="footer-item">
-    <p class="copyright">
+    
+<p class="copyright">
+
     &copy; Copyright 2022, the PyGLImER development team.<br>
+
 </p>
+
   </div>
   
   <div class="footer-item">
-    <p class="sphinx-version">
+    
+<p class="sphinx-version">
 Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
 </p>
+
   </div>
   
 </div>
-</footer>
+  </footer>
   </body>
 </html>
