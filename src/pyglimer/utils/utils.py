@@ -17,7 +17,7 @@ Last Modified: Friday, 6th May 2022 01:18:05 pm
 import logging
 import os
 from threading import Event
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from warnings import warn
 
 import numpy as np
@@ -30,6 +30,7 @@ from obspy.core.utcdatetime import UTCDateTime
 
 from pyglimer.database.asdf import write_st
 from pyglimer.rf.create import RFStream, RFTrace
+from pyglimer.database.asdf import save_raw_single_station_asdf
 
 from .roundhalf import roundhalf
 
@@ -99,7 +100,44 @@ def join_inv(invlist=List[Inventory]) -> Inventory:
     return inv
 
 
-def __client__loop__(client: str or Client, statloc: str, bulk: list):
+def check_UTC_overlap(start: List[UTCDateTime], end: List[UTCDateTime]) -> List[bool]:
+    """Checks a list of starttimes and endtimes for overlap
+
+    Parameters
+    ----------
+    start : List[UTCDateTime]
+        List of UTCDatetime starttimes
+    end : List[UTCDateTime]
+        List of UTCDateTime endtimes
+
+    Returns
+    -------
+    List[bool]
+        List of booleans. If True no overlap, if False overlap
+    """
+
+    # Initiate list saying there is no overlap
+    check = len(start)*[True]
+
+    for _i, (_start, _end) in enumerate(zip(start, end)):
+
+        # Loop over same array to check whether there is overlap in any of the windows.
+        for _j, (_startc, _endc) in enumerate(zip(start, end)):
+
+            # Don't want to compute overlap of the same window
+            if _j==_i:
+                continue
+
+            # Check whether start or endtime of another window is in the range
+            if (_start < _startc and _startc < _end) \
+                or (_start < _endc and _endc < _end):
+
+                check[_i] = False
+
+    return check
+
+
+def __client__loop__(client: str or Client, statloc: str, bulk: list) -> Inventory:
     """
     Download station information from specified client and for the
     specified bulk list.
@@ -138,7 +176,7 @@ def __client__loop__(client: str or Client, statloc: str, bulk: list):
 
 def __client__loop_wav__(
     client: str, rawloc: str, bulk: list, saved: dict, saveasdf: bool,
-        inv: Inventory):
+        inv: Inventory, network: Optional[str] = None , station: Optional[str] = None):
     """
     Download waveforms from specified client and for the
     specified bulk list.
@@ -167,7 +205,18 @@ def __client__loop_wav__(
         return  # wrong client
         # ValueError is raised for querying a client without station service
     logger.info(f'Downloaded {st.count()} traces from Client {str(client)}.')
-    save_raw(saved, st, rawloc, inv, saveasdf)
+
+    if saveasdf:
+        # Make sure ASDF file is only opened once
+        if (network is not None) and (station is not None):
+            save_raw_single_station_asdf(network, station, saved, st, rawloc, inv)
+
+        # Opens and closes ASDF file for each trace. It's more versatile, but
+        # less efficient
+        else:
+            save_raw(saved, st, rawloc, inv, False)
+    else:
+        save_raw(saved, st, rawloc, inv, False)
 
 
 def save_raw(

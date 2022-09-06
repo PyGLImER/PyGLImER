@@ -140,3 +140,95 @@ def write_st(
         ds.add_waveforms(st, tag='raw_recording')
         ds.add_stationxml(statxml)  # If there are still problems, we will have
         # to check whether they are similar probelms to add event
+
+
+def save_raw_single_station_asdf(
+        network: str, station: str, saved: dict,
+        st: Stream, rawloc: str, inv: Inventory):
+    """
+    A variation of the above function that will open the ASDF file once and write
+    all traces and then close it afterwards
+    Save the raw waveform data in the desired format.
+    The point of this function is mainly that the waveforms will be saved
+    with the correct associations and at the correct locations.
+
+    :param saved: Dictionary holding information about the original streams
+        to identify them afterwards.
+    :type saved: dict
+    :param st: obspy stream holding all data (from various stations)
+    :type st: Stream
+    :param rawloc: Parental directory (with phase) to save the files in.
+    :type rawloc: str
+    :param inv: The inventory holding all the station information
+    :type inv: Inventory
+    :param saveasdf: If True the data will be saved in asdf format.
+    :type saveasdf: bool
+    """
+
+    # Filename of the station to be opened.
+    fname = '%s.%s.h5' % (network, station)
+
+    # Just use the same name
+    with ASDFDataSet(os.path.join(rawloc, fname)) as ds:
+        # Events should not be added because it will read the whole
+        # catalogue every single time!
+        N = len(saved['event'])
+        for _i, (evt, startt, endt, net, stat) in enumerate(zip(
+            saved['event'], saved['startt'], saved['endt'], saved['net'],
+                saved['stat'])):
+            logging.debug(f'{net}.{stat}: Processing #{_i}/N')
+            # earlier we downloaded all locations, but we don't really want
+            # to have several, so let's just keep one
+            try:
+                sst = st.select(network=net, station=stat)
+                # This might actually be empty if so, let's just skip
+                if sst.count() == 0:
+                    logging.debug(f'No trace of {net}.{stat} in Stream.')
+                    continue
+
+                # This must assume that there is no overlap
+                slst = sst.slice(startt, endt)
+
+                # Only write the prevelant location
+                locs = [tr.stats.location for tr in sst]
+                filtloc = max(set(locs), key=locs.count)
+                sslst = slst.select(location=filtloc)
+
+                # Check whether channels overlap
+                sinv = inv.select(net, stat, starttime=startt, endtime=endt)
+
+                logging.debug(f'{net}.{stat} writing event #{_i}/N')
+                write_st_to_ds(ds, sslst, evt, sinv)
+
+            except Exception as e:
+                logging.error(e)
+
+
+def write_st_to_ds(
+    ds: ASDFDataSet, st: Stream, outfolder: str, statxml: Inventory,
+        resample: bool = True):
+    """
+    Write raw waveform data to an asdf file. This includes the corresponding
+    (teleseismic) event and the station inventory (i.e., response information).
+
+    :param st: The stream holding the raw waveform data.
+    :type st: Stream
+    :param event: The seismic event associated to the recorded data.
+    :type event: Event
+    :param outfolder: Output folder to write the asdf file to.
+    :type outfolder: str
+    :param statxml: The station inventory
+    :type statxml: Inventory
+    :param resample: Resample the data to 10Hz sampling rate? Defaults to True.
+    :type resample: bool, optional
+    """
+    fname = '%s.%s.h5' % (st[0].stats.network, st[0].stats.station)
+    if resample:
+        st.filter('lowpass_cheby_2', freq=4, maxorder=12)
+        st = resample_or_decimate(st, 10, filter=False)
+
+    # Add waveforms and stationxml
+    ds.add_waveforms(st, tag='raw_recording')
+    ds.add_stationxml(statxml)
+    # If there are still problems, we will have
+    # to check whether they are similar probelms to add event
