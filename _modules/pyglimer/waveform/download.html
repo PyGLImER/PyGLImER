@@ -395,7 +395,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Tue May 26 2019 13:31:30</span>
-<span class="sd">Last Modified: Friday, 8th April 2022 02:47:54 pm</span>
+<span class="sd">Last Modified: Tuesday, 6th September 2022 11:18:10 am</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 
@@ -600,7 +600,6 @@
             <span class="c1"># Add minibulk to overall request</span>
             <span class="n">netsta_bulk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mini_bulk</span><span class="p">)</span>
 
-
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">netsta_bulk</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No new data found.&#39;</span><span class="p">)</span>
         <span class="k">return</span>
@@ -653,7 +652,6 @@
                     <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="n">clients</span><span class="p">)</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloaded </span><span class="si">{</span><span class="n">_i</span><span class="si">:{</span><span class="n">Nd</span><span class="si">}</span><span class="s2">d</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">N</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
-
 
 
 <div class="viewcode-block" id="downloadwav"><a class="viewcode-back" href="../../../chapters/api/waveform.html#pyglimer.waveform.download.downloadwav">[docs]</a><span class="k">def</span> <span class="nf">downloadwav</span><span class="p">(</span>
