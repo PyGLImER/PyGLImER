@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Tuesday, 6th September 2022 05:27:19 pm
+Last Modified: Tuesday, 6th September 2022 05:33:34 pm
 '''
 
 import fnmatch
@@ -40,7 +40,7 @@ class DBHandler(h5py.File):
     .. warning::
 
         **Should not be accessed directly. Access
-        :class:`~pyglimer.database.rfh5.RFDataBase` instead.**
+        :class:`~pyglimer.database.raw.RawDataBase` instead.**
 
     Child object of :class:`h5py.File` and inherets all its attributes and
     functions in addition to functions that are particularly useful for noise
@@ -105,20 +105,15 @@ class DBHandler(h5py.File):
         Add receiver function to the hdf5 file. The data can later be accessed
         using the :meth:`~pyglimer.database.rfh5.DBHandler.get_data()` method.
 
-        :param data: Data to save. Either a
-            :class:`~pyglimer.rf.create.RFTrace` object or a
-            :class:`~pyglimer.rf.create.RFStream` holding one or
-            several traces.
-        :type data: RFTrace or RFStream
-        :param tag: The tag that the data should be saved under. By convention,
-            unstacked correlations are saved with the tag `'raw'`.
+        :param data: Data to save.
+        :type data: Trace or Stream
+        :param tag: The tag that the data should be saved under. Defaults to
+            'raw'
         :raises TypeError: for wrong data type.
         """
         if not isinstance(data, Trace) and\
                 not isinstance(data, Stream):
-            raise TypeError('Data has to be either a \
-:class:`~pyglimer.rf.create.RFTrace` object or a \
-:class:`~~pyglimer.rf.create.RFStream` object')
+            raise TypeError('Data has to be either an obspy Trace or Stream')
 
         if isinstance(data, Trace):
             data = [data]
@@ -173,8 +168,8 @@ omitted." % path, category=UserWarning)
         self, network: str, station: str, starttime: UTCDateTime = None,
             tag: str = 'raw') -> Stream:
         """
-        Returns an obspy Stream holding
-        all the requested data.
+        Returns an obspy Stream holding the requested data and all
+        existing channels.
 
         .. note::
 
@@ -184,17 +179,13 @@ omitted." % path, category=UserWarning)
         :type network: str
         :param station: station code, e.g., HRV
         :type station: str
-        :param phase: Teleseismic phase
-        :type phase: str
-        :param evt_time: Origin Time of the Event
-        :type evt_time: UTCDateTime, optional
-        :param tag: Data tag (e.g., 'rf'). Defaults to rf.
+        :param starttime: Starttime of the Trace
+        :type starttime: UTCDateTime, optional
+        :param tag: Data tag (e.g., 'raw'). Defaults to raw.
         :type tag: str, optional
-        :param pol: RF Polarisation. Defaults to v.
-        :type pol: str, optional
-        :return: a :class:`~pyglimer.rf.create.RFStream` holding the requested
+        :return: a :class:`Stream` holding the requested
             data.
-        :rtype: RFStream
+        :rtype: Stream
         """
         try:
             starttime = UTCDateTime(starttime)
@@ -289,7 +280,7 @@ class RawDatabase(object):
     def __init__(
             self, path: str, mode: str = 'a', compression: str = 'gzip3'):
         """
-        Access an hdf5 file holding receiver functions. The resulting file can
+        Access an hdf5 file holding raw waveforms. The resulting file can
         be accessed using all functionalities of
         `h5py <https://www.h5py.org/>`_ (for example as a dict).
 
@@ -320,10 +311,10 @@ class RawDatabase(object):
                         '/path/to/db/XN.NEP06.h5') as rfdb:
             >>>     # find the available tags for existing db
             >>>     print(list(rfdb.keys()))
-            ['rf', 'rfstack']
-            >>>     # Get Data from all times and tag rf, phase P
+            ['raw', 'weird']
+            >>>     # Get Data from all times and
             >>>     st = rfdb.get_data(
-            >>>         'XN', 'NEP06', 'P', '*', 'rf')
+            >>>         'XN', 'NEP06', '*')
             >>> print(st.count())
             250
         """
@@ -356,12 +347,12 @@ def all_traces_recursive(
     :param group: group to search through
     :type group: class:`h5py._hl.group.Group`
     :param stream: Stream to append the traces to
-    :type stream: CorrStream
+    :type stream: Stream
     :param pattern: pattern for the path in the hdf5 file, see fnmatch for
         details.
     :type pattern: str
     :return: Stream with appended traces
-    :rtype: CorrStream
+    :rtype: Stream
     """
     for v in group.values():
         if isinstance(v, h5py._hl.group.Group):
@@ -401,7 +392,7 @@ def convert_header_to_hdf5(dataset: h5py.Dataset, header: Stats):
 
 def read_hdf5_header(dataset: h5py.Dataset) -> Stats:
     """
-    Takes an hdf5 dataset as input and returns the header of the CorrTrace.
+    Takes an hdf5 dataset as input and returns the header of the Trace.
 
     :param dataset: The dataset to be read from
     :type dataset: h5py.Dataset
