@@ -12,7 +12,7 @@ Seismic Format (asdf).
 
 Created: Friday, 12th February 2021 03:24:30 pm
 
-Last Modified: Friday, 6th May 2022 02:28:13 pm
+Last Modified: Tuesday, 6th September 2022 11:01:32 am
 '''
 
 import logging
@@ -146,7 +146,8 @@ def save_raw_single_station_asdf(
         network: str, station: str, saved: dict,
         st: Stream, rawloc: str, inv: Inventory):
     """
-    A variation of the above function that will open the ASDF file once and write
+    A variation of the above function that will open the ASDF file once and
+    write
     all traces and then close it afterwards
     Save the raw waveform data in the desired format.
     The point of this function is mainly that the waveforms will be saved
@@ -172,7 +173,6 @@ def save_raw_single_station_asdf(
     with ASDFDataSet(os.path.join(rawloc, fname)) as ds:
         # Events should not be added because it will read the whole
         # catalogue every single time!
-        N = len(saved['event'])
         for _i, (evt, startt, endt, net, stat) in enumerate(zip(
             saved['event'], saved['startt'], saved['endt'], saved['net'],
                 saved['stat'])):

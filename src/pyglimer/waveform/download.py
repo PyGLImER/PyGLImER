@@ -10,7 +10,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 8th April 2022 02:47:54 pm
+Last Modified: Tuesday, 6th September 2022 11:18:10 am
 '''
 
 
@@ -215,7 +215,6 @@ def download_small_db(
             # Add minibulk to overall request
             netsta_bulk.append(mini_bulk)
 
-
     if len(netsta_bulk) == 0:
         logger.info('No new data found.')
         return
@@ -268,7 +267,6 @@ def download_small_db(
                     for client in clients)
 
             logger.info(f"Downloaded {_i:{Nd}d}/{N:d}")
-
 
 
 def downloadwav(
