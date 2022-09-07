@@ -393,7 +393,7 @@
 <span class="sd">   Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Wednesday, 11th August 2021 03:20:09 pm</span>
-<span class="sd">Last Modified: Friday, 11th February 2022 01:06:08 pm</span>
+<span class="sd">Last Modified: Tuesday, 6th September 2022 05:34:54 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">fnmatch</span>
@@ -425,8 +425,8 @@
 <span class="sd">        :class:`~pyglimer.database.rfh5.RFDataBase` instead.**</span>
 
 <span class="sd">    Child object of :class:`h5py.File` and inherets all its attributes and</span>
-<span class="sd">    functions in addition to functions that are particularly useful for noise</span>
-<span class="sd">    correlations.</span>
+<span class="sd">    functions in addition to functions that are particularly useful for</span>
+<span class="sd">    receiver functions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">compression</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">DBHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
@@ -483,7 +483,7 @@
 <span class="sd">            several traces.</span>
 <span class="sd">        :type data: RFTrace or RFStream</span>
 <span class="sd">        :param tag: The tag that the data should be saved under. By convention,</span>
-<span class="sd">            unstacked correlations are saved with the tag `&#39;rf&#39;`.</span>
+<span class="sd">            receiver functions are saved with the tag `&#39;rf&#39;`.</span>
 <span class="sd">        :raises TypeError: for wrong data type.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">RFTrace</span><span class="p">)</span> <span class="ow">and</span>\
@@ -645,7 +645,7 @@
 
 <div class="viewcode-block" id="RFDataBase"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.rfh5.RFDataBase">[docs]</a><span class="k">class</span> <span class="nc">RFDataBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class to handle the hdf5 files that contain noise correlations.</span>
+<span class="sd">    Base class to handle the hdf5 files that contain receiver functions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;gzip3&#39;</span><span class="p">):</span>
@@ -717,12 +717,12 @@
 <span class="sd">    :param group: group to search through</span>
 <span class="sd">    :type group: class:`h5py._hl.group.Group`</span>
 <span class="sd">    :param stream: Stream to append the traces to</span>
-<span class="sd">    :type stream: CorrStream</span>
+<span class="sd">    :type stream: Stream</span>
 <span class="sd">    :param pattern: pattern for the path in the hdf5 file, see fnmatch for</span>
 <span class="sd">        details.</span>
 <span class="sd">    :type pattern: str</span>
 <span class="sd">    :return: Stream with appended traces</span>
-<span class="sd">    :rtype: CorrStream</span>
+<span class="sd">    :rtype: Stream</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">h5py</span><span class="o">.</span><span class="n">_hl</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
@@ -767,7 +767,7 @@
 
 <div class="viewcode-block" id="read_hdf5_header"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.rfh5.read_hdf5_header">[docs]</a><span class="k">def</span> <span class="nf">read_hdf5_header</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stats</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Takes an hdf5 dataset as input and returns the header of the CorrTrace.</span>
+<span class="sd">    Takes an hdf5 dataset as input and returns the header of the Trace.</span>
 
 <span class="sd">    :param dataset: The dataset to be read from</span>
 <span class="sd">    :type dataset: h5py.Dataset</span>

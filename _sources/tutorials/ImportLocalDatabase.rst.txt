@@ -139,7 +139,7 @@ Now that all parameters are in place, let's initialize the
 
  .. code-block:: none
 
-    2022-09-07 00:36:44,344 - INFO - Successfully obtained 1 events
+    2022-09-07 00:43:11,750 - INFO - Successfully obtained 1 events
 
 
 
@@ -319,10 +319,10 @@ This method will do the following:
 
  .. code-block:: none
 
-    2022-09-07 00:36:44,630 - INFO - Computing theoretical times of arrival. Save Inventories
-    2022-09-07 00:36:44,637 - INFO - Checking IU.HRV
-    2022-09-07 00:36:44,638 - DEBUG - IU.HRV
-    2022-09-07 00:36:44,659 - INFO - Slice data in chunks and save them into PyGLImER database.
+    2022-09-07 00:43:12,034 - INFO - Computing theoretical times of arrival. Save Inventories
+    2022-09-07 00:43:12,042 - INFO - Checking IU.HRV
+    2022-09-07 00:43:12,043 - DEBUG - IU.HRV
+    2022-09-07 00:43:12,064 - INFO - Slice data in chunks and save them into PyGLImER database.
 
 
 
@@ -404,25 +404,25 @@ expression is needed for running this examples
 
  .. code-block:: none
 
-    2022-09-07 00:36:44,680 - INFO - 
+    2022-09-07 00:43:12,085 - INFO - 
 
 
     ...Preprocessing initialiased...
 
-      0%|          | 0/1 [00:00<?, ?it/s]2022-09-07 00:36:44,681 - INFO - Processing waveforms for event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293.
-    2022-09-07 00:36:44,695 - DEBUG - Before cut and resample
-    2022-09-07 00:36:44,695 - DEBUG -    Time elapsed: 0.0 s
-    2022-09-07 00:36:44,719 - INFO - Stream accepted. Preprocessing successful
-    2022-09-07 00:36:44,719 - INFO - File preprocessed.
+      0%|          | 0/1 [00:00<?, ?it/s]2022-09-07 00:43:12,086 - INFO - Processing waveforms for event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293.
+    2022-09-07 00:43:12,100 - DEBUG - Before cut and resample
+    2022-09-07 00:43:12,100 - DEBUG -    Time elapsed: 0.0 s
+    2022-09-07 00:43:12,124 - INFO - Stream accepted. Preprocessing successful
+    2022-09-07 00:43:12,124 - INFO - File preprocessed.
     Station IU.HRV
     Event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293
-    2022-09-07 00:36:44,719 - DEBUG -    Time elapsed: 0.0 s
-    2022-09-07 00:36:44,729 - INFO - RF created.
+    2022-09-07 00:43:12,124 - DEBUG -    Time elapsed: 0.0 s
+    2022-09-07 00:43:12,134 - INFO - RF created.
     Station IU.HRV
     Event: smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293
-    2022-09-07 00:36:44,729 - DEBUG -    Time elapsed: 0.0 s
-    100%|##########| 1/1 [00:00<00:00, 19.57it/s]
-    2022-09-07 00:36:44,732 - INFO - Preprocessing finished.
+    2022-09-07 00:43:12,134 - DEBUG -    Time elapsed: 0.0 s
+    100%|##########| 1/1 [00:00<00:00, 19.48it/s]
+    2022-09-07 00:43:12,137 - INFO - Preprocessing finished.
 
 
 
@@ -684,7 +684,7 @@ just a single smalle script.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.117 seconds)
+   **Total running time of the script:** ( 0 minutes  1.769 seconds)
 
 
 .. _sphx_glr_download_tutorials_ImportLocalDatabase.py:
