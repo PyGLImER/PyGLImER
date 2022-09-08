@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Wednesday, 7th September 2022 06:10:50 pm
+Last Modified: Thursday, 8th September 2022 12:37:27 pm
 '''
 
 from glob import glob
@@ -233,8 +233,9 @@ def _preprocessh5_single(
                     f'Only {st.count()} traces found for Station {net}.{stat}'
                     + f'and arrival time {toa}.')
                 continue
-            if st[0].stats.endtime - st[0].stats.endtime < toa+ta-5:
-                logger.info('Trace shorter than requested time window, skip')
+            if st[0].stats.endtime - st[0].stats.starttime < tz+ta-20:
+                logger.warning(
+                    'Stream shorter than requested time window, skip.')
                 continue
             try:
                 rf_temp = __station_process__(

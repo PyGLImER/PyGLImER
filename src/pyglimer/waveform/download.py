@@ -10,7 +10,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 7th September 2022 04:32:56 pm
+Last Modified: Thursday, 8th September 2022 04:11:27 pm
 '''
 
 
@@ -492,7 +492,7 @@ def get_mseed_storage(
     # will be downloaded.
 
     if asdfsave:
-        if wav_in_asdf(
+        if wav_in_hdf5(
                 network, station, location, channel, starttime, endtime):
             return True
     else:
@@ -583,7 +583,6 @@ def wav_in_hdf5(
     network: str, station: str, location: str, channel: str,
         starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
     """Is the waveform already in the Raw hdf5 database?"""
-
     h5_file = os.path.join(tmp.folder, os.pardir, '%s.%s.h5' % (
         network, station))
 
@@ -598,6 +597,8 @@ def wav_in_hdf5(
     except KeyError:
         pass
     # Check whether there is data from this station at all
+    av_data.setdefault(network, {})
+    av_data[network].setdefault(station, {})
     if not os.path.isfile(h5_file):
         logging.debug(f'{h5_file} not found')
         av_data[network][station][channel] = []

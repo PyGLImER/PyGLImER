@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Wednesday, 7th September 2022 05:15:40 pm
+Last Modified: Thursday, 8th September 2022 12:07:00 pm
 '''
 
 import fnmatch
@@ -468,7 +468,7 @@ def mseed_to_hdf5(
         old_cont = rdb._get_table_of_contents()
         for k, v in old_cont.items():
             try:
-                new_cont[k].extent(v)
+                new_cont[k].extend(v)
             except KeyError:
                 new_cont[k] = v
         rdb.add_waveform(st)
