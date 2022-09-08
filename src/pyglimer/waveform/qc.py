@@ -12,7 +12,7 @@ Contains quality control for waveforms used for receiver function creation.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 11:38:40 am
-Last Modified: Thursday, 28th October 2021 10:03:35 am
+Last Modified: Wednesday, 7th September 2022 06:08:38 pm
 '''
 
 import numpy as np

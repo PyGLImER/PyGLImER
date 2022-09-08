@@ -12,12 +12,13 @@ Seismic Format (asdf).
 
 Created: Friday, 12th February 2021 03:24:30 pm
 
-Last Modified: Tuesday, 6th September 2022 11:01:32 am
+Last Modified: Wednesday, 7th September 2022 12:15:10 pm
 '''
 
 import logging
 import os
 import shutil
+import glob
 
 import obspy
 from obspy import read, read_inventory, UTCDateTime
@@ -30,45 +31,45 @@ from pyglimer.utils.signalproc import resample_or_decimate
 from pyglimer.utils.roundhalf import roundhalf
 
 
-def rewrite_to_hdf5(catfile: str, rawfolder: str, statloc: str):
-    """
-    Converts an existing miniseed waveform database to hierachal data format
-    (hdf5).
+# def rewrite_to_hdf5(catfile: str, rawfolder: str, statloc: str):
+#     """
+#     Converts an existing miniseed waveform database to hierachal data format
+#     (hdf5).
 
-    :param catfile: The pat hto the event catalogue that was used to download
-        the raw data. Will be altered during the process (removes already used
-        ones).
-    :type catfile: path to obspy.Catalog (str)
-    :param rawfolder: The folder that the raw data is saved in - ending with
-        the phase code (i.e., waveforms/raw/P)
-    :type rawfolder: str
-    :param statloc: Location that the station xmls are saved in.
-    :type statloc: str
-    """
-    # Create backup of original catalog
-    shutil.copyfile(catfile, '%s_bac' % catfile)
-    cat = read_events(catfile)
-    while cat.count():
-        event = cat[0]
-        origin_time = event.origins[0].time
-        ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
-        evtlat = event.origins[0].latitude
-        evtlon = event.origins[0].longitude
-        evtlat_loc = str(roundhalf(evtlat))
-        evtlon_loc = str(roundhalf(evtlon))
-        evtdir = os.path.join(
-            rawfolder, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
-        if not os.path.isdir(evtdir):
-            pass
-        elif not os.listdir(evtdir):
-            os.rmdir(evtdir)
-        else:
-            writeraw(event, evtdir, statloc, False, True)
-        logging.warning('removing event...')
-        del cat[0]
-        # Overwrite old catalog, so we don't have to restart the whole
-        # process over again afterwards
-        cat.write(catfile, format="QUAKEML")
+#     :param catfile: The pat hto the event catalogue that was used to download
+#         the raw data. Will be altered during the process (removes already used
+#         ones).
+#     :type catfile: path to obspy.Catalog (str)
+#     :param rawfolder: The folder that the raw data is saved in - ending with
+#         the phase code (i.e., waveforms/raw/P)
+#     :type rawfolder: str
+#     :param statloc: Location that the station xmls are saved in.
+#     :type statloc: str
+#     """
+#     # Create backup of original catalog
+#     shutil.copyfile(catfile, '%s_bac' % catfile)
+#     cat = read_events(catfile)
+#     while cat.count():
+#         event = cat[0]
+#         origin_time = event.origins[0].time
+#         ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
+#         evtlat = event.origins[0].latitude
+#         evtlon = event.origins[0].longitude
+#         evtlat_loc = str(roundhalf(evtlat))
+#         evtlon_loc = str(roundhalf(evtlon))
+#         evtdir = os.path.join(
+#             rawfolder, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
+#         if not os.path.isdir(evtdir):
+#             pass
+#         elif not os.listdir(evtdir):
+#             os.rmdir(evtdir)
+#         else:
+#             writeraw(event, evtdir, statloc, False, True)
+#         logging.warning('removing event...')
+#         del cat[0]
+#         # Overwrite old catalog, so we don't have to restart the whole
+#         # process over again afterwards
+#         cat.write(catfile, format="QUAKEML")
 
 
 def writeraw(

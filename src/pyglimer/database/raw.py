@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Tuesday, 6th September 2022 05:33:34 pm
+Last Modified: Wednesday, 7th September 2022 05:15:40 pm
 '''
 
 import fnmatch
@@ -20,10 +20,11 @@ import os
 import re
 from typing import Iterable
 import warnings
+import glob
 
 import numpy as np
 from obspy.core.utcdatetime import UTCDateTime
-from obspy.core import Stats, Stream, Trace
+from obspy.core import Stats, Stream, Trace, read
 from obspy import Inventory, read_inventory
 import h5py
 
@@ -76,7 +77,7 @@ class DBHandler(h5py.File):
         Define the known waveforms per waveform.
         Known waveforms to receive. Is just a dictionary with one key for
         each channel with the values being a list of available waveform
-        starttimes.
+        starttimes as a string in format_fissure until [:-4].
 
         :param content: dictionary with one key for
             each channel with the values being a list of available waveform
@@ -86,18 +87,12 @@ class DBHandler(h5py.File):
         .. note:: This overwrites the old table of contents, so make sure
             to add everything!
         """
-        # Format and round
-        content_write = {}
-        for channel, starttimes in content.items():
-            starttimes = [t.format_fissures()[:-7] for t in starttimes]
-            starttimes = list(set(starttimes))
-            content_write[channel] = starttimes
         try:
             ds = self.create_dataset('content', data=np.empty(1))
         except ValueError:
             ds = self['content']
             # Already existing, just change attributes
-        ds.attrs['content'] = str(content_write)
+        ds.attrs['content'] = str(content)
 
     def add_waveform(
             self, data: Trace or Stream, tag: str = 'raw'):
@@ -122,7 +117,7 @@ class DBHandler(h5py.File):
             st = tr.stats
             path = hierarchy.format(
                 tag=tag, network=st.network, station=st.station,
-                starttime=st.starttime.format_fissures()[:-7],
+                starttime=st.starttime.format_fissures()[:-4],
                 channel=st.channel)
             try:
                 ds = self.create_dataset(
@@ -166,7 +161,7 @@ omitted." % path, category=UserWarning)
 
     def get_data(
         self, network: str, station: str, starttime: UTCDateTime = None,
-            tag: str = 'raw') -> Stream:
+            endtime: UTCDateTime = None, tag: str = 'raw') -> Stream:
         """
         Returns an obspy Stream holding the requested data and all
         existing channels.
@@ -188,20 +183,25 @@ omitted." % path, category=UserWarning)
         :rtype: Stream
         """
         try:
-            starttime = UTCDateTime(starttime)
-            starttime = starttime.format_fissures()[:-7]
-        except TypeError:
-            starttime = '*'
+            search_time = starttime.format_fissures()[:-10] + '*'
+            # starttime = UTCDateTime(starttime)
+            # starttime = starttime.format_fissures()[:-4]
+        except (TypeError, AttributeError):
+            search_time = '*'
 
         path = hierarchy.format(
-            tag=tag, network=network, station=station, starttime=starttime,
+            tag=tag, network=network, station=station, starttime=search_time,
             channel="*")
         # Now, we need to differ between the fnmatch pattern and the actually
         # acessed path
         pattern = path.replace('/*', '*')
         path = path.split('*')[0]
+        path = os.path.dirname(path)
         try:
-            return all_traces_recursive(self[path], Stream(), pattern)
+            st = all_traces_recursive(self[path], Stream(), pattern)
+            if isinstance(starttime, UTCDateTime):
+                st = st.slice(starttime=starttime, endtime=endtime)
+            return st
         except KeyError:
             warnings.warn(
                 f'Could not find data from {network}.{station} for'
@@ -240,9 +240,9 @@ omitted." % path, category=UserWarning)
         try:
             ds = self['content']
             content = eval(ds.attrs['content'])
+            return content
         except (KeyError, AttributeError):
-            return []
-        return content
+            return {}
 
     def walk(
             self, tag: str, network: str, station: str) -> Iterable[Stream]:
@@ -420,3 +420,89 @@ def read_hdf5_header(dataset: h5py.Dataset) -> Stats:
         else:
             header[key] = attrs[key]
     return Stats(header)
+
+
+def mseed_to_hdf5(
+    rawfolder: str or os.PathLike, save_statxml: bool,
+        statloc: str = None):
+    """
+    Convert a given mseed database in rawfolder to an h5 based database.
+
+    :param rawfolder: directory in which the fodlers for each event are stored
+    :type rawfolder: os.PathLike
+    :param save_statxml: should stationxmls be read as well? If so, you need
+        to provide `statloc` as well.
+    :type save_statxml: bool
+    :param statloc: location of station xmls only needed if `save_statxml` is
+        is set to True, defaults to None
+    :type statloc: str, optional
+    """
+    av_mseed = glob.glob(os.path.join(rawfolder, '*', '*.mseed'))
+    # We do that for every single station
+    if len(av_mseed) == 0:
+        # Delete empty folders
+        evt_dirs = glob.glob(os.path.join(rawfolder, '*_*_*'))
+        for d in evt_dirs:
+            os.rmdir(d)
+        if save_statxml:
+            statxml_to_hdf5(rawfolder, statloc)
+        return
+    st = read(av_mseed[0])
+    net = st[0].stats.network
+    stat = st[0].stats.station
+
+    # Now, read all available files for this station
+    mseeds = os.path.join(rawfolder, '*', f'{net}.{stat}.mseed')
+    st = read(mseeds)
+
+    # Create table of new contents
+    new_cont = {}
+    for tr in st:
+        new_cont.setdefault(tr.stats.channel, [])
+        new_cont[tr.stats.channel].append(
+            tr.stats.starttime.format_fissures()[:-4])
+
+    h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
+    # Write all of them to the hdf5 file
+    with RawDatabase(h5_file) as rdb:
+        old_cont = rdb._get_table_of_contents()
+        for k, v in old_cont.items():
+            try:
+                new_cont[k].extent(v)
+            except KeyError:
+                new_cont[k] = v
+        rdb.add_waveform(st)
+        if save_statxml:
+            statxml = os.path.join(statloc, f'{net}.{stat}.xml')
+            rdb.add_response(read_inventory(statxml))
+        rdb._define_content(new_cont)
+    # Clear RAM
+    st.clear()
+    # If all of that was successful, we can remove the mseeds
+    for f in glob.glob(mseeds):
+        os.remove(f)
+    if save_statxml:
+        os.remove(statxml)
+    # next station
+    mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
+
+
+def statxml_to_hdf5(
+        rawfolder: str or os.PathLike, statloc: str or os.PathLike):
+    """
+    Write a statxml database to h5 files
+
+    :param rawfolder: location that contains the h5 files
+    :type rawfolder: stroros.PathLike
+    :param statloc: location where the stationxmls are stored
+    :type statloc: stroros.PathLike
+    """
+    av_xml = glob.glob(os.path.join(statloc, '*.xml'))
+    for xml in av_xml:
+        inv = read_inventory(xml)
+        net = inv[0].code
+        stat = inv[0][0].code
+        h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
+        with RawDatabase(h5_file) as rdb:
+            rdb.add_response(inv)
+            os.remove(xml)
