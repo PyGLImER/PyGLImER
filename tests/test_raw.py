@@ -8,15 +8,17 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 8th September 2022 04:26:34 pm
-Last Modified: Thursday, 8th September 2022 05:18:04 pm
+Last Modified: Friday, 9th September 2022 04:11:00 pm
 '''
 
 
 import unittest
+from unittest import mock
 from unittest.mock import call, patch, MagicMock
 import warnings
+import os
 
-from obspy import read, UTCDateTime, Stream
+from obspy import read, UTCDateTime, Stream, read_inventory
 import numpy as np
 import h5py
 
@@ -198,7 +200,7 @@ class TestDBHandler(unittest.TestCase):
             create_ds_mock().attrs.__setitem__.assert_has_calls(calls)
 
     @patch('pyglimer.database.raw.h5py.File.__getitem__')
-    def test_add_known_waveform_data_att_exists(self, file_mock):
+    def test_define_content_2(self, file_mock):
         attrs_mock = MagicMock()
         d = {'content': attrs_mock}
         file_mock.side_effect = d.__getitem__
@@ -251,116 +253,64 @@ class TestDBHandler(unittest.TestCase):
         with self.assertRaises(TypeError):
             dbh.add_waveform(unittest.TestCase())
 
-    # @patch('pyglimer.database.raw.read_hdf5_header')
-    # @patch('pyglimer.database.raw.h5py.File.__getitem__')
-    # def test_get_data_no_wildcard(self, file_mock, read_hdf5_header_mock):
-    #     read_hdf5_header_mock.return_value = self.rftr.stats
-    #     net = 'AB'
-    #     stat = 'CD'
-    #     tag = 'rand'
-    #     channel = 'Z'
-    #     starttime = '*'
-    #     exp_path = raw.hierarchy.format(
-    #         tag=tag, network=net, station=stat,
-    #         starttime=UTCDateTime(0).format_fissures()[:-4],
-    #         channel=channel)
-    #     d = {exp_path: self.rftr.data}
-    #     file_mock.side_effect = d.__getitem__
-    #     self.assertTrue(np.all(self.dbh[exp_path] == d[exp_path]))
-    #     outdata = self.dbh.get_data(
-    #         net, stat, UTCDateTime(0), None, tag=tag)
-    #     print(outdata)
-    #     # self.assertEqual(outdata[0], self.rftr)
-    #     file_mock.assert_called_with(exp_path)
+    @patch('pyglimer.database.raw.all_traces_recursive')
+    @patch('pyglimer.database.raw.h5py.File.__getitem__')
+    def test_get_data_wildcard(self, file_mock, all_tr_recursive_mock):
+        all_tr_recursive_mock.return_value = Stream([self.rftr])
+        st = self.rftr.stats
+        net = st.network
+        stat = st.station
+        tag = 'rand'
+        channel = st.channel
+        starttime = st.starttime
+        exp_path = raw.hierarchy.format(
+            tag=tag, network=net, station=stat,
+            starttime=st.starttime.format_fissures()[:-4],
+            channel=channel)
+        d = {
+            exp_path: self.rftr.data,
+            os.path.dirname(os.path.dirname(exp_path)): self.rftr.data}
+        file_mock.side_effect = d.__getitem__
 
-#     @patch('pyglimer.database.raw.all_traces_recursive')
-#     @patch('pyglimer.database.raw.h5py.File.__getitem__')
-#     def test_get_data_wildcard(self, file_mock, all_tr_recursive_mock):
-#         all_tr_recursive_mock.return_value = None
-#         net = 'AB'
-#         stat = '*'
-#         tag = 'rand'
-#         phase = 'P'
-#         pol = 'v'
-#         evt_time = UTCDateTime(0)
-#         exp_path = raw.hierarchy.format(
-#             tag=tag, network=net, station=stat, phase=phase,
-#             pol=pol, evt_time=evt_time.format_fissures())
-#         d = {exp_path: self.rftr.data, '/rand/AB/': self.rftr.data}
-#         file_mock.side_effect = d.__getitem__
+        _ = self.dbh.get_data(
+            net, stat, starttime, None, tag=tag)
+        file_mock.assert_called_with('/rand/BW/RJOB')
 
-#         _ = self.dbh.get_data(net, stat, phase, evt_time, tag=tag, pol=pol)
-#         file_mock.assert_called_with('/rand/AB/')
-#         all_tr_recursive_mock.assert_called_with(
-#             d['/rand/AB/'], Stream(), '/rand/AB*/%s/%s/%s' % (
-#                 phase, pol, evt_time.format_fissures()))
+    @patch('pyglimer.database.raw.BytesIO')
+    @patch('pyglimer.database.raw.read_inventory')
+    @patch('pyglimer.database.raw.h5py.File.__getitem__')
+    def test_get_response(self, file_mock, read_inv_mock, b_mock):
+        read_inv_mock.return_value = 'works'
+        st = self.rftr.stats
+        net = st.network
+        stat = st.station
+        tag = 'rand'
+        exp_path = raw.hierarchy_xml.format(
+            tag=tag, network=net, station=stat)
+        d = {
+            exp_path: [1, 2, 3]}
+        file_mock.side_effect = d.__getitem__
 
-#     @patch('pyglimer.database.raw.all_traces_recursive')
-#     @patch('pyglimer.database.raw.h5py.File.__getitem__')
-#     def test_get_data_wildcard2(self, file_mock, all_tr_recursive_mock):
-#         all_tr_recursive_mock.return_value = None
-#         net = 'AB'
-#         stat = '*'
-#         phase = '*'
-#         tag = 'rand'
-#         evt_time = '*'
-#         pol = '*'
-#         exp_path = raw.hierarchy.format(
-#             tag=tag, network=net, station=stat, phase=phase,
-#             pol=pol, evt_time=evt_time)
-#         exp_path = '/'.join(exp_path.split('/')[:-4])
-#         d = {exp_path: self.rftr.data, '/rand/AB/': self.rftr.data}
-#         file_mock.side_effect = d.__getitem__
+        x = self.dbh.get_response(net, stat, tag=tag)
+        self.assertEqual(x, 'works')
+        file_mock.assert_called_with(exp_path)
 
-#         _ = self.dbh.get_data(net, stat, phase, evt_time, tag=tag, pol=pol)
-#         file_mock.assert_called_with('/rand/AB/')
-#         all_tr_recursive_mock.assert_called_with(
-#             d['/rand/AB/'], Stream(), '/rand/AB****')
-
-#     @patch('pyglimer.database.raw.DBHandler.get_data')
-#     @patch('pyglimer.database.raw.h5py.File.__getitem__')
-#     def test_get_coords(self, file_mock, get_data_mock):
-#         get_data_mock.return_value = Stream([self.rftr])
-#         d_inner = {'bla': create_group_mock({}, '/rf/%s/%s/P/v' % (
-#             self.rftr.stats.network, self.rftr.stats.station), True)}
-#         d_middle = {'v': create_group_mock(d_inner, '/rf/%s/%s/P' % (
-#             self.rftr.stats.network, self.rftr.stats.station), True)}
-#         d_outer = {
-#             'P': create_group_mock(d_middle, '/rf/%s/%s' % (
-#                 self.rftr.stats.network, self.rftr.stats.station), True)}
-#         d_oo = {'rf': {self.rftr.stats.network: {
-#             self.rftr.stats.station: d_outer}}}
-#         file_mock.side_effect = d_oo.__getitem__
-#         exp_result = (15, -55, 355)
-#         self.assertTupleEqual(exp_result, self.dbh.get_coords(
-#             self.rftr.stats.network, self.rftr.stats.station))
-
-#     @patch('pyglimer.database.raw.DBHandler.get_data')
-#     @patch('pyglimer.database.raw.h5py.File.__getitem__')
-#     def test_get_coords_warning(self, file_mock, get_data_mock):
-#         get_data_mock.return_value = Stream([self.rftr])
-#         d_inner = {'bla': create_group_mock({}, '/rf/%s/%s/P/v' % (
-#             self.rftr.stats.network, self.rftr.stats.station), True)}
-#         d_middle = {'v': create_group_mock(d_inner, '/rf/%s/%s/P' % (
-#             self.rftr.stats.network, self.rftr.stats.station), True)}
-#         d_outer = {
-#             'P': create_group_mock(d_middle, '/rf/%s/%s' % (
-#                 self.rftr.stats.network, self.rftr.stats.station), True)}
-#         d_oo = {'rf': {self.rftr.stats.network: {
-#             self.rftr.stats.station: d_outer}}}
-#         file_mock.side_effect = d_oo.__getitem__
-#         with warnings.catch_warnings(record=True) as w:
-#             x = self.dbh.get_coords(
-#                 'bla', self.rftr.stats.station)
-#             self.assertTupleEqual(x, (None, None, None))
-#             self.assertEqual(len(w), 1)
+    def test_add_response(self):
+        inv = read_inventory()
+        path = raw.hierarchy_xml.format(
+            tag='response', network=inv[0].code, station=inv[0][0].code)
+        with patch.object(self.dbh, 'create_dataset') as create_ds_mock:
+            self.dbh.add_response(inv)
+            create_ds_mock.assert_called_once_with(
+                path, data=mock.ANY, compression=self.dbh.compression,
+                compression_opts=self.dbh.compression_opts)
 
 
-# class TestCorrelationDataBase(unittest.TestCase):
-#     @patch('pyglimer.database.raw.DBHandler')
-#     def test_path_name(self, dbh_mock):
-#         cdb = raw.RawDatabase('a', None, 'r')
-#         self.assertEqual(cdb.path, 'a.h5')
+class TestCorrelationDataBase(unittest.TestCase):
+    @patch('pyglimer.database.raw.DBHandler')
+    def test_path_name(self, dbh_mock):
+        cdb = raw.RawDatabase('a', None, 'r')
+        self.assertEqual(cdb.path, 'a.h5')
 
 
 if __name__ == "__main__":
