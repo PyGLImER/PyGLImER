@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Thursday, 8th September 2022 12:07:00 pm
+Last Modified: Thursday, 8th September 2022 04:54:25 pm
 '''
 
 import fnmatch
@@ -124,8 +124,7 @@ class DBHandler(h5py.File):
                     path, data=tr.data, compression=self.compression,
                     compression_opts=self.compression_opts)
                 convert_header_to_hdf5(ds, st)
-            except ValueError as e:
-                print(e)
+            except ValueError:
                 warnings.warn("The dataset %s is already in file and will be \
 omitted." % path, category=UserWarning)
 
