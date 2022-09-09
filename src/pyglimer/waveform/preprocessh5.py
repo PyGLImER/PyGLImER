@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Thursday, 8th September 2022 12:37:27 pm
+Last Modified: Friday, 9th September 2022 04:29:21 pm
 '''
 
 from glob import glob
@@ -25,7 +25,6 @@ from joblib import Parallel, delayed
 import obspy
 from obspy import Stream, UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
-from pyasdf import ASDFDataSet
 from tqdm.std import tqdm
 
 from pyglimer import constants
