@@ -140,6 +140,7 @@ def preprocess(
     for evtcat in evtcats:
 
         if client.lower() == 'joblib':
+            logger.debug('USING JOBLIB AS BACKEND')
             out = Parallel(n_jobs=-1, backend='multiprocessing')(
                 delayed(__event_loop)(
                     phase, rot, pol, event, taper_perc,
@@ -148,6 +149,7 @@ def preprocess(
                     hc_filt, netrestr, statrestr, remove_response)
                 for event in tqdm(evtcat))
         elif client.lower() == 'mpi':
+            logger.debug('USING MPI AS BACKEND')
             from mpi4py import MPI
             comm = MPI.COMM_WORLD
             rank = comm.Get_rank()
@@ -157,9 +159,14 @@ def preprocess(
             ind = pmap == rank
             ind = np.arange(len(evtcat))[ind]
 
+            print('\n\n\n\n\n\n hello \n\n\n\n\n\n\n')
+            print('\n\n\n\n\n\n hello \n\n\n\n\n\n\n')
+            print('\n\n\n\n\n\n hello \n\n\n\n\n\n\n')
+
             # get new MPI compatible loggers
             logger = create_mpi_logger(logger, rank)
             rflogger = logging.getLogger("%s.RF" % logger.name)
+            # rflogger.debug(f'Rank/Size: {rank}/{psize}')
             for ii in tqdm(ind):
                 __event_loop(
                     phase, rot, pol, evtcat[ii], taper_perc, taper_type,
@@ -169,6 +176,7 @@ def preprocess(
 
         # Use single core only
         elif client.lower() == 'single':
+            logger.debug('USING SINGLE CORE BACKEND')
             out = []
             for event in tqdm(evtcat):
                 out.append(
