@@ -40,8 +40,8 @@ from pyglimer.utils import utils as pu
 from pyglimer.utils.utils import download_full_inventory
 from pyglimer.waveform.preprocessh5 import compute_toa
 
+def __check_times_small_db_sub(
 
-def __download_small_db_sub(
     event_cat: Catalog, channel: str,
     rawloc: str, tz: float, ta: float, phase: str, model: TauPyModel,
     logger: logging.Logger, saveasdf: bool, net: Network,
@@ -173,14 +173,19 @@ def download_small_db(
     # information
     # We make a list of dicts akin to
     networks, stations = [], []
+    netsta_str = []
     for net in inv:
         for stat in net:
             networks.append(net)
             stations.append(stat)
+            netsta_str.append(f"{net}.{stat}")
+
+    # Multiple stations
+    MULT = True if len(set(netsta_str)) > 1 else False
 
     # Get bulk string for a single station
     if len(networks) == 1:
-        d = __download_small_db_sub(
+        d = __check_times_small_db_sub(
             event_cat, channel, rawloc, tz, ta, phase, model,
             logger, saveasdf, networks[0], stations[0])
 
@@ -199,7 +204,7 @@ def download_small_db(
     else:
         # Create partial function
         dsub = partial(
-            __download_small_db_sub,
+            __check_times_small_db_sub,
             event_cat, channel, rawloc, tz, ta, phase, model,
             logger, saveasdf)
 
@@ -239,25 +244,32 @@ def download_small_db(
     os.makedirs(rawloc, exist_ok=True)
 
     if len(clients) == 1:
-        # Length of request
-        N = len(netsta_bulk)
 
-        # Number of digits
-        Nd = len(str(N))
+        if MULT is False:
+            # Length of request
+            N = len(netsta_bulk)
 
-        # Download station chunks chunks
-        for _i, (_net, _sta, _bulk, _netsta_d) in enumerate(
-                zip(networks, stations, netsta_bulk, netsta_d)):
-            # Provide status
-            logger.info(f"Downloading ... {_i:{Nd}d}/{N:d}")
+            # Number of digits
+            Nd = len(str(N))
 
-            # Download
-            pu.__client__loop_wav__(
-                clients[0], rawloc, _bulk, _netsta_d, saveasdf, inv,
-                network=_net.code, station=_sta.code)
+            # Download station chunks chunks
+            for _i, (_net, _sta, _bulk, _netsta_d) in enumerate(zip(networks, stations, netsta_bulk, netsta_d)):
+                # Provide status
+                logger.info(f"Downloading ... {_i:{Nd}d}/{N:d}")
 
-            logger.info(f"Downloaded {_i:{Nd}d}/{N:d}")
-        # logger.info(f"Downloaded {N:d}/{N:d} Stations")
+
+                # Download
+                pu.__client__loop_wav__(clients[0], rawloc, _bulk, _netsta_d, saveasdf, inv, network=_net.code, station=_sta.code)
+
+                logger.info(f"Downloaded {_i:{Nd}d}/{N:d}")
+
+        else:
+
+            # Download multiple stations in parallel
+            Parallel(n_jobs=20, backend='multiprocessing')(
+                delayed(pu.__client__loop_wav__)(
+                    clients[0], rawloc, _bulk, _netsta_d, saveasdf, inv, network=_net.code, station=_sta.code)
+                        for _net, _sta, _bulk, _netsta_d in zip(networks, stations, netsta_bulk, netsta_d))
 
     else:
         # Length of requestf
