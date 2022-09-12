@@ -8,9 +8,10 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Friday, 6th May 2022 11:58:54 am
+Last Modified: Thursday, 8th September 2022 11:44:03 am
 '''
 
+from copy import deepcopy
 import fnmatch
 import logging
 import os
@@ -483,15 +484,13 @@ def __waveform_loop(
                 trim = False
 
             if not infodict:
-                info = shelve.open(infof, flag='r')
+                with shelve.open(infof, flag='r') as info:
+                    # In this case info is still a file. It needs to be in RAM
+                    infodict = deepcopy(info)
 
-                RF = createRF(
-                    st, phase, pol=pol, info=info, trim=trim, method=deconmeth)
-
-            else:
-                RF = createRF(
-                    st, phase, pol=pol, info=infodict, trim=trim,
-                    method=deconmeth)
+            RF = createRF(
+                st, phase, pol=pol, info=infodict, trim=trim,
+                method=deconmeth)
 
         # Write RF
             rfdir = os.path.join(rfloc, network, station)

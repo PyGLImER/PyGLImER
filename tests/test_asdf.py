@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 03:50:35 pm
-Last Modified: Friday, 24th December 2021 12:41:45 pm
+Last Modified: Thursday, 8th September 2022 04:16:10 pm
 '''
 import os
 import unittest
@@ -88,107 +88,6 @@ class TestWriteSt(unittest.TestCase):
             self.st[:-1], tag='raw_recording')
         ds_mock().__enter__().add_stationxml.assert_called_once_with(
             self.inv)
-
-
-class TestRewriteToHDF5(unittest.TestCase):
-    def setUp(self):
-        self.evtcat = read_events()
-        self.rawdir = os.path.join('path', 'to', 'waveforms')
-        self.calls = []
-        self.writeraw_calls = []
-        for event in self.evtcat:
-            origin_time = event.origins[0].time
-            ot_loc = UTCDateTime(
-                origin_time, precision=-1).format_fissures()[:-6]
-            evtlat = event.origins[0].latitude
-            evtlon = event.origins[0].longitude
-            evtlat_loc = str(roundhalf(evtlat))
-            evtlon_loc = str(roundhalf(evtlon))
-            evtdir = os.path.join(
-                self.rawdir, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
-            self.calls.append(call(evtdir))
-            self.writeraw_calls.append(call(
-                event, evtdir, os.path.join('path', 'to', 'response'),
-                False, True))
-
-    @patch('pyglimer.database.asdf.obspy.core.event.catalog.Catalog.write')
-    @patch('pyglimer.database.asdf.os.path.isdir')
-    @patch('pyglimer.database.asdf.writeraw')
-    @patch('pyglimer.database.asdf.shutil.copyfile')
-    @patch('pyglimer.database.asdf.read_events')
-    def test_no_waveform(
-            self, re_mock, copy_mock, writeraw_mock, isdir_mock, cat_mock):
-        re_mock.return_value = self.evtcat
-        isdir_mock.return_value = False
-        catfile = os.path.join('path', 'to', 'catalog')
-        statdir = os.path.join('path', 'to', 'response')
-
-        asdf.rewrite_to_hdf5(catfile, self.rawdir, statdir)
-        copy_mock.assert_called_once_with(catfile, '%s_bac' % catfile)
-        writeraw_mock.assert_not_called()
-        # expected calls
-        isdir_mock.assert_has_calls(self.calls)
-        isdir_mock.assert_called_with
-        assert 3 == isdir_mock.call_count
-        cat_mock.assert_called_with(catfile, format='QUAKEML')
-
-    @patch('pyglimer.database.asdf.os.rmdir')
-    @patch('pyglimer.database.asdf.os.listdir')
-    @patch('pyglimer.database.asdf.obspy.core.event.catalog.Catalog.write')
-    @patch('pyglimer.database.asdf.os.path.isdir')
-    @patch('pyglimer.database.asdf.writeraw')
-    @patch('pyglimer.database.asdf.shutil.copyfile')
-    @patch('pyglimer.database.asdf.read_events')
-    def test_remove_empty_dir(
-        self, re_mock, copy_mock, writeraw_mock, isdir_mock, cat_mock,
-            listdir_mock, rmdir_mock):
-        re_mock.return_value = self.evtcat
-        isdir_mock.return_value = True
-        listdir_mock.return_value = []
-        catfile = os.path.join('path', 'to', 'catalog')
-        statdir = os.path.join('path', 'to', 'response')
-
-        asdf.rewrite_to_hdf5(catfile, self.rawdir, statdir)
-        copy_mock.assert_called_once_with(catfile, '%s_bac' % catfile)
-        writeraw_mock.assert_not_called()
-        # expected calls
-        isdir_mock.assert_has_calls(self.calls)
-        assert 3 == isdir_mock.call_count
-        listdir_mock.assert_has_calls(self.calls)
-        assert 3 == listdir_mock.call_count
-        rmdir_mock.assert_has_calls(self.calls)
-        assert 3 == rmdir_mock.call_count
-        cat_mock.assert_called_with(catfile, format='QUAKEML')
-
-    @patch('pyglimer.database.asdf.os.rmdir')
-    @patch('pyglimer.database.asdf.os.listdir')
-    @patch('pyglimer.database.asdf.obspy.core.event.catalog.Catalog.write')
-    @patch('pyglimer.database.asdf.os.path.isdir')
-    @patch('pyglimer.database.asdf.writeraw')
-    @patch('pyglimer.database.asdf.shutil.copyfile')
-    @patch('pyglimer.database.asdf.read_events')
-    def test_waveform_found(
-        self, re_mock, copy_mock, writeraw_mock, isdir_mock, cat_mock,
-            listdir_mock, rmdir_mock):
-        re_mock.return_value = self.evtcat
-        isdir_mock.return_value = True
-        listdir_mock.return_value = [
-            'EG.IE.mseed', 'ETC.PP.mseed']
-        catfile = os.path.join('path', 'to', 'catalog')
-        statdir = os.path.join('path', 'to', 'response')
-
-        asdf.rewrite_to_hdf5(catfile, self.rawdir, statdir)
-        copy_mock.assert_called_once_with(catfile, '%s_bac' % catfile)
-
-        # expected calls
-        assert 3 == writeraw_mock.call_count
-        writeraw_mock.assert_has_calls(self.writeraw_calls)
-        isdir_mock.assert_has_calls(self.calls)
-        assert 3 == isdir_mock.call_count
-        listdir_mock.assert_has_calls(self.calls)
-        assert 3 == listdir_mock.call_count
-        rmdir_mock.assert_not_called
-        cat_mock.assert_called_with(catfile, format='QUAKEML')
 
 
 if __name__ == "__main__":

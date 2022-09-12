@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Monday, 30th May 2022 02:35:04 pm
+Last Modified: Thursday, 8th September 2022 11:44:40 am
 
 
 **The file is split and has a second copyright disclaimer**

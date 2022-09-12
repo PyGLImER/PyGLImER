@@ -10,7 +10,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 8th April 2022 02:47:54 pm
+Last Modified: Thursday, 8th September 2022 04:11:27 pm
 '''
 
 
@@ -18,7 +18,6 @@ import fnmatch
 from http.client import IncompleteRead
 import logging
 import os
-import shutil
 from functools import partial
 from itertools import compress
 from tqdm import tqdm
@@ -34,20 +33,26 @@ from obspy.core.inventory.network import Network
 from obspy.taup import TauPyModel
 from pyasdf import ASDFDataSet
 
-from pyglimer.database.asdf import writeraw
+from pyglimer.database.raw import RawDatabase, mseed_to_hdf5
 from pyglimer import tmp
 from pyglimer.utils.roundhalf import roundhalf
 from pyglimer.utils import utils as pu
-from pyglimer.utils.utils import download_full_inventory, chunks
+from pyglimer.utils.utils import download_full_inventory
 from pyglimer.waveform.preprocessh5 import compute_toa
 
 def __check_times_small_db_sub(
+
     event_cat: Catalog, channel: str,
     rawloc: str, tz: float, ta: float, phase: str, model: TauPyModel,
-    logger: logging.Logger, saveasdf: bool, net: Network, stat: Station) -> dict:
+    logger: logging.Logger, saveasdf: bool, net: Network,
+        stat: Station) -> dict:
 
     d = {'event': [], 'startt': [], 'endt': [], 'net': [], 'stat': []}
     logger.info(f"Checking {net.code}.{stat.code}")
+
+    # Information on available data for hdf5
+    global av_data
+    av_data = {}
     for evt in event_cat:
         try:
             toa, _, _, _, delta = compute_toa(
@@ -62,7 +67,8 @@ def __check_times_small_db_sub(
 
         # Already in DB?
         if saveasdf:
-            if wav_in_asdf(net, stat, '*', channel, toa-tz, toa+ta):
+            # if wav_in_asdf(net, stat, '*', channel, toa-tz, toa+ta):
+            if wav_in_hdf5(net, stat, '*', channel, toa-tz, toa+ta):
                 logger.info(
                     'File already in database. %s ' % stat.code
                     + 'Event: %s' % evt.resource_id)
@@ -103,7 +109,8 @@ def filter_overlapping_times(d):
     ``d = {'event': [], 'startt': [], 'endt': [], 'net': [], 'stat': []}``.
     """
 
-    # Check overlapping windows and set checkovelap to False if there is overlap
+    # Check overlapping windows and set checkovelap to False if there is
+    # overlap
     checkoverlap = pu.check_UTC_overlap(d['startt'], d['endt'])
 
     # Create filtered dictionary
@@ -204,7 +211,8 @@ def download_small_db(
         # Run partial function in parallel, resulting in one
         # dictionary per net/sta combo
         netsta_d = Parallel(n_jobs=20, backend='multiprocessing')(
-            delayed(dsub)(_net, _sta,)for _net, _sta in zip(networks, stations))
+            delayed(dsub)(_net, _sta,)for _net, _sta in zip(
+                networks, stations))
 
         # Create one request per station over all events.
         # This makes writing an asdf file per station much easier
@@ -219,7 +227,6 @@ def download_small_db(
 
             # Add minibulk to overall request
             netsta_bulk.append(mini_bulk)
-
 
     if len(netsta_bulk) == 0:
         logger.info('No new data found.')
@@ -250,6 +257,7 @@ def download_small_db(
                 # Provide status
                 logger.info(f"Downloading ... {_i:{Nd}d}/{N:d}")
 
+
                 # Download
                 pu.__client__loop_wav__(clients[0], rawloc, _bulk, _netsta_d, saveasdf, inv, network=_net.code, station=_sta.code)
 
@@ -264,25 +272,26 @@ def download_small_db(
                         for _net, _sta, _bulk, _netsta_d in zip(networks, stations, netsta_bulk, netsta_d))
 
     else:
-        # Length of request
+        # Length of requestf
         N = len(netsta_bulk)
 
         # Number of digits
         Nd = len(str(N))
 
         # Download station chunks chunks
-        for _i, (_net, _sta, _bulk, _netsta_d) in enumerate(zip(networks, stations, netsta_bulk, netsta_d)):
+        for _i, (_net, _sta, _bulk, _netsta_d) in enumerate(
+                zip(networks, stations, netsta_bulk, netsta_d)):
             # Provide status
             logger.info(f"Downloading ... {_i:{Nd}d}/{N:d}")
 
             # Download
             Parallel(n_jobs=-1, prefer='threads')(
                 delayed(pu.__client__loop_wav__)(
-                    client, rawloc, _bulk, _netsta_d, saveasdf, inv, network=_net.code, station=_sta.code)
-                    for client in clients)
+                    client, rawloc, _bulk, _netsta_d, saveasdf, inv,
+                    network=_net.code,
+                    station=_sta.code) for client in clients)
 
             logger.info(f"Downloaded {_i:{Nd}d}/{N:d}")
-
 
 
 def downloadwav(
@@ -349,6 +358,11 @@ def downloadwav(
     global asdfsave
     asdfsave = saveasdf
 
+    global av_data
+    # Dictionary holding available data - needed in download functions
+    # Keys are {network}{station}
+    av_data = {}
+
     # Calculate the min and max theoretical arrival time after event time
     # according to minimum and maximum epicentral distance
     min_time = model.get_travel_times(source_depth_in_km=500,
@@ -381,6 +395,8 @@ def downloadwav(
     fdsn_mass_logger.addHandler(fh)
 
     ####
+    # counter how many events are written only for h5
+    jj = 0
     # Loop over each event
     global event
     for ii, event in enumerate(tqdm(event_cat)):
@@ -459,22 +475,24 @@ def downloadwav(
             except Exception:
                 incomplete = False  # Any other error: continue
 
-        # 2021.02.15 Here, we write everything to asdf
-        if saveasdf:
-            writeraw(event, tmp.folder, statloc, verbose, True)
-            # If that works, we will be deleting the cached mseeds here
-            try:
-                shutil.rmtree(tmp.folder)
-            except FileNotFoundError:
-                # This does not make much sense, but for some reason it occurs
-                # even if the folder exists? However, we will not want the
-                # whole process to stop because of this
-                pass
+        # 2021.02.15 Here, we write everything to hdf5
+        # this should not be done every single event, but perhaps every 100th
+        # event or so.
+        if saveasdf and ii-jj > 99:
+            fdsn_mass_logger.info('Rewriting mseed to hdf5.....')
+            mseed_to_hdf5(rawloc, False)
+            jj = ii
+            fdsn_mass_logger.info('...Done')
         if fast_redownload:
             event_cat[ii:].write(evtfile, format="QUAKEML")
 
-    if not saveasdf:
-        download_full_inventory(statloc, clients)
+    # Always issues with the massdownlaoder inventory, so lets fix it here
+    fdsn_mass_logger.info('Downloading all response files.....')
+    download_full_inventory(statloc, clients)
+    if saveasdf:
+        fdsn_mass_logger.info('Rewriting mseed and xmls to hdf5.....')
+        mseed_to_hdf5(rawloc, save_statxml=True, statloc=statloc)
+        fdsn_mass_logger.info('...Done')
     tmp.folder = "finished"  # removes the restriction for preprocess.py
 
 
@@ -486,7 +504,7 @@ def get_mseed_storage(
     # will be downloaded.
 
     if asdfsave:
-        if wav_in_asdf(
+        if wav_in_hdf5(
                 network, station, location, channel, starttime, endtime):
             return True
     else:
@@ -571,3 +589,36 @@ def wav_in_asdf(
             return exists
         except KeyError:
             return False
+
+
+def wav_in_hdf5(
+    network: str, station: str, location: str, channel: str,
+        starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
+    """Is the waveform already in the Raw hdf5 database?"""
+    h5_file = os.path.join(tmp.folder, os.pardir, '%s.%s.h5' % (
+        network, station))
+
+    t = starttime.format_fissures()[:-4]
+
+    # First check dictionary
+    try:
+        if t in av_data[network][station][channel]:
+            return True
+        else:
+            return False
+    except KeyError:
+        pass
+    # Check whether there is data from this station at all
+    av_data.setdefault(network, {})
+    av_data[network].setdefault(station, {})
+    if not os.path.isfile(h5_file):
+        logging.debug(f'{h5_file} not found')
+        av_data[network][station][channel] = []
+        return False
+
+    # The file exists, so we will have to open it and get the dictionary
+    with RawDatabase(h5_file) as rdb:
+        av_data[network][station] = rdb._get_table_of_contents()
+
+    # execute this again to check
+    return wav_in_hdf5(network, station, location, channel, starttime, endtime)

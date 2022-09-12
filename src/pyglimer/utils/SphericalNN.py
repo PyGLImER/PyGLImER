@@ -246,7 +246,9 @@ class SphericalNN(object):
                 datarows = (wsum != 0)
 
                 def interpolator(data):
-                    """Using the weights and indices, we can return an interpolator
+                    """
+                    Using the weights and indices, we can return an
+                    interpolator
                     """
 
                     # Empty array
@@ -269,7 +271,9 @@ class SphericalNN(object):
                 datarows = (wsum != 0)
 
                 def interpolator(data):
-                    """Using the weights and indices, we can return an interpolator
+                    """
+                    Using the weights and indices, we can return an
+                    interpolator
                     """
 
                     # Empty array

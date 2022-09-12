@@ -12,63 +12,20 @@ Seismic Format (asdf).
 
 Created: Friday, 12th February 2021 03:24:30 pm
 
-Last Modified: Friday, 6th May 2022 02:28:13 pm
+Last Modified: Friday, 9th September 2022 04:28:15 pm
 '''
 
 import logging
 import os
-import shutil
 
 import obspy
-from obspy import read, read_inventory, UTCDateTime
-from obspy.core.event.catalog import read_events, Event
+from obspy import read, read_inventory
+from obspy.core.event.catalog import Event
 from obspy.core.inventory.inventory import Inventory
 from obspy.core.stream import Stream
 from pyasdf import ASDFDataSet
 
 from pyglimer.utils.signalproc import resample_or_decimate
-from pyglimer.utils.roundhalf import roundhalf
-
-
-def rewrite_to_hdf5(catfile: str, rawfolder: str, statloc: str):
-    """
-    Converts an existing miniseed waveform database to hierachal data format
-    (hdf5).
-
-    :param catfile: The pat hto the event catalogue that was used to download
-        the raw data. Will be altered during the process (removes already used
-        ones).
-    :type catfile: path to obspy.Catalog (str)
-    :param rawfolder: The folder that the raw data is saved in - ending with
-        the phase code (i.e., waveforms/raw/P)
-    :type rawfolder: str
-    :param statloc: Location that the station xmls are saved in.
-    :type statloc: str
-    """
-    # Create backup of original catalog
-    shutil.copyfile(catfile, '%s_bac' % catfile)
-    cat = read_events(catfile)
-    while cat.count():
-        event = cat[0]
-        origin_time = event.origins[0].time
-        ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
-        evtlat = event.origins[0].latitude
-        evtlon = event.origins[0].longitude
-        evtlat_loc = str(roundhalf(evtlat))
-        evtlon_loc = str(roundhalf(evtlon))
-        evtdir = os.path.join(
-            rawfolder, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
-        if not os.path.isdir(evtdir):
-            pass
-        elif not os.listdir(evtdir):
-            os.rmdir(evtdir)
-        else:
-            writeraw(event, evtdir, statloc, False, True)
-        logging.warning('removing event...')
-        del cat[0]
-        # Overwrite old catalog, so we don't have to restart the whole
-        # process over again afterwards
-        cat.write(catfile, format="QUAKEML")
 
 
 def writeraw(
@@ -146,7 +103,8 @@ def save_raw_single_station_asdf(
         network: str, station: str, saved: dict,
         st: Stream, rawloc: str, inv: Inventory):
     """
-    A variation of the above function that will open the ASDF file once and write
+    A variation of the above function that will open the ASDF file once and
+    write
     all traces and then close it afterwards
     Save the raw waveform data in the desired format.
     The point of this function is mainly that the waveforms will be saved
@@ -172,7 +130,6 @@ def save_raw_single_station_asdf(
     with ASDFDataSet(os.path.join(rawloc, fname)) as ds:
         # Events should not be added because it will read the whole
         # catalogue every single time!
-        N = len(saved['event'])
         for _i, (evt, startt, endt, net, stat) in enumerate(zip(
             saved['event'], saved['startt'], saved['endt'], saved['net'],
                 saved['stat'])):
@@ -222,7 +179,6 @@ def write_st_to_ds(
     :param resample: Resample the data to 10Hz sampling rate? Defaults to True.
     :type resample: bool, optional
     """
-    fname = '%s.%s.h5' % (st[0].stats.network, st[0].stats.station)
     if resample:
         st.filter('lowpass_cheby_2', freq=4, maxorder=12)
         st = resample_or_decimate(st, 10, filter=False)
