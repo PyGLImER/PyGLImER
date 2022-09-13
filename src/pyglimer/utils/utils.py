@@ -28,9 +28,9 @@ from obspy.core.inventory.inventory import Inventory
 from obspy.core.stream import Stream, Trace
 from obspy.core.utcdatetime import UTCDateTime
 
-from pyglimer.database.asdf import write_st
+from pyglimer.database.asdf import save_raw_DB_single_station, write_st
 from pyglimer.rf.create import RFStream, RFTrace
-from pyglimer.database.asdf import save_raw_single_station_asdf
+# from pyglimer.database.asdf import save_raw_single_station_asdf
 
 from .roundhalf import roundhalf
 
@@ -213,7 +213,7 @@ def __client__loop_wav__(
     if saveasdf:
         # Make sure ASDF file is only opened once
         if (network is not None) and (station is not None):
-            save_raw_single_station_asdf(
+            save_raw_DB_single_station(
                 network, station, saved, st, rawloc, inv)
 
         # Opens and closes ASDF file for each trace. It's more versatile, but

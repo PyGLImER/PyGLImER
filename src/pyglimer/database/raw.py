@@ -21,6 +21,7 @@ import re
 from typing import Iterable
 import warnings
 import glob
+import typing as tp
 
 import numpy as np
 from obspy.core.utcdatetime import UTCDateTime
@@ -95,7 +96,7 @@ class DBHandler(h5py.File):
         ds.attrs['content'] = str(content)
 
     def add_waveform(
-            self, data: Trace or Stream, tag: str = 'raw'):
+            self, data: tp.Union[Trace,Stream], tag: str = 'raw'):
         """
         Add receiver function to the hdf5 file. The data can later be accessed
         using the :meth:`~pyglimer.database.rfh5.DBHandler.get_data()` method.

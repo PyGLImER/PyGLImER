@@ -24,6 +24,7 @@ from obspy.core.event.catalog import Event
 from obspy.core.inventory.inventory import Inventory
 from obspy.core.stream import Stream
 from pyasdf import ASDFDataSet
+from pyglimer.database import raw
 
 from pyglimer.utils.signalproc import resample_or_decimate
 
@@ -99,7 +100,7 @@ def write_st(
         # to check whether they are similar probelms to add event
 
 
-def save_raw_single_station_asdf(
+def save_raw_DB_single_station(
         network: str, station: str, saved: dict,
         st: Stream, rawloc: str, inv: Inventory):
     """
@@ -119,15 +120,18 @@ def save_raw_single_station_asdf(
     :type rawloc: str
     :param inv: The inventory holding all the station information
     :type inv: Inventory
-    :param saveasdf: If True the data will be saved in asdf format.
-    :type saveasdf: bool
     """
 
     # Filename of the station to be opened.
     fname = '%s.%s.h5' % (network, station)
 
     # Just use the same name
-    with ASDFDataSet(os.path.join(rawloc, fname)) as ds:
+    with raw.RawDatabase(os.path.join(rawloc, fname)) as ds:
+
+        # Inventory should be saved once to the the station file
+        sinv = inv.select(network=network, station=station)
+        ds.add_response(sinv)
+
         # Events should not be added because it will read the whole
         # catalogue every single time!
         for _i, (evt, startt, endt, net, stat) in enumerate(zip(
@@ -151,18 +155,15 @@ def save_raw_single_station_asdf(
                 filtloc = max(set(locs), key=locs.count)
                 sslst = slst.select(location=filtloc)
 
-                # Check whether channels overlap
-                sinv = inv.select(net, stat, starttime=startt, endtime=endt)
-
                 logging.debug(f'{net}.{stat} writing event #{_i}/N')
-                write_st_to_ds(ds, sslst, evt, sinv)
+                write_st_to_ds(ds, sslst, evt)
 
             except Exception as e:
                 logging.error(e)
 
 
 def write_st_to_ds(
-    ds: ASDFDataSet, st: Stream, outfolder: str, statxml: Inventory,
+    ds: raw.DBHandler, st: Stream, outfolder: str,
         resample: bool = True):
     """
     Write raw waveform data to an asdf file. This includes the corresponding
@@ -184,7 +185,7 @@ def write_st_to_ds(
         st = resample_or_decimate(st, 10, filter=False)
 
     # Add waveforms and stationxml
-    ds.add_waveforms(st, tag='raw_recording')
-    ds.add_stationxml(statxml)
+    ds.add_waveform(st, tag='raw_recording')
+    #
     # If there are still problems, we will have
     # to check whether they are similar probelms to add event

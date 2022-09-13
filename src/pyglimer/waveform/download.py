@@ -44,7 +44,7 @@ def __check_times_small_db_sub(
 
     event_cat: Catalog, channel: str,
     rawloc: str, tz: float, ta: float, phase: str, model: TauPyModel,
-    logger: logging.Logger, saveasdf: bool, net: Network,
+    logger: logging.Logger, saveh5: bool, net: Network,
         stat: Station) -> dict:
 
     d = {'event': [], 'startt': [], 'endt': [], 'net': [], 'stat': []}
@@ -66,9 +66,9 @@ def __check_times_small_db_sub(
             continue
 
         # Already in DB?
-        if saveasdf:
+        if saveh5:
             # if wav_in_asdf(net, stat, '*', channel, toa-tz, toa+ta):
-            if wav_in_hdf5(net, stat, '*', channel, toa-tz, toa+ta):
+            if wav_in_hdf5(net.code, stat.code, '*', channel, toa-tz, toa+ta):
                 logger.info(
                     'File already in database. %s ' % stat.code
                     + 'Event: %s' % evt.resource_id)
@@ -128,7 +128,7 @@ def download_small_db(
     phase: str, min_epid: float, max_epid: float, model: TauPyModel,
     event_cat: Catalog, tz: float, ta: float, statloc: str,
     rawloc: str, clients: list, network: str, station: str, channel: str,
-        saveasdf: bool):
+        saveh5: bool):
     """
     see corresponding method :meth:`~pyglimer.waveform.request.Request.\
     download_waveforms_small_db`
@@ -187,7 +187,7 @@ def download_small_db(
     if len(networks) == 1:
         d = __check_times_small_db_sub(
             event_cat, channel, rawloc, tz, ta, phase, model,
-            logger, saveasdf, networks[0], stations[0])
+            logger, saveh5, networks[0], stations[0])
 
         # Hi bulk
         netsta_bulk = pu.create_bulk_str(
@@ -206,7 +206,7 @@ def download_small_db(
         dsub = partial(
             __check_times_small_db_sub,
             event_cat, channel, rawloc, tz, ta, phase, model,
-            logger, saveasdf)
+            logger, saveh5)
 
         # Run partial function in parallel, resulting in one
         # dictionary per net/sta combo
@@ -259,7 +259,7 @@ def download_small_db(
 
 
                 # Download
-                pu.__client__loop_wav__(clients[0], rawloc, _bulk, _netsta_d, saveasdf, inv, network=_net.code, station=_sta.code)
+                pu.__client__loop_wav__(clients[0], rawloc, _bulk, _netsta_d, saveh5, inv, network=_net.code, station=_sta.code)
 
                 logger.info(f"Downloaded {_i:{Nd}d}/{N:d}")
 
@@ -268,7 +268,7 @@ def download_small_db(
             # Download multiple stations in parallel
             Parallel(n_jobs=20, backend='multiprocessing')(
                 delayed(pu.__client__loop_wav__)(
-                    clients[0], rawloc, _bulk, _netsta_d, saveasdf, inv, network=_net.code, station=_sta.code)
+                    clients[0], rawloc, _bulk, _netsta_d, saveh5, inv, network=_net.code, station=_sta.code)
                         for _net, _sta, _bulk, _netsta_d in zip(networks, stations, netsta_bulk, netsta_d))
 
     else:
@@ -287,7 +287,7 @@ def download_small_db(
             # Download
             Parallel(n_jobs=-1, prefer='threads')(
                 delayed(pu.__client__loop_wav__)(
-                    client, rawloc, _bulk, _netsta_d, saveasdf, inv,
+                    client, rawloc, _bulk, _netsta_d, saveh5, inv,
                     network=_net.code,
                     station=_sta.code) for client in clients)
 
@@ -608,9 +608,11 @@ def wav_in_hdf5(
             return False
     except KeyError:
         pass
+
     # Check whether there is data from this station at all
     av_data.setdefault(network, {})
     av_data[network].setdefault(station, {})
+
     if not os.path.isfile(h5_file):
         logging.debug(f'{h5_file} not found')
         av_data[network][station][channel] = []
