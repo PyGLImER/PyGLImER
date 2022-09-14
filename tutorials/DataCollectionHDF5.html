@@ -680,6 +680,18 @@ parsed all needed information to <a class="reference internal" href="../chapters
   warnings.warn(msg, ASDFWarning)
 /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.10.BHZ__2021-04-18T06:54:22__2021-04-18T06:56:51__raw_recording&#39; already exists in file. Will not be added!
   warnings.warn(msg, ASDFWarning)
+/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.10.BH1__2021-04-18T00:42:09__2021-04-18T00:44:39__raw_recording&#39; already exists in file. Will not be added!
+  warnings.warn(msg, ASDFWarning)
+/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.10.BH2__2021-04-18T00:42:09__2021-04-18T00:44:39__raw_recording&#39; already exists in file. Will not be added!
+  warnings.warn(msg, ASDFWarning)
+/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.10.BHZ__2021-04-18T00:42:09__2021-04-18T00:44:39__raw_recording&#39; already exists in file. Will not be added!
+  warnings.warn(msg, ASDFWarning)
+/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.10.BH1__2021-04-18T00:41:53__2021-04-18T00:44:23__raw_recording&#39; already exists in file. Will not be added!
+  warnings.warn(msg, ASDFWarning)
+/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.10.BH2__2021-04-18T00:41:53__2021-04-18T00:44:23__raw_recording&#39; already exists in file. Will not be added!
+  warnings.warn(msg, ASDFWarning)
+/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.10.BHZ__2021-04-18T00:41:53__2021-04-18T00:44:23__raw_recording&#39; already exists in file. Will not be added!
+  warnings.warn(msg, ASDFWarning)
 /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.10.BH1__2021-04-14T04:41:40__2021-04-14T04:44:10__raw_recording&#39; already exists in file. Will not be added!
   warnings.warn(msg, ASDFWarning)
 /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data &#39;IU.HRV/IU.HRV.10.BH2__2021-04-14T04:41:40__2021-04-14T04:44:10__raw_recording&#39; already exists in file. Will not be added!
@@ -961,7 +973,7 @@ to count how many traces it contains.</p>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of downloaded waveforms: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Number of downloaded waveforms: 207
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Number of downloaded waveforms: 213
 </pre></div>
 </div>
 <p>The final step to get you receiver function data is the preprocessing.
@@ -994,96 +1006,158 @@ that very coordinate system.
 
   0%|          | 0/289 [00:00&lt;?, ?it/s]
 
-  0%|          | 1/289 [00:00&lt;00:41,  6.86it/s]
+  0%|          | 1/289 [00:00&lt;00:38,  7.41it/s]
 
-  1%|1         | 4/289 [00:00&lt;00:19, 14.52it/s]
+  1%|1         | 4/289 [00:00&lt;00:17, 15.99it/s]
 
-  2%|2         | 6/289 [00:00&lt;00:19, 14.25it/s]
+  2%|2         | 6/289 [00:00&lt;00:18, 15.62it/s]
 
-  6%|5         | 17/289 [00:00&lt;00:07, 37.25it/s]
+  6%|5         | 17/289 [00:00&lt;00:06, 40.61it/s]
 
-  7%|7         | 21/289 [00:00&lt;00:07, 35.10it/s]
+  7%|7         | 21/289 [00:00&lt;00:07, 36.96it/s]
 
-  9%|8         | 25/289 [00:01&lt;00:10, 24.65it/s]
+  9%|8         | 25/289 [00:00&lt;00:10, 25.96it/s]
 
- 10%|9         | 28/289 [00:01&lt;00:13, 18.97it/s]
+ 10%|9         | 28/289 [00:01&lt;00:13, 19.85it/s]
 
- 11%|#         | 31/289 [00:01&lt;00:13, 19.50it/s]
+ 11%|#         | 31/289 [00:01&lt;00:12, 20.44it/s]
 
- 12%|#1        | 34/289 [00:01&lt;00:12, 19.86it/s]
+ 12%|#1        | 34/289 [00:01&lt;00:12, 20.96it/s]
 
- 14%|#4        | 41/289 [00:01&lt;00:08, 28.22it/s]
+ 14%|#4        | 41/289 [00:01&lt;00:08, 29.29it/s]
 
- 16%|#5        | 45/289 [00:01&lt;00:10, 22.31it/s]
+ 16%|#5        | 45/289 [00:01&lt;00:10, 23.03it/s]
 
- 17%|#6        | 48/289 [00:02&lt;00:10, 22.16it/s]
+ 17%|#6        | 48/289 [00:02&lt;00:10, 23.00it/s]
 
- 18%|#7        | 51/289 [00:02&lt;00:13, 17.84it/s]
+ 18%|#7        | 51/289 [00:02&lt;00:12, 18.44it/s]
 
- 19%|#8        | 54/289 [00:02&lt;00:15, 15.43it/s]
+ 19%|#8        | 54/289 [00:02&lt;00:14, 15.94it/s]
 
- 20%|##        | 59/289 [00:02&lt;00:11, 19.96it/s]
+ 20%|##        | 59/289 [00:02&lt;00:11, 20.46it/s]
 
- 21%|##1       | 62/289 [00:02&lt;00:11, 20.18it/s]
+ 21%|##1       | 62/289 [00:02&lt;00:10, 20.96it/s]
 
- 22%|##2       | 65/289 [00:03&lt;00:11, 20.11it/s]
+ 22%|##2       | 65/289 [00:02&lt;00:10, 21.14it/s]
 
- 24%|##3       | 68/289 [00:03&lt;00:10, 20.34it/s]
+ 24%|##3       | 68/289 [00:03&lt;00:10, 21.63it/s]
 
- 25%|##4       | 71/289 [00:03&lt;00:10, 20.33it/s]
+ 25%|##4       | 71/289 [00:03&lt;00:09, 21.91it/s]
 
- 27%|##6       | 77/289 [00:03&lt;00:08, 26.25it/s]
+ 27%|##6       | 77/289 [00:03&lt;00:07, 28.40it/s]
 
- 28%|##8       | 81/289 [00:03&lt;00:07, 26.85it/s]
+ 28%|##8       | 81/289 [00:03&lt;00:07, 29.09it/s]
 
- 29%|##9       | 85/289 [00:03&lt;00:07, 26.80it/s]
+ 29%|##9       | 85/289 [00:03&lt;00:07, 28.97it/s]2022-09-14 18:05:25,043 - ERROR - RF Creation failed. Waveform Data:
+IU.HRV.2021108T002925.0380Z
+original error:
+Unexpected behavior in rotation. Please file a bug report on github.
+Traceback (most recent call last):
+  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 346, in __station_process__
+    st, _, infodict = __rotate_qc(
+  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 405, in __rotate_qc
+    st.rotate(method=&#39;-&gt;ZNE&#39;, inventory=station_inv)
+  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 2733, in rotate
+    return self._rotate_to_zne(inventory, **kwargs)
+  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3469, in _rotate_to_zne
+    self._rotate_specific_channels_to_zne(
+  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3542, in _rotate_specific_channels_to_zne
+    raise NotImplementedError(msg)
+NotImplementedError: Unexpected behavior in rotation. Please file a bug report on github.
+ERROR:pyglimer.request.preprocess.RF:RF Creation failed. Waveform Data:
+IU.HRV.2021108T002925.0380Z
+original error:
+Unexpected behavior in rotation. Please file a bug report on github.
+Traceback (most recent call last):
+  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 346, in __station_process__
+    st, _, infodict = __rotate_qc(
+  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 405, in __rotate_qc
+    st.rotate(method=&#39;-&gt;ZNE&#39;, inventory=station_inv)
+  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 2733, in rotate
+    return self._rotate_to_zne(inventory, **kwargs)
+  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3469, in _rotate_to_zne
+    self._rotate_specific_channels_to_zne(
+  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3542, in _rotate_specific_channels_to_zne
+    raise NotImplementedError(msg)
+NotImplementedError: Unexpected behavior in rotation. Please file a bug report on github.
+2022-09-14 18:05:25,265 - ERROR - RF Creation failed. Waveform Data:
+IU.HRV.2021108T002912.4990Z
+original error:
+Unexpected behavior in rotation. Please file a bug report on github.
+Traceback (most recent call last):
+  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 346, in __station_process__
+    st, _, infodict = __rotate_qc(
+  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 405, in __rotate_qc
+    st.rotate(method=&#39;-&gt;ZNE&#39;, inventory=station_inv)
+  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 2733, in rotate
+    return self._rotate_to_zne(inventory, **kwargs)
+  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3469, in _rotate_to_zne
+    self._rotate_specific_channels_to_zne(
+  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3542, in _rotate_specific_channels_to_zne
+    raise NotImplementedError(msg)
+NotImplementedError: Unexpected behavior in rotation. Please file a bug report on github.
+ERROR:pyglimer.request.preprocess.RF:RF Creation failed. Waveform Data:
+IU.HRV.2021108T002912.4990Z
+original error:
+Unexpected behavior in rotation. Please file a bug report on github.
+Traceback (most recent call last):
+  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 346, in __station_process__
+    st, _, infodict = __rotate_qc(
+  File &quot;/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py&quot;, line 405, in __rotate_qc
+    st.rotate(method=&#39;-&gt;ZNE&#39;, inventory=station_inv)
+  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 2733, in rotate
+    return self._rotate_to_zne(inventory, **kwargs)
+  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3469, in _rotate_to_zne
+    self._rotate_specific_channels_to_zne(
+  File &quot;/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py&quot;, line 3542, in _rotate_specific_channels_to_zne
+    raise NotImplementedError(msg)
+NotImplementedError: Unexpected behavior in rotation. Please file a bug report on github.
 
- 30%|###       | 88/289 [00:04&lt;00:09, 21.18it/s]
 
- 31%|###1      | 91/289 [00:04&lt;00:09, 21.60it/s]
+ 30%|###       | 88/289 [00:04&lt;00:12, 16.22it/s]
 
- 33%|###2      | 94/289 [00:04&lt;00:09, 21.38it/s]
+ 31%|###1      | 91/289 [00:04&lt;00:11, 17.45it/s]
 
- 37%|###6      | 106/289 [00:04&lt;00:04, 39.85it/s]
+ 33%|###2      | 94/289 [00:04&lt;00:10, 18.57it/s]
 
- 38%|###8      | 111/289 [00:04&lt;00:05, 30.09it/s]
+ 37%|###6      | 106/289 [00:04&lt;00:05, 35.65it/s]
 
- 40%|####      | 117/289 [00:04&lt;00:05, 33.11it/s]
+ 38%|###8      | 111/289 [00:04&lt;00:06, 28.60it/s]
 
- 42%|####1     | 121/289 [00:05&lt;00:06, 25.61it/s]
+ 40%|####      | 117/289 [00:04&lt;00:05, 32.40it/s]
 
- 43%|####3     | 125/289 [00:05&lt;00:06, 26.64it/s]
+ 42%|####1     | 121/289 [00:05&lt;00:06, 25.67it/s]
 
- 45%|####4     | 129/289 [00:05&lt;00:07, 22.13it/s]
+ 43%|####3     | 125/289 [00:05&lt;00:06, 26.67it/s]
 
- 46%|####6     | 133/289 [00:05&lt;00:06, 23.88it/s]
+ 45%|####4     | 129/289 [00:05&lt;00:07, 22.45it/s]
 
- 65%|######4   | 187/289 [00:05&lt;00:00, 110.94it/s]
+ 46%|####6     | 133/289 [00:05&lt;00:06, 24.18it/s]
 
- 69%|######9   | 200/289 [00:06&lt;00:01, 61.33it/s]
+ 65%|######4   | 187/289 [00:05&lt;00:00, 111.87it/s]
 
- 73%|#######2  | 210/289 [00:06&lt;00:01, 47.63it/s]
+ 69%|######9   | 200/289 [00:06&lt;00:01, 63.13it/s]
 
- 75%|#######5  | 218/289 [00:07&lt;00:01, 42.29it/s]
+ 73%|#######2  | 210/289 [00:06&lt;00:01, 48.87it/s]
 
- 83%|########2 | 239/289 [00:07&lt;00:00, 60.16it/s]
+ 75%|#######5  | 218/289 [00:06&lt;00:01, 44.14it/s]
 
- 86%|########5 | 248/289 [00:07&lt;00:00, 61.72it/s]
+ 83%|########2 | 239/289 [00:07&lt;00:00, 62.23it/s]
 
- 89%|########8 | 257/289 [00:07&lt;00:00, 38.21it/s]
+ 86%|########5 | 248/289 [00:07&lt;00:00, 63.34it/s]
 
- 91%|#########1| 264/289 [00:08&lt;00:00, 28.58it/s]
+ 89%|########8 | 257/289 [00:07&lt;00:00, 39.59it/s]
 
- 93%|#########3| 269/289 [00:08&lt;00:00, 21.04it/s]
+ 91%|#########1| 264/289 [00:08&lt;00:00, 30.70it/s]
 
- 94%|#########4| 273/289 [00:09&lt;00:00, 19.45it/s]
+ 93%|#########3| 269/289 [00:08&lt;00:00, 22.42it/s]
 
- 96%|#########5| 276/289 [00:09&lt;00:00, 17.66it/s]
+ 94%|#########4| 273/289 [00:08&lt;00:00, 20.58it/s]
 
- 97%|#########6| 279/289 [00:09&lt;00:00, 18.47it/s]
+ 96%|#########5| 277/289 [00:09&lt;00:00, 19.28it/s]
 
- 98%|#########7| 282/289 [00:09&lt;00:00, 18.75it/s]
-100%|##########| 289/289 [00:09&lt;00:00, 29.70it/s]
+ 97%|#########6| 280/289 [00:09&lt;00:00, 17.15it/s]
+100%|##########| 289/289 [00:09&lt;00:00, 30.37it/s]
 /home/runner/work/PyGLImER/PyGLImER/src/pyglimer/database/rfh5.py:376: UserWarning: The header contains an item of type &lt;class &#39;obspy.core.util.attribdict.AttribDict&#39;&gt;. Information            of this type cannot be written to an hdf5 file.
   warnings.warn(
 /home/runner/work/PyGLImER/PyGLImER/src/pyglimer/database/rfh5.py:376: UserWarning: The header contains an item of type &lt;class &#39;obspy.core.inventory.response.Response&#39;&gt;. Information            of this type cannot be written to an hdf5 file.
@@ -1091,8 +1165,8 @@ that very coordinate system.
 /home/runner/work/PyGLImER/PyGLImER/src/pyglimer/database/rfh5.py:376: UserWarning: The header contains an item of type &lt;class &#39;obspy.core.event.resourceid.ResourceIdentifier&#39;&gt;. Information            of this type cannot be written to an hdf5 file.
   warnings.warn(
 
-100%|##########| 1/1 [00:09&lt;00:00,  9.91s/it]
-100%|##########| 1/1 [00:09&lt;00:00,  9.91s/it]
+100%|##########| 1/1 [00:09&lt;00:00,  9.70s/it]
+100%|##########| 1/1 [00:09&lt;00:00,  9.70s/it]
 </pre></div>
 </div>
 <hr class="docutils" />
@@ -1200,7 +1274,7 @@ already see trends:</p>
 </div>
 <p>As simple as that you can create your own receiver functions with
 just a single smalle script.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  5.532 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  19.400 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-datacollectionhdf5-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/2d66953dda8e36d9559e64d07e0d09e0/DataCollectionHDF5.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">DataCollectionHDF5.py</span></code></a></p>

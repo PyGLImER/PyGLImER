@@ -488,7 +488,7 @@ Seismic Format (asdf).</p>
 </dd>
 </dl>
 <p>Created: Friday, 12th February 2021 03:24:30 pm</p>
-<p>Last Modified: Tuesday, 6th September 2022 11:01:32 am</p>
+<p>Last Modified: Friday, 6th May 2022 02:28:13 pm</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyglimer.database.asdf.rewrite_to_hdf5">
 <span class="sig-prename descclassname"><span class="pre">pyglimer.database.asdf.</span></span><span class="sig-name descname"><span class="pre">rewrite_to_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">catfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawfolder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/asdf.html#rewrite_to_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.asdf.rewrite_to_hdf5" title="Permalink to this definition">#</a></dt>
@@ -509,49 +509,8 @@ the phase code (i.e., waveforms/raw/P)</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.database.asdf.save_raw_single_station_asdf">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.database.asdf.</span></span><span class="sig-name descname"><span class="pre">save_raw_single_station_asdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saved</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rawloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Inventory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/asdf.html#save_raw_single_station_asdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.asdf.save_raw_single_station_asdf" title="Permalink to this definition">#</a></dt>
-<dd><p>A variation of the above function that will open the ASDF file once and
-write
-all traces and then close it afterwards
-Save the raw waveform data in the desired format.
-The point of this function is mainly that the waveforms will be saved
-with the correct associations and at the correct locations.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>saved</strong> (<em>dict</em>) – Dictionary holding information about the original streams
-to identify them afterwards.</p></li>
-<li><p><strong>st</strong> (<em>Stream</em>) – obspy stream holding all data (from various stations)</p></li>
-<li><p><strong>rawloc</strong> (<em>str</em>) – Parental directory (with phase) to save the files in.</p></li>
-<li><p><strong>inv</strong> (<em>Inventory</em>) – The inventory holding all the station information</p></li>
-<li><p><strong>saveasdf</strong> (<em>bool</em>) – If True the data will be saved in asdf format.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="pyglimer.database.asdf.write_st">
 <span class="sig-prename descclassname"><span class="pre">pyglimer.database.asdf.</span></span><span class="sig-name descname"><span class="pre">write_st</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfolder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statxml</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Inventory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/asdf.html#write_st"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.asdf.write_st" title="Permalink to this definition">#</a></dt>
-<dd><p>Write raw waveform data to an asdf file. This includes the corresponding
-(teleseismic) event and the station inventory (i.e., response information).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>st</strong> (<em>Stream</em>) – The stream holding the raw waveform data.</p></li>
-<li><p><strong>event</strong> (<em>Event</em>) – The seismic event associated to the recorded data.</p></li>
-<li><p><strong>outfolder</strong> (<em>str</em>) – Output folder to write the asdf file to.</p></li>
-<li><p><strong>statxml</strong> (<em>Inventory</em>) – The station inventory</p></li>
-<li><p><strong>resample</strong> (<em>bool</em><em>, </em><em>optional</em>) – Resample the data to 10Hz sampling rate? Defaults to True.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.database.asdf.write_st_to_ds">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.database.asdf.</span></span><span class="sig-name descname"><span class="pre">write_st_to_ds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ASDFDataSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">st</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfolder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statxml</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Inventory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/asdf.html#write_st_to_ds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.asdf.write_st_to_ds" title="Permalink to this definition">#</a></dt>
 <dd><p>Write raw waveform data to an asdf file. This includes the corresponding
 (teleseismic) event and the station inventory (i.e., response information).</p>
 <dl class="field-list simple">
@@ -602,7 +561,7 @@ Includes an AA-filter.</p></li>
 </dd>
 </dl>
 <p>Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Tuesday, 6th September 2022 05:34:54 pm</p>
+Last Modified: Friday, 11th February 2022 01:06:08 pm</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyglimer.database.rfh5.DBHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></span><span class="sig-name descname"><span class="pre">DBHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#DBHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.DBHandler" title="Permalink to this definition">#</a></dt>
@@ -614,8 +573,8 @@ Last Modified: Tuesday, 6th September 2022 05:34:54 pm</p>
 :class:`~pyglimer.database.rfh5.RFDataBase` instead.</strong></p>
 </div>
 <p>Child object of <code class="xref py py-class docutils literal notranslate"><span class="pre">h5py.File</span></code> and inherets all its attributes and
-functions in addition to functions that are particularly useful for
-receiver functions.</p>
+functions in addition to functions that are particularly useful for noise
+correlations.</p>
 <p>Create a new file object.</p>
 <p>See the h5py user guide for a detailed explanation of the options.</p>
 <dl class="simple">
@@ -735,7 +694,7 @@ using the <a class="reference internal" href="#pyglimer.database.rfh5.DBHandler.
 <a class="reference internal" href="rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> holding one or
 several traces.</p></li>
 <li><p><strong>tag</strong> – The tag that the data should be saved under. By convention,
-receiver functions are saved with the tag <cite>‘rf’</cite>.</p></li>
+unstacked correlations are saved with the tag <cite>‘rf’</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -834,7 +793,7 @@ data.</p>
 <dt class="sig sig-object py" id="pyglimer.database.rfh5.RFDataBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></span><span class="sig-name descname"><span class="pre">RFDataBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'a'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gzip3'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#RFDataBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.RFDataBase" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Base class to handle the hdf5 files that contain receiver functions.</p>
+<p>Base class to handle the hdf5 files that contain noise correlations.</p>
 <p>Access an hdf5 file holding receiver functions. The resulting file can
 be accessed using all functionalities of
 <a class="reference external" href="https://www.h5py.org/">h5py</a> (for example as a dict).</p>
@@ -886,7 +845,7 @@ In addition this will check whether the data matches a certain pattern.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>group</strong> (class:<cite>h5py._hl.group.Group</cite>) – group to search through</p></li>
-<li><p><strong>stream</strong> (<em>Stream</em>) – Stream to append the traces to</p></li>
+<li><p><strong>stream</strong> (<em>CorrStream</em>) – Stream to append the traces to</p></li>
 <li><p><strong>pattern</strong> (<em>str</em>) – pattern for the path in the hdf5 file, see fnmatch for
 details.</p></li>
 </ul>
@@ -895,7 +854,7 @@ details.</p></li>
 <dd class="field-even"><p>Stream with appended traces</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Stream</p>
+<dd class="field-odd"><p>CorrStream</p>
 </dd>
 </dl>
 </dd></dl>
@@ -918,7 +877,7 @@ hdf5 dataset.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyglimer.database.rfh5.read_hdf5_header">
 <span class="sig-prename descclassname"><span class="pre">pyglimer.database.rfh5.</span></span><span class="sig-name descname"><span class="pre">read_hdf5_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Stats</span></span></span><a class="reference internal" href="../../_modules/pyglimer/database/rfh5.html#read_hdf5_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.database.rfh5.read_hdf5_header" title="Permalink to this definition">#</a></dt>
-<dd><p>Takes an hdf5 dataset as input and returns the header of the Trace.</p>
+<dd><p>Takes an hdf5 dataset as input and returns the header of the CorrTrace.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>dataset</strong> (<em>h5py.Dataset</em>) – The dataset to be read from</p>

@@ -397,7 +397,7 @@
 
 <span class="sd">Created: Friday, 12th February 2021 03:24:30 pm</span>
 
-<span class="sd">Last Modified: Tuesday, 6th September 2022 11:01:32 am</span>
+<span class="sd">Last Modified: Friday, 6th May 2022 02:28:13 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -525,98 +525,6 @@
         <span class="n">ds</span><span class="o">.</span><span class="n">add_waveforms</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;raw_recording&#39;</span><span class="p">)</span>
         <span class="n">ds</span><span class="o">.</span><span class="n">add_stationxml</span><span class="p">(</span><span class="n">statxml</span><span class="p">)</span>  <span class="c1"># If there are still problems, we will have</span></div>
         <span class="c1"># to check whether they are similar probelms to add event</span>
-
-
-<div class="viewcode-block" id="save_raw_single_station_asdf"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.asdf.save_raw_single_station_asdf">[docs]</a><span class="k">def</span> <span class="nf">save_raw_single_station_asdf</span><span class="p">(</span>
-        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">saved</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-        <span class="n">st</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inv</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A variation of the above function that will open the ASDF file once and</span>
-<span class="sd">    write</span>
-<span class="sd">    all traces and then close it afterwards</span>
-<span class="sd">    Save the raw waveform data in the desired format.</span>
-<span class="sd">    The point of this function is mainly that the waveforms will be saved</span>
-<span class="sd">    with the correct associations and at the correct locations.</span>
-
-<span class="sd">    :param saved: Dictionary holding information about the original streams</span>
-<span class="sd">        to identify them afterwards.</span>
-<span class="sd">    :type saved: dict</span>
-<span class="sd">    :param st: obspy stream holding all data (from various stations)</span>
-<span class="sd">    :type st: Stream</span>
-<span class="sd">    :param rawloc: Parental directory (with phase) to save the files in.</span>
-<span class="sd">    :type rawloc: str</span>
-<span class="sd">    :param inv: The inventory holding all the station information</span>
-<span class="sd">    :type inv: Inventory</span>
-<span class="sd">    :param saveasdf: If True the data will be saved in asdf format.</span>
-<span class="sd">    :type saveasdf: bool</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Filename of the station to be opened.</span>
-    <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.h5&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">)</span>
-
-    <span class="c1"># Just use the same name</span>
-    <span class="k">with</span> <span class="n">ASDFDataSet</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rawloc</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
-        <span class="c1"># Events should not be added because it will read the whole</span>
-        <span class="c1"># catalogue every single time!</span>
-        <span class="k">for</span> <span class="n">_i</span><span class="p">,</span> <span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">startt</span><span class="p">,</span> <span class="n">endt</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
-            <span class="n">saved</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">],</span> <span class="n">saved</span><span class="p">[</span><span class="s1">&#39;startt&#39;</span><span class="p">],</span> <span class="n">saved</span><span class="p">[</span><span class="s1">&#39;endt&#39;</span><span class="p">],</span> <span class="n">saved</span><span class="p">[</span><span class="s1">&#39;net&#39;</span><span class="p">],</span>
-                <span class="n">saved</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">])):</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1">: Processing #</span><span class="si">{</span><span class="n">_i</span><span class="si">}</span><span class="s1">/N&#39;</span><span class="p">)</span>
-            <span class="c1"># earlier we downloaded all locations, but we don&#39;t really want</span>
-            <span class="c1"># to have several, so let&#39;s just keep one</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">sst</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="n">net</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">stat</span><span class="p">)</span>
-                <span class="c1"># This might actually be empty if so, let&#39;s just skip</span>
-                <span class="k">if</span> <span class="n">sst</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No trace of </span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1"> in Stream.&#39;</span><span class="p">)</span>
-                    <span class="k">continue</span>
-
-                <span class="c1"># This must assume that there is no overlap</span>
-                <span class="n">slst</span> <span class="o">=</span> <span class="n">sst</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">startt</span><span class="p">,</span> <span class="n">endt</span><span class="p">)</span>
-
-                <span class="c1"># Only write the prevelant location</span>
-                <span class="n">locs</span> <span class="o">=</span> <span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">location</span> <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">sst</span><span class="p">]</span>
-                <span class="n">filtloc</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">locs</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">locs</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
-                <span class="n">sslst</span> <span class="o">=</span> <span class="n">slst</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">filtloc</span><span class="p">)</span>
-
-                <span class="c1"># Check whether channels overlap</span>
-                <span class="n">sinv</span> <span class="o">=</span> <span class="n">inv</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">starttime</span><span class="o">=</span><span class="n">startt</span><span class="p">,</span> <span class="n">endtime</span><span class="o">=</span><span class="n">endt</span><span class="p">)</span>
-
-                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1"> writing event #</span><span class="si">{</span><span class="n">_i</span><span class="si">}</span><span class="s1">/N&#39;</span><span class="p">)</span>
-                <span class="n">write_st_to_ds</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">sslst</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">sinv</span><span class="p">)</span>
-
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">e</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="write_st_to_ds"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.asdf.write_st_to_ds">[docs]</a><span class="k">def</span> <span class="nf">write_st_to_ds</span><span class="p">(</span>
-    <span class="n">ds</span><span class="p">:</span> <span class="n">ASDFDataSet</span><span class="p">,</span> <span class="n">st</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">outfolder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">statxml</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">,</span>
-        <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Write raw waveform data to an asdf file. This includes the corresponding</span>
-<span class="sd">    (teleseismic) event and the station inventory (i.e., response information).</span>
-
-<span class="sd">    :param st: The stream holding the raw waveform data.</span>
-<span class="sd">    :type st: Stream</span>
-<span class="sd">    :param event: The seismic event associated to the recorded data.</span>
-<span class="sd">    :type event: Event</span>
-<span class="sd">    :param outfolder: Output folder to write the asdf file to.</span>
-<span class="sd">    :type outfolder: str</span>
-<span class="sd">    :param statxml: The station inventory</span>
-<span class="sd">    :type statxml: Inventory</span>
-<span class="sd">    :param resample: Resample the data to 10Hz sampling rate? Defaults to True.</span>
-<span class="sd">    :type resample: bool, optional</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.h5&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">resample</span><span class="p">:</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;lowpass_cheby_2&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">maxorder</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-        <span class="n">st</span> <span class="o">=</span> <span class="n">resample_or_decimate</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-    <span class="c1"># Add waveforms and stationxml</span>
-    <span class="n">ds</span><span class="o">.</span><span class="n">add_waveforms</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;raw_recording&#39;</span><span class="p">)</span>
-    <span class="n">ds</span><span class="o">.</span><span class="n">add_stationxml</span><span class="p">(</span><span class="n">statxml</span><span class="p">)</span></div>
-    <span class="c1"># If there are still problems, we will have</span>
-    <span class="c1"># to check whether they are similar probelms to add event</span>
 </pre></div>
 
             </article>

@@ -942,26 +942,6 @@ Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-
 <p>Created: Tue May 26 2019 13:31:30
 Last Modified: Friday, 6th May 2022 01:18:05 pm</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyglimer.utils.utils.check_UTC_overlap">
-<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></span><span class="sig-name descname"><span class="pre">check_UTC_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">UTCDateTime</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">UTCDateTime</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#check_UTC_overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.check_UTC_overlap" title="Permalink to this definition">#</a></dt>
-<dd><p>Checks a list of starttimes and endtimes for overlap</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>start</strong> (<em>List</em><em>[</em><em>UTCDateTime</em><em>]</em>) – List of UTCDatetime starttimes</p></li>
-<li><p><strong>end</strong> (<em>List</em><em>[</em><em>UTCDateTime</em><em>]</em>) – List of UTCDateTime endtimes</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of booleans. If True no overlap, if False overlap</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List[bool]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="pyglimer.utils.utils.chunks">
 <span class="sig-prename descclassname"><span class="pre">pyglimer.utils.utils.</span></span><span class="sig-name descname"><span class="pre">chunks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/utils.html#chunks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.utils.chunks" title="Permalink to this definition">#</a></dt>
 <dd><p>Yield successive n-sized chunks from lst. Useful for multi-threading</p>

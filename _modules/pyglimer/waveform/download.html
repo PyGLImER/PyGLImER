@@ -395,7 +395,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Tue May 26 2019 13:31:30</span>
-<span class="sd">Last Modified: Tuesday, 6th September 2022 11:18:10 am</span>
+<span class="sd">Last Modified: Friday, 8th April 2022 02:47:54 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 
@@ -404,8 +404,6 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">compress</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
@@ -414,8 +412,6 @@
 <span class="kn">from</span> <span class="nn">obspy.clients.fdsn.mass_downloader</span> <span class="kn">import</span> <span class="n">CircularDomain</span><span class="p">,</span> \
     <span class="n">Restrictions</span><span class="p">,</span> <span class="n">MassDownloader</span>
 <span class="kn">from</span> <span class="nn">obspy.core.event.catalog</span> <span class="kn">import</span> <span class="n">Catalog</span>
-<span class="kn">from</span> <span class="nn">obspy.core.inventory.station</span> <span class="kn">import</span> <span class="n">Station</span>
-<span class="kn">from</span> <span class="nn">obspy.core.inventory.network</span> <span class="kn">import</span> <span class="n">Network</span>
 <span class="kn">from</span> <span class="nn">obspy.taup</span> <span class="kn">import</span> <span class="n">TauPyModel</span>
 <span class="kn">from</span> <span class="nn">pyasdf</span> <span class="kn">import</span> <span class="n">ASDFDataSet</span>
 
@@ -423,83 +419,8 @@
 <span class="kn">from</span> <span class="nn">pyglimer</span> <span class="kn">import</span> <span class="n">tmp</span>
 <span class="kn">from</span> <span class="nn">pyglimer.utils.roundhalf</span> <span class="kn">import</span> <span class="n">roundhalf</span>
 <span class="kn">from</span> <span class="nn">pyglimer.utils</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">pu</span>
-<span class="kn">from</span> <span class="nn">pyglimer.utils.utils</span> <span class="kn">import</span> <span class="n">download_full_inventory</span><span class="p">,</span> <span class="n">chunks</span>
+<span class="kn">from</span> <span class="nn">pyglimer.utils.utils</span> <span class="kn">import</span> <span class="n">download_full_inventory</span>
 <span class="kn">from</span> <span class="nn">pyglimer.waveform.preprocessh5</span> <span class="kn">import</span> <span class="n">compute_toa</span>
-
-<span class="k">def</span> <span class="nf">__download_small_db_sub</span><span class="p">(</span>
-    <span class="n">event_cat</span><span class="p">:</span> <span class="n">Catalog</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">TauPyModel</span><span class="p">,</span>
-    <span class="n">logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">net</span><span class="p">:</span> <span class="n">Network</span><span class="p">,</span> <span class="n">stat</span><span class="p">:</span> <span class="n">Station</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-
-    <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;startt&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;endt&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;net&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;stat&#39;</span><span class="p">:</span> <span class="p">[]}</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checking </span><span class="si">{</span><span class="n">net</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">stat</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="n">event_cat</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">toa</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">compute_toa</span><span class="p">(</span>
-                <span class="n">evt</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-
-            <span class="c1"># occurs when there is no arrival of the phase at stat</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                <span class="s1">&#39;No valid arrival found for station </span><span class="si">%s</span><span class="s1">,&#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span>
-                <span class="o">+</span> <span class="s1">&#39;event </span><span class="si">%s</span><span class="s1">, and phase </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">phase</span><span class="p">))</span>
-            <span class="k">continue</span>
-
-        <span class="c1"># Already in DB?</span>
-        <span class="k">if</span> <span class="n">saveasdf</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">wav_in_asdf</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">toa</span><span class="o">-</span><span class="n">tz</span><span class="p">,</span> <span class="n">toa</span><span class="o">+</span><span class="n">ta</span><span class="p">):</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="s1">&#39;File already in database. </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span>
-                    <span class="o">+</span> <span class="s1">&#39;Event: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">)</span>
-                <span class="k">continue</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">o</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">ot_loc</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span>
-                <span class="n">o</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">precision</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
-            <span class="n">evtlat_loc</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">roundhalf</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">latitude</span><span class="p">))</span>
-            <span class="n">evtlon_loc</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">roundhalf</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">longitude</span><span class="p">))</span>
-            <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="n">rawloc</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ot_loc</span><span class="p">,</span> <span class="n">evtlat_loc</span><span class="p">,</span> <span class="n">evtlon_loc</span><span class="p">))</span>
-            <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.mseed&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="s1">&#39;File already in database. </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span>
-                    <span class="o">+</span> <span class="s1">&#39;Event: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">)</span>
-                <span class="k">continue</span>
-        <span class="c1"># It&#39;s new data, so add to request!</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;startt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">toa</span><span class="o">-</span><span class="n">tz</span><span class="p">)</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;endt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">toa</span><span class="o">+</span><span class="n">ta</span><span class="p">)</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;net&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stat</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
-
-    <span class="c1"># Check the dictionary for overlaps</span>
-    <span class="c1"># Filtering overlaps</span>
-    <span class="n">dd</span> <span class="o">=</span> <span class="n">filter_overlapping_times</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;net&quot;</span><span class="p">])</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">dd</span><span class="p">[</span><span class="s2">&quot;net&quot;</span><span class="p">])</span><span class="si">}</span><span class="s1"> overlaps &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;at </span><span class="si">{</span><span class="n">net</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">dd</span>
-
-
-<div class="viewcode-block" id="filter_overlapping_times"><a class="viewcode-back" href="../../../chapters/api/waveform.html#pyglimer.waveform.download.filter_overlapping_times">[docs]</a><span class="k">def</span> <span class="nf">filter_overlapping_times</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Filters the found dictionary for overlapping windows.</span>
-<span class="sd">    Dictionary looks as follows:</span>
-<span class="sd">    ``d = {&#39;event&#39;: [], &#39;startt&#39;: [], &#39;endt&#39;: [], &#39;net&#39;: [], &#39;stat&#39;: []}``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Check overlapping windows and set checkovelap to False if there is overlap</span>
-    <span class="n">checkoverlap</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">check_UTC_overlap</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;startt&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;endt&#39;</span><span class="p">])</span>
-
-    <span class="c1"># Create filtered dictionary</span>
-    <span class="n">dfilt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="n">dfilt</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">],</span> <span class="n">checkoverlap</span><span class="p">))</span>
-    <span class="n">dfilt</span><span class="p">[</span><span class="s1">&#39;net&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;net&#39;</span><span class="p">],</span> <span class="n">checkoverlap</span><span class="p">))</span>
-    <span class="n">dfilt</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">],</span> <span class="n">checkoverlap</span><span class="p">))</span>
-    <span class="n">dfilt</span><span class="p">[</span><span class="s1">&#39;startt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;startt&#39;</span><span class="p">],</span> <span class="n">checkoverlap</span><span class="p">))</span>
-    <span class="n">dfilt</span><span class="p">[</span><span class="s1">&#39;endt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;endt&#39;</span><span class="p">],</span> <span class="n">checkoverlap</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">dfilt</span></div>
 
 
 <div class="viewcode-block" id="download_small_db"><a class="viewcode-back" href="../../../chapters/api/waveform.html#pyglimer.waveform.download.download_small_db">[docs]</a><span class="k">def</span> <span class="nf">download_small_db</span><span class="p">(</span>
@@ -536,13 +457,10 @@
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">statloc</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Run parallel station loop.</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">clients</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">inv</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">__client__loop__</span><span class="p">(</span><span class="n">clients</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">statloc</span><span class="p">,</span> <span class="n">bulk_stat</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)(</span>
-            <span class="n">delayed</span><span class="p">(</span><span class="n">pu</span><span class="o">.</span><span class="n">__client__loop__</span><span class="p">)(</span><span class="n">client</span><span class="p">,</span> <span class="n">statloc</span><span class="p">,</span> <span class="n">bulk_stat</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="n">clients</span><span class="p">)</span>
-        <span class="n">inv</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">join_inv</span><span class="p">([</span><span class="n">inv</span> <span class="k">for</span> <span class="n">inv</span> <span class="ow">in</span> <span class="n">out</span><span class="p">])</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s1">&#39;threads&#39;</span><span class="p">)(</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">pu</span><span class="o">.</span><span class="n">__client__loop__</span><span class="p">)(</span><span class="n">client</span><span class="p">,</span> <span class="n">statloc</span><span class="p">,</span> <span class="n">bulk_stat</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="n">clients</span><span class="p">)</span>
+    <span class="n">inv</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">join_inv</span><span class="p">([</span><span class="n">inv</span> <span class="k">for</span> <span class="n">inv</span> <span class="ow">in</span> <span class="n">out</span><span class="p">])</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
         <span class="s1">&#39;Computing theoretical times of arrival and checking available data.&#39;</span><span class="p">)</span>
@@ -550,108 +468,78 @@
     <span class="c1"># Now we compute the theoretical arrivals using the events and the station</span>
     <span class="c1"># information</span>
     <span class="c1"># We make a list of dicts akin to</span>
-    <span class="n">networks</span><span class="p">,</span> <span class="n">stations</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;startt&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;endt&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;net&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;stat&#39;</span><span class="p">:</span> <span class="p">[]}</span>
     <span class="k">for</span> <span class="n">net</span> <span class="ow">in</span> <span class="n">inv</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">net</span><span class="p">:</span>
-            <span class="n">networks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
-            <span class="n">stations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stat</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checking </span><span class="si">{</span><span class="n">net</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">stat</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="n">event_cat</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">toa</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">compute_toa</span><span class="p">(</span>
+                        <span class="n">evt</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
 
-    <span class="c1"># Get bulk string for a single station</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">networks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="n">__download_small_db_sub</span><span class="p">(</span>
-            <span class="n">event_cat</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span> <span class="n">ta</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span>
-            <span class="n">logger</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">,</span> <span class="n">networks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">stations</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="c1"># occurs when there is no arrival of the phase at stat</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                        <span class="s1">&#39;No valid arrival found for station </span><span class="si">%s</span><span class="s1">,&#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span>
+                        <span class="o">+</span> <span class="s1">&#39;event </span><span class="si">%s</span><span class="s1">, and phase </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">,</span> <span class="n">phase</span><span class="p">))</span>
+                    <span class="k">continue</span>
 
-        <span class="c1"># Hi bulk</span>
-        <span class="n">netsta_bulk</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">create_bulk_str</span><span class="p">(</span>
-            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;net&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">],</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;startt&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;endt&#39;</span><span class="p">])</span>
+                <span class="c1"># Already in DB?</span>
+                <span class="k">if</span> <span class="n">saveasdf</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">wav_in_asdf</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">toa</span><span class="o">-</span><span class="n">tz</span><span class="p">,</span> <span class="n">toa</span><span class="o">+</span><span class="n">ta</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s1">&#39;File already in database. </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span>
+                            <span class="o">+</span> <span class="s1">&#39;Event: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">o</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">ot_loc</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span>
+                        <span class="n">o</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">precision</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
+                    <span class="n">evtlat_loc</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">roundhalf</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">latitude</span><span class="p">))</span>
+                    <span class="n">evtlon_loc</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">roundhalf</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">longitude</span><span class="p">))</span>
+                    <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">rawloc</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ot_loc</span><span class="p">,</span> <span class="n">evtlat_loc</span><span class="p">,</span> <span class="n">evtlon_loc</span><span class="p">))</span>
+                    <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.mseed&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s1">&#39;File already in database. </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">stat</span><span class="o">.</span><span class="n">code</span>
+                            <span class="o">+</span> <span class="s1">&#39;Event: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                <span class="c1"># It&#39;s new data, so add to request!</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;startt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">toa</span><span class="o">-</span><span class="n">tz</span><span class="p">)</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;endt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">toa</span><span class="o">+</span><span class="n">ta</span><span class="p">)</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;net&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stat</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
 
-        <span class="c1"># Sort bulk request</span>
-        <span class="n">netsta_bulk</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="c1"># Create waveform download bulk list</span>
+    <span class="n">bulk_wav</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">create_bulk_str</span><span class="p">(</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;net&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">],</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;startt&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;endt&#39;</span><span class="p">])</span>
 
-        <span class="c1"># Create lists</span>
-        <span class="n">netsta_bulk</span> <span class="o">=</span> <span class="p">[</span><span class="n">netsta_bulk</span><span class="p">,</span> <span class="p">]</span>
-        <span class="n">netsta_d</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="p">]</span>
-
-    <span class="c1"># Get bulk string for a one station at a time in parallel</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Create partial function</span>
-        <span class="n">dsub</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
-            <span class="n">__download_small_db_sub</span><span class="p">,</span>
-            <span class="n">event_cat</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span> <span class="n">ta</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span>
-            <span class="n">logger</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">)</span>
-
-        <span class="c1"># Run partial function in parallel, resulting in one</span>
-        <span class="c1"># dictionary per net/sta combo</span>
-        <span class="n">netsta_d</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;multiprocessing&#39;</span><span class="p">)(</span>
-            <span class="n">delayed</span><span class="p">(</span><span class="n">dsub</span><span class="p">)(</span><span class="n">_net</span><span class="p">,</span> <span class="n">_sta</span><span class="p">,)</span><span class="k">for</span> <span class="n">_net</span><span class="p">,</span> <span class="n">_sta</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">networks</span><span class="p">,</span> <span class="n">stations</span><span class="p">))</span>
-
-        <span class="c1"># Create one request per station over all events.</span>
-        <span class="c1"># This makes writing an asdf file per station much easier</span>
-        <span class="n">netsta_bulk</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">_net</span><span class="p">,</span> <span class="n">_sta</span><span class="p">,</span> <span class="n">_d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">networks</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">netsta_d</span><span class="p">):</span>
-            <span class="c1"># Get bulk stuff</span>
-            <span class="n">mini_bulk</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">create_bulk_str</span><span class="p">(</span>
-                <span class="n">_d</span><span class="p">[</span><span class="s1">&#39;net&#39;</span><span class="p">],</span> <span class="n">_d</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">],</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">_d</span><span class="p">[</span><span class="s1">&#39;startt&#39;</span><span class="p">],</span> <span class="n">_d</span><span class="p">[</span><span class="s1">&#39;endt&#39;</span><span class="p">])</span>
-
-            <span class="c1"># Sort bulk request</span>
-            <span class="n">mini_bulk</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-
-            <span class="c1"># Add minibulk to overall request</span>
-            <span class="n">netsta_bulk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mini_bulk</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">netsta_bulk</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bulk_wav</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No new data found.&#39;</span><span class="p">)</span>
         <span class="k">return</span>
+
+    <span class="c1"># Sort bulk request</span>
+    <span class="n">bulk_wav</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
     <span class="c1"># This does almost certainly need to be split up, so we don&#39;t overload the</span>
     <span class="c1"># RAM with the downloaded mseeds</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialising waveform download.&#39;</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;The request string looks like this:&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">_bulkd</span> <span class="ow">in</span> <span class="n">netsta_bulk</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">_bw</span> <span class="ow">in</span> <span class="n">_bulkd</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_bw</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_bw</span> <span class="ow">in</span> <span class="n">bulk_wav</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_bw</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># Create waveform directories</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">rawloc</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">clients</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="c1"># Length of request</span>
-        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">netsta_bulk</span><span class="p">)</span>
-
-        <span class="c1"># Number of digits</span>
-        <span class="n">Nd</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
-
-        <span class="c1"># Download station chunks chunks</span>
-        <span class="k">for</span> <span class="n">_i</span><span class="p">,</span> <span class="p">(</span><span class="n">_net</span><span class="p">,</span> <span class="n">_sta</span><span class="p">,</span> <span class="n">_bulk</span><span class="p">,</span> <span class="n">_netsta_d</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">networks</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">netsta_bulk</span><span class="p">,</span> <span class="n">netsta_d</span><span class="p">)):</span>
-            <span class="c1"># Provide status</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloading ... </span><span class="si">{</span><span class="n">_i</span><span class="si">:{</span><span class="n">Nd</span><span class="si">}</span><span class="s2">d</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">N</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-            <span class="c1"># Download</span>
-            <span class="n">pu</span><span class="o">.</span><span class="n">__client__loop_wav__</span><span class="p">(</span><span class="n">clients</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">_bulk</span><span class="p">,</span> <span class="n">_netsta_d</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">_net</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">_sta</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
-
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloaded </span><span class="si">{</span><span class="n">_i</span><span class="si">:{</span><span class="n">Nd</span><span class="si">}</span><span class="s2">d</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">N</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="c1"># logger.info(f&quot;Downloaded {N:d}/{N:d} Stations&quot;)</span>
-
+        <span class="n">pu</span><span class="o">.</span><span class="n">__client__loop_wav__</span><span class="p">(</span><span class="n">clients</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">bulk_wav</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">,</span> <span class="n">inv</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Length of request</span>
-        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">netsta_bulk</span><span class="p">)</span>
-
-        <span class="c1"># Number of digits</span>
-        <span class="n">Nd</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
-
-        <span class="c1"># Download station chunks chunks</span>
-        <span class="k">for</span> <span class="n">_i</span><span class="p">,</span> <span class="p">(</span><span class="n">_net</span><span class="p">,</span> <span class="n">_sta</span><span class="p">,</span> <span class="n">_bulk</span><span class="p">,</span> <span class="n">_netsta_d</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">networks</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">netsta_bulk</span><span class="p">,</span> <span class="n">netsta_d</span><span class="p">)):</span>
-            <span class="c1"># Provide status</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloading ... </span><span class="si">{</span><span class="n">_i</span><span class="si">:{</span><span class="n">Nd</span><span class="si">}</span><span class="s2">d</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">N</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-            <span class="c1"># Download</span>
-            <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s1">&#39;threads&#39;</span><span class="p">)(</span>
-                <span class="n">delayed</span><span class="p">(</span><span class="n">pu</span><span class="o">.</span><span class="n">__client__loop_wav__</span><span class="p">)(</span>
-                    <span class="n">client</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">_bulk</span><span class="p">,</span> <span class="n">_netsta_d</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">_net</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">_sta</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="n">clients</span><span class="p">)</span>
-
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloaded </span><span class="si">{</span><span class="n">_i</span><span class="si">:{</span><span class="n">Nd</span><span class="si">}</span><span class="s2">d</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">N</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+        <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s1">&#39;threads&#39;</span><span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">pu</span><span class="o">.</span><span class="n">__client__loop_wav__</span><span class="p">)(</span>
+                <span class="n">client</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">bulk_wav</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">,</span> <span class="n">inv</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="n">clients</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="downloadwav"><a class="viewcode-back" href="../../../chapters/api/waveform.html#pyglimer.waveform.download.downloadwav">[docs]</a><span class="k">def</span> <span class="nf">downloadwav</span><span class="p">(</span>

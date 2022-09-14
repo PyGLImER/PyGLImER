@@ -402,7 +402,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Event</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -415,7 +415,6 @@
 
 <span class="kn">from</span> <span class="nn">pyglimer.database.asdf</span> <span class="kn">import</span> <span class="n">write_st</span>
 <span class="kn">from</span> <span class="nn">pyglimer.rf.create</span> <span class="kn">import</span> <span class="n">RFStream</span><span class="p">,</span> <span class="n">RFTrace</span>
-<span class="kn">from</span> <span class="nn">pyglimer.database.asdf</span> <span class="kn">import</span> <span class="n">save_raw_single_station_asdf</span>
 
 <span class="kn">from</span> <span class="nn">.roundhalf</span> <span class="kn">import</span> <span class="n">roundhalf</span>
 
@@ -485,44 +484,7 @@
     <span class="k">return</span> <span class="n">inv</span>
 
 
-<div class="viewcode-block" id="check_UTC_overlap"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.check_UTC_overlap">[docs]</a><span class="k">def</span> <span class="nf">check_UTC_overlap</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">UTCDateTime</span><span class="p">],</span> <span class="n">end</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">UTCDateTime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Checks a list of starttimes and endtimes for overlap</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    start : List[UTCDateTime]</span>
-<span class="sd">        List of UTCDatetime starttimes</span>
-<span class="sd">    end : List[UTCDateTime]</span>
-<span class="sd">        List of UTCDateTime endtimes</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    List[bool]</span>
-<span class="sd">        List of booleans. If True no overlap, if False overlap</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Initiate list saying there is no overlap</span>
-    <span class="n">check</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">*</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span>
-
-    <span class="k">for</span> <span class="n">_i</span><span class="p">,</span> <span class="p">(</span><span class="n">_start</span><span class="p">,</span> <span class="n">_end</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)):</span>
-
-        <span class="c1"># Loop over same array to check whether there is overlap in any of the windows.</span>
-        <span class="k">for</span> <span class="n">_j</span><span class="p">,</span> <span class="p">(</span><span class="n">_startc</span><span class="p">,</span> <span class="n">_endc</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)):</span>
-
-            <span class="c1"># Don&#39;t want to compute overlap of the same window</span>
-            <span class="k">if</span> <span class="n">_j</span><span class="o">==</span><span class="n">_i</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-            <span class="c1"># Check whether start or endtime of another window is in the range</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">_start</span> <span class="o">&lt;</span> <span class="n">_startc</span> <span class="ow">and</span> <span class="n">_startc</span> <span class="o">&lt;</span> <span class="n">_end</span><span class="p">)</span> \
-                <span class="ow">or</span> <span class="p">(</span><span class="n">_start</span> <span class="o">&lt;</span> <span class="n">_endc</span> <span class="ow">and</span> <span class="n">_endc</span> <span class="o">&lt;</span> <span class="n">_end</span><span class="p">):</span>
-
-                <span class="n">check</span><span class="p">[</span><span class="n">_i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="k">return</span> <span class="n">check</span></div>
-
-
-<span class="k">def</span> <span class="nf">__client__loop__</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">Client</span><span class="p">,</span> <span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bulk</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Inventory</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">__client__loop__</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">Client</span><span class="p">,</span> <span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bulk</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download station information from specified client and for the</span>
 <span class="sd">    specified bulk list.</span>
@@ -561,7 +523,7 @@
 
 <span class="k">def</span> <span class="nf">__client__loop_wav__</span><span class="p">(</span>
     <span class="n">client</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bulk</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">saved</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-        <span class="n">inv</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">inv</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download waveforms from specified client and for the</span>
 <span class="sd">    specified bulk list.</span>
@@ -590,18 +552,7 @@
         <span class="k">return</span>  <span class="c1"># wrong client</span>
         <span class="c1"># ValueError is raised for querying a client without station service</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Downloaded </span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">}</span><span class="s1"> traces from Client </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">client</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">saveasdf</span><span class="p">:</span>
-        <span class="c1"># Make sure ASDF file is only opened once</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">network</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">station</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="n">save_raw_single_station_asdf</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">saved</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">inv</span><span class="p">)</span>
-
-        <span class="c1"># Opens and closes ASDF file for each trace. It&#39;s more versatile, but</span>
-        <span class="c1"># less efficient</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">save_raw</span><span class="p">(</span><span class="n">saved</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">save_raw</span><span class="p">(</span><span class="n">saved</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">save_raw</span><span class="p">(</span><span class="n">saved</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="save_raw"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.save_raw">[docs]</a><span class="k">def</span> <span class="nf">save_raw</span><span class="p">(</span>
