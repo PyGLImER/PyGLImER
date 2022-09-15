@@ -11,11 +11,12 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Thursday, 8th September 2022 04:54:25 pm
+Last Modified: Thursday, 15th September 2022 03:15:02 pm
 '''
 
 import fnmatch
 from io import BytesIO
+import logging
 import os
 import re
 from typing import Iterable
@@ -23,6 +24,7 @@ import warnings
 import glob
 
 import numpy as np
+import obspy
 from obspy.core.utcdatetime import UTCDateTime
 from obspy.core import Stats, Stream, Trace, read
 from obspy import Inventory, read_inventory
@@ -446,7 +448,14 @@ def mseed_to_hdf5(
         if save_statxml:
             statxml_to_hdf5(rawfolder, statloc)
         return
-    st = read(av_mseed[0])
+    try:
+        st = read(av_mseed[0])
+    except obspy.io.mseed.InternalMSEEDError:
+        # broken mseed
+        logger = logging.getLogger('pyglimer.request')
+        logger.warning(f'File {av_mseed[0]} is corrupt. Skipping this file..')
+        os.remove(av_mseed[0])
+        mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
     net = st[0].stats.network
     stat = st[0].stats.station
 
