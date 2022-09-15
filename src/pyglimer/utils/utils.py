@@ -353,8 +353,8 @@ def get_multiple_fdsn_clients(
 
 
 def create_bulk_str(
-    networks: str or List[str], stations: str or List[str], location: str,
-    channel: str, t0: UTCDateTime or str or List[UTCDateTime],
+    networks: str | List[str], stations: str | List[str], location: str,
+    channel: str| List[str], t0: UTCDateTime or str or List[UTCDateTime],
         t1: UTCDateTime or str or List[UTCDateTime]) -> List[tuple]:
     """
     Function to generate the input for the obspy functions:

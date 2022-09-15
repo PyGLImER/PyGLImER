@@ -111,6 +111,9 @@ def save_raw_DB_single_station(
     The point of this function is mainly that the waveforms will be saved
     with the correct associations and at the correct locations.
 
+    W are specifically writing event by event streams, so that we don't loose
+    parts that are already downloaded!
+
     :param saved: Dictionary holding information about the original streams
         to identify them afterwards.
     :type saved: dict
@@ -121,6 +124,8 @@ def save_raw_DB_single_station(
     :param inv: The inventory holding all the station information
     :type inv: Inventory
     """
+    # Get logger
+    logger = logging.getLogger('pyglimer.request')
 
     # Filename of the station to be opened.
     fname = '%s.%s.h5' % (network, station)
@@ -132,38 +137,70 @@ def save_raw_DB_single_station(
         sinv = inv.select(network=network, station=station)
         ds.add_response(sinv)
 
+        # Number of events
+        N = len(saved['event'])
+        Ns = len(str(N))
         # Events should not be added because it will read the whole
         # catalogue every single time!
+        outst = Stream()
         for _i, (evt, startt, endt, net, stat) in enumerate(zip(
             saved['event'], saved['startt'], saved['endt'], saved['net'],
                 saved['stat'])):
-            logging.debug(f'{net}.{stat}: Processing #{_i}/N')
+            logger.debug(f'{net}.{stat}: Processing #{_i:>{Ns}d}/{N}')
             # earlier we downloaded all locations, but we don't really want
             # to have several, so let's just keep one
             try:
+                # Grab only single station from stream (should be only one...)
                 sst = st.select(network=net, station=stat)
+
                 # This might actually be empty if so, let's just skip
                 if sst.count() == 0:
-                    logging.debug(f'No trace of {net}.{stat} in Stream.')
+                    logger.debug(f'No trace of {net}.{stat} in Stream.')
                     continue
 
                 # This must assume that there is no overlap
                 slst = sst.slice(startt, endt)
 
+                if slst.count() == 0:
+                    print(f"No data for {net}.{stat} and event {evt.resource_id}")
+                    continue
+
                 # Only write the prevelant location
-                locs = [tr.stats.location for tr in sst]
+                locs = [tr.stats.location for tr in slst]
                 filtloc = max(set(locs), key=locs.count)
                 sslst = slst.select(location=filtloc)
 
-                logging.debug(f'{net}.{stat} writing event #{_i}/N')
-                write_st_to_ds(ds, sslst, evt)
+                write_st_to_ds(ds, sslst)
+
+                # Add substream to stream for content update
+                outst += sslst
 
             except Exception as e:
-                logging.error(e)
+                logger.error(e)
+
+        # Create table of new contents
+        new_cont = {}
+        for tr in outst:
+            new_cont.setdefault(tr.stats.channel, [])
+            new_cont[tr.stats.channel].append(
+                tr.stats.starttime.format_fissures()[:-4])
+
+        # Get old table of contents
+        old_cont = ds._get_table_of_contents()
+
+        # Extend the old table of contents
+        for k, v in old_cont.items():
+            try:
+                new_cont[k].extend(v)
+            except KeyError:
+                new_cont[k] = v
+
+        # Redefine the table of contents.
+        ds._define_content(new_cont)
 
 
 def write_st_to_ds(
-    ds: raw.DBHandler, st: Stream, outfolder: str,
+    ds: raw.DBHandler, st: Stream,
         resample: bool = True):
     """
     Write raw waveform data to an asdf file. This includes the corresponding
@@ -186,6 +223,4 @@ def write_st_to_ds(
 
     # Add waveforms and stationxml
     ds.add_waveform(st, tag='raw_recording')
-    #
-    # If there are still problems, we will have
-    # to check whether they are similar probelms to add event
+

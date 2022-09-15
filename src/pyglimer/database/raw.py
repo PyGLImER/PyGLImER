@@ -271,6 +271,86 @@ omitted." % path, category=UserWarning)
                 st.append(Trace(np.array(v), header=read_hdf5_header(v)))
             yield st
 
+    def content_dict(self):
+        """Returns a dictionary with the following structure. Not actively used.
+
+        .. code::
+
+            dict
+            ├── raw_recording
+            │   └── YP
+            │       └── NE11
+            │           ├── 2009261T120020.8
+            │           │   ├── BHE (1500)
+            │           │   ├── BHN (1500)
+            │           │   └── BHZ (1500)
+            :           :
+            │           └── 2009261T184125.8
+            │               ├── BHE (1500)
+            │               ├── BHN (1500)
+            │               └── BHZ (1500)
+            └── response
+                └── YP
+                    └── NE11 (27156)
+        """
+        return h5_dict(self)
+
+    def print_tree(self):
+        """print a tree with the following structure
+
+        .. code::
+
+            dict
+            ├── raw_recording
+            │   └── YP
+            │       └── NE11
+            │           ├── 2009261T120020.8
+            │           │   ├── BHE (1500)
+            │           │   ├── BHN (1500)
+            │           │   └── BHZ (1500)
+            :           :
+            │           └── 2009261T184125.8
+            │               ├── BHE (1500)
+            │               ├── BHN (1500)
+            │               └── BHZ (1500)
+            └── response
+                └── YP
+                    └── NE11 (27156)
+        """
+        h5_tree(self)
+
+
+def h5_tree(val, pre=''):
+    """Recursive function to print the structure of an ASDF dataset."""
+    items = len(val)
+    for key, val in val.items():
+        items -= 1
+        if items == 0:
+            # the last item
+            if type(val) == h5py._hl.group.Group:
+                print(pre + '└── ' + key)
+                h5_tree(val, pre+'    ')
+            else:
+                print(pre + '└── ' + key + ' (%d)' % len(val))
+        else:
+            if type(val) == h5py._hl.group.Group:
+                print(pre + '├── ' + key)
+                h5_tree(val, pre+'│   ')
+            else:
+                print(pre + '├── ' + key + ' (%d)' % len(val))
+
+
+def h5_dict(val):
+    """Recursive function to red the keys of a dataset."""
+    h5dict = dict()
+    for key, val in val.items():
+        # the last item
+        if type(val) == h5py._hl.group.Group:
+            h5dict[key] = h5_dict(val)
+        else:
+            h5dict[key] = len(val)
+
+    return h5dict
 
 class RawDatabase(object):
     """
@@ -463,6 +543,7 @@ def mseed_to_hdf5(
             tr.stats.starttime.format_fissures()[:-4])
 
     h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
+
     # Write all of them to the hdf5 file
     with RawDatabase(h5_file) as rdb:
         old_cont = rdb._get_table_of_contents()
@@ -475,7 +556,9 @@ def mseed_to_hdf5(
         if save_statxml:
             statxml = os.path.join(statloc, f'{net}.{stat}.xml')
             rdb.add_response(read_inventory(statxml))
+
         rdb._define_content(new_cont)
+
     # Clear RAM
     st.clear()
     # If all of that was successful, we can remove the mseeds

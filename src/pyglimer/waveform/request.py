@@ -21,7 +21,7 @@ import os
 from http.client import IncompleteRead
 from datetime import datetime
 import logging
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, List
 import warnings
 import time
 
@@ -51,10 +51,12 @@ class Request(object):
         starttime: UTCDateTime or str, endtime: UTCDateTime or str,
         pol: str = 'v', minmag: float or int = 5.5,
         event_coords: Tuple[float, float, float, float] = None,
-        network: str = None, station: str = None,
+        network: str | List[str] | None = None,
+        station: str | List[str] | None = None,
         waveform_client: list = None, evtcat: str = None,
         continue_download: bool = False, loglvl: int = logging.WARNING,
-            format: str = 'hdf5', remove_response: bool = True):
+        format: str = 'hdf5', remove_response: bool = True,
+        **kwargs):
         """
         Create object that is used to start the receiver function
         workflow.
