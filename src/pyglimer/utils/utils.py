@@ -16,10 +16,10 @@ Last Modified: Wednesday, 7th September 2022 01:27:30 pm
 
 import logging
 import os
-from threading import Event
+from obspy.core.event.event import Event
 from typing import List, Tuple, Optional
 from warnings import warn
-
+import psutil
 import numpy as np
 from joblib import Parallel, delayed
 from obspy.clients.fdsn import Client, header
@@ -41,6 +41,10 @@ log_lvl = {
     'WARNING': logging.WARNING,
     'CRITICAL': logging.CRITICAL,
     'ERROR': logging.ERROR}
+
+
+def utc_save_str(utc: UTCDateTime):
+    return UTCDateTime(round(utc.timestamp)).format_fissures()[:-6]
 
 
 def dt_string(dt: float) -> str:
@@ -177,10 +181,85 @@ def __client__loop__(
     return stat_inv
 
 
-def __client__loop_wav__(
-    client: str, rawloc: str, bulk: list, saved: dict, saveasdf: bool,
+def chunkdict(d: dict, chunksize) -> list:
+    """Chunks upd dictionary with values into list of dictionaries where
+    each dictionary has chunksize or less entries."""
+
+    #
+    tempd = dict()
+    for k, v in d.items():
+        tempd[k] = list(chunks(v, chunksize))
+
+    key = list(d.keys())[0]
+    Nchunk = len(tempd[key])
+
+    out = []
+
+    for i in range(Nchunk):
+        subd = dict()
+        for k, v in tempd.items():
+            subd[k] = v[i]
+        out.append(subd)
+
+    return out
+
+
+def __download_sub__(
+        client: str, rawloc: str, saved: dict, saveasdf: bool,
         inv: Inventory, network: Optional[str] = None,
         station: Optional[str] = None):
+
+    logger = logging.getLogger('pyglimer.request')
+
+    # Get bulk and flatten
+    bulk = []
+
+    for _b in saved['bulk']:
+        bulk.extend(_b)
+
+    ## The Block here is to debug the actual request made #####
+    #  But for code and output purposes it is unecessary
+    for _net, _sta, _cha, _st, _et, _event, _b in zip(
+            saved['net'], saved['stat'], saved['chan'],
+            saved['startt'], saved['endt'], saved['event'], saved['bulk']):
+
+        print(f"{_net}.{_sta}..{_cha}: {_st} -- {_et} >> {str(_event.resource_id).split('=')[-1]}")
+
+        for __b in _b:
+            print(f"^-->{__b}")
+    ##############################################################
+
+    # Sort bulk request.
+    bulk.sort()
+
+    try:
+        if not isinstance(client, Client):
+            client = Client(client)
+
+        st = client.get_waveforms_bulk(bulk)
+
+        logger.info(f'Downloaded {st.count()} traces from Client {str(client)}.')
+
+        return st
+
+    except (header.FDSNNoDataException, header.FDSNException, ValueError) as e:
+        print(str(e))
+        if 'HTTP Status code: 204' in str(e):
+            logger.debug('--------- NO DATA FOR REQUESTS: ----------------')
+            for __bulk in bulk:
+                logger.debug(f"||    {__bulk}")
+            logger.debug('------------------------------------------------')
+            return Stream()
+        else:
+            print(str(e))
+            raise ValueError('See Error above.')
+            # ValueError is raised for querying a client without station service
+
+
+def __client__loop_wav__(
+    client: str, rawloc: str, saved: dict, saveasdf: bool,
+        inv: Inventory, network: Optional[str] = None,
+        station: Optional[str] = None, parallel: bool = False):
     """
     Download waveforms from specified client and for the
     specified bulk list.
@@ -200,29 +279,102 @@ def __client__loop_wav__(
     :type inv: obspy.Inventory
     """
     logger = logging.getLogger('pyglimer.request')
-    try:
-        if not isinstance(client, Client):
-            client = Client(client)
-        st = client.get_waveforms_bulk(bulk)
-    except (header.FDSNNoDataException, header.FDSNException, ValueError) as e:
-        logger.warning(str(e))
-        return  # wrong client
-        # ValueError is raised for querying a client without station service
-    logger.info(f'Downloaded {st.count()} traces from Client {str(client)}.')
 
-    if saveasdf:
-        # Make sure ASDF file is only opened once
-        if (network is not None) and (station is not None):
-            save_raw_DB_single_station(
-                network, station, saved, st, rawloc, inv)
+    # Making sure that all chunksizes are the same
+    chunksize = 100
 
-        # Opens and closes ASDF file for each trace. It's more versatile, but
-        # less efficient
-        else:
-            save_raw(saved, st, rawloc, inv, False)
+    # Get one key
+    key = list(saved.keys())[0]
+    N0 = len(saved[key])
+
+    # Chunkify data and bulkstrings
+    if N0 > chunksize:
+        saved = chunkdict(saved, chunksize)
     else:
-        save_raw(saved, st, rawloc, inv, False)
+        saved = [saved, ]
 
+        # Request too small to parallelize
+        parallel = False
+
+    N = len(saved)
+    logger.debug(f"Downloading ...")
+
+    # Get number of cores available
+    if parallel:
+
+        NCPU = psutil.cpu_count(logical=False) - 2
+
+        # Turn off parallelism if c=number of available cores is 1
+        if NCPU <= 1:
+            parallel = False
+
+        elif NCPU > 4:
+            NCPU = 4
+
+    if parallel:
+
+        print('saved length ', len(saved))
+        print(NCPU)
+
+        # Chunk the chunks
+        saved = list(chunks(saved, NCPU))
+
+        counter = 0
+        logger.debug(f"    Downloading {N} chunks with each chunk  <= 100 requests dowloaded in Parallel")
+
+        for _i, _saved in enumerate(saved):
+
+            counter += len(_saved)
+            logger.debug(f"    Downloading {counter}/{N} chunks")
+
+            streams = Parallel(n_jobs=NCPU, backend='multiprocessing')(
+                delayed(__download_sub__)(
+                    client, rawloc, __saved, saveasdf, inv, network, station)
+                for __saved in _saved)
+
+            for st, __saved in zip(streams, _saved):
+
+                if len(st) == 0:
+                    continue
+
+                if saveasdf:
+                    # Make sure ASDF file is only opened once
+                    if (network is not None) and (station is not None):
+                        save_raw_DB_single_station(
+                            network, station, __saved, st, rawloc, inv)
+
+                    # Opens and closes ASDF file for each trace. It's more versatile, but
+                    # less efficient
+                    else:
+                        save_raw(__saved, st, rawloc, inv, False)
+                else:
+                    save_raw(__saved, st, rawloc, inv, False)
+
+    else:
+
+        streams = []
+        for i, _saved in enumerate(saved):
+
+            logger.debug(f"    --> Bulk chunk {i}/{N}")
+
+            st = __download_sub__(
+                client, rawloc, _saved, saveasdf, inv, network, station)
+
+            if len(st) == 0:
+                continue
+
+            if saveasdf:
+                # Make sure ASDF file is only opened once
+                if (network is not None) and (station is not None):
+                    save_raw_DB_single_station(
+                        network, station, _saved, st, rawloc, inv)
+
+                # Opens and closes ASDF file for each trace. It's more versatile, but
+                # less efficient
+                else:
+                    save_raw(_saved, st, rawloc, inv, False)
+            else:
+                save_raw(_saved, st, rawloc, inv, False)
 
 def save_raw(
         saved: dict, st: Stream, rawloc: str, inv: Inventory, saveasdf: bool):

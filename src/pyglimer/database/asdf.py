@@ -143,15 +143,15 @@ def save_raw_DB_single_station(
         # Events should not be added because it will read the whole
         # catalogue every single time!
         outst = Stream()
-        for _i, (evt, startt, endt, net, stat) in enumerate(zip(
+        for _i, (evt, startt, endt, net, stat, chan) in enumerate(zip(
             saved['event'], saved['startt'], saved['endt'], saved['net'],
-                saved['stat'])):
-            logger.debug(f'{net}.{stat}: Processing #{_i:>{Ns}d}/{N}')
+                saved['stat'], saved['chan'])):
+            logger.debug(f'{net}.{stat}..{chan}: Processing #{_i+1:>{Ns}d}/{N}')
             # earlier we downloaded all locations, but we don't really want
             # to have several, so let's just keep one
             try:
                 # Grab only single station from stream (should be only one...)
-                sst = st.select(network=net, station=stat)
+                sst = st.select(network=net, station=stat, channel=chan)
 
                 # This might actually be empty if so, let's just skip
                 if sst.count() == 0:
@@ -169,6 +169,11 @@ def save_raw_DB_single_station(
                 locs = [tr.stats.location for tr in slst]
                 filtloc = max(set(locs), key=locs.count)
                 sslst = slst.select(location=filtloc)
+                for tr in sslst:
+                    print(tr)
+                if sslst.count() == 0:
+                    print(f"No data for {net}.{stat} and event {evt.resource_id}")
+                    continue
 
                 write_st_to_ds(ds, sslst)
 

@@ -13,6 +13,7 @@ Created: Tue May 26 2019 13:31:30
 Last Modified: Thursday, 8th September 2022 04:11:27 pm
 '''
 
+from multiprocessing import Event
 import typing as tp
 import fnmatch
 from http.client import IncompleteRead
@@ -21,6 +22,7 @@ import os
 import sys
 from functools import partial
 from itertools import compress
+from weakref import KeyedRef
 from tqdm import tqdm
 from pprint import pprint
 
@@ -31,6 +33,7 @@ from obspy import UTCDateTime
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
 from obspy.core.event.catalog import Catalog
+from obspy.core.event.event import Event
 from obspy.core.inventory.inventory import Inventory
 from obspy.core.inventory.station import Station
 from obspy.core.inventory.network import Network
@@ -46,90 +49,198 @@ from pyglimer.utils.utils import download_full_inventory
 from pyglimer.waveform.preprocessh5 import compute_toa
 
 
+def ____check_times_small_db_event(
+        rawloc: str, tz: float, ta: float, phase: str, model: TauPyModel,
+        logger: logging.Logger, saveh5: bool, mintime: float, maxtime: float,
+        inv: Inventory, net: str, stat: str, channels: tp.List[str],
+        evt: Event,
+        av_data_manual: dict | None = None) -> tp.Tuple[UTCDateTime, tp.List[str]] | bool:
+
+    try:
+        logger.debug(f"Computing TOA for {evt.resource_id} and {net}.{stat}")
+
+        # Get origin
+        o = (evt.preferred_origin() or evt.origins[0])
+
+        # Get origin dependent station
+        STA = inv.select(
+            network=net, station=stat,
+            starttime=o.time+mintime-tz, endtime=o.time+maxtime+ta)[0][0]
+
+        # Compute the Time of arrival
+        toa, _, _, _, _ = compute_toa(
+            evt, STA.latitude, STA.longitude, phase, model)
+
+    except (IndexError, ValueError):
+
+        # occurs when there is no arrival of the phase at stat
+        logger.debug(
+            'No valid arrival found for station %s,' % stat
+            + 'event %s, and phase %s' % (evt.resource_id, phase))
+        return False
+
+    # Channel fix, not all channels are equally present at in a given time range
+    channels_fix = []
+    for _cha in channels:
+        try:
+            STA = inv.select(
+                network=net, station=stat, channel=_cha,
+                starttime=o.time+mintime-tz, endtime=o.time+maxtime+ta)[0][0]
+            channels_fix.append(_cha)
+        except:
+            logger.debug(f'Channel {net}.{stat}..{_cha} not available for event {str(evt.resource_id).split("=")[-1]}')
+
+    # Already in DB?
+    if saveh5:
+        # Check if all expected channels are in saved already
+        checklist = []
+        for _channel in channels_fix:
+
+            # For event parallelism to separate functions.
+            if av_data_manual is None:
+                indb = wav_in_hdf5(rawloc, net, stat, '*', _channel, toa-tz, toa+ta)
+            else:
+                indb = wav_in_hdf5_no_global(av_data_manual, rawloc, net, stat, '*', _channel, toa-tz, toa+ta)
+
+            print(f'Channel {net}.{stat}..{_channel} - {(toa-tz).format_fissures()[:-3]} in file: {indb}')
+
+            # Add to checklist whether a channel is in the database
+            checklist.append(indb)
+
+        if all(checklist):
+            logger.info(f'Already in database: {net}.{stat} event={str(evt.resource_id).split("=")[-1]}')
+            return False
+
+    # If dataformat is mseed
+    else:
+
+        o = (evt.preferred_origin() or evt.origins[0])
+        ot_loc = UTCDateTime(
+            o.time, precision=-1).format_fissures()[:-6]
+        evtlat_loc = str(roundhalf(o.latitude))
+        evtlon_loc = str(roundhalf(o.longitude))
+        tmp.folder = os.path.join(
+            rawloc, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
+
+        # create folder for each event
+        os.makedirs(tmp.folder, exist_ok=True)
+
+        # Check if all expected channels are in saved already
+        checklist = []
+
+        for _channel in channels_fix:
+            # Here we don't need a separate function because each event just
+            # checks the existence of a file, which requires no parallel access.
+            checklist.append(wav_in_db(net, stat, '*', _channel, toa-tz, toa+ta))
+
+        if all(checklist):
+            logger.info(f'Already in database: {net}.{stat} event={str(evt.resource_id).split("=")[-1]}')
+            return False
+
+    # Get required channels
+    # Add a list of channels
+    addchannels = []
+    for _channel, _check in zip(channels_fix, checklist):
+        if not _check:
+            addchannels.append(_channel)
+
+    # Finally return the time of arrival and the channels to be downloaded
+    return toa, addchannels
+
+
 def __check_times_small_db_sub(
         event_cat: Catalog,
         rawloc: str, tz: float, ta: float, phase: str, model: TauPyModel,
         logger: logging.Logger, saveh5: bool, mintime: float, maxtime: float,
-        inv: Inventory, net: str, stat: str, channels: tp.List[Channel]) -> dict:
+        inv: Inventory, net: str, stat: str, channels: tp.List[str],
+        parallel: bool = False) -> dict:
 
     d = {'event': [], 'startt': [], 'endt': [], 'net': [], 'stat': [], 'chan': []}
 
-    # Information on available data for hdf5
-    global av_data
-    av_data = {}
 
     print(f'--> Enter TOA event loop for station {net}.{stat}')
-    for evt in event_cat:
 
+    # This parallelizes the event loop, which is only use if we downloading
+    # data for a single station
+    if parallel:
+        # Get HDF5 content
 
-        try:
-            logger.debug(f"Computing TOA for {evt.resource_id} and {net}.{stat}")
+        # H5 file location
+        h5_file = os.path.join(rawloc, '%s.%s.h5' % (
+            net, stat))
 
-            # Get origin
-            o = (evt.preferred_origin() or evt.origins[0])
-
-            # Get origin dependent station
-            STA = inv.select(
-                network=net, station=stat,
-                starttime=o.time+mintime, endtime=o.time+maxtime)[0][0]
-
-            # Compute the Time of arrival
-            toa, _, _, _, delta = compute_toa(
-                evt, STA.latitude, STA.longitude, phase, model)
-
-        except (IndexError, ValueError):
-
-            # occurs when there is no arrival of the phase at stat
-            logger.debug(
-                'No valid arrival found for station %s,' % stat
-                + 'event %s, and phase %s' % (evt.resource_id, phase))
-            continue
-
-        # Already in DB?
-        if saveh5:
-            # Check if all expected channels are in saved already
-            checklist = []
-            for _channel in channels:
-                checklist.append(wav_in_hdf5(rawloc, net, stat, '*', _channel, toa-tz, toa+ta))
-
-            if all(checklist):
-
-                continue
+        # Check whether there is data from this station at all
+        av_data_manual = {}
+        av_data_manual.setdefault(net, {})
+        av_data_manual[net].setdefault(stat, {})
+        if not os.path.isfile(h5_file):
+            logging.debug(f'{h5_file} not found')
+            for _cha in channels:
+                av_data_manual[net][stat][_cha] = list()
         else:
-            o = (evt.preferred_origin() or evt.origins[0])
-            ot_loc = UTCDateTime(
-                o.time, precision=-1).format_fissures()[:-6]
-            evtlat_loc = str(roundhalf(o.latitude))
-            evtlon_loc = str(roundhalf(o.longitude))
-            tmp.folder = os.path.join(
-                rawloc, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
+            # The file exists, so we will have to open it and get the dictionary
+            with RawDatabase(h5_file) as rdb:
+                av_data_manual[net][stat] = rdb._get_table_of_contents()
 
-            # create folder for each event
-            os.makedirs(tmp.folder, exist_ok=True)
+                # Safety net for when the channel list is empty for some reason.
+                if not av_data_manual[net][stat]:
+                    for _cha in channels:
+                        av_data_manual[net][stat][_cha] = list()
 
-            # Check if all expected channels are in saved already
-            checklist = []
-            for _channel in channels:
-                checklist.append(wav_in_db(net, stat, '*', _channel, toa-tz, toa+ta))
+        # Get number of cores available
+        NCPU = psutil.cpu_count(logical = False) - 2
+        NCPU = 1 if NCPU < 1 else NCPU
 
-            if all(checklist):
-                logger.info(f'Already in database: {net}.{stat} event={str(evt.resource_id).split("=")[-1]}')
+        # Create partial function
+        dsub = partial(
+            ____check_times_small_db_event,
+            rawloc, tz, ta, phase, model, logger, saveh5, mintime, maxtime,
+            inv, net, stat, channels)
+
+        # Run parallel event loop
+        out = Parallel(n_jobs=NCPU, backend='multiprocessing')(
+            delayed(dsub)(_evt, av_data_manual)
+            for _evt in event_cat)
+
+        for evt, _out in zip(event_cat, out):
+
+            if not _out:
                 continue
+            else:
+                toa, addchannels = _out
 
-        # It's new data, so add to request!
-        d['event'].append(evt)
-        d['startt'].append(toa-tz)
-        d['endt'].append(toa+ta)
-        d['net'].append(net)
-        d['stat'].append(stat)
+            # It's new data, so add to request!
+            d['event'].append(evt)
+            d['startt'].append(toa-tz)
+            d['endt'].append(toa+ta)
+            d['net'].append(net)
+            d['stat'].append(stat)
+            d['chan'].append(addchannels)
 
-        # Add a list of channels
-        addchannels = []
-        for _channel, _check in zip(channels, checklist):
-            if not _check:
-                addchannels.append(_channel)
+    # Here the event loop is serial, because the stations are parallelized
+    else:
 
-        d['chan'].append(addchannels)
+        # Information on available data for hdf5
+        global av_data
+        av_data = {}
+
+        for evt in event_cat:
+
+            out = ____check_times_small_db_event(rawloc, tz, ta, phase, model,
+                logger, saveh5, mintime, maxtime, inv, net, stat, channels, evt)
+
+            if not out:
+                continue
+            else:
+                toa, addchannels = out
+
+            # It's new data, so add to request!
+            d['event'].append(evt)
+            d['startt'].append(toa-tz)
+            d['endt'].append(toa+ta)
+            d['net'].append(net)
+            d['stat'].append(stat)
+            d['chan'].append(addchannels)
 
     # Check the dictionary for overlaps
     # Filtering overlaps
@@ -189,6 +300,7 @@ def download_small_db(
     # If station and network are None
     station = station or '*'
     network = network or '*'
+
     # First we download the stations to subsequently compute the times of
     # theoretical arrival
     clients = pu.get_multiple_fdsn_clients(clients)
@@ -273,7 +385,7 @@ def download_small_db(
     MULT = True if len(set(netsta_str)) > 1 else False
 
     # Get bulk string for a single station
-    if len(networks) == 1:
+    if not MULT:
 
         logger.info('Computing TOA and checking available data single threaded')
 
@@ -281,25 +393,11 @@ def download_small_db(
         d = dict()
         d['net'], d['stat'], d['chan'], d['startt'], d['endt'] = [],[],[],[],[]
 
-        for _chan in channels[0]:
-            _d = __check_times_small_db_sub(
-                event_cat, rawloc, tz, ta, phase, model,
-                logger, saveh5, mintime, maxtime, subinvs[0], networks[0], stations[0], _chan)
 
-            d['net'].extend(_d['net'])
-            d['stat'].extend(_d['stat'])
-            d['chan'].extend(_d['chan'])
+        d = __check_times_small_db_sub(
+            event_cat, rawloc, tz, ta, phase, model,
+            logger, saveh5, mintime, maxtime, subinvs[0], networks[0], stations[0], channels[0], parallel=True)
 
-        # Hi bulk
-        netsta_bulk = []
-        for _net, _sta, _cha, _st, _et in zip(d['net'], d['stat'], d['chan'], d['startt'], d['endt']):
-            netsta_bulk.extend(pu.create_bulk_str(_net, _sta, '*', _cha, _st, _et))
-
-        # Sort bulk request
-        netsta_bulk.sort()
-
-        # Create lists
-        netsta_bulk = [netsta_bulk, ]
         netsta_d = [d, ]
 
     # Get bulk string for a one station at a time in parallel
@@ -322,82 +420,99 @@ def download_small_db(
             for _subinv, _net, _sta, _channels in
             zip(subinvs, networks, stations, channels))
 
-        # Create one request per station over all events.
-        # This makes writing an asdf file per station much easier
-        netsta_bulk = []
+    # Create one request per station over all events.
+    # This makes writing an asdf file per station much easier
+    netsta_bulk = []
 
-        # Fix the lists to check to add request per channel
-        for _d in netsta_d:
-            mini_bulk = []
-            nets, stats, chans, st, et = [],[],[],[],[]
-            # Get bulk stuff
-            for _net, _sta, _channels, _st, _et in zip(_d['net'], _d['stat'], _d['chan'], _d['startt'], _d['endt']):
-                for _cha in _channels:
-                    nets.append(_net)
-                    stats.append(_sta)
-                    chans.append(_cha)
-                    st.append(_st)
-                    et.append(_et)
+    # Fix the lists to check to add request per channel
+    bulk_list = []
+    fullbulk = []
+    for _d in netsta_d:
 
-            for _nets, _stats, _chans, _st, _et \
+        bulk_dict = dict()
+
+        nets, stats, chans, st, et, evts = [], [], [], [], [], []
+        # Get bulk stuff
+        for _net, _sta, _channels, _st, _et, _evt in zip(
+                _d['net'], _d['stat'], _d['chan'],
+                _d['startt'], _d['endt'], _d['event']):
+            for _cha in _channels:
+                nets.append(_net)
+                stats.append(_sta)
+                chans.append(_cha)
+                st.append(_st)
+                et.append(_et)
+                evts.append(_evt)
+
+        bulk_dict['net'] = nets
+        bulk_dict['stat'] = stats
+        bulk_dict['chan'] = chans
+        bulk_dict['startt'] = st
+        bulk_dict['endt'] = et
+        bulk_dict['event'] = evts
+
+        # one list per net.sta.cha start/endtime
+        mini_bulk_list = []
+        for _nets, _stats, _chans, _st, _et \
                 in zip(nets, stats, chans, st, et):
 
-                mini_bulk.extend(pu.create_bulk_str(
-                    _nets, _stats, '*', _chans, _st, _et))
+            # Get list of bulk strings associated with net.sta.... combo
+            subbulk = pu.create_bulk_str(
+                _nets, _stats, '*', _chans, _st, _et)
 
-            # Sort bulk request
-            mini_bulk.sort()
+            # Add list to list of bulk associated with corresponding
+            # net.sta... combo
+            mini_bulk_list.append(subbulk)
 
-            # Add minibulk to overall request
-            netsta_bulk.append(mini_bulk)
+            # Get full number of bulk requests by extending a list of all
+            # requests.
+            fullbulk.extend(subbulk)
 
-    if len(netsta_bulk) == 0:
+        # Add list to bulk
+        bulk_dict['bulk'] = mini_bulk_list
+
+        # Append the new dictionary to the bulk_list
+        bulk_list.append(bulk_dict)
+
+    print('---------sizes-------')
+    print(len(bulk_list[0]['bulk']))
+    print(len(bulk_list[0]['net']))
+
+    if len(fullbulk) == 0:
         logger.info('No new data found.')
         return
+    else:
+        logger.info(f'A total of {len(fullbulk)} requests will be made.')
 
     # This does almost certainly need to be split up, so we don't overload the
     # RAM with the downloaded mseeds
     logger.info('Initialising waveform download.')
     logger.debug('The request string looks like this:')
-    for _bulkd in netsta_bulk:
-        for _bw in _bulkd:
-            logger.debug(f"{_bw}")
+    for _d in bulk_list:
+        for _bulk in _d['bulk']:
+            for _bw in _bulk:
+                logger.debug(f"{_bw}")
 
     # Create waveform directories
     os.makedirs(rawloc, exist_ok=True)
 
     if len(clients) == 1:
 
-        if MULT is False:
-            # Length of request
-            N = len(netsta_bulk)
+        if not MULT:
 
-            # Number of digits
-            Nd = len(str(N))
-
-            # Download station chunks chunks
-            for _i, (_subinv, _net, _sta, _bulk, _netsta_d) in enumerate(
-                zip(subinvs, networks, stations, netsta_bulk, netsta_d)):
-
-                # Provide status
-                logger.info(f"Downloading ... {_i:{Nd}d}/{N:d}")
-
-                # Download
-                pu.__client__loop_wav__(
-                    clients[0], rawloc, _bulk, _netsta_d, saveh5,
-                    _subinv, network=_net, station=_sta)
-
-                logger.info(f"Downloaded {_i:{Nd}d}/{N:d}")
+            pu.__client__loop_wav__(
+                clients[0], rawloc, bulk_list[0], saveh5,
+                subinvs[0], network=networks[0], station=stations[0], parallel=True)
 
         else:
 
             # Download multiple stations in parallel
             Parallel(n_jobs=NCPU, backend='multiprocessing')(
                 delayed(pu.__client__loop_wav__)(
-                clients[0], rawloc, _bulk, _netsta_d, saveh5,
+                clients[0], rawloc, _bulk_dict, saveh5,
                 _subinv, network=_net, station=_sta)
-                for _subinv, _net, _sta, _bulk, _netsta_d \
-                    in zip(subinvs, networks, stations, netsta_bulk, netsta_d))
+                for _subinv, _net, _sta, _bulk_dict \
+                    in zip(subinvs, networks, stations, bulk_list))
 
     else:
         # Length of requestf
@@ -407,15 +522,15 @@ def download_small_db(
         Nd = len(str(N))
 
         # Download station chunks chunks
-        for _i, (_subinv, _net, _sta, _bulk, _netsta_d) in enumerate(
-                zip(subinvs, networks, stations, netsta_bulk, netsta_d)):
+        for _i, (_subinv, _net, _sta, _bulk_dict) in enumerate(
+                zip(subinvs, networks, stations, bulk_list)):
             # Provide status
             logger.info(f"Downloading ... {_i:{Nd}d}/{N:d}")
 
             # Download
             Parallel(n_jobs=NCPU, backend='multiprocessing')(
                 delayed(pu.__client__loop_wav__)(
-                    client, rawloc, _bulk, _netsta_d, saveh5, _subinv,
+                    client, rawloc, _bulk_dict, saveh5, _subinv,
                     network=_net.code,
                     station=_sta.code) for client in clients)
 
@@ -759,3 +874,19 @@ def wav_in_hdf5(
 
     # execute this again to check
     return wav_in_hdf5(rawloc, network, station, location, channel, starttime, endtime)
+
+
+def wav_in_hdf5_no_global(
+    av_data: dict, rawloc: str, network: str, station: str, location: str, channel: str,
+        starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
+    """Is the waveform already in the Raw hdf5 database?"""
+
+    t = starttime.format_fissures()[:-4]
+
+    if channel not in av_data[network][station]:
+        return False
+
+    if t in av_data[network][station][channel]:
+        return True
+    else:
+        return False
