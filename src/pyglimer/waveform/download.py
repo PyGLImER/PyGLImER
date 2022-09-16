@@ -10,7 +10,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Thursday, 8th September 2022 04:11:27 pm
+Last Modified: Thursday, 15th September 2022 02:45:38 pm
 '''
 
 
@@ -147,7 +147,11 @@ def download_small_db(
     logger.info('Requesting data from the following FDSN servers:\n %s' % str(
         clients))
 
-    bulk_stat = pu.create_bulk_str(network, station, '*', channel, '*', '*')
+    # Find earliest start and end times
+    otimes = [evt.preferred_origin().time for evt in event_cat.events]
+
+    bulk_stat = pu.create_bulk_str(
+        network, station, '*', channel, min(otimes), max(otimes))
 
     logger.info('Bulk_stat parameter created.')
     logger.debug('Bulk stat parameters: %s' % str(bulk_stat))
