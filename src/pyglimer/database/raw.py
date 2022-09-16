@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Thursday, 15th September 2022 03:15:02 pm
+Last Modified: Friday, 16th September 2022 02:30:09 pm
 '''
 
 import fnmatch
@@ -31,8 +31,10 @@ from obspy.core import Stats, Stream, Trace, read
 from obspy import Inventory, read_inventory
 import h5py
 
+from pyglimer.utils import utils as pu
 
-hierarchy = "/{tag}/{network}/{station}/{starttime}/{channel}"
+
+hierarchy = "/{tag}/{network}/{station}/{evt_id}/{channel}"
 hierarchy_xml = '/{tag}/{network}/{station}'
 h5_FMTSTR = os.path.join("{dir}", "{network}.{station}.h5")
 
@@ -79,12 +81,12 @@ class DBHandler(h5py.File):
         """
         Define the known waveforms per waveform.
         Known waveforms to receive. Is just a dictionary with one key for
-        each channel with the values being a list of available waveform
-        starttimes as a string in format_fissure until [:-4].
+        each channel with the values being a list of event origin times
+        rounded to one second.
 
         :param content: dictionary with one key for
             each channel with the values being a list of available waveform
-            starttimes
+            seismic event origin times
         :type ret: dict
 
         .. note:: This overwrites the old table of contents, so make sure
@@ -98,17 +100,23 @@ class DBHandler(h5py.File):
         ds.attrs['content'] = str(content)
 
     def add_waveform(
-            self, data: tp.Union[Trace,Stream], tag: str = 'raw'):
+        self, data: tp.Union[Trace, Stream], evt_id: UTCDateTime or str,
+            tag: str = 'raw'):
         """
         Add receiver function to the hdf5 file. The data can later be accessed
         using the :meth:`~pyglimer.database.rfh5.DBHandler.get_data()` method.
 
         :param data: Data to save.
         :type data: Trace or Stream
+        :param evt_id: Event identifier. Defined by the origin time of the
+            event rounded using :fun:`~pyglimer.utils.utils.utc_save_str()`
         :param tag: The tag that the data should be saved under. Defaults to
             'raw'
         :raises TypeError: for wrong data type.
         """
+        if isinstance(evt_id, UTCDateTime):
+            evt_id = pu.utc_save_str(evt_id)
+
         if not isinstance(data, Trace) and\
                 not isinstance(data, Stream):
             raise TypeError('Data has to be either an obspy Trace or Stream')
@@ -120,8 +128,7 @@ class DBHandler(h5py.File):
             st = tr.stats
             path = hierarchy.format(
                 tag=tag, network=st.network, station=st.station,
-                starttime=st.starttime.format_fissures()[:-4],
-                channel=st.channel)
+                evt_id=evt_id, channel=st.channel)
             try:
                 ds = self.create_dataset(
                     path, data=tr.data, compression=self.compression,
@@ -162,8 +169,8 @@ omitted." % path, category=UserWarning)
 omitted." % path, category=UserWarning)
 
     def get_data(
-        self, network: str, station: str, starttime: UTCDateTime = None,
-            endtime: UTCDateTime = None, tag: str = 'raw') -> Stream:
+        self, network: str, station: str, evt_id: UTCDateTime or str,
+            tag: str = 'raw') -> Stream:
         """
         Returns an obspy Stream holding the requested data and all
         existing channels.
@@ -176,23 +183,19 @@ omitted." % path, category=UserWarning)
         :type network: str
         :param station: station code, e.g., HRV
         :type station: str
-        :param starttime: Starttime of the Trace
-        :type starttime: UTCDateTime, optional
+        :param evt_id: Origin Time of the corresponding event
+        :type evt_id: UTCDateTime or str
         :param tag: Data tag (e.g., 'raw'). Defaults to raw.
         :type tag: str, optional
         :return: a :class:`Stream` holding the requested
             data.
         :rtype: Stream
         """
-        try:
-            search_time = starttime.format_fissures()[:-10] + '*'
-            # starttime = UTCDateTime(starttime)
-            # starttime = starttime.format_fissures()[:-4]
-        except (TypeError, AttributeError):
-            search_time = '*'
+        if isinstance(evt_id, UTCDateTime):
+            evt_id = pu.utc_save_str(evt_id)
 
         path = hierarchy.format(
-            tag=tag, network=network, station=station, starttime=search_time,
+            tag=tag, network=network, station=station, evt_id=evt_id,
             channel="*")
         # Now, we need to differ between the fnmatch pattern and the actually
         # acessed path
@@ -201,13 +204,11 @@ omitted." % path, category=UserWarning)
         path = os.path.dirname(path)
         try:
             st = all_traces_recursive(self[path], Stream(), pattern)
-            if isinstance(starttime, UTCDateTime):
-                st = st.slice(starttime=starttime, endtime=endtime)
             return st
         except KeyError:
-            warnings.warn(
-                f'Could not find data from {network}.{station} for'
-                + "and time f'{starttime}. Returning empty Stream.")
+            logging.info(
+                f'Could not find data from {network}.{station} '
+                + f'and event {evt_id}. Returning empty Stream.')
             return Stream()
 
     def get_response(
@@ -235,7 +236,7 @@ omitted." % path, category=UserWarning)
         Retrieve the contents of the file.
 
         :return: A dictionary where the keys are the available channels and the
-            values lists of the available starttimes in rounded format fissure
+            values lists of the available events in rounded format fissure
             on 10 seconds.
         :rtype: dict
         """
@@ -250,7 +251,7 @@ omitted." % path, category=UserWarning)
             self, tag: str, network: str, station: str) -> Iterable[Stream]:
         """
         Iterate over all Streams with the given properties.
-        (i.e, all starttimes)
+        (i.e, all events)
 
         :param tag: data tag
         :type tag: str
@@ -260,7 +261,7 @@ omitted." % path, category=UserWarning)
         :type station: str
         :return: Iterator
         :rtype: Iterable[RFTrace]
-        :yield: one Stream per starttime.
+        :yield: one Stream per event.
         :rtype: Iterator[Iterable[Stream]]
 
         .. note::
@@ -465,10 +466,9 @@ def convert_header_to_hdf5(dataset: h5py.Dataset, header: Stats):
                 header[key] = header[key].format_fissures()
             dataset.attrs[key] = header[key]
         except TypeError:
-            warnings.warn(
-                'The header contains an item of type %s. Information\
-            of this type cannot be written to an hdf5 file.'
-                % str(type(header[key])), UserWarning)
+            logging.debug(
+                f'The header contains an item of type {type(header[key])}.'
+                + 'Information of this type cannot be written to hdf5.')
             continue
 
 
@@ -523,7 +523,7 @@ def mseed_to_hdf5(
     # We do that for every single station
     if len(av_mseed) == 0:
         # Delete empty folders
-        evt_dirs = glob.glob(os.path.join(rawfolder, '*_*_*'))
+        evt_dirs = glob.glob(os.path.join(rawfolder, '??????????????'))
         for d in evt_dirs:
             os.rmdir(d)
         if save_statxml:
@@ -540,39 +540,46 @@ def mseed_to_hdf5(
     net = st[0].stats.network
     stat = st[0].stats.station
 
+    h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
+
     # Now, read all available files for this station
-    mseeds = os.path.join(rawfolder, '*', f'{net}.{stat}.mseed')
-    st = read(mseeds)
+    mseeds = glob.glob(os.path.join(rawfolder, '*', f'{net}.{stat}.mseed'))
 
     # Create table of new contents
     new_cont = {}
-    for tr in st:
-        new_cont.setdefault(tr.stats.channel, [])
-        new_cont[tr.stats.channel].append(
-            tr.stats.starttime.format_fissures()[:-4])
 
-    h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
-
-    # Write all of them to the hdf5 file
     with RawDatabase(h5_file) as rdb:
+        for mseed in mseeds:
+            # event ID string, used to save the data in hdf5
+            evt_str = os.path.basename(os.path.dirname(mseed))
+            try:
+                st = read(mseed)
+            except obspy.io.mseed.InternalMSEEDError:
+                logger = logging.getLogger('pyglimer.request')
+                logger.warning(
+                    f'File {mseed} is corrupt. Skipping this file..')
+                os.remove(mseed)
+                continue
+            rdb.add_waveform(st, evt_str)
+            # Everything went well
+            os.remove(mseed)
+
+            for tr in st:
+                new_cont.setdefault(tr.stats.channel, [])
+                new_cont[tr.stats.channel].append(evt_str)
+
+        # Write content to the hdf5 file
         old_cont = rdb._get_table_of_contents()
         for k, v in old_cont.items():
             try:
                 new_cont[k].extend(v)
             except KeyError:
                 new_cont[k] = v
-        rdb.add_waveform(st)
+        rdb._define_content(new_cont)
         if save_statxml:
             statxml = os.path.join(statloc, f'{net}.{stat}.xml')
             rdb.add_response(read_inventory(statxml))
 
-        rdb._define_content(new_cont)
-
-    # Clear RAM
-    st.clear()
-    # If all of that was successful, we can remove the mseeds
-    for f in glob.glob(mseeds):
-        os.remove(f)
     if save_statxml:
         os.remove(statxml)
     # next station

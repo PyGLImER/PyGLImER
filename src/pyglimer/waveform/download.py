@@ -10,7 +10,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Thursday, 15th September 2022 02:45:38 pm
+Last Modified: Friday, 16th September 2022 02:02:50 pm
 '''
 
 from multiprocessing import Event
@@ -646,6 +646,7 @@ def downloadwav(
     jj = 0
     # Loop over each event
     global event
+    global evt_id
     for ii, event in enumerate(tqdm(event_cat)):
         # fetch event-data
         origin_time = event.origins[0].time
@@ -654,12 +655,10 @@ def downloadwav(
         evtlat = event.origins[0].latitude
         evtlon = event.origins[0].longitude
 
+        evt_id = pu.utc_save_str(origin_time)
+
         # Download location
-        ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
-        evtlat_loc = str(roundhalf(evtlat))
-        evtlon_loc = str(roundhalf(evtlon))
-        tmp.folder = os.path.join(
-            rawloc, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
+        tmp.folder = os.path.join(rawloc, f'{evt_id}')
 
         # create folder for each event
         os.makedirs(tmp.folder, exist_ok=True)
@@ -839,6 +838,7 @@ def wav_in_asdf(
         except KeyError:
             return False
 
+
 def wav_in_hdf5(
     rawloc: str, network: str, station: str, location: str, channel: str,
         starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
@@ -848,11 +848,9 @@ def wav_in_hdf5(
     h5_file = os.path.join(rawloc, '%s.%s.h5' % (
         network, station))
 
-    t = starttime.format_fissures()[:-4]
-
     # First check dictionary
     try:
-        if t in av_data[network][station][channel]:
+        if evt_id in av_data[network][station][channel]:
             return True
         else:
             return False
@@ -877,7 +875,8 @@ def wav_in_hdf5(
             av_data[network][station][channel] = []
 
     # execute this again to check
-    return wav_in_hdf5(rawloc, network, station, location, channel, starttime, endtime)
+    return wav_in_hdf5(
+        rawloc, network, station, location, channel, starttime, endtime)
 
 
 def wav_in_hdf5_no_global(
@@ -885,12 +884,10 @@ def wav_in_hdf5_no_global(
         starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
     """Is the waveform already in the Raw hdf5 database?"""
 
-    t = starttime.format_fissures()[:-4]
-
     if channel not in av_data[network][station]:
         return False
 
-    if t in av_data[network][station][channel]:
+    if evt_id in av_data[network][station][channel]:
         return True
     else:
         return False

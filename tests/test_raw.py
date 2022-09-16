@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 8th September 2022 04:26:34 pm
-Last Modified: Friday, 9th September 2022 04:11:00 pm
+Last Modified: Friday, 16th September 2022 02:42:07 pm
 '''
 
 
@@ -23,6 +23,7 @@ import numpy as np
 import h5py
 
 from pyglimer.database import raw
+from pyglimer.utils import utils as pu
 
 
 class TestConvertHeaderToHDF5(unittest.TestCase):
@@ -234,12 +235,12 @@ class TestDBHandler(unittest.TestCase):
         path = raw.hierarchy.format(
             tag='raw',
             network=st.network, station=st.station,
-            starttime=st.event_time.format_fissures()[:-4],
+            evt_id=pu.utc_save_str(st.event_time),
             channel=st.channel)
         with warnings.catch_warnings(record=True) as w:
             with patch.object(self.dbh, 'create_dataset') as create_ds_mock:
                 create_ds_mock.side_effect = ValueError('test')
-                self.dbh.add_waveform(self.rftr)
+                self.dbh.add_waveform(self.rftr, evt_id=st.event_time)
                 create_ds_mock.assert_called_with(
                     path, data=self.rftr.data,
                     compression=self.dbh.compression,
@@ -265,7 +266,7 @@ class TestDBHandler(unittest.TestCase):
         starttime = st.starttime
         exp_path = raw.hierarchy.format(
             tag=tag, network=net, station=stat,
-            starttime=st.starttime.format_fissures()[:-4],
+            evt_id=pu.utc_save_str(starttime),
             channel=channel)
         d = {
             exp_path: self.rftr.data,
@@ -273,8 +274,9 @@ class TestDBHandler(unittest.TestCase):
         file_mock.side_effect = d.__getitem__
 
         _ = self.dbh.get_data(
-            net, stat, starttime, None, tag=tag)
-        file_mock.assert_called_with('/rand/BW/RJOB')
+            net, stat, starttime, tag=tag)
+        file_mock.assert_called_with(
+            f'/rand/BW/RJOB/{pu.utc_save_str(starttime)}')
 
     @patch('pyglimer.database.raw.BytesIO')
     @patch('pyglimer.database.raw.read_inventory')

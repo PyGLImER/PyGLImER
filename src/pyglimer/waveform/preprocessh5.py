@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Friday, 9th September 2022 04:29:21 pm
+Last Modified: Friday, 16th September 2022 02:06:05 pm
 '''
 
 from glob import glob
@@ -224,9 +224,9 @@ def _preprocessh5_single(
             except ValueError as e:
                 rflogger.debug(e)
                 continue
-            # st = ds.get_waveforms(
-            #     net, stat, '*', '*', toa-tz, toa+ta, 'raw_recording')
-            st = rdb.get_data(net, stat, toa-tz, toa+ta)
+
+            st = rdb.get_data(net, stat, ot)
+            st = st.slice(starttime=toa-tz, endtime=toa+tz)
             if st.count() < 3:
                 logger.info(
                     f'Only {st.count()} traces found for Station {net}.{stat}'
