@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Friday, 16th September 2022 02:30:09 pm
+Last Modified: Friday, 18th September 2022 07:18:55 pm
 '''
 
 import fnmatch
@@ -28,10 +28,12 @@ import numpy as np
 import obspy
 from obspy.core.utcdatetime import UTCDateTime
 from obspy.core import Stats, Stream, Trace, read
+from obspy.core.event.event import Event
 from obspy import Inventory, read_inventory
 import h5py
 
 from pyglimer.utils import utils as pu
+from pyglimer.utils.signalproc import resample_or_decimate
 
 
 hierarchy = "/{tag}/{network}/{station}/{evt_id}/{channel}"
@@ -100,7 +102,7 @@ class DBHandler(h5py.File):
         ds.attrs['content'] = str(content)
 
     def add_waveform(
-        self, data: tp.Union[Trace, Stream], evt_id: UTCDateTime or str,
+        self, data: tp.Union[Trace, Stream], evt_id: UTCDateTime | str,
             tag: str = 'raw'):
         """
         Add receiver function to the hdf5 file. The data can later be accessed
@@ -355,6 +357,7 @@ def h5_dict(val):
 
     return h5dict
 
+
 class RawDatabase(object):
     """
     Base class to handle the hdf5 files that contain raw data for receiver
@@ -519,7 +522,10 @@ def mseed_to_hdf5(
         is set to True, defaults to None
     :type statloc: str, optional
     """
+
+    # Find all miniseed related to that
     av_mseed = glob.glob(os.path.join(rawfolder, '*', '*.mseed'))
+
     # We do that for every single station
     if len(av_mseed) == 0:
         # Delete empty folders
@@ -529,14 +535,18 @@ def mseed_to_hdf5(
         if save_statxml:
             statxml_to_hdf5(rawfolder, statloc)
         return
+
     try:
         st = read(av_mseed[0])
+
     except obspy.io.mseed.InternalMSEEDError:
         # broken mseed
         logger = logging.getLogger('pyglimer.request')
         logger.warning(f'File {av_mseed[0]} is corrupt. Skipping this file..')
         os.remove(av_mseed[0])
         mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
+
+    # Get network and station
     net = st[0].stats.network
     stat = st[0].stats.station
 
@@ -549,18 +559,25 @@ def mseed_to_hdf5(
     new_cont = {}
 
     with RawDatabase(h5_file) as rdb:
+
         for mseed in mseeds:
             # event ID string, used to save the data in hdf5
             evt_str = os.path.basename(os.path.dirname(mseed))
+
             try:
                 st = read(mseed)
+
             except obspy.io.mseed.InternalMSEEDError:
+
                 logger = logging.getLogger('pyglimer.request')
                 logger.warning(
                     f'File {mseed} is corrupt. Skipping this file..')
                 os.remove(mseed)
+
                 continue
+
             rdb.add_waveform(st, evt_str)
+
             # Everything went well
             os.remove(mseed)
 
@@ -576,12 +593,14 @@ def mseed_to_hdf5(
             except KeyError:
                 new_cont[k] = v
         rdb._define_content(new_cont)
+
         if save_statxml:
             statxml = os.path.join(statloc, f'{net}.{stat}.xml')
             rdb.add_response(read_inventory(statxml))
 
     if save_statxml:
         os.remove(statxml)
+
     # next station
     mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
 
@@ -596,7 +615,9 @@ def statxml_to_hdf5(
     :param statloc: location where the stationxmls are stored
     :type statloc: stroros.PathLike
     """
+
     av_xml = glob.glob(os.path.join(statloc, '*.xml'))
+
     for xml in av_xml:
         inv = read_inventory(xml)
         net = inv[0].code
@@ -605,3 +626,326 @@ def statxml_to_hdf5(
         with RawDatabase(h5_file) as rdb:
             rdb.add_response(inv)
             os.remove(xml)
+
+
+def save_raw_DB_single_station(
+        network: str, station: str, saved: dict,
+        st: Stream, rawloc: str, inv: Inventory):
+    """
+    A variation of the above function that will open the ASDF file once and
+    write
+    all traces and then close it afterwards
+    Save the raw waveform data in the desired format.
+    The point of this function is mainly that the waveforms will be saved
+    with the correct associations and at the correct locations.
+
+    W are specifically writing event by event streams, so that we don't loose
+    parts that are already downloaded!
+
+    :param saved: Dictionary holding information about the original streams
+        to identify them afterwards.
+    :type saved: dict
+    :param st: obspy stream holding all data (from various stations)
+    :type st: Stream
+    :param rawloc: Parental directory (with phase) to save the files in.
+    :type rawloc: str
+    :param inv: The inventory holding all the station information
+    :type inv: Inventory
+    """
+    # Get logger
+    logger = logging.getLogger('pyglimer.request')
+
+    # Filename of the station to be opened.
+    fname = '%s.%s.h5' % (network, station)
+
+    # Just use the same name
+    event_ids = []
+    with RawDatabase(os.path.join(rawloc, fname)) as ds:
+
+        # Inventory should be saved once to the the station file
+        sinv = inv.select(network=network, station=station)
+        ds.add_response(sinv)
+
+        # Number of events
+        N = len(saved['event'])
+        Ns = len(str(N))
+        # Events should not be added because it will read the whole
+        # catalogue every single time!
+        outst = Stream()
+
+        for _i, (evt, startt, endt, net, stat, chan) in enumerate(zip(
+            saved['event'], saved['startt'], saved['endt'], saved['net'],
+                saved['stat'], saved['chan'])):
+
+            # Log the processed trace
+            logger.debug(
+                f'{net}.{stat}..{chan}: Processing #{_i+1:>{Ns}d}/{N}')
+
+            # Get event id save string
+            o = (evt.preferred_origin() or evt.origins[0])
+            evt_id = pu.utc_save_str(o.time)
+
+            # earlier we downloaded all locations, but we don't really want
+            # to have several, so let's just keep one
+            try:
+                # Grab only single station from stream (should be only one...)
+                sst = st.select(network=net, station=stat, channel=chan)
+
+                # This might actually be empty if so, let's just skip
+                if sst.count() == 0:
+                    logger.debug(f'No trace of {net}.{stat} in Stream.')
+                    continue
+
+                # This must assume that there is no overlap
+                slst = sst.slice(startt, endt)
+
+                # This might actually be empty if so, let's just skip
+                if slst.count() == 0:
+                    print(f"No data for {net}.{stat} "
+                          f"and event {evt.resource_id}")
+                    continue
+
+                # Only write the prevelant location
+                locs = [tr.stats.location for tr in slst]
+                filtloc = max(set(locs), key=locs.count)
+                sslst = slst.select(location=filtloc)
+
+                # This might actually be empty if so, let's just skip
+                if sslst.count() == 0:
+                    print(f"No data for {net}.{stat} and "
+                          f"event {evt.resource_id}")
+                    continue
+
+                write_st_to_ds(ds, sslst, evt_id)
+
+                # Add substream to stream for content update
+                outst += sslst
+                event_ids.append(evt_id)
+
+            except Exception as e:
+                logger.error(e)
+
+        # Create table of new contents
+        new_cont = {}
+        for tr, _evt_id in zip(outst, event_ids):
+            new_cont.setdefault(tr.stats.channel, [])
+            new_cont[tr.stats.channel].append(_evt_id)
+
+        # Get old table of contents
+        old_cont = ds._get_table_of_contents()
+
+        # Extend the old table of contents
+        for k, v in old_cont.items():
+            try:
+                new_cont[k].extend(v)
+            except KeyError:
+                new_cont[k] = v
+
+        # Redefine the table of contents.
+        ds._define_content(new_cont)
+
+
+def save_raw(
+        saved: dict, st: Stream, rawloc: str, inv: Inventory):
+    """
+    A variation of the above function that will open the ASDF file once and
+    write
+    all traces and then close it afterwards
+    Save the raw waveform data in the desired format.
+    The point of this function is mainly that the waveforms will be saved
+    with the correct associations and at the correct locations.
+
+    W are specifically writing event by event streams, so that we don't loose
+    parts that are already downloaded!
+
+    :param saved: Dictionary holding information about the original streams
+        to identify them afterwards.
+    :type saved: dict
+    :param st: obspy stream holding all data (from various stations)
+    :type st: Stream
+    :param rawloc: Parental directory (with phase) to save the files in.
+    :type rawloc: str
+    :param inv: The inventory holding all the station information
+    :type inv: Inventory
+    """
+    # Get logger
+    logger = logging.getLogger('pyglimer.request')
+
+    # Filename of the station to be opened.
+    fname = '%s.%s.h5' % (network, station)
+
+    # Just use the same name
+    event_ids = []
+    with RawDatabase(os.path.join(rawloc, fname)) as ds:
+
+        # Inventory should be saved once to the the station file
+        sinv = inv.select(network=network, station=station)
+        ds.add_response(sinv)
+
+        # Number of events
+        N = len(saved['event'])
+        Ns = len(str(N))
+        # Events should not be added because it will read the whole
+        # catalogue every single time!
+        outst = Stream()
+
+        for _i, (evt, startt, endt, net, stat, chan) in enumerate(zip(
+            saved['event'], saved['startt'], saved['endt'], saved['net'],
+                saved['stat'], saved['chan'])):
+
+            # Log stuff
+            logger.debug(
+                f'{net}.{stat}..{chan}: Processing #{_i+1:>{Ns}d}/{N}')
+
+            # Get event id save string
+            o = (evt.preferred_origin() or evt.origins[0])
+            evt_id = pu.utc_save_str(o.time)
+
+            # earlier we downloaded all locations, but we don't really want
+            # to have several, so let's just keep one
+            try:
+
+                # Grab only single station from stream (should be only one...)
+                sst = st.select(network=net, station=stat, channel=chan)
+
+                # This might actually be empty if so, let's just skip
+                if sst.count() == 0:
+                    logger.debug(f'No trace of {net}.{stat} in Stream.')
+                    continue
+
+                # This must assume that there is no overlap
+                slst = sst.slice(startt, endt)
+
+                if slst.count() == 0:
+                    print(f"No data for {net}.{stat} and "
+                          f"event {evt.resource_id}")
+                    continue
+
+                # Only write the prevelant location
+                locs = [tr.stats.location for tr in slst]
+                filtloc = max(set(locs), key=locs.count)
+                sslst = slst.select(location=filtloc)
+
+                if sslst.count() == 0:
+                    print(f"No data for {net}.{stat} and "
+                          f"event {evt.resource_id}")
+                    continue
+
+                write_st_to_ds(ds, sslst, evt_id)
+
+                # Add substream to stream for content update
+                outst += sslst
+                event_ids.append(evt_id)
+
+            except Exception as e:
+                logger.error(e)
+
+        # Create table of new contents
+        new_cont = {}
+        for tr, _evt_id in zip(outst, event_ids):
+            new_cont.setdefault(tr.stats.channel, [])
+            new_cont[tr.stats.channel].append(_evt_id)
+
+        # Get old table of contents
+        old_cont = ds._get_table_of_contents()
+
+        # Extend the old table of contents
+        for k, v in old_cont.items():
+            try:
+                new_cont[k].extend(v)
+            except KeyError:
+                new_cont[k] = v
+
+        # Redefine the table of contents.
+        ds._define_content(new_cont)
+
+
+def write_st_to_ds(
+    ds: DBHandler, st: Stream, evt_id: str,
+        resample: bool = True):
+    """
+    Write raw waveform data to an asdf file. This includes the corresponding
+    (teleseismic) event and the station inventory (i.e., response information).
+
+    :param st: The stream holding the raw waveform data.
+    :type st: Stream
+    :param event: The seismic event associated to the recorded data.
+    :type event: Event
+    :param outfolder: Output folder to write the asdf file to.
+    :type outfolder: str
+    :param statxml: The station inventory
+    :type statxml: Inventory
+    :param resample: Resample the data to 10Hz sampling rate? Defaults to True.
+    :type resample: bool, optional
+    """
+    if resample:
+        st.filter('lowpass_cheby_2', freq=4, maxorder=12)
+        st = resample_or_decimate(st, 10, filter=False)
+
+    # Add waveforms and stationxml
+    ds.add_waveform(st, evt_id, tag='raw_recording')
+
+
+def write_st(
+    st: Stream, event: Event, outfolder: str, statxml: Inventory,
+        resample: bool = True):
+    """
+    Write raw waveform data to an asdf file. This includes the corresponding
+    (teleseismic) event and the station inventory (i.e., response information).
+
+    :param st: The stream holding the raw waveform data.
+    :type st: Stream
+    :param event: The seismic event associated to the recorded data.
+    :type event: Event
+    :param outfolder: Output folder to write the asdf file to.
+    :type outfolder: str
+    :param statxml: The station inventory
+    :type statxml: Inventory
+    :param resample: Resample the data to 10Hz sampling rate? Defaults to True.
+    :type resample: bool, optional
+    """
+
+    # Get event id
+    origin = (event.preferred_origin() or event.origins[0])
+    evt_id = pu.utc_save_str(origin.time)
+
+    if resample:
+        st.filter('lowpass_cheby_2', freq=4, maxorder=12)
+        st = resample_or_decimate(st, 10, filter=False)
+
+    netsta = set()
+    for tr in st:
+        netsta.add((tr.stats.network, tr.stats.station))
+
+    for net, sta in netsta:
+
+        fname = '%s.%s.h5' % (net, sta)
+        subst = st.select(network=net, station=sta)
+
+        with RawDatabase(os.path.join(outfolder, fname)) as ds:
+            # Events should not be added because it will read the whole
+            # catalogue every single time!
+
+            ds.add_waveform(subst, evt_id, tag='raw_recording')
+            ds.add_response(statxml)
+            # If there are still problems, we will have
+            # to check whether they are similar probelms to add event
+
+            # Create table of new contents
+            new_cont = {}
+            for tr, in subst:
+                new_cont.setdefault(tr.stats.channel, [])
+                new_cont[tr.stats.channel].append(evt_id)
+
+            # Get old table of contents
+            old_cont = ds._get_table_of_contents()
+
+            # Extend the old table of contents
+            for k, v in old_cont.items():
+                try:
+                    new_cont[k].extend(v)
+                except KeyError:
+                    new_cont[k] = v
+
+            # Redefine the table of contents.
+            ds._define_content(new_cont)
