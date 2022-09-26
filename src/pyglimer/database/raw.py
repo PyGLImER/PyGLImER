@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Thursday, 15th September 2022 03:15:02 pm
+Last Modified: Monday, 26th September 2022 03:03:46 pm
 '''
 
 import fnmatch
@@ -507,10 +507,13 @@ def statxml_to_hdf5(
     """
     av_xml = glob.glob(os.path.join(statloc, '*.xml'))
     for xml in av_xml:
-        inv = read_inventory(xml)
-        net = inv[0].code
-        stat = inv[0][0].code
-        h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
-        with RawDatabase(h5_file) as rdb:
-            rdb.add_response(inv)
-            os.remove(xml)
+        try:
+            inv = read_inventory(xml)
+            net = inv[0].code
+            stat = inv[0][0].code
+            h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
+            with RawDatabase(h5_file) as rdb:
+                rdb.add_response(inv)
+                os.remove(xml)
+        except Exception as e:
+            logging.warning(f'Station XML could not be added to h5 file. {e}')
