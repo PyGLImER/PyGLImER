@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Monday, 26th September 2022 03:03:46 pm
+Last Modified: Thursday, 29th September 2022 12:20:35 pm
 '''
 
 import fnmatch
@@ -454,6 +454,21 @@ def mseed_to_hdf5(
         # broken mseed
         logger = logging.getLogger('pyglimer.request')
         logger.warning(f'File {av_mseed[0]} is corrupt. Skipping this file..')
+        os.remove(av_mseed[0])
+        mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
+    try:
+        if not len(st[0]):
+            # broken mseed
+            logger = logging.getLogger('pyglimer.request')
+            logger.warning(
+                f'File {av_mseed[0]} is corrupt. Skipping this file..')
+            os.remove(av_mseed[0])
+            mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
+    except UnboundLocalError:
+        # broken mseed Don't really understand why this happens..
+        logger = logging.getLogger('pyglimer.request')
+        logger.warning(
+            f'File {av_mseed[0]} is corrupt. Skipping this file..')
         os.remove(av_mseed[0])
         mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
     net = st[0].stats.network
