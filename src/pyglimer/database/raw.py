@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Thursday, 29th September 2022 12:20:35 pm
+Last Modified: Monday, 3rd October 2022 11:49:46 am
 '''
 
 import fnmatch
@@ -476,7 +476,21 @@ def mseed_to_hdf5(
 
     # Now, read all available files for this station
     mseeds = os.path.join(rawfolder, '*', f'{net}.{stat}.mseed')
-    st = read(mseeds)
+    try:
+        st = read(mseeds)
+    except obspy.io.mseed.InternalMSEEDError:
+        # Read each of them and remove the broken files
+        st = Stream()
+        for mseed in glob.glob(mseeds):
+            try:
+                st.append(read(mseed))
+            except obspy.io.mseed.InternalMSEEDError:
+                logger = logging.getLogger('pyglimer.request')
+                logger.warning(
+                    f'File {mseed} is corrupt. Skipping this file..')
+                os.remove(mseed)
+        if not st.count():
+            mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
 
     # Create table of new contents
     new_cont = {}
