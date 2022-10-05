@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Monday, 3rd October 2022 11:49:46 am
+Last Modified: Wednesday, 5th October 2022 11:25:22 am
 '''
 
 import fnmatch
@@ -483,7 +483,7 @@ def mseed_to_hdf5(
         st = Stream()
         for mseed in glob.glob(mseeds):
             try:
-                st.append(read(mseed))
+                st.extend(read(mseed))
             except obspy.io.mseed.InternalMSEEDError:
                 logger = logging.getLogger('pyglimer.request')
                 logger.warning(
