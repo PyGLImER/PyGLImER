@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Friday, 7th October 2022 05:20:39 pm
+Last Modified: Monday, 10th October 2022 04:37:08 pm
 '''
 
 import fnmatch
@@ -473,7 +473,7 @@ def mseed_to_hdf5(
             os.remove(av_mseed[0])
         except FileNotFoundError:
             # This might actually be the reason for hte Unboundlocalerror
-            continue
+            pass
         mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
     net = st[0].stats.network
     stat = st[0].stats.station
