@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Monday, 10th October 2022 04:37:08 pm
+Last Modified: Thursday, 13th October 2022 09:50:17 am
 '''
 
 import fnmatch
@@ -457,26 +457,27 @@ def mseed_to_hdf5(
         os.remove(av_mseed[0])
         mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
     try:
-        if not len(st[0]):
+        if not len(st):
             # broken mseed
             logger = logging.getLogger('pyglimer.request')
             logger.warning(
                 f'File {av_mseed[0]} is corrupt. Skipping this file..')
             os.remove(av_mseed[0])
             mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
-    except UnboundLocalError:
+        net = st[0].stats.network
+        stat = st[0].stats.station
+    except UnboundLocalError as e:
         # broken mseed Don't really understand why this happens..
         logger = logging.getLogger('pyglimer.request')
-        logger.warning(
-            f'File {av_mseed[0]} is corrupt. Skipping this file..')
+        logger.error(
+            f'File {av_mseed[0]} is corrupt. Skipping this file..\n'
+            + f'The original error was {e} on Stream {st}')
         try:
             os.remove(av_mseed[0])
         except FileNotFoundError:
             # This might actually be the reason for hte Unboundlocalerror
             pass
         mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
-    net = st[0].stats.network
-    stat = st[0].stats.station
 
     # Now, read all available files for this station
     mseeds = os.path.join(rawfolder, '*', f'{net}.{stat}.mseed')
