@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Thursday, 20th October 2022 10:49:27 am
+Last Modified: Thursday, 20th October 2022 10:51:46 am
 '''
 
 import fnmatch
@@ -449,36 +449,6 @@ def mseed_to_hdf5(
             statxml_to_hdf5(rawfolder, statloc)
         return
     net, stat, _ = os.path.basename(av_mseed[0]).split('.')
-    # try:
-    #     st = read(av_mseed[0])
-    # except obspy.io.mseed.InternalMSEEDError:
-    #     # broken mseed
-    #     logger = logging.getLogger('pyglimer.request')
-    #     logger.warning(f'File {av_mseed[0]} is corrupt. Skipping this file..')
-    #     os.remove(av_mseed[0])
-    #     mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
-    # try:
-    #     if not len(st):
-    #         # broken mseed
-    #         logger = logging.getLogger('pyglimer.request')
-    #         logger.warning(
-    #             f'File {av_mseed[0]} is corrupt. Skipping this file..')
-    #         os.remove(av_mseed[0])
-    #         mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
-    #     net = st[0].stats.network
-    #     stat = st[0].stats.station
-    # except UnboundLocalError as e:
-    #     # broken mseed Don't really understand why this happens..
-    #     logger = logging.getLogger('pyglimer.request')
-    #     logger.error(
-    #         f'File {av_mseed[0]} is corrupt. Skipping this file..\n'
-    #         + f'The original error was {e} on Stream {st}')
-    #     try:
-    #         os.remove(av_mseed[0])
-    #     except FileNotFoundError:
-    #         # This might actually be the reason for hte Unboundlocalerror
-    #         pass
-    #     mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
 
     # Now, read all available files for this station
     mseeds = os.path.join(rawfolder, '*', f'{net}.{stat}.mseed')
