@@ -904,12 +904,12 @@ class RFStream(Stream):
         # Then, use a 3d histogram to create stacks, and create them quickly
         # Create
         logger.info("Computing Move-out correction")
-        self.moveout(vmodel=vmodel_file)
+        _, st = self.moveout(vmodel=vmodel_file)
 
         #
         logger.info("Getting locations corresponding to the traces")
         latitude, longitude, depth, rf = [], [], [], []
-        for _tr in self:
+        for _tr in st:
             latitude.extend(_tr.stats.pp_latitude)
             longitude.extend(_tr.stats.pp_longitude)
             depth.extend(_tr.stats.pp_depth)  # Doubt that it's saved like this
