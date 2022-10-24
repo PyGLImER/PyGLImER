@@ -19,12 +19,9 @@ import fnmatch
 from http.client import IncompleteRead
 import logging
 import os
-import sys
 from functools import partial
 from itertools import compress
-from weakref import KeyedRef
 from tqdm import tqdm
-from pprint import pprint
 
 from joblib import Parallel, delayed
 import psutil
@@ -33,11 +30,7 @@ from obspy import UTCDateTime
 from obspy.clients.fdsn.mass_downloader import CircularDomain, \
     Restrictions, MassDownloader
 from obspy.core.event.catalog import Catalog
-from obspy.core.event.event import Event
 from obspy.core.inventory.inventory import Inventory
-from obspy.core.inventory.station import Station
-from obspy.core.inventory.network import Network
-from obspy.core.inventory.channel import Channel
 from obspy.taup import TauPyModel
 from pyasdf import ASDFDataSet
 
@@ -53,8 +46,8 @@ def ____check_times_small_db_event(
         rawloc: str, tz: float, ta: float, phase: str, model: TauPyModel,
         logger: logging.Logger, saveh5: bool, mintime: float, maxtime: float,
         inv: Inventory, net: str, stat: str, channels: tp.List[str],
-        evt: Event, av_data_manual: tp.Union[dict, None] = None
-        ) -> tp.Tuple[UTCDateTime, tp.Union[tp.List[str]], bool]:
+        evt: Event, av_data_manual: tp.Union[dict, None] = None) \
+        -> tp.Tuple[UTCDateTime, tp.Union[tp.List[str]], bool]:
 
     """Checks whether event already in database and if not compute toa and
     return missing channels.
@@ -110,7 +103,8 @@ def ____check_times_small_db_event(
     # Get evt_id
     evt_id = pu.utc_save_str(o.time)
 
-    # Channel fix, not all channels are equally present at in a given time range
+    # Channel fix, not all channels are equally present at in a given time
+    # range
     channels_fix = []
     for _cha in channels:
         try:
@@ -118,8 +112,9 @@ def ____check_times_small_db_event(
                 network=net, station=stat, channel=_cha,
                 starttime=o.time+mintime-tz, endtime=o.time+maxtime+ta)[0][0]
             channels_fix.append(_cha)
-        except:
-            logger.debug(f'Channel {net}.{stat}..{_cha} not available for event {str(evt.resource_id).split("=")[-1]}')
+        except Exception:
+            logger.debug(f'Channel {net}.{stat}..{_cha} not available for '
+                         f'event {str(evt.resource_id).split("=")[-1]}')
 
     # Already in DB?
     if saveh5:
@@ -132,15 +127,16 @@ def ____check_times_small_db_event(
                 indb = wav_in_hdf5(rawloc, net, stat, '*', _channel)
             else:
                 indb = evt_id in av_data_manual[net][stat][_channel]
-                # indb = wav_in_hdf5_no_global(av_data_manual, rawloc, net, stat, '*', _channel, toa-tz, toa+ta)
 
-            logger.debug(f'||----> {net}.{stat}..{_channel} - {evt_id} in file: {indb}')
+            logger.debug(
+                f'||----> {net}.{stat}..{_channel} - {evt_id} in file: {indb}')
 
             # Add to checklist whether a channel is in the database
             checklist.append(indb)
 
         if all(checklist):
-            logger.info(f'Already in database: {net}.{stat} event={str(evt.resource_id).split("=")[-1]}')
+            logger.info(f'Already in database: {net}.{stat} '
+                        f'event={str(evt.resource_id).split("=")[-1]}')
             return False
 
     # If dataformat is mseed
@@ -160,11 +156,14 @@ def ____check_times_small_db_event(
 
         for _channel in channels_fix:
             # Here we don't need a separate function because each event just
-            # checks the existence of a file, which requires no parallel access.
+            # checks the existence of a file, which requires
+            # no parallel access.
             checklist.append(wav_in_db(net, stat, '*', _channel))
 
         if all(checklist):
-            logger.info(f'Already in database: {net}.{stat} event={str(evt.resource_id).split("=")[-1]}')
+            logger.info(
+                f'Already in database: {net}.{stat} '
+                f'event={str(evt.resource_id).split("=")[-1]}')
             return False
 
     # Get required channels
@@ -248,10 +247,14 @@ def __check_times_small_db_sub(
         _description_
     """
 
-    d = {'event': [], 'startt': [], 'endt': [], 'net': [], 'stat': [], 'chan': []}
+    d = {
+        'event': [],
+        'startt': [], 'endt': [],
+        'net': [], 'stat': [], 'chan': []}
 
     # Get origin times
-    # otimes = [_o.time _o in [evt.preferred_origin() or evt.origins[0]for evt in event_cat.events]]
+    # otimes = [_o.time _o in [evt.preferred_origin() or evt.origins[0]
+    # for evt in event_cat.events]]
 
     print(f'--> Enter TOA event loop for station {net}.{stat}')
 
@@ -286,7 +289,7 @@ def __check_times_small_db_sub(
                         av_data_manual[net][stat][_cha] = list()
 
         # Get number of cores available
-        NCPU = psutil.cpu_count(logical = False) - 2
+        NCPU = psutil.cpu_count(logical=False) - 2
         NCPU = 1 if NCPU < 1 else NCPU
 
         # Create partial function
@@ -346,9 +349,9 @@ def __check_times_small_db_sub(
         keys = list(d.keys())
         lists = (v for v in d.values())
 
-        net_idx =  keys.index('net')
-        sta_idx =  keys.index('stat')
-        cha_idx =  keys.index('chan')
+        net_idx = keys.index('net')
+        sta_idx = keys.index('stat')
+        cha_idx = keys.index('chan')
         st_idx = keys.index('startt')
         et_idx = keys.index('endt')
 
@@ -357,7 +360,6 @@ def __check_times_small_db_sub(
             logger.debug(f"||  {_d[net_idx]}.{_d[sta_idx]}..{_d[cha_idx]}: "
                          f"{_d[st_idx]} -- {_d[et_idx]}")
         logger.debug("====================================================")
-
 
     # Print TOAs before check overlap
     logger.debug(f'Final list of found arrival times for station {net}.{stat}')
@@ -463,9 +465,6 @@ def create_bulk_list(netsta_d: tp.List[dict]):
     """Takes in a list of dictionaries, to create a bulk request list
     of dictionaries that contain station info and bulk request strings."""
 
-    # logging
-    logger = logging.getLogger('pyglimer.request')
-
     # Fix the lists to check to add request per channel
     bulk_list = []
     fullbulk = []
@@ -542,8 +541,7 @@ def download_small_db(
     # Sort event catalog after origin time
     idx_list = sorted(
         range(len(event_cat)),
-        key=
-        lambda k: (
+        key=lambda k: (
             event_cat[k].preferred_origin()
             or event_cat[k].origins[0]).time.format_fissures())
 
@@ -552,13 +550,15 @@ def download_small_db(
 
     # Calculate the min and max theoretical arrival time after event time
     # according to minimum and maximum epicentral distance
-    mintime = model.get_travel_times(source_depth_in_km=500,
-                                      distance_in_degree=min_epid,
-                                      phase_list=[phase])[0].time - tz
+    mintime = model.get_travel_times(
+        source_depth_in_km=500,
+        distance_in_degree=min_epid,
+        phase_list=[phase])[0].time - tz
 
-    maxtime = model.get_travel_times(source_depth_in_km=0.001,
-                                      distance_in_degree=max_epid,
-                                      phase_list=[phase])[0].time + ta
+    maxtime = model.get_travel_times(
+        source_depth_in_km=0.001,
+        distance_in_degree=max_epid,
+        phase_list=[phase])[0].time + ta
 
     # logging
     logger = logging.getLogger('pyglimer.request')
@@ -588,7 +588,7 @@ def download_small_db(
     os.makedirs(statloc, exist_ok=True)
 
     # Get number of cores available
-    NCPU = psutil.cpu_count(logical = False) - 2
+    NCPU = psutil.cpu_count(logical=False) - 2
     NCPU = 1 if NCPU < 1 else NCPU
 
     # Run single thread station
@@ -613,11 +613,13 @@ def download_small_db(
     # Get bulk string for a single station
     if not MULT:
 
-        logger.info('Computing TOA and checking available data single threaded')
+        logger.info(
+            'Computing TOA and checking available data single threaded')
 
         # Empty network dict
         d = dict()
-        d['net'], d['stat'], d['chan'], d['startt'], d['endt'] = [],[],[],[],[]
+        d['net'], d['stat'], d['chan'], d['startt'], d['endt'] \
+            = [], [], [], [], []
 
         # Since we only have a single station we can loop over the events
         d = __check_times_small_db_sub(
@@ -651,7 +653,7 @@ def download_small_db(
     # Transform the list of network.station dictionaries containing lists
     # of channels to a list of network.station dictionaries that lists channels
     # individually and contain the bulk request parameters.
-    bulk_list, Nbulk  = create_bulk_list(netsta_d)
+    bulk_list, Nbulk = create_bulk_list(netsta_d)
 
     # End here if there aren't any bulk requests.
     if Nbulk == 0:
@@ -686,7 +688,8 @@ def download_small_db(
 
             pu.__client__loop_wav__(
                 clients[0], rawloc, bulk_list[0], saveh5,
-                subinvs[0], network=networks[0], station=stations[0], parallel=True)
+                subinvs[0], network=networks[0], station=stations[0],
+                parallel=True)
 
         # Multiple Stations, parallellize stations directly
         else:
@@ -694,10 +697,10 @@ def download_small_db(
             # Download multiple stations in parallel
             Parallel(n_jobs=NCPU, backend='multiprocessing')(
                 delayed(pu.__client__loop_wav__)(
-                clients[0], rawloc, _bulk_dict, saveh5,
-                _subinv, network=_net, station=_sta)
-                for _subinv, _net, _sta, _bulk_dict \
-                    in zip(subinvs, networks, stations, bulk_list))
+                    clients[0], rawloc, _bulk_dict, saveh5,
+                    _subinv, network=_net, station=_sta)
+                for _subinv, _net, _sta, _bulk_dict
+                in zip(subinvs, networks, stations, bulk_list))
 
     # If there are multiple clients, parallelize the clients
     else:
@@ -958,7 +961,7 @@ def get_stationxml_storage(network: str, station: str, statloc: str):
 
 
 def wav_in_db(
-    network: str, station: str, location: str, channel: str) -> bool:
+        network: str, station: str, location: str, channel: str) -> bool:
 
     """Checks if waveform is already downloaded."""
     path = os.path.join(tmp.folder, "%s.%s.mseed" % (network, station))
@@ -1021,8 +1024,8 @@ def wav_in_asdf(
 
 
 def wav_in_hdf5(
-    rawloc: str, network: str, station: str, location: str,
-    channel: str) -> bool:
+        rawloc: str, network: str, station: str, location: str,
+        channel: str) -> bool:
     """Is the waveform already in the Raw hdf5 database?"""
 
     # H5 file location
@@ -1061,7 +1064,8 @@ def wav_in_hdf5(
 
 
 def wav_in_hdf5_no_global(
-    av_data: dict, network: str, station: str, channel: str, evt_id) -> bool:
+        av_data: dict, network: str, station: str, channel: str,
+        evt_id) -> bool:
     """Is the waveform already in the Raw hdf5 database?"""
 
     if channel not in av_data[network][station]:

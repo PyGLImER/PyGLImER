@@ -24,7 +24,6 @@ from obspy.core.event.catalog import Event
 from obspy.core.inventory.inventory import Inventory
 from obspy.core.stream import Stream
 from pyasdf import ASDFDataSet
-from pyglimer.database import raw
 
 from pyglimer.utils.signalproc import resample_or_decimate
 
@@ -95,11 +94,9 @@ def write_st(
 
     fname = '%s.%s.h5' % (st[0].stats.network, st[0].stats.station)
 
-
     with ASDFDataSet(os.path.join(outfolder, fname)) as ds:
         # Events should not be added because it will read the whole
         # catalogue every single time!
         ds.add_waveforms(st, tag='raw_recording')
         ds.add_stationxml(statxml)  # If there are still problems, we will have
         # to check whether they are similar probelms to add event
-

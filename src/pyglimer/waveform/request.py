@@ -46,18 +46,17 @@ class Request(object):
     time domain receiver functions."""
 
     def __init__(
-        self, proj_dir: str, raw_subdir: str, prepro_subdir: str,
-        rf_subdir: str, statloc_subdir: str, evt_subdir: str,
-        log_subdir: str, phase: str, rot: str, deconmeth: str,
-        starttime: UTCDateTime or str, endtime: UTCDateTime or str,
-        pol: str = 'v', minmag: float or int = 5.5,
-        event_coords: Tuple[float, float, float, float] = None,
-        network: tp.Union[str, List[str], None] = None,
-        station: tp.Union[str, List[str], None] = None,
-        waveform_client: list = None, evtcat: str = None,
-        continue_download: bool = False, loglvl: int = logging.WARNING,
-        format: str = 'hdf5', remove_response: bool = True,
-        **kwargs):
+            self, proj_dir: str, raw_subdir: str, prepro_subdir: str,
+            rf_subdir: str, statloc_subdir: str, evt_subdir: str,
+            log_subdir: str, phase: str, rot: str, deconmeth: str,
+            starttime: UTCDateTime or str, endtime: UTCDateTime or str,
+            pol: str = 'v', minmag: float or int = 5.5,
+            event_coords: Tuple[float, float, float, float] = None,
+            network: tp.Union[str, List[str], None] = None,
+            station: tp.Union[str, List[str], None] = None,
+            waveform_client: list = None, evtcat: str = None,
+            continue_download: bool = False, loglvl: int = logging.WARNING,
+            format: str = 'hdf5', remove_response: bool = True, **kwargs):
         """
         Create object that is used to start the receiver function
         workflow.

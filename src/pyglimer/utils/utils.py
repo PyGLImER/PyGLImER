@@ -233,7 +233,8 @@ def chunkdict(d: dict, chunksize) -> list:
 
 def save_stream(
         st: Stream, rawloc: str, saveh5: bool, saved: dict, inv: Inventory,
-        network: tp.Union[str, None] = None, station: tp.Union[str, None] = None):
+        network: tp.Union[str, None] = None,
+        station: tp.Union[str, None] = None):
     """Saves a stream to either mseed or HDF5 format depending on flag, and the
     event-channel dictionary ``saved`` which with created in a parent function.
 
@@ -304,7 +305,7 @@ def __download_sub__(client: str, saved: dict) -> Stream:
     for _b in saved['bulk']:
         bulk.extend(_b)
 
-    ## The Block here is to debug the actual request made #####
+    # ## The Block here is to debug the actual request made #####
     #  But for code and output purposes it is unecessary to log.
     #  I would just keep it for future debugging
     # for _net, _sta, _cha, _st, _et, _event, _b in zip(
@@ -319,7 +320,7 @@ def __download_sub__(client: str, saved: dict) -> Stream:
     #     print(f"{_net}.{_sta}..{_cha}: {_st} -- {_et} --> {e_id}")
     #     for __b in _b:
     #         print(f"^-->{__b}")
-    ##############################################################
+    # #############################################################
 
     # Sort bulk request.
     bulk.sort()
@@ -408,7 +409,7 @@ def __client__loop_wav__(
     # Number of Total chunks to be downloaded
     N = len(saved)
 
-    logger.debug(f"Downloading ...")
+    logger.debug("Downloading ...")
 
     # Get number of cores available
     if parallel:
@@ -603,10 +604,10 @@ def get_multiple_fdsn_clients(
 
 
 def create_bulk_str(
-    networks: tp.Union[str, List[str]], stations: tp.Union[str,List[str]],
-    location: str, channel: tp.Union[str,List[str]],
-    t0: UTCDateTime or str or List[UTCDateTime],
-    t1: UTCDateTime or str or List[UTCDateTime]) -> List[tuple]:
+        networks: tp.Union[str, List[str]], stations: tp.Union[str, List[str]],
+        location: str, channel: tp.Union[str, List[str]],
+        t0: UTCDateTime or str or List[UTCDateTime],
+        t1: UTCDateTime or str or List[UTCDateTime]) -> List[tuple]:
     """
     Function to generate the input for the obspy functions:
     get_stations_bulk() and get_waveforms_bulk().
