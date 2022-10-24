@@ -53,8 +53,9 @@ def ____check_times_small_db_event(
         rawloc: str, tz: float, ta: float, phase: str, model: TauPyModel,
         logger: logging.Logger, saveh5: bool, mintime: float, maxtime: float,
         inv: Inventory, net: str, stat: str, channels: tp.List[str],
-        evt: Event, av_data_manual: dict | None = None
-        ) -> tp.Tuple[UTCDateTime, tp.List[str]] | bool:
+        evt: Event, av_data_manual: tp.Union[dict, None] = None
+        ) -> tp.Tuple[UTCDateTime, tp.Union[tp.List[str]], bool]:
+
     """Checks whether event already in database and if not compute toa and
     return missing channels.
 
@@ -530,8 +531,8 @@ def create_bulk_list(netsta_d: tp.List[dict]):
 def download_small_db(
     phase: str, min_epid: float, max_epid: float, model: TauPyModel,
     event_cat: Catalog, tz: float, ta: float, statloc: str,
-    rawloc: str, clients: list, network: str | tp.List[str],
-    station: str | tp.List[str], channel: str,
+    rawloc: str, clients: list, network: tp.Union[str, tp.List[str]],
+    station: tp.Union[str, tp.List[str]], channel: str,
         saveh5: bool):
     """
     see corresponding method :meth:`~pyglimer.waveform.request.Request.\

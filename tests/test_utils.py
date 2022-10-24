@@ -133,17 +133,17 @@ class TestClientLoop(unittest.TestCase):
 class TestClientLoopWav(unittest.TestCase):
     def test_no_valid_fdsn(self):
         self.assertIsNone(pu.__client__loop_wav__(
-            'bla', 'some', ['a', 'b'], 0, 0, 0))
+            'bla', 'some', dict(bulk=['a', 'b']), 0, 0, 0))
 
     @patch('pyglimer.utils.utils.save_raw')
     def test_orga(self, save_raw_mock):
         c = MagicMock(spec=obspy.clients.fdsn.Client)
-        bulkl = ['my', 'nonesense']
+        bulkl = dict(bulk=['my', 'nonesense'])
         rawloc = 'should not exist'
         c.get_waveforms_bulk.return_value = read()
-        pu.__client__loop_wav__(c, rawloc, bulkl, {}, False, 'inventory')
+        pu.__client__loop_wav__(c, rawloc, bulkl, False, 'inventory')
         save_raw_mock.assert_called_once_with(
-            {}, read(), rawloc, 'inventory', False)
+            bulkl, read(), rawloc, 'inventory', False)
 
 
 class TestSaveRaw(unittest.TestCase):

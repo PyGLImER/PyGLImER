@@ -21,6 +21,7 @@ import os
 from http.client import IncompleteRead
 from datetime import datetime
 import logging
+import typing as tp
 from typing import Iterable, Tuple, List
 import warnings
 import time
@@ -51,8 +52,8 @@ class Request(object):
         starttime: UTCDateTime or str, endtime: UTCDateTime or str,
         pol: str = 'v', minmag: float or int = 5.5,
         event_coords: Tuple[float, float, float, float] = None,
-        network: str | List[str] | None = None,
-        station: str | List[str] | None = None,
+        network: tp.Union[str, List[str], None] = None,
+        station: tp.Union[str, List[str], None] = None,
         waveform_client: list = None, evtcat: str = None,
         continue_download: bool = False, loglvl: int = logging.WARNING,
         format: str = 'hdf5', remove_response: bool = True,

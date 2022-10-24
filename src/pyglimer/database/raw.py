@@ -102,7 +102,7 @@ class DBHandler(h5py.File):
         ds.attrs['content'] = str(content)
 
     def add_waveform(
-        self, data: tp.Union[Trace, Stream], evt_id: UTCDateTime | str,
+        self, data: tp.Union[Trace, Stream], evt_id: tp.Union[UTCDateTime,str],
             tag: str = 'raw'):
         """
         Add receiver function to the hdf5 file. The data can later be accessed
@@ -633,7 +633,7 @@ def statxml_to_hdf5(
                 os.remove(xml)
         except Exception as e:
             logging.warning(f'Station XML could not be added to h5 file. {e}')
-      
+
 
 def save_raw_DB_single_station(
         network: str, station: str, saved: dict,

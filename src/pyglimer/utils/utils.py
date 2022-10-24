@@ -17,6 +17,7 @@ Last Modified: Monday, 26th September 2022 10:45:48 am
 import logging
 import os
 from obspy.core.event.event import Event
+import typing as tp
 from typing import List, Tuple, Optional
 from warnings import warn
 import psutil
@@ -232,7 +233,7 @@ def chunkdict(d: dict, chunksize) -> list:
 
 def save_stream(
         st: Stream, rawloc: str, saveh5: bool, saved: dict, inv: Inventory,
-        network: str | None = None, station: str | None = None):
+        network: tp.Union[str, None] = None, station: tp.Union[str, None] = None):
     """Saves a stream to either mseed or HDF5 format depending on flag, and the
     event-channel dictionary ``saved`` which with created in a parent function.
 
@@ -335,13 +336,14 @@ def __download_sub__(client: str, saved: dict) -> Stream:
         return st
 
     except (header.FDSNNoDataException, header.FDSNException, ValueError) as e:
-        print(str(e))
         if 'HTTP Status code: 204' in str(e):
             logger.debug('--------- NO DATA FOR REQUESTS: ----------------')
             for __bulk in bulk:
                 logger.debug(f"||    {__bulk}")
             logger.debug('------------------------------------------------')
             return Stream()
+        elif isinstance(e, ValueError):
+            print(str(e))
         else:
             print(str(e))
             raise ValueError('See Error above.')
@@ -465,7 +467,7 @@ def __client__loop_wav__(
 
             st = __download_sub__(client, _saved)
 
-            if len(st) == 0:
+            if st is None or len(st) == 0:
                 continue
 
             # Save stream to mseed ot h5
@@ -601,9 +603,10 @@ def get_multiple_fdsn_clients(
 
 
 def create_bulk_str(
-    networks: str | List[str], stations: str | List[str], location: str,
-    channel: str| List[str], t0: UTCDateTime or str or List[UTCDateTime],
-        t1: UTCDateTime or str or List[UTCDateTime]) -> List[tuple]:
+    networks: tp.Union[str, List[str]], stations: tp.Union[str,List[str]],
+    location: str, channel: tp.Union[str,List[str]],
+    t0: UTCDateTime or str or List[UTCDateTime],
+    t1: UTCDateTime or str or List[UTCDateTime]) -> List[tuple]:
     """
     Function to generate the input for the obspy functions:
     get_stations_bulk() and get_waveforms_bulk().
