@@ -15,6 +15,7 @@ pip
 plotly
 prov
 psutil
+h5py
 scipy
 tqdm
 flake8
