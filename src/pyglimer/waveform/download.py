@@ -15,7 +15,6 @@ Last Modified: Monday, 10th October 2022 04:53:26 pm
 
 from multiprocessing import Event
 import typing as tp
-import fnmatch
 from http.client import IncompleteRead
 import logging
 import os
@@ -32,7 +31,6 @@ from obspy.clients.fdsn.mass_downloader import CircularDomain, \
 from obspy.core.event.catalog import Catalog
 from obspy.core.inventory.inventory import Inventory
 from obspy.taup import TauPyModel
-from pyasdf import ASDFDataSet
 
 from pyglimer.database.raw import RawDatabase, mseed_to_hdf5
 from pyglimer import tmp
@@ -981,46 +979,6 @@ def wav_in_db(
         return True
     else:
         return False
-
-
-def wav_in_asdf(
-    network: str, station: str, location: str, channel: str,
-        starttime: UTCDateTime, endtime: UTCDateTime) -> bool:
-    """Is the waveform already in the asdf database?"""
-    asdf_file = os.path.join(tmp.folder, os.pardir, '%s.%s.h5' % (
-        network, station))
-
-    if not os.path.isfile(asdf_file):
-        logging.debug(f'{asdf_file} not found')
-        return False
-
-    # Change precision of start and endtime
-    # Pyasdf rounds with a precision of 1 for the starttime and 0 for endtime
-    starttime = UTCDateTime(
-        starttime, precision=1).format_iris_web_service()[:-6]
-    endtime = endtime.format_iris_web_service()[:-6]
-    # make them patterns for the cases where it downloads a slightly different
-    # time window
-    starttime += '??'
-    endtime += '??'
-
-    # Waveforms are saved in pyasdf with filenames akin to:
-    nametag = "%s.%s.%s.%s__%s__%s__raw_recording"\
-        % (network, station, location, channel, starttime, endtime)
-
-    with ASDFDataSet(asdf_file, mode='r') as ds:
-        # Note .list only checks the names not the actual traces and is
-        # therefore way faster!
-        try:
-            exists = len(fnmatch.filter(ds.waveforms[
-                '%s.%s' % (network, station)].list(), nametag)) > 0
-            # exists = nametag in ds.waveforms[
-            #     '%s.%s' % (network, station)].list()
-            if exists:
-                logging.debug(f'{nametag} already exists!')
-            return exists
-        except KeyError:
-            return False
 
 
 def wav_in_hdf5(
