@@ -11,7 +11,7 @@ Plot utilities not to modify plots or base plots.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 05:05:08 pm
-Last Modified: Monday, 30th May 2022 03:18:09 pm
+Last Modified: Wednesday, 19th October 2022 11:29:22 am
 '''
 
 import os
@@ -25,26 +25,26 @@ from cartopy.crs import PlateCarree
 from pyglimer.constants import maxz, res
 
 
-def set_mpl_params():
+def set_mpl_params(bold=False):
     params = {
-        'font.family': "Arial",
-        'font.size': 12,
+        'font.family': "DejaVu Sans",
+        'font.size': 14 if bold else 12,
         # 'pdf.fonttype': 3,
-        'font.weight': 'normal',
+        'font.weight': 'bold' if bold else 'normal',
         # 'pdf.fonttype': 42,
         # 'ps.fonttype': 42,
         # 'ps.useafm': True,
         # 'pdf.use14corefonts': True,
         'axes.unicode_minus': False,
-        'axes.labelweight': 'normal',
-        'axes.labelsize': 'small',
-        'axes.titlesize': 'medium',
+        'axes.labelweight': 'bold' if bold else 'normal',
+        'axes.labelsize': 'medium' if bold else 'small',
+        'axes.titlesize': 'large' if bold else 'medium',
         'axes.linewidth': 1,
         'axes.grid': False,
         'grid.color': "k",
         'grid.linestyle': ":",
         'grid.alpha': 0.7,
-        'xtick.labelsize': 'small',
+        'xtick.labelsize': 'medium' if bold else 'small',
         'xtick.direction': 'out',
         'xtick.top': True,  # draw label on the top
         'xtick.bottom': True,  # draw label on the bottom
@@ -57,7 +57,7 @@ def set_mpl_params():
         'xtick.minor.bottom': True,  # draw x axis bottom minor ticks
         'xtick.minor.width': 1,  # draw x axis top major ticks
         'xtick.minor.size': 2,  # draw x axis top major ticks
-        'ytick.labelsize': 'small',
+        'ytick.labelsize': 'medium' if bold else 'small',
         'ytick.direction': 'out',
         'ytick.left': True,  # draw label on the top
         'ytick.right': True,  # draw label on the bottom
@@ -74,15 +74,15 @@ def set_mpl_params():
         'legend.frameon': True,
         'legend.loc': 'best',
         'legend.numpoints': 1,
-        'legend.fontsize': 'small',
+        'legend.fontsize': 'medium' if bold else 'small',
         'legend.framealpha': 1,
         'legend.scatterpoints': 3,
         'legend.edgecolor': 'inherit',
         'legend.facecolor': 'w',
         'mathtext.fontset': 'custom',
-        'mathtext.rm': 'Arial',
-        'mathtext.it': 'Arial:italic',
-        'mathtext.bf': 'Arial:bold'
+        'mathtext.rm': 'DejaVu Sans',
+        'mathtext.it': 'DejaVu Sans:italic',
+        'mathtext.bf': 'DejaVu Sans:bold'
     }
     matplotlib.rcParams.update(params)
 
@@ -164,7 +164,8 @@ def plot_single_rf(
     depth: np.ndarray or None = None, ax: plt.Axes = None,
     outputdir: str = None, pre_fix: str = None,
     post_fix: str = None, format: str = 'pdf', clean: bool = False,
-        std: np.ndarray = None, flipxy: bool = False):
+    std: np.ndarray = None, flipxy: bool = False, color: str = 'seismic',
+        show: bool = True, bold: bool = False):
     """Creates plot of a single receiver function
 
     Parameters
@@ -194,19 +195,36 @@ def plot_single_rf(
         If True, clears out all axes and plots RF only.
         Defaults to False.
     std: np.ndarray, optional
-            **Only if self.type == stastack**. Plots the upper and lower
-            limit of the standard deviation in the plot. Provide the std
-            as a numpy array (can be easily computed from the output of
-            :meth:`~pyglimer.rf.create.RFStream.bootstrap`)
+        **Only if self.type == stastack**. Plots the upper and lower
+        limit of the standard deviation in the plot. Provide the std
+        as a numpy array (can be easily computed from the output of
+        :meth:`~pyglimer.rf.create.RFStream.bootstrap`)
     flipxy: bool, optional
         Plot Depth/Time on the Y-Axis and amplitude on the x-axis. Defaults
         to False.
+    color: str, optional
+        Color-scale to use. Options are 'seismic', 'pyglimer', or 'mono'.
+        Defaults to 'seismic'.
+    show: bool, optional
+        Execute plt.show()? Defaults to True
 
      Returns
     -------
     ax : `matplotlib.pyplot.Axes`
     """
-    set_mpl_params()
+    set_mpl_params(bold)
+
+    if color == 'seismic':
+        colorp = (0.9, 0.2, 0.2)
+        colorn = (0.2, 0.2, 0.7)
+    elif color == 'pyglimer':
+        colorp = "#f7931e"
+        colorn = "#008edd"
+    elif color == 'mono':
+        colorp = 'k'
+        colorn = 'grey'
+    else:
+        raise ValueError(f'Unknown argument for color: {color}.')
 
     # Get figure/axes dimensions
     if ax is None:
@@ -248,17 +266,17 @@ def plot_single_rf(
             ax.plot(ydata+std, times, 'k--', lw=0.75)
             ax.fill_betweenx(
                 times, 0, ydata, where=ydata > 0,
-                interpolate=True, color=(0.9, 0.2, 0.2), alpha=.8)
+                interpolate=True, color=colorp, alpha=.8)
             ax.fill_betweenx(
                 times, 0, ydata, where=ydata < 0,
-                interpolate=True, color=(0.2, 0.2, 0.7), alpha=.8)
+                interpolate=True, color=colorn, alpha=.8)
         else:
             ax.fill_betweenx(
                 times, 0, ydata, where=ydata > 0,
-                interpolate=True, color=(0.9, 0.2, 0.2), alpha=.8)
+                interpolate=True, color=colorp, alpha=.8)
             ax.fill_betweenx(
                 times, 0, ydata, where=ydata < 0,
-                interpolate=True, color=(0.2, 0.2, 0.7), alpha=.8)
+                interpolate=True, color=colorn, alpha=.8)
         ax.plot(ydata, times, 'k', lw=0.75)
 
         # Set limits
@@ -279,14 +297,14 @@ def plot_single_rf(
             ax.plot(times, ydata-std, 'k--', lw=0.75)
             ax.plot(times, ydata+std, 'k--', lw=0.75)
             ax.fill_between(times, 0, ydata, where=ydata > 0,
-                            interpolate=True, color=(0.9, 0.2, 0.2), alpha=.8)
+                            interpolate=True, color=colorp, alpha=.8)
             ax.fill_between(times, 0, ydata, where=ydata < 0,
-                            interpolate=True, color=(0.2, 0.2, 0.7), alpha=.8)
+                            interpolate=True, color=colorn, alpha=.8)
         else:
             ax.fill_between(times, 0, ydata, where=ydata > 0,
-                            interpolate=True, color=(0.9, 0.2, 0.2), alpha=.8)
+                            interpolate=True, color=colorp, alpha=.8)
             ax.fill_between(times, 0, ydata, where=ydata < 0,
-                            interpolate=True, color=(0.2, 0.2, 0.7), alpha=.8)
+                            interpolate=True, color=colorn, alpha=.8)
         ax.plot(times, ydata, 'k', lw=0.75)
 
         # Set limits
@@ -360,9 +378,8 @@ def plot_single_rf(
             + post_fix
             + f".{format}")
         plt.savefig(filename, format=format, transparent=True)
-    else:
+    elif show:
         plt.show()
-
     return ax
 
 
@@ -372,7 +389,8 @@ def plot_section(
     epilimits: list or tuple or None = None,
     scalingfactor: float = 2.0, ax: plt.Axes = None,
     line: bool = True, linewidth: float = 0.25, outputfile: str or None = None,
-        title: str or None = None, show: bool = True, format: str = None):
+    title: str or None = None, show: bool = True, format: str = None,
+        color: str = 'seismic', bold: bool = False):
     """Creates plot of a receiver function section as a function
     of epicentral distance.
 
@@ -407,13 +425,28 @@ def plot_section(
     clean: bool
         If True, clears out all axes and plots RF only.
         Defaults to False.
+    color: str, optional
+        Color-scale to use. Options are 'seismic', 'pyglimer', or 'mono'.
+        Defaults to 'seismic'.
 
      Returns
     -------
     ax : `matplotlib.pyplot.Axes`
 
     """
-    set_mpl_params()
+    set_mpl_params(bold)
+
+    if color == 'seismic':
+        colorp = (0.9, 0.2, 0.2)
+        colorn = (0.2, 0.2, 0.7)
+    elif color == 'pyglimer':
+        colorp = "#f7931e"
+        colorn = "#008edd"
+    elif color == 'mono':
+        colorp = 'k'
+        colorn = 'grey'
+    else:
+        raise ValueError(f'Unknown argument for color: {color}.')
 
     # Create figure if no axes is specified
     if ax is None:
@@ -444,11 +477,11 @@ def plot_section(
             + rf.stats.distance
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
                          where=rftmp < rf.stats.distance,
-                         interpolate=True, color=(0.2, 0.2, 0.7),
+                         interpolate=True, color=colorn,
                          zorder=-_i, alpha=.8)
         ax.fill_betweenx(times, rf.stats.distance, rftmp,
                          where=rftmp > rf.stats.distance,
-                         interpolate=True, color=(0.9, 0.2, 0.2),
+                         interpolate=True, color=colorp,
                          zorder=-_i - 0.1, alpha=.8)
         if line:
             ax.plot(rftmp, times, 'k', lw=linewidth, zorder=-_i + 0.1)
@@ -493,11 +526,11 @@ def plot_section(
 
 def combined_single_station_plot(
     rfst, stack, ylim: Tuple[float, float] = None, std: np.ndarray = None,
-    scalingfactor: float = 6, outputfile: str = None, fmt: str = None,
-        title: str = None):
-    set_mpl_params()
+    scalingfactor: float = 6, outputfile: str = None, fmt: str = None, dpi=300,
+        title: str = None, color: str = 'seismic', bold: bool = False):
+    set_mpl_params(bold)
 
-    fig, _ = plt.subplots(
+    fig, (ax0, ax1) = plt.subplots(
         1, 2, gridspec_kw={'width_ratios': [1, 2]}, figsize=(10, 10))
     if title:
         fig.suptitle(title, fontsize=16, fontweight='bold')
@@ -505,9 +538,11 @@ def combined_single_station_plot(
     # no space between panels
     plt.subplots_adjust(wspace=0, hspace=0)
 
-    ax0 = plt.subplot(121)
-    plot_single_rf(stack, flipxy=True, std=std, ax=ax0)
-    plt.title('Stack')
+    # ax0 = plt.subplot(121)
+    plot_single_rf(
+        stack, flipxy=True, std=std, ax=ax0, color=color, show=False,
+        bold=bold)
+    ax0.set_title('Stack')
 
     # Full Box
     ax0.spines['right'].set_visible(True)
@@ -522,20 +557,23 @@ def combined_single_station_plot(
         txt.remove()
 
     # Section plot
-    ax1 = plt.subplot(122, sharey=ax0)
+    # ax1 = plt.subplot(122, sharey=ax0)
     ax1 = plot_section(
         rfst, line=False, scalingfactor=scalingfactor, timelimits=ylim, ax=ax1,
-        show=False, title='Individual Receiver Functions')
+        show=False, title='Individual Receiver Functions', color=color,
+        bold=bold)
+    ax1.spines['right'].set_visible(True)
+    ax1.spines['top'].set_visible(True)
     ax1.set_xlabel(r'Epicentral Distance, $\Delta$ [$^{\circ}$]')
     ax1.tick_params(
         axis='both', which='both', right=False, top=False, labelleft=False,
         direction='inout')
     plt.ylabel(None)
     if outputfile is not None:
-        plt.savefig(outputfile, transparent=True, format=fmt)
+        plt.savefig(outputfile, transparent=True, format=fmt, dpi=dpi)
 
 
-def baz_hist(az, nbins):
+def baz_hist(az, nbins, bold=False):
     """
     Takes in backazimuth distribution and number of bins to compute
     the distribution of incoming angles.
@@ -552,6 +590,7 @@ def baz_hist(az, nbins):
     None
 
     """
+    set_mpl_params(bold)
 
     # Get axes (or create one)
     ax = plt.gca()
@@ -582,7 +621,7 @@ def baz_hist(az, nbins):
         label.set_position([pos[0], pos[1]-0.02])
 
 
-def rayp_hist(rayp, nbins, v=5.8):
+def rayp_hist(rayp, nbins, v=5.8, bold=False):
     """
     Takes in rayparameter distribution and number of bins to compute
     the distribution of incoming angles.
@@ -610,6 +649,7 @@ def rayp_hist(rayp, nbins, v=5.8):
     Default value 5.8 km/s taken from PREM.
 
     """
+    set_mpl_params(bold)
 
     # Compute the angle
     angle = np.arcsin(rayp*v)
@@ -648,10 +688,11 @@ def rayp_hist(rayp, nbins, v=5.8):
                    labeltop=False, labelbottom=True)
 
 
-def stream_dist(rayp: list or np.array, baz: list or np.array,
-                nbins: float = 50, v: float = 5.8, phase: str = 'P',
-                outputfile: None or str = None, format: str = "pdf",
-                dpi: int = 300, title: str = None):
+def stream_dist(
+    rayp: list or np.array, baz: list or np.array, nbins: float = 50,
+    v: float = 5.8, phase: str = 'P', outputfile: None or str = None,
+    format: str = "pdf", dpi: int = 300, title: str = None,
+        bold: bool = False):
     """Uses backazimuth and rayparameter histogram plotting tools to create
     combined overview over the Distribution of incident waves.
 
@@ -677,6 +718,8 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
         outputfile format
     dpi: int
         only used if file format is none vector.
+    bold: bool, optional
+        Print titles and labels larger
 
     """
     fig = plt.figure(figsize=(10, 4.5))
@@ -684,9 +727,9 @@ def stream_dist(rayp: list or np.array, baz: list or np.array,
         fig.suptitle(title, fontsize=19, fontweight='bold')
     plt.subplots_adjust(wspace=0.05)
     plt.subplot(121, projection="polar")
-    baz_hist(baz, nbins)
+    baz_hist(baz, nbins, bold=bold)
     plt.subplot(122, projection="polar")
-    rayp_hist(rayp, nbins, v=v)
+    rayp_hist(rayp, nbins, v=v, bold=bold)
 
     if outputfile:
         if format in ["pdf", "epsg", "svg", "ps"]:

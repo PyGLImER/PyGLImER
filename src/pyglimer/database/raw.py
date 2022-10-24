@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Friday, 18th September 2022 07:18:55 pm
+Last Modified: Thursday, 20th October 2022 10:51:46 am
 '''
 
 import fnmatch
@@ -536,24 +536,28 @@ def mseed_to_hdf5(
             statxml_to_hdf5(rawfolder, statloc)
         return
 
-    try:
-        st = read(av_mseed[0])
+    net, stat, _ = os.path.basename(av_mseed[0]).split('.')
 
-    except obspy.io.mseed.InternalMSEEDError:
-        # broken mseed
-        logger = logging.getLogger('pyglimer.request')
-        logger.warning(f'File {av_mseed[0]} is corrupt. Skipping this file..')
-        os.remove(av_mseed[0])
-        mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
-
-    # Get network and station
-    net = st[0].stats.network
-    stat = st[0].stats.station
 
     h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
 
     # Now, read all available files for this station
-    mseeds = glob.glob(os.path.join(rawfolder, '*', f'{net}.{stat}.mseed'))
+    mseeds = os.path.join(rawfolder, '*', f'{net}.{stat}.mseed')
+    try:
+        st = read(mseeds)
+    except obspy.io.mseed.InternalMSEEDError:
+        # Read each of them and remove the broken files
+        st = Stream()
+        for mseed in glob.glob(mseeds):
+            try:
+                st.extend(read(mseed))
+            except obspy.io.mseed.InternalMSEEDError:
+                logger = logging.getLogger('pyglimer.request')
+                logger.warning(
+                    f'File {mseed} is corrupt. Skipping this file..')
+                os.remove(mseed)
+        if not st.count():
+            mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
 
     # Create table of new contents
     new_cont = {}
@@ -619,14 +623,17 @@ def statxml_to_hdf5(
     av_xml = glob.glob(os.path.join(statloc, '*.xml'))
 
     for xml in av_xml:
-        inv = read_inventory(xml)
-        net = inv[0].code
-        stat = inv[0][0].code
-        h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
-        with RawDatabase(h5_file) as rdb:
-            rdb.add_response(inv)
-            os.remove(xml)
-
+        try:
+            inv = read_inventory(xml)
+            net = inv[0].code
+            stat = inv[0][0].code
+            h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
+            with RawDatabase(h5_file) as rdb:
+                rdb.add_response(inv)
+                os.remove(xml)
+        except Exception as e:
+            logging.warning(f'Station XML could not be added to h5 file. {e}')
+      
 
 def save_raw_DB_single_station(
         network: str, station: str, saved: dict,

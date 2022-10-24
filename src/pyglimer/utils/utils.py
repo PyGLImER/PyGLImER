@@ -11,7 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 18th September 2022 07:18:30 pm
+Last Modified: Monday, 26th September 2022 10:45:48 am
 '''
 
 import logging
@@ -167,8 +167,9 @@ def __client__loop__(
 
         stat_inv = client.get_stations_bulk(
             bulk, level='response')
-
-    except (header.FDSNNoDataException, header.FDSNException, ValueError) as e:
+    except (
+        header.FDSNNoDataException, header.FDSNException, ValueError,
+            TypeError) as e:
         logger.warning(str(e))
         logger.warning(f"--> {bulk}")
         return  # wrong client
