@@ -32,7 +32,7 @@
   # If so insert path+filename here.
   evtcat: None
   # earliest event
-  starttime: '2009-01-1 00:00:00.0'
+  starttime: '2009-06-1 00:00:00.0'
   # latest event
   endtime: '2011-12-31 00:00:00.0'
   # Minumum Magnitude

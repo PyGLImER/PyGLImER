@@ -278,7 +278,8 @@ omitted." % path, category=UserWarning)
             yield st
 
     def content_dict(self):
-        """Returns a dictionary with the following structure. Not actively used.
+        """
+        Returns a dictionary with the following structure. Not actively used.
 
         .. code::
 
