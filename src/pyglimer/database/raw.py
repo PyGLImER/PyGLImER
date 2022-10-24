@@ -102,7 +102,8 @@ class DBHandler(h5py.File):
         ds.attrs['content'] = str(content)
 
     def add_waveform(
-        self, data: tp.Union[Trace, Stream], evt_id: tp.Union[UTCDateTime,str],
+            self, data: tp.Union[Trace, Stream],
+            evt_id: tp.Union[UTCDateTime, str],
             tag: str = 'raw'):
         """
         Add receiver function to the hdf5 file. The data can later be accessed
@@ -538,7 +539,6 @@ def mseed_to_hdf5(
 
     net, stat, _ = os.path.basename(av_mseed[0]).split('.')
 
-
     h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
 
     # Now, read all available files for this station
@@ -718,121 +718,6 @@ def save_raw_DB_single_station(
                 sslst = slst.select(location=filtloc)
 
                 # This might actually be empty if so, let's just skip
-                if sslst.count() == 0:
-                    print(f"No data for {net}.{stat} and "
-                          f"event {evt.resource_id}")
-                    continue
-
-                write_st_to_ds(ds, sslst, evt_id)
-
-                # Add substream to stream for content update
-                outst += sslst
-                event_ids.append(evt_id)
-
-            except Exception as e:
-                logger.error(e)
-
-        # Create table of new contents
-        new_cont = {}
-        for tr, _evt_id in zip(outst, event_ids):
-            new_cont.setdefault(tr.stats.channel, [])
-            new_cont[tr.stats.channel].append(_evt_id)
-
-        # Get old table of contents
-        old_cont = ds._get_table_of_contents()
-
-        # Extend the old table of contents
-        for k, v in old_cont.items():
-            try:
-                new_cont[k].extend(v)
-            except KeyError:
-                new_cont[k] = v
-
-        # Redefine the table of contents.
-        ds._define_content(new_cont)
-
-
-def save_raw(
-        saved: dict, st: Stream, rawloc: str, inv: Inventory):
-    """
-    A variation of the above function that will open the ASDF file once and
-    write
-    all traces and then close it afterwards
-    Save the raw waveform data in the desired format.
-    The point of this function is mainly that the waveforms will be saved
-    with the correct associations and at the correct locations.
-
-    W are specifically writing event by event streams, so that we don't loose
-    parts that are already downloaded!
-
-    :param saved: Dictionary holding information about the original streams
-        to identify them afterwards.
-    :type saved: dict
-    :param st: obspy stream holding all data (from various stations)
-    :type st: Stream
-    :param rawloc: Parental directory (with phase) to save the files in.
-    :type rawloc: str
-    :param inv: The inventory holding all the station information
-    :type inv: Inventory
-    """
-    # Get logger
-    logger = logging.getLogger('pyglimer.request')
-
-    # Filename of the station to be opened.
-    fname = '%s.%s.h5' % (network, station)
-
-    # Just use the same name
-    event_ids = []
-    with RawDatabase(os.path.join(rawloc, fname)) as ds:
-
-        # Inventory should be saved once to the the station file
-        sinv = inv.select(network=network, station=station)
-        ds.add_response(sinv)
-
-        # Number of events
-        N = len(saved['event'])
-        Ns = len(str(N))
-        # Events should not be added because it will read the whole
-        # catalogue every single time!
-        outst = Stream()
-
-        for _i, (evt, startt, endt, net, stat, chan) in enumerate(zip(
-            saved['event'], saved['startt'], saved['endt'], saved['net'],
-                saved['stat'], saved['chan'])):
-
-            # Log stuff
-            logger.debug(
-                f'{net}.{stat}..{chan}: Processing #{_i+1:>{Ns}d}/{N}')
-
-            # Get event id save string
-            o = (evt.preferred_origin() or evt.origins[0])
-            evt_id = pu.utc_save_str(o.time)
-
-            # earlier we downloaded all locations, but we don't really want
-            # to have several, so let's just keep one
-            try:
-
-                # Grab only single station from stream (should be only one...)
-                sst = st.select(network=net, station=stat, channel=chan)
-
-                # This might actually be empty if so, let's just skip
-                if sst.count() == 0:
-                    logger.debug(f'No trace of {net}.{stat} in Stream.')
-                    continue
-
-                # This must assume that there is no overlap
-                slst = sst.slice(startt, endt)
-
-                if slst.count() == 0:
-                    print(f"No data for {net}.{stat} and "
-                          f"event {evt.resource_id}")
-                    continue
-
-                # Only write the prevelant location
-                locs = [tr.stats.location for tr in slst]
-                filtloc = max(set(locs), key=locs.count)
-                sslst = slst.select(location=filtloc)
-
                 if sslst.count() == 0:
                     print(f"No data for {net}.{stat} and "
                           f"event {evt.resource_id}")
