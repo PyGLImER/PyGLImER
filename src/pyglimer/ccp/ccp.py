@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 30th May 2022 04:17:33 pm
+Last Modified: Monday, 24th October 2022 05:05:36 pm
 '''
 
 # !/usr/bin/env python3
@@ -651,10 +651,15 @@ code if you want to filter by station")
             # get new MPI compatible loggers
             self.logger = create_mpi_logger(self.logger, rank)
             for ii in ind:
-                kk, jj, datal, datalm1, datalm2, N =\
-                    self._create_ccp_from_hdf5(
-                        streams[ii], multiple, append_pp, n_closest_points,
-                        vel_model, latb, lonb, filt)
+                try:
+                    kk, jj, datal, datalm1, datalm2, N =\
+                        self._create_ccp_from_hdf5(
+                            streams[ii], multiple, append_pp, n_closest_points,
+                            vel_model, latb, lonb, filt)
+                except KeyError:
+                    self.logger.warning(
+                        f'No Receiver Functions in file {streams[ii]}.')
+                    continue
                 self.N += N
                 if multiple:
                     self._unpack_output_multiple(
@@ -1870,7 +1875,7 @@ def init_ccp(
         raise NotImplementedError(
             'Multiple mode is not supported for phase S.')
 
-    if format in ('hdf5', 'h5', 'hdf'):
+    if format.lower() in ('hdf5', 'h5', 'hdf'):
         preproloc = None
         format = 'hdf5'
     db = StationDB(

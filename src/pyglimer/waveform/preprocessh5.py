@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Friday, 16th September 2022 02:06:05 pm
+Last Modified: Monday, 24th October 2022 05:08:25 pm
 '''
 
 from glob import glob
@@ -257,11 +257,12 @@ def _preprocessh5_single(
                     rfdb._add_known_waveform_data(ret, rej)
                 rflogger.info('..written.')
                 rf.clear()
-    rflogger.info('Writing to file %s....' % outf)
-    with RFDataBase(outf) as rfdb:
-        rfdb.add_rf(rf)
-        rfdb._add_known_waveform_data(ret, rej)
-    rflogger.info('..written.')
+    if rf.count():
+        rflogger.info('Writing to file %s....' % outf)
+        with RFDataBase(outf) as rfdb:
+            rfdb.add_rf(rf)
+            rfdb._add_known_waveform_data(ret, rej)
+        rflogger.info('..written.')
     rf.clear()
 
 
