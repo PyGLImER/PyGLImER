@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Monday, 24th October 2022 07:18:26 pm
+Last Modified: Tuesday, 25th October 2022 01:36:57 pm
 '''
 
 import fnmatch
@@ -284,7 +284,7 @@ omitted." % path, category=UserWarning)
         .. code::
 
             dict
-            ├── raw_recording
+            ├── raw
             │   └── YP
             │       └── NE11
             │           ├── 2009261T120020.8
@@ -308,7 +308,7 @@ omitted." % path, category=UserWarning)
         .. code::
 
             dict
-            ├── raw_recording
+            ├── raw
             │   └── YP
             │       └── NE11
             │           ├── 2009261T120020.8
@@ -761,7 +761,7 @@ def write_st_to_ds(
         st = resample_or_decimate(st, 10, filter=False)
 
     # Add waveforms and stationxml
-    ds.add_waveform(st, evt_id, tag='raw_recording')
+    ds.add_waveform(st, evt_id, tag='raw')
 
 
 def write_st(
@@ -804,7 +804,7 @@ def write_st(
             # Events should not be added because it will read the whole
             # catalogue every single time!
 
-            ds.add_waveform(subst, evt_id, tag='raw_recording')
+            ds.add_waveform(subst, evt_id, tag='raw')
             ds.add_response(statxml)
             # If there are still problems, we will have
             # to check whether they are similar probelms to add event
