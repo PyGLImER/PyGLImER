@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Monday, 24th October 2022 05:05:36 pm
+Last Modified: Tuesday, 25th October 2022 03:51:42 pm
 '''
 
 # !/usr/bin/env python3
@@ -629,7 +629,7 @@ code if you want to filter by station")
         """
         # note that streams are actually files - confusing variable name
         if mc_backend.lower() == 'joblib':
-            out = Parallel(n_jobs=1, backend='multiprocessing')(
+            out = Parallel(n_jobs=-1, backend='multiprocessing')(
                 delayed(self._create_ccp_from_hdf5)(
                     f, multiple, append_pp, n_closest_points, vel_model,
                     latb, lonb, filt)

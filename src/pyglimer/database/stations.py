@@ -12,7 +12,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Monday, 30th May 2022 04:29:39 pm
+Last Modified: Tuesday, 25th October 2022 03:50:51 pm
 '''
 
 import fnmatch
@@ -174,7 +174,7 @@ class StationDB(object):
             'code': [], 'network': [], 'station': [], 'lat': [], 'lon': [],
             'elevation': []}
         for f in glob.glob(os.path.join(
-                self.dir, '**', '*.*.h5'), recursive=True):
+                self.dir, self.phase, '*.*.h5'), recursive=True):
             net, stat, _ = os.path.basename(f).split('.')
             # For now, we only do coordinates. Never used anything else anyways
             with RFDataBase(f, mode='r') as rfdb:
@@ -187,7 +187,6 @@ class StationDB(object):
             data['lat'].append(lat)
             data['lon'].append(lon)
             data['elevation'].append(el)
-
         return pd.DataFrame.from_dict(data)
 
     def _create_from_info(self) -> pd.DataFrame:
