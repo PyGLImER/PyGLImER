@@ -11,15 +11,16 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Friday, 6th May 2022 01:18:05 pm
+Last Modified: Monday, 26th September 2022 10:45:48 am
 '''
 
 import logging
 import os
-from threading import Event
-from typing import List, Tuple
+from obspy.core.event.event import Event
+import typing as tp
+from typing import List, Tuple, Optional
 from warnings import warn
-
+import psutil
 import numpy as np
 from joblib import Parallel, delayed
 from obspy.clients.fdsn import Client, header
@@ -28,8 +29,9 @@ from obspy.core.inventory.inventory import Inventory
 from obspy.core.stream import Stream, Trace
 from obspy.core.utcdatetime import UTCDateTime
 
-from pyglimer.database.asdf import write_st
+from pyglimer.database.raw import save_raw_DB_single_station, write_st
 from pyglimer.rf.create import RFStream, RFTrace
+# from pyglimer.database.asdf import save_raw_single_station_asdf
 
 from .roundhalf import roundhalf
 
@@ -40,6 +42,10 @@ log_lvl = {
     'WARNING': logging.WARNING,
     'CRITICAL': logging.CRITICAL,
     'ERROR': logging.ERROR}
+
+
+def utc_save_str(utc: UTCDateTime):
+    return UTCDateTime(round(utc.timestamp)).format_fissures()[:-6]
 
 
 def dt_string(dt: float) -> str:
@@ -99,7 +105,47 @@ def join_inv(invlist=List[Inventory]) -> Inventory:
     return inv
 
 
-def __client__loop__(client: str or Client, statloc: str, bulk: list):
+def check_UTC_overlap(
+        start: List[UTCDateTime], end: List[UTCDateTime]) -> List[bool]:
+    """Checks a list of starttimes and endtimes for overlap
+
+    Parameters
+    ----------
+    start : List[UTCDateTime]
+        List of UTCDatetime starttimes
+    end : List[UTCDateTime]
+        List of UTCDateTime endtimes
+
+    Returns
+    -------
+    List[bool]
+        List of booleans. If True no overlap, if False overlap
+    """
+
+    # Initiate list saying there is no overlap
+    check = len(start)*[True]
+
+    for _i, (_start, _end) in enumerate(zip(start, end)):
+
+        # Loop over same array to check whether there is overlap in any of
+        # the windows.
+        for _j, (_startc, _endc) in enumerate(zip(start, end)):
+
+            # Don't want to compute overlap of the same window
+            if _j == _i:
+                continue
+
+            # Check whether start or endtime of another window is in the range
+            if (_start < _startc and _startc < _end) \
+                    or (_start < _endc and _endc < _end):
+
+                check[_i] = False
+
+    return check
+
+
+def __client__loop__(
+        client: str or Client, statloc: str, bulk: list) -> Inventory:
     """
     Download station information from specified client and for the
     specified bulk list.
@@ -116,62 +162,321 @@ def __client__loop__(client: str or Client, statloc: str, bulk: list):
     logger = logging.getLogger('pyglimer.request')
 
     try:
+
         if not isinstance(client, Client):
             client = Client(client)
+
         stat_inv = client.get_stations_bulk(
             bulk, level='response')
-    except (header.FDSNNoDataException, header.FDSNException, ValueError) as e:
+    except (
+        header.FDSNNoDataException, header.FDSNException, ValueError,
+            TypeError) as e:
         logger.warning(str(e))
-        logger.debug(f"{bulk}")
+        logger.warning(f"--> {bulk}")
         return  # wrong client
         # ValueError is raised for querying a client without station service
+
     for network in stat_inv:
+
         netcode = network.code
+
         for station in network:
+
             statcode = station.code
+
             logger.debug(f"{netcode}.{statcode}")
+
             out = os.path.join(statloc, '%s.%s.xml' % (netcode, statcode))
+
             stat_inv.select(network=netcode, station=statcode).write(
                 out, format="STATIONXML")
+
     return stat_inv
 
 
-def __client__loop_wav__(
-    client: str, rawloc: str, bulk: list, saved: dict, saveasdf: bool,
-        inv: Inventory):
-    """
-    Download waveforms from specified client and for the
-    specified bulk list.
+def chunkdict(d: dict, chunksize) -> list:
+    """Chunks upd dictionary with values into list of dictionaries where
+    each dictionary has chunksize or less entries.
 
-    :param client: FDSN client to use
-    :type client: str or obspy.fdsn.clients.Client
-    :param rawloc: Location in which the waveforms are to be saved
-    :type rawloc: str
-    :param bulk: Bulk list to described the queried download.
-    :type bulk: list
-    :param saved: Dictionary holding information about each request and
-        their associated events.
-    :type saved: dict
-    :param saveasdf: True if the desired output format will be asdf.
-    :type saveasdf: bool
-    :param inv: The inventory for all downloaded stations
-    :type inv: obspy.Inventory
+    Parameters
+    ----------
+    d : dict
+        dictionary of lists
+    chunksize : int
+        number of elements per list in dictionary
+
+    Returns
+    -------
+    list
+        returns a list of dictionaries subsets of lists in the original
+        dictionary
     """
+
+    #
+    tempd = dict()
+    for k, v in d.items():
+        tempd[k] = list(chunks(v, chunksize))
+
+    key = list(d.keys())[0]
+    Nchunk = len(tempd[key])
+
+    out = []
+
+    for i in range(Nchunk):
+        subd = dict()
+        for k, v in tempd.items():
+            subd[k] = v[i]
+        out.append(subd)
+
+    return out
+
+
+def save_stream(
+        st: Stream, rawloc: str, saveh5: bool, saved: dict, inv: Inventory,
+        network: tp.Union[str, None] = None,
+        station: tp.Union[str, None] = None):
+    """Saves a stream to either mseed or HDF5 format depending on flag, and the
+    event-channel dictionary ``saved`` which with created in a parent function.
+
+    Parameters
+    ----------
+    st : Stream
+        stream to save
+    rawloc : str
+        path to database raw waveforms databases
+    saveh5 : bool
+        whether to save hdf5 or mseed
+    saved : dict
+        event-channel dictionary that contains the bulk requests made
+    inv : Inventory
+        inventory
+    network : str | None, optional
+        network string, by default None
+    station : str | None, optional
+        station string, by default None
+    """
+
+    # Save stuff in hdf5 format (custom format that is provided by pyglimer)
+    if saveh5:
+
+        # Make sure HDF5 file is only opened once
+        if (network is not None) and (station is not None):
+            save_raw_DB_single_station(
+                network, station, saved, st, rawloc, inv)
+
+        # Opens and closes HDF5 file for all traces belonging to one station.
+        # It's more versatile, but less efficient
+        else:
+            save_raw(saved, st, rawloc, inv, True)
+
+    # Save minised
+    else:
+        save_raw(saved, st, rawloc, inv, False)
+
+
+def __download_sub__(client: str, saved: dict) -> Stream:
+    """Takes in bulk requests, downloads them, and and returns stream of
+    traces, empty stream or raises an error.
+
+    Parameters
+    ----------
+    client : str
+        Name of the client that data is requested from
+    saved : dict
+        dictionary with event-channel data and bulk requests
+
+    Returns
+    -------
+    Stream
+        empty or full
+
+    Raises
+    ------
+    ValueError
+        if request is faulty or another error was thrown
+    """
+
     logger = logging.getLogger('pyglimer.request')
+
+    # Get bulk and flatten
+    bulk = []
+
+    # Get full bulk list
+    for _b in saved['bulk']:
+        bulk.extend(_b)
+
+    # ## The Block here is to debug the actual request made #####
+    #  But for code and output purposes it is unecessary to log.
+    #  I would just keep it for future debugging
+    # for _net, _sta, _cha, _st, _et, _event, _b in zip(
+    #         saved['net'], saved['stat'], saved['chan'],
+    #         saved['startt'], saved['endt'], saved['event'], saved['bulk']):
+
+    #     # Get event id
+    #     origin = (_event.preferred_origin() or _event.origins[0])
+    #     e_id = utc_save_str(origin.time)
+
+    #     # Print relevant debugging information
+    #     print(f"{_net}.{_sta}..{_cha}: {_st} -- {_et} --> {e_id}")
+    #     for __b in _b:
+    #         print(f"^-->{__b}")
+    # #############################################################
+
+    # Sort bulk request.
+    bulk.sort()
+
     try:
         if not isinstance(client, Client):
             client = Client(client)
+
         st = client.get_waveforms_bulk(bulk)
+
+        logger.info(
+            f'Downloaded {st.count()} traces from Client {str(client)}.')
+
+        return st
+
     except (header.FDSNNoDataException, header.FDSNException, ValueError) as e:
-        logger.warning(str(e))
-        return  # wrong client
-        # ValueError is raised for querying a client without station service
-    logger.info(f'Downloaded {st.count()} traces from Client {str(client)}.')
-    save_raw(saved, st, rawloc, inv, saveasdf)
+        if 'HTTP Status code: 204' in str(e):
+            logger.debug('--------- NO DATA FOR REQUESTS: ----------------')
+            for __bulk in bulk:
+                logger.debug(f"||    {__bulk}")
+            logger.debug('------------------------------------------------')
+            return Stream()
+        elif isinstance(e, ValueError):
+            print(str(e))
+        else:
+            print(str(e))
+            raise ValueError('See Error above.')
+            # ValueError is raised for querying a client without
+            # station service
+
+
+def __client__loop_wav__(
+    client: str, rawloc: str, saved: dict, saveh5: bool,
+        inv: Inventory, network: Optional[str] = None,
+        station: Optional[str] = None, parallel: bool = False):
+    """ Loops over event-channel requests and launches parallel or single
+    threaded downloads depending on the input parameter ``parallel``. The
+    Single threaded type is used if station downloads are parallelized (a
+    parent function) and parallel is used when a single station is downloaded
+    and events can be parallelized.
+
+    Parameters
+    ----------
+    client : str
+        client to download from, e.g. "IRIS".
+    rawloc : str
+        database location for the raw data
+    saved : dict
+        dict containing channel-event info and bulk requests
+    saveh5 : bool
+        whether to save in HDF5 or not
+    inv : Inventory
+        inventory of the stations
+    network : Optional[str], optional
+        network string, by default None
+    station : Optional[str], optional
+        station string, by default None
+    parallel : bool, optional
+        whether to download requests in parallel or not, by default False
+
+    """
+
+    logger = logging.getLogger('pyglimer.request')
+
+    # Making sure that all chunk sizes are the same
+    # This has become the equivalent of number of traces, unless there are
+    # multiple locations available.
+    chunksize = 5000
+
+    # Get one key to get length of lists in dictionaries.
+    key = list(saved.keys())[0]
+    N0 = len(saved[key])
+
+    # Chunkify data and bulkstrings
+    if N0 > chunksize:
+        saved = chunkdict(saved, chunksize)
+
+    # Request too small to parallelize
+    else:
+        # Create single chunk
+        saved = [saved, ]
+
+        # Set parallel to false because it is unnecessary
+        parallel = False
+
+    # Number of Total chunks to be downloaded
+    N = len(saved)
+
+    logger.debug("Downloading ...")
+
+    # Get number of cores available
+    if parallel:
+
+        # Get number of available CPUs
+        NCPU = psutil.cpu_count(logical=False) - 2
+
+        # Turn off parallelism if c=number of available cores is 1
+        if NCPU <= 1:
+            parallel = False
+
+        # Limit CPUs to four so that the FDSN server is not overwhelmed
+        elif NCPU > 4:
+            NCPU = 4
+
+        # Splitting the total number of chunks of NCPU, so that NCPU chunks
+        # are downloaded simulatenously
+        saved = list(chunks(saved, NCPU))
+
+        counter = 0
+        logger.debug(
+            f"    Downloading {N} chunks with each chunk  "
+            f"<= 100 requests dowloaded in Parallel")
+
+        with Parallel(n_jobs=NCPU, backend='multiprocessing') as PARALLEL:
+
+            # Loop of chunk subsets
+            for _i, _saved in enumerate(saved):
+
+                counter += len(_saved)
+                logger.debug(f"    Downloading {counter}/{N} chunks")
+
+                # Download streams in parallel
+                streams = PARALLEL(
+                    delayed(__download_sub__)(client, __saved)
+                    for __saved in _saved)
+
+                # Save streams one by one
+                for st, __saved in zip(streams, _saved):
+
+                    # If stream is empty skip
+                    if len(st) == 0:
+                        continue
+
+                    # Save stream to mseed ot h5
+                    save_stream(
+                        st, rawloc, saveh5, __saved, inv, network, station)
+
+    # Get stuff single threadedly
+    else:
+
+        streams = []
+        for i, _saved in enumerate(saved):
+
+            logger.debug(f"    --> Bulk chunk {i}/{N}")
+
+            st = __download_sub__(client, _saved)
+
+            if st is None or len(st) == 0:
+                continue
+
+            # Save stream to mseed ot h5
+            save_stream(st, rawloc, saveh5, _saved, inv, network, station)
 
 
 def save_raw(
-        saved: dict, st: Stream, rawloc: str, inv: Inventory, saveasdf: bool):
+        saved: dict, st: Stream, rawloc: str, inv: Inventory, saveh5: bool):
     """
     Save the raw waveform data in the desired format.
     The point of this function is mainly that the waveforms will be saved
@@ -206,7 +511,7 @@ def save_raw(
             locs = [tr.stats.location for tr in sst]
             filtloc = max(set(locs), key=locs.count)
             sslst = slst.select(location=filtloc)
-            if saveasdf:
+            if saveh5:
                 sinv = inv.select(net, stat, starttime=startt, endtime=endt)
                 write_st(sslst, evt, rawloc, sinv)
             else:
@@ -299,8 +604,9 @@ def get_multiple_fdsn_clients(
 
 
 def create_bulk_str(
-    networks: str or List[str], stations: str or List[str], location: str,
-    channel: str, t0: UTCDateTime or str or List[UTCDateTime],
+        networks: tp.Union[str, List[str]], stations: tp.Union[str, List[str]],
+        location: str, channel: tp.Union[str, List[str]],
+        t0: UTCDateTime or str or List[UTCDateTime],
         t1: UTCDateTime or str or List[UTCDateTime]) -> List[tuple]:
     """
     Function to generate the input for the obspy functions:
@@ -326,6 +632,7 @@ def create_bulk_str(
 
         All parameters accept wildcards.
     """
+
     # request object
     bulk = []
     if isinstance(t0, str) and t0 != '*':

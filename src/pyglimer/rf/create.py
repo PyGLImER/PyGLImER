@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Monday, 30th May 2022 02:35:04 pm
+Last Modified: Wednesday, 19th October 2022 11:28:13 am
 
 
 **The file is split and has a second copyright disclaimer**
@@ -27,13 +27,11 @@ import json
 import logging
 from operator import itemgetter
 from typing import List, Tuple
-# from pkg_resources import resource_filename
 import warnings
 import os
 
 from geographiclib.geodesic import Geodesic
 from matplotlib import pyplot as plt
-# from matplotlib.ticker import ScalarFormatter, AutoMinorLocator
 import numpy as np
 from obspy import read, Stream, Trace, UTCDateTime
 from obspy.core import AttribDict
@@ -739,7 +737,8 @@ class RFStream(Stream):
         epilimits: list or tuple or None = None, scalingfactor: float = 2.0,
         ax: plt.Axes = None, line: bool = True, linewidth: float = 0.25,
         outputdir: str or None = None, title: str or None = None,
-            show: bool = True, format: str = 'pdf'):
+        show: bool = True, format: str = 'pdf', color: str = 'seismic',
+            bold: bool = False):
         """Creates plot of a receiver function section as a function
         of epicentral distance or single plot if len(RFStream)==1.
 
@@ -773,6 +772,11 @@ class RFStream(Stream):
         clean: bool
             If True, clears out all axes and plots RF only.
             Defaults to False.
+        color: str, optional
+            Color-scale to use. Options are 'seismic', 'pyglimer', or 'mono'.
+            Defaults to 'seismic'.
+        bold: bool, optional
+            Print titles and labels larger
 
         Returns
         -------
@@ -782,7 +786,8 @@ class RFStream(Stream):
         if self.count() == 1:
             # Do single plot
             ax = plot_single_rf(
-                self[0], tlim=lim, ax=ax, outputdir=outputdir, format=format)
+                self[0], tlim=lim, ax=ax, outputdir=outputdir, format=format,
+                color=color, bold=bold)
         else:
             if outputdir:
                 outputfile = os.path.join(outputdir, '%s%s' % (
@@ -793,12 +798,13 @@ class RFStream(Stream):
             ax = plot_section(
                 self, timelimits=lim, epilimits=epilimits,
                 scalingfactor=scalingfactor, line=line, linewidth=linewidth,
-                ax=ax, outputfile=outputfile, channel=channel, format=format)
+                ax=ax, outputfile=outputfile, channel=channel, format=format,
+                color=color, bold=bold)
         return ax
 
     def plot_distribution(
         self, nbins=50, phase="P", outputfile=None, format="pdf", dpi=300,
-            title: str = None):
+            title: str = None, bold: bool = False):
         """
         Plot back azimuth and rayparameter distributions.
 
@@ -816,6 +822,8 @@ class RFStream(Stream):
             outputfile format
         dpi : int, optional
             only used if file format is none vector.
+        bold: bool, optional
+            Print titles and labels larger
 
 
         Returns
@@ -847,7 +855,8 @@ class RFStream(Stream):
 
         stream_dist(
             np.array(rayp), np.array(baz), nbins=nbins, v=v,
-            outputfile=outputfile, format=format,  dpi=dpi, title=title)
+            outputfile=outputfile, format=format,  dpi=dpi, title=title,
+            bold=bold)
 
     def dirty_ccp_stack(
             self, dlon: float = 1.0, z_res: float = 1.0,
@@ -895,12 +904,12 @@ class RFStream(Stream):
         # Then, use a 3d histogram to create stacks, and create them quickly
         # Create
         logger.info("Computing Move-out correction")
-        self.moveout(vmodel=vmodel_file)
+        _, st = self.moveout(vmodel=vmodel_file)
 
         #
         logger.info("Getting locations corresponding to the traces")
         latitude, longitude, depth, rf = [], [], [], []
-        for _tr in self:
+        for _tr in st:
             latitude.extend(_tr.stats.pp_latitude)
             longitude.extend(_tr.stats.pp_longitude)
             depth.extend(_tr.stats.pp_depth)  # Doubt that it's saved like this
@@ -1322,7 +1331,8 @@ class RFTrace(Trace):
         self, lim: list or tuple or None = None,
         depth: np.ndarray or None = None, ax: plt.Axes = None,
         outputdir: str = None, format: str = 'pdf', clean: bool = False,
-            std: np.ndarray = None, flipxy: bool = False):
+        std: np.ndarray = None, flipxy: bool = False,
+            color: str = 'seismic', bold: bool = False):
         """Creates plot of a single receiver function
 
         Parameters
@@ -1350,6 +1360,11 @@ class RFTrace(Trace):
         flipxy: bool, optional
             Plot Depth/Time on the Y-Axis and amplitude on the x-axis. Defaults
             to False.
+        color: str, optional
+            Color-scale to use. Options are 'seismic', 'pyglimer', or 'mono'.
+            Defaults to 'seismic'.
+        bold: bool, optional
+            Print titles and labels larger
 
         Returns
         -------
@@ -1357,7 +1372,7 @@ class RFTrace(Trace):
         """
         ax = plot_single_rf(
             self, lim, depth=depth, ax=ax, outputdir=outputdir, clean=clean,
-            format=format, std=std, flipxy=flipxy)
+            format=format, std=std, flipxy=flipxy, color=color, bold=bold)
         return ax
 
     def write(self, filename, format, **kwargs):

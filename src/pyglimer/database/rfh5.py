@@ -8,13 +8,14 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Friday, 11th February 2022 01:06:08 pm
+Last Modified: Friday, 16th September 2022 02:47:40 pm
 '''
 
 import fnmatch
 import os
 import re
 from typing import Iterable, List, Tuple
+import logging
 import warnings
 
 import numpy as np
@@ -40,8 +41,8 @@ class DBHandler(h5py.File):
         :class:`~pyglimer.database.rfh5.RFDataBase` instead.**
 
     Child object of :class:`h5py.File` and inherets all its attributes and
-    functions in addition to functions that are particularly useful for noise
-    correlations.
+    functions in addition to functions that are particularly useful for
+    receiver functions.
     """
     def __init__(self, path, mode, compression):
         super(DBHandler, self).__init__(path, mode=mode)
@@ -98,7 +99,7 @@ class DBHandler(h5py.File):
             several traces.
         :type data: RFTrace or RFStream
         :param tag: The tag that the data should be saved under. By convention,
-            unstacked correlations are saved with the tag `'rf'`.
+            receiver functions are saved with the tag `'rf'`.
         :raises TypeError: for wrong data type.
         """
         if not isinstance(data, RFTrace) and\
@@ -260,7 +261,7 @@ omitted." % path, category=UserWarning)
 
 class RFDataBase(object):
     """
-    Base class to handle the hdf5 files that contain noise correlations.
+    Base class to handle the hdf5 files that contain receiver functions.
     """
     def __init__(
             self, path: str, mode: str = 'a', compression: str = 'gzip3'):
@@ -332,12 +333,12 @@ def all_traces_recursive(
     :param group: group to search through
     :type group: class:`h5py._hl.group.Group`
     :param stream: Stream to append the traces to
-    :type stream: CorrStream
+    :type stream: Stream
     :param pattern: pattern for the path in the hdf5 file, see fnmatch for
         details.
     :type pattern: str
     :return: Stream with appended traces
-    :rtype: CorrStream
+    :rtype: Stream
     """
     for v in group.values():
         if isinstance(v, h5py._hl.group.Group):
@@ -373,16 +374,15 @@ def convert_header_to_hdf5(dataset: h5py.Dataset, header: Stats):
                 header[key] = header[key].format_fissures()
             dataset.attrs[key] = header[key]
         except TypeError:
-            warnings.warn(
-                'The header contains an item of type %s. Information\
-            of this type cannot be written to an hdf5 file.'
-                % str(type(header[key])), UserWarning)
+            logging.debug(
+                f'The header contains an item of type {type(header[key])}.'
+                + 'Information of this type cannot be written to hdf5.')
             continue
 
 
 def read_hdf5_header(dataset: h5py.Dataset) -> Stats:
     """
-    Takes an hdf5 dataset as input and returns the header of the CorrTrace.
+    Takes an hdf5 dataset as input and returns the header of the Trace.
 
     :param dataset: The dataset to be read from
     :type dataset: h5py.Dataset

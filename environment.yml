@@ -10,14 +10,14 @@ dependencies:
   - joblib
   - matplotlib
   - numpy
-  - obspy>=1.3
+  - obspy>=1.3.1
   - OWSLib
   - pandas
   - pip
   - plotly
   - prov
   - psutil
-  - pyasdf
+  - h5py
   - pytest
   - python>=3.7
   - scipy<1.9

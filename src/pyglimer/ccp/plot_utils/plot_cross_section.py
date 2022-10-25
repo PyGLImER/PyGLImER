@@ -1,6 +1,5 @@
 # Basic
 from typing import Optional, Union, Iterable
-import matplotlib
 
 # External
 import numpy as np
@@ -14,7 +13,9 @@ from cartopy.mpl.geoaxes import GeoAxes, GeoAxesSubplot
 # Internal
 from pyglimer.ccp.plot_utils.plot_map import plot_map
 from pyglimer.ccp.plot_utils.plot_line_buffer import plot_line_buffer
-from pyglimer.ccp.plot_utils.midpointcolornorm import MidpointNormalize
+from pyglimer.ccp.plot_utils.midpointcolornorm import MidpointNormalize,\
+    StretchOutNormalize
+from pyglimer.plot.plot_utils import set_mpl_params
 
 
 def get_ax_coor(ax, lat, lon):
@@ -66,10 +67,16 @@ def plot_cross_section(
         minillum: int = 50,
         vmin: Optional[float] = None,
         vmax: Optional[float] = None,
+        low_clip: Optional[float] = None,
+        up_clip: Optional[float] = None,
         label: Optional[str] = None,
         rfcmap: str = "seismic",
         depthextent: Optional[Iterable] = None,
-        mapextent: Optional[Iterable] = None):
+        mapextent: Optional[Iterable] = None,
+        bold: bool = False,
+        outfile: Optional[str] = None,
+        format: Optional[str] = 'png',
+        dpi: Optional[int] = 300):
     """Plots a cross section for given waypoints. If no axes are given, the
     function will also create figures for the map and the cross section.
 
@@ -98,6 +105,12 @@ def plot_cross_section(
         minimum value of the cross section, by default None
     vmax : Optional[float], optional
         maximum value of the cross section, by default None
+    low_clip : Optional[float],
+        All values between lowclip and zero will be shown as
+        zero. By default None.
+    up_clip : Optional[float],
+        All values between upclip and zero will be shown as
+        zero. By default None.
     label : Optional[str], optional
         label to put in the corner of the cross section plot and the
         cross section waypoints on the map, by default None
@@ -125,9 +138,12 @@ def plot_cross_section(
         2021.04.21 20.00 (Lucas Sawade)
 
     """
+    if outfile and len(outfile.split('.')) > 1:
+        # infer format
+        format = outfile.split('.')[-1]
+        outfile = '.'.join(outfile.split('.')[:-1])
 
-    matplotlib.rcParams.update({'font.family': 'Arial'})
-
+    set_mpl_params(bold)
     # Get Cross section
     slat, slon, sdists, qlat, qlon, qdists, qz, qillum, qccp, epi_area = \
         ccp.get_profile(lat, lon, ddeg=ddeg)
@@ -139,7 +155,11 @@ def plot_cross_section(
         vmax = np.quantile(qccp[qccp > 0], 0.98)
 
     # Norm for the cross section
-    rfnorm = MidpointNormalize(vmin=vmin, vmax=vmax, midpoint=0.0)
+    if low_clip is None and up_clip is None:
+        rfnorm = MidpointNormalize(vmin=vmin, vmax=vmax, midpoint=0.0)
+    else:
+        rfnorm = StretchOutNormalize(
+            vmin=vmin, vmax=vmax, low=low_clip or .0, up=up_clip or .0)
     snorm = mcolors.Normalize(vmin=0, vmax=sdists[-1])
 
     # Set illumination boundaries for section plotting
@@ -183,7 +203,7 @@ def plot_cross_section(
                 c = plt.colorbar(
                     sc,
                     orientation='vertical', aspect=40, pad=0.025,
-                    fraction=0.05)
+                    fraction=0.05, shrink=.5)
                 c.set_label("Hitcount")
 
                 # Set colormap alpha manually
@@ -231,6 +251,15 @@ def plot_cross_section(
                 bbox=dict(facecolor='w', edgecolor='k'),
                 transform=geoax.transAxes, zorder=100)
 
+        if outfile:
+            if isinstance(geoax, GeoAxesSubplot):
+                mapfig = geoax.figure
+            elif isinstance(geoax, GeoAxes):
+                mapfig = geoax.fig
+            else:
+                mapfig = plt.gcf()
+            mapfig.savefig(f'{outfile}_map.{format}', format=format, dpi=dpi)
+
     # ############### Plot section ###################
 
     # Plot section
@@ -260,10 +289,10 @@ def plot_cross_section(
         cmap='Greys', norm=snorm,
         marker='o', edgecolor='k',
         zorder=10, clip_on=False)
-
     c = plt.colorbar(
-        rfim, orientation='vertical', aspect=40, pad=0.025, fraction=0.05)
-    c.set_label("A", rotation=0, font='Arial')
+        rfim, orientation='vertical', aspect=40, pad=0.025, fraction=0.05,
+        boundaries=np.linspace(vmin, vmax, 101), ticks=[vmin, 0, vmax])
+    c.set_label("A", rotation=0)
     plt.xlabel('Offset [$^\\circ$]')
     plt.ylabel('Depth [km]')
 
@@ -276,5 +305,7 @@ def plot_cross_section(
             fontdict=dict(fontsize='small'),
             bbox=dict(facecolor='none', edgecolor='none'),
             transform=ax.transAxes, zorder=100)
+    if outfile:
+        plt.savefig(f'{outfile}.{format}', format=format, dpi=dpi)
 
     return ax, geoax

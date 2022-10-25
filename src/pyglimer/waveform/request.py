@@ -15,13 +15,14 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Friday, 6th May 2022 02:19:37 pm
+Last Modified: Tuesday, 25th October 2022 12:34:06 pm
 '''
 import os
 from http.client import IncompleteRead
 from datetime import datetime
 import logging
-from typing import Iterable, Tuple
+import typing as tp
+from typing import Iterable, Tuple, List
 import warnings
 import time
 
@@ -45,16 +46,17 @@ class Request(object):
     time domain receiver functions."""
 
     def __init__(
-        self, proj_dir: str, raw_subdir: str, prepro_subdir: str,
-        rf_subdir: str, statloc_subdir: str, evt_subdir: str,
-        log_subdir: str, phase: str, rot: str, deconmeth: str,
-        starttime: UTCDateTime or str, endtime: UTCDateTime or str,
-        pol: str = 'v', minmag: float or int = 5.5,
+        self, proj_dir: str, raw_subdir: str, rf_subdir: str,
+        statloc_subdir: str, evt_subdir: str, log_subdir: str, phase: str,
+        rot: str, deconmeth: str, starttime: UTCDateTime or str,
+        endtime: UTCDateTime or str, prepro_subdir: str = None, pol: str = 'v',
+        minmag: float or int = 5.5,
         event_coords: Tuple[float, float, float, float] = None,
-        network: str = None, station: str = None,
+        network: tp.Union[str, List[str], None] = None,
+        station: tp.Union[str, List[str], None] = None,
         waveform_client: list = None, evtcat: str = None,
         continue_download: bool = False, loglvl: int = logging.WARNING,
-            format: str = 'hdf5', remove_response: bool = True):
+            format: str = 'hdf5', remove_response: bool = True, **kwargs):
         """
         Create object that is used to start the receiver function
         workflow.
@@ -66,7 +68,7 @@ class Request(object):
         :type raw_subdir: str
         :param prepro_subdir: Directory, in which to store the preprocessed
             waveform data (mseed). **Irrelevant if format is hdf5**.
-        :type prepro_subdir: str
+        :type prepro_subdir: str or None
         :param rf_subdir: Directory, in which to store the receiver functions
             in time domain (sac).
         :type rf_subdir: str
@@ -178,7 +180,14 @@ class Request(object):
         self.evtloc = os.path.join(proj_dir, evt_subdir)
         self.statloc = os.path.join(proj_dir, statloc_subdir)
         self.rawloc = os.path.join(proj_dir, raw_subdir, self.phase)
-        self.preproloc = os.path.join(proj_dir, prepro_subdir, self.phase)
+        if prepro_subdir is None and not self.h5:
+            raise ValueError(
+                'Prepro_subdir has to be defined if the output format is '
+                f'{format}.')
+        if prepro_subdir is None:
+            self.preproloc = None
+        else:
+            self.preproloc = os.path.join(proj_dir, prepro_subdir, self.phase)
         self.rfloc = os.path.join(proj_dir, rf_subdir, self.phase)
 
         # logger for the download steps

@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Friday, 6th May 2022 12:00:07 pm
+Last Modified: Tuesday, 25th October 2022 12:26:09 pm
 '''
 
 from glob import glob
@@ -25,11 +25,11 @@ from joblib import Parallel, delayed
 import obspy
 from obspy import Stream, UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
-from pyasdf import ASDFDataSet
 from tqdm.std import tqdm
 
 from pyglimer import constants
 from pyglimer.database.rfh5 import RFDataBase
+from pyglimer.database.raw import RawDatabase
 from pyglimer.utils.log import create_mpi_logger
 from .qc import qcp, qcs
 from .rotate import rotate_LQT_min, rotate_PSV
@@ -184,10 +184,10 @@ def _preprocessh5_single(
         ret = []
         rej = []
     rflogger.info(f'Processing Station {code}')
-    with ASDFDataSet(f, mode='r', mpi=False) as ds:
+    with RawDatabase(f, mode='r') as rdb:
         # get station inventory
         try:
-            inv = ds.waveforms[code].StationXML
+            inv = rdb.get_response(net, stat)
         except KeyError:
             logger.exception(
                 f'Could not find station inventory for Station {net}.{stat}')
@@ -198,9 +198,8 @@ def _preprocessh5_single(
         # thresholds
 
         # Which times are available as raw data?
-        t_raw = [
-            tr.stats.starttime for tr in ds.waveforms[code][
-                'raw_recording']]
+        t_raw = list(rdb._get_table_of_contents().values())[0]
+        t_raw = [UTCDateTime(t) for t in t_raw]
         t_raw_min = min(t_raw) - 600
         t_raw_max = max(t_raw) + 600
         # c_date = inv[0][0].creation_date
@@ -225,12 +224,17 @@ def _preprocessh5_single(
             except ValueError as e:
                 rflogger.debug(e)
                 continue
-            st = ds.get_waveforms(
-                net, stat, '*', '*', toa-tz, toa+ta, 'raw_recording')
-            if not st.count():
+
+            st = rdb.get_data(net, stat, ot)
+            st = st.slice(starttime=toa-tz, endtime=toa+ta)
+            if st.count() < 3:
                 logger.info(
-                    f'No traces found for Station {net}.{stat} and arrival '
-                    + f'time {toa}')
+                    f'Only {st.count()} traces found for Station {net}.{stat}'
+                    + f'and arrival time {toa}.')
+                continue
+            if st[0].stats.endtime - st[0].stats.starttime < tz+ta-20:
+                logger.warning(
+                    'Stream shorter than requested time window, skip.')
                 continue
             try:
                 rf_temp = __station_process__(
@@ -253,11 +257,12 @@ def _preprocessh5_single(
                     rfdb._add_known_waveform_data(ret, rej)
                 rflogger.info('..written.')
                 rf.clear()
-    rflogger.info('Writing to file %s....' % outf)
-    with RFDataBase(outf) as rfdb:
-        rfdb.add_rf(rf)
-        rfdb._add_known_waveform_data(ret, rej)
-    rflogger.info('..written.')
+    if rf.count():
+        rflogger.info('Writing to file %s....' % outf)
+        with RFDataBase(outf) as rfdb:
+            rfdb.add_rf(rf)
+            rfdb._add_known_waveform_data(ret, rej)
+        rflogger.info('..written.')
     rf.clear()
 
 
@@ -324,7 +329,6 @@ def __station_process__(
     # Is the data already processed?
     origin = (evt.preferred_origin() or evt.origins[0])
     ot_fiss = UTCDateTime(origin.time).format_fissures()
-    # ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]
 
     # Remove repsonse
     if remove_response:

@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Friday, 6th May 2022 11:58:54 am
+Last Modified: Friday, 21st October 2022 03:31:31 pm
 '''
 
 import fnmatch
@@ -140,14 +140,17 @@ def preprocess(
     for evtcat in evtcats:
 
         if client.lower() == 'joblib':
+            logger.debug('USING JOBLIB AS BACKEND')
             out = Parallel(n_jobs=-1, backend='multiprocessing')(
                 delayed(__event_loop)(
                     phase, rot, pol, event, taper_perc,
                     taper_type, model, logger, rflogger, eh, tz,
                     ta, statloc, rawloc, preproloc, rfloc, deconmeth,
-                    hc_filt, netrestr, statrestr, remove_response)
+                    hc_filt, netrestr, statrestr, remove_response,
+                    single_core=False)
                 for event in tqdm(evtcat))
         elif client.lower() == 'mpi':
+            logger.debug('USING MPI AS BACKEND')
             from mpi4py import MPI
             comm = MPI.COMM_WORLD
             rank = comm.Get_rank()
@@ -160,6 +163,7 @@ def preprocess(
             # get new MPI compatible loggers
             logger = create_mpi_logger(logger, rank)
             rflogger = logging.getLogger("%s.RF" % logger.name)
+            # rflogger.debug(f'Rank/Size: {rank}/{psize}')
             for ii in tqdm(ind):
                 __event_loop(
                     phase, rot, pol, evtcat[ii], taper_perc, taper_type,
@@ -169,6 +173,7 @@ def preprocess(
 
         # Use single core only
         elif client.lower() == 'single':
+            logger.debug('USING SINGLE CORE BACKEND')
             out = []
             for event in tqdm(evtcat):
                 out.append(
@@ -176,7 +181,8 @@ def preprocess(
                         phase, rot, pol, event, taper_perc,
                         taper_type, model, logger, rflogger, eh, tz,
                         ta, statloc, rawloc, preproloc, rfloc, deconmeth,
-                        hc_filt, netrestr, statrestr, remove_response))
+                        hc_filt, netrestr, statrestr, remove_response,
+                        single_core=True))
 
         else:
             raise NotImplementedError('Unknown client %s' % client)
@@ -229,7 +235,7 @@ def __event_loop(
     logger: logging.Logger, rflogger: logging.Logger, eh: bool, tz: float,
     ta: float, statloc: str, rawloc: str, preproloc: str, rfloc: str,
     deconmeth: str, hc_filt: float, netrestr: str, statrestr: str,
-        remove_response: bool):
+        remove_response: bool, single_core: bool):
     """
     Loops over each event in the event catalogue
     """
@@ -244,7 +250,7 @@ def __event_loop(
     ot_fiss = UTCDateTime(origin_time).format_fissures()
     evtlat = origin.latitude
     evtlon = origin.longitude
-    depth = origin.depth
+    depth = origin.depth or 25000  # For very old events this info is empty
 
     # Rounded for filenames
     ot_loc = UTCDateTime(origin_time, precision=-1).format_fissures()[:-6]
@@ -285,7 +291,8 @@ def __event_loop(
                 phase, rot, pol, filestr, taper_perc, taper_type,
                 model, origin_time, ot_fiss, evtlat, evtlon, depth,
                 prepro_folder, event, logger, rflogger, by_event, eh, tz, ta,
-                statloc, preproloc, rfloc, deconmeth, hc_filt, remove_response)
+                statloc, preproloc, rfloc, deconmeth, hc_filt, remove_response,
+                single_core)
             infolist.append(info)
         except Exception as e:
             # Unhandled exceptions should not cause the loop to quit
@@ -303,7 +310,8 @@ def __waveform_loop(
     prepro_folder: str, event: obspy.core.event.event.Event,
     logger: logging.Logger, rflogger: logging.Logger, by_event, eh: bool,
     tz: float, ta: float, statloc: str, preproloc: str, rfloc: str,
-        deconmeth: str, hc_filt: float, remove_response: bool):
+    deconmeth: str, hc_filt: float, remove_response: bool,
+        single_core=bool):
     """
     Loops over each waveform for a specific event and a specific station
     """
@@ -392,6 +400,13 @@ def __waveform_loop(
         except SNRError as e:  # QR rejections
             logger.debug(
                 [filestr, "QC was not met, SNR ratios are", e])
+            infodict['dt'] = st[0].stats.delta
+            infodict['sampling_rate'] = st[0].stats.sampling_rate
+            infodict['network'] = network
+            infodict['station'] = station
+            infodict['statlat'] = station_inv[0][0][0].latitude
+            infodict['statlon'] = station_inv[0][0][0].longitude
+            infodict['statel'] = station_inv[0][0][0].elevation
 
             if __file_in_db(outdir, 'info.dat'):
                 with shelve.open(infof, flag='r') as info:
@@ -402,6 +417,9 @@ def __waveform_loop(
             else:
                 infodict.setdefault('ot_all', []).append(ot_fiss)
 
+            if single_core:
+                write_info(network, station, infodict)
+                return
             return infodict
 
         except StreamLengthError as e:
@@ -513,7 +531,7 @@ def __waveform_loop(
             rflogger.exception([network, station, ot_loc, e])
 
         finally:
-            if infodict:
+            if single_core:
                 # Single-core case
                 write_info(network, station, infodict, preproloc)
 

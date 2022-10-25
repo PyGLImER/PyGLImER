@@ -70,6 +70,26 @@ class TestJoinInv(unittest.TestCase):
         # Just testing the test
         self.assertNotEqual(inv0, inv1)
 
+class TestCheckOverlap(unittest.TestCase):
+    def test_result(self):
+
+        startarray = [1,   5, 16, 35, 40]
+        endarray = [10, 15, 30, 40, 45]
+
+        # Random starttime
+        utctime = UTCDateTime(2022,2,2,12,0,30)
+
+        # Make array of UTCDatetime as a test
+        start = [utctime + _i for _i in startarray]
+        end = [utctime + _i for _i in endarray]
+
+        # Check results
+        result = [False, False, True, True, True]
+        check = pu.check_UTC_overlap(start, end)
+
+        # Testing the two arrays
+        np.testing.assert_array_equal(result, check)
+
 
 class TestDownloadFullInventory(unittest.TestCase):
     @patch('pyglimer.utils.utils.os.listdir')
@@ -113,17 +133,17 @@ class TestClientLoop(unittest.TestCase):
 class TestClientLoopWav(unittest.TestCase):
     def test_no_valid_fdsn(self):
         self.assertIsNone(pu.__client__loop_wav__(
-            'bla', 'some', ['a', 'b'], 0, 0, 0))
+            'bla', 'some', dict(bulk=['a', 'b']), 0, 0, 0))
 
     @patch('pyglimer.utils.utils.save_raw')
     def test_orga(self, save_raw_mock):
         c = MagicMock(spec=obspy.clients.fdsn.Client)
-        bulkl = ['my', 'nonesense']
+        bulkl = dict(bulk=['my', 'nonesense'])
         rawloc = 'should not exist'
         c.get_waveforms_bulk.return_value = read()
-        pu.__client__loop_wav__(c, rawloc, bulkl, {}, False, 'inventory')
+        pu.__client__loop_wav__(c, rawloc, bulkl, False, 'inventory')
         save_raw_mock.assert_called_once_with(
-            {}, read(), rawloc, 'inventory', False)
+            bulkl, read(), rawloc, 'inventory', False)
 
 
 class TestSaveRaw(unittest.TestCase):
