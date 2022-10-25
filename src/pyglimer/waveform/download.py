@@ -10,7 +10,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Monday, 24th October 2022 07:18:39 pm
+Last Modified: Tuesday, 25th October 2022 12:29:11 pm
 '''
 
 from multiprocessing import Event
@@ -832,7 +832,7 @@ def downloadwav(
     global evt_id
     for ii, event in enumerate(tqdm(event_cat)):
         # fetch event-data
-        origin_time = event.origins[0].time
+        origin_time = (event.preferred_origin() or event.origins[0]).time
         ot_fiss = UTCDateTime(origin_time).format_fissures()
         fdsn_mass_logger.info('Downloading event: '+ot_fiss)
         evtlat = event.origins[0].latitude

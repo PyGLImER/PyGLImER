@@ -21,3 +21,4 @@ omit =
     */tmp.py
     */constants.py
     */test/*
+    ccp/plot_utils/*
