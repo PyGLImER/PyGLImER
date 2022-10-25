@@ -1,7 +1,6 @@
 # Basic
 from typing import Optional, Union, Iterable
 import matplotlib
-from copy import deepcopy
 
 # External
 import numpy as np
@@ -15,7 +14,9 @@ from cartopy.mpl.geoaxes import GeoAxes, GeoAxesSubplot
 # Internal
 from pyglimer.ccp.plot_utils.plot_map import plot_map
 from pyglimer.ccp.plot_utils.plot_line_buffer import plot_line_buffer
-from pyglimer.ccp.plot_utils.midpointcolornorm import MidpointNormalize, StretchOutNormalize
+from pyglimer.ccp.plot_utils.midpointcolornorm import MidpointNormalize,\
+    StretchOutNormalize
+from pyglimer.plot.plot_utils import set_mpl_params
 
 
 def get_ax_coor(ax, lat, lon):
@@ -72,7 +73,8 @@ def plot_cross_section(
         label: Optional[str] = None,
         rfcmap: str = "seismic",
         depthextent: Optional[Iterable] = None,
-        mapextent: Optional[Iterable] = None):
+        mapextent: Optional[Iterable] = None,
+        bold: bool = False):
     """Plots a cross section for given waypoints. If no axes are given, the
     function will also create figures for the map and the cross section.
 
@@ -136,7 +138,7 @@ def plot_cross_section(
     """
 
     matplotlib.rcParams.update({'font.family': 'Arial'})
-
+    set_mpl_params(bold)
     # Get Cross section
     slat, slon, sdists, qlat, qlon, qdists, qz, qillum, qccp, epi_area = \
         ccp.get_profile(lat, lon, ddeg=ddeg)
