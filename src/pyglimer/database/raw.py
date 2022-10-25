@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Tuesday, 25th October 2022 01:40:19 pm
+Last Modified: Tuesday, 25th October 2022 01:41:43 pm
 '''
 
 import fnmatch
@@ -758,8 +758,7 @@ def write_st_to_ds(
     :type resample: bool, optional
     """
     if resample:
-        st.filter('lowpass_cheby_2', freq=4, maxorder=12)
-        st = resample_or_decimate(st, 10, filter=False)
+        st = resample_or_decimate(st, 10)
 
     # Add waveforms and stationxml
     ds.add_waveform(st, evt_id, tag='raw')
