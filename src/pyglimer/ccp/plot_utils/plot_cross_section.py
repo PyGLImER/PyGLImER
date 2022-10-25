@@ -1,6 +1,5 @@
 # Basic
 from typing import Optional, Union, Iterable
-import matplotlib
 
 # External
 import numpy as np

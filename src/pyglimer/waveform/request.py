@@ -15,9 +15,8 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Tuesday, 25th October 2022 11:14:51 am
+Last Modified: Tuesday, 25th October 2022 12:34:06 pm
 '''
-from multiprocessing.sharedctypes import Value
 import os
 from http.client import IncompleteRead
 from datetime import datetime
