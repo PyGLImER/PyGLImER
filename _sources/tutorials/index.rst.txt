@@ -47,23 +47,6 @@ A set of tutorials to make you familiar with the package.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This Tutorial illustrates how to import waveform data from a local database of continuous wavef...">
-
-.. only:: html
-
-  .. image:: /tutorials/images/thumb/sphx_glr_ImportLocalDatabase_thumb.png
-    :alt: Import from Local DataBase
-
-  :ref:`sphx_glr_tutorials_ImportLocalDatabase.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Import from Local DataBase</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="This example is nearly identical to the MSEED tutorial except the fact that we are specifying a...">
 
 .. only:: html
@@ -81,6 +64,23 @@ A set of tutorials to make you familiar with the package.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="This Tutorial illustrates how to import waveform data from a local database of continuous wavef...">
+
+.. only:: html
+
+  .. image:: /tutorials/images/thumb/sphx_glr_ImportLocalDatabase_thumb.png
+    :alt: Import from Local DataBase
+
+  :ref:`sphx_glr_tutorials_ImportLocalDatabase.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Import from Local DataBase</div>
+    </div>
+
+
+.. raw:: html
+
     </div>
 
 
@@ -89,8 +89,8 @@ A set of tutorials to make you familiar with the package.
 
    /tutorials/nc_CCPStack_SingleStation
    /tutorials/DataCollectionSAC
-   /tutorials/ImportLocalDatabase
    /tutorials/DataCollectionHDF5
+   /tutorials/ImportLocalDatabase
 
 
 .. only:: html

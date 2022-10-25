@@ -12,8 +12,8 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
-<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+  <link href="../../../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
 
   
   <link rel="stylesheet"
@@ -22,6 +22,8 @@
     href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css" />
@@ -31,13 +33,14 @@
     <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
 
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/clipboard.min.js"></script>
     <script src="../../../../_static/copybutton.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyglimer/ccp/plot_utils/plot_cross_section';</script>
@@ -64,7 +67,7 @@
     <div class="search-button__search-container">
       
 <form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
-  <i class="icon fas fa-search"></i>
+  <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
@@ -74,7 +77,7 @@
   
   <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
-      <span class="fas fa-bars"></span>
+      <span class="fa-solid fa-bars"></span>
   </label>
   <div id="navbar-start">
     
@@ -174,7 +177,7 @@
                 
 
             <li class="nav-item">
-                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fa-solid fa-up-right-from-square"></i></a>
             </li>
                 </div>
             </div>
@@ -188,16 +191,16 @@
     <div id="navbar-end">
       <div class="navbar-end-item navbar-end__search-button-container">
         
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
       </div>
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -210,7 +213,8 @@
           
           
           
-          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+          
+          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -222,14 +226,14 @@
 
   
   <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
   </div>
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
-      <span class="fas fa-outdent"></span>
+      <span class="fa-solid fa-outdent"></span>
   </label>
   
 
@@ -317,7 +321,7 @@
                 
 
             <li class="nav-item">
-                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fa-solid fa-up-right-from-square"></i></a>
             </li>
                 </div>
             </div>
@@ -334,10 +338,10 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -350,7 +354,8 @@
           
           
           
-          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+          
+          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -385,7 +390,6 @@
   <h1>Source code for pyglimer.ccp.plot_utils.plot_cross_section</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Basic</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Iterable</span>
-<span class="kn">import</span> <span class="nn">matplotlib</span>
 
 <span class="c1"># External</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -399,7 +403,9 @@
 <span class="c1"># Internal</span>
 <span class="kn">from</span> <span class="nn">pyglimer.ccp.plot_utils.plot_map</span> <span class="kn">import</span> <span class="n">plot_map</span>
 <span class="kn">from</span> <span class="nn">pyglimer.ccp.plot_utils.plot_line_buffer</span> <span class="kn">import</span> <span class="n">plot_line_buffer</span>
-<span class="kn">from</span> <span class="nn">pyglimer.ccp.plot_utils.midpointcolornorm</span> <span class="kn">import</span> <span class="n">MidpointNormalize</span>
+<span class="kn">from</span> <span class="nn">pyglimer.ccp.plot_utils.midpointcolornorm</span> <span class="kn">import</span> <span class="n">MidpointNormalize</span><span class="p">,</span>\
+    <span class="n">StretchOutNormalize</span>
+<span class="kn">from</span> <span class="nn">pyglimer.plot.plot_utils</span> <span class="kn">import</span> <span class="n">set_mpl_params</span>
 
 
 <div class="viewcode-block" id="get_ax_coor"><a class="viewcode-back" href="../../../../chapters/api/ccp.html#pyglimer.ccp.plot_utils.plot_cross_section.get_ax_coor">[docs]</a><span class="k">def</span> <span class="nf">get_ax_coor</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
@@ -451,10 +457,16 @@
         <span class="n">minillum</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">vmin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">vmax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">low_clip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">up_clip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">label</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">rfcmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;seismic&quot;</span><span class="p">,</span>
         <span class="n">depthextent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">mapextent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">mapextent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bold</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">outfile</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="nb">format</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span><span class="p">,</span>
+        <span class="n">dpi</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">300</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Plots a cross section for given waypoints. If no axes are given, the</span>
 <span class="sd">    function will also create figures for the map and the cross section.</span>
 
@@ -483,6 +495,12 @@
 <span class="sd">        minimum value of the cross section, by default None</span>
 <span class="sd">    vmax : Optional[float], optional</span>
 <span class="sd">        maximum value of the cross section, by default None</span>
+<span class="sd">    low_clip : Optional[float],</span>
+<span class="sd">        All values between lowclip and zero will be shown as</span>
+<span class="sd">        zero. By default None.</span>
+<span class="sd">    up_clip : Optional[float],</span>
+<span class="sd">        All values between upclip and zero will be shown as</span>
+<span class="sd">        zero. By default None.</span>
 <span class="sd">    label : Optional[str], optional</span>
 <span class="sd">        label to put in the corner of the cross section plot and the</span>
 <span class="sd">        cross section waypoints on the map, by default None</span>
@@ -510,9 +528,12 @@
 <span class="sd">        2021.04.21 20.00 (Lucas Sawade)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">outfile</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">outfile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># infer format</span>
+        <span class="nb">format</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outfile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.family&#39;</span><span class="p">:</span> <span class="s1">&#39;Arial&#39;</span><span class="p">})</span>
-
+    <span class="n">set_mpl_params</span><span class="p">(</span><span class="n">bold</span><span class="p">)</span>
     <span class="c1"># Get Cross section</span>
     <span class="n">slat</span><span class="p">,</span> <span class="n">slon</span><span class="p">,</span> <span class="n">sdists</span><span class="p">,</span> <span class="n">qlat</span><span class="p">,</span> <span class="n">qlon</span><span class="p">,</span> <span class="n">qdists</span><span class="p">,</span> <span class="n">qz</span><span class="p">,</span> <span class="n">qillum</span><span class="p">,</span> <span class="n">qccp</span><span class="p">,</span> <span class="n">epi_area</span> <span class="o">=</span> \
         <span class="n">ccp</span><span class="o">.</span><span class="n">get_profile</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">ddeg</span><span class="o">=</span><span class="n">ddeg</span><span class="p">)</span>
@@ -524,7 +545,11 @@
         <span class="n">vmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">qccp</span><span class="p">[</span><span class="n">qccp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">],</span> <span class="mf">0.98</span><span class="p">)</span>
 
     <span class="c1"># Norm for the cross section</span>
-    <span class="n">rfnorm</span> <span class="o">=</span> <span class="n">MidpointNormalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">midpoint</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">low_clip</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">up_clip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">rfnorm</span> <span class="o">=</span> <span class="n">MidpointNormalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">midpoint</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rfnorm</span> <span class="o">=</span> <span class="n">StretchOutNormalize</span><span class="p">(</span>
+            <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="n">low_clip</span> <span class="ow">or</span> <span class="mf">.0</span><span class="p">,</span> <span class="n">up</span><span class="o">=</span><span class="n">up_clip</span> <span class="ow">or</span> <span class="mf">.0</span><span class="p">)</span>
     <span class="n">snorm</span> <span class="o">=</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">sdists</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="c1"># Set illumination boundaries for section plotting</span>
@@ -568,7 +593,7 @@
                 <span class="n">c</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span>
                     <span class="n">sc</span><span class="p">,</span>
                     <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.025</span><span class="p">,</span>
-                    <span class="n">fraction</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+                    <span class="n">fraction</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">.5</span><span class="p">)</span>
                 <span class="n">c</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s2">&quot;Hitcount&quot;</span><span class="p">)</span>
 
                 <span class="c1"># Set colormap alpha manually</span>
@@ -616,6 +641,15 @@
                 <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">),</span>
                 <span class="n">transform</span><span class="o">=</span><span class="n">geoax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geoax</span><span class="p">,</span> <span class="n">GeoAxesSubplot</span><span class="p">):</span>
+                <span class="n">mapfig</span> <span class="o">=</span> <span class="n">geoax</span><span class="o">.</span><span class="n">figure</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geoax</span><span class="p">,</span> <span class="n">GeoAxes</span><span class="p">):</span>
+                <span class="n">mapfig</span> <span class="o">=</span> <span class="n">geoax</span><span class="o">.</span><span class="n">fig</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mapfig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
+            <span class="n">mapfig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s1">_map.</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
+
     <span class="c1"># ############### Plot section ###################</span>
 
     <span class="c1"># Plot section</span>
@@ -645,10 +679,10 @@
         <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Greys&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">snorm</span><span class="p">,</span>
         <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span>
         <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">clip_on</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
     <span class="n">c</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span>
-        <span class="n">rfim</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.025</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="s1">&#39;Arial&#39;</span><span class="p">)</span>
+        <span class="n">rfim</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.025</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+        <span class="n">boundaries</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">,</span> <span class="mi">101</span><span class="p">),</span> <span class="n">ticks</span><span class="o">=</span><span class="p">[</span><span class="n">vmin</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="p">])</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Offset [$^</span><span class="se">\\</span><span class="s1">circ$]&#39;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Depth [km]&#39;</span><span class="p">)</span>
 
@@ -661,6 +695,8 @@
             <span class="n">fontdict</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;small&#39;</span><span class="p">),</span>
             <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">),</span>
             <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">geoax</span></div>
 </pre></div>
@@ -681,6 +717,11 @@
           
             <div class="bd-sidebar-secondary bd-toc">
               
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
 <div class="toc-item">
   
 </div>
@@ -706,7 +747,7 @@
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -723,7 +764,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

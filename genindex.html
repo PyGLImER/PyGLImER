@@ -12,8 +12,8 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
-<link href="_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+  <link href="_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
 
   
   <link rel="stylesheet"
@@ -22,6 +22,8 @@
     href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -31,13 +33,14 @@
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
 
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/clipboard.min.js"></script>
     <script src="_static/copybutton.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
@@ -64,7 +67,7 @@
     <div class="search-button__search-container">
       
 <form class="bd-search d-flex align-items-center" action="search.html" method="get">
-  <i class="icon fas fa-search"></i>
+  <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
@@ -74,7 +77,7 @@
   
   <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
-      <span class="fas fa-bars"></span>
+      <span class="fa-solid fa-bars"></span>
   </label>
   <div id="navbar-start">
     
@@ -174,7 +177,7 @@
                 
 
             <li class="nav-item">
-                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fa-solid fa-up-right-from-square"></i></a>
             </li>
                 </div>
             </div>
@@ -188,16 +191,16 @@
     <div id="navbar-end">
       <div class="navbar-end-item navbar-end__search-button-container">
         
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
       </div>
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -210,7 +213,8 @@
           
           
           
-          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+          
+          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -222,14 +226,14 @@
 
   
   <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
   </div>
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
-      <span class="fas fa-outdent"></span>
+      <span class="fa-solid fa-outdent"></span>
   </label>
   
 
@@ -317,7 +321,7 @@
                 
 
             <li class="nav-item">
-                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fa-solid fa-up-right-from-square"></i></a>
             </li>
                 </div>
             </div>
@@ -334,10 +338,10 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -350,7 +354,8 @@
           
           
           
-          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+          
+          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -415,8 +420,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chapters/api/database.html#pyglimer.database.rfh5.all_traces_recursive">all_traces_recursive() (in module pyglimer.database.rfh5)</a>
 </li>
-      <li><a href="chapters/api/test.html#pyglimer.test.rate.automatic_rate">automatic_rate() (in module pyglimer.test.rate)</a>
-</li>
   </ul></td>
 </tr></table>
 
@@ -439,6 +442,10 @@
 </li>
       <li><a href="chapters/api/ccp.html#pyglimer.ccp.ccp.CCPStack">CCPStack (class in pyglimer.ccp.ccp)</a>
 </li>
+      <li><a href="chapters/api/utils.html#pyglimer.utils.utils.check_UTC_overlap">check_UTC_overlap() (in module pyglimer.utils.utils)</a>
+</li>
+      <li><a href="chapters/api/utils.html#pyglimer.utils.utils.chunkdict">chunkdict() (in module pyglimer.utils.utils)</a>
+</li>
       <li><a href="chapters/api/utils.html#pyglimer.utils.utils.chunks">chunks() (in module pyglimer.utils.utils)</a>
 </li>
       <li><a href="chapters/api/ccp.html#pyglimer.ccp.compute.bin.BinGrid.compute_bins">compute_bins() (pyglimer.ccp.compute.bin.BinGrid method)</a>
@@ -451,10 +458,10 @@
 </li>
       <li><a href="chapters/api/ccp.html#pyglimer.ccp.ccp.CCPStack.conclude_ccp">conclude_ccp() (pyglimer.ccp.ccp.CCPStack method)</a>
 </li>
-      <li><a href="chapters/api/database.html#pyglimer.database.rfh5.convert_header_to_hdf5">convert_header_to_hdf5() (in module pyglimer.database.rfh5)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chapters/api/database.html#pyglimer.database.rfh5.convert_header_to_hdf5">convert_header_to_hdf5() (in module pyglimer.database.rfh5)</a>
+</li>
       <li><a href="chapters/api/utils.html#pyglimer.utils.signalproc.convf">convf() (in module pyglimer.utils.signalproc)</a>
 </li>
       <li><a href="chapters/api/utils.html#pyglimer.utils.signalproc.corrf">corrf() (in module pyglimer.utils.signalproc)</a>
@@ -463,11 +470,11 @@
 </li>
       <li><a href="chapters/api/utils.html#pyglimer.utils.utils.cos_taper_st">cos_taper_st() (in module pyglimer.utils.utils)</a>
 </li>
+      <li><a href="chapters/api/waveform.html#pyglimer.waveform.download.create_bulk_list">create_bulk_list() (in module pyglimer.waveform.download)</a>
+</li>
       <li><a href="chapters/api/utils.html#pyglimer.utils.utils.create_bulk_str">create_bulk_str() (in module pyglimer.utils.utils)</a>
 </li>
       <li><a href="chapters/api/utils.html#pyglimer.utils.create_geom.create_geom">create_geom() (in module pyglimer.utils.create_geom)</a>
-</li>
-      <li><a href="chapters/api/test.html#pyglimer.test.synthetic.create_R">create_R() (in module pyglimer.test.synthetic)</a>
 </li>
       <li><a href="chapters/api/ccp.html#pyglimer.ccp.ccp.CCPStack.create_vtk_mesh">create_vtk_mesh() (pyglimer.ccp.ccp.CCPStack method)</a>
 </li>
@@ -480,8 +487,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chapters/api/database.html#pyglimer.database.rfh5.DBHandler">DBHandler (class in pyglimer.database.rfh5)</a>
-</li>
-      <li><a href="chapters/api/test.html#pyglimer.test.tests.decon_test">decon_test() (in module pyglimer.test.tests)</a>
 </li>
       <li><a href="chapters/api/rf.html#pyglimer.rf.create.RFStream.dirty_ccp_stack">dirty_ccp_stack() (pyglimer.rf.create.RFStream method)</a>
 </li>
@@ -533,6 +538,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chapters/api/utils.html#pyglimer.utils.signalproc.filter">filter() (in module pyglimer.utils.signalproc)</a>
 </li>
+      <li><a href="chapters/api/waveform.html#pyglimer.waveform.download.filter_overlapping_times">filter_overlapping_times() (in module pyglimer.waveform.download)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -569,9 +576,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chapters/api/waveform.html#pyglimer.waveform.request.Request.import_database">import_database() (pyglimer.waveform.request.Request method)</a>
 </li>
+      <li><a href="chapters/api/ccp.html#pyglimer.ccp.ccp.init_ccp">init_ccp() (in module pyglimer.ccp.ccp)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="chapters/api/ccp.html#pyglimer.ccp.ccp.init_ccp">init_ccp() (in module pyglimer.ccp.ccp)</a>
+      <li><a href="chapters/api/waveform.html#pyglimer.waveform.download.inv2uniqlists">inv2uniqlists() (in module pyglimer.waveform.download)</a>
 </li>
       <li><a href="chapters/api/rf.html#pyglimer.rf.deconvolve.it">it() (in module pyglimer.rf.deconvolve)</a>
 </li>
@@ -623,8 +632,6 @@
 </li>
         <li><a href="chapters/api/ccp.html#module-pyglimer.ccp.plot_utils.plot_line_buffer">pyglimer.ccp.plot_utils.plot_line_buffer</a>
 </li>
-        <li><a href="chapters/api/database.html#module-pyglimer.database.asdf">pyglimer.database.asdf</a>
-</li>
         <li><a href="chapters/api/database.html#module-pyglimer.database.rfh5">pyglimer.database.rfh5</a>
 </li>
         <li><a href="chapters/api/database.html#module-pyglimer.database.stations">pyglimer.database.stations</a>
@@ -634,12 +641,6 @@
         <li><a href="chapters/api/rf.html#module-pyglimer.rf.deconvolve">pyglimer.rf.deconvolve</a>
 </li>
         <li><a href="chapters/api/rf.html#module-pyglimer.rf.moveout">pyglimer.rf.moveout</a>
-</li>
-        <li><a href="chapters/api/test.html#module-pyglimer.test.rate">pyglimer.test.rate</a>
-</li>
-        <li><a href="chapters/api/test.html#module-pyglimer.test.synthetic">pyglimer.test.synthetic</a>
-</li>
-        <li><a href="chapters/api/test.html#module-pyglimer.test.tests">pyglimer.test.tests</a>
 </li>
         <li><a href="chapters/api/utils.html#module-pyglimer.utils.create_geom">pyglimer.utils.create_geom</a>
 </li>
@@ -680,8 +681,6 @@
         <li><a href="chapters/api/rf.html#pyglimer.rf.create.RFTrace.moveout">(pyglimer.rf.create.RFTrace method)</a>
 </li>
       </ul></li>
-      <li><a href="chapters/api/test.html#pyglimer.test.tests.moveout_test">moveout_test() (in module pyglimer.test.tests)</a>
-</li>
       <li><a href="chapters/api/ccp.html#pyglimer.ccp.ccp.CCPStack.multicore_stack">multicore_stack() (pyglimer.ccp.ccp.CCPStack method)</a>
 </li>
       <li><a href="chapters/api/rf.html#pyglimer.rf.deconvolve.multitaper">multitaper() (in module pyglimer.rf.deconvolve)</a>
@@ -799,13 +798,6 @@
 </li>
       </ul></li>
       <li>
-    pyglimer.database.asdf
-
-      <ul>
-        <li><a href="chapters/api/database.html#module-pyglimer.database.asdf">module</a>
-</li>
-      </ul></li>
-      <li>
     pyglimer.database.rfh5
 
       <ul>
@@ -819,6 +811,8 @@
         <li><a href="chapters/api/database.html#module-pyglimer.database.stations">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     pyglimer.rf.create
 
@@ -826,8 +820,6 @@
         <li><a href="chapters/api/rf.html#module-pyglimer.rf.create">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     pyglimer.rf.deconvolve
 
@@ -840,27 +832,6 @@
 
       <ul>
         <li><a href="chapters/api/rf.html#module-pyglimer.rf.moveout">module</a>
-</li>
-      </ul></li>
-      <li>
-    pyglimer.test.rate
-
-      <ul>
-        <li><a href="chapters/api/test.html#module-pyglimer.test.rate">module</a>
-</li>
-      </ul></li>
-      <li>
-    pyglimer.test.synthetic
-
-      <ul>
-        <li><a href="chapters/api/test.html#module-pyglimer.test.synthetic">module</a>
-</li>
-      </ul></li>
-      <li>
-    pyglimer.test.tests
-
-      <ul>
-        <li><a href="chapters/api/test.html#module-pyglimer.test.tests">module</a>
 </li>
       </ul></li>
       <li>
@@ -987,21 +958,13 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="chapters/api/test.html#pyglimer.test.rate.rate">rate() (in module pyglimer.test.rate)</a>
-</li>
       <li><a href="chapters/api/rf.html#pyglimer.rf.create.read_by_station">read_by_station() (in module pyglimer.rf.create)</a>
 </li>
       <li><a href="chapters/api/ccp.html#pyglimer.ccp.ccp.read_ccp">read_ccp() (in module pyglimer.ccp.ccp)</a>
 </li>
-      <li><a href="chapters/api/test.html#pyglimer.test.tests.read_geom">read_geom() (in module pyglimer.test.tests)</a>
-</li>
       <li><a href="chapters/api/database.html#pyglimer.database.rfh5.read_hdf5_header">read_hdf5_header() (in module pyglimer.database.rfh5)</a>
 </li>
-      <li><a href="chapters/api/test.html#pyglimer.test.tests.read_raysum">read_raysum() (in module pyglimer.test.tests)</a>
-</li>
       <li><a href="chapters/api/rf.html#pyglimer.rf.create.read_rf">read_rf() (in module pyglimer.rf.create)</a>
-</li>
-      <li><a href="chapters/api/test.html#pyglimer.test.tests.read_rfs_mat">read_rfs_mat() (in module pyglimer.test.tests)</a>
 </li>
       <li><a href="chapters/api/utils.html#pyglimer.utils.geo_utils.reckon">reckon() (in module pyglimer.utils.geo_utils)</a>
 </li>
@@ -1011,15 +974,11 @@
 </li>
       <li><a href="chapters/api/waveform.html#pyglimer.waveform.errorhandler.redownload_statxml">redownload_statxml() (in module pyglimer.waveform.errorhandler)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chapters/api/waveform.html#pyglimer.waveform.request.Request">Request (class in pyglimer.waveform.request)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chapters/api/utils.html#pyglimer.utils.signalproc.resample_or_decimate">resample_or_decimate() (in module pyglimer.utils.signalproc)</a>
-</li>
-      <li><a href="chapters/api/database.html#pyglimer.database.asdf.rewrite_to_hdf5">rewrite_to_hdf5() (in module pyglimer.database.asdf)</a>
-</li>
-      <li><a href="chapters/api/test.html#pyglimer.test.tests.rf_test">rf_test() (in module pyglimer.test.tests)</a>
 </li>
       <li><a href="chapters/api/database.html#pyglimer.database.rfh5.RFDataBase">RFDataBase (class in pyglimer.database.rfh5)</a>
 </li>
@@ -1047,16 +1006,16 @@
 </li>
       <li><a href="chapters/api/utils.html#pyglimer.utils.utils.save_raw_mseed">save_raw_mseed() (in module pyglimer.utils.utils)</a>
 </li>
+      <li><a href="chapters/api/utils.html#pyglimer.utils.utils.save_stream">save_stream() (in module pyglimer.utils.utils)</a>
+</li>
       <li><a href="chapters/api/rf.html#pyglimer.rf.moveout.SimpleModel">SimpleModel (class in pyglimer.rf.moveout)</a>
 </li>
       <li><a href="chapters/api/rf.html#pyglimer.rf.create.RFStream.slice2">slice2() (pyglimer.rf.create.RFStream method)</a>
 </li>
-      <li><a href="chapters/api/waveform.html#pyglimer.waveform.preprocess.SNRError">SNRError</a>, <a href="chapters/api/waveform.html#pyglimer.waveform.preprocessh5.SNRError">[1]</a>
-</li>
-      <li><a href="chapters/api/test.html#pyglimer.test.rate.sort_rated">sort_rated() (in module pyglimer.test.rate)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chapters/api/waveform.html#pyglimer.waveform.preprocess.SNRError">SNRError</a>, <a href="chapters/api/waveform.html#pyglimer.waveform.preprocessh5.SNRError">[1]</a>
+</li>
       <li><a href="chapters/api/rf.html#pyglimer.rf.deconvolve.spectraldivision">spectraldivision() (in module pyglimer.rf.deconvolve)</a>
 </li>
       <li><a href="chapters/api/utils.html#pyglimer.utils.signalproc.sshift">sshift() (in module pyglimer.utils.signalproc)</a>
@@ -1067,20 +1026,16 @@
 </li>
       <li><a href="chapters/api/waveform.html#pyglimer.waveform.preprocess.StreamLengthError">StreamLengthError</a>, <a href="chapters/api/waveform.html#pyglimer.waveform.preprocessh5.StreamLengthError">[1]</a>
 </li>
-      <li><a href="chapters/api/test.html#pyglimer.test.synthetic.synthetic">synthetic() (in module pyglimer.test.synthetic)</a>
-</li>
   </ul></td>
 </tr></table>
 
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="chapters/api/test.html#pyglimer.test.tests.test_SNR">test_SNR() (in module pyglimer.test.tests)</a>
+      <li><a href="chapters/api/rf.html#pyglimer.rf.create.RFStream.trim2">trim2() (pyglimer.rf.create.RFStream method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="chapters/api/rf.html#pyglimer.rf.create.RFStream.trim2">trim2() (pyglimer.rf.create.RFStream method)</a>
-</li>
       <li><a href="chapters/api/rf.html#pyglimer.rf.create.RFStream.type">type (pyglimer.rf.create.RFStream property)</a>
 </li>
   </ul></td>
@@ -1091,10 +1046,14 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chapters/api/database.html#pyglimer.database.rfh5.DBHandler.walk">walk() (pyglimer.database.rfh5.DBHandler method)</a>
 </li>
-      <li><a href="chapters/api/waveform.html#pyglimer.waveform.download.wav_in_asdf">wav_in_asdf() (in module pyglimer.waveform.download)</a>
-</li>
       <li><a href="chapters/api/waveform.html#pyglimer.waveform.download.wav_in_db">wav_in_db() (in module pyglimer.waveform.download)</a>
 </li>
+      <li><a href="chapters/api/waveform.html#pyglimer.waveform.download.wav_in_hdf5">wav_in_hdf5() (in module pyglimer.waveform.download)</a>
+</li>
+      <li><a href="chapters/api/waveform.html#pyglimer.waveform.download.wav_in_hdf5_no_global">wav_in_hdf5_no_global() (in module pyglimer.waveform.download)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chapters/api/ccp.html#pyglimer.ccp.ccp.CCPStack.write">write() (pyglimer.ccp.ccp.CCPStack method)</a>
 
       <ul>
@@ -1103,13 +1062,7 @@
         <li><a href="chapters/api/rf.html#pyglimer.rf.create.RFTrace.write">(pyglimer.rf.create.RFTrace method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chapters/api/waveform.html#pyglimer.waveform.preprocess.write_info">write_info() (in module pyglimer.waveform.preprocess)</a>
-</li>
-      <li><a href="chapters/api/database.html#pyglimer.database.asdf.write_st">write_st() (in module pyglimer.database.asdf)</a>
-</li>
-      <li><a href="chapters/api/database.html#pyglimer.database.asdf.writeraw">writeraw() (in module pyglimer.database.asdf)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1132,6 +1085,11 @@
           
             <div class="bd-sidebar-secondary bd-toc">
               
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
 <div class="toc-item">
   
 </div>
@@ -1157,7 +1115,7 @@
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+  <script src="_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -1174,7 +1132,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

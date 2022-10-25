@@ -207,432 +207,7 @@ parsed all needed information to :class:`pyglimer.waveform.request.Request`.
 
  .. code-block:: none
 
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-06-26T18:08:17__2021-06-26T18:10:47__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-06-26T18:08:17__2021-06-26T18:10:47__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-06-26T18:08:17__2021-06-26T18:10:47__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-06-23T03:03:16__2021-06-23T03:05:46__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-06-23T03:03:16__2021-06-23T03:05:46__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-06-23T03:03:16__2021-06-23T03:05:46__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-06-21T22:25:07__2021-06-21T22:27:37__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-06-21T22:25:07__2021-06-21T22:27:37__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-06-21T22:25:07__2021-06-21T22:27:37__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-06-13T03:04:16__2021-06-13T03:06:46__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-06-13T03:04:16__2021-06-13T03:06:46__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-06-13T03:04:16__2021-06-13T03:06:46__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-06-10T23:33:29__2021-06-10T23:35:59__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-06-10T23:33:29__2021-06-10T23:35:59__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-06-10T23:33:29__2021-06-10T23:35:59__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-06-04T08:24:02__2021-06-04T08:26:32__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-06-04T08:24:02__2021-06-04T08:26:32__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-06-04T08:24:02__2021-06-04T08:26:32__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-06-04T07:59:45__2021-06-04T08:02:15__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-06-04T07:59:45__2021-06-04T08:02:15__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-06-04T07:59:45__2021-06-04T08:02:15__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-06-01T11:27:49__2021-06-01T11:30:19__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-06-01T11:27:49__2021-06-01T11:30:19__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-06-01T11:27:49__2021-06-01T11:30:19__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-31T07:07:55__2021-05-31T07:10:25__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-31T07:07:55__2021-05-31T07:10:25__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-31T07:07:55__2021-05-31T07:10:25__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-29T01:15:36__2021-05-29T01:18:06__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-29T01:15:36__2021-05-29T01:18:06__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-29T01:15:36__2021-05-29T01:18:06__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-21T22:25:51__2021-05-21T22:28:21__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-21T22:25:51__2021-05-21T22:28:21__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-21T22:25:51__2021-05-21T22:28:21__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-19T18:06:49__2021-05-19T18:09:19__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-19T18:06:49__2021-05-19T18:09:19__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-19T18:06:49__2021-05-19T18:09:19__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-19T00:54:14__2021-05-19T00:56:44__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-19T00:54:14__2021-05-19T00:56:44__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-19T00:54:14__2021-05-19T00:56:44__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-16T03:36:21__2021-05-16T03:38:51__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-16T03:36:21__2021-05-16T03:38:51__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-16T03:36:21__2021-05-16T03:38:51__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-14T00:11:00__2021-05-14T00:13:30__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-14T00:11:00__2021-05-14T00:13:30__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-14T00:11:00__2021-05-14T00:13:30__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-13T09:48:51__2021-05-13T09:51:20__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-13T09:48:51__2021-05-13T09:51:20__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-13T09:48:51__2021-05-13T09:51:20__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-12T16:06:05__2021-05-12T16:08:35__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-12T16:06:05__2021-05-12T16:08:35__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-12T16:06:05__2021-05-12T16:08:35__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-12T08:51:51__2021-05-12T08:54:21__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-12T08:51:51__2021-05-12T08:54:21__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-12T08:51:51__2021-05-12T08:54:21__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-12T06:23:13__2021-05-12T06:25:43__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-12T06:23:13__2021-05-12T06:25:43__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-12T06:23:13__2021-05-12T06:25:43__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-07T11:51:44__2021-05-07T11:54:14__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-07T11:51:44__2021-05-07T11:54:14__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-07T11:51:44__2021-05-07T11:54:14__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-03T08:58:49__2021-05-03T09:01:19__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-03T08:58:49__2021-05-03T09:01:19__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-03T08:58:49__2021-05-03T09:01:19__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-02T07:08:31__2021-05-02T07:11:01__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-02T07:08:31__2021-05-02T07:11:01__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-02T07:08:31__2021-05-02T07:11:01__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-05-01T01:40:10__2021-05-01T01:42:40__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-05-01T01:40:10__2021-05-01T01:42:40__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-05-01T01:40:10__2021-05-01T01:42:40__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-04-29T02:28:37__2021-04-29T02:31:07__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-04-29T02:28:37__2021-04-29T02:31:07__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-04-29T02:28:37__2021-04-29T02:31:07__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-04-25T23:59:52__2021-04-26T00:02:22__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-04-25T23:59:52__2021-04-26T00:02:22__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-04-25T23:59:52__2021-04-26T00:02:22__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-04-22T00:28:33__2021-04-22T00:31:03__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-04-22T00:28:33__2021-04-22T00:31:03__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-04-22T00:28:33__2021-04-22T00:31:03__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-04-18T06:54:22__2021-04-18T06:56:51__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-04-18T06:54:22__2021-04-18T06:56:51__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-04-18T06:54:22__2021-04-18T06:56:51__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-04-18T00:42:09__2021-04-18T00:44:39__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-04-18T00:42:09__2021-04-18T00:44:39__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-04-18T00:42:09__2021-04-18T00:44:39__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-04-18T00:41:53__2021-04-18T00:44:23__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-04-18T00:41:53__2021-04-18T00:44:23__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-04-18T00:41:53__2021-04-18T00:44:23__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-04-14T04:41:40__2021-04-14T04:44:10__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-04-14T04:41:40__2021-04-14T04:44:10__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-04-14T04:41:40__2021-04-14T04:44:10__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-04-08T17:18:15__2021-04-08T17:20:45__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-04-08T17:18:15__2021-04-08T17:20:45__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-04-08T17:18:15__2021-04-08T17:20:45__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-30T21:47:47__2021-03-30T21:50:17__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-30T21:47:47__2021-03-30T21:50:17__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-30T21:47:47__2021-03-30T21:50:17__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-28T23:07:33__2021-03-28T23:10:03__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-28T23:07:33__2021-03-28T23:10:03__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-28T23:07:33__2021-03-28T23:10:03__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-27T13:57:43__2021-03-27T14:00:12__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-27T13:57:43__2021-03-27T14:00:12__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-27T13:57:43__2021-03-27T14:00:12__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-20T09:22:26__2021-03-20T09:24:56__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-20T09:22:26__2021-03-20T09:24:56__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-20T09:22:26__2021-03-20T09:24:56__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-20T03:12:51__2021-03-20T03:15:20__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-20T03:12:51__2021-03-20T03:15:20__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-20T03:12:51__2021-03-20T03:15:20__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-20T01:55:09__2021-03-20T01:57:39__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-20T01:55:09__2021-03-20T01:57:39__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-20T01:55:09__2021-03-20T01:57:39__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-18T00:13:25__2021-03-18T00:15:55__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-18T00:13:25__2021-03-18T00:15:55__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-18T00:13:25__2021-03-18T00:15:55__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-17T00:24:49__2021-03-17T00:27:19__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-17T00:24:49__2021-03-17T00:27:19__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-17T00:24:49__2021-03-17T00:27:19__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-16T18:49:16__2021-03-16T18:51:46__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-16T18:49:16__2021-03-16T18:51:46__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-16T18:49:16__2021-03-16T18:51:46__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-12T13:08:13__2021-03-12T13:10:43__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-12T13:08:13__2021-03-12T13:10:43__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-12T13:08:13__2021-03-12T13:10:43__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-04T19:34:13__2021-03-04T19:36:42__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-04T19:34:13__2021-03-04T19:36:42__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-04T19:34:13__2021-03-04T19:36:42__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-04T18:48:41__2021-03-04T18:51:11__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-04T18:48:41__2021-03-04T18:51:11__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-04T18:48:41__2021-03-04T18:51:11__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-03T10:26:32__2021-03-03T10:29:02__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-03T10:26:32__2021-03-03T10:29:02__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-03T10:26:32__2021-03-03T10:29:02__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-03-02T21:34:57__2021-03-02T21:37:27__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-03-02T21:34:57__2021-03-02T21:37:27__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-03-02T21:34:57__2021-03-02T21:37:27__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-02-28T02:25:39__2021-02-28T02:28:09__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-02-28T02:25:39__2021-02-28T02:28:09__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-02-28T02:25:39__2021-02-28T02:28:09__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-02-24T10:12:23__2021-02-24T10:14:52__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-02-24T10:12:23__2021-02-24T10:14:52__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-02-24T10:12:23__2021-02-24T10:14:52__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-02-18T19:41:18__2021-02-18T19:43:48__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-02-18T19:41:18__2021-02-18T19:43:48__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-02-18T19:41:18__2021-02-18T19:43:48__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-02-17T03:46:34__2021-02-17T03:49:04__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-02-17T03:46:34__2021-02-17T03:49:04__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-02-17T03:46:34__2021-02-17T03:49:04__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-02-13T14:20:35__2021-02-13T14:23:04__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-02-13T14:20:35__2021-02-13T14:23:04__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-02-13T14:20:35__2021-02-13T14:23:04__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-02-12T17:14:10__2021-02-12T17:16:40__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-02-12T17:14:10__2021-02-12T17:16:40__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-02-12T17:14:10__2021-02-12T17:16:40__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-02-10T08:32:54__2021-02-10T08:35:24__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-02-10T08:32:54__2021-02-10T08:35:24__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-02-10T08:32:54__2021-02-10T08:35:24__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-02-03T05:35:33__2021-02-03T05:38:03__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-02-03T05:35:33__2021-02-03T05:38:03__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-02-03T05:35:33__2021-02-03T05:38:03__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-31T19:12:28__2021-01-31T19:14:58__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-31T19:12:28__2021-01-31T19:14:58__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-31T19:12:28__2021-01-31T19:14:58__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-29T13:21:12__2021-01-29T13:23:42__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-29T13:21:12__2021-01-29T13:23:42__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-29T13:21:12__2021-01-29T13:23:42__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-29T12:48:06__2021-01-29T12:50:36__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-29T12:48:06__2021-01-29T12:50:36__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-29T12:48:06__2021-01-29T12:50:36__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-24T00:18:47__2021-01-24T00:21:17__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-24T00:18:47__2021-01-24T00:21:17__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-24T00:18:47__2021-01-24T00:21:17__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-20T23:08:30__2021-01-20T23:11:00__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-20T23:08:30__2021-01-20T23:11:00__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-20T23:08:30__2021-01-20T23:11:00__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-20T16:11:30__2021-01-20T16:13:59__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-20T16:11:30__2021-01-20T16:13:59__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-20T16:11:30__2021-01-20T16:13:59__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-19T02:57:26__2021-01-19T02:59:56__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-19T02:57:26__2021-01-19T02:59:56__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-19T02:57:26__2021-01-19T02:59:56__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-16T20:15:11__2021-01-16T20:17:41__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-16T20:15:11__2021-01-16T20:17:41__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-16T20:15:11__2021-01-16T20:17:41__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-15T21:43:58__2021-01-15T21:46:28__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-15T21:43:58__2021-01-15T21:46:28__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-15T21:43:58__2021-01-15T21:46:28__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-15T16:17:00__2021-01-15T16:19:30__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-15T16:17:00__2021-01-15T16:19:30__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-15T16:17:00__2021-01-15T16:19:30__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-15T13:31:57__2021-01-15T13:34:27__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-15T13:31:57__2021-01-15T13:34:27__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-15T13:31:57__2021-01-15T13:34:27__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-12T02:51:46__2021-01-12T02:54:16__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-12T02:51:46__2021-01-12T02:54:16__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-12T02:51:46__2021-01-12T02:54:16__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-11T21:56:15__2021-01-11T21:58:45__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-11T21:56:15__2021-01-11T21:58:45__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-11T21:56:15__2021-01-11T21:58:45__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-11T21:53:15__2021-01-11T21:55:44__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-11T21:53:15__2021-01-11T21:55:44__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-11T21:53:15__2021-01-11T21:55:44__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-11T21:45:10__2021-01-11T21:47:40__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-11T21:45:10__2021-01-11T21:47:40__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-11T21:45:10__2021-01-11T21:47:40__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-10T15:56:47__2021-01-10T15:59:17__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-10T15:56:47__2021-01-10T15:59:17__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-10T15:56:47__2021-01-10T15:59:17__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-10T04:04:10__2021-01-10T04:06:40__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-10T04:04:10__2021-01-10T04:06:40__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-10T04:04:10__2021-01-10T04:06:40__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH1__2021-01-03T12:49:14__2021-01-03T12:51:44__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BH2__2021-01-03T12:49:14__2021-01-03T12:51:44__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
-    /usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/pyasdf/asdf_data_set.py:1546: ASDFWarning: Data 'IU.HRV/IU.HRV.10.BHZ__2021-01-03T12:49:14__2021-01-03T12:51:44__raw_recording' already exists in file. Will not be added!
-      warnings.warn(msg, ASDFWarning)
+    --> Enter TOA event loop for station IU.HRV
 
 
 
@@ -643,30 +218,27 @@ there is indeed a change in the code because we saved the raw data in form of
 ``ASDFDataset``s and we need to actually access the ``hdf5`` file that we
 to count how many traces it contains.
 
-.. GENERATED FROM PYTHON SOURCE LINES 109-134
+.. GENERATED FROM PYTHON SOURCE LINES 109-131
 
 .. code-block:: default
 
 
-    # Import ASDFDataset
-    from pyasdf import ASDFDataSet
+    # Import RawDataBase
+    from pyglimer.database.raw import RawDatabase
 
     # Path to the where the miniseeds are stored
     data_storage = os.path.join(
         proj_dir, 'waveforms', 'raw', 'P', f'{network}.{station}.h5')
 
     # Read the data from the station ``h5`` file
-    with ASDFDataSet(data_storage, mode='r', mpi=False) as ds:
+    with RawDatabase(data_storage, mode='r') as ds:
 
         # Perform waveform query on ASDFDataSet
-        stream = ds.get_waveforms(
+        stream = ds.get_data(
             network,
             station,
-            '*', # Location
-            '*', # Channel
-            request_dict['starttime']-1000,  # Starttime 
-            request_dict['endtime']+1000,    # Endtime
-            'raw_recording')
+            '*',  # Event ID
+            'raw')
 
     # Print output
     print(f"Number of downloaded waveforms: {len(stream)}")
@@ -680,12 +252,12 @@ to count how many traces it contains.
 
  .. code-block:: none
 
-    Number of downloaded waveforms: 213
+    Number of downloaded waveforms: 207
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 135-160
+.. GENERATED FROM PYTHON SOURCE LINES 132-157
 
 The final step to get you receiver function data is the preprocessing. 
 Although it is hidden in a single function, which
@@ -713,7 +285,7 @@ that very coordinate system.
 10. Deconvolution with method ``deconmeth`` from our dict is perfomed.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 160-163
+.. GENERATED FROM PYTHON SOURCE LINES 157-160
 
 .. code-block:: default
 
@@ -730,126 +302,28 @@ that very coordinate system.
 
       0%|          | 0/1 [00:00<?, ?it/s]
       0%|          | 0/289 [00:00<?, ?it/s]
-      0%|          | 1/289 [00:00<00:38,  7.41it/s]
-      1%|1         | 4/289 [00:00<00:17, 15.99it/s]
-      2%|2         | 6/289 [00:00<00:18, 15.62it/s]
-      6%|5         | 17/289 [00:00<00:06, 40.61it/s]
-      7%|7         | 21/289 [00:00<00:07, 36.96it/s]
-      9%|8         | 25/289 [00:00<00:10, 25.96it/s]
-     10%|9         | 28/289 [00:01<00:13, 19.85it/s]
-     11%|#         | 31/289 [00:01<00:12, 20.44it/s]
-     12%|#1        | 34/289 [00:01<00:12, 20.96it/s]
-     14%|#4        | 41/289 [00:01<00:08, 29.29it/s]
-     16%|#5        | 45/289 [00:01<00:10, 23.03it/s]
-     17%|#6        | 48/289 [00:02<00:10, 23.00it/s]
-     18%|#7        | 51/289 [00:02<00:12, 18.44it/s]
-     19%|#8        | 54/289 [00:02<00:14, 15.94it/s]
-     20%|##        | 59/289 [00:02<00:11, 20.46it/s]
-     21%|##1       | 62/289 [00:02<00:10, 20.96it/s]
-     22%|##2       | 65/289 [00:02<00:10, 21.14it/s]
-     24%|##3       | 68/289 [00:03<00:10, 21.63it/s]
-     25%|##4       | 71/289 [00:03<00:09, 21.91it/s]
-     27%|##6       | 77/289 [00:03<00:07, 28.40it/s]
-     28%|##8       | 81/289 [00:03<00:07, 29.09it/s]
-     29%|##9       | 85/289 [00:03<00:07, 28.97it/s]2022-09-14 18:05:25,043 - ERROR - RF Creation failed. Waveform Data:
-    IU.HRV.2021108T002925.0380Z
-    original error:
-    Unexpected behavior in rotation. Please file a bug report on github.
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py", line 346, in __station_process__
-        st, _, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py", line 405, in __rotate_qc
-        st.rotate(method='->ZNE', inventory=station_inv)
-      File "/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py", line 2733, in rotate
-        return self._rotate_to_zne(inventory, **kwargs)
-      File "/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py", line 3469, in _rotate_to_zne
-        self._rotate_specific_channels_to_zne(
-      File "/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py", line 3542, in _rotate_specific_channels_to_zne
-        raise NotImplementedError(msg)
-    NotImplementedError: Unexpected behavior in rotation. Please file a bug report on github.
-    ERROR:pyglimer.request.preprocess.RF:RF Creation failed. Waveform Data:
-    IU.HRV.2021108T002925.0380Z
-    original error:
-    Unexpected behavior in rotation. Please file a bug report on github.
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py", line 346, in __station_process__
-        st, _, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py", line 405, in __rotate_qc
-        st.rotate(method='->ZNE', inventory=station_inv)
-      File "/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py", line 2733, in rotate
-        return self._rotate_to_zne(inventory, **kwargs)
-      File "/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py", line 3469, in _rotate_to_zne
-        self._rotate_specific_channels_to_zne(
-      File "/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py", line 3542, in _rotate_specific_channels_to_zne
-        raise NotImplementedError(msg)
-    NotImplementedError: Unexpected behavior in rotation. Please file a bug report on github.
-    2022-09-14 18:05:25,265 - ERROR - RF Creation failed. Waveform Data:
-    IU.HRV.2021108T002912.4990Z
-    original error:
-    Unexpected behavior in rotation. Please file a bug report on github.
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py", line 346, in __station_process__
-        st, _, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py", line 405, in __rotate_qc
-        st.rotate(method='->ZNE', inventory=station_inv)
-      File "/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py", line 2733, in rotate
-        return self._rotate_to_zne(inventory, **kwargs)
-      File "/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py", line 3469, in _rotate_to_zne
-        self._rotate_specific_channels_to_zne(
-      File "/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py", line 3542, in _rotate_specific_channels_to_zne
-        raise NotImplementedError(msg)
-    NotImplementedError: Unexpected behavior in rotation. Please file a bug report on github.
-    ERROR:pyglimer.request.preprocess.RF:RF Creation failed. Waveform Data:
-    IU.HRV.2021108T002912.4990Z
-    original error:
-    Unexpected behavior in rotation. Please file a bug report on github.
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py", line 346, in __station_process__
-        st, _, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocessh5.py", line 405, in __rotate_qc
-        st.rotate(method='->ZNE', inventory=station_inv)
-      File "/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py", line 2733, in rotate
-        return self._rotate_to_zne(inventory, **kwargs)
-      File "/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py", line 3469, in _rotate_to_zne
-        self._rotate_specific_channels_to_zne(
-      File "/usr/share/miniconda/envs/pyglimer/lib/python3.10/site-packages/obspy/core/stream.py", line 3542, in _rotate_specific_channels_to_zne
-        raise NotImplementedError(msg)
-    NotImplementedError: Unexpected behavior in rotation. Please file a bug report on github.
-
-     30%|###       | 88/289 [00:04<00:12, 16.22it/s]
-     31%|###1      | 91/289 [00:04<00:11, 17.45it/s]
-     33%|###2      | 94/289 [00:04<00:10, 18.57it/s]
-     37%|###6      | 106/289 [00:04<00:05, 35.65it/s]
-     38%|###8      | 111/289 [00:04<00:06, 28.60it/s]
-     40%|####      | 117/289 [00:04<00:05, 32.40it/s]
-     42%|####1     | 121/289 [00:05<00:06, 25.67it/s]
-     43%|####3     | 125/289 [00:05<00:06, 26.67it/s]
-     45%|####4     | 129/289 [00:05<00:07, 22.45it/s]
-     46%|####6     | 133/289 [00:05<00:06, 24.18it/s]
-     65%|######4   | 187/289 [00:05<00:00, 111.87it/s]
-     69%|######9   | 200/289 [00:06<00:01, 63.13it/s] 
-     73%|#######2  | 210/289 [00:06<00:01, 48.87it/s]
-     75%|#######5  | 218/289 [00:06<00:01, 44.14it/s]
-     83%|########2 | 239/289 [00:07<00:00, 62.23it/s]
-     86%|########5 | 248/289 [00:07<00:00, 63.34it/s]
-     89%|########8 | 257/289 [00:07<00:00, 39.59it/s]
-     91%|#########1| 264/289 [00:08<00:00, 30.70it/s]
-     93%|#########3| 269/289 [00:08<00:00, 22.42it/s]
-     94%|#########4| 273/289 [00:08<00:00, 20.58it/s]
-     96%|#########5| 277/289 [00:09<00:00, 19.28it/s]
-     97%|#########6| 280/289 [00:09<00:00, 17.15it/s]    100%|##########| 289/289 [00:09<00:00, 30.37it/s]
-    /home/runner/work/PyGLImER/PyGLImER/src/pyglimer/database/rfh5.py:376: UserWarning: The header contains an item of type <class 'obspy.core.util.attribdict.AttribDict'>. Information            of this type cannot be written to an hdf5 file.
-      warnings.warn(
-    /home/runner/work/PyGLImER/PyGLImER/src/pyglimer/database/rfh5.py:376: UserWarning: The header contains an item of type <class 'obspy.core.inventory.response.Response'>. Information            of this type cannot be written to an hdf5 file.
-      warnings.warn(
-    /home/runner/work/PyGLImER/PyGLImER/src/pyglimer/database/rfh5.py:376: UserWarning: The header contains an item of type <class 'obspy.core.event.resourceid.ResourceIdentifier'>. Information            of this type cannot be written to an hdf5 file.
-      warnings.warn(
-    100%|##########| 1/1 [00:09<00:00,  9.70s/it]    100%|##########| 1/1 [00:09<00:00,  9.70s/it]
+      2%|2         | 6/289 [00:00<00:05, 53.06it/s]
+      8%|7         | 23/289 [00:00<00:02, 111.97it/s]
+     12%|#2        | 35/289 [00:00<00:02, 89.07it/s] 
+     16%|#5        | 45/289 [00:00<00:02, 90.42it/s]
+     19%|#9        | 55/289 [00:00<00:03, 77.86it/s]
+     22%|##2       | 65/289 [00:00<00:02, 81.99it/s]
+     27%|##6       | 77/289 [00:00<00:02, 91.95it/s]
+     31%|###       | 89/289 [00:00<00:02, 94.83it/s]
+     37%|###7      | 108/289 [00:01<00:01, 116.92it/s]
+     42%|####1     | 120/289 [00:01<00:01, 117.24it/s]
+     46%|####5     | 132/289 [00:01<00:01, 107.78it/s]
+     65%|######5   | 188/289 [00:01<00:00, 219.81it/s]
+     73%|#######3  | 211/289 [00:01<00:00, 176.34it/s]
+     83%|########2 | 239/289 [00:01<00:00, 199.61it/s]
+     90%|######### | 261/289 [00:01<00:00, 174.07it/s]
+     97%|#########7| 281/289 [00:02<00:00, 96.97it/s]     100%|##########| 289/289 [00:02<00:00, 118.84it/s]
+    100%|##########| 1/1 [00:02<00:00,  2.48s/it]    100%|##########| 1/1 [00:02<00:00,  2.49s/it]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 164-172
+.. GENERATED FROM PYTHON SOURCE LINES 161-169
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -860,7 +334,7 @@ workflow because the RFs are saved in form of
 Header info that cannot be saved in ASDF. So, we import the database class
 and query for the P receiver functions we computed. and output a stream.
 
-.. GENERATED FROM PYTHON SOURCE LINES 172-189
+.. GENERATED FROM PYTHON SOURCE LINES 169-186
 
 .. code-block:: default
 
@@ -894,14 +368,14 @@ and query for the P receiver functions we computed. and output a stream.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 190-194
+.. GENERATED FROM PYTHON SOURCE LINES 187-191
 
 PyGLImER is based on Obspy and hence, similar to ``obspy``, we can access
 the ``Stats`` of a ``RFTrace`` in a ``RFStream``. The abstraction from obspy
 follows a need for more (SAC) header information to handle RFs. Let's take
 a look at the attributes.
 
-.. GENERATED FROM PYTHON SOURCE LINES 194-201
+.. GENERATED FROM PYTHON SOURCE LINES 191-198
 
 .. code-block:: default
 
@@ -920,12 +394,12 @@ a look at the attributes.
 
  .. code-block:: none
 
-    Stats({'sampling_rate': 10.0, 'delta': 0.1, 'starttime': UTCDateTime(2021, 1, 10, 4, 4, 10, 294500), 'endtime': UTCDateTime(2021, 1, 10, 4, 6, 40, 194500), 'npts': 1500, 'calib': 1.0, 'network': 'IU', 'station': 'HRV', 'location': '10', 'channel': 'PRF', '_format': 'ASDF', 'back_azimuth': 175.0198780525632, 'distance': 66.41981345929631, 'event_depth': 217000.0, 'event_latitude': -24.0412, 'event_longitude': -66.5729, 'event_magnitude': 6.1, 'event_time': UTCDateTime(2021, 1, 10, 3, 54, 14, 483000), 'onset': UTCDateTime(2021, 1, 10, 4, 4, 40, 294000), 'phase': 'P', 'pol': 'v', 'processing': ["ObsPy 1.3.0: remove_response(fig=None::inventory=None::output='VEL'::plot=False::pre_filt=None::taper=True::taper_fraction=0.05::water_level=60::zero_mean=True)", "ObsPy 1.3.0: detrend(options={}::type='demean')", "ObsPy 1.3.0: taper(max_length=None::max_percentage=0.05::side='both'::type='hann')", 'ObsPy 1.3.0: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 194538)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 294538))', 'ObsPy 1.3.0: normalize(norm=None)', "ObsPy 1.3.0: filter(options={'freq': 1.5, 'zerophase': True, 'corners': 2}::type='lowpass')"], 'slowness': 6.33734875354112, 'station_elevation': 200.0, 'station_latitude': 42.5064, 'station_longitude': -71.5583, 'type': 'time'})
+    Stats({'sampling_rate': 10.0, 'delta': 0.1, 'starttime': UTCDateTime(2021, 1, 10, 4, 4, 10, 294500), 'endtime': UTCDateTime(2021, 1, 10, 4, 6, 40, 194500), 'npts': 1500, 'calib': 1.0, 'network': 'IU', 'station': 'HRV', 'location': '60', 'channel': 'PRF', '_fdsnws_dataselect_url': 'http://service.iris.edu/fdsnws/dataselect/1/query', '_format': 'MSEED', 'back_azimuth': 175.0198780525632, 'distance': 66.41981345929631, 'event_depth': 217000.0, 'event_latitude': -24.0412, 'event_longitude': -66.5729, 'event_magnitude': 6.1, 'event_time': UTCDateTime(2021, 1, 10, 3, 54, 14, 483000), 'onset': UTCDateTime(2021, 1, 10, 4, 4, 40, 294000), 'phase': 'P', 'pol': 'v', 'processing': ['ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 269538)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 269538))', "ObsPy 1.3.1: filter(options={'freq': 4, 'maxorder': 12}::type='lowpass_cheby_2')", 'ObsPy 1.3.1: decimate(factor=4::no_filter=True::strict_length=False)', 'ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 294500)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 294500))', "ObsPy 1.3.1: remove_response(fig=None::inventory=None::output='VEL'::plot=False::pre_filt=None::taper=True::taper_fraction=0.05::water_level=60::zero_mean=True)", "ObsPy 1.3.1: detrend(options={}::type='demean')", "ObsPy 1.3.1: taper(max_length=None::max_percentage=0.05::side='both'::type='hann')", 'ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 194500)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 294500))', 'ObsPy 1.3.1: normalize(norm=None)', "ObsPy 1.3.1: filter(options={'freq': 1.5, 'zerophase': True, 'corners': 2}::type='lowpass')"], 'slowness': 6.33734875354112, 'station_elevation': 200.0, 'station_latitude': 42.5064, 'station_longitude': -71.5583, 'type': 'time'})
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 202-218
+.. GENERATED FROM PYTHON SOURCE LINES 199-215
 
 First Receiver function plots
 -----------------------------
@@ -944,7 +418,7 @@ Below we show how to plot the receiver function
 as a function of time, and the clean option, which plots
 the receiver function without any axes or text.
 
-.. GENERATED FROM PYTHON SOURCE LINES 218-224
+.. GENERATED FROM PYTHON SOURCE LINES 215-221
 
 .. code-block:: default
 
@@ -968,15 +442,15 @@ the receiver function without any axes or text.
  .. code-block:: none
 
 
-    <AxesSubplot:xlabel='Conversion Time [s]', ylabel='A    '>
+    <AxesSubplot: xlabel='Conversion Time [s]', ylabel='A    '>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 225-226
+.. GENERATED FROM PYTHON SOURCE LINES 222-223
 
 Let's zoom into the first 20 seconds (~200km)
 
-.. GENERATED FROM PYTHON SOURCE LINES 226-229
+.. GENERATED FROM PYTHON SOURCE LINES 223-226
 
 .. code-block:: default
 
@@ -997,11 +471,11 @@ Let's zoom into the first 20 seconds (~200km)
  .. code-block:: none
 
 
-    <AxesSubplot:xlabel='Conversion Time [s]', ylabel='A    '>
+    <AxesSubplot: xlabel='Conversion Time [s]', ylabel='A    '>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 230-235
+.. GENERATED FROM PYTHON SOURCE LINES 227-232
 
 Plot RF section
 +++++++++++++++
@@ -1009,7 +483,7 @@ Plot RF section
 Since we have an entire stream of receiver functions at hand,
 we can plot a section
 
-.. GENERATED FROM PYTHON SOURCE LINES 235-238
+.. GENERATED FROM PYTHON SOURCE LINES 232-235
 
 .. code-block:: default
 
@@ -1030,16 +504,16 @@ we can plot a section
  .. code-block:: none
 
 
-    <AxesSubplot:title={'center':'PRF component'}, xlabel='$\\Delta$ [$^{\\circ}$]', ylabel='Time [s]'>
+    <AxesSubplot: title={'center': 'PRF component'}, xlabel='$\\Delta$ [$^{\\circ}$]', ylabel='Time [s]'>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 239-241
+.. GENERATED FROM PYTHON SOURCE LINES 236-238
 
 Similar to the single RF plot we can provide time and 
 epicentral distance limits:
 
-.. GENERATED FROM PYTHON SOURCE LINES 241-248
+.. GENERATED FROM PYTHON SOURCE LINES 238-245
 
 .. code-block:: default
 
@@ -1064,16 +538,16 @@ epicentral distance limits:
  .. code-block:: none
 
 
-    <AxesSubplot:title={'center':'PRF component'}, xlabel='$\\Delta$ [$^{\\circ}$]', ylabel='Time [s]'>
+    <AxesSubplot: title={'center': 'PRF component'}, xlabel='$\\Delta$ [$^{\\circ}$]', ylabel='Time [s]'>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 249-251
+.. GENERATED FROM PYTHON SOURCE LINES 246-248
 
 By increasing the scaling factor and removing the plotted lines, we can
 already see trends:
 
-.. GENERATED FROM PYTHON SOURCE LINES 251-257
+.. GENERATED FROM PYTHON SOURCE LINES 248-254
 
 .. code-block:: default
 
@@ -1097,11 +571,11 @@ already see trends:
  .. code-block:: none
 
 
-    <AxesSubplot:title={'center':'PRF component'}, xlabel='$\\Delta$ [$^{\\circ}$]', ylabel='Time [s]'>
+    <AxesSubplot: title={'center': 'PRF component'}, xlabel='$\\Delta$ [$^{\\circ}$]', ylabel='Time [s]'>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 258-259
+.. GENERATED FROM PYTHON SOURCE LINES 255-256
 
 As simple as that you can create your own receiver functions with 
 just a single smalle script.
@@ -1109,7 +583,7 @@ just a single smalle script.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  19.400 seconds)
+   **Total running time of the script:** ( 0 minutes  54.162 seconds)
 
 
 .. _sphx_glr_download_tutorials_DataCollectionHDF5.py:

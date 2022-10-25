@@ -12,8 +12,8 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+  <link href="../../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
 
   
   <link rel="stylesheet"
@@ -22,6 +22,8 @@
     href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
@@ -31,13 +33,14 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/clipboard.min.js"></script>
     <script src="../../../_static/copybutton.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyglimer/utils/utils';</script>
@@ -64,7 +67,7 @@
     <div class="search-button__search-container">
       
 <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
-  <i class="icon fas fa-search"></i>
+  <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
@@ -74,7 +77,7 @@
   
   <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
-      <span class="fas fa-bars"></span>
+      <span class="fa-solid fa-bars"></span>
   </label>
   <div id="navbar-start">
     
@@ -174,7 +177,7 @@
                 
 
             <li class="nav-item">
-                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fa-solid fa-up-right-from-square"></i></a>
             </li>
                 </div>
             </div>
@@ -188,16 +191,16 @@
     <div id="navbar-end">
       <div class="navbar-end-item navbar-end__search-button-container">
         
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
       </div>
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -210,7 +213,8 @@
           
           
           
-          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+          
+          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -222,14 +226,14 @@
 
   
   <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
   </div>
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
-      <span class="fas fa-outdent"></span>
+      <span class="fa-solid fa-outdent"></span>
   </label>
   
 
@@ -317,7 +321,7 @@
                 
 
             <li class="nav-item">
-                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fa-solid fa-up-right-from-square"></i></a>
             </li>
                 </div>
             </div>
@@ -334,10 +338,10 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -350,7 +354,8 @@
           
           
           
-          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+          
+          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -396,15 +401,16 @@
 
 
 <span class="sd">Created: Tue May 26 2019 13:31:30</span>
-<span class="sd">Last Modified: Friday, 6th May 2022 01:18:05 pm</span>
+<span class="sd">Last Modified: Monday, 26th September 2022 10:45:48 am</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Event</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">obspy.core.event.event</span> <span class="kn">import</span> <span class="n">Event</span>
+<span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">tp</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
-
+<span class="kn">import</span> <span class="nn">psutil</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
 <span class="kn">from</span> <span class="nn">obspy.clients.fdsn</span> <span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">header</span>
@@ -413,8 +419,9 @@
 <span class="kn">from</span> <span class="nn">obspy.core.stream</span> <span class="kn">import</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">Trace</span>
 <span class="kn">from</span> <span class="nn">obspy.core.utcdatetime</span> <span class="kn">import</span> <span class="n">UTCDateTime</span>
 
-<span class="kn">from</span> <span class="nn">pyglimer.database.asdf</span> <span class="kn">import</span> <span class="n">write_st</span>
+<span class="kn">from</span> <span class="nn">pyglimer.database.raw</span> <span class="kn">import</span> <span class="n">save_raw_DB_single_station</span><span class="p">,</span> <span class="n">write_st</span>
 <span class="kn">from</span> <span class="nn">pyglimer.rf.create</span> <span class="kn">import</span> <span class="n">RFStream</span><span class="p">,</span> <span class="n">RFTrace</span>
+<span class="c1"># from pyglimer.database.asdf import save_raw_single_station_asdf</span>
 
 <span class="kn">from</span> <span class="nn">.roundhalf</span> <span class="kn">import</span> <span class="n">roundhalf</span>
 
@@ -425,6 +432,10 @@
     <span class="s1">&#39;WARNING&#39;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span>
     <span class="s1">&#39;CRITICAL&#39;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">CRITICAL</span><span class="p">,</span>
     <span class="s1">&#39;ERROR&#39;</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">utc_save_str</span><span class="p">(</span><span class="n">utc</span><span class="p">:</span> <span class="n">UTCDateTime</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">utc</span><span class="o">.</span><span class="n">timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="dt_string"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.dt_string">[docs]</a><span class="k">def</span> <span class="nf">dt_string</span><span class="p">(</span><span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -484,7 +495,47 @@
     <span class="k">return</span> <span class="n">inv</span>
 
 
-<span class="k">def</span> <span class="nf">__client__loop__</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">Client</span><span class="p">,</span> <span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bulk</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<div class="viewcode-block" id="check_UTC_overlap"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.check_UTC_overlap">[docs]</a><span class="k">def</span> <span class="nf">check_UTC_overlap</span><span class="p">(</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">UTCDateTime</span><span class="p">],</span> <span class="n">end</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">UTCDateTime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Checks a list of starttimes and endtimes for overlap</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    start : List[UTCDateTime]</span>
+<span class="sd">        List of UTCDatetime starttimes</span>
+<span class="sd">    end : List[UTCDateTime]</span>
+<span class="sd">        List of UTCDateTime endtimes</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    List[bool]</span>
+<span class="sd">        List of booleans. If True no overlap, if False overlap</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Initiate list saying there is no overlap</span>
+    <span class="n">check</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">*</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">_i</span><span class="p">,</span> <span class="p">(</span><span class="n">_start</span><span class="p">,</span> <span class="n">_end</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)):</span>
+
+        <span class="c1"># Loop over same array to check whether there is overlap in any of</span>
+        <span class="c1"># the windows.</span>
+        <span class="k">for</span> <span class="n">_j</span><span class="p">,</span> <span class="p">(</span><span class="n">_startc</span><span class="p">,</span> <span class="n">_endc</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)):</span>
+
+            <span class="c1"># Don&#39;t want to compute overlap of the same window</span>
+            <span class="k">if</span> <span class="n">_j</span> <span class="o">==</span> <span class="n">_i</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Check whether start or endtime of another window is in the range</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">_start</span> <span class="o">&lt;</span> <span class="n">_startc</span> <span class="ow">and</span> <span class="n">_startc</span> <span class="o">&lt;</span> <span class="n">_end</span><span class="p">)</span> \
+                    <span class="ow">or</span> <span class="p">(</span><span class="n">_start</span> <span class="o">&lt;</span> <span class="n">_endc</span> <span class="ow">and</span> <span class="n">_endc</span> <span class="o">&lt;</span> <span class="n">_end</span><span class="p">):</span>
+
+                <span class="n">check</span><span class="p">[</span><span class="n">_i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">check</span></div>
+
+
+<span class="k">def</span> <span class="nf">__client__loop__</span><span class="p">(</span>
+        <span class="n">client</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">Client</span><span class="p">,</span> <span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bulk</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Inventory</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download station information from specified client and for the</span>
 <span class="sd">    specified bulk list.</span>
@@ -501,62 +552,321 @@
     <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pyglimer.request&#39;</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">Client</span><span class="p">):</span>
             <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+
         <span class="n">stat_inv</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_stations_bulk</span><span class="p">(</span>
             <span class="n">bulk</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;response&#39;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">FDSNNoDataException</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">FDSNException</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">except</span> <span class="p">(</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">FDSNNoDataException</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">FDSNException</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span>
+            <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bulk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;--&gt; </span><span class="si">{</span><span class="n">bulk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span>  <span class="c1"># wrong client</span>
         <span class="c1"># ValueError is raised for querying a client without station service</span>
+
     <span class="k">for</span> <span class="n">network</span> <span class="ow">in</span> <span class="n">stat_inv</span><span class="p">:</span>
+
         <span class="n">netcode</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">code</span>
+
         <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="n">network</span><span class="p">:</span>
+
             <span class="n">statcode</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">code</span>
+
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">netcode</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">statcode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
             <span class="n">out</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">statloc</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.xml&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">netcode</span><span class="p">,</span> <span class="n">statcode</span><span class="p">))</span>
+
             <span class="n">stat_inv</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="n">netcode</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">statcode</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
                 <span class="n">out</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;STATIONXML&quot;</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">stat_inv</span>
 
 
-<span class="k">def</span> <span class="nf">__client__loop_wav__</span><span class="p">(</span>
-    <span class="n">client</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bulk</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">saved</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-        <span class="n">inv</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Download waveforms from specified client and for the</span>
-<span class="sd">    specified bulk list.</span>
+<div class="viewcode-block" id="chunkdict"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.chunkdict">[docs]</a><span class="k">def</span> <span class="nf">chunkdict</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Chunks upd dictionary with values into list of dictionaries where</span>
+<span class="sd">    each dictionary has chunksize or less entries.</span>
 
-<span class="sd">    :param client: FDSN client to use</span>
-<span class="sd">    :type client: str or obspy.fdsn.clients.Client</span>
-<span class="sd">    :param rawloc: Location in which the waveforms are to be saved</span>
-<span class="sd">    :type rawloc: str</span>
-<span class="sd">    :param bulk: Bulk list to described the queried download.</span>
-<span class="sd">    :type bulk: list</span>
-<span class="sd">    :param saved: Dictionary holding information about each request and</span>
-<span class="sd">        their associated events.</span>
-<span class="sd">    :type saved: dict</span>
-<span class="sd">    :param saveasdf: True if the desired output format will be asdf.</span>
-<span class="sd">    :type saveasdf: bool</span>
-<span class="sd">    :param inv: The inventory for all downloaded stations</span>
-<span class="sd">    :type inv: obspy.Inventory</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    d : dict</span>
+<span class="sd">        dictionary of lists</span>
+<span class="sd">    chunksize : int</span>
+<span class="sd">        number of elements per list in dictionary</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list</span>
+<span class="sd">        returns a list of dictionaries subsets of lists in the original</span>
+<span class="sd">        dictionary</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#</span>
+    <span class="n">tempd</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">tempd</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chunks</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">))</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">Nchunk</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tempd</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nchunk</span><span class="p">):</span>
+        <span class="n">subd</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">tempd</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">subd</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subd</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="save_stream"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.save_stream">[docs]</a><span class="k">def</span> <span class="nf">save_stream</span><span class="p">(</span>
+        <span class="n">st</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">saveh5</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">saved</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">inv</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">station</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Saves a stream to either mseed or HDF5 format depending on flag, and the</span>
+<span class="sd">    event-channel dictionary ``saved`` which with created in a parent function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    st : Stream</span>
+<span class="sd">        stream to save</span>
+<span class="sd">    rawloc : str</span>
+<span class="sd">        path to database raw waveforms databases</span>
+<span class="sd">    saveh5 : bool</span>
+<span class="sd">        whether to save hdf5 or mseed</span>
+<span class="sd">    saved : dict</span>
+<span class="sd">        event-channel dictionary that contains the bulk requests made</span>
+<span class="sd">    inv : Inventory</span>
+<span class="sd">        inventory</span>
+<span class="sd">    network : str | None, optional</span>
+<span class="sd">        network string, by default None</span>
+<span class="sd">    station : str | None, optional</span>
+<span class="sd">        station string, by default None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Save stuff in hdf5 format (custom format that is provided by pyglimer)</span>
+    <span class="k">if</span> <span class="n">saveh5</span><span class="p">:</span>
+
+        <span class="c1"># Make sure HDF5 file is only opened once</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">network</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">station</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">save_raw_DB_single_station</span><span class="p">(</span>
+                <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">saved</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">inv</span><span class="p">)</span>
+
+        <span class="c1"># Opens and closes HDF5 file for all traces belonging to one station.</span>
+        <span class="c1"># It&#39;s more versatile, but less efficient</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">save_raw</span><span class="p">(</span><span class="n">saved</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Save minised</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">save_raw</span><span class="p">(</span><span class="n">saved</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">__download_sub__</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">saved</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stream</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Takes in bulk requests, downloads them, and and returns stream of</span>
+<span class="sd">    traces, empty stream or raises an error.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    client : str</span>
+<span class="sd">        Name of the client that data is requested from</span>
+<span class="sd">    saved : dict</span>
+<span class="sd">        dictionary with event-channel data and bulk requests</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Stream</span>
+<span class="sd">        empty or full</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        if request is faulty or another error was thrown</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pyglimer.request&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Get bulk and flatten</span>
+    <span class="n">bulk</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Get full bulk list</span>
+    <span class="k">for</span> <span class="n">_b</span> <span class="ow">in</span> <span class="n">saved</span><span class="p">[</span><span class="s1">&#39;bulk&#39;</span><span class="p">]:</span>
+        <span class="n">bulk</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_b</span><span class="p">)</span>
+
+    <span class="c1"># ## The Block here is to debug the actual request made #####</span>
+    <span class="c1">#  But for code and output purposes it is unecessary to log.</span>
+    <span class="c1">#  I would just keep it for future debugging</span>
+    <span class="c1"># for _net, _sta, _cha, _st, _et, _event, _b in zip(</span>
+    <span class="c1">#         saved[&#39;net&#39;], saved[&#39;stat&#39;], saved[&#39;chan&#39;],</span>
+    <span class="c1">#         saved[&#39;startt&#39;], saved[&#39;endt&#39;], saved[&#39;event&#39;], saved[&#39;bulk&#39;]):</span>
+
+    <span class="c1">#     # Get event id</span>
+    <span class="c1">#     origin = (_event.preferred_origin() or _event.origins[0])</span>
+    <span class="c1">#     e_id = utc_save_str(origin.time)</span>
+
+    <span class="c1">#     # Print relevant debugging information</span>
+    <span class="c1">#     print(f&quot;{_net}.{_sta}..{_cha}: {_st} -- {_et} --&gt; {e_id}&quot;)</span>
+    <span class="c1">#     for __b in _b:</span>
+    <span class="c1">#         print(f&quot;^--&gt;{__b}&quot;)</span>
+    <span class="c1"># #############################################################</span>
+
+    <span class="c1"># Sort bulk request.</span>
+    <span class="n">bulk</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">Client</span><span class="p">):</span>
             <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+
         <span class="n">st</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_waveforms_bulk</span><span class="p">(</span><span class="n">bulk</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Downloaded </span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">}</span><span class="s1"> traces from Client </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">client</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">st</span>
+
     <span class="k">except</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">FDSNNoDataException</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">FDSNException</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-        <span class="k">return</span>  <span class="c1"># wrong client</span>
-        <span class="c1"># ValueError is raised for querying a client without station service</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Downloaded </span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">}</span><span class="s1"> traces from Client </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">client</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
-    <span class="n">save_raw</span><span class="p">(</span><span class="n">saved</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;HTTP Status code: 204&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;--------- NO DATA FOR REQUESTS: ----------------&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">__bulk</span> <span class="ow">in</span> <span class="n">bulk</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;||    </span><span class="si">{</span><span class="n">__bulk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;------------------------------------------------&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Stream</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;See Error above.&#39;</span><span class="p">)</span>
+            <span class="c1"># ValueError is raised for querying a client without</span>
+            <span class="c1"># station service</span>
+
+
+<span class="k">def</span> <span class="nf">__client__loop_wav__</span><span class="p">(</span>
+    <span class="n">client</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">saved</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">saveh5</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">inv</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">station</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Loops over event-channel requests and launches parallel or single</span>
+<span class="sd">    threaded downloads depending on the input parameter ``parallel``. The</span>
+<span class="sd">    Single threaded type is used if station downloads are parallelized (a</span>
+<span class="sd">    parent function) and parallel is used when a single station is downloaded</span>
+<span class="sd">    and events can be parallelized.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    client : str</span>
+<span class="sd">        client to download from, e.g. &quot;IRIS&quot;.</span>
+<span class="sd">    rawloc : str</span>
+<span class="sd">        database location for the raw data</span>
+<span class="sd">    saved : dict</span>
+<span class="sd">        dict containing channel-event info and bulk requests</span>
+<span class="sd">    saveh5 : bool</span>
+<span class="sd">        whether to save in HDF5 or not</span>
+<span class="sd">    inv : Inventory</span>
+<span class="sd">        inventory of the stations</span>
+<span class="sd">    network : Optional[str], optional</span>
+<span class="sd">        network string, by default None</span>
+<span class="sd">    station : Optional[str], optional</span>
+<span class="sd">        station string, by default None</span>
+<span class="sd">    parallel : bool, optional</span>
+<span class="sd">        whether to download requests in parallel or not, by default False</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pyglimer.request&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Making sure that all chunk sizes are the same</span>
+    <span class="c1"># This has become the equivalent of number of traces, unless there are</span>
+    <span class="c1"># multiple locations available.</span>
+    <span class="n">chunksize</span> <span class="o">=</span> <span class="mi">5000</span>
+
+    <span class="c1"># Get one key to get length of lists in dictionaries.</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">saved</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">N0</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">saved</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="c1"># Chunkify data and bulkstrings</span>
+    <span class="k">if</span> <span class="n">N0</span> <span class="o">&gt;</span> <span class="n">chunksize</span><span class="p">:</span>
+        <span class="n">saved</span> <span class="o">=</span> <span class="n">chunkdict</span><span class="p">(</span><span class="n">saved</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">)</span>
+
+    <span class="c1"># Request too small to parallelize</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Create single chunk</span>
+        <span class="n">saved</span> <span class="o">=</span> <span class="p">[</span><span class="n">saved</span><span class="p">,</span> <span class="p">]</span>
+
+        <span class="c1"># Set parallel to false because it is unnecessary</span>
+        <span class="n">parallel</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># Number of Total chunks to be downloaded</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">saved</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Downloading ...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Get number of cores available</span>
+    <span class="k">if</span> <span class="n">parallel</span><span class="p">:</span>
+
+        <span class="c1"># Get number of available CPUs</span>
+        <span class="n">NCPU</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(</span><span class="n">logical</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span>
+
+        <span class="c1"># Turn off parallelism if c=number of available cores is 1</span>
+        <span class="k">if</span> <span class="n">NCPU</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">parallel</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Limit CPUs to four so that the FDSN server is not overwhelmed</span>
+        <span class="k">elif</span> <span class="n">NCPU</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">NCPU</span> <span class="o">=</span> <span class="mi">4</span>
+
+        <span class="c1"># Splitting the total number of chunks of NCPU, so that NCPU chunks</span>
+        <span class="c1"># are downloaded simulatenously</span>
+        <span class="n">saved</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chunks</span><span class="p">(</span><span class="n">saved</span><span class="p">,</span> <span class="n">NCPU</span><span class="p">))</span>
+
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;    Downloading </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2"> chunks with each chunk  &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;&lt;= 100 requests dowloaded in Parallel&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">NCPU</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;multiprocessing&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">PARALLEL</span><span class="p">:</span>
+
+            <span class="c1"># Loop of chunk subsets</span>
+            <span class="k">for</span> <span class="n">_i</span><span class="p">,</span> <span class="n">_saved</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">saved</span><span class="p">):</span>
+
+                <span class="n">counter</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_saved</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Downloading </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2"> chunks&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Download streams in parallel</span>
+                <span class="n">streams</span> <span class="o">=</span> <span class="n">PARALLEL</span><span class="p">(</span>
+                    <span class="n">delayed</span><span class="p">(</span><span class="n">__download_sub__</span><span class="p">)(</span><span class="n">client</span><span class="p">,</span> <span class="n">__saved</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">__saved</span> <span class="ow">in</span> <span class="n">_saved</span><span class="p">)</span>
+
+                <span class="c1"># Save streams one by one</span>
+                <span class="k">for</span> <span class="n">st</span><span class="p">,</span> <span class="n">__saved</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">streams</span><span class="p">,</span> <span class="n">_saved</span><span class="p">):</span>
+
+                    <span class="c1"># If stream is empty skip</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># Save stream to mseed ot h5</span>
+                    <span class="n">save_stream</span><span class="p">(</span>
+                        <span class="n">st</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">saveh5</span><span class="p">,</span> <span class="n">__saved</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">)</span>
+
+    <span class="c1"># Get stuff single threadedly</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">streams</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_saved</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">saved</span><span class="p">):</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    --&gt; Bulk chunk </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">st</span> <span class="o">=</span> <span class="n">__download_sub__</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">_saved</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">st</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Save stream to mseed ot h5</span>
+            <span class="n">save_stream</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">saveh5</span><span class="p">,</span> <span class="n">_saved</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="save_raw"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.save_raw">[docs]</a><span class="k">def</span> <span class="nf">save_raw</span><span class="p">(</span>
-        <span class="n">saved</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">st</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inv</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">,</span> <span class="n">saveasdf</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="n">saved</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">st</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inv</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">,</span> <span class="n">saveh5</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Save the raw waveform data in the desired format.</span>
 <span class="sd">    The point of this function is mainly that the waveforms will be saved</span>
@@ -591,7 +901,7 @@
             <span class="n">locs</span> <span class="o">=</span> <span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">location</span> <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">sst</span><span class="p">]</span>
             <span class="n">filtloc</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">locs</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">locs</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
             <span class="n">sslst</span> <span class="o">=</span> <span class="n">slst</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">filtloc</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">saveasdf</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">saveh5</span><span class="p">:</span>
                 <span class="n">sinv</span> <span class="o">=</span> <span class="n">inv</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">starttime</span><span class="o">=</span><span class="n">startt</span><span class="p">,</span> <span class="n">endtime</span><span class="o">=</span><span class="n">endt</span><span class="p">)</span>
                 <span class="n">write_st</span><span class="p">(</span><span class="n">sslst</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">sinv</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -684,8 +994,9 @@
 
 
 <div class="viewcode-block" id="create_bulk_str"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.utils.create_bulk_str">[docs]</a><span class="k">def</span> <span class="nf">create_bulk_str</span><span class="p">(</span>
-    <span class="n">networks</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">stations</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">t0</span><span class="p">:</span> <span class="n">UTCDateTime</span> <span class="ow">or</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">List</span><span class="p">[</span><span class="n">UTCDateTime</span><span class="p">],</span>
+        <span class="n">networks</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">stations</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+        <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+        <span class="n">t0</span><span class="p">:</span> <span class="n">UTCDateTime</span> <span class="ow">or</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">List</span><span class="p">[</span><span class="n">UTCDateTime</span><span class="p">],</span>
         <span class="n">t1</span><span class="p">:</span> <span class="n">UTCDateTime</span> <span class="ow">or</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">List</span><span class="p">[</span><span class="n">UTCDateTime</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to generate the input for the obspy functions:</span>
@@ -711,6 +1022,7 @@
 
 <span class="sd">        All parameters accept wildcards.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># request object</span>
     <span class="n">bulk</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">t0</span> <span class="o">!=</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
@@ -877,6 +1189,11 @@
               
 <div class="toc-item">
   
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
 </div>
 
 <div class="toc-item">
@@ -900,7 +1217,7 @@
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -917,7 +1234,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

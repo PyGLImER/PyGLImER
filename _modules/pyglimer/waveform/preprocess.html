@@ -12,8 +12,8 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+  <link href="../../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
 
   
   <link rel="stylesheet"
@@ -22,6 +22,8 @@
     href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
@@ -31,13 +33,14 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/clipboard.min.js"></script>
     <script src="../../../_static/copybutton.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyglimer/waveform/preprocess';</script>
@@ -64,7 +67,7 @@
     <div class="search-button__search-container">
       
 <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
-  <i class="icon fas fa-search"></i>
+  <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
@@ -74,7 +77,7 @@
   
   <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
-      <span class="fas fa-bars"></span>
+      <span class="fa-solid fa-bars"></span>
   </label>
   <div id="navbar-start">
     
@@ -174,7 +177,7 @@
                 
 
             <li class="nav-item">
-                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fa-solid fa-up-right-from-square"></i></a>
             </li>
                 </div>
             </div>
@@ -188,16 +191,16 @@
     <div id="navbar-end">
       <div class="navbar-end-item navbar-end__search-button-container">
         
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
       </div>
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -210,7 +213,8 @@
           
           
           
-          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+          
+          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -222,14 +226,14 @@
 
   
   <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
   </div>
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
-      <span class="fas fa-outdent"></span>
+      <span class="fa-solid fa-outdent"></span>
   </label>
   
 
@@ -317,7 +321,7 @@
                 
 
             <li class="nav-item">
-                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fas fa-external-link-alt"></i></a>
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fa-solid fa-up-right-from-square"></i></a>
             </li>
                 </div>
             </div>
@@ -334,10 +338,10 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -350,7 +354,8 @@
           
           
           
-          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+          
+          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -393,7 +398,7 @@
 <span class="sd">    Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Tuesday, 19th May 2019 8:59:40 pm</span>
-<span class="sd">Last Modified: Friday, 6th May 2022 11:58:54 am</span>
+<span class="sd">Last Modified: Friday, 21st October 2022 03:31:31 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">fnmatch</span>
@@ -525,14 +530,17 @@
     <span class="k">for</span> <span class="n">evtcat</span> <span class="ow">in</span> <span class="n">evtcats</span><span class="p">:</span>
 
         <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;joblib&#39;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;USING JOBLIB AS BACKEND&#39;</span><span class="p">)</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;multiprocessing&#39;</span><span class="p">)(</span>
                 <span class="n">delayed</span><span class="p">(</span><span class="n">__event_loop</span><span class="p">)(</span>
                     <span class="n">phase</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">,</span>
                     <span class="n">taper_type</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">,</span> <span class="n">eh</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span>
                     <span class="n">ta</span><span class="p">,</span> <span class="n">statloc</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">preproloc</span><span class="p">,</span> <span class="n">rfloc</span><span class="p">,</span> <span class="n">deconmeth</span><span class="p">,</span>
-                    <span class="n">hc_filt</span><span class="p">,</span> <span class="n">netrestr</span><span class="p">,</span> <span class="n">statrestr</span><span class="p">,</span> <span class="n">remove_response</span><span class="p">)</span>
+                    <span class="n">hc_filt</span><span class="p">,</span> <span class="n">netrestr</span><span class="p">,</span> <span class="n">statrestr</span><span class="p">,</span> <span class="n">remove_response</span><span class="p">,</span>
+                    <span class="n">single_core</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">evtcat</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">client</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;mpi&#39;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;USING MPI AS BACKEND&#39;</span><span class="p">)</span>
             <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
             <span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
             <span class="n">rank</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span>
@@ -545,6 +553,7 @@
             <span class="c1"># get new MPI compatible loggers</span>
             <span class="n">logger</span> <span class="o">=</span> <span class="n">create_mpi_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">rank</span><span class="p">)</span>
             <span class="n">rflogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.RF&quot;</span> <span class="o">%</span> <span class="n">logger</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="c1"># rflogger.debug(f&#39;Rank/Size: {rank}/{psize}&#39;)</span>
             <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">ind</span><span class="p">):</span>
                 <span class="n">__event_loop</span><span class="p">(</span>
                     <span class="n">phase</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">evtcat</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">taper_perc</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">,</span>
@@ -554,6 +563,7 @@
 
         <span class="c1"># Use single core only</span>
         <span class="k">elif</span> <span class="n">client</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;single&#39;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;USING SINGLE CORE BACKEND&#39;</span><span class="p">)</span>
             <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">evtcat</span><span class="p">):</span>
                 <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -561,7 +571,8 @@
                         <span class="n">phase</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">,</span>
                         <span class="n">taper_type</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">,</span> <span class="n">eh</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span>
                         <span class="n">ta</span><span class="p">,</span> <span class="n">statloc</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">,</span> <span class="n">preproloc</span><span class="p">,</span> <span class="n">rfloc</span><span class="p">,</span> <span class="n">deconmeth</span><span class="p">,</span>
-                        <span class="n">hc_filt</span><span class="p">,</span> <span class="n">netrestr</span><span class="p">,</span> <span class="n">statrestr</span><span class="p">,</span> <span class="n">remove_response</span><span class="p">))</span>
+                        <span class="n">hc_filt</span><span class="p">,</span> <span class="n">netrestr</span><span class="p">,</span> <span class="n">statrestr</span><span class="p">,</span> <span class="n">remove_response</span><span class="p">,</span>
+                        <span class="n">single_core</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Unknown client </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">client</span><span class="p">)</span>
@@ -614,7 +625,7 @@
     <span class="n">logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span> <span class="n">eh</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">ta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">preproloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rfloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">deconmeth</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">netrestr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">statrestr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">remove_response</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="n">remove_response</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">single_core</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loops over each event in the event catalogue</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -629,7 +640,7 @@
     <span class="n">ot_fiss</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">origin_time</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()</span>
     <span class="n">evtlat</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">latitude</span>
     <span class="n">evtlon</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">longitude</span>
-    <span class="n">depth</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">depth</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">depth</span> <span class="ow">or</span> <span class="mi">25000</span>  <span class="c1"># For very old events this info is empty</span>
 
     <span class="c1"># Rounded for filenames</span>
     <span class="n">ot_loc</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">origin_time</span><span class="p">,</span> <span class="n">precision</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
@@ -670,7 +681,8 @@
                 <span class="n">phase</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">filestr</span><span class="p">,</span> <span class="n">taper_perc</span><span class="p">,</span> <span class="n">taper_type</span><span class="p">,</span>
                 <span class="n">model</span><span class="p">,</span> <span class="n">origin_time</span><span class="p">,</span> <span class="n">ot_fiss</span><span class="p">,</span> <span class="n">evtlat</span><span class="p">,</span> <span class="n">evtlon</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span>
                 <span class="n">prepro_folder</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">,</span> <span class="n">by_event</span><span class="p">,</span> <span class="n">eh</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span> <span class="n">ta</span><span class="p">,</span>
-                <span class="n">statloc</span><span class="p">,</span> <span class="n">preproloc</span><span class="p">,</span> <span class="n">rfloc</span><span class="p">,</span> <span class="n">deconmeth</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">,</span> <span class="n">remove_response</span><span class="p">)</span>
+                <span class="n">statloc</span><span class="p">,</span> <span class="n">preproloc</span><span class="p">,</span> <span class="n">rfloc</span><span class="p">,</span> <span class="n">deconmeth</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">,</span> <span class="n">remove_response</span><span class="p">,</span>
+                <span class="n">single_core</span><span class="p">)</span>
             <span class="n">infolist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="c1"># Unhandled exceptions should not cause the loop to quit</span>
@@ -688,7 +700,8 @@
     <span class="n">prepro_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">obspy</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span>
     <span class="n">logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span> <span class="n">rflogger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">,</span> <span class="n">by_event</span><span class="p">,</span> <span class="n">eh</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">tz</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">preproloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rfloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">deconmeth</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">remove_response</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+    <span class="n">deconmeth</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hc_filt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">remove_response</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">single_core</span><span class="o">=</span><span class="nb">bool</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loops over each waveform for a specific event and a specific station</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -777,6 +790,13 @@
         <span class="k">except</span> <span class="n">SNRError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># QR rejections</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">filestr</span><span class="p">,</span> <span class="s2">&quot;QC was not met, SNR ratios are&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">])</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">delta</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;sampling_rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sampling_rate</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;network&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;station&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statlat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">latitude</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statlon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longitude</span>
+            <span class="n">infodict</span><span class="p">[</span><span class="s1">&#39;statel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">elevation</span>
 
             <span class="k">if</span> <span class="n">__file_in_db</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s1">&#39;info.dat&#39;</span><span class="p">):</span>
                 <span class="k">with</span> <span class="n">shelve</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">infof</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">info</span><span class="p">:</span>
@@ -787,6 +807,9 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">infodict</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;ot_all&#39;</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ot_fiss</span><span class="p">)</span>
 
+            <span class="k">if</span> <span class="n">single_core</span><span class="p">:</span>
+                <span class="n">write_info</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">infodict</span><span class="p">)</span>
+                <span class="k">return</span>
             <span class="k">return</span> <span class="n">infodict</span>
 
         <span class="k">except</span> <span class="n">StreamLengthError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -898,7 +921,7 @@
             <span class="n">rflogger</span><span class="o">.</span><span class="n">exception</span><span class="p">([</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">ot_loc</span><span class="p">,</span> <span class="n">e</span><span class="p">])</span>
 
         <span class="k">finally</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">infodict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">single_core</span><span class="p">:</span>
                 <span class="c1"># Single-core case</span>
                 <span class="n">write_info</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">infodict</span><span class="p">,</span> <span class="n">preproloc</span><span class="p">)</span>
 
@@ -1200,6 +1223,11 @@
               
 <div class="toc-item">
   
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
 </div>
 
 <div class="toc-item">
@@ -1223,7 +1251,7 @@
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -1240,7 +1268,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>
