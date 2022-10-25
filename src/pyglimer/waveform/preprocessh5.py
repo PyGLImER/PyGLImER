@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Monday, 24th October 2022 05:08:25 pm
+Last Modified: Tuesday, 25th October 2022 11:01:58 am
 '''
 
 from glob import glob
@@ -226,7 +226,7 @@ def _preprocessh5_single(
                 continue
 
             st = rdb.get_data(net, stat, ot)
-            st = st.slice(starttime=toa-tz, endtime=toa+tz)
+            st = st.slice(starttime=toa-tz, endtime=toa+ta)
             if st.count() < 3:
                 logger.info(
                     f'Only {st.count()} traces found for Station {net}.{stat}'
