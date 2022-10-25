@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Tuesday, 25th October 2022 01:36:57 pm
+Last Modified: Tuesday, 25th October 2022 01:40:19 pm
 '''
 
 import fnmatch
@@ -565,7 +565,8 @@ def mseed_to_hdf5(
                 os.remove(mseed)
 
                 continue
-
+            # Decimate
+            st = resample_or_decimate(st, 10)
             rdb.add_waveform(st, evt_str)
 
             # Everything went well
