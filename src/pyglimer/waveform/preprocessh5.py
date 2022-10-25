@@ -12,7 +12,7 @@ and process files station wise rather than event wise.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 18th February 2021 02:26:03 pm
-Last Modified: Tuesday, 25th October 2022 11:01:58 am
+Last Modified: Tuesday, 25th October 2022 12:26:09 pm
 '''
 
 from glob import glob
@@ -329,7 +329,6 @@ def __station_process__(
     # Is the data already processed?
     origin = (evt.preferred_origin() or evt.origins[0])
     ot_fiss = UTCDateTime(origin.time).format_fissures()
-    # ot_loc = UTCDateTime(origin.time, precision=-1).format_fissures()[:-6]
 
     # Remove repsonse
     if remove_response:
