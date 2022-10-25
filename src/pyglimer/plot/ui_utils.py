@@ -31,7 +31,7 @@ def set_sliderval_no_callback(slider: Slider, val):
         xy[2] = val, 1
         xy[3] = val, 0
     slider.poly.xy = xy
-    slider.valtext.set_text(val)  # slider.valfmt % val)
+    slider.valtext.set_text(val)
     if slider.drawon:
         slider.ax.figure.canvas.draw_idle()
 

@@ -55,4 +55,4 @@
   # Waterlevel Spectral Division: 'waterlevel'
   deconmeth: 'it'
   # Remove the station response. Set to False if you don't have access to the response
-  remove_response: True
+  remove_response: False
