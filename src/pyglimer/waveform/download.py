@@ -10,7 +10,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Monday, 10th October 2022 04:53:26 pm
+Last Modified: Monday, 24th October 2022 07:18:39 pm
 '''
 
 from multiprocessing import Event
@@ -935,10 +935,10 @@ def get_mseed_storage(
     if asdfsave:
         if wav_in_hdf5(
                 os.path.join(tmp.folder, os.pardir),
-                network, station, location, channel, starttime, endtime):
+                network, station, location, channel):
             return True
     else:
-        if wav_in_db(network, station, location, channel, starttime, endtime):
+        if wav_in_db(network, station, location, channel):
             return True
 
     # If a string is returned the file will be saved in that location.
@@ -985,7 +985,6 @@ def wav_in_hdf5(
         rawloc: str, network: str, station: str, location: str,
         channel: str) -> bool:
     """Is the waveform already in the Raw hdf5 database?"""
-
     # H5 file location
     h5_file = os.path.join(rawloc, '%s.%s.h5' % (
         network, station))
