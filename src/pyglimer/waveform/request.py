@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Tuesday, 25th October 2022 10:39:59 am
+Last Modified: Tuesday, 25th October 2022 11:14:51 am
 '''
 from multiprocessing.sharedctypes import Value
 import os
@@ -185,7 +185,10 @@ class Request(object):
             raise ValueError(
                 'Prepro_subdir has to be defined if the output format is '
                 f'{format}.')
-        self.preproloc = os.path.join(proj_dir, prepro_subdir, self.phase)
+        if prepro_subdir is None:
+            self.preproloc = None
+        else:
+            self.preproloc = os.path.join(proj_dir, prepro_subdir, self.phase)
         self.rfloc = os.path.join(proj_dir, rf_subdir, self.phase)
 
         # logger for the download steps
