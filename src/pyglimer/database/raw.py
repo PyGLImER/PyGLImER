@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Tuesday, 25th October 2022 01:41:43 pm
+Last Modified: Tuesday, 25th October 2022 01:42:06 pm
 '''
 
 import fnmatch
@@ -788,8 +788,7 @@ def write_st(
     evt_id = pu.utc_save_str(origin.time)
 
     if resample:
-        st.filter('lowpass_cheby_2', freq=4, maxorder=12)
-        st = resample_or_decimate(st, 10, filter=False)
+        st = resample_or_decimate(st, 10)
 
     netsta = set()
     for tr in st:
