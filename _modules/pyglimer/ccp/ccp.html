@@ -401,7 +401,7 @@
 <span class="sd">   Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Friday, 10th April 2020 05:30:18 pm</span>
-<span class="sd">Last Modified: Monday, 24th October 2022 05:05:36 pm</span>
+<span class="sd">Last Modified: Tuesday, 25th October 2022 03:51:42 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="c1"># !/usr/bin/env python3</span>
@@ -1019,7 +1019,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># note that streams are actually files - confusing variable name</span>
         <span class="k">if</span> <span class="n">mc_backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;joblib&#39;</span><span class="p">:</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;multiprocessing&#39;</span><span class="p">)(</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;multiprocessing&#39;</span><span class="p">)(</span>
                 <span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_ccp_from_hdf5</span><span class="p">)(</span>
                     <span class="n">f</span><span class="p">,</span> <span class="n">multiple</span><span class="p">,</span> <span class="n">append_pp</span><span class="p">,</span> <span class="n">n_closest_points</span><span class="p">,</span> <span class="n">vel_model</span><span class="p">,</span>
                     <span class="n">latb</span><span class="p">,</span> <span class="n">lonb</span><span class="p">,</span> <span class="n">filt</span><span class="p">)</span>
