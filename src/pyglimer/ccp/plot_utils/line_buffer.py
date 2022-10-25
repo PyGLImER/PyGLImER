@@ -3,7 +3,7 @@ from pyglimer.utils.geo_utils import geo2cart
 from pyglimer.utils.geo_utils import cart2geo
 from pyglimer.utils.Ra2b import Ra2b
 from shapely.geometry import Polygon
-from shapely.ops import cascaded_union
+from shapely.ops import unary_union
 
 
 def line_buffer(lat, lon, delta=1.0):
@@ -77,7 +77,7 @@ def line_buffer(lat, lon, delta=1.0):
         polygons.append(polygon)
 
     # Combine from converted points
-    upoly = cascaded_union(polygons)
+    upoly = unary_union(polygons)
 
     if upoly.type == 'MultiPolygon':
         polyplot = [np.array(x.exterior.xy).T for x in upoly.geoms]
