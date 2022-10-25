@@ -8,13 +8,14 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 11th August 2021 03:20:09 pm
-Last Modified: Tuesday, 6th September 2022 05:34:54 pm
+Last Modified: Friday, 16th September 2022 02:47:40 pm
 '''
 
 import fnmatch
 import os
 import re
 from typing import Iterable, List, Tuple
+import logging
 import warnings
 
 import numpy as np
@@ -373,10 +374,9 @@ def convert_header_to_hdf5(dataset: h5py.Dataset, header: Stats):
                 header[key] = header[key].format_fissures()
             dataset.attrs[key] = header[key]
         except TypeError:
-            warnings.warn(
-                'The header contains an item of type %s. Information\
-            of this type cannot be written to an hdf5 file.'
-                % str(type(header[key])), UserWarning)
+            logging.debug(
+                f'The header contains an item of type {type(header[key])}.'
+                + 'Information of this type cannot be written to hdf5.')
             continue
 
 

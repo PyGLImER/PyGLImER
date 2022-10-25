@@ -14,7 +14,9 @@ from cartopy.mpl.geoaxes import GeoAxes, GeoAxesSubplot
 # Internal
 from pyglimer.ccp.plot_utils.plot_map import plot_map
 from pyglimer.ccp.plot_utils.plot_line_buffer import plot_line_buffer
-from pyglimer.ccp.plot_utils.midpointcolornorm import MidpointNormalize
+from pyglimer.ccp.plot_utils.midpointcolornorm import MidpointNormalize,\
+    StretchOutNormalize
+from pyglimer.plot.plot_utils import set_mpl_params
 
 
 def get_ax_coor(ax, lat, lon):
@@ -66,10 +68,13 @@ def plot_cross_section(
         minillum: int = 50,
         vmin: Optional[float] = None,
         vmax: Optional[float] = None,
+        low_clip: Optional[float] = None,
+        up_clip: Optional[float] = None,
         label: Optional[str] = None,
         rfcmap: str = "seismic",
         depthextent: Optional[Iterable] = None,
-        mapextent: Optional[Iterable] = None):
+        mapextent: Optional[Iterable] = None,
+        bold: bool = False):
     """Plots a cross section for given waypoints. If no axes are given, the
     function will also create figures for the map and the cross section.
 
@@ -98,6 +103,12 @@ def plot_cross_section(
         minimum value of the cross section, by default None
     vmax : Optional[float], optional
         maximum value of the cross section, by default None
+    low_clip : Optional[float],
+        All values between lowclip and zero will be shown as
+        zero. By default None.
+    up_clip : Optional[float],
+        All values between upclip and zero will be shown as
+        zero. By default None.
     label : Optional[str], optional
         label to put in the corner of the cross section plot and the
         cross section waypoints on the map, by default None
@@ -127,7 +138,7 @@ def plot_cross_section(
     """
 
     matplotlib.rcParams.update({'font.family': 'Arial'})
-
+    set_mpl_params(bold)
     # Get Cross section
     slat, slon, sdists, qlat, qlon, qdists, qz, qillum, qccp, epi_area = \
         ccp.get_profile(lat, lon, ddeg=ddeg)
@@ -139,7 +150,11 @@ def plot_cross_section(
         vmax = np.quantile(qccp[qccp > 0], 0.98)
 
     # Norm for the cross section
-    rfnorm = MidpointNormalize(vmin=vmin, vmax=vmax, midpoint=0.0)
+    if low_clip is None and up_clip is None:
+        rfnorm = MidpointNormalize(vmin=vmin, vmax=vmax, midpoint=0.0)
+    else:
+        rfnorm = StretchOutNormalize(
+            vmin=vmin, vmax=vmax, low=low_clip or .0, up=up_clip or .0)
     snorm = mcolors.Normalize(vmin=0, vmax=sdists[-1])
 
     # Set illumination boundaries for section plotting
@@ -262,7 +277,8 @@ def plot_cross_section(
         zorder=10, clip_on=False)
 
     c = plt.colorbar(
-        rfim, orientation='vertical', aspect=40, pad=0.025, fraction=0.05)
+        rfim, orientation='vertical', aspect=40, pad=0.025, fraction=0.05,
+        boundaries=np.linspace(vmin, vmax, 101))
     c.set_label("A", rotation=0, font='Arial')
     plt.xlabel('Offset [$^\\circ$]')
     plt.ylabel('Depth [km]')

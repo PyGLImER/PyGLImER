@@ -36,6 +36,12 @@ conda activate PyGLImER
 pip install -e .
 ```
 
+Optionally, you can test the package by running
+
+```bash
+pytest -p no:logging tests
+```
+
 ## Getting started
 Access PyGLImER's documentation [here](https://pyglimer.github.io/PyGLImER/).
 
