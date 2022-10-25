@@ -107,25 +107,22 @@ R.download_waveforms_small_db(channel='BH?')
 # ``ASDFDataset``s and we need to actually access the ``hdf5`` file that we
 # to count how many traces it contains.
 
-# Import ASDFDataset
-from pyasdf import ASDFDataSet
+# Import RawDataBase
+from pyglimer.database.raw import RawDatabase
 
 # Path to the where the miniseeds are stored
 data_storage = os.path.join(
     proj_dir, 'waveforms', 'raw', 'P', f'{network}.{station}.h5')
 
 # Read the data from the station ``h5`` file
-with ASDFDataSet(data_storage, mode='r', mpi=False) as ds:
+with RawDatabase(data_storage, mode='r') as ds:
 
     # Perform waveform query on ASDFDataSet
-    stream = ds.get_waveforms(
+    stream = ds.get_data(
         network,
         station,
-        '*', # Location
-        '*', # Channel
-        request_dict['starttime']-1000,  # Starttime 
-        request_dict['endtime']+1000,    # Endtime
-        'raw_recording')
+        '*',  # Event ID
+        'raw')
 
 # Print output
 print(f"Number of downloaded waveforms: {len(stream)}")
