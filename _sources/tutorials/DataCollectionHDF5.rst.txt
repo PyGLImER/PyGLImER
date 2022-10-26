@@ -302,25 +302,21 @@ that very coordinate system.
 
       0%|          | 0/1 [00:00<?, ?it/s]
       0%|          | 0/289 [00:00<?, ?it/s]
-      2%|2         | 6/289 [00:00<00:06, 43.04it/s]
-      8%|7         | 23/289 [00:00<00:02, 90.72it/s]
-     11%|#1        | 33/289 [00:00<00:03, 67.46it/s]
-     15%|#5        | 44/289 [00:00<00:03, 73.04it/s]
-     18%|#7        | 52/289 [00:00<00:03, 71.49it/s]
-     21%|##        | 60/289 [00:00<00:03, 69.32it/s]
-     24%|##3       | 68/289 [00:00<00:03, 66.98it/s]
-     28%|##8       | 81/289 [00:01<00:02, 78.81it/s]
-     31%|###1      | 90/289 [00:01<00:02, 81.20it/s]
-     37%|###7      | 108/289 [00:01<00:01, 99.10it/s]
-     42%|####1     | 120/289 [00:01<00:01, 98.80it/s]
-     45%|####4     | 130/289 [00:01<00:01, 85.04it/s]
-     65%|######4   | 187/289 [00:01<00:00, 200.82it/s]
-     73%|#######2  | 210/289 [00:02<00:00, 142.80it/s]
-     83%|########2 | 239/289 [00:02<00:00, 164.58it/s]
-     90%|########9 | 259/289 [00:02<00:00, 140.32it/s]
-     96%|#########5| 276/289 [00:02<00:00, 83.56it/s] 
-    100%|##########| 289/289 [00:02<00:00, 86.13it/s]    100%|##########| 289/289 [00:02<00:00, 98.11it/s]
-    100%|##########| 1/1 [00:03<00:00,  3.00s/it]    100%|##########| 1/1 [00:03<00:00,  3.00s/it]
+      2%|2         | 6/289 [00:00<00:04, 57.01it/s]
+      8%|7         | 23/289 [00:00<00:02, 121.79it/s]
+     12%|#2        | 36/289 [00:00<00:02, 100.88it/s]
+     16%|#6        | 47/289 [00:00<00:02, 94.77it/s] 
+     20%|#9        | 57/289 [00:00<00:02, 89.37it/s]
+     23%|##3       | 67/289 [00:00<00:02, 85.27it/s]
+     29%|##9       | 85/289 [00:00<00:01, 102.57it/s]
+     37%|###6      | 106/289 [00:00<00:01, 129.56it/s]
+     42%|####1     | 120/289 [00:01<00:01, 122.28it/s]
+     46%|####6     | 133/289 [00:01<00:01, 108.67it/s]
+     67%|######6   | 193/289 [00:01<00:00, 227.06it/s]
+     76%|#######5  | 219/289 [00:01<00:00, 182.96it/s]
+     87%|########6 | 250/289 [00:01<00:00, 209.98it/s]
+     95%|#########4| 274/289 [00:02<00:00, 122.29it/s]    100%|##########| 289/289 [00:02<00:00, 129.05it/s]
+    100%|##########| 1/1 [00:02<00:00,  2.29s/it]    100%|##########| 1/1 [00:02<00:00,  2.29s/it]
 
 
 
@@ -396,7 +392,7 @@ a look at the attributes.
 
  .. code-block:: none
 
-    Stats({'sampling_rate': 10.0, 'delta': 0.1, 'starttime': UTCDateTime(2021, 1, 10, 4, 4, 10, 319500), 'endtime': UTCDateTime(2021, 1, 10, 4, 6, 40, 219500), 'npts': 1500, 'calib': 1.0, 'network': 'IU', 'station': 'HRV', 'location': '00', 'channel': 'PRF', '_fdsnws_dataselect_url': 'http://service.iris.edu/fdsnws/dataselect/1/query', '_format': 'MSEED', 'back_azimuth': 175.0198780525632, 'distance': 66.41981345929631, 'event_depth': 217000.0, 'event_latitude': -24.0412, 'event_longitude': -66.5729, 'event_magnitude': 6.1, 'event_time': UTCDateTime(2021, 1, 10, 3, 54, 14, 483000), 'onset': UTCDateTime(2021, 1, 10, 4, 4, 40, 294000), 'phase': 'P', 'pol': 'v', 'processing': ['ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 269538)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 269538))', "ObsPy 1.3.1: filter(options={'freq': 4, 'maxorder': 12}::type='lowpass_cheby_2')", 'ObsPy 1.3.1: decimate(factor=2::no_filter=True::strict_length=False)', 'ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 319500)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 319500))', "ObsPy 1.3.1: remove_response(fig=None::inventory=None::output='VEL'::plot=False::pre_filt=None::taper=True::taper_fraction=0.05::water_level=60::zero_mean=True)", "ObsPy 1.3.1: detrend(options={}::type='demean')", "ObsPy 1.3.1: taper(max_length=None::max_percentage=0.05::side='both'::type='hann')", 'ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 219500)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 319500))', 'ObsPy 1.3.1: normalize(norm=None)', "ObsPy 1.3.1: filter(options={'freq': 1.5, 'zerophase': True, 'corners': 2}::type='lowpass')"], 'slowness': 6.33734875354112, 'station_elevation': 200.0, 'station_latitude': 42.5064, 'station_longitude': -71.5583, 'type': 'time'})
+    Stats({'sampling_rate': 10.0, 'delta': 0.1, 'starttime': UTCDateTime(2021, 1, 10, 4, 4, 10, 294500), 'endtime': UTCDateTime(2021, 1, 10, 4, 6, 40, 194500), 'npts': 1500, 'calib': 1.0, 'network': 'IU', 'station': 'HRV', 'location': '10', 'channel': 'PRF', '_fdsnws_dataselect_url': 'http://service.iris.edu/fdsnws/dataselect/1/query', '_format': 'MSEED', 'back_azimuth': 175.0198780525632, 'distance': 66.41981345929631, 'event_depth': 217000.0, 'event_latitude': -24.0412, 'event_longitude': -66.5729, 'event_magnitude': 6.1, 'event_time': UTCDateTime(2021, 1, 10, 3, 54, 14, 483000), 'onset': UTCDateTime(2021, 1, 10, 4, 4, 40, 294000), 'phase': 'P', 'pol': 'v', 'processing': ['ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 269538)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 269538))', "ObsPy 1.3.1: filter(options={'freq': 4, 'maxorder': 12}::type='lowpass_cheby_2')", 'ObsPy 1.3.1: decimate(factor=4::no_filter=True::strict_length=False)', 'ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 294500)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 294500))', "ObsPy 1.3.1: remove_response(fig=None::inventory=None::output='VEL'::plot=False::pre_filt=None::taper=True::taper_fraction=0.05::water_level=60::zero_mean=True)", "ObsPy 1.3.1: detrend(options={}::type='demean')", "ObsPy 1.3.1: taper(max_length=None::max_percentage=0.05::side='both'::type='hann')", 'ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 194500)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 294500))', 'ObsPy 1.3.1: normalize(norm=None)', "ObsPy 1.3.1: filter(options={'freq': 1.5, 'zerophase': True, 'corners': 2}::type='lowpass')"], 'slowness': 6.33734875354112, 'station_elevation': 200.0, 'station_latitude': 42.5064, 'station_longitude': -71.5583, 'type': 'time'})
 
 
 
@@ -585,7 +581,7 @@ just a single smalle script.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  59.281 seconds)
+   **Total running time of the script:** ( 0 minutes  46.555 seconds)
 
 
 .. _sphx_glr_download_tutorials_DataCollectionHDF5.py:
