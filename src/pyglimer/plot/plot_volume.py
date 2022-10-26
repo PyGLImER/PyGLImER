@@ -201,7 +201,7 @@ class VolumePlot:
             extent=[self.minY, self.maxY, self.minZ, self.maxZ],
             interpolation='nearest', origin='lower', aspect='auto',
             cmap=self.cmap, norm=self.norm, rasterized=True)
-        self.ax['x'].set_xlabel("y")
+        self.ax['x'].set_xlabel(r"y [$^\circ$]")
         plt.setp(self.ax['x'].get_yticklabels(), visible=False)
         self.ax['x'].invert_yaxis()
 
@@ -211,8 +211,8 @@ class VolumePlot:
             extent=[self.minX, self.maxX, self.minZ, self.maxZ],
             interpolation='nearest', origin='lower', aspect='auto',
             cmap=self.cmap, norm=self.norm, rasterized=True)
-        self.ax['y'].set_xlabel("x")
-        self.ax['y'].set_ylabel("z")
+        self.ax['y'].set_xlabel(r"x [$^\circ$]")
+        self.ax['y'].set_ylabel("z [km]")
         self.ax['y'].invert_yaxis()
 
     def plot_zsl(self):
@@ -221,7 +221,7 @@ class VolumePlot:
             extent=[self.minX, self.maxX, self.minY, self.maxY],
             interpolation='nearest', origin='lower', aspect='auto',
             cmap=self.cmap, norm=self.norm, rasterized=True)
-        self.ax['z'].set_ylabel("y")
+        self.ax['z'].set_ylabel(r"y [$^\circ$]")
         plt.setp(self.ax['z'].get_xticklabels(), visible=False)
 
     def plot_map(self):
@@ -401,7 +401,6 @@ class VolumeExploration:
 
         self.controlpanel()
         self.activate_slicers()
-        print(self.vp.V[self.vp.xli, :, :].shape)
         plt.show(block=True)
 
     def controlpanel(self):
@@ -423,7 +422,7 @@ class VolumeExploration:
                                             valstep=np.diff(self.vp.Y)[0])
 
         self.slices['z']['ax'] = self.cp.add_subplot(self.gs[2, :])
-        self.slices['z']['slider'] = Slider(self.slices['z']['ax'], r'y_l',
+        self.slices['z']['slider'] = Slider(self.slices['z']['ax'], r'z_l',
                                             self.vp.minZ, self.vp.maxZ,
                                             valinit=np.mean(self.vp.Z),
                                             valfmt='%d',
