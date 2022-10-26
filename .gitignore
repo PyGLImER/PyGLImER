@@ -22,3 +22,4 @@ examples/tutorials/database_sac
 **/tmp/**
 docs/_build
 docs/tutorials
+dist
