@@ -314,14 +314,14 @@ expression is needed for running this examples
 
  .. code-block:: none
 
-      0%|          | 0/3 [00:00<?, ?it/s]     33%|###3      | 1/3 [00:00<00:00,  9.57it/s]    100%|##########| 3/3 [00:00<00:00, 28.47it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:25,249 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 30.79it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:29,820 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.76549496 0.97226612 6.74721243]\n [0.76747878 0.99470118 6.35524615]\n [1.89990656 1.24512503 6.25358232]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.77465665 1.00897487 6.76707489]\n [0.78395596 1.00488542 6.3984945 ]\n [1.99114243 1.19502438 6.35761708]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -337,7 +337,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.76549496 0.97226612 6.74721243]\n [0.76747878 0.99470118 6.35524615]\n [1.89990656 1.24512503 6.25358232]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.77465665 1.00897487 6.76707489]\n [0.78395596 1.00488542 6.3984945 ]\n [1.99114243 1.19502438 6.35761708]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -347,51 +347,18 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 18.51it/s]    100%|##########| 3/3 [00:00<00:00, 18.48it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3447.37it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3395.28it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3802.63it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 33.17it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:25,418 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 20.49it/s]    100%|##########| 3/3 [00:00<00:00, 20.45it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3852.70it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4489.09it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4471.54it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 36.83it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:29,977 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.57032401 1.51985421 4.18286722]\n [0.54352496 1.4341365  3.79920419]\n [1.08498482 0.7031882  1.88781185]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.57032401 1.51985421 4.18286722]\n [0.54352496 1.4341365  3.79920419]\n [1.08498482 0.7031882  1.88781185]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 40.99it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:25,491 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.33773937 1.86126275 0.17455782]\n [0.53010265 1.29019989 0.47216992]\n [0.9723987  1.79061754 2.24415297]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.55738492 1.52284439 4.12091759]\n [0.53260342 1.4382248  3.74746545]\n [1.11606256 0.68984621 1.92233572]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -407,7 +374,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.33773937 1.86126275 0.17455782]\n [0.53010265 1.29019989 0.47216992]\n [0.9723987  1.79061754 2.24415297]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.55738492 1.52284439 4.12091759]\n [0.53260342 1.4382248  3.74746545]\n [1.11606256 0.68984621 1.92233572]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -417,46 +384,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    2022-10-25 23:04:25,562 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 42.08it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:30,043 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.1327371  0.84565732 6.6403446 ]\n [1.66057428 0.77881922 5.00261798]\n [1.83955158 0.69673167 4.28499293]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.1327371  0.84565732 6.6403446 ]\n [1.66057428 0.77881922 5.00261798]\n [1.83955158 0.69673167 4.28499293]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 21.03it/s]    100%|##########| 3/3 [00:00<00:00, 21.00it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:25,641 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.02230188 0.27012247 0.70190507]\n [1.93474814 0.28076508 0.55774396]\n [5.12271503 0.42159929 2.22174124]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.34698491 1.75790696 0.17980923]\n [0.53975226 1.2397252  0.47975826]\n [0.97949665 1.76450105 2.22356795]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -472,7 +407,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.02230188 0.27012247 0.70190507]\n [1.93474814 0.28076508 0.55774396]\n [5.12271503 0.42159929 2.22174124]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.34698491 1.75790696 0.17980923]\n [0.53975226 1.2397252  0.47975826]\n [0.97949665 1.76450105 2.22356795]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -482,46 +417,13 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    2022-10-25 23:04:25,718 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    2022-10-26 21:55:30,110 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.78628633 0.95708908 1.94408249]\n [0.79765119 0.85845994 1.89457661]\n [3.76322185 0.40506828 7.62107585]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.78628633 0.95708908 1.94408249]\n [0.79765119 0.85845994 1.89457661]\n [3.76322185 0.40506828 7.62107585]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 19.34it/s]    100%|##########| 3/3 [00:00<00:00, 19.31it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:25,799 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.24788576 0.69241528 0.65345473]\n [1.25875122 0.70820261 0.66218288]\n [1.54017682 0.8834641  1.25950846]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.09763721 0.86116757 6.57545482]\n [1.63770847 0.79814294 4.98739698]\n [1.84310136 0.74321738 4.36383089]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -537,7 +439,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.24788576 0.69241528 0.65345473]\n [1.25875122 0.70820261 0.66218288]\n [1.54017682 0.8834641  1.25950846]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.09763721 0.86116757 6.57545482]\n [1.63770847 0.79814294 4.98739698]\n [1.84310136 0.74321738 4.36383089]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -547,49 +449,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 37.05it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:25,879 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 22.87it/s]    100%|##########| 3/3 [00:00<00:00, 22.82it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:30,179 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.57508417 1.31958902 2.52393377]\n [2.86235725 1.44927499 2.88420866]\n [1.41702297 2.20668449 2.3486472 ]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.57508417 1.31958902 2.52393377]\n [2.86235725 1.44927499 2.88420866]\n [1.41702297 2.20668449 2.3486472 ]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 37.80it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3779.79it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3734.91it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:25,958 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.36235231 1.59613936 1.33800885]\n [0.38493044 1.51495096 1.21185401]\n [0.79004086 1.50473873 1.79091627]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.05215338 0.27042716 0.74857378]\n [1.95892751 0.28213521 0.6040649 ]\n [5.14329143 0.42889155 2.30579555]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -605,7 +472,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.36235231 1.59613936 1.33800885]\n [0.38493044 1.51495096 1.21185401]\n [0.79004086 1.50473873 1.79091627]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.05215338 0.27042716 0.74857378]\n [1.95892751 0.28213521 0.6040649 ]\n [5.14329143 0.42889155 2.30579555]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -615,46 +482,13 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 39.51it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:26,034 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    2022-10-26 21:55:30,247 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[4.80590313 1.30512091 5.67075537]\n [4.27478475 1.07990391 4.9282529 ]\n [2.27867222 0.79992649 2.74808054]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[4.80590313 1.30512091 5.67075537]\n [4.27478475 1.07990391 4.9282529 ]\n [2.27867222 0.79992649 2.74808054]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    2022-10-25 23:04:26,119 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.16829229  1.92680888  5.66831085]\n [ 1.14361383  1.93980949  5.00947833]\n [ 2.29315705  0.7441845  13.96806342]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.79974257 0.94303415 1.93664348]\n [0.81125452 0.84643511 1.88741756]\n [3.86171499 0.40865182 7.88765905]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -670,7 +504,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.16829229  1.92680888  5.66831085]\n [ 1.14361383  1.93980949  5.00947833]\n [ 2.29315705  0.7441845  13.96806342]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.79974257 0.94303415 1.93664348]\n [0.81125452 0.84643511 1.88741756]\n [3.86171499 0.40865182 7.88765905]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -680,47 +514,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-     67%|######6   | 2/3 [00:00<00:00, 12.54it/s]    100%|##########| 3/3 [00:00<00:00, 18.74it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:26,192 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 21.92it/s]    100%|##########| 3/3 [00:00<00:00, 21.88it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:30,316 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 6.28694358  0.94410541 22.13765247]\n [ 6.37214857  0.9337805  20.90432469]\n [ 4.54421961  0.5960027  12.97939054]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 6.28694358  0.94410541 22.13765247]\n [ 6.37214857  0.9337805  20.90432469]\n [ 4.54421961  0.5960027  12.97939054]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 41.09it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:26,269 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[12.2751103   0.53814923  3.62538593]\n [10.05510791  0.56011234  2.3855218 ]\n [ 2.08510155  3.97779948  2.76643303]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.25191365 0.6969515  0.66039297]\n [1.26440898 0.71294255 0.66727628]\n [1.54331557 0.90504796 1.24511069]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -736,7 +537,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[12.2751103   0.53814923  3.62538593]\n [10.05510791  0.56011234  2.3855218 ]\n [ 2.08510155  3.97779948  2.76643303]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.25191365 0.6969515  0.66039297]\n [1.26440898 0.71294255 0.66727628]\n [1.54331557 0.90504796 1.24511069]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -746,46 +547,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    2022-10-25 23:04:26,340 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 44.00it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:30,383 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.79728296 1.32753672 0.7354865 ]\n [0.87324132 1.32366017 1.08197999]\n [0.76487814 2.01727935 2.86163404]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.79728296 1.32753672 0.7354865 ]\n [0.87324132 1.32366017 1.08197999]\n [0.76487814 2.01727935 2.86163404]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 20.43it/s]    100%|##########| 3/3 [00:00<00:00, 20.40it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:26,416 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[4.88513732 0.50906746 2.32405523]\n [4.43764651 0.41859196 2.03374464]\n [1.49725489 0.88049738 1.30962348]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.62783222 1.33640018 2.51115809]\n [2.80713403 1.46571748 2.89194389]\n [1.43486858 2.21896923 2.37325583]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -801,7 +570,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[4.88513732 0.50906746 2.32405523]\n [4.43764651 0.41859196 2.03374464]\n [1.49725489 0.88049738 1.30962348]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.62783222 1.33640018 2.51115809]\n [2.80713403 1.46571748 2.89194389]\n [1.43486858 2.21896923 2.37325583]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -811,47 +580,16 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    2022-10-25 23:04:26,494 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 44.85it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4188.72it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4439.98it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:30,451 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.2057228  3.97806436 0.39663366]\n [0.21483115 3.4640344  0.34511111]\n [1.02724865 0.80328468 0.60817052]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.2057228  3.97806436 0.39663366]\n [0.21483115 3.4640344  0.34511111]\n [1.02724865 0.80328468 0.60817052]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 19.62it/s]    100%|##########| 3/3 [00:00<00:00, 19.59it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3111.50it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:26,570 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.95803537 1.24924546 1.72208583]\n [1.71125292 1.4135715  1.5224738 ]\n [3.13448532 0.89995997 6.09699857]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.36946357 1.59009554 1.33959493]\n [0.39248076 1.5084356  1.21811842]\n [0.7883569  1.4916343  1.7627449 ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -867,7 +605,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.95803537 1.24924546 1.72208583]\n [1.71125292 1.4135715  1.5224738 ]\n [3.13448532 0.89995997 6.09699857]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.36946357 1.59009554 1.33959493]\n [0.39248076 1.5084356  1.21811842]\n [0.7883569  1.4916343  1.7627449 ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -877,47 +615,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 40.71it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:26,646 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 46.45it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:30,519 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.19392688 0.82059416 2.46937545]\n [1.29491858 0.91257541 2.36033328]\n [5.87703384 0.37743749 9.93879412]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.19392688 0.82059416 2.46937545]\n [1.29491858 0.91257541 2.36033328]\n [5.87703384 0.37743749 9.93879412]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 39.90it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:26,802 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.94461225  1.17689987 16.71939594]\n [ 1.01999975  1.6148504   7.98653891]\n [ 1.05935364  0.97684135  4.86790722]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[4.6256822  1.26814363 5.60683339]\n [4.11921133 1.05732341 4.87549887]\n [2.24663193 0.80906255 2.756494  ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -933,7 +638,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.94461225  1.17689987 16.71939594]\n [ 1.01999975  1.6148504   7.98653891]\n [ 1.05935364  0.97684135  4.86790722]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[4.6256822  1.26814363 5.60683339]\n [4.11921133 1.05732341 4.87549887]\n [2.24663193 0.80906255 2.756494  ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -943,49 +648,13 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 19.19it/s]    100%|##########| 3/3 [00:00<00:00, 19.16it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3263.20it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:26,879 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    2022-10-26 21:55:30,594 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.78556619 0.7278314  3.01580907]\n [1.76714478 0.72706977 2.92304532]\n [2.26173689 0.30410548 9.84661329]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.78556619 0.7278314  3.01580907]\n [1.76714478 0.72706977 2.92304532]\n [2.26173689 0.30410548 9.84661329]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 39.96it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3756.09it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:26,958 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.23796186 5.31608057 0.83811294]\n [0.19392739 5.96255397 0.87108843]\n [0.60829267 3.44304172 1.8877618 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.18174212  1.9058565   5.84034768]\n [ 1.15656671  1.92210902  5.17544844]\n [ 2.25286359  0.76143188 13.24849562]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1001,7 +670,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.23796186 5.31608057 0.83811294]\n [0.19392739 5.96255397 0.87108843]\n [0.60829267 3.44304172 1.8877618 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.18174212  1.9058565   5.84034768]\n [ 1.15656671  1.92210902  5.17544844]\n [ 2.25286359  0.76143188 13.24849562]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1011,48 +680,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 39.56it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:27,074 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+     67%|######6   | 2/3 [00:00<00:00, 14.06it/s]    100%|##########| 3/3 [00:00<00:00, 21.00it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:30,660 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.33242229 0.35911222 2.42917983]\n [1.26338022 0.39207955 2.40016393]\n [0.70360457 0.77797906 5.73576208]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.33242229 0.35911222 2.42917983]\n [1.26338022 0.39207955 2.40016393]\n [0.70360457 0.77797906 5.73576208]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 26.16it/s]    100%|##########| 3/3 [00:00<00:00, 26.10it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3305.20it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:27,165 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.37395962 0.60787522 1.47152559]\n [0.35603094 0.61578981 1.37740889]\n [0.67768185 0.68386931 1.02651279]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 6.33644578  0.92816468 22.16567589]\n [ 6.45708456  0.91802692 20.92932409]\n [ 4.57169208  0.59941267 12.87209401]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1068,7 +703,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.37395962 0.60787522 1.47152559]\n [0.35603094 0.61578981 1.37740889]\n [0.67768185 0.68386931 1.02651279]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 6.33644578  0.92816468 22.16567589]\n [ 6.45708456  0.91802692 20.92932409]\n [ 4.57169208  0.59941267 12.87209401]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1078,48 +713,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 33.78it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:27,241 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 45.57it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:30,729 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.52098586 1.40203659 0.36203123]\n [0.43120872 1.62591106 0.35626504]\n [1.16687716 1.34135125 1.09795461]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.52098586 1.40203659 0.36203123]\n [0.43120872 1.62591106 0.35626504]\n [1.16687716 1.34135125 1.09795461]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 39.66it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3798.04it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:27,317 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.48873243 8.2364189  1.76867168]\n [0.4806747  8.34908539 1.81447601]\n [2.72182891 1.76659214 8.89327833]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[12.31516683  0.52109744  3.62905983]\n [10.17945695  0.54410724  2.42748922]\n [ 2.27777848  3.66156507  2.98023857]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1135,7 +736,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.48873243 8.2364189  1.76867168]\n [0.4806747  8.34908539 1.81447601]\n [2.72182891 1.76659214 8.89327833]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[12.31516683  0.52109744  3.62905983]\n [10.17945695  0.54410724  2.42748922]\n [ 2.27777848  3.66156507  2.98023857]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1145,49 +746,13 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 40.41it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3843.28it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3759.46it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3816.47it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:27,399 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    2022-10-26 21:55:30,794 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.11641089 0.20843233 1.38743368]\n [1.90026676 0.19629326 1.31827074]\n [0.78584127 1.38847867 1.74006081]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.11641089 0.20843233 1.38743368]\n [1.90026676 0.19629326 1.31827074]\n [0.78584127 1.38847867 1.74006081]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    2022-10-25 23:04:27,484 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[3.18855928 0.21062263 1.18874626]\n [3.27105028 0.2169815  1.15097918]\n [0.72177461 1.16326386 1.4536602 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.79234939 1.31997455 0.79656996]\n [0.8709967  1.31212136 1.15438836]\n [0.79439029 1.95865842 2.88900837]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1203,7 +768,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[3.18855928 0.21062263 1.18874626]\n [3.27105028 0.2169815  1.15097918]\n [0.72177461 1.16326386 1.4536602 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.79234939 1.31997455 0.79656996]\n [0.8709967  1.31212136 1.15438836]\n [0.79439029 1.95865842 2.88900837]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1213,48 +778,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 18.55it/s]    100%|##########| 3/3 [00:00<00:00, 18.51it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:27,562 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 22.71it/s]    100%|##########| 3/3 [00:00<00:00, 22.67it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:30,861 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.36212073 1.65364626 2.37760306]\n [1.36812729 1.73034154 2.27926724]\n [2.21146286 0.92668236 3.25713624]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.36212073 1.65364626 2.37760306]\n [1.36812729 1.73034154 2.27926724]\n [2.21146286 0.92668236 3.25713624]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 38.71it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3835.08it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:27,637 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.46309449  1.30131684 10.67051355]\n [ 0.56210858  2.23409871  3.13008946]\n [ 1.83662121  1.21675134  5.03460169]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[4.86963346 0.49996072 2.28061054]\n [4.42374213 0.412849   2.02334711]\n [1.56623265 0.86088051 1.33365883]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1270,7 +801,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.46309449  1.30131684 10.67051355]\n [ 0.56210858  2.23409871  3.13008946]\n [ 1.83662121  1.21675134  5.03460169]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[4.86963346 0.49996072 2.28061054]\n [4.42374213 0.412849   2.02334711]\n [1.56623265 0.86088051 1.33365883]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1280,47 +811,13 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 41.66it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:27,726 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    2022-10-26 21:55:30,929 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 0.31568172 10.80624137  1.14423111]\n [ 0.32865589 10.23022704  1.12717158]\n [ 1.08039867  1.34898366  1.76721969]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 0.31568172 10.80624137  1.14423111]\n [ 0.32865589 10.23022704  1.12717158]\n [ 1.08039867  1.34898366  1.76721969]]'
-
-    During handling of the above exception, another exception occurred:
-
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
-        info = __waveform_loop(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
-        write_info(network, station, infodict)
-    TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 33.85it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:27,808 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
-    Traceback (most recent call last):
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
-        st, crit, infodict = __rotate_qc(
-      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
-        raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.84054783 0.30633399 3.87475845]\n [0.85935042 0.29487836 3.84325754]\n [0.99961394 0.63515683 2.87725633]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.207504   3.91981655 0.39421082]\n [0.21870725 3.37556495 0.34303395]\n [1.03521629 0.86202356 0.63562027]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1336,7 +833,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.84054783 0.30633399 3.87475845]\n [0.85935042 0.29487836 3.84325754]\n [0.99961394 0.63515683 2.87725633]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.207504   3.91981655 0.39421082]\n [0.21870725 3.37556495 0.34303395]\n [1.03521629 0.86202356 0.63562027]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1346,14 +843,15 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 36.60it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:27,898 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 22.22it/s]    100%|##########| 3/3 [00:00<00:00, 22.18it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3719.45it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:30,999 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.29245805  0.54135509  2.74721462]\n [ 2.95023272  0.55470856  2.56992965]\n [ 5.10263025  1.14226489 15.74774532]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.93197151 1.25958794 1.72720219]\n [1.70396234 1.41538054 1.54498997]\n [3.18254879 0.86279844 6.14538468]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1369,7 +867,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.29245805  0.54135509  2.74721462]\n [ 2.95023272  0.55470856  2.56992965]\n [ 5.10263025  1.14226489 15.74774532]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.93197151 1.25958794 1.72720219]\n [1.70396234 1.41538054 1.54498997]\n [3.18254879 0.86279844 6.14538468]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1379,13 +877,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    2022-10-25 23:04:27,974 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 44.32it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:31,067 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.18859507 1.0015073  0.32654795]\n [0.19920945 0.9650667  0.32414723]\n [0.6860501  1.00986391 1.78691828]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.19458544  0.81832005  2.47912244]\n [ 1.29881621  0.9082169   2.35966301]\n [ 5.94398005  0.36718399 10.02892903]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1401,7 +900,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.18859507 1.0015073  0.32654795]\n [0.19920945 0.9650667  0.32414723]\n [0.6860501  1.00986391 1.78691828]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.19458544  0.81832005  2.47912244]\n [ 1.29881621  0.9082169   2.35966301]\n [ 5.94398005  0.36718399 10.02892903]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1411,14 +910,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 18.21it/s]    100%|##########| 3/3 [00:00<00:00, 18.18it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:28,048 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 44.46it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:31,209 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.45225859  7.48733763  4.24620392]\n [ 1.1551511   6.22943273  3.319011  ]\n [ 6.33903924  1.93557967 23.73059774]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.97016363  1.16794642 16.36215449]\n [ 1.07574577  1.54145175  7.85548671]\n [ 1.08863403  0.95467032  4.94234647]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1434,7 +933,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.45225859  7.48733763  4.24620392]\n [ 1.1551511   6.22943273  3.319011  ]\n [ 6.33903924  1.93557967 23.73059774]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.97016363  1.16794642 16.36215449]\n [ 1.07574577  1.54145175  7.85548671]\n [ 1.08863403  0.95467032  4.94234647]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1444,15 +943,15 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 40.63it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3752.73it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:28,127 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 21.18it/s]    100%|##########| 3/3 [00:00<00:00, 21.14it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3877.63it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:31,278 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.54869533 0.58627939 2.17857437]\n [1.55076267 0.57715794 2.10840417]\n [0.7676787  1.20161307 1.27697141]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.75149505  0.71290573  3.01690911]\n [ 1.73201783  0.71279446  2.9250638 ]\n [ 2.30373545  0.30048345 10.23488144]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1468,7 +967,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.54869533 0.58627939 2.17857437]\n [1.55076267 0.57715794 2.10840417]\n [0.7676787  1.20161307 1.27697141]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.75149505  0.71290573  3.01690911]\n [ 1.73201783  0.71279446  2.9250638 ]\n [ 2.30373545  0.30048345 10.23488144]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1478,31 +977,15 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 39.11it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3778.65it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3801.48it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3579.78it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3772.99it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3817.63it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3255.60it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3917.47it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3960.63it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3775.25it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3790.03it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3798.04it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3769.60it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3732.69it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3950.68it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3655.70it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3474.02it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3777.52it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:28,226 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 44.87it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4080.06it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:31,348 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.11357208 1.10226102 0.66434213]\n [0.85854348 0.98776117 0.51455866]\n [0.76839518 2.01468228 1.03754339]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.23852881 5.35085842 0.86698052]\n [0.19491652 6.00248374 0.90349542]\n [0.61894996 3.39331302 1.9376621 ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1518,7 +1001,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.11357208 1.10226102 0.66434213]\n [0.85854348 0.98776117 0.51455866]\n [0.76839518 2.01468228 1.03754339]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.23852881 5.35085842 0.86698052]\n [0.19491652 6.00248374 0.90349542]\n [0.61894996 3.39331302 1.9376621 ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1528,13 +1011,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    2022-10-25 23:04:28,296 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 43.75it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:31,414 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.36185548 1.26556019 1.03458142]\n [1.31955296 0.66662329 0.60433115]\n [2.80675221 0.99219906 2.35782963]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.3058556  0.36227009 2.46243893]\n [1.23795793 0.39560712 2.42969189]\n [0.71088007 0.77127428 5.8917886 ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1550,7 +1034,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.36185548 1.26556019 1.03458142]\n [1.31955296 0.66662329 0.60433115]\n [2.80675221 0.99219906 2.35782963]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.3058556  0.36227009 2.46243893]\n [1.23795793 0.39560712 2.42969189]\n [0.71088007 0.77127428 5.8917886 ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1560,15 +1044,15 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-     67%|######6   | 2/3 [00:00<00:00, 13.71it/s]    100%|##########| 3/3 [00:00<00:00, 20.47it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3948.20it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:28,368 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 45.90it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3596.15it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:31,492 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.95740553 0.71182272 4.15676132]\n [2.4379235  0.88866427 3.59885775]\n [3.37040348 0.42328836 5.62946039]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.37695608 0.61037371 1.45286415]\n [0.35745489 0.61754662 1.35660595]\n [0.7081454  0.67376546 1.03013349]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1584,7 +1068,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.95740553 0.71182272 4.15676132]\n [2.4379235  0.88866427 3.59885775]\n [3.37040348 0.42328836 5.62946039]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.37695608 0.61037371 1.45286415]\n [0.35745489 0.61754662 1.35660595]\n [0.7081454  0.67376546 1.03013349]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1594,13 +1078,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    2022-10-25 23:04:28,438 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 39.50it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:31,560 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.90875868 4.29559478 1.71627543]\n [0.85332924 4.76930789 1.75053681]\n [1.26885019 0.63770376 3.96402886]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.48765892 1.52089774 0.36097947]\n [0.40434299 1.75794151 0.35558971]\n [1.11930979 1.38768576 1.1200572 ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1616,7 +1101,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.90875868 4.29559478 1.71627543]\n [0.85332924 4.76930789 1.75053681]\n [1.26885019 0.63770376 3.96402886]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.48765892 1.52089774 0.36097947]\n [0.40434299 1.75794151 0.35558971]\n [1.11930979 1.38768576 1.1200572 ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1626,14 +1111,15 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-     67%|######6   | 2/3 [00:00<00:00, 14.33it/s]    100%|##########| 3/3 [00:00<00:00, 21.40it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:28,509 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 44.59it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4262.50it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:31,629 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.57433453 0.48260497 4.17219459]\n [1.29594973 0.5961753  3.92372258]\n [0.88622095 1.50463624 2.46713969]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.50137621 8.08273098 1.81695077]\n [0.49684474 8.11940006 1.86362684]\n [2.74568051 1.72460876 8.4104976 ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1649,7 +1135,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.57433453 0.48260497 4.17219459]\n [1.29594973 0.5961753  3.92372258]\n [0.88622095 1.50463624 2.46713969]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.50137621 8.08273098 1.81695077]\n [0.49684474 8.11940006 1.86362684]\n [2.74568051 1.72460876 8.4104976 ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1659,15 +1145,17 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 42.93it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3655.70it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:28,585 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 44.27it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4223.87it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4399.62it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4436.85it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:31,698 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.47296164 2.0463655  0.24223318]\n [0.51168974 1.77390845 0.27142247]\n [0.97752534 0.90763298 1.89358284]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.11852153 0.20478462 1.36658408]\n [1.9033695  0.19330488 1.29824582]\n [0.81758287 1.31993168 1.79033817]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1683,7 +1171,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.47296164 2.0463655  0.24223318]\n [0.51168974 1.77390845 0.27142247]\n [0.97752534 0.90763298 1.89358284]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.11852153 0.20478462 1.36658408]\n [1.9033695  0.19330488 1.29824582]\n [0.81758287 1.31993168 1.79033817]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1693,14 +1181,13 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 40.22it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:28,657 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    2022-10-26 21:55:31,772 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.18748163 1.53724199 0.78765384]\n [0.15603482 1.90668416 0.80180628]\n [0.87737396 0.77889677 3.71347822]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[3.14417656 0.21762841 1.18374098]\n [3.22423182 0.22454063 1.1434097 ]\n [0.71133617 1.17235395 1.40356982]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1716,7 +1203,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.18748163 1.53724199 0.78765384]\n [0.15603482 1.90668416 0.80180628]\n [0.87737396 0.77889677 3.71347822]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[3.14417656 0.21762841 1.18374098]\n [3.22423182 0.22454063 1.1434097 ]\n [0.71133617 1.17235395 1.40356982]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1726,14 +1213,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 40.56it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:28,776 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 21.73it/s]    100%|##########| 3/3 [00:00<00:00, 21.69it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:31,839 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.60972415 1.24408833 7.66389699]\n [1.61386821 1.20635259 7.62797455]\n [1.52257542 0.24273127 3.31089598]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.30474186 1.65675168 2.33766345]\n [1.31324529 1.72973074 2.24288312]\n [2.23032937 0.8877333  3.31340704]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1749,7 +1236,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.60972415 1.24408833 7.66389699]\n [1.61386821 1.20635259 7.62797455]\n [1.52257542 0.24273127 3.31089598]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.30474186 1.65675168 2.33766345]\n [1.31324529 1.72973074 2.24288312]\n [2.23032937 0.8877333  3.31340704]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1759,15 +1246,15 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 26.02it/s]    100%|##########| 3/3 [00:00<00:00, 25.96it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3299.14it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:28,855 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 44.95it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4165.15it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:31,905 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.32716423  3.02234667  7.53612074]\n [ 1.25686844  1.04627309  8.08431546]\n [ 9.03640694  2.57879093 80.30018218]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.48713345  1.26278022 10.42521761]\n [ 0.57210968  2.18397877  3.08139534]\n [ 1.82669697  1.25985703  5.25424248]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1783,7 +1270,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.32716423  3.02234667  7.53612074]\n [ 1.25686844  1.04627309  8.08431546]\n [ 9.03640694  2.57879093 80.30018218]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.48713345  1.26278022 10.42521761]\n [ 0.57210968  2.18397877  3.08139534]\n [ 1.82669697  1.25985703  5.25424248]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1793,14 +1280,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 39.79it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:28,929 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 45.78it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:31,973 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.69757468 0.24227549 2.2895882 ]\n [1.77644475 0.22213454 2.58094397]\n [1.03566943 1.7749146  5.7885165 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 0.31699098 10.72221528  1.1373009 ]\n [ 0.3311078  10.10227358  1.12144035]\n [ 1.11756988  1.31805085  1.84244938]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1816,7 +1303,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.69757468 0.24227549 2.2895882 ]\n [1.77644475 0.22213454 2.58094397]\n [1.03566943 1.7749146  5.7885165 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 0.31699098 10.72221528  1.1373009 ]\n [ 0.3311078  10.10227358  1.12144035]\n [ 1.11756988  1.31805085  1.84244938]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1826,20 +1313,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 40.28it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3737.13it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3626.20it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3758.34it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3760.58it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3564.56it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3747.14it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:29,012 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 45.37it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:32,042 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.99917817 1.50269942 2.84528128]\n [2.77636679 1.32352745 2.4987733 ]\n [0.24832712 1.28063747 3.2665846 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.82846419 0.3146184  3.86160363]\n [0.85182855 0.30010691 3.81857979]\n [0.99119347 0.64149876 2.79141971]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1855,7 +1336,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.99917817 1.50269942 2.84528128]\n [2.77636679 1.32352745 2.4987733 ]\n [0.24832712 1.28063747 3.2665846 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.82846419 0.3146184  3.86160363]\n [0.85182855 0.30010691 3.81857979]\n [0.99119347 0.64149876 2.79141971]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1865,15 +1346,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 40.35it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3603.35it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:29,110 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 43.39it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:32,110 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[3.71751905 0.49828483 0.81370686]\n [3.71889837 0.51020985 0.82930219]\n [1.99001747 1.15577478 1.2620033 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.33415618  0.54938196  2.80578659]\n [ 2.99452423  0.56630551  2.62776272]\n [ 5.22110221  1.13268981 16.04885634]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1889,7 +1369,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[3.71751905 0.49828483 0.81370686]\n [3.71889837 0.51020985 0.82930219]\n [1.99001747 1.15577478 1.2620033 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.33415618  0.54938196  2.80578659]\n [ 2.99452423  0.56630551  2.62776272]\n [ 5.22110221  1.13268981 16.04885634]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1899,15 +1379,13 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 31.40it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3216.49it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:29,283 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    2022-10-26 21:55:32,176 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.39344798 1.02472917 0.00795878]\n [0.42526267 0.8879805  0.02212526]\n [1.11861932 0.84251437 0.39347019]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.19066722 1.02539295 0.32687827]\n [0.20092153 0.99037003 0.32560234]\n [0.70024576 1.03154053 1.82284694]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1923,7 +1401,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.39344798 1.02472917 0.00795878]\n [0.42526267 0.8879805  0.02212526]\n [1.11861932 0.84251437 0.39347019]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.19066722 1.02539295 0.32687827]\n [0.20092153 0.99037003 0.32560234]\n [0.70024576 1.03154053 1.82284694]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1933,14 +1411,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 17.59it/s]    100%|##########| 3/3 [00:00<00:00, 17.56it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:29,356 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 22.69it/s]    100%|##########| 3/3 [00:00<00:00, 22.65it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:32,240 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.05189894e-02 1.36849418e+00 1.05732194e-02]\n [3.47595021e-04 1.20963702e+01 6.34423783e-03]\n [9.68012781e-02 9.09132039e-02 2.79146358e-01]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.5134158   7.12916547  4.34975005]\n [ 1.21763932  5.87758287  3.46152152]\n [ 6.55444519  1.95193533 24.43550174]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1956,7 +1434,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.05189894e-02 1.36849418e+00 1.05732194e-02]\n [3.47595021e-04 1.20963702e+01 6.34423783e-03]\n [9.68012781e-02 9.09132039e-02 2.79146358e-01]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.5134158   7.12916547  4.34975005]\n [ 1.21763932  5.87758287  3.46152152]\n [ 6.55444519  1.95193533 24.43550174]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1966,14 +1444,15 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 41.01it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:29,433 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 46.44it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4473.13it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:32,310 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.17304126 0.79017714 1.64705197]\n [1.3357521  2.08203995 1.96385249]\n [2.06088405 0.70962557 4.61254886]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.53211509 0.58742688 2.16797096]\n [1.52884941 0.57955025 2.09763533]\n [0.7714919  1.17997521 1.25198413]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1989,7 +1468,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.17304126 0.79017714 1.64705197]\n [1.3357521  2.08203995 1.96385249]\n [2.06088405 0.70962557 4.61254886]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.53211509 0.58742688 2.16797096]\n [1.52884941 0.57955025 2.09763533]\n [0.7714919  1.17997521 1.25198413]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -1999,15 +1478,31 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 39.26it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 2686.36it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:29,511 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 44.38it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 1521.70it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4489.09it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4477.90it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4531.12it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4582.27it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4572.28it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4316.61it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4521.35it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4490.69it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4524.60it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4524.60it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4554.08it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4590.63it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4213.97it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4575.60it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4529.49it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4424.37it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:32,399 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.48380039 0.31962806 3.38274125]\n [1.28010428 0.29281987 3.69253515]\n [0.64948266 0.87901023 1.53770399]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.11587664 1.0889175  0.66435922]\n [0.8559692  0.9865344  0.51811433]\n [0.73876595 1.99303477 1.02615493]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2023,7 +1518,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.48380039 0.31962806 3.38274125]\n [1.28010428 0.29281987 3.69253515]\n [0.64948266 0.87901023 1.53770399]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.11587664 1.0889175  0.66435922]\n [0.8559692  0.9865344  0.51811433]\n [0.73876595 1.99303477 1.02615493]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2033,13 +1528,13 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    2022-10-25 23:04:29,584 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    2022-10-26 21:55:32,464 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.92246953 1.38145656 0.58510137]\n [0.93579167 1.37404879 0.59817494]\n [1.05727091 0.52047877 1.08342308]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.3572727  1.27520298 1.04087958]\n [1.31233243 0.67306272 0.61712604]\n [2.90442703 0.96157888 2.37805971]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2055,7 +1550,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.92246953 1.38145656 0.58510137]\n [0.93579167 1.37404879 0.59817494]\n [1.05727091 0.52047877 1.08342308]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.3572727  1.27520298 1.04087958]\n [1.31233243 0.67306272 0.61712604]\n [2.90442703 0.96157888 2.37805971]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2065,13 +1560,15 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-     67%|######6   | 2/3 [00:00<00:00, 13.51it/s]2022-10-25 23:04:29,672 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+     67%|######6   | 2/3 [00:00<00:00, 15.02it/s]    100%|##########| 3/3 [00:00<00:00, 22.43it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4306.27it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:32,531 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.47040127  0.43179417 14.93041317]\n [ 1.85286554  0.67150081 11.39321052]\n [ 6.87707921  1.54725362 32.67054444]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.99901602 0.70355602 4.24354721]\n [2.46879809 0.87875136 3.65038726]\n [3.44821161 0.41931474 5.83365682]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2087,7 +1584,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.47040127  0.43179417 14.93041317]\n [ 1.85286554  0.67150081 11.39321052]\n [ 6.87707921  1.54725362 32.67054444]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.99901602 0.70355602 4.24354721]\n [2.46879809 0.87875136 3.65038726]\n [3.44821161 0.41931474 5.83365682]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2097,14 +1594,13 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 12.68it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:29,750 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    2022-10-26 21:55:32,596 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.92118564 0.88704794 0.46148629]\n [0.95450518 0.81263941 0.48508938]\n [1.01012934 1.39829842 2.13882043]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.94202712 4.1720967  1.7250499 ]\n [0.885124   4.61889442 1.7591223 ]\n [1.27150042 0.63014472 3.96690695]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2120,7 +1616,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.92118564 0.88704794 0.46148629]\n [0.95450518 0.81263941 0.48508938]\n [1.01012934 1.39829842 2.13882043]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.94202712 4.1720967  1.7250499 ]\n [0.885124   4.61889442 1.7591223 ]\n [1.27150042 0.63014472 3.96690695]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2130,13 +1626,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    2022-10-25 23:04:29,826 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+     67%|######6   | 2/3 [00:00<00:00, 15.45it/s]    100%|##########| 3/3 [00:00<00:00, 23.06it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:32,662 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.14369832 0.99760622 1.5909814 ]\n [1.09821119 0.95327011 1.13794495]\n [1.15187795 1.5382586  0.55940431]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.56476423 0.49393762 4.17525705]\n [1.29827061 0.60459027 3.93034809]\n [0.91875839 1.45908496 2.44306798]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2152,7 +1649,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.14369832 0.99760622 1.5909814 ]\n [1.09821119 0.95327011 1.13794495]\n [1.15187795 1.5382586  0.55940431]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.56476423 0.49393762 4.17525705]\n [1.29827061 0.60459027 3.93034809]\n [0.91875839 1.45908496 2.44306798]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2162,13 +1659,15 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-     67%|######6   | 2/3 [00:00<00:00, 13.09it/s]2022-10-25 23:04:29,902 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 45.95it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3513.80it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:32,731 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.99991118  1.86518861  3.34918537]\n [ 3.30231757  1.85247806  2.88777152]\n [13.38744136  1.51382259  7.95016854]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.46355877 2.07757762 0.24869133]\n [0.50323266 1.79471544 0.27856967]\n [0.98619123 0.91055669 1.96065821]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2184,7 +1683,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.99991118  1.86518861  3.34918537]\n [ 3.30231757  1.85247806  2.88777152]\n [13.38744136  1.51382259  7.95016854]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.46355877 2.07757762 0.24869133]\n [0.50323266 1.79471544 0.27856967]\n [0.98619123 0.91055669 1.96065821]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2194,14 +1693,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 13.06it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:29,986 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 44.39it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:32,797 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.05207496 1.25911174 0.85959389]\n [1.15166578 1.01173492 0.89510472]\n [0.61297262 1.06425736 1.1322929 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.18765612 1.59511094 0.77840285]\n [0.15629658 1.97458159 0.79474687]\n [0.93388211 0.68341089 3.51859875]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2217,7 +1716,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.05207496 1.25911174 0.85959389]\n [1.15166578 1.01173492 0.89510472]\n [0.61297262 1.06425736 1.1322929 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.18765612 1.59511094 0.77840285]\n [0.15629658 1.97458159 0.79474687]\n [0.93388211 0.68341089 3.51859875]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2227,14 +1726,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 36.43it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]     67%|######6   | 2/3 [00:00<00:00, 18.90it/s]2022-10-25 23:04:30,170 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 46.06it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:32,866 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.08167191 0.39851606 0.24556036]\n [0.06890337 1.95593322 0.67855414]\n [3.25676275 0.42702339 0.62344713]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.47122283 1.33198142 7.56635662]\n [1.4804066  1.2939493  7.53332819]\n [1.46198128 0.24910905 3.23563016]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2250,7 +1749,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.08167191 0.39851606 0.24556036]\n [0.06890337 1.95593322 0.67855414]\n [3.25676275 0.42702339 0.62344713]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.47122283 1.33198142 7.56635662]\n [1.4804066  1.2939493  7.53332819]\n [1.46198128 0.24910905 3.23563016]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2260,14 +1759,15 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 16.40it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:30,247 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 44.16it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3392.53it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:32,933 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.98076621 0.06559887 0.55282823]\n [1.93057409 0.06287228 0.64807112]\n [0.47493043 1.47153468 0.4945255 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.32042807  3.03786004  7.63596366]\n [ 1.25786885  1.07473834  8.32546965]\n [ 9.05911085  2.58990346 81.35894004]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2283,7 +1783,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.98076621 0.06559887 0.55282823]\n [1.93057409 0.06287228 0.64807112]\n [0.47493043 1.47153468 0.4945255 ]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 1.32042807  3.03786004  7.63596366]\n [ 1.25786885  1.07473834  8.32546965]\n [ 9.05911085  2.58990346 81.35894004]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2293,13 +1793,14 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    2022-10-25 23:04:30,324 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 45.96it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:32,999 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.18209725  1.61047896 25.88385257]\n [ 0.77926402  4.32690384 14.5357224 ]\n [ 3.45930176 10.615431   23.83383082]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.70015226 0.24010874 2.2959211 ]\n [1.78360645 0.21788584 2.59740144]\n [1.05162744 1.76552374 5.8017984 ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2315,7 +1816,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.18209725  1.61047896 25.88385257]\n [ 0.77926402  4.32690384 14.5357224 ]\n [ 3.45930176 10.615431   23.83383082]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.70015226 0.24010874 2.2959211 ]\n [1.78360645 0.21788584 2.59740144]\n [1.05162744 1.76552374 5.8017984 ]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2325,14 +1826,20 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-     67%|######6   | 2/3 [00:00<00:00, 13.08it/s]    100%|##########| 3/3 [00:00<00:00, 19.54it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]2022-10-25 23:04:30,398 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 45.80it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4361.49it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4416.61it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4474.72it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4474.72it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4503.55it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4500.33it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:33,072 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.94825384 1.70034386 1.00696113]\n [0.98538527 1.42626512 0.82415387]\n [1.55589142 0.76774    0.43155714]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.96067918 1.48343149 2.7944811 ]\n [2.73502545 1.30625742 2.45446028]\n [0.26024097 1.24864774 3.27127154]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2348,7 +1855,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.94825384 1.70034386 1.00696113]\n [0.98538527 1.42626512 0.82415387]\n [1.55589142 0.76774    0.43155714]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.96067918 1.48343149 2.7944811 ]\n [2.73502545 1.30625742 2.45446028]\n [0.26024097 1.24864774 3.27127154]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2358,17 +1865,15 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 3/3 [00:00<00:00, 38.85it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 31.22it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3672.77it/s]
-      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3930.93it/s]
-      0%|          | 0/1 [00:00<?, ?it/s]2022-10-25 23:04:30,577 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    100%|##########| 3/3 [00:00<00:00, 45.79it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4002.20it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:33,138 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
     Traceback (most recent call last):
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[4.50122114 1.84696301 2.79471935]\n [4.91666868 1.81029176 3.12567603]\n [2.7526834  1.0352396  3.36614814]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[3.68602203 0.49919763 0.82143315]\n [3.67648557 0.51242735 0.83682993]\n [1.93360987 1.186115   1.35390583]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2384,7 +1889,7 @@ expression is needed for running this examples
         st, crit, infodict = __rotate_qc(
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
-    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[4.50122114 1.84696301 2.79471935]\n [4.91666868 1.81029176 3.12567603]\n [2.7526834  1.0352396  3.36614814]]'
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[3.68602203 0.49919763 0.82143315]\n [3.67648557 0.51242735 0.83682993]\n [1.93360987 1.186115   1.35390583]]'
 
     During handling of the above exception, another exception occurred:
 
@@ -2394,7 +1899,502 @@ expression is needed for running this examples
       File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
         write_info(network, station, infodict)
     TypeError: write_info() missing 1 required positional argument: 'preproloc'
-    100%|##########| 1/1 [00:00<00:00, 13.27it/s]
+    100%|##########| 3/3 [00:00<00:00, 46.53it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 3599.23it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:33,281 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.39436265 1.06161047 0.80833058]\n [0.41064204 0.92787455 0.80650057]\n [1.15155032 0.8069674  1.41004968]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.39436265 1.06161047 0.80833058]\n [0.41064204 0.92787455 0.80650057]\n [1.15155032 0.8069674  1.41004968]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    100%|##########| 3/3 [00:00<00:00, 21.25it/s]    100%|##########| 3/3 [00:00<00:00, 21.22it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:33,347 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.4540302  1.66351048 0.93836724]\n [0.46214179 1.71081926 0.87659122]\n [2.1941202  0.33036774 1.50860983]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.4540302  1.66351048 0.93836724]\n [0.46214179 1.71081926 0.87659122]\n [2.1941202  0.33036774 1.50860983]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    100%|##########| 3/3 [00:00<00:00, 45.96it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:33,416 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.18428771 0.7890499  1.66870549]\n [1.30185146 2.13476244 1.99134201]\n [2.06818988 0.69539516 4.69082092]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[2.18428771 0.7890499  1.66870549]\n [1.30185146 2.13476244 1.99134201]\n [2.06818988 0.69539516 4.69082092]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    100%|##########| 3/3 [00:00<00:00, 43.86it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4329.98it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:33,486 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.4696332  0.3180262  3.43923645]\n [1.26079935 0.2926006  3.74712701]\n [0.66141491 0.87704583 1.53416411]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.4696332  0.3180262  3.43923645]\n [1.26079935 0.2926006  3.74712701]\n [0.66141491 0.87704583 1.53416411]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    2022-10-26 21:55:33,551 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.96114395 1.31404547 0.58601326]\n [0.96214625 1.35656142 0.59997236]\n [1.08262967 0.5134989  1.09100031]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.96114395 1.31404547 0.58601326]\n [0.96214625 1.35656142 0.59997236]\n [1.08262967 0.5134989  1.09100031]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+     67%|######6   | 2/3 [00:00<00:00, 15.11it/s]2022-10-26 21:55:33,629 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.69179137  0.39428315 16.48242578]\n [ 2.07954956  0.60278277 13.03671662]\n [ 7.48471173  1.44069323 36.45517572]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.69179137  0.39428315 16.48242578]\n [ 2.07954956  0.60278277 13.03671662]\n [ 7.48471173  1.44069323 36.45517572]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    100%|##########| 3/3 [00:00<00:00, 14.23it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:33,697 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.92829267 0.88957341 0.47600718]\n [0.96142953 0.81388053 0.50033741]\n [1.01812335 1.40434638 2.15255299]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.92829267 0.88957341 0.47600718]\n [0.96142953 0.81388053 0.50033741]\n [1.01812335 1.40434638 2.15255299]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    2022-10-26 21:55:33,763 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.18599079 0.96763175 1.57652515]\n [1.1402394  0.92690482 1.13532165]\n [1.1624181  1.54171883 0.57884433]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.18599079 0.96763175 1.57652515]\n [1.1402394  0.92690482 1.13532165]\n [1.1624181  1.54171883 0.57884433]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+     67%|######6   | 2/3 [00:00<00:00, 14.97it/s]2022-10-26 21:55:33,830 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 3.02557643  1.85270331  3.39576384]\n [ 3.30553404  1.8631756   2.9657923 ]\n [13.28056921  1.44392776  8.33493155]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 3.02557643  1.85270331  3.39576384]\n [ 3.30553404  1.8631756   2.9657923 ]\n [13.28056921  1.44392776  8.33493155]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    100%|##########| 3/3 [00:00<00:00, 14.99it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:33,898 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.04715985 1.23905155 0.86147272]\n [1.15440674 1.00576103 0.89681645]\n [0.61940983 1.08995289 1.12565782]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.04715985 1.23905155 0.86147272]\n [1.15440674 1.00576103 0.89681645]\n [0.61940983 1.08995289 1.12565782]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    100%|##########| 3/3 [00:00<00:00, 43.83it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:34,057 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.08074301 0.40361461 0.2492072 ]\n [0.06956622 1.92427215 0.67380438]\n [3.21690923 0.43727423 0.6300436 ]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.08074301 0.40361461 0.2492072 ]\n [0.06956622 1.92427215 0.67380438]\n [3.21690923 0.43727423 0.6300436 ]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    100%|##########| 3/3 [00:00<00:00, 19.09it/s]    100%|##########| 3/3 [00:00<00:00, 19.06it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:34,124 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.98482589 0.06870258 0.53173313]\n [1.93330114 0.06596743 0.6224342 ]\n [0.47420229 1.4134802  0.48149862]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[1.98482589 0.06870258 0.53173313]\n [1.93330114 0.06596743 0.6224342 ]\n [0.47420229 1.4134802  0.48149862]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    2022-10-26 21:55:34,192 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.30954048  1.50889535 27.06374045]\n [ 0.83829111  4.06996713 15.10360683]\n [ 3.49074656 10.37422203 24.08254121]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[ 2.30954048  1.50889535 27.06374045]\n [ 0.83829111  4.06996713 15.10360683]\n [ 3.49074656 10.37422203 24.08254121]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+     67%|######6   | 2/3 [00:00<00:00, 14.88it/s]    100%|##########| 3/3 [00:00<00:00, 22.21it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]2022-10-26 21:55:34,258 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.97530422 1.6348726  0.96184111]\n [1.0147696  1.3706552  0.78644021]\n [1.56252016 0.77566709 0.43324109]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[0.97530422 1.6348726  0.96184111]\n [1.0147696  1.3706552  0.78644021]\n [1.56252016 0.77566709 0.43324109]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    100%|##########| 3/3 [00:00<00:00, 46.05it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 36.99it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4297.44it/s]
+      0%|          | 0/3 [00:00<?, ?it/s]    100%|##########| 3/3 [00:00<00:00, 4432.16it/s]
+      0%|          | 0/1 [00:00<?, ?it/s]2022-10-26 21:55:34,410 - ERROR - ['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[4.51160428 1.85321184 2.87863976]\n [4.92779428 1.8120025  3.22000192]\n [2.68676592 1.04404429 3.41115888]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    ERROR:pyglimer.request.preprocess:['IU.HRV.mseed', TypeError("write_info() missing 1 required positional argument: 'preproloc'")]
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 392, in __waveform_loop
+        st, crit, infodict = __rotate_qc(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 666, in __rotate_qc
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    pyglimer.waveform.preprocess.SNRError: 'QC rejected [[4.51160428 1.85321184 2.87863976]\n [4.92779428 1.8120025  3.22000192]\n [2.68676592 1.04404429 3.41115888]]'
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 290, in __event_loop
+        info = __waveform_loop(
+      File "/home/runner/work/PyGLImER/PyGLImER/src/pyglimer/waveform/preprocess.py", line 421, in __waveform_loop
+        write_info(network, station, infodict)
+    TypeError: write_info() missing 1 required positional argument: 'preproloc'
+    100%|##########| 1/1 [00:00<00:00, 14.86it/s]
 
 
 
@@ -2467,7 +2467,7 @@ PyGLImER is based on Obspy, but to handle RFs we need some more attributes:
 
  .. code-block:: none
 
-    Stats({'sampling_rate': 10.0, 'delta': 0.1, 'starttime': UTCDateTime(2021, 1, 10, 4, 4, 10, 294538), 'endtime': UTCDateTime(2021, 1, 10, 4, 6, 40, 194538), 'npts': 1500, 'calib': 1.0, 'network': 'IU', 'station': 'HRV', 'location': '60', 'channel': 'PRF', 'sac': AttribDict({'delta': 0.1, 'depmin': -0.5170056, 'depmax': 0.6425919, 'scale': 1.0, 'b': 0.000538, 'e': 149.90054, 'o': -595.811, 'a': 30.00007, 'stla': 42.5064, 'stlo': -71.5583, 'stel': 200.0, 'evla': -24.0412, 'evlo': -66.5729, 'evdp': 217000.0, 'mag': 6.1, 'user1': 6.337349, 'baz': 175.01988, 'gcarc': 66.419815, 'depmen': 6.35307e-09, 'nzyear': 2021, 'nzjday': 10, 'nzhour': 4, 'nzmin': 4, 'nzsec': 10, 'nzmsec': 294, 'nvhdr': 6, 'npts': 1500, 'iftype': 1, 'iztype': 9, 'leven': 1, 'lpspol': 1, 'lovrok': 1, 'lcalda': 0, 'kstnm': 'HRV', 'khole': '60', 'kuser0': 'time', 'kuser1': 'P', 'kcmpnm': 'PRF', 'knetwk': 'IU'}), '_format': 'SAC', 'station_latitude': 42.5064, 'station_longitude': -71.5583, 'station_elevation': 200.0, 'event_latitude': -24.0412, 'event_longitude': -66.5729, 'event_depth': 217000.0, 'event_magnitude': 6.1, 'event_time': UTCDateTime(2021, 1, 10, 3, 54, 14, 483026), 'onset': UTCDateTime(2021, 1, 10, 4, 4, 40, 294071), 'type': 'time', 'phase': 'P', 'distance': 66.419815, 'back_azimuth': 175.01988, 'slowness': 6.337349})
+    Stats({'sampling_rate': 10.0, 'delta': 0.1, 'starttime': UTCDateTime(2021, 1, 10, 4, 4, 10, 319538), 'endtime': UTCDateTime(2021, 1, 10, 4, 6, 40, 219538), 'npts': 1500, 'calib': 1.0, 'network': 'IU', 'station': 'HRV', 'location': '00', 'channel': 'PRF', 'sac': AttribDict({'delta': 0.1, 'depmin': -0.49422535, 'depmax': 0.63900816, 'scale': 1.0, 'b': 0.000538, 'e': 149.90054, 'o': -595.836, 'a': 29.97507, 'stla': 42.5064, 'stlo': -71.5583, 'stel': 200.0, 'evla': -24.0412, 'evlo': -66.5729, 'evdp': 217000.0, 'mag': 6.1, 'user1': 6.337349, 'baz': 175.01988, 'gcarc': 66.419815, 'depmen': 3.451596e-09, 'nzyear': 2021, 'nzjday': 10, 'nzhour': 4, 'nzmin': 4, 'nzsec': 10, 'nzmsec': 319, 'nvhdr': 6, 'npts': 1500, 'iftype': 1, 'iztype': 9, 'leven': 1, 'lpspol': 1, 'lovrok': 1, 'lcalda': 0, 'kstnm': 'HRV', 'khole': '00', 'kuser0': 'time', 'kuser1': 'P', 'kcmpnm': 'PRF', 'knetwk': 'IU'}), '_format': 'SAC', 'station_latitude': 42.5064, 'station_longitude': -71.5583, 'station_elevation': 200.0, 'event_latitude': -24.0412, 'event_longitude': -66.5729, 'event_depth': 217000.0, 'event_magnitude': 6.1, 'event_time': UTCDateTime(2021, 1, 10, 3, 54, 14, 483001), 'onset': UTCDateTime(2021, 1, 10, 4, 4, 40, 294071), 'type': 'time', 'phase': 'P', 'distance': 66.419815, 'back_azimuth': 175.01988, 'slowness': 6.337349})
 
 
 
@@ -2656,7 +2656,7 @@ just a single smalle script.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  7.416 seconds)
+   **Total running time of the script:** ( 1 minutes  40.627 seconds)
 
 
 .. _sphx_glr_download_tutorials_DataCollectionSAC.py:
