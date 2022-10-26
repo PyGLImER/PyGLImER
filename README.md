@@ -1,4 +1,4 @@
-<img src="https://github.com/PyGLImER/PyGLImER/blob/master/docs/chapters/figures/logo_horizontal_colour.png" alt="PyGLImER logo" width="600"/>
+<img src="https://github.com/PyGLImER/PyGLImER/raw/master/docs/chapters/figures/logo_horizontal_colour.png" alt="PyGLImER logo" width="600"/>
 
 [![Build Status](https://github.com/PyGLImER/PyGLImER/actions/workflows/test_on_push.yml/badge.svg?branch=master)](https://github.com/PyGLImER/PyGLImER/actions/workflows/test_on_push.yml) [![Documentation Status](https://github.com/PyGLImER/PyGLImER/actions/workflows/deploy_gh_pages.yml/badge.svg)](https://github.com/PyGLImER/PyGLImER/actions/workflows/deploy_gh_pages.yml) [![License: EUPL v1.2](https://img.shields.io/badge/license-EUPL--1.2-blue)](https://joinup.ec.europa.eu/collection/eupl/introduction-eupl-licence) [![codecov](https://codecov.io/gh/PyGLImER/PyGLImER/branch/master/graph/badge.svg?token=9WK7ZKIZ6N)](https://codecov.io/gh/PyGLImER/PyGLImER)
 
@@ -75,17 +75,17 @@ PyGLImER comes with a few tutorials (Jupyter notebooks). You can find those in t
 ## What it looks like
 With PyGLImER, we facilitate processing extremely large amounts of teleseismic data. This enables us to create large scale CCP sections as shown for P-to-S and S-to-P receiver function data in the plot below:
 
-| <img src="https://github.com/PyGLImER/PyGLImER/blob/master/docs/chapters/figures/map_w_ccp_sections.png" alt="Map With CCP sections" width="600"/> |
+| <img src="https://github.com/PyGLImER/PyGLImER/raw/master/docs/chapters/figures/map_w_ccp_sections.png" alt="Map With CCP sections" width="600"/> |
 |:--:| 
 | *FIG: Seismic broadband stations with available receiver functions are plotted as downward-pointing red triangles. The locations of the shown cross-sections are demarked as bold black lines. Cross-sections A, B, and D are created from S receiver functions stacked by common conversion point, whereas cross-section C shows a slice through a P receiver function common conversion point stack. Data begin to fade to grey if the respective gridpoint is hit by fewer than 25 rays. Note that the vertical exaggeration varies from panel to panel.* |
 
 PyGLImER also comes with a toolset to create publication ready figures:
 
-| <img src="https://github.com/PyGLImER/PyGLImER/blob/master/docs/chapters/figures/combined.jpg" alt="Combined Stack and Section" width="400"/> |
+| <img src="https://github.com/PyGLImER/PyGLImER/raw/master/docs/chapters/figures/combined.jpg" alt="Combined Stack and Section" width="400"/> |
 |:--:|
 | *FIG: Single station stack and receiver functions sorted by epicentral distance from P receiver function for station GE.DAG.* |
 
-| <img src="https://github.com/PyGLImER/PyGLImER/blob/master/docs/chapters/figures/distr.jpg" alt="Distribution of back-azimuth and rayparameters" width="600"/> |
+| <img src="https://github.com/PyGLImER/PyGLImER/raw/master/docs/chapters/figures/distr.jpg" alt="Distribution of back-azimuth and rayparameters" width="600"/> |
 |:--:|
 | *FIG: Distribution of back-azimuth and rayparameter for the P receiver functions from GE.DAG as shown above.* |
 
