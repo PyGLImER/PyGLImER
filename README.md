@@ -36,7 +36,7 @@ pip install pyglimer
 ### Installation from source code
 To obtain the latest updates, you can install PyGLImER from the source code, available on GitHub.
 
-:note: **Developers should download the ``dev`` branch**
+⚠️ **Developers should download the ``dev`` branch**
 
 ```bash
 # Download via wget or web-browser
