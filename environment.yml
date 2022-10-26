@@ -1,4 +1,4 @@
-name: PyGLImER
+name: pyglimer
 channels:
   - conda-forge
 dependencies:

@@ -42,6 +42,9 @@ To obtain the latest updates, you can install PyGLImER from the source code, ava
 # Download via wget or web-browser
 wget https://github.com/PyGLImER/PyGLImER/archive/refs/heads/master.zip
 
+# For developers
+wget https://github.com/PyGLImER/PyGLImER/archive/refs/heads/dev.zip
+
 # unzip the package
 unzip master.zip  # or dev.zip, depending on branch
 
@@ -52,7 +55,7 @@ cd PyGLImER-master  # That's the standard name the folder should have
 conda env create -f environment.yml
 
 # Activate the conda environment
-conda activate PyGLImER
+conda activate pyglimer
 
 # Install your package
 pip install -e .
