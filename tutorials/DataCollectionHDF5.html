@@ -566,41 +566,37 @@ that very coordinate system.
 
   0%|          | 0/289 [00:00&lt;?, ?it/s]
 
-  2%|2         | 6/289 [00:00&lt;00:05, 49.85it/s]
+  2%|2         | 6/289 [00:00&lt;00:05, 54.66it/s]
 
-  8%|7         | 23/289 [00:00&lt;00:02, 107.00it/s]
+  8%|7         | 23/289 [00:00&lt;00:02, 118.09it/s]
 
- 12%|#1        | 34/289 [00:00&lt;00:03, 82.81it/s]
+ 12%|#2        | 35/289 [00:00&lt;00:02, 95.27it/s]
 
- 15%|#5        | 44/289 [00:00&lt;00:02, 85.30it/s]
+ 16%|#6        | 47/289 [00:00&lt;00:02, 94.51it/s]
 
- 18%|#8        | 53/289 [00:00&lt;00:03, 78.31it/s]
+ 20%|#9        | 57/289 [00:00&lt;00:02, 89.77it/s]
 
- 21%|##1       | 62/289 [00:00&lt;00:02, 80.37it/s]
+ 23%|##3       | 67/289 [00:00&lt;00:02, 85.61it/s]
 
- 25%|##4       | 71/289 [00:00&lt;00:02, 80.61it/s]
+ 29%|##9       | 85/289 [00:00&lt;00:01, 102.77it/s]
 
- 29%|##9       | 85/289 [00:00&lt;00:02, 94.26it/s]
+ 37%|###6      | 106/289 [00:00&lt;00:01, 129.59it/s]
 
- 37%|###6      | 106/289 [00:01&lt;00:01, 121.17it/s]
+ 42%|####1     | 120/289 [00:01&lt;00:01, 121.99it/s]
 
- 41%|####1     | 119/289 [00:01&lt;00:01, 119.65it/s]
+ 46%|####6     | 133/289 [00:01&lt;00:01, 107.46it/s]
 
- 46%|####5     | 132/289 [00:01&lt;00:01, 101.19it/s]
+ 67%|######6   | 193/289 [00:01&lt;00:00, 224.94it/s]
 
- 65%|######5   | 188/289 [00:01&lt;00:00, 204.77it/s]
+ 75%|#######5  | 218/289 [00:01&lt;00:00, 179.69it/s]
 
- 73%|#######2  | 210/289 [00:01&lt;00:00, 165.03it/s]
+ 87%|########6 | 250/289 [00:01&lt;00:00, 209.48it/s]
 
- 83%|########2 | 239/289 [00:01&lt;00:00, 190.39it/s]
+ 95%|#########5| 275/289 [00:02&lt;00:00, 118.78it/s]
+100%|##########| 289/289 [00:02&lt;00:00, 128.36it/s]
 
- 90%|######### | 261/289 [00:01&lt;00:00, 165.99it/s]
-
- 97%|#########6| 280/289 [00:02&lt;00:00, 92.78it/s]
-100%|##########| 289/289 [00:02&lt;00:00, 115.01it/s]
-
-100%|##########| 1/1 [00:02&lt;00:00,  2.56s/it]
-100%|##########| 1/1 [00:02&lt;00:00,  2.56s/it]
+100%|##########| 1/1 [00:02&lt;00:00,  2.30s/it]
+100%|##########| 1/1 [00:02&lt;00:00,  2.30s/it]
 </pre></div>
 </div>
 <hr class="docutils" />
@@ -640,7 +636,7 @@ a look at the attributes.</p>
 <span class="n">pprint</span><span class="p">(</span><span class="n">rftrace</span><span class="o">.</span><span class="n">stats</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Stats({&#39;sampling_rate&#39;: 10.0, &#39;delta&#39;: 0.1, &#39;starttime&#39;: UTCDateTime(2021, 1, 10, 4, 4, 10, 319500), &#39;endtime&#39;: UTCDateTime(2021, 1, 10, 4, 6, 40, 219500), &#39;npts&#39;: 1500, &#39;calib&#39;: 1.0, &#39;network&#39;: &#39;IU&#39;, &#39;station&#39;: &#39;HRV&#39;, &#39;location&#39;: &#39;00&#39;, &#39;channel&#39;: &#39;PRF&#39;, &#39;_fdsnws_dataselect_url&#39;: &#39;http://service.iris.edu/fdsnws/dataselect/1/query&#39;, &#39;_format&#39;: &#39;MSEED&#39;, &#39;back_azimuth&#39;: 175.0198780525632, &#39;distance&#39;: 66.41981345929631, &#39;event_depth&#39;: 217000.0, &#39;event_latitude&#39;: -24.0412, &#39;event_longitude&#39;: -66.5729, &#39;event_magnitude&#39;: 6.1, &#39;event_time&#39;: UTCDateTime(2021, 1, 10, 3, 54, 14, 483000), &#39;onset&#39;: UTCDateTime(2021, 1, 10, 4, 4, 40, 294000), &#39;phase&#39;: &#39;P&#39;, &#39;pol&#39;: &#39;v&#39;, &#39;processing&#39;: [&#39;ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 269538)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 269538))&#39;, &quot;ObsPy 1.3.1: filter(options={&#39;freq&#39;: 4, &#39;maxorder&#39;: 12}::type=&#39;lowpass_cheby_2&#39;)&quot;, &#39;ObsPy 1.3.1: decimate(factor=2::no_filter=True::strict_length=False)&#39;, &#39;ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 319500)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 319500))&#39;, &quot;ObsPy 1.3.1: remove_response(fig=None::inventory=None::output=&#39;VEL&#39;::plot=False::pre_filt=None::taper=True::taper_fraction=0.05::water_level=60::zero_mean=True)&quot;, &quot;ObsPy 1.3.1: detrend(options={}::type=&#39;demean&#39;)&quot;, &quot;ObsPy 1.3.1: taper(max_length=None::max_percentage=0.05::side=&#39;both&#39;::type=&#39;hann&#39;)&quot;, &#39;ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 219500)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 319500))&#39;, &#39;ObsPy 1.3.1: normalize(norm=None)&#39;, &quot;ObsPy 1.3.1: filter(options={&#39;freq&#39;: 1.5, &#39;zerophase&#39;: True, &#39;corners&#39;: 2}::type=&#39;lowpass&#39;)&quot;], &#39;slowness&#39;: 6.33734875354112, &#39;station_elevation&#39;: 200.0, &#39;station_latitude&#39;: 42.5064, &#39;station_longitude&#39;: -71.5583, &#39;type&#39;: &#39;time&#39;})
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Stats({&#39;sampling_rate&#39;: 10.0, &#39;delta&#39;: 0.1, &#39;starttime&#39;: UTCDateTime(2021, 1, 10, 4, 4, 10, 294500), &#39;endtime&#39;: UTCDateTime(2021, 1, 10, 4, 6, 40, 194500), &#39;npts&#39;: 1500, &#39;calib&#39;: 1.0, &#39;network&#39;: &#39;IU&#39;, &#39;station&#39;: &#39;HRV&#39;, &#39;location&#39;: &#39;60&#39;, &#39;channel&#39;: &#39;PRF&#39;, &#39;_fdsnws_dataselect_url&#39;: &#39;http://service.iris.edu/fdsnws/dataselect/1/query&#39;, &#39;_format&#39;: &#39;MSEED&#39;, &#39;back_azimuth&#39;: 175.0198780525632, &#39;distance&#39;: 66.41981345929631, &#39;event_depth&#39;: 217000.0, &#39;event_latitude&#39;: -24.0412, &#39;event_longitude&#39;: -66.5729, &#39;event_magnitude&#39;: 6.1, &#39;event_time&#39;: UTCDateTime(2021, 1, 10, 3, 54, 14, 483000), &#39;onset&#39;: UTCDateTime(2021, 1, 10, 4, 4, 40, 294000), &#39;phase&#39;: &#39;P&#39;, &#39;pol&#39;: &#39;v&#39;, &#39;processing&#39;: [&#39;ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 269538)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 269538))&#39;, &quot;ObsPy 1.3.1: filter(options={&#39;freq&#39;: 4, &#39;maxorder&#39;: 12}::type=&#39;lowpass_cheby_2&#39;)&quot;, &#39;ObsPy 1.3.1: decimate(factor=4::no_filter=True::strict_length=False)&#39;, &#39;ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 294500)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 294500))&#39;, &quot;ObsPy 1.3.1: remove_response(fig=None::inventory=None::output=&#39;VEL&#39;::plot=False::pre_filt=None::taper=True::taper_fraction=0.05::water_level=60::zero_mean=True)&quot;, &quot;ObsPy 1.3.1: detrend(options={}::type=&#39;demean&#39;)&quot;, &quot;ObsPy 1.3.1: taper(max_length=None::max_percentage=0.05::side=&#39;both&#39;::type=&#39;hann&#39;)&quot;, &#39;ObsPy 1.3.1: trim(endtime=UTCDateTime(2021, 1, 10, 4, 6, 40, 194500)::fill_value=None::nearest_sample=True::pad=False::starttime=UTCDateTime(2021, 1, 10, 4, 4, 10, 294500))&#39;, &#39;ObsPy 1.3.1: normalize(norm=None)&#39;, &quot;ObsPy 1.3.1: filter(options={&#39;freq&#39;: 1.5, &#39;zerophase&#39;: True, &#39;corners&#39;: 2}::type=&#39;lowpass&#39;)&quot;], &#39;slowness&#39;: 6.33734875354112, &#39;station_elevation&#39;: 200.0, &#39;station_latitude&#39;: 42.5064, &#39;station_longitude&#39;: -71.5583, &#39;type&#39;: &#39;time&#39;})
 </pre></div>
 </div>
 </section>
@@ -708,7 +704,7 @@ already see trends:</p>
 </div>
 <p>As simple as that you can create your own receiver functions with
 just a single smalle script.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  50.290 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  57.119 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-datacollectionhdf5-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/2d66953dda8e36d9559e64d07e0d09e0/DataCollectionHDF5.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">DataCollectionHDF5.py</span></code></a></p>
