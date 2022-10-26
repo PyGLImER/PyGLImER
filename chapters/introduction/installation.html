@@ -392,18 +392,39 @@
               
   <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h1>
-<p>The installation of <code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> for development purposes is fairly simple.</p>
+<section id="from-pypi">
+<h2>From PyPi<a class="headerlink" href="#from-pypi" title="Permalink to this heading">#</a></h2>
+<p>We recommend installing <code class="docutils literal notranslate"><span class="pre">PyGLImER</span></code> from PyPi.</p>
+</section>
+<section id="installation-from-source-code">
+<h2>Installation from source code<a class="headerlink" href="#installation-from-source-code" title="Permalink to this heading">#</a></h2>
+<p>This will mostly make sense for developers. Note that you should download
+the <code class="docutils literal notranslate"><span class="pre">dev</span></code> branch if you should wish to make contributions.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the source code</span>
-git clone https://github.com/PeterMakus/PyGLImER
-<span class="nb">cd</span> PyGLImER
+<span class="c1"># Download via wget or web-browser</span>
+wget https://github.com/PyGLImER/PyGLImER/archive/refs/heads/master.zip
 
-<span class="c1"># Create environment and editable installation of pyglimer</span>
-conda env create -n pyglimer -f environment.yml
+<span class="c1"># For developers use</span>
+<span class="c1">#wget https://github.com/PyGLImER/PyGLImER/archive/refs/heads/dev.zip</span>
 
-<span class="c1"># Activate environemt</span>
+<span class="c1"># unzip the package</span>
+unzip master.zip  <span class="c1"># or dev.zip, depending on branch</span>
+<span class="c1"># devlopers use dev.zip</span>
+
+<span class="c1"># Change directory to the same directory that this repo is in (i.e., same directory as setup.py)</span>
+<span class="nb">cd</span> PyGLImER-master  <span class="c1"># That&#39;s the standard name the folder should have</span>
+
+<span class="c1"># Create the conda environment and install dependencies</span>
+conda env create -f environment.yml
+
+<span class="c1"># Activate the conda environment</span>
 conda activate pyglimer
+
+<span class="c1"># Install your package, -e ensure that the package will be updated as you edit modules</span>
+pip install -e .
 </pre></div>
 </div>
+</section>
 </section>
 
 
@@ -437,6 +458,28 @@ conda activate pyglimer
           
             <div class="bd-sidebar-secondary bd-toc">
               
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#from-pypi">
+   From PyPi
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#installation-from-source-code">
+   Installation from source code
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
 <div class="toc-item">
   
 <div id="searchbox"></div>
