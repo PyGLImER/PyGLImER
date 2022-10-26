@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Tuesday, 25th October 2022 01:42:06 pm
+Last Modified: Wednesday, 26th October 2022 09:05:57 am
 '''
 
 import fnmatch
@@ -563,10 +563,17 @@ def mseed_to_hdf5(
                 logger.warning(
                     f'File {mseed} is corrupt. Skipping this file..')
                 os.remove(mseed)
-
                 continue
             # Decimate
-            st = resample_or_decimate(st, 10)
+            try:
+                st = resample_or_decimate(st, 10)
+            except ValueError:
+                logger = logging.getLogger('pyglimer.request')
+                logger.warning(
+                    f'File {mseed}. Native sampling rate below 10Hz.'
+                    'Skipping this file..')
+                os.remove(mseed)
+                continue
             rdb.add_waveform(st, evt_str)
 
             # Everything went well
