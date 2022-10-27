@@ -23,7 +23,7 @@ copyright = '2022, the PyGLImER development team'
 author = 'Peter Makus, Lucas Sawade'
 
 # The full version, including alpha/beta/rc tags
-release = '0.4.0'
+release = '0.4.1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -84,7 +84,7 @@ html_logo = "chapters/figures/logo_horizontal_colour.png"
 
 html_context = {
     # "github_url": "https://github.com", # or your GitHub Enterprise
-    "github_user": 'PeterMakus',
+    "github_user": 'PyGLImER',
     "github_repo": 'PyGLImER',
     "github_version": "master",
     "doc_path": "docs",
@@ -95,7 +95,7 @@ html_theme_options = {
         {"url": "http://www.stephanerondenay.com/glimer-web.html",
             "name": "GLImER"}
     ],
-    "github_url": "https://github.com/PeterMakus/PyGLImER",
+    "github_url": "https://github.com/PyGLImER/PyGLImER",
     "use_edit_page_button": True,
     # "show_toc_level": 1,
 

@@ -40,7 +40,7 @@
   # Network and station to use, unix-style wildcards are allowed
   # if you use the Request.download_waveforms_small_db method,
   # you can also provide a list of networks and/or a list of stations
-  network: 'YP'
+  network: 'TA'
   station: '*'
 
   ## concerning preprocessing

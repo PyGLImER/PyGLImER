@@ -13,7 +13,7 @@ examples/database
 .vscode
 *.pdf
 .DS_Store
-pyglimer.egg-info/
+*.egg-info
 .idea/
 ccp*.pkl
 .coverage
