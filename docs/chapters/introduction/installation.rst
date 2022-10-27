@@ -7,10 +7,14 @@ From PyPi
 We recommend installing ``PyGLImER`` from PyPi.
 
 .. code:: bash
+
     pip install pyglimer
     # if you want to use mpi
     pip install mpi4py
 
+.. note::
+    Sometimes the cartopy installation from PyPi fails.
+    We recommed using `conda install -c conda-forge cartopy` instead.
 
 Installation from source code
 =============================

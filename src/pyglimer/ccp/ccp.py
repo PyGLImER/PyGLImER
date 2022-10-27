@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 25th October 2022 03:51:42 pm
+Last Modified: Thursday, 27th October 2022 10:11:09 am
 '''
 
 # !/usr/bin/env python3
@@ -1205,7 +1205,7 @@ misspelled or not yet implemented')
         if len(x) > 1:
             if x[-1].lower() in ('pkl', 'mat', 'npz'):
                 fmt = x[-1].lower()
-                filename = ''.join(x[:-1])
+                filename = '.'.join(x[:-1])
 
         # output location
         oloc = os.path.join(folder, filename)

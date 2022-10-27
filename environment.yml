@@ -18,7 +18,7 @@ dependencies:
   - psutil
   - h5py
   - pytest
-  - python>=3.7
+  - python>=3.7, <3.11
   - scipy
   - tqdm
   - flake8
