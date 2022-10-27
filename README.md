@@ -27,7 +27,7 @@ successor of the [GLImER](http://stephanerondenay.com/glimer-web.html) project.
 ## Installation of this package
 
 ### Installation from PyPi
-PyGLImER 0.4.0 is now deployed on PyPi and can simply be installed using:
+PyGLImER is now deployed on PyPi and can simply be installed using:
 
 ```bash
 pip install pyglimer
