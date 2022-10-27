@@ -217,7 +217,7 @@
           
           
           
-          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+          <a href="https://github.com/PyGLImER/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -358,7 +358,7 @@
           
           
           
-          <a href="https://github.com/PeterMakus/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+          <a href="https://github.com/PyGLImER/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -487,7 +487,7 @@ needed information. Let’s look at the expected information:</p>
 <span class="n">R</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="o">**</span><span class="n">request_dict</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-10-27 16:28:45,883 - INFO - Successfully obtained 1 events
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-10-27 18:37:16,466 - INFO - Successfully obtained 1 events
 </pre></div>
 </div>
 <p>The initialization will look for all events for which data is available. To
@@ -578,10 +578,10 @@ This method will do the following:
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">R</span><span class="o">.</span><span class="n">import_database</span><span class="p">(</span><span class="n">yield_st</span><span class="p">,</span> <span class="n">yield_inv</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-10-27 16:28:46,139 - INFO - Computing theoretical times of arrival. Save Inventories
-2022-10-27 16:28:46,146 - INFO - Checking IU.HRV
-2022-10-27 16:28:46,146 - DEBUG - IU.HRV
-2022-10-27 16:28:46,167 - INFO - Slice data in chunks and save them into PyGLImER database.
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-10-27 18:37:16,651 - INFO - Computing theoretical times of arrival. Save Inventories
+2022-10-27 18:37:16,656 - INFO - Checking IU.HRV
+2022-10-27 18:37:16,656 - DEBUG - IU.HRV
+2022-10-27 18:37:16,672 - INFO - Slice data in chunks and save them into PyGLImER database.
 </pre></div>
 </div>
 <p>Let’s just check how many teleseismic arrivals were found in this one week.</p>
@@ -627,28 +627,28 @@ expression is needed for running this examples</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">R</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">hc_filt</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="s1">&#39;single&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-10-27 16:28:46,185 - INFO -
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2022-10-27 18:37:16,683 - INFO -
 
 
 ...Preprocessing initialiased...
 
-2022-10-27 16:28:46,185 - DEBUG - USING SINGLE CORE BACKEND
+2022-10-27 18:37:16,684 - DEBUG - USING SINGLE CORE BACKEND
 
-  0%|          | 0/1 [00:00&lt;?, ?it/s]2022-10-27 16:28:46,186 - INFO - Processing waveforms for event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293.
-2022-10-27 16:28:46,200 - DEBUG - Before cut and resample
-2022-10-27 16:28:46,200 - DEBUG -    Time elapsed: 0.0 s
-2022-10-27 16:28:46,224 - INFO - Stream accepted. Preprocessing successful
-2022-10-27 16:28:46,224 - INFO - File preprocessed.
+  0%|          | 0/1 [00:00&lt;?, ?it/s]2022-10-27 18:37:16,684 - INFO - Processing waveforms for event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293.
+2022-10-27 18:37:16,695 - DEBUG - Before cut and resample
+2022-10-27 18:37:16,695 - DEBUG -    Time elapsed: 0.0 s
+2022-10-27 18:37:16,712 - INFO - Stream accepted. Preprocessing successful
+2022-10-27 18:37:16,713 - INFO - File preprocessed.
 Station IU.HRV
 Event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293
-2022-10-27 16:28:46,225 - DEBUG -    Time elapsed: 0.0 s
-2022-10-27 16:28:46,235 - INFO - RF created.
+2022-10-27 18:37:16,713 - DEBUG -    Time elapsed: 0.0 s
+2022-10-27 18:37:16,720 - INFO - RF created.
 Station IU.HRV
 Event: smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293
-2022-10-27 16:28:46,236 - DEBUG -    Time elapsed: 0.0 s
+2022-10-27 18:37:16,721 - DEBUG -    Time elapsed: 0.0 s
 
-100%|##########| 1/1 [00:00&lt;00:00, 19.04it/s]
-2022-10-27 16:28:46,238 - INFO - Preprocessing finished.
+100%|##########| 1/1 [00:00&lt;00:00, 26.19it/s]
+2022-10-27 18:37:16,722 - INFO - Preprocessing finished.
 </pre></div>
 </div>
 </section>
@@ -753,7 +753,7 @@ already see trends:</p>
 </div>
 <p>As simple as that you can create your own receiver functions with
 just a single smalle script.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.872 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.380 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-importlocaldatabase-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/4d512cc35b7f72391f450a9b384a4ad4/ImportLocalDatabase.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">ImportLocalDatabase.py</span></code></a></p>
@@ -863,7 +863,7 @@ just a single smalle script.</p>
   
 
 <div class="tocsection editthispage">
-    <a href="https://github.com/PeterMakus/PyGLImER/edit/master/docs/tutorials/ImportLocalDatabase.rst">
+    <a href="https://github.com/PyGLImER/PyGLImER/edit/master/docs/tutorials/ImportLocalDatabase.rst">
         <i class="fa-solid fa-pencil"></i> Edit this page
     </a>
 </div>
