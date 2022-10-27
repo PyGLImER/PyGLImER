@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyglimer.plot.ui_utils</title>
+    <title>pyglimer.utils.even2Dpoints</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -43,7 +43,7 @@
     <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/clipboard.min.js"></script>
     <script src="../../../_static/copybutton.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyglimer/plot/ui_utils';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyglimer/utils/even2Dpoints';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -387,184 +387,88 @@
             
             <article class="bd-article" role="main">
               
-  <h1>Source code for pyglimer.plot.ui_utils</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">:copyright:</span>
-<span class="sd">   The PyGLImER development team (makus@gfz-potsdam.de).</span>
-<span class="sd">:license:</span>
-<span class="sd">   GNU Lesser General Public License, Version 3</span>
-<span class="sd">   (https://www.gnu.org/copyleft/lesser.html)</span>
-<span class="sd">:author:</span>
-<span class="sd">    Lucas Sawade (lsawade@princeton.edu)</span>
-
-<span class="sd">Last Update: June 19, 2020</span>
-
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="kn">from</span> <span class="nn">matplotlib.widgets</span> <span class="kn">import</span> <span class="n">Slider</span>
+  <h1>Source code for pyglimer.utils.even2Dpoints</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 
 
-<div class="viewcode-block" id="set_sliderval_no_callback"><a class="viewcode-back" href="../../../chapters/api/plot.html#pyglimer.plot.ui_utils.set_sliderval_no_callback">[docs]</a><span class="k">def</span> <span class="nf">set_sliderval_no_callback</span><span class="p">(</span><span class="n">slider</span><span class="p">:</span> <span class="n">Slider</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Set slider value to *val*</span>
+<div class="viewcode-block" id="distance"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.even2Dpoints.distance">[docs]</a><span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y0</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute euclidean 2D distance between points</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    val : float</span>
+<span class="sd">    x : arraylike</span>
+<span class="sd">        x coordinates</span>
+<span class="sd">    y : arraylike</span>
+<span class="sd">        y coordinates</span>
+<span class="sd">    x0 : float</span>
+<span class="sd">        x coordinate to measure distance to</span>
+<span class="sd">    y0 : float</span>
+<span class="sd">        y coordinatte to measure distance to</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float or arraylike</span>
+<span class="sd">        distances</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+
+<span class="sd">    :Author:</span>
+<span class="sd">        Lucas Sawade (lsawade@princeton.edu)</span>
+
+<span class="sd">    :Last Modified:</span>
+<span class="sd">        2021.03.16 16.30</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">xy</span> <span class="o">=</span> <span class="n">slider</span><span class="o">.</span><span class="n">poly</span><span class="o">.</span><span class="n">xy</span>
-    <span class="k">if</span> <span class="n">slider</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;vertical&#39;</span><span class="p">:</span>
-        <span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">val</span>
-        <span class="n">xy</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">val</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">xy</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span><span class="p">,</span> <span class="mi">1</span>
-        <span class="n">xy</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span><span class="p">,</span> <span class="mi">0</span>
-    <span class="n">slider</span><span class="o">.</span><span class="n">poly</span><span class="o">.</span><span class="n">xy</span> <span class="o">=</span> <span class="n">xy</span>
-    <span class="n">slider</span><span class="o">.</span><span class="n">valtext</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">slider</span><span class="o">.</span><span class="n">drawon</span><span class="p">:</span>
-        <span class="n">slider</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw_idle</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
 
 
-<span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="even2Dpoints"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.even2Dpoints.even2Dpoints">[docs]</a><span class="k">def</span> <span class="nf">even2Dpoints</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates evenly distributed points in 2D space.</span>
 
-<span class="sd">class LineBuilder:</span>
-<span class="sd">    def __init__(self, line):</span>
-<span class="sd">        self.line = line</span>
-<span class="sd">        self.xs = list(line.get_xdata())</span>
-<span class="sd">        self.ys = list(line.get_ydata())</span>
-<span class="sd">        self.cid = line.figure.canvas.mpl_connect(&#39;button_press_event&#39;, self)</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n : int</span>
+<span class="sd">        number of points to be generated</span>
+<span class="sd">    width : floatt</span>
+<span class="sd">        width of the 2D space</span>
+<span class="sd">    height : float</span>
+<span class="sd">        height of the 2D space</span>
+<span class="sd">    radius : float</span>
+<span class="sd">        min distance between the points</span>
 
-<span class="sd">    def __call__(self, event):</span>
-<span class="sd">        print(&#39;click&#39;, event)</span>
-<span class="sd">        if event.inaxes!=self.line.axes: return</span>
-<span class="sd">        self.xs.append(event.xdata)</span>
-<span class="sd">        self.ys.append(event.ydata)</span>
-<span class="sd">        self.line.set_data(self.xs, self.ys)</span>
-<span class="sd">        self.line.figure.canvas.draw()</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        x,y coordinates in 2D space</span>
 
-<span class="sd">fig = plt.figure()</span>
-<span class="sd">ax = fig.add_subplot(111)</span>
-<span class="sd">ax.set_title(&#39;click to build line segments&#39;)</span>
-<span class="sd">line, = ax.plot([0], [0])  # empty line</span>
-<span class="sd">linebuilder = LineBuilder(line)</span>
+<span class="sd">    Does not really need a unit test, since its testing its distances</span>
+<span class="sd">    itself, and the distance function is really not a complicated thing...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-<span class="sd">plt.show()</span>
+    <span class="c1"># Initialize empty array</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
 
+    <span class="k">if</span> <span class="n">seed</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># Get candidate</span>
+        <span class="n">xc</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">width</span>
+        <span class="n">yc</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">height</span>
 
-<span class="sd">def on_release(self, event):</span>
-<span class="sd">    &#39;on release we reset the press data&#39;</span>
-<span class="sd">    self.press = None</span>
-<span class="sd">    self.rect.figure.canvas.draw()</span>
+        <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">distance</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span> <span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">radius</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
 
-<span class="sd">def disconnect(self):</span>
-<span class="sd">    &#39;disconnect all the stored connection ids&#39;</span>
-<span class="sd">    self.rect.figure.canvas.mpl_disconnect(self.cidpress)</span>
-<span class="sd">    self.rect.figure.canvas.mpl_disconnect(self.cidrelease)</span>
-<span class="sd">    self.rect.figure.canvas.mpl_disconnect(self.cidmotion)</span>
+        <span class="k">if</span> <span class="n">flag</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">xc</span><span class="p">))</span>
+            <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">yc</span><span class="p">))</span>
 
-<span class="sd">fig = plt.figure()</span>
-<span class="sd">ax = fig.add_subplot(111)</span>
-<span class="sd">rects = ax.bar(range(10), 20*np.random.rand(10))</span>
-<span class="sd">drs = []</span>
-<span class="sd">for rect in rects:</span>
-<span class="sd">    dr = DraggableRectangle(rect)</span>
-<span class="sd">    dr.connect()</span>
-<span class="sd">    drs.append(dr)</span>
-
-<span class="sd">plt.show()</span>
-
-
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Illustrate the figure and axes enter and leave events by changing the</span>
-<span class="sd">frame colors on enter and leave</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">import matplotlib.pyplot as plt</span>
-
-<span class="sd">def enter_axes(event):</span>
-<span class="sd">    print(&#39;enter_axes&#39;, event.inaxes)</span>
-<span class="sd">    event.inaxes.patch.set_facecolor(&#39;yellow&#39;)</span>
-<span class="sd">    event.canvas.draw()</span>
-
-<span class="sd">def leave_axes(event):</span>
-<span class="sd">    print(&#39;leave_axes&#39;, event.inaxes)</span>
-<span class="sd">    event.inaxes.patch.set_facecolor(&#39;white&#39;)</span>
-<span class="sd">    event.canvas.draw()</span>
-
-<span class="sd">def enter_figure(event):</span>
-<span class="sd">    print(&#39;enter_figure&#39;, event.canvas.figure)</span>
-<span class="sd">    event.canvas.figure.patch.set_facecolor(&#39;red&#39;)</span>
-<span class="sd">    event.canvas.draw()</span>
-
-<span class="sd">def leave_figure(event):</span>
-<span class="sd">    print(&#39;leave_figure&#39;, event.canvas.figure)</span>
-<span class="sd">    event.canvas.figure.patch.set_facecolor(&#39;grey&#39;)</span>
-<span class="sd">    event.canvas.draw()</span>
-
-<span class="sd">fig1 = plt.figure()</span>
-<span class="sd">fig1.suptitle(&#39;mouse hover over figure or axes to trigger events&#39;)</span>
-<span class="sd">ax1 = fig1.add_subplot(211)</span>
-<span class="sd">ax2 = fig1.add_subplot(212)</span>
-
-<span class="sd">fig1.canvas.mpl_connect(&#39;figure_enter_event&#39;, enter_figure)</span>
-<span class="sd">fig1.canvas.mpl_connect(&#39;figure_leave_event&#39;, leave_figure)</span>
-<span class="sd">fig1.canvas.mpl_connect(&#39;axes_enter_event&#39;, enter_axes)</span>
-<span class="sd">fig1.canvas.mpl_connect(&#39;axes_leave_event&#39;, leave_axes)</span>
-
-<span class="sd">fig2 = plt.figure()</span>
-<span class="sd">fig2.suptitle(&#39;mouse hover over figure or axes to trigger events&#39;)</span>
-<span class="sd">ax1 = fig2.add_subplot(211)</span>
-<span class="sd">ax2 = fig2.add_subplot(212)</span>
-
-<span class="sd">fig2.canvas.mpl_connect(&#39;figure_enter_event&#39;, enter_figure)</span>
-<span class="sd">fig2.canvas.mpl_connect(&#39;figure_leave_event&#39;, leave_figure)</span>
-<span class="sd">fig2.canvas.mpl_connect(&#39;axes_enter_event&#39;, enter_axes)</span>
-<span class="sd">fig2.canvas.mpl_connect(&#39;axes_leave_event&#39;, leave_axes)</span>
-
-<span class="sd">plt.show()</span>
-
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">compute the mean and stddev of 100 data sets and plot mean vs. stddev.</span>
-<span class="sd">When you click on one of the mu, sigma points, plot the raw data from</span>
-<span class="sd">the dataset that generated the mean and stddev</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">import numpy as np</span>
-<span class="sd">import matplotlib.pyplot as plt</span>
-
-<span class="sd">X = np.random.rand(100, 1000)</span>
-<span class="sd">xs = np.mean(X, axis=1)</span>
-<span class="sd">ys = np.std(X, axis=1)</span>
-
-<span class="sd">fig = plt.figure()</span>
-<span class="sd">ax = fig.add_subplot(111)</span>
-<span class="sd">ax.set_title(&#39;click on point to plot time series&#39;)</span>
-<span class="sd">line, = ax.plot(xs, ys, &#39;o&#39;, picker=5)  # 5 points tolerance</span>
-
-
-<span class="sd">def onpick(event):</span>
-
-<span class="sd">    if event.artist!=line: return True</span>
-
-<span class="sd">    N = len(event.ind)</span>
-<span class="sd">    if not N: return True</span>
-
-
-<span class="sd">    figi = plt.figure()</span>
-<span class="sd">    for subplotnum, dataind in enumerate(event.ind):</span>
-<span class="sd">        ax = figi.add_subplot(N,1,subplotnum+1)</span>
-<span class="sd">        ax.plot(X[dataind])</span>
-<span class="sd">        ax.text(0.05, 0.9, &#39;mu=%1.3f\nsigma=%1.3f&#39;%(xs[dataind], ys[dataind]),</span>
-<span class="sd">                transform=ax.transAxes, va=&#39;top&#39;)</span>
-<span class="sd">        ax.set_ylim(-0.5, 1.5)</span>
-<span class="sd">    figi.show()</span>
-<span class="sd">    return True</span>
-
-<span class="sd">fig.canvas.mpl_connect(&#39;pick_event&#39;, onpick)</span>
-
-<span class="sd">plt.show()</span>
-
-<span class="sd">&#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span></div>
 </pre></div>
 
             </article>

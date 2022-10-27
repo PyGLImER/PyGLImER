@@ -379,9 +379,9 @@
 <li class="toctree-l1"><a class="reference internal" href="waveform.html">pyglimer.waveform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rf.html">pyglimer.rf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="database.html">pyglimer.database</a></li>
-<li class="toctree-l1"><a class="reference internal" href="test.html">pyglimer.test</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">pyglimer.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ccp.html">pyglimer.ccp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">pyglimer.plot</a></li>
 </ul>
 
   </div>
@@ -415,17 +415,6 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="waveform.html">pyglimer.waveform</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="waveform.html#module-pyglimer.waveform.request">pyglimer.waveform.request</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.request.Request"><code class="docutils literal notranslate"><span class="pre">Request</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="waveform.html#pyglimer.waveform.request.Request.download_eventcat"><code class="docutils literal notranslate"><span class="pre">Request.download_eventcat()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="waveform.html#pyglimer.waveform.request.Request.download_waveforms"><code class="docutils literal notranslate"><span class="pre">Request.download_waveforms()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="waveform.html#pyglimer.waveform.request.Request.download_waveforms_small_db"><code class="docutils literal notranslate"><span class="pre">Request.download_waveforms_small_db()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="waveform.html#pyglimer.waveform.request.Request.import_database"><code class="docutils literal notranslate"><span class="pre">Request.import_database()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="waveform.html#pyglimer.waveform.request.Request.preprocess"><code class="docutils literal notranslate"><span class="pre">Request.preprocess()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="waveform.html#module-pyglimer.waveform.download">pyglimer.waveform.download</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.download.create_bulk_list"><code class="docutils literal notranslate"><span class="pre">create_bulk_list()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.download.download_small_db"><code class="docutils literal notranslate"><span class="pre">download_small_db()</span></code></a></li>
@@ -436,6 +425,16 @@
 <li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.download.wav_in_db"><code class="docutils literal notranslate"><span class="pre">wav_in_db()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.download.wav_in_hdf5"><code class="docutils literal notranslate"><span class="pre">wav_in_hdf5()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.download.wav_in_hdf5_no_global"><code class="docutils literal notranslate"><span class="pre">wav_in_hdf5_no_global()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="waveform.html#module-pyglimer.waveform.errorhandler">pyglimer.waveform.errorhandler</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.errorhandler.NoMatchingResponseHandler"><code class="docutils literal notranslate"><span class="pre">NoMatchingResponseHandler()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.errorhandler.redownload"><code class="docutils literal notranslate"><span class="pre">redownload()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.errorhandler.redownload_statxml"><code class="docutils literal notranslate"><span class="pre">redownload_statxml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="waveform.html#module-pyglimer.waveform.filesystem">pyglimer.waveform.filesystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.filesystem.import_database"><code class="docutils literal notranslate"><span class="pre">import_database()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="waveform.html#module-pyglimer.waveform.preprocess">pyglimer.waveform.preprocess</a><ul>
@@ -457,15 +456,20 @@
 <li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.qc.qcs"><code class="docutils literal notranslate"><span class="pre">qcs()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="waveform.html#module-pyglimer.waveform.request">pyglimer.waveform.request</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.request.Request"><code class="docutils literal notranslate"><span class="pre">Request</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="waveform.html#pyglimer.waveform.request.Request.download_eventcat"><code class="docutils literal notranslate"><span class="pre">Request.download_eventcat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="waveform.html#pyglimer.waveform.request.Request.download_waveforms"><code class="docutils literal notranslate"><span class="pre">Request.download_waveforms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="waveform.html#pyglimer.waveform.request.Request.download_waveforms_small_db"><code class="docutils literal notranslate"><span class="pre">Request.download_waveforms_small_db()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="waveform.html#pyglimer.waveform.request.Request.import_database"><code class="docutils literal notranslate"><span class="pre">Request.import_database()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="waveform.html#pyglimer.waveform.request.Request.preprocess"><code class="docutils literal notranslate"><span class="pre">Request.preprocess()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="waveform.html#module-pyglimer.waveform.rotate">pyglimer.waveform.rotate</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.rotate.rotate_LQT_min"><code class="docutils literal notranslate"><span class="pre">rotate_LQT_min()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.rotate.rotate_PSV"><code class="docutils literal notranslate"><span class="pre">rotate_PSV()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="waveform.html#module-pyglimer.waveform.errorhandler">pyglimer.waveform.errorhandler</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.errorhandler.NoMatchingResponseHandler"><code class="docutils literal notranslate"><span class="pre">NoMatchingResponseHandler()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.errorhandler.redownload"><code class="docutils literal notranslate"><span class="pre">redownload()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="waveform.html#pyglimer.waveform.errorhandler.redownload_statxml"><code class="docutils literal notranslate"><span class="pre">redownload_statxml()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -524,7 +528,30 @@
 <li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.stations.redownload_missing_statxmls"><code class="docutils literal notranslate"><span class="pre">redownload_missing_statxmls()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="database.html#pyglimer-database-asdf">pyglimer.database.asdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="database.html#module-pyglimer.database.raw">pyglimer.database.raw</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.raw.DBHandler"><code class="docutils literal notranslate"><span class="pre">DBHandler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="database.html#pyglimer.database.raw.DBHandler.add_response"><code class="docutils literal notranslate"><span class="pre">DBHandler.add_response()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="database.html#pyglimer.database.raw.DBHandler.add_waveform"><code class="docutils literal notranslate"><span class="pre">DBHandler.add_waveform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="database.html#pyglimer.database.raw.DBHandler.content_dict"><code class="docutils literal notranslate"><span class="pre">DBHandler.content_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="database.html#pyglimer.database.raw.DBHandler.get_data"><code class="docutils literal notranslate"><span class="pre">DBHandler.get_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="database.html#pyglimer.database.raw.DBHandler.get_response"><code class="docutils literal notranslate"><span class="pre">DBHandler.get_response()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="database.html#pyglimer.database.raw.DBHandler.print_tree"><code class="docutils literal notranslate"><span class="pre">DBHandler.print_tree()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="database.html#pyglimer.database.raw.DBHandler.walk"><code class="docutils literal notranslate"><span class="pre">DBHandler.walk()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.raw.RawDatabase"><code class="docutils literal notranslate"><span class="pre">RawDatabase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.raw.all_traces_recursive"><code class="docutils literal notranslate"><span class="pre">all_traces_recursive()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.raw.convert_header_to_hdf5"><code class="docutils literal notranslate"><span class="pre">convert_header_to_hdf5()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.raw.h5_dict"><code class="docutils literal notranslate"><span class="pre">h5_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.raw.h5_tree"><code class="docutils literal notranslate"><span class="pre">h5_tree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.raw.mseed_to_hdf5"><code class="docutils literal notranslate"><span class="pre">mseed_to_hdf5()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.raw.read_hdf5_header"><code class="docutils literal notranslate"><span class="pre">read_hdf5_header()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.raw.save_raw_DB_single_station"><code class="docutils literal notranslate"><span class="pre">save_raw_DB_single_station()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.raw.statxml_to_hdf5"><code class="docutils literal notranslate"><span class="pre">statxml_to_hdf5()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.raw.write_st"><code class="docutils literal notranslate"><span class="pre">write_st()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.raw.write_st_to_ds"><code class="docutils literal notranslate"><span class="pre">write_st_to_ds()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="database.html#module-pyglimer.database.rfh5">pyglimer.database.rfh5</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="database.html#pyglimer.database.rfh5.DBHandler"><code class="docutils literal notranslate"><span class="pre">DBHandler</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="database.html#pyglimer.database.rfh5.DBHandler.add_rf"><code class="docutils literal notranslate"><span class="pre">DBHandler.add_rf()</span></code></a></li>
@@ -541,12 +568,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="test.html">pyglimer.test</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="test.html#pyglimer-test-rate">pyglimer.test.rate</a></li>
-<li class="toctree-l2"><a class="reference internal" href="test.html#pyglimer-test-synthetic">pyglimer.test.synthetic</a></li>
-<li class="toctree-l2"><a class="reference internal" href="test.html#pyglimer-test-tests">pyglimer.test.tests</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">pyglimer.utils</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="utils.html#module-pyglimer.utils.create_geom">pyglimer.utils.create_geom</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.create_geom.create_geom"><code class="docutils literal notranslate"><span class="pre">create_geom()</span></code></a></li>
@@ -555,6 +576,11 @@
 <li class="toctree-l2"><a class="reference internal" href="utils.html#module-pyglimer.utils.createvmodel">pyglimer.utils.createvmodel</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.createvmodel.load_avvmodel"><code class="docutils literal notranslate"><span class="pre">load_avvmodel()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.createvmodel.load_gyps"><code class="docutils literal notranslate"><span class="pre">load_gyps()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-pyglimer.utils.even2Dpoints">pyglimer.utils.even2Dpoints</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.even2Dpoints.distance"><code class="docutils literal notranslate"><span class="pre">distance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.even2Dpoints.even2Dpoints"><code class="docutils literal notranslate"><span class="pre">even2Dpoints()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="utils.html#module-pyglimer.utils.geo_utils">pyglimer.utils.geo_utils</a><ul>
@@ -568,8 +594,17 @@
 <li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.geo_utils.reckon"><code class="docutils literal notranslate"><span class="pre">reckon()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-pyglimer.utils.log">pyglimer.utils.log</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.log.create_mpi_logger"><code class="docutils literal notranslate"><span class="pre">create_mpi_logger()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.log.start_logger_if_necessary"><code class="docutils literal notranslate"><span class="pre">start_logger_if_necessary()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="utils.html#module-pyglimer.utils.nextpowof2">pyglimer.utils.nextpowof2</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.nextpowof2.nextPowerOf2"><code class="docutils literal notranslate"><span class="pre">nextPowerOf2()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-pyglimer.utils.Ra2b">pyglimer.utils.Ra2b</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.Ra2b.Ra2b"><code class="docutils literal notranslate"><span class="pre">Ra2b()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="utils.html#module-pyglimer.utils.roundhalf">pyglimer.utils.roundhalf</a><ul>
@@ -585,6 +620,26 @@
 <li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.signalproc.resample_or_decimate"><code class="docutils literal notranslate"><span class="pre">resample_or_decimate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.signalproc.ricker"><code class="docutils literal notranslate"><span class="pre">ricker()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.signalproc.sshift"><code class="docutils literal notranslate"><span class="pre">sshift()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-pyglimer.utils.SphericalNN">pyglimer.utils.SphericalNN</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.SphericalNN.SphericalNN"><code class="docutils literal notranslate"><span class="pre">SphericalNN</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#pyglimer.utils.SphericalNN.SphericalNN.data"><code class="docutils literal notranslate"><span class="pre">SphericalNN.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#pyglimer.utils.SphericalNN.SphericalNN.kd_tree"><code class="docutils literal notranslate"><span class="pre">SphericalNN.kd_tree</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#pyglimer.utils.SphericalNN.SphericalNN.query"><code class="docutils literal notranslate"><span class="pre">SphericalNN.query()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#pyglimer.utils.SphericalNN.SphericalNN.query_pairs"><code class="docutils literal notranslate"><span class="pre">SphericalNN.query_pairs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#pyglimer.utils.SphericalNN.SphericalNN.interp"><code class="docutils literal notranslate"><span class="pre">SphericalNN.interp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#pyglimer.utils.SphericalNN.SphericalNN.interpolator"><code class="docutils literal notranslate"><span class="pre">SphericalNN.interpolator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#id0"><code class="docutils literal notranslate"><span class="pre">SphericalNN.query()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#id1"><code class="docutils literal notranslate"><span class="pre">SphericalNN.query_pairs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#pyglimer.utils.SphericalNN.SphericalNN.sparse_distance_matrix"><code class="docutils literal notranslate"><span class="pre">SphericalNN.sparse_distance_matrix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#pyglimer.utils.SphericalNN.SphericalNN.spherical2cartesian"><code class="docutils literal notranslate"><span class="pre">SphericalNN.spherical2cartesian()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-pyglimer.utils.statistics">pyglimer.utils.statistics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pyglimer.utils.statistics.stack_case_resampling"><code class="docutils literal notranslate"><span class="pre">stack_case_resampling()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="utils.html#module-pyglimer.utils.utils">pyglimer.utils.utils</a><ul>
@@ -658,6 +713,33 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="ccp.html#module-pyglimer.ccp.plot_utils.line_buffer">pyglimer.ccp.plot_utils.line_buffer</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="ccp.html#pyglimer.ccp.plot_utils.line_buffer.line_buffer"><code class="docutils literal notranslate"><span class="pre">line_buffer()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">pyglimer.plot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="plot.html#module-pyglimer.plot.plot_map">pyglimer.plot.plot_map</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_map.plot_bins"><code class="docutils literal notranslate"><span class="pre">plot_bins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_map.plot_map"><code class="docutils literal notranslate"><span class="pre">plot_map()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_map.plot_map_ccp"><code class="docutils literal notranslate"><span class="pre">plot_map_ccp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_map.plot_stations"><code class="docutils literal notranslate"><span class="pre">plot_stations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_map.plot_vel_grad"><code class="docutils literal notranslate"><span class="pre">plot_vel_grad()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plot.html#module-pyglimer.plot.plot_utils">pyglimer.plot.plot_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_utils.baz_hist"><code class="docutils literal notranslate"><span class="pre">baz_hist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_utils.plot_catalog"><code class="docutils literal notranslate"><span class="pre">plot_catalog()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_utils.plot_section"><code class="docutils literal notranslate"><span class="pre">plot_section()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_utils.plot_single_rf"><code class="docutils literal notranslate"><span class="pre">plot_single_rf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_utils.rayp_hist"><code class="docutils literal notranslate"><span class="pre">rayp_hist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_utils.remove_all"><code class="docutils literal notranslate"><span class="pre">remove_all()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_utils.remove_topright"><code class="docutils literal notranslate"><span class="pre">remove_topright()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.plot_utils.stream_dist"><code class="docutils literal notranslate"><span class="pre">stream_dist()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plot.html#module-pyglimer.plot.plot_volume">pyglimer.plot.plot_volume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot.html#module-pyglimer.plot.ui_utils">pyglimer.plot.ui_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="plot.html#pyglimer.plot.ui_utils.set_sliderval_no_callback"><code class="docutils literal notranslate"><span class="pre">set_sliderval_no_callback()</span></code></a></li>
 </ul>
 </li>
 </ul>

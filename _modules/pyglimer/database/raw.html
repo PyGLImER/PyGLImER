@@ -1,0 +1,1299 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyglimer.database.raw</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyglimer/database/raw';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../../_static/logo_horizontal_colour.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/logo_horizontal_colour.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/introduction/introduction.html">
+                        Introduction
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/introduction/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../tutorials/index.html">
+                        Tutorials
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/creation/index.html">
+                        Receiver Functions
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/receiver_functions/index.html">
+                        RF Handling
+                    </a>
+                </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/ccp/index.html">
+                        CCP
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/plotting/index.html">
+                        Plotting
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/api/index.html">
+                        API
+                    </a>
+                </li>
+                
+
+            <li class="nav-item">
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fa-solid fa-up-right-from-square"></i></a>
+            </li>
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PyGLImER/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/introduction/introduction.html">
+                        Introduction
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/introduction/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../tutorials/index.html">
+                        Tutorials
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/creation/index.html">
+                        Receiver Functions
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/receiver_functions/index.html">
+                        RF Handling
+                    </a>
+                </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/ccp/index.html">
+                        CCP
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/plotting/index.html">
+                        Plotting
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/api/index.html">
+                        API
+                    </a>
+                </li>
+                
+
+            <li class="nav-item">
+                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fa-solid fa-up-right-from-square"></i></a>
+            </li>
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PyGLImER/PyGLImER" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for pyglimer.database.raw</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">HDF5 based data format to save raw waveforms and station XMLs. Works similar</span>
+<span class="sd">to the data format saving receiver functions.</span>
+
+<span class="sd">:copyright:</span>
+<span class="sd">   The PyGLImER development team (makus@gfz-potsdam.de).</span>
+<span class="sd">:license:</span>
+<span class="sd">   GNU Lesser General Public License, Version 3</span>
+<span class="sd">   (https://www.gnu.org/copyleft/lesser.html)</span>
+<span class="sd">:author:</span>
+<span class="sd">   Peter Makus (makus@gfz-potsdam.de)</span>
+
+<span class="sd">Created: Tuesday, 6th September 2022 10:37:12 am</span>
+<span class="sd">Last Modified: Thursday, 27th October 2022 03:07:39 pm</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">tp</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">obspy</span>
+<span class="kn">from</span> <span class="nn">obspy.core.utcdatetime</span> <span class="kn">import</span> <span class="n">UTCDateTime</span>
+<span class="kn">from</span> <span class="nn">obspy.core</span> <span class="kn">import</span> <span class="n">Stats</span><span class="p">,</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">Trace</span><span class="p">,</span> <span class="n">read</span>
+<span class="kn">from</span> <span class="nn">obspy.core.event.event</span> <span class="kn">import</span> <span class="n">Event</span>
+<span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">Inventory</span><span class="p">,</span> <span class="n">read_inventory</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+
+<span class="kn">from</span> <span class="nn">pyglimer.utils</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">pu</span>
+<span class="kn">from</span> <span class="nn">pyglimer.utils.signalproc</span> <span class="kn">import</span> <span class="n">resample_or_decimate</span>
+
+
+<span class="n">hierarchy</span> <span class="o">=</span> <span class="s2">&quot;/</span><span class="si">{tag}</span><span class="s2">/</span><span class="si">{network}</span><span class="s2">/</span><span class="si">{station}</span><span class="s2">/</span><span class="si">{evt_id}</span><span class="s2">/</span><span class="si">{channel}</span><span class="s2">&quot;</span>
+<span class="n">hierarchy_xml</span> <span class="o">=</span> <span class="s1">&#39;/</span><span class="si">{tag}</span><span class="s1">/</span><span class="si">{network}</span><span class="s1">/</span><span class="si">{station}</span><span class="s1">&#39;</span>
+<span class="n">h5_FMTSTR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{dir}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{network}</span><span class="s2">.</span><span class="si">{station}</span><span class="s2">.h5&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DBHandler"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.DBHandler">[docs]</a><span class="k">class</span> <span class="nc">DBHandler</span><span class="p">(</span><span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The actual file handler of the hdf5 receiver function files.</span>
+
+<span class="sd">    .. warning::</span>
+
+<span class="sd">        **Should not be accessed directly. Access</span>
+<span class="sd">        :class:`~pyglimer.database.raw.RawDataBase` instead.**</span>
+
+<span class="sd">    Child object of :class:`h5py.File` and inherets all its attributes and</span>
+<span class="sd">    functions in addition to functions that are particularly useful for noise</span>
+<span class="sd">    correlations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">compression</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DBHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">compression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(\w+?)(\d+)&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">!=</span> <span class="s1">&#39;gzip&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;Compression of type </span><span class="si">%s</span><span class="s1"> is not supported.&#39;</span>
+                    <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(\w+?)(\d+)&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">):</span>
+                <span class="n">ii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)[</span><span class="n">ii</span><span class="p">]</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s1">&#39;Chosen compression level is not available for </span><span class="si">%s</span><span class="s1">. </span><span class="se">\</span>
+<span class="si">%s</span><span class="s1"> Has been chosen instead (closest)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">compression</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_define_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define the known waveforms per waveform.</span>
+<span class="sd">        Known waveforms to receive. Is just a dictionary with one key for</span>
+<span class="sd">        each channel with the values being a list of event origin times</span>
+<span class="sd">        rounded to one second.</span>
+
+<span class="sd">        :param content: dictionary with one key for</span>
+<span class="sd">            each channel with the values being a list of available waveform</span>
+<span class="sd">            seismic event origin times</span>
+<span class="sd">        :type ret: dict</span>
+
+<span class="sd">        .. note:: This overwrites the old table of contents, so make sure</span>
+<span class="sd">            to add everything!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">]</span>
+            <span class="c1"># Already existing, just change attributes</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DBHandler.add_waveform"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.DBHandler.add_waveform">[docs]</a>    <span class="k">def</span> <span class="nf">add_waveform</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">Trace</span><span class="p">,</span> <span class="n">Stream</span><span class="p">],</span>
+            <span class="n">evt_id</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">UTCDateTime</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+            <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;raw&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add receiver function to the hdf5 file. The data can later be accessed</span>
+<span class="sd">        using the :meth:`~pyglimer.database.rfh5.DBHandler.get_data()` method.</span>
+
+<span class="sd">        :param data: Data to save.</span>
+<span class="sd">        :type data: Trace or Stream</span>
+<span class="sd">        :param evt_id: Event identifier. Defined by the origin time of the</span>
+<span class="sd">            event rounded using :func:`~pyglimer.utils.utils.utc_save_str()`</span>
+<span class="sd">        :param tag: The tag that the data should be saved under. Defaults to</span>
+<span class="sd">            &#39;raw&#39;</span>
+<span class="sd">        :raises TypeError: for wrong data type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evt_id</span><span class="p">,</span> <span class="n">UTCDateTime</span><span class="p">):</span>
+            <span class="n">evt_id</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">utc_save_str</span><span class="p">(</span><span class="n">evt_id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Trace</span><span class="p">)</span> <span class="ow">and</span>\
+                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Stream</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Data has to be either an obspy Trace or Stream&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Trace</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">hierarchy</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">station</span><span class="p">,</span>
+                <span class="n">evt_id</span><span class="o">=</span><span class="n">evt_id</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">channel</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">compression</span><span class="p">,</span>
+                    <span class="n">compression_opts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span><span class="p">)</span>
+                <span class="n">convert_header_to_hdf5</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">st</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The dataset </span><span class="si">%s</span><span class="s2"> is already in file and will be </span><span class="se">\</span>
+<span class="s2">omitted.&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DBHandler.add_response"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.DBHandler.add_response">[docs]</a>    <span class="k">def</span> <span class="nf">add_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inv</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;response&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add the response information (i.e., stationxml).</span>
+
+<span class="sd">        :param inv: inventory containing information of only **one**</span>
+<span class="sd">            station</span>
+<span class="sd">        :type inv: Inventory</span>
+<span class="sd">        :param tag: tag to save under, defaults to &#39;response&#39;</span>
+<span class="sd">        :type tag: str, optional</span>
+
+<span class="sd">        .. note:: The Inventory `inv` should only contain information of one</span>
+<span class="sd">            station.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">code</span>
+        <span class="n">station</span> <span class="o">=</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">code</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">hierarchy_xml</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">station</span><span class="p">)</span>
+        <span class="c1"># Writing as bytes to avoid slow xml in hdf5</span>
+        <span class="k">with</span> <span class="n">BytesIO</span><span class="p">()</span> <span class="k">as</span> <span class="n">b</span><span class="p">:</span>
+            <span class="n">inv</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;stationxml&#39;</span><span class="p">)</span>
+            <span class="n">b</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;byte&#39;</span><span class="p">)),</span>
+                    <span class="n">compression</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">compression</span><span class="p">,</span>
+                    <span class="n">compression_opts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">compression_opts</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The dataset </span><span class="si">%s</span><span class="s2"> is already in file and will be </span><span class="se">\</span>
+<span class="s2">omitted.&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DBHandler.get_data"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.DBHandler.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">evt_id</span><span class="p">:</span> <span class="n">UTCDateTime</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;raw&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stream</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an obspy Stream holding the requested data and all</span>
+<span class="sd">        existing channels.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            `Wildcards are allowed for all parameters`.</span>
+
+<span class="sd">        :param network: network code, e.g., IU</span>
+<span class="sd">        :type network: str</span>
+<span class="sd">        :param station: station code, e.g., HRV</span>
+<span class="sd">        :type station: str</span>
+<span class="sd">        :param evt_id: Origin Time of the corresponding event</span>
+<span class="sd">        :type evt_id: UTCDateTime or str</span>
+<span class="sd">        :param tag: Data tag (e.g., &#39;raw&#39;). Defaults to raw.</span>
+<span class="sd">        :type tag: str, optional</span>
+<span class="sd">        :return: a :class:`Stream` holding the requested</span>
+<span class="sd">            data.</span>
+<span class="sd">        :rtype: Stream</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evt_id</span><span class="p">,</span> <span class="n">UTCDateTime</span><span class="p">):</span>
+            <span class="n">evt_id</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">utc_save_str</span><span class="p">(</span><span class="n">evt_id</span><span class="p">)</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">hierarchy</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">station</span><span class="p">,</span> <span class="n">evt_id</span><span class="o">=</span><span class="n">evt_id</span><span class="p">,</span>
+            <span class="n">channel</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>
+        <span class="c1"># Now, we need to differ between the fnmatch pattern and the actually</span>
+        <span class="c1"># acessed path</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/*&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">all_traces_recursive</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">path</span><span class="p">],</span> <span class="n">Stream</span><span class="p">(),</span> <span class="n">pattern</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">st</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Could not find data from </span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">station</span><span class="si">}</span><span class="s1"> &#39;</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;and event </span><span class="si">{</span><span class="n">evt_id</span><span class="si">}</span><span class="s1">. Returning empty Stream.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Stream</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DBHandler.get_response"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.DBHandler.get_response">[docs]</a>    <span class="k">def</span> <span class="nf">get_response</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;response&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Inventory</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the Response information for the queried station.</span>
+
+<span class="sd">        :param network: Network Code</span>
+<span class="sd">        :type network: str</span>
+<span class="sd">        :param station: Station Code</span>
+<span class="sd">        :type station: str</span>
+<span class="sd">        :param tag: Tag under which the response is saved,</span>
+<span class="sd">            defaults to &#39;response&#39;</span>
+<span class="sd">        :type tag: str, optional</span>
+<span class="sd">        :return: Obspy Inventory</span>
+<span class="sd">        :rtype: Inventory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">hierarchy_xml</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">station</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">BytesIO</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">path</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;byte&#39;</span><span class="p">)))</span> <span class="k">as</span> <span class="n">b</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">read_inventory</span><span class="p">(</span><span class="n">b</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_table_of_contents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the contents of the file.</span>
+
+<span class="sd">        :return: A dictionary where the keys are the available channels and the</span>
+<span class="sd">            values lists of the available events in rounded format fissure</span>
+<span class="sd">            on 10 seconds.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">]</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">content</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="DBHandler.walk"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.DBHandler.walk">[docs]</a>    <span class="k">def</span> <span class="nf">walk</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Stream</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterate over all Streams with the given properties.</span>
+<span class="sd">        (i.e, all events)</span>
+
+<span class="sd">        :param tag: data tag</span>
+<span class="sd">        :type tag: str</span>
+<span class="sd">        :param network: Network code</span>
+<span class="sd">        :type network: str</span>
+<span class="sd">        :param station: Statio ncode</span>
+<span class="sd">        :type station: str</span>
+<span class="sd">        :return: Iterator</span>
+<span class="sd">        :rtype: Iterable[RFTrace]</span>
+<span class="sd">        :yield: one Stream per event.</span>
+<span class="sd">        :rtype: Iterator[Iterable[Stream]]</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            Does not accept wildcards.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="n">tag</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">station</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">Stream</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Trace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="n">read_hdf5_header</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
+            <span class="k">yield</span> <span class="n">st</span></div>
+
+<div class="viewcode-block" id="DBHandler.content_dict"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.DBHandler.content_dict">[docs]</a>    <span class="k">def</span> <span class="nf">content_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a dictionary with the following structure. Not actively used.</span>
+
+<span class="sd">        .. code::</span>
+
+<span class="sd">            dict</span>
+<span class="sd">            ├── raw</span>
+<span class="sd">            │   └── YP</span>
+<span class="sd">            │       └── NE11</span>
+<span class="sd">            │           ├── 2009261T120020.8</span>
+<span class="sd">            │           │   ├── BHE (1500)</span>
+<span class="sd">            │           │   ├── BHN (1500)</span>
+<span class="sd">            │           │   └── BHZ (1500)</span>
+<span class="sd">            :           :</span>
+<span class="sd">            │           └── 2009261T184125.8</span>
+<span class="sd">            │               ├── BHE (1500)</span>
+<span class="sd">            │               ├── BHN (1500)</span>
+<span class="sd">            │               └── BHZ (1500)</span>
+<span class="sd">            └── response</span>
+<span class="sd">                └── YP</span>
+<span class="sd">                    └── NE11 (27156)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">h5_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DBHandler.print_tree"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.DBHandler.print_tree">[docs]</a>    <span class="k">def</span> <span class="nf">print_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;print a tree with the following structure</span>
+
+<span class="sd">        .. code::</span>
+
+<span class="sd">            dict</span>
+<span class="sd">            ├── raw</span>
+<span class="sd">            │   └── YP</span>
+<span class="sd">            │       └── NE11</span>
+<span class="sd">            │           ├── 2009261T120020.8</span>
+<span class="sd">            │           │   ├── BHE (1500)</span>
+<span class="sd">            │           │   ├── BHN (1500)</span>
+<span class="sd">            │           │   └── BHZ (1500)</span>
+<span class="sd">            :           :</span>
+<span class="sd">            │           └── 2009261T184125.8</span>
+<span class="sd">            │               ├── BHE (1500)</span>
+<span class="sd">            │               ├── BHN (1500)</span>
+<span class="sd">            │               └── BHZ (1500)</span>
+<span class="sd">            └── response</span>
+<span class="sd">                └── YP</span>
+<span class="sd">                    └── NE11 (27156)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">h5_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="h5_tree"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.h5_tree">[docs]</a><span class="k">def</span> <span class="nf">h5_tree</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Recursive function to print the structure of an ASDF dataset.&quot;&quot;&quot;</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">items</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">items</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># the last item</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="n">h5py</span><span class="o">.</span><span class="n">_hl</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">Group</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">pre</span> <span class="o">+</span> <span class="s1">&#39;└── &#39;</span> <span class="o">+</span> <span class="n">key</span><span class="p">)</span>
+                <span class="n">h5_tree</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">pre</span><span class="o">+</span><span class="s1">&#39;    &#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">pre</span> <span class="o">+</span> <span class="s1">&#39;└── &#39;</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s1">&#39; (</span><span class="si">%d</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="n">h5py</span><span class="o">.</span><span class="n">_hl</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">Group</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">pre</span> <span class="o">+</span> <span class="s1">&#39;├── &#39;</span> <span class="o">+</span> <span class="n">key</span><span class="p">)</span>
+                <span class="n">h5_tree</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">pre</span><span class="o">+</span><span class="s1">&#39;│   &#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">pre</span> <span class="o">+</span> <span class="s1">&#39;├── &#39;</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s1">&#39; (</span><span class="si">%d</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="h5_dict"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.h5_dict">[docs]</a><span class="k">def</span> <span class="nf">h5_dict</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Recursive function to red the keys of a dataset.&quot;&quot;&quot;</span>
+    <span class="n">h5dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># the last item</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="n">h5py</span><span class="o">.</span><span class="n">_hl</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">Group</span><span class="p">:</span>
+            <span class="n">h5dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5_dict</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">h5dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">h5dict</span></div>
+
+
+<div class="viewcode-block" id="RawDatabase"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.RawDatabase">[docs]</a><span class="k">class</span> <span class="nc">RawDatabase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class to handle the hdf5 files that contain raw data for receiver</span>
+<span class="sd">    function computaiton.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;gzip3&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access an hdf5 file holding raw waveforms. The resulting file can</span>
+<span class="sd">        be accessed using all functionalities of</span>
+<span class="sd">        `h5py &lt;https://www.h5py.org/&gt;`_ (for example as a dict).</span>
+
+<span class="sd">        :param path: Full path to the file</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param mode: Mode to access the file. Options are: &#39;a&#39; for all, &#39;w&#39; for</span>
+<span class="sd">            write, &#39;r+&#39; for writing in an already existing file, or &#39;r&#39; for</span>
+<span class="sd">            read-only , defaults to &#39;a&#39;.</span>
+<span class="sd">        :type mode: str, optional</span>
+<span class="sd">        :param compression: The compression algorithm and compression level</span>
+<span class="sd">            that the arrays should be saved with. &#39;gzip3&#39; tends to perform</span>
+<span class="sd">            well, else you could choose &#39;gzipx&#39; where x is a digit between</span>
+<span class="sd">            1 and 9 (i.e., 9 is the highest compression) or None for fastest</span>
+<span class="sd">            perfomance, defaults to &#39;gzip3&#39;.</span>
+<span class="sd">        :type compression: str, optional</span>
+
+<span class="sd">        .. warning::</span>
+
+<span class="sd">            **Access only through a context manager (see below):**</span>
+
+<span class="sd">            &gt;&gt;&gt; with RawDataBase(&#39;myfile.h5&#39;) as rdb:</span>
+<span class="sd">            &gt;&gt;&gt;     type(rdb)  # This is a DBHandler</span>
+<span class="sd">            &lt;class &#39;pyglimer.database.rfh5.DBHandler&#39;&gt;</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            &gt;&gt;&gt; with RawDataBase(</span>
+<span class="sd">                        &#39;/path/to/db/XN.NEP06.h5&#39;) as rfdb:</span>
+<span class="sd">            &gt;&gt;&gt;     # find the available tags for existing db</span>
+<span class="sd">            &gt;&gt;&gt;     print(list(rfdb.keys()))</span>
+<span class="sd">            [&#39;raw&#39;, &#39;weird&#39;]</span>
+<span class="sd">            &gt;&gt;&gt;     # Get Data from all times and</span>
+<span class="sd">            &gt;&gt;&gt;     st = rfdb.get_data(</span>
+<span class="sd">            &gt;&gt;&gt;         &#39;XN&#39;, &#39;NEP06&#39;, &#39;*&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; print(st.count())</span>
+<span class="sd">            250</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Create / read file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;h5&#39;</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">+=</span> <span class="s1">&#39;.h5&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">=</span> <span class="n">compression</span>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DBHandler</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_handler</span> <span class="o">=</span> <span class="n">DBHandler</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">compression</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_handler</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">tb</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_handler</span><span class="o">.</span><span class="n">_close</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="all_traces_recursive"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.all_traces_recursive">[docs]</a><span class="k">def</span> <span class="nf">all_traces_recursive</span><span class="p">(</span>
+    <span class="n">group</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">_hl</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">Group</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span>
+        <span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stream</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recursively, appends all traces in a h5py group to the input stream.</span>
+<span class="sd">    In addition this will check whether the data matches a certain pattern.</span>
+
+<span class="sd">    :param group: group to search through</span>
+<span class="sd">    :type group: class:`h5py._hl.group.Group`</span>
+<span class="sd">    :param stream: Stream to append the traces to</span>
+<span class="sd">    :type stream: Stream</span>
+<span class="sd">    :param pattern: pattern for the path in the hdf5 file, see fnmatch for</span>
+<span class="sd">        details.</span>
+<span class="sd">    :type pattern: str</span>
+<span class="sd">    :return: Stream with appended traces</span>
+<span class="sd">    :rtype: Stream</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">h5py</span><span class="o">.</span><span class="n">_hl</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>
+            <span class="n">all_traces_recursive</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">stream</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pattern</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Trace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="n">read_hdf5_header</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">stream</span></div>
+
+
+<div class="viewcode-block" id="convert_header_to_hdf5"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.convert_header_to_hdf5">[docs]</a><span class="k">def</span> <span class="nf">convert_header_to_hdf5</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="n">Stats</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert an :class:`~obspy.core.Stats` object and adds it to the provided</span>
+<span class="sd">    hdf5 dataset.</span>
+
+<span class="sd">    :param dataset: the dataset that the header should be added to</span>
+<span class="sd">    :type dataset: h5py.Dataset</span>
+<span class="sd">    :param header: The trace&#39;s header</span>
+<span class="sd">    :type header: Stats</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">UTCDateTime</span><span class="p">):</span>
+                <span class="c1"># convert time to string</span>
+                <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">format_fissures</span><span class="p">()</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;The header contains an item of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="si">}</span><span class="s1">.&#39;</span>
+                <span class="o">+</span> <span class="s1">&#39;Information of this type cannot be written to hdf5.&#39;</span><span class="p">)</span>
+            <span class="k">continue</span></div>
+
+
+<div class="viewcode-block" id="read_hdf5_header"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.read_hdf5_header">[docs]</a><span class="k">def</span> <span class="nf">read_hdf5_header</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stats</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes an hdf5 dataset as input and returns the header of the Trace.</span>
+
+<span class="sd">    :param dataset: The dataset to be read from</span>
+<span class="sd">    :type dataset: h5py.Dataset</span>
+<span class="sd">    :return: The trace&#39;s header</span>
+<span class="sd">    :rtype: Stats</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span>
+    <span class="n">time_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;starttime&#39;</span><span class="p">,</span> <span class="s1">&#39;endtime&#39;</span><span class="p">,</span> <span class="s1">&#39;onset&#39;</span><span class="p">,</span> <span class="s1">&#39;event_time&#39;</span><span class="p">]</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">time_keys</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># temporary fix of obspy&#39;s UTCDateTime issue. SHould be removed</span>
+                <span class="c1"># as soon as they release version 1.23</span>
+                <span class="k">if</span> <span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;360T&#39;</span><span class="p">:</span>
+                    <span class="n">new</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                    <span class="n">new</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+                    <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new</span><span class="p">))</span> <span class="o">-</span> <span class="mi">86400</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">e</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;processing&#39;</span><span class="p">:</span>
+            <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">Stats</span><span class="p">(</span><span class="n">header</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mseed_to_hdf5"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.mseed_to_hdf5">[docs]</a><span class="k">def</span> <span class="nf">mseed_to_hdf5</span><span class="p">(</span>
+    <span class="n">rawfolder</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">,</span> <span class="n">save_statxml</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a given mseed database in rawfolder to an h5 based database.</span>
+
+<span class="sd">    :param rawfolder: directory in which the fodlers for each event are stored</span>
+<span class="sd">    :type rawfolder: os.PathLike</span>
+<span class="sd">    :param save_statxml: should stationxmls be read as well? If so, you need</span>
+<span class="sd">        to provide `statloc` as well.</span>
+<span class="sd">    :type save_statxml: bool</span>
+<span class="sd">    :param statloc: location of station xmls only needed if `save_statxml` is</span>
+<span class="sd">        is set to True, defaults to None</span>
+<span class="sd">    :type statloc: str, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Find all miniseed related to that</span>
+    <span class="n">av_mseed</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rawfolder</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;*.mseed&#39;</span><span class="p">))</span>
+
+    <span class="c1"># We do that for every single station</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">av_mseed</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Delete empty folders</span>
+        <span class="n">evt_dirs</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rawfolder</span><span class="p">,</span> <span class="s1">&#39;??????????????&#39;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">evt_dirs</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_statxml</span><span class="p">:</span>
+            <span class="n">statxml_to_hdf5</span><span class="p">(</span><span class="n">rawfolder</span><span class="p">,</span> <span class="n">statloc</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">av_mseed</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+
+    <span class="n">h5_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rawfolder</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1">.h5&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Now, read all available files for this station</span>
+    <span class="n">mseeds</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rawfolder</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1">.mseed&#39;</span><span class="p">))</span>
+
+    <span class="c1"># Create table of new contents</span>
+    <span class="n">new_cont</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">with</span> <span class="n">RawDatabase</span><span class="p">(</span><span class="n">h5_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">rdb</span><span class="p">:</span>
+
+        <span class="k">for</span> <span class="n">mseed</span> <span class="ow">in</span> <span class="n">mseeds</span><span class="p">:</span>
+            <span class="c1"># event ID string, used to save the data in hdf5</span>
+            <span class="n">evt_str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">mseed</span><span class="p">))</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">st</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">mseed</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="n">obspy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">mseed</span><span class="o">.</span><span class="n">InternalMSEEDError</span><span class="p">:</span>
+
+                <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pyglimer.request&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;File </span><span class="si">{</span><span class="n">mseed</span><span class="si">}</span><span class="s1"> is corrupt. Skipping this file..&#39;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">mseed</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c1"># Decimate</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">st</span> <span class="o">=</span> <span class="n">resample_or_decimate</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pyglimer.request&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;File </span><span class="si">{</span><span class="n">mseed</span><span class="si">}</span><span class="s1">. Native sampling rate below 10Hz.&#39;</span>
+                    <span class="s1">&#39;Skipping this file..&#39;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">mseed</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">rdb</span><span class="o">.</span><span class="n">add_waveform</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">evt_str</span><span class="p">)</span>
+
+            <span class="c1"># Everything went well</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">mseed</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
+                <span class="n">new_cont</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">new_cont</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evt_str</span><span class="p">)</span>
+
+        <span class="c1"># Write content to the hdf5 file</span>
+        <span class="n">old_cont</span> <span class="o">=</span> <span class="n">rdb</span><span class="o">.</span><span class="n">_get_table_of_contents</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">old_cont</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">new_cont</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">new_cont</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="n">rdb</span><span class="o">.</span><span class="n">_define_content</span><span class="p">(</span><span class="n">new_cont</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">save_statxml</span><span class="p">:</span>
+            <span class="n">statxml</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">statloc</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1">.xml&#39;</span><span class="p">)</span>
+            <span class="n">rdb</span><span class="o">.</span><span class="n">add_response</span><span class="p">(</span><span class="n">read_inventory</span><span class="p">(</span><span class="n">statxml</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">save_statxml</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">statxml</span><span class="p">)</span>
+
+    <span class="c1"># next station</span>
+    <span class="n">mseed_to_hdf5</span><span class="p">(</span><span class="n">rawfolder</span><span class="p">,</span> <span class="n">save_statxml</span><span class="p">,</span> <span class="n">statloc</span><span class="o">=</span><span class="n">statloc</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="statxml_to_hdf5"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.statxml_to_hdf5">[docs]</a><span class="k">def</span> <span class="nf">statxml_to_hdf5</span><span class="p">(</span>
+        <span class="n">rawfolder</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">,</span> <span class="n">statloc</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write a statxml database to h5 files</span>
+
+<span class="sd">    :param rawfolder: location that contains the h5 files</span>
+<span class="sd">    :type rawfolder: stroros.PathLike</span>
+<span class="sd">    :param statloc: location where the stationxmls are stored</span>
+<span class="sd">    :type statloc: stroros.PathLike</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">av_xml</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">statloc</span><span class="p">,</span> <span class="s1">&#39;*.xml&#39;</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">xml</span> <span class="ow">in</span> <span class="n">av_xml</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">inv</span> <span class="o">=</span> <span class="n">read_inventory</span><span class="p">(</span><span class="n">xml</span><span class="p">)</span>
+            <span class="n">net</span> <span class="o">=</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">code</span>
+            <span class="n">stat</span> <span class="o">=</span> <span class="n">inv</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">code</span>
+            <span class="n">h5_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rawfolder</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1">.h5&#39;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">RawDatabase</span><span class="p">(</span><span class="n">h5_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">rdb</span><span class="p">:</span>
+                <span class="n">rdb</span><span class="o">.</span><span class="n">add_response</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">xml</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Station XML could not be added to h5 file. </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="save_raw_DB_single_station"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.save_raw_DB_single_station">[docs]</a><span class="k">def</span> <span class="nf">save_raw_DB_single_station</span><span class="p">(</span>
+        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">station</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">saved</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">st</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">rawloc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inv</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A variation of the above function that will open the ASDF file once and</span>
+<span class="sd">    write</span>
+<span class="sd">    all traces and then close it afterwards</span>
+<span class="sd">    Save the raw waveform data in the desired format.</span>
+<span class="sd">    The point of this function is mainly that the waveforms will be saved</span>
+<span class="sd">    with the correct associations and at the correct locations.</span>
+
+<span class="sd">    W are specifically writing event by event streams, so that we don&#39;t loose</span>
+<span class="sd">    parts that are already downloaded!</span>
+
+<span class="sd">    :param saved: Dictionary holding information about the original streams</span>
+<span class="sd">        to identify them afterwards.</span>
+<span class="sd">    :type saved: dict</span>
+<span class="sd">    :param st: obspy stream holding all data (from various stations)</span>
+<span class="sd">    :type st: Stream</span>
+<span class="sd">    :param rawloc: Parental directory (with phase) to save the files in.</span>
+<span class="sd">    :type rawloc: str</span>
+<span class="sd">    :param inv: The inventory holding all the station information</span>
+<span class="sd">    :type inv: Inventory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get logger</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pyglimer.request&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Filename of the station to be opened.</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.h5&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">)</span>
+
+    <span class="c1"># Just use the same name</span>
+    <span class="n">event_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="n">RawDatabase</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rawloc</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+
+        <span class="c1"># Inventory should be saved once to the the station file</span>
+        <span class="n">sinv</span> <span class="o">=</span> <span class="n">inv</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">station</span><span class="p">)</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">add_response</span><span class="p">(</span><span class="n">sinv</span><span class="p">)</span>
+
+        <span class="c1"># Number of events</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">saved</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">])</span>
+        <span class="n">Ns</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
+        <span class="c1"># Events should not be added because it will read the whole</span>
+        <span class="c1"># catalogue every single time!</span>
+        <span class="n">outst</span> <span class="o">=</span> <span class="n">Stream</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">_i</span><span class="p">,</span> <span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">startt</span><span class="p">,</span> <span class="n">endt</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">chan</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
+            <span class="n">saved</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">],</span> <span class="n">saved</span><span class="p">[</span><span class="s1">&#39;startt&#39;</span><span class="p">],</span> <span class="n">saved</span><span class="p">[</span><span class="s1">&#39;endt&#39;</span><span class="p">],</span> <span class="n">saved</span><span class="p">[</span><span class="s1">&#39;net&#39;</span><span class="p">],</span>
+                <span class="n">saved</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">],</span> <span class="n">saved</span><span class="p">[</span><span class="s1">&#39;chan&#39;</span><span class="p">])):</span>
+
+            <span class="c1"># Log the processed trace</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1">..</span><span class="si">{</span><span class="n">chan</span><span class="si">}</span><span class="s1">: Processing #</span><span class="si">{</span><span class="n">_i</span><span class="o">+</span><span class="mi">1</span><span class="si">:</span><span class="s1">&gt;</span><span class="si">{</span><span class="n">Ns</span><span class="si">}</span><span class="s1">d</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Get event id save string</span>
+            <span class="n">o</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">evt</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">evt_id</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">utc_save_str</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+
+            <span class="c1"># earlier we downloaded all locations, but we don&#39;t really want</span>
+            <span class="c1"># to have several, so let&#39;s just keep one</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Grab only single station from stream (should be only one...)</span>
+                <span class="n">sst</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="n">net</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">stat</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">chan</span><span class="p">)</span>
+
+                <span class="c1"># This might actually be empty if so, let&#39;s just skip</span>
+                <span class="k">if</span> <span class="n">sst</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No trace of </span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1"> in Stream.&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># This must assume that there is no overlap</span>
+                <span class="n">slst</span> <span class="o">=</span> <span class="n">sst</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">startt</span><span class="p">,</span> <span class="n">endt</span><span class="p">)</span>
+
+                <span class="c1"># This might actually be empty if so, let&#39;s just skip</span>
+                <span class="k">if</span> <span class="n">slst</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No data for </span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s2"> &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;and event </span><span class="si">{</span><span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Only write the prevelant location</span>
+                <span class="n">locs</span> <span class="o">=</span> <span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">location</span> <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">slst</span><span class="p">]</span>
+                <span class="n">filtloc</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">locs</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">locs</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+                <span class="n">sslst</span> <span class="o">=</span> <span class="n">slst</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">filtloc</span><span class="p">)</span>
+
+                <span class="c1"># This might actually be empty if so, let&#39;s just skip</span>
+                <span class="k">if</span> <span class="n">sslst</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No data for </span><span class="si">{</span><span class="n">net</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s2"> and &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;event </span><span class="si">{</span><span class="n">evt</span><span class="o">.</span><span class="n">resource_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="n">write_st_to_ds</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">sslst</span><span class="p">,</span> <span class="n">evt_id</span><span class="p">)</span>
+
+                <span class="c1"># Add substream to stream for content update</span>
+                <span class="n">outst</span> <span class="o">+=</span> <span class="n">sslst</span>
+                <span class="n">event_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evt_id</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="c1"># Create table of new contents</span>
+        <span class="n">new_cont</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">tr</span><span class="p">,</span> <span class="n">_evt_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">outst</span><span class="p">,</span> <span class="n">event_ids</span><span class="p">):</span>
+            <span class="n">new_cont</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">new_cont</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_evt_id</span><span class="p">)</span>
+
+        <span class="c1"># Get old table of contents</span>
+        <span class="n">old_cont</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">_get_table_of_contents</span><span class="p">()</span>
+
+        <span class="c1"># Extend the old table of contents</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">old_cont</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">new_cont</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">new_cont</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="c1"># Redefine the table of contents.</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">_define_content</span><span class="p">(</span><span class="n">new_cont</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_st_to_ds"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.write_st_to_ds">[docs]</a><span class="k">def</span> <span class="nf">write_st_to_ds</span><span class="p">(</span>
+    <span class="n">ds</span><span class="p">:</span> <span class="n">DBHandler</span><span class="p">,</span> <span class="n">st</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">evt_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write raw waveform data to an asdf file. This includes the corresponding</span>
+<span class="sd">    (teleseismic) event and the station inventory (i.e., response information).</span>
+
+<span class="sd">    :param st: The stream holding the raw waveform data.</span>
+<span class="sd">    :type st: Stream</span>
+<span class="sd">    :param event: The seismic event associated to the recorded data.</span>
+<span class="sd">    :type event: Event</span>
+<span class="sd">    :param outfolder: Output folder to write the asdf file to.</span>
+<span class="sd">    :type outfolder: str</span>
+<span class="sd">    :param statxml: The station inventory</span>
+<span class="sd">    :type statxml: Inventory</span>
+<span class="sd">    :param resample: Resample the data to 10Hz sampling rate? Defaults to True.</span>
+<span class="sd">    :type resample: bool, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">resample</span><span class="p">:</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">resample_or_decimate</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="c1"># Add waveforms and stationxml</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">add_waveform</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">evt_id</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_st"><a class="viewcode-back" href="../../../chapters/api/database.html#pyglimer.database.raw.write_st">[docs]</a><span class="k">def</span> <span class="nf">write_st</span><span class="p">(</span>
+    <span class="n">st</span><span class="p">:</span> <span class="n">Stream</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">Event</span><span class="p">,</span> <span class="n">outfolder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">statxml</span><span class="p">:</span> <span class="n">Inventory</span><span class="p">,</span>
+        <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write raw waveform data to an asdf file. This includes the corresponding</span>
+<span class="sd">    (teleseismic) event and the station inventory (i.e., response information).</span>
+
+<span class="sd">    :param st: The stream holding the raw waveform data.</span>
+<span class="sd">    :type st: Stream</span>
+<span class="sd">    :param event: The seismic event associated to the recorded data.</span>
+<span class="sd">    :type event: Event</span>
+<span class="sd">    :param outfolder: Output folder to write the asdf file to.</span>
+<span class="sd">    :type outfolder: str</span>
+<span class="sd">    :param statxml: The station inventory</span>
+<span class="sd">    :type statxml: Inventory</span>
+<span class="sd">    :param resample: Resample the data to 10Hz sampling rate? Defaults to True.</span>
+<span class="sd">    :type resample: bool, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get event id</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">preferred_origin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">origins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">evt_id</span> <span class="o">=</span> <span class="n">pu</span><span class="o">.</span><span class="n">utc_save_str</span><span class="p">(</span><span class="n">origin</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">resample</span><span class="p">:</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">resample_or_decimate</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">netsta</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
+        <span class="n">netsta</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">station</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">net</span><span class="p">,</span> <span class="n">sta</span> <span class="ow">in</span> <span class="n">netsta</span><span class="p">:</span>
+
+        <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.h5&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">sta</span><span class="p">)</span>
+        <span class="n">subst</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="n">net</span><span class="p">,</span> <span class="n">station</span><span class="o">=</span><span class="n">sta</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">RawDatabase</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outfolder</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+            <span class="c1"># Events should not be added because it will read the whole</span>
+            <span class="c1"># catalogue every single time!</span>
+
+            <span class="n">ds</span><span class="o">.</span><span class="n">add_waveform</span><span class="p">(</span><span class="n">subst</span><span class="p">,</span> <span class="n">evt_id</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="p">)</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">add_response</span><span class="p">(</span><span class="n">statxml</span><span class="p">)</span>
+            <span class="c1"># If there are still problems, we will have</span>
+            <span class="c1"># to check whether they are similar probelms to add event</span>
+
+            <span class="c1"># Create table of new contents</span>
+            <span class="n">new_cont</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">tr</span><span class="p">,</span> <span class="ow">in</span> <span class="n">subst</span><span class="p">:</span>
+                <span class="n">new_cont</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">new_cont</span><span class="p">[</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evt_id</span><span class="p">)</span>
+
+            <span class="c1"># Get old table of contents</span>
+            <span class="n">old_cont</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">_get_table_of_contents</span><span class="p">()</span>
+
+            <span class="c1"># Extend the old table of contents</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">old_cont</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">new_cont</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">new_cont</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+            <span class="c1"># Redefine the table of contents.</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">_define_content</span><span class="p">(</span><span class="n">new_cont</span><span class="p">)</span></div>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2022, the PyGLImER development team.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

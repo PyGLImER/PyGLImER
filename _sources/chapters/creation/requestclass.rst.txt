@@ -12,7 +12,7 @@ If the user chooses this option, the :py:class:`~pyglimer.waveform.request.Reque
 a folder structure as defined by the user. Those contain raw (i.e. unprocessed, but downsampled)
 waveform files in miniseed format, preprocessed (3 component in RTZ coordinate system, and filtered/discarded
 by signal to noise ratio) waveforms in miniseed format together with info-files (shelve format),
-and receiver functions in time domain and in .SAC format, respectively). Additionally,
+and receiver functions in time domain and in *.SAC* format, respectively). Additionally,
 a directory with station response files will be created.
 
 .. note::
@@ -26,9 +26,7 @@ HDF5 Database
 #############
 Your second option is to save data in *hdf5* format. In this case, only two directories will be created;
 one for the downsampled raw-data and another one for the final time-domain receiver functions. The raw data
-management is based on `PyASDF <https://seismicdata.github.io/pyasdf/>`_ (head there to
-learn how to access waveforms, event catalogues, and station response files), whereas receiver
-functions are saved in an hdf5 variant specific to PyGLImER (in the following, we will learn how to use it).
+and receiver functions are saved in an hdf5 variant specific to PyGLImER (in the following, we will learn how to use it).
 
 .. note::
 
@@ -89,7 +87,7 @@ is to create a *yaml* file with the parameters. An example comes with this repos
     :linenos:
 
     # This file is used to define the parameters used for PyGLImER
-    #### Project wide parameters
+    # ### Project wide parameters ###
     # lowest level project directory
     proj_dir : 'database'
     # raw waveforms
@@ -106,7 +104,7 @@ is to create a *yaml* file with the parameters. An example comes with this repos
     log_subdir : 'log'
     # levels:
     # 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'
-    loglvl: 'DEBUG'
+    loglvl: 'WARNING'
     # format, either mseed or hdf5
     format: 'hdf5'
 
@@ -122,7 +120,7 @@ is to create a *yaml* file with the parameters. An example comes with this repos
     # If so insert path+filename here.
     evtcat: None
     # earliest event
-    starttime: '2009-01-1 00:00:00.0'
+    starttime: '2009-06-1 00:00:00.0'
     # latest event
     endtime: '2011-12-31 00:00:00.0'
     # Minumum Magnitude
@@ -144,6 +142,8 @@ is to create a *yaml* file with the parameters. An example comes with this repos
     # Iterative time domain: 'it'
     # Waterlevel Spectral Division: 'waterlevel'
     deconmeth: 'it'
+    # Remove the station response. Set to False if you don't have access to the response
+    remove_response: False
 
 You can then read the yaml file using *pyyaml* like so:
 

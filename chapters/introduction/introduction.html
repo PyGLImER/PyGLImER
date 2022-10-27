@@ -392,14 +392,32 @@
               
   <section id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">#</a></h1>
-<p>This project was created in the framework of a
-Master’s thesis by Peter Makus. It aims to automate receiver function (RF)
-processing from download of raw waveform data to CCP imaging with a minimum
-amount of user interference. This project is largely based on the ObsPy project
-and can be seen as a more powerful and user-friendly successor of the GLImER
-project.</p>
+<p>PyGLImER automates receiver function (RF) processing from download of raw waveform data to common conversion point (CCP)
+imaging with a minimum amount of user interference.</p>
+<p>The implementation includes:</p>
+<ul class="simple">
+<li><p>Functions to download raw waveform data from FDSN providers</p></li>
+<li><p>Functions to feed in local waveform data</p></li>
+<li><p>An adaptable preprocessing scheme, including various rotational algorithms</p></li>
+<li><p>A variety of deconvolution algorithms (user-defined algorithms possible)</p></li>
+<li><p>An implementation of the iasp91 and GyPSum velocity models for depth migration (user-defined models are accepted)</p></li>
+<li><p>A new, particularly efficient Common Conversion Point Stacking algorithm</p></li>
+<li><p>A variety of plotting tools to explore datasets and to create prublication ready figures</p></li>
+<li><p>Efficient and fast processing and data management, support multi-processing, MPI, and HDF5</p></li>
+</ul>
+<p>As developers, we are particularly concerned to create an automated, adaptable, efficient, and, yet, easy-to-use toolkit.</p>
+<p>The project is relying on an <a class="reference external" href="https://github.com/obspy/obspy">ObsPy-like</a> API and can be seen as a more powerful and
+user-friendly successor of
+<a class="reference external" href="https://www.stephanerondenay.com/glimer-map/map.html">the GLImER project</a>.</p>
 <p>A review of the receiver function technique is given here: <a class="reference external" href="https://link.springer.com/article/10.1007/s10712-009-9071-5">Upper Mantle Imaging
 with Array Recordings of Converted and Scattered Teleseismic Waves</a></p>
+<figure class="align-default" id="id1">
+<img alt="../../_images/intro.svg" src="../../_images/intro.svg" /><figcaption>
+<p><span class="caption-text"><strong>(left)</strong> <em>A cartoon of a conversion of an incoming teleseismic S arrival and its conversion at a boundary below a seismic array.</em>
+<strong>(right)</strong> <em>The resulting seismogram. One can create a receiver function by confining the conversion/coda and the primary arrival
+to each one component (rotation) and, subsequently, deconvolving the primary wavelet from the converted wavelet.</em></span><a class="headerlink" href="#id1" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
 </section>
 
 

@@ -48,7 +48,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="pyglimer.ccp" href="ccp.html" />
-    <link rel="prev" title="pyglimer.test" href="test.html" />
+    <link rel="prev" title="pyglimer.database" href="database.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -379,9 +379,9 @@
 <li class="toctree-l1"><a class="reference internal" href="waveform.html">pyglimer.waveform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rf.html">pyglimer.rf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="database.html">pyglimer.database</a></li>
-<li class="toctree-l1"><a class="reference internal" href="test.html">pyglimer.test</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">pyglimer.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ccp.html">pyglimer.ccp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">pyglimer.plot</a></li>
 </ul>
 
   </div>
@@ -510,6 +510,64 @@ The default is False, as it lead to unstabilities with joblib.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>ComplexModel object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pyglimer.utils.even2Dpoints">
+<span id="pyglimer-utils-even2dpoints"></span><h2>pyglimer.utils.even2Dpoints<a class="headerlink" href="#module-pyglimer.utils.even2Dpoints" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.utils.even2Dpoints.distance">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.even2Dpoints.</span></span><span class="sig-name descname"><span class="pre">distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/even2Dpoints.html#distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.even2Dpoints.distance" title="Permalink to this definition">#</a></dt>
+<dd><p>Compute euclidean 2D distance between points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>arraylike</em>) – x coordinates</p></li>
+<li><p><strong>y</strong> (<em>arraylike</em>) – y coordinates</p></li>
+<li><p><strong>x0</strong> (<em>float</em>) – x coordinate to measure distance to</p></li>
+<li><p><strong>y0</strong> (<em>float</em>) – y coordinatte to measure distance to</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>distances</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float or arraylike</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)</p>
+</dd>
+<dt class="field-even">Last Modified<span class="colon">:</span></dt>
+<dd class="field-even"><p>2021.03.16 16.30</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.utils.even2Dpoints.even2Dpoints">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.even2Dpoints.</span></span><span class="sig-name descname"><span class="pre">even2Dpoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/even2Dpoints.html#even2Dpoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.even2Dpoints.even2Dpoints" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates evenly distributed points in 2D space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>int</em>) – number of points to be generated</p></li>
+<li><p><strong>width</strong> (<em>floatt</em>) – width of the 2D space</p></li>
+<li><p><strong>height</strong> (<em>float</em>) – height of the 2D space</p></li>
+<li><p><strong>radius</strong> (<em>float</em>) – min distance between the points</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>tuple</em> – x,y coordinates in 2D space</p></li>
+<li><p><em>Does not really need a unit test, since its testing its distances</em></p></li>
+<li><p><em>itself, and the distance function is really not a complicated thing…</em></p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -674,6 +732,62 @@ bearing = np.pi/2 # 90 degrees
 </dd></dl>
 
 </section>
+<section id="module-pyglimer.utils.log">
+<span id="pyglimer-utils-log"></span><h2>pyglimer.utils.log<a class="headerlink" href="#module-pyglimer.utils.log" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
+</dd>
+<dt class="field-even">license<span class="colon">:</span></dt>
+<dd class="field-even"><p>GNU Lesser General Public License, Version 3
+(<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
+</dd>
+<dt class="field-odd">author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
+</dd>
+</dl>
+<p>Created: Monday, 13th September 2021 10:38:53 am
+Last Modified: Friday, 7th January 2022 11:05:39 am</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.utils.log.create_mpi_logger">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.log.</span></span><span class="sig-name descname"><span class="pre">create_mpi_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Logger</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/log.html#create_mpi_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.log.create_mpi_logger" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a very similar logger to the input logger, but with name and
+filehandler dependent on mpi rank.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>logger</strong> (<em>logging.Logger</em>) – The original logger to crete a rank-dependent version on.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The rank dependent logger (different name and different file)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>logging.Logger</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.utils.log.start_logger_if_necessary">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.log.</span></span><span class="sig-name descname"><span class="pre">start_logger_if_necessary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loglvl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Logger</span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/log.html#start_logger_if_necessary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.log.start_logger_if_necessary" title="Permalink to this definition">#</a></dt>
+<dd><p>Initialise a logger.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The logger’s name</p></li>
+<li><p><strong>logfile</strong> (<em>str</em>) – File to log to</p></li>
+<li><p><strong>loglvl</strong> (<em>int</em>) – Log level</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the logger</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>logging.Logger</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-pyglimer.utils.nextpowof2">
 <span id="pyglimer-utils-nextpowof2"></span><h2>pyglimer.utils.nextpowof2<a class="headerlink" href="#module-pyglimer.utils.nextpowof2" title="Permalink to this heading">#</a></h2>
 <dl class="field-list simple">
@@ -694,6 +808,41 @@ Last Modified: Thursday, 25th March 2021 03:56:56 pm</p>
 <dt class="sig sig-object py" id="pyglimer.utils.nextpowof2.nextPowerOf2">
 <span class="sig-prename descclassname"><span class="pre">pyglimer.utils.nextpowof2.</span></span><span class="sig-name descname"><span class="pre">nextPowerOf2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/nextpowof2.html#nextPowerOf2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.nextpowof2.nextPowerOf2" title="Permalink to this definition">#</a></dt>
 <dd><p>just returns the next higher power of two from n</p>
+</dd></dl>
+
+</section>
+<section id="module-pyglimer.utils.Ra2b">
+<span id="pyglimer-utils-ra2b"></span><h2>pyglimer.utils.Ra2b<a class="headerlink" href="#module-pyglimer.utils.Ra2b" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.utils.Ra2b.Ra2b">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.Ra2b.</span></span><span class="sig-name descname"><span class="pre">Ra2b</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/Ra2b.html#Ra2b"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.Ra2b.Ra2b" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets rotation matrix for R3 vectors that rotates a -&gt; b.
+This is the linear algebra version of rodriquez formula.
+Theory:
+<a class="reference external" href="https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula">https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>np.ndarray</em>) – vector to rotate towards</p></li>
+<li><p><strong>b</strong> (<em>np.ndarray</em>) – vector to rotate from</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>3x3 rotation matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)</p>
+</dd>
+<dt class="field-even">Last Modified<span class="colon">:</span></dt>
+<dd class="field-even"><p>2021.04.17 00.30</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -900,6 +1049,222 @@ Else the signal will be interpolated (a lot slower).</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Timeshifted signal</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pyglimer.utils.SphericalNN">
+<span id="pyglimer-utils-sphericalnn"></span><h2>pyglimer.utils.SphericalNN<a class="headerlink" href="#module-pyglimer.utils.SphericalNN" title="Permalink to this heading">#</a></h2>
+<p>Spherical nearest neighbour idea taken from ObsPy originally,
+but heavily modified to include interpolation using shephard’s and
+modified shephard’s method of inverse distance weighting.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyglimer.utils.SphericalNN.SphericalNN">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyglimer.utils.SphericalNN.</span></span><span class="sig-name descname"><span class="pre">SphericalNN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/SphericalNN.html#SphericalNN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.SphericalNN.SphericalNN" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Spherical nearest neighbour queries using scipy’s fast kd-tree
+implementation.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyglimer.utils.SphericalNN.SphericalNN.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#pyglimer.utils.SphericalNN.SphericalNN.data" title="Permalink to this definition">#</a></dt>
+<dd><p>cartesian point data array [x,y,z]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyglimer.utils.SphericalNN.SphericalNN.kd_tree">
+<span class="sig-name descname"><span class="pre">kd_tree</span></span><a class="headerlink" href="#pyglimer.utils.SphericalNN.SphericalNN.kd_tree" title="Permalink to this definition">#</a></dt>
+<dd><p>a KDTree used to query data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>scipy.spatial.cKDTree</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyglimer.utils.SphericalNN.SphericalNN.query">
+<span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/SphericalNN.html#SphericalNN.query"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.SphericalNN.SphericalNN.query" title="Permalink to this definition">#</a></dt>
+<dd><p>Query a set of latitudes and longitudes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyglimer.utils.SphericalNN.SphericalNN.query_pairs">
+<span class="sig-name descname"><span class="pre">query_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maximum_distance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/SphericalNN.html#SphericalNN.query_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.SphericalNN.SphericalNN.query_pairs" title="Permalink to this definition">#</a></dt>
+<dd><p>Find pairs of points that are within a certain distance of each other</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyglimer.utils.SphericalNN.SphericalNN.interp">
+<span class="sig-name descname"><span class="pre">interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlon</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyglimer.utils.SphericalNN.SphericalNN.interp" title="Permalink to this definition">#</a></dt>
+<dd><p>Use the kdtree to interpolate data corresponding
+to the points of the Kdtree onto a new set of points using nearest
+neighbor interpolation or weighted nearest neighbor
+interpolation (default).</p>
+</dd></dl>
+
+<p class="rubric">Notes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Authors<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Lucas Sawade (<a class="reference external" href="mailto:lsawade&#37;&#52;&#48;princeton&#46;edu">lsawade<span>&#64;</span>princeton<span>&#46;</span>edu</a>)</p>
+</dd>
+<dt class="field-even">Last Modified<span class="colon">:</span></dt>
+<dd class="field-even"><p>2021.04.21 20.00</p>
+</dd>
+</dl>
+<p>Initialize class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>numpy.ndarray</em>) – latitudes</p></li>
+<li><p><strong>lon</strong> (<em>numpy.ndarray</em>) – longitudes</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyglimer.utils.SphericalNN.SphericalNN.interpolator">
+<span class="sig-name descname"><span class="pre">interpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_weighting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/SphericalNN.html#SphericalNN.interpolator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.SphericalNN.SphericalNN.interpolator" title="Permalink to this definition">#</a></dt>
+<dd><p>Spherical interpolation function using the <code class="docutils literal notranslate"><span class="pre">SphericalNN</span></code> object.
+Returns an interpolator that can be used for interpolating the same
+set of locations based on the KDTree. The only input the interpolator
+takes are the data corresponding to the points in the KDTree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qlat</strong> (<em>numpy.ndarray</em>) – query latitudes</p></li>
+<li><p><strong>qlon</strong> (<em>numpy.ndarray</em>) – query longitude</p></li>
+<li><p><strong>maximum_distance</strong> (<em>float</em><em>, </em><em>optional</em>) – max distace for the interpolation in degree angle. Default None.
+If the mindistance to any points is larger than maximum_distance
+the interpolated value is set to <code class="docutils literal notranslate"><span class="pre">np.nan</span></code>.</p></li>
+<li><p><strong>no_weighting</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether or not the function uses a weightied nearest neighbor
+interpolation</p></li>
+<li><p><strong>k</strong> (<em>int</em><em>, </em><em>optional</em>) – Define maximum number of neighbors to be used for the weighted
+interpolation. Not used if <code class="docutils literal notranslate"><span class="pre">no_weighting</span> <span class="pre">=</span> <span class="pre">True</span></code>. Default None</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – Exponent to compute the inverse distance weights. Note that in
+the limit <code class="docutils literal notranslate"><span class="pre">p-&gt;inf</span></code> is just a nearest neighbor interpolation.
+Default is 2</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>In the future, I may add a variable weighting function for the
+weighted interpolation.</p>
+<p>Please refer to
+<a class="reference external" href="https://en.wikipedia.org/wiki/Inverse_distance_weighting">https://en.wikipedia.org/wiki/Inverse_distance_weighting</a>
+for the interpolation weighting.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qlat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/SphericalNN.html#SphericalNN.query"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Permalink to this definition">#</a></dt>
+<dd><p>Query latitude and longitude values from kdtree</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qlat</strong> (<em>np.ndarray</em><em> or </em><em>float</em>) – query latitude</p></li>
+<li><p><strong>qlon</strong> (<em>np.ndarray</em><em> or </em><em>float</em>) – query longitude</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(distance, indeces) to closest point in kdtree</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">query_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maximum_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/SphericalNN.html#SphericalNN.query_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Permalink to this definition">#</a></dt>
+<dd><p>Query pairs within the kdtree</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>maximum_distance</strong> (<em>float</em>) – Maximum query distance in deg</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Set of pairs (i, j) where i &lt; j</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>set or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyglimer.utils.SphericalNN.SphericalNN.sparse_distance_matrix">
+<span class="sig-name descname"><span class="pre">sparse_distance_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pyglimer.utils.SphericalNN.SphericalNN" title="pyglimer.utils.SphericalNN.SphericalNN"><span class="pre">SphericalNN</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sparse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">km</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/SphericalNN.html#SphericalNN.sparse_distance_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.SphericalNN.SphericalNN.sparse_distance_matrix" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes the sparse distance matrix between two kdtree. if no other
+kdtree is provided, this kdtree is used</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#pyglimer.utils.SphericalNN.SphericalNN" title="pyglimer.utils.SphericalNN.SphericalNN"><em>SphericalNN</em></a>) – other SphericalNN tree</p></li>
+<li><p><strong>maximum_distance</strong> (<em>float</em>) – Maximum query distance in deg</p></li>
+<li><p><strong>sparse</strong> (<em>bool</em>) – Flag to output sparse array for memory. Default False</p></li>
+<li><p><strong>km</strong> (<em>bool</em>) – flag to output distances in kilometers. Default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Set of pairs (i, j) where i &lt; j</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>set or ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyglimer.utils.SphericalNN.SphericalNN.spherical2cartesian">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">spherical2cartesian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/utils/SphericalNN.html#SphericalNN.spherical2cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.SphericalNN.SphericalNN.spherical2cartesian" title="Permalink to this definition">#</a></dt>
+<dd><p>Converts a list of <code class="xref py py-class docutils literal notranslate"><span class="pre">Station</span></code>
+objects to an array of shape(len(list), 3) containing x/y/z in meters.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pyglimer.utils.statistics">
+<span id="pyglimer-utils-statistics"></span><h2>pyglimer.utils.statistics<a class="headerlink" href="#module-pyglimer.utils.statistics" title="Permalink to this heading">#</a></h2>
+<p>Toolbox for statistical tools to quantify errors in receiver functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">copyright<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The PyGLImER development team (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>).</p>
+</dd>
+<dt class="field-even">license<span class="colon">:</span></dt>
+<dd class="field-even"><p>GNU Lesser General Public License, Version 3
+(<a class="reference external" href="https://www.gnu.org/copyleft/lesser.html">https://www.gnu.org/copyleft/lesser.html</a>)</p>
+</dd>
+<dt class="field-odd">author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Peter Makus (<a class="reference external" href="mailto:makus&#37;&#52;&#48;gfz-potsdam&#46;de">makus<span>&#64;</span>gfz-potsdam<span>&#46;</span>de</a>)</p>
+</dd>
+</dl>
+<p>Created: Monday, 27th September 2021 03:14:17 pm
+Last Modified: Thursday, 21st October 2021 10:23:01 am</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyglimer.utils.statistics.stack_case_resampling">
+<span class="sig-prename descclassname"><span class="pre">pyglimer.utils.statistics.</span></span><span class="sig-name descname"><span class="pre">stack_case_resampling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/pyglimer/utils/statistics.html#stack_case_resampling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.utils.statistics.stack_case_resampling" title="Permalink to this definition">#</a></dt>
+<dd><p>Monte Carlo Case resampling algorithm that can be used with single station
+RF stacks (aka bootstrap).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – Moveout corrected receiver function data that is used for the
+bootstrap. Given in form of a 2D matrix -&gt; 1 line = 1 RF.</p></li>
+<li><p><strong>b</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of iterations that the bootstrap is supposed to run.
+Defaults to 1000</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list with each of the boot strapped stacks / averages.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[np.ndarray]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1171,11 +1536,11 @@ event-channel dictionary <code class="docutils literal notranslate"><span class=
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="test.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="database.html" title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">pyglimer.test</p>
+          <p class="prev-next-title">pyglimer.database</p>
       </div>
   </a>
   <a class='right-next' id="next-link" href="ccp.html" title="next page">
@@ -1236,6 +1601,31 @@ event-channel dictionary <code class="docutils literal notranslate"><span class=
      <code class="docutils literal notranslate">
       <span class="pre">
        load_gyps()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-pyglimer.utils.even2Dpoints">
+   pyglimer.utils.even2Dpoints
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#pyglimer.utils.even2Dpoints.distance">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       distance()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#pyglimer.utils.even2Dpoints.even2Dpoints">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       even2Dpoints()
       </span>
      </code>
     </a>
@@ -1322,6 +1712,31 @@ event-channel dictionary <code class="docutils literal notranslate"><span class=
   </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-pyglimer.utils.log">
+   pyglimer.utils.log
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#pyglimer.utils.log.create_mpi_logger">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       create_mpi_logger()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#pyglimer.utils.log.start_logger_if_necessary">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       start_logger_if_necessary()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#module-pyglimer.utils.nextpowof2">
    pyglimer.utils.nextpowof2
   </a>
@@ -1331,6 +1746,22 @@ event-channel dictionary <code class="docutils literal notranslate"><span class=
      <code class="docutils literal notranslate">
       <span class="pre">
        nextPowerOf2()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-pyglimer.utils.Ra2b">
+   pyglimer.utils.Ra2b
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#pyglimer.utils.Ra2b.Ra2b">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       Ra2b()
       </span>
      </code>
     </a>
@@ -1426,6 +1857,130 @@ event-channel dictionary <code class="docutils literal notranslate"><span class=
      <code class="docutils literal notranslate">
       <span class="pre">
        sshift()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-pyglimer.utils.SphericalNN">
+   pyglimer.utils.SphericalNN
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#pyglimer.utils.SphericalNN.SphericalNN">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       SphericalNN
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#pyglimer.utils.SphericalNN.SphericalNN.data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SphericalNN.data
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#pyglimer.utils.SphericalNN.SphericalNN.kd_tree">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SphericalNN.kd_tree
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#pyglimer.utils.SphericalNN.SphericalNN.query">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SphericalNN.query()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#pyglimer.utils.SphericalNN.SphericalNN.query_pairs">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SphericalNN.query_pairs()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#pyglimer.utils.SphericalNN.SphericalNN.interp">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SphericalNN.interp()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#pyglimer.utils.SphericalNN.SphericalNN.interpolator">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SphericalNN.interpolator()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#id0">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SphericalNN.query()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#id1">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SphericalNN.query_pairs()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#pyglimer.utils.SphericalNN.SphericalNN.sparse_distance_matrix">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SphericalNN.sparse_distance_matrix()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#pyglimer.utils.SphericalNN.SphericalNN.spherical2cartesian">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SphericalNN.spherical2cartesian()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-pyglimer.utils.statistics">
+   pyglimer.utils.statistics
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#pyglimer.utils.statistics.stack_case_resampling">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       stack_case_resampling()
       </span>
      </code>
     </a>

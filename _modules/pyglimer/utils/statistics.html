@@ -4,51 +4,48 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-
-    <title>RF Handling</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyglimer.utils.statistics</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+  <link href="../../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
 
   
   <link rel="stylesheet"
-    href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
+    href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
   <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
-    <script src="../../_static/clipboard.min.js"></script>
-    <script src="../../_static/copybutton.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/receiver_functions/index';</script>
-    <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Reading receiver functions that were saved in sac format" href="sac.html" />
-    <link rel="prev" title="Raw waveforms stored in hdf5 format" href="../creation/hdf5.html" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyglimer/utils/statistics';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -69,7 +66,7 @@
     <div class="search-button__overlay"></div>
     <div class="search-button__search-container">
       
-<form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
   <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
@@ -88,7 +85,7 @@
   
 
 
-<a class="navbar-brand logo" href="../../index.html">
+<a class="navbar-brand logo" href="../../../index.html">
 
   
   
@@ -99,8 +96,8 @@
   
 
   
-    <img src="../../_static/logo_horizontal_colour.png" class="logo__image only-light" alt="Logo image">
-    <img src="../../_static/logo_horizontal_colour.png" class="logo__image only-dark" alt="Logo image">
+    <img src="../../../_static/logo_horizontal_colour.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/logo_horizontal_colour.png" class="logo__image only-dark" alt="Logo image">
   
   
 </a>
@@ -119,35 +116,35 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                 <li class="nav-item">
-                    <a class="nav-link" href="../introduction/introduction.html">
+                    <a class="nav-link" href="../../../chapters/introduction/introduction.html">
                         Introduction
                     </a>
                 </li>
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../introduction/installation.html">
+                    <a class="nav-link" href="../../../chapters/introduction/installation.html">
                         Installation
                     </a>
                 </li>
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../../tutorials/index.html">
+                    <a class="nav-link" href="../../../tutorials/index.html">
                         Tutorials
                     </a>
                 </li>
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../creation/index.html">
+                    <a class="nav-link" href="../../../chapters/creation/index.html">
                         Receiver Functions
                     </a>
                 </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="#">
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/receiver_functions/index.html">
                         RF Handling
                     </a>
                 </li>
@@ -159,21 +156,21 @@
                 <div class="dropdown-menu">
                     
                 <li class="nav-item">
-                    <a class="nav-link" href="../ccp/index.html">
+                    <a class="nav-link" href="../../../chapters/ccp/index.html">
                         CCP
                     </a>
                 </li>
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../plotting/index.html">
+                    <a class="nav-link" href="../../../chapters/plotting/index.html">
                         Plotting
                     </a>
                 </li>
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../api/index.html">
+                    <a class="nav-link" href="../../../chapters/api/index.html">
                         API
                     </a>
                 </li>
@@ -247,7 +244,7 @@
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
   
   <div class="sidebar-header-items sidebar-primary__section">
@@ -263,35 +260,35 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                 <li class="nav-item">
-                    <a class="nav-link" href="../introduction/introduction.html">
+                    <a class="nav-link" href="../../../chapters/introduction/introduction.html">
                         Introduction
                     </a>
                 </li>
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../introduction/installation.html">
+                    <a class="nav-link" href="../../../chapters/introduction/installation.html">
                         Installation
                     </a>
                 </li>
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../../tutorials/index.html">
+                    <a class="nav-link" href="../../../tutorials/index.html">
                         Tutorials
                     </a>
                 </li>
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../creation/index.html">
+                    <a class="nav-link" href="../../../chapters/creation/index.html">
                         Receiver Functions
                     </a>
                 </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="#">
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../chapters/receiver_functions/index.html">
                         RF Handling
                     </a>
                 </li>
@@ -303,21 +300,21 @@
                 <div class="dropdown-menu">
                     
                 <li class="nav-item">
-                    <a class="nav-link" href="../ccp/index.html">
+                    <a class="nav-link" href="../../../chapters/ccp/index.html">
                         CCP
                     </a>
                 </li>
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../plotting/index.html">
+                    <a class="nav-link" href="../../../chapters/plotting/index.html">
                         Plotting
                     </a>
                 </li>
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../api/index.html">
+                    <a class="nav-link" href="../../../chapters/api/index.html">
                         API
                     </a>
                 </li>
@@ -369,24 +366,6 @@
   </div>
 
   
-  <div class="sidebar-start-items sidebar-primary__section">
-    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">
-    Section Navigation
-  </p>
-  <div class="bd-toc-item navbar-nav">
-    <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="sac.html">Reading receiver functions that were saved in sac format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hdf5.html">Receiver functions stored in hdf5 format</a></li>
-
-<li class="toctree-l1"><a class="reference internal" href="methods.html">Methods available for both RFStream and RFTrace objects</a></li>
-</ul>
-
-  </div>
-</nav>
-    </div>
-  </div>
-  
 
   
   <div class="sidebar-end-items sidebar-primary__section">
@@ -408,43 +387,51 @@
             
             <article class="bd-article" role="main">
               
-  <section id="rf-handling">
-<h1>RF Handling<a class="headerlink" href="#rf-handling" title="Permalink to this heading">#</a></h1>
-<p>Supposing that you have created receiver functions and have them available in
-the directory <code class="docutils literal notranslate"><span class="pre">output/RF</span></code>, we can now start imaging!</p>
-<p>Handling of receiver functions is generally done by using the
-<a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a> and
-<a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> classes. These classes are built upon a
-modified version of the <a class="reference external" href="https://rf.readthedocs.io/en/latest/index.html">rf</a>
-project by Tom Richter.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Just as in the obspy base classes, an
-<a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> can hold several receiver
-functions, while an <a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFTrace" title="pyglimer.rf.create.RFTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFTrace</span></code></a> object can only
-hold one receiver function. In the <em>.sac</em> format, saving
-<a class="reference internal" href="../api/rf.html#pyglimer.rf.create.RFStream" title="pyglimer.rf.create.RFStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFStream</span></code></a> will lead to the creation of
-several files.</p>
-</div>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="sac.html">Reading receiver functions that were saved in sac format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hdf5.html">Receiver functions stored in hdf5 format</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="hdf5.html#reading-data">Reading data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hdf5.html#tags">Tags</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hdf5.html#getting-an-overview-over-available-data">Getting an overview over available data</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="hdf5.html#writing-data-to-hdf5">Writing data to hdf5</a></li>
-<li class="toctree-l1"><a class="reference internal" href="methods.html">Methods available for both RFStream and RFTrace objects</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="methods.html#methods-for-rftrace-objects">Methods for RFTrace objects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="methods.html#methods-for-rfstream-objects">Methods for RFStream objects</a></li>
-</ul>
-</li>
-</ul>
-</div>
-</section>
+  <h1>Source code for pyglimer.utils.statistics</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Toolbox for statistical tools to quantify errors in receiver functions.</span>
 
+<span class="sd">:copyright:</span>
+<span class="sd">   The PyGLImER development team (makus@gfz-potsdam.de).</span>
+<span class="sd">:license:</span>
+<span class="sd">    GNU Lesser General Public License, Version 3</span>
+<span class="sd">    (https://www.gnu.org/copyleft/lesser.html)</span>
+<span class="sd">:author:</span>
+<span class="sd">   Peter Makus (makus@gfz-potsdam.de)</span>
+
+<span class="sd">Created: Monday, 27th September 2021 03:14:17 pm</span>
+<span class="sd">Last Modified: Thursday, 21st October 2021 10:23:01 am</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="stack_case_resampling"><a class="viewcode-back" href="../../../chapters/api/utils.html#pyglimer.utils.statistics.stack_case_resampling">[docs]</a><span class="k">def</span> <span class="nf">stack_case_resampling</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Monte Carlo Case resampling algorithm that can be used with single station</span>
+<span class="sd">    RF stacks (aka bootstrap).</span>
+
+<span class="sd">    :param data: Moveout corrected receiver function data that is used for the</span>
+<span class="sd">        bootstrap. Given in form of a 2D matrix -&gt; 1 line = 1 RF.</span>
+<span class="sd">    :type data: np.ndarray</span>
+<span class="sd">    :param b: Number of iterations that the bootstrap is supposed to run.</span>
+<span class="sd">        Defaults to 1000</span>
+<span class="sd">    :type b: int, optional</span>
+<span class="sd">    :return: A list with each of the boot strapped stacks / averages.</span>
+<span class="sd">    :rtype: List[np.ndarray]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">rstack</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+        <span class="n">resampled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ni</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">resampled</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">resampled</span><span class="p">[</span><span class="n">ni</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">rstack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">resampled</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">rstack</span></div>
+</pre></div>
 
             </article>
             
@@ -453,20 +440,6 @@ several files.</p>
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="../creation/hdf5.html" title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-          <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Raw waveforms stored in hdf5 format</p>
-      </div>
-  </a>
-  <a class='right-next' id="next-link" href="sac.html" title="next page">
-  <div class="prev-next-info">
-      <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Reading receiver functions that were saved in sac format</p>
-  </div>
-  <i class="fa-solid fa-angle-right"></i>
-  </a>
 </div>
             </footer>
             
@@ -483,23 +456,10 @@ several files.</p>
 
 <div class="toc-item">
   
-
-<div class="tocsection editthispage">
-    <a href="https://github.com/PyGLImER/PyGLImER/edit/master/docs/chapters/receiver_functions/index.rst">
-        <i class="fa-solid fa-pencil"></i> Edit this page
-    </a>
-</div>
-
 </div>
 
 <div class="toc-item">
   
-<div class="tocsection sourcelink">
-    <a href="../../_sources/chapters/receiver_functions/index.rst.txt">
-        <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-</div>
-
 </div>
 
             </div>
@@ -519,7 +479,7 @@ several files.</p>
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   

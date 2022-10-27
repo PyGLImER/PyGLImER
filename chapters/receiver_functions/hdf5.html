@@ -413,6 +413,11 @@
 <p>If you saved your receiver functions in <em>hdf5</em> format, you can use the
 <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.RFDataBase" title="pyglimer.database.rfh5.RFDataBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code></a> class to access and manipulate
 your database.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Accessing receiver functions in <em>hdf5</em> format works similarly to accessing
+raw waveform data.</p>
+</div>
 <p>As a user, you will only ever be calling the
 <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.RFDataBase" title="pyglimer.database.rfh5.RFDataBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFDataBase</span></code></a> class. The only function of this
 class is to return a <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler" title="pyglimer.database.rfh5.DBHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBHandler</span></code></a>, which hold
@@ -451,7 +456,7 @@ receiver functions in a subset defined by the provided arguments</p></li>
 </td></tr></table>
 <section id="reading-data">
 <h2>Reading data<a class="headerlink" href="#reading-data" title="Permalink to this heading">#</a></h2>
-<p>The most common usecase is probably that you will want to access receciver
+<p>The most common usecase is probably that you will want to access receiver
 functions that <strong>PyGLImER</strong> computed for you (as shown earlier). To do so, you
 can use the <a class="reference internal" href="../api/database.html#pyglimer.database.rfh5.DBHandler.get_data" title="pyglimer.database.rfh5.DBHandler.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a> method:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyglimer.database.rfh5</span> <span class="kn">import</span> <span class="n">RFDataBase</span>

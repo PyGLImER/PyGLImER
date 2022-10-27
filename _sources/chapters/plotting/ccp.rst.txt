@@ -8,10 +8,12 @@ Volume Sections
 ===============
 
 Here we compute a CCP volume first and subsequently slice through it by simply 
-taking slices from a 3D matrix.
+taking slices from a 3D matrix using :py:meth:`~pyglimer.ccp.ccp.CCPStack.plot_volume_sections()`.
 
 .. code-block:: python
     :linenos:
+
+    import numpy as np
 
     from pyglimer.ccp.ccp import read_ccp
     from pyglimer.plot.plot_utils import set_mpl_params
@@ -36,8 +38,9 @@ taking slices from a 3D matrix.
 Cross Section
 =============
 
-We can build cross sections without actually compute a full volume. This is
-done (like the computation of the fiull volume) by using a KDTree that 
+We can build cross sections with :py:meth:`~pyglimer.ccp.ccp.CCPStack.plot_cross_section()`
+without actually compute a full volume. This is
+done (like the computation of the full volume) by using a KDTree that 
 provides weighted nearest neighbour interpolation on a sphere.
 
 .. code-block:: python
@@ -45,9 +48,7 @@ provides weighted nearest neighbour interpolation on a sphere.
 
     import numpy as np
     from pyglimer.ccp.ccp import read_ccp
-    from pyglimer.plot.plot_utils import set_mpl_params
     import matplotlib.pyplot as plt
-    set_mpl_params()
 
     # Read the CCP Stack
     ccpstack = read_ccp(filename='../ccp_IU_HRV.pkl', fmt=None)
@@ -90,3 +91,10 @@ and the respective cross sections A
 and B
 
 .. image:: figures/cross_section_B.png
+
+
+Exploring your CCP-Stack interactively
+======================================
+
+You can use :py:meth:`~pyglimer.ccp.ccp.CCPStack.explore()` to create an interactive window
+that slides through your CCP object.
