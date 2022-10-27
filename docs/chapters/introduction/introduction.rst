@@ -17,7 +17,7 @@ The implementation includes:
 
 As developers, we are particularly concerned to create an automated, adaptable, efficient, and, yet, easy-to-use toolkit.
 
-The project is relying on an `ObsPy-like <https://github.com/obspy/obspy>` API and can be seen as a more powerful and
+The project is relying on an `ObsPy-like <https://github.com/obspy/obspy>`_ API and can be seen as a more powerful and
 user-friendly successor of
 `the GLImER project <https://www.stephanerondenay.com/glimer-map/map.html>`_.
 
@@ -26,8 +26,8 @@ with Array Recordings of Converted and Scattered Teleseismic Waves
 <https://link.springer.com/article/10.1007/s10712-009-9071-5>`_
 
 
-.. image:: ../figures/intro.svg
+.. figure:: figures/intro.svg
 
-    (left) A cartoon of a conversion of an incoming teleseismic S arrival and its conversion at a boundary below a seismic array.
-    (right) The resulting seismogram. One can create a receiver function by confining the conversion/coda and the primary arrival
-    to each one component (rotation) and, subsequently, deconvolving the primary wavelet from the converted wavelet.
+    **(left)** *A cartoon of a conversion of an incoming teleseismic S arrival and its conversion at a boundary below a seismic array.*
+    **(right)** *The resulting seismogram. One can create a receiver function by confining the conversion/coda and the primary arrival
+    to each one component (rotation) and, subsequently, deconvolving the primary wavelet from the converted wavelet.*

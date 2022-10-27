@@ -86,64 +86,64 @@ is to create a *yaml* file with the parameters. An example comes with this repos
 .. code-block:: yaml
     :linenos:
 
-  # This file is used to define the parameters used for PyGLImER
-  # ### Project wide parameters ###
-  # lowest level project directory
-  proj_dir : 'database'
-  # raw waveforms
-  raw_subdir: 'waveforms/raw'
-  # preprocessed subdir, only in use if fileformat = 'mseed'
-  prepro_subdir: 'waveforms/preprocessed'
-  # receiver function subdir
-  rf_subdir: 'waveforms/RF'
-  # statxml subdir
-  statloc_subdir: 'stations'
-  # subdir for event catalogues
-  evt_subdir: 'event_catalogs'
-  # directory for logging information
-  log_subdir : 'log'
-  # levels:
-  # 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'
-  loglvl: 'WARNING'
-  # format, either mseed or hdf5
-  format: 'hdf5'
+    # This file is used to define the parameters used for PyGLImER
+    # ### Project wide parameters ###
+    # lowest level project directory
+    proj_dir : 'database'
+    # raw waveforms
+    raw_subdir: 'waveforms/raw'
+    # preprocessed subdir, only in use if fileformat = 'mseed'
+    prepro_subdir: 'waveforms/preprocessed'
+    # receiver function subdir
+    rf_subdir: 'waveforms/RF'
+    # statxml subdir
+    statloc_subdir: 'stations'
+    # subdir for event catalogues
+    evt_subdir: 'event_catalogs'
+    # directory for logging information
+    log_subdir : 'log'
+    # levels:
+    # 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'
+    loglvl: 'WARNING'
+    # format, either mseed or hdf5
+    format: 'hdf5'
 
-  # The teleseismic phase to use (P or S or also more exotic ones like SKS, PKP, ScS)
-  phase: 'S'
+    # The teleseismic phase to use (P or S or also more exotic ones like SKS, PKP, ScS)
+    phase: 'S'
 
-  ### Request parameters
-  ## First, everything concerning the download
-  # waveform client, list of strings
-  # use None if you want to download from all available FDSN servers
-  waveform_client: ['IRIS']
-  # Use an already downloaded event catalog
-  # If so insert path+filename here.
-  evtcat: None
-  # earliest event
-  starttime: '2009-06-1 00:00:00.0'
-  # latest event
-  endtime: '2011-12-31 00:00:00.0'
-  # Minumum Magnitude
-  minmag: 5.5
-  # Network and station to use, unix-style wildcards are allowed
-  # if you use the Request.download_waveforms_small_db method,
-  # you can also provide a list of networks and/or a list of stations
-  network: 'YP'
-  station: '*'
+    ### Request parameters
+    ## First, everything concerning the download
+    # waveform client, list of strings
+    # use None if you want to download from all available FDSN servers
+    waveform_client: ['IRIS']
+    # Use an already downloaded event catalog
+    # If so insert path+filename here.
+    evtcat: None
+    # earliest event
+    starttime: '2009-06-1 00:00:00.0'
+    # latest event
+    endtime: '2011-12-31 00:00:00.0'
+    # Minumum Magnitude
+    minmag: 5.5
+    # Network and station to use, unix-style wildcards are allowed
+    # if you use the Request.download_waveforms_small_db method,
+    # you can also provide a list of networks and/or a list of stations
+    network: 'YP'
+    station: '*'
 
-  ## concerning preprocessing
-  # Coordinate system to rotate the seismogram to before deconvolution
-  # RTZ, LQT, or PSS
-  rot: 'PSS'
-  # Polarisation, use v for v/q receiver functions
-  # and h for transverse (SH)
-  pol: 'v'
-  # Deconvolution method to use
-  # Iterative time domain: 'it'
-  # Waterlevel Spectral Division: 'waterlevel'
-  deconmeth: 'it'
-  # Remove the station response. Set to False if you don't have access to the response
-  remove_response: False
+    ## concerning preprocessing
+    # Coordinate system to rotate the seismogram to before deconvolution
+    # RTZ, LQT, or PSS
+    rot: 'PSS'
+    # Polarisation, use v for v/q receiver functions
+    # and h for transverse (SH)
+    pol: 'v'
+    # Deconvolution method to use
+    # Iterative time domain: 'it'
+    # Waterlevel Spectral Division: 'waterlevel'
+    deconmeth: 'it'
+    # Remove the station response. Set to False if you don't have access to the response
+    remove_response: False
 
 You can then read the yaml file using *pyyaml* like so:
 

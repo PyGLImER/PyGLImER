@@ -11,7 +11,7 @@ to the data format saving receiver functions.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Wednesday, 26th October 2022 09:05:57 am
+Last Modified: Thursday, 27th October 2022 03:07:39 pm
 '''
 
 import fnmatch
@@ -112,7 +112,7 @@ class DBHandler(h5py.File):
         :param data: Data to save.
         :type data: Trace or Stream
         :param evt_id: Event identifier. Defined by the origin time of the
-            event rounded using :fun:`~pyglimer.utils.utils.utc_save_str()`
+            event rounded using :func:`~pyglimer.utils.utils.utc_save_str()`
         :param tag: The tag that the data should be saved under. Defaults to
             'raw'
         :raises TypeError: for wrong data type.

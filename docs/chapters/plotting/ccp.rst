@@ -12,6 +12,7 @@ taking slices from a 3D matrix using :py:meth:`~pyglimer.ccp.ccp.CCPStack.plot_v
 
 .. code-block:: python
     :linenos:
+
     import numpy as np
 
     from pyglimer.ccp.ccp import read_ccp
