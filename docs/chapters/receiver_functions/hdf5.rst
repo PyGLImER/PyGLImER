@@ -5,6 +5,11 @@ If you saved your receiver functions in *hdf5* format, you can use the
 :py:class:`~pyglimer.database.rfh5.RFDataBase` class to access and manipulate
 your database.
 
+.. note::
+
+    Accessing receiver functions in *hdf5* format works similarly to accessing
+    raw waveform data.
+
 As a user, you will only ever be calling the
 :py:class:`~pyglimer.database.rfh5.RFDataBase` class. The only function of this
 class is to return a :py:class:`~pyglimer.database.rfh5.DBHandler`, which hold
@@ -46,7 +51,7 @@ all the "useful" functions. To call
 Reading data
 ############
 
-The most common usecase is probably that you will want to access receciver
+The most common usecase is probably that you will want to access receiver
 functions that **PyGLImER** computed for you (as shown earlier). To do so, you
 can use the :py:meth:`~pyglimer.database.rfh5.DBHandler.get_data()` method:
 
