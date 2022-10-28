@@ -8,7 +8,7 @@
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Thursday, 19th August 2021 04:27:03 pm
-Last Modified: Thursday, 10th February 2022 04:47:15 pm
+Last Modified: Thursday, 27th October 2022 07:04:41 pm
 '''
 
 import unittest
@@ -19,6 +19,7 @@ import os
 import numpy as np
 
 from pyglimer.utils import createvmodel as cvm
+import pyglimer
 
 
 class TestComplexModel(unittest.TestCase):
@@ -105,7 +106,7 @@ class TestAVVModel(unittest.TestCase):
         self.model.write('this_file')
         self.assertIn(
             os.path.join(
-                'PyGLImER', 'src', 'pyglimer', 'data', 'velocity_models',
+                os.path.dirname(pyglimer.__file__), 'data', 'velocity_models',
                 'this_file'), mkdir_mock.call_args_list[-1][0][0])
         mkdir_mock.assert_called_once_with(mock.ANY, exist_ok=True)
 

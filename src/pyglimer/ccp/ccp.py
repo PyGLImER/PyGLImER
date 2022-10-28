@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 27th October 2022 10:11:09 am
+Last Modified: Thursday, 27th October 2022 07:01:06 pm
 '''
 
 # !/usr/bin/env python3
@@ -1264,11 +1264,10 @@ misspelled or not yet implemented')
             coords = self.coords
         plot_bins(self.bingrid.stations, coords)
 
-    def compute_kdtree_volume(self,
-                              qlon: np.ndarray or list = None,
-                              qlat: np.ndarray or list = None,
-                              zmax: float = None,
-                              verbose: bool = True):
+    def compute_kdtree_volume(
+        self, qlon: np.ndarray or list = None,
+        qlat: np.ndarray or list = None, zmax: float = None,
+            verbose: bool = True):
         """Using the CCP kdtree, we get the closest few points and compute
         the weighting using a distance metric. if points are too far away,
         they aren't weighted
@@ -1280,6 +1279,8 @@ misspelled or not yet implemented')
             grid defining array for longitude
         qlat : np.ndarray or list
             grid defining array for latitude
+        zmax : float, optional
+            maximum depth to compute.
         gz : np.array or list
             grid defining array for z
         r : float or None
@@ -1503,28 +1504,30 @@ misspelled or not yet implemented')
     def explore(
         self, qlon: np.ndarray or list = None, qlat: np.ndarray or list = None,
             zmax: float = None):
-        """Creates a volume exploration window set. One window is for all
+        """
+        Creates a volume exploration window set. One window is for all
         plots, and the other window is generated with sliders such that one
         can explore how future plots should be generated. It technically does
         not require any inputs, as simply the binning size will be used to
         create a meshgrid fitting to the bin distance distribution.
-        One can however set a factor by which to divide the bin distance for a
-        finer grid.
-
+        One can however fix the extent and size of the grid by defining the
+        grids coordinate vectors.
 
         Parameters
         ----------
 
-        factor: float, optional
-            Bingrid epicentral distance multiplier to refine grid.
-            Defaults to 0.5.
-        maxz: float or None, optional
-            Maximum Depth if None, the max ccp bin depth is used.
-            Defaults to None.
-        minillum: int or None, optional
-            Minimum number of illumation points use in the interpolation,
-            everything below is downweighted by the square reciprocal
-        extent : list or tuple or Non, optional
+        qlon: np.ndarray, optional
+            Longitude gridpoints for the Grid. Defines longitudinal extent
+            and resolution. If None, it's determined automatically from
+            the CCPStacks resolution and grid extent.
+            Must be monotonically increasing.
+        qlat: np.ndarray, optional
+            Latitude gridpoints for the Grid. Defines latitudinal extent
+            and resolution. If None, it's determined automatically from
+            the CCPStacks resolution and grid extent.
+            Must be monotonically increasing.
+        zmax: float, optional
+            Maximum depth (km) that the CCP-exploration extends to.
 
         Returns
         -------
@@ -1544,7 +1547,8 @@ misspelled or not yet implemented')
         lonsl: float or None = None, latsl: float or None = None,
         zsl: float or None = None, r: float or None = None,
             minillum: int or None = None, show: bool = True):
-        """Creates the same plot as the `explore` tool, but(!) statically and
+        """
+        Creates the same plot as the `explore` tool, but(!) statically and
         with more options left to the user.
 
         !!! IT IS IMPORTANT for the plotting function that the input arrays
