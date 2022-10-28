@@ -429,7 +429,7 @@ objects resulting from such.</p>
 </dd>
 </dl>
 <p>Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 27th October 2022 10:11:09 am</p>
+Last Modified: Thursday, 27th October 2022 07:01:06 pm</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyglimer.ccp.ccp.CCPStack">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyglimer.ccp.ccp.</span></span><span class="sig-name descname"><span class="pre">CCPStack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyglimer/ccp/ccp.html#CCPStack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyglimer.ccp.ccp.CCPStack" title="Permalink to this definition">#</a></dt>
@@ -465,6 +465,7 @@ they aren’t weighted</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>qlon</strong> (<em>np.ndarray</em><em> or </em><em>list</em>) – grid defining array for longitude</p></li>
 <li><p><strong>qlat</strong> (<em>np.ndarray</em><em> or </em><em>list</em>) – grid defining array for latitude</p></li>
+<li><p><strong>zmax</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum depth to compute.</p></li>
 <li><p><strong>gz</strong> (<em>np.array</em><em> or </em><em>list</em>) – grid defining array for z</p></li>
 <li><p><strong>r</strong> (<em>float</em><em> or </em><em>None</em>) – outside r everything is nan</p></li>
 <li><p><strong>minillum</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Minimum number of illumation points use in the interpolation,
@@ -626,18 +627,20 @@ plots, and the other window is generated with sliders such that one
 can explore how future plots should be generated. It technically does
 not require any inputs, as simply the binning size will be used to
 create a meshgrid fitting to the bin distance distribution.
-One can however set a factor by which to divide the bin distance for a
-finer grid.</p>
+One can however fix the extent and size of the grid by defining the
+grids coordinate vectors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Bingrid epicentral distance multiplier to refine grid.
-Defaults to 0.5.</p></li>
-<li><p><strong>maxz</strong> (<em>float</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Maximum Depth if None, the max ccp bin depth is used.
-Defaults to None.</p></li>
-<li><p><strong>minillum</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Minimum number of illumation points use in the interpolation,
-everything below is downweighted by the square reciprocal</p></li>
-<li><p><strong>extent</strong> (<em>list</em><em> or </em><em>tuple</em><em> or </em><em>Non</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>qlon</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Longitude gridpoints for the Grid. Defines longitudinal extent
+and resolution. If None, it’s determined automatically from
+the CCPStacks resolution and grid extent.
+Must be monotonically increasing.</p></li>
+<li><p><strong>qlat</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Latitude gridpoints for the Grid. Defines latitudinal extent
+and resolution. If None, it’s determined automatically from
+the CCPStacks resolution and grid extent.
+Must be monotonically increasing.</p></li>
+<li><p><strong>zmax</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum depth (km) that the CCP-exploration extends to.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>

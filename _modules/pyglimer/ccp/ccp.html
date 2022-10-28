@@ -401,7 +401,7 @@
 <span class="sd">   Peter Makus (makus@gfz-potsdam.de)</span>
 
 <span class="sd">Created: Friday, 10th April 2020 05:30:18 pm</span>
-<span class="sd">Last Modified: Thursday, 27th October 2022 10:11:09 am</span>
+<span class="sd">Last Modified: Thursday, 27th October 2022 07:01:06 pm</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="c1"># !/usr/bin/env python3</span>
@@ -1654,11 +1654,10 @@
             <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span>
         <span class="n">plot_bins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bingrid</span><span class="o">.</span><span class="n">stations</span><span class="p">,</span> <span class="n">coords</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CCPStack.compute_kdtree_volume"><a class="viewcode-back" href="../../../chapters/api/ccp.html#pyglimer.ccp.ccp.CCPStack.compute_kdtree_volume">[docs]</a>    <span class="k">def</span> <span class="nf">compute_kdtree_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                              <span class="n">qlon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">or</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                              <span class="n">qlat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">or</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                              <span class="n">zmax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                              <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="CCPStack.compute_kdtree_volume"><a class="viewcode-back" href="../../../chapters/api/ccp.html#pyglimer.ccp.ccp.CCPStack.compute_kdtree_volume">[docs]</a>    <span class="k">def</span> <span class="nf">compute_kdtree_volume</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">qlon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">or</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">qlat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">or</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">zmax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Using the CCP kdtree, we get the closest few points and compute</span>
 <span class="sd">        the weighting using a distance metric. if points are too far away,</span>
 <span class="sd">        they aren&#39;t weighted</span>
@@ -1670,6 +1669,8 @@
 <span class="sd">            grid defining array for longitude</span>
 <span class="sd">        qlat : np.ndarray or list</span>
 <span class="sd">            grid defining array for latitude</span>
+<span class="sd">        zmax : float, optional</span>
+<span class="sd">            maximum depth to compute.</span>
 <span class="sd">        gz : np.array or list</span>
 <span class="sd">            grid defining array for z</span>
 <span class="sd">        r : float or None</span>
@@ -1893,28 +1894,30 @@
 <div class="viewcode-block" id="CCPStack.explore"><a class="viewcode-back" href="../../../chapters/api/ccp.html#pyglimer.ccp.ccp.CCPStack.explore">[docs]</a>    <span class="k">def</span> <span class="nf">explore</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">qlon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">or</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">qlat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">or</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">zmax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Creates a volume exploration window set. One window is for all</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a volume exploration window set. One window is for all</span>
 <span class="sd">        plots, and the other window is generated with sliders such that one</span>
 <span class="sd">        can explore how future plots should be generated. It technically does</span>
 <span class="sd">        not require any inputs, as simply the binning size will be used to</span>
 <span class="sd">        create a meshgrid fitting to the bin distance distribution.</span>
-<span class="sd">        One can however set a factor by which to divide the bin distance for a</span>
-<span class="sd">        finer grid.</span>
-
+<span class="sd">        One can however fix the extent and size of the grid by defining the</span>
+<span class="sd">        grids coordinate vectors.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 
-<span class="sd">        factor: float, optional</span>
-<span class="sd">            Bingrid epicentral distance multiplier to refine grid.</span>
-<span class="sd">            Defaults to 0.5.</span>
-<span class="sd">        maxz: float or None, optional</span>
-<span class="sd">            Maximum Depth if None, the max ccp bin depth is used.</span>
-<span class="sd">            Defaults to None.</span>
-<span class="sd">        minillum: int or None, optional</span>
-<span class="sd">            Minimum number of illumation points use in the interpolation,</span>
-<span class="sd">            everything below is downweighted by the square reciprocal</span>
-<span class="sd">        extent : list or tuple or Non, optional</span>
+<span class="sd">        qlon: np.ndarray, optional</span>
+<span class="sd">            Longitude gridpoints for the Grid. Defines longitudinal extent</span>
+<span class="sd">            and resolution. If None, it&#39;s determined automatically from</span>
+<span class="sd">            the CCPStacks resolution and grid extent.</span>
+<span class="sd">            Must be monotonically increasing.</span>
+<span class="sd">        qlat: np.ndarray, optional</span>
+<span class="sd">            Latitude gridpoints for the Grid. Defines latitudinal extent</span>
+<span class="sd">            and resolution. If None, it&#39;s determined automatically from</span>
+<span class="sd">            the CCPStacks resolution and grid extent.</span>
+<span class="sd">            Must be monotonically increasing.</span>
+<span class="sd">        zmax: float, optional</span>
+<span class="sd">            Maximum depth (km) that the CCP-exploration extends to.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1934,7 +1937,8 @@
         <span class="n">lonsl</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">latsl</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">zsl</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">minillum</span><span class="p">:</span> <span class="nb">int</span> <span class="ow">or</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Creates the same plot as the `explore` tool, but(!) statically and</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates the same plot as the `explore` tool, but(!) statically and</span>
 <span class="sd">        with more options left to the user.</span>
 
 <span class="sd">        !!! IT IS IMPORTANT for the plotting function that the input arrays</span>
