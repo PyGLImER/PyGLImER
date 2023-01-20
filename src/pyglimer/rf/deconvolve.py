@@ -7,13 +7,13 @@ Various Deconvolution approaches used for the RF technique.
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 16th October 2019 02:24:30 pm
-Last Modified: Wednesday, 20th July 2022 02:55:20 pm
+Last Modified: Friday, 20th January 2023 03:50:29 pm
 
 '''
 

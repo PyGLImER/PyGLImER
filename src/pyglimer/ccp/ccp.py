@@ -5,13 +5,13 @@ objects resulting from such.
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Thursday, 27th October 2022 10:11:09 am
+Last Modified: Friday, 20th January 2023 03:50:29 pm
 '''
 
 # !/usr/bin/env python3
