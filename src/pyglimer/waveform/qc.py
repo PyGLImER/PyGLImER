@@ -6,13 +6,13 @@ Contains quality control for waveforms used for receiver function creation.
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 11:38:40 am
-Last Modified: Wednesday, 7th September 2022 06:08:38 pm
+Last Modified: Friday, 20th January 2023 03:50:29 pm
 '''
 
 import numpy as np

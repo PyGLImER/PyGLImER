@@ -5,13 +5,13 @@ objects resulting from such.
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Tuesday, 25th October 2022 03:51:42 pm
+Last Modified: Friday, 20th January 2023 03:50:29 pm
 '''
 
 # !/usr/bin/env python3
@@ -1205,7 +1205,7 @@ misspelled or not yet implemented')
         if len(x) > 1:
             if x[-1].lower() in ('pkl', 'mat', 'npz'):
                 fmt = x[-1].lower()
-                filename = ''.join(x[:-1])
+                filename = '.'.join(x[:-1])
 
         # output location
         oloc = os.path.join(folder, filename)

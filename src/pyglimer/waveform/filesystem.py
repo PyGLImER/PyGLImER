@@ -5,13 +5,13 @@ TO use this feed in a function that yields obspy streams.
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 8th April 2022 02:27:30 pm
-Last Modified: Monday, 30th May 2022 01:30:48 pm
+Last Modified: Friday, 20th January 2023 03:50:29 pm
 '''
 
 import logging

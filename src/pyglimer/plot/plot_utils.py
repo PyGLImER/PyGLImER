@@ -4,14 +4,14 @@ Plot utilities not to modify plots or base plots.
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Lucas Sawade (lsawade@princeton.edu)
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 05:05:08 pm
-Last Modified: Wednesday, 19th October 2022 11:29:22 am
+Last Modified: Friday, 20th January 2023 03:50:29 pm
 '''
 
 import os

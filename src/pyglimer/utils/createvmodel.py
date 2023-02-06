@@ -6,13 +6,13 @@ Create a 3D velocity model using Litho1.0
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 01st May 2020 12:11:03
-Last Modified: Thursday, 21st October 2021 03:48:11 pm
+Last Modified: Friday, 20th January 2023 03:50:29 pm
 '''
 
 

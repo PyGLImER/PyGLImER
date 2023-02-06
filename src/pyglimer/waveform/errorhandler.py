@@ -5,13 +5,13 @@ Files contains all Errorhandler for the Glimer to obspy project
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Saturday, 21th March 2020 19:16:41
-Last Modified: Thursday, 25th March 2021 04:02:16 pm
+Last Modified: Friday, 20th January 2023 03:50:29 pm
 '''
 
 # !/usr/bin/env python3

@@ -2,13 +2,13 @@
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Thursday, 19th August 2021 03:08:57 pm
+Last Modified: Friday, 20th January 2023 03:51:52 pm
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -76,8 +76,6 @@ def plot_map(
         cartopy.feature.NaturalEarthFeature('physical', 'lakes', '110m'),
         zorder=-2, edgecolor='black',
         linewidth=0.5, facecolor='w')
-    # ax.add_feature(cartopy.feature.RIVERS, zorder=-2, edgecolor='black',
-    #                 linewidth=0.5, facecolor=(0.9, 0.9, 0.9))
 
     if lat and lon:
         # dy = np.floor((lat[1] - lat[0])/6)
@@ -92,11 +90,7 @@ def plot_map(
 
     ax.xaxis.set_major_formatter(LongitudeFormatter())
     ax.yaxis.set_major_formatter(LatitudeFormatter())
-    # ax.set_xticks(xt, crs=ccrs.Robinson())
-    # ax.set_yticks(yt, crs=ccrs.Robinson())
 
-    # ax.xaxis.set_major_formatter(LongitudeFormatter())
-    # ax.yaxis.set_major_formatter(LatitudeFormatter())
     if geology:
         ax.add_wms(
             wms='https://mrdata.usgs.gov/services/worldgeol?',
@@ -139,15 +133,11 @@ def plot_stations(slat, slon, cl=0.0):
     """Plots stations into a map
     """
 
-    # slat = [station[0] for station in stations]
     # Weird fix because cartopy is weird
     if cl == 180.0:
         slon = [sl + cl if sl <= 0
                 else sl - cl
                 for sl in slon]
-    # else:
-    #     slon = [station[1] for station in stations]
-    # ax = plot_map()
     ax = plt.gca()
     ax.scatter(slon, slat, s=13, marker='v', c=((0.7, 0.2, 0.2),),
                edgecolors='k', linewidths=0.25, zorder=-1, label='stations')
@@ -158,7 +148,6 @@ def plot_bins(binlat, binlon, cl=0.0):
     Plots bins into a map
     """
 
-    # slat = [station[0] for station in stations]
     # Weird fix because cartopy is weird
     if cl == 180.0:
         binlon = [bl + cl if bl <= 0
@@ -180,12 +169,7 @@ def plot_illum(binlat, binlon, dbin, illum, cl=0.0):
     ax = plt.gca()
     # Create histogram
     illumflat = np.log10(np.sum(illum, axis=1))
-    # plot_res = (
-    #     abs(min(binlon)-max(binlon))/dbin,
-    #     abs(min(binlat)-max(binlat))/dbin)
-    # heatmap, xedges, yedges = np.histogram(np.histogram2d(binlon, binlat,
-    #                                                       bins=plot_res))
-    # ax.imshow(heatmap.T, origin='lower')
+
     il = ax.scatter(
         binlon, binlat, c=illumflat, cmap='plasma', s=10, edgecolors=None,
         label='bin centres', zorder=-1)
@@ -286,11 +270,9 @@ def plot_map_ccp(
     if stations:
         plot_stations(slat, slon, cl=cl)
     if bins or illum or stations or profile:
-        # ax.legend()
         plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
                    ncol=4, mode="expand", borderaxespad=0.)
-        # plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
-        # ncol=2, mode="expand", borderaxespad=0.)
+
     if title:
         plt.title(title, fontdict={'fontweight': 'bold'}, y=1.1)
     plt.tight_layout()

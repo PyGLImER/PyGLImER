@@ -3,8 +3,8 @@
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Lucas Sawade (lsawade@princeton.edu)
 
@@ -21,17 +21,16 @@ from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
 import numpy as np
 from cartopy.crs import PlateCarree
 import cartopy.feature as cfeature
+
+from pyglimer.ccp.plot_utils.midpointcolornorm import StretchOutNormalize
 from .ui_utils import set_sliderval_no_callback
 
 
 class VolumePlot:
 
-    def __init__(self, X, Y, Z, V,
-                 xl: float or None = None,
-                 yl: float or None = None,
-                 zl: float or None = None,
-                 nancolor='w', show=True,
-                 cmap='seismic'):
+    def __init__(
+        self, X, Y, Z, V, xl: float or None = None, yl: float or None = None,
+            zl: float or None = None, nancolor='w', show=True, cmap='seismic'):
         """
 
         Parameters:
@@ -140,11 +139,15 @@ class VolumePlot:
 
         # Colormap settings
         self.vmin0, self.vmax0 = [-0.05, 0.05]
+        self.low0, self.up0 = [-.005, .005]
         # Due to the interpolation the above valuers are not easily
         # identifiable by distribution
         self.vmin, self.vmax = self.vmin0, self.vmax0
+        self.low, self.up = self.low0, self.up0
         self.norm = matcolors.TwoSlopeNorm(
             vmin=self.vmin, vcenter=0.0, vmax=self.vmax)
+        # self.norm = StretchOutNormalize(
+        #     self.vmin, self.vmax, self.low, self.up)
         self.cmapname = cmap
         self.nancolor = nancolor
         self.cmap = plt.get_cmap(self.cmapname)
@@ -191,7 +194,9 @@ class VolumePlot:
         self.cbar = self.fig.colorbar(
             self.mappable, shrink=1., aspect=50, orientation="horizontal",
             ax=[self.ax['z'], self.ax['m']['main'],
-                self.ax['y'], self.ax['x']])
+                self.ax['y'], self.ax['x']], label='A',
+            boundaries=np.linspace(self.vmin, self.vmax, 101),
+            ticks=[self.vmin, self.vmin/2, 0, self.vmax/2, self.vmax])
         if self.show:
             plt.show(block=False)
 
@@ -201,7 +206,7 @@ class VolumePlot:
             extent=[self.minY, self.maxY, self.minZ, self.maxZ],
             interpolation='nearest', origin='lower', aspect='auto',
             cmap=self.cmap, norm=self.norm, rasterized=True)
-        self.ax['x'].set_xlabel("y")
+        self.ax['x'].set_xlabel(r"y [$^\circ$]")
         plt.setp(self.ax['x'].get_yticklabels(), visible=False)
         self.ax['x'].invert_yaxis()
 
@@ -211,8 +216,8 @@ class VolumePlot:
             extent=[self.minX, self.maxX, self.minZ, self.maxZ],
             interpolation='nearest', origin='lower', aspect='auto',
             cmap=self.cmap, norm=self.norm, rasterized=True)
-        self.ax['y'].set_xlabel("x")
-        self.ax['y'].set_ylabel("z")
+        self.ax['y'].set_xlabel(r"x [$^\circ$]")
+        self.ax['y'].set_ylabel("z [km]")
         self.ax['y'].invert_yaxis()
 
     def plot_zsl(self):
@@ -221,7 +226,7 @@ class VolumePlot:
             extent=[self.minX, self.maxX, self.minY, self.maxY],
             interpolation='nearest', origin='lower', aspect='auto',
             cmap=self.cmap, norm=self.norm, rasterized=True)
-        self.ax['z'].set_ylabel("y")
+        self.ax['z'].set_ylabel(r"y [$^\circ$]")
         plt.setp(self.ax['z'].get_xticklabels(), visible=False)
 
     def plot_map(self):
@@ -320,12 +325,15 @@ class VolumePlot:
         # Set lines on the other slices and the map.
         self.fig.canvas.draw_idle()
 
-    def update_cmap(self, vmin, vcenter, vmax):
+    def update_cmap(self, vmin, vmax, low, up):
 
         # Colormap settings
         self.vmin, self.vmax = [vmin, vmax]
-        self.norm = matcolors.TwoSlopeNorm(
-            vmin=vmin, vcenter=vcenter, vmax=vmax)
+        # self.norm = matcolors.TwoSlopeNorm(
+        #     vmin=vmin, vcenter=vcenter, vmax=vmax)
+        self.norm = StretchOutNormalize(
+            vmin, vmax, low, up
+        )
         self.cmap = plt.cm.coolwarm
         self.mappable = cm.ScalarMappable(norm=self.norm, cmap=self.cmap)
 
@@ -335,6 +343,8 @@ class VolumePlot:
         self.slice['y'].set_data(self.V[:, self.yli, :].T)
         self.slice['z'].norm = self.norm
         self.slice['z'].set_data(self.V[:, :, self.zli].T)
+        # Update colorbar as well
+        self.cbar.update_normal(self.mappable)
         self.fig.canvas.draw_idle()
 
     def get_locations(self):
@@ -396,12 +406,13 @@ class VolumeExploration:
         self.cmap = {
             'pos': {'slider': None, 'ax': None},
             'neg': {'slider': None, 'ax': None},
+            'low': {'slider': None, 'ax': None},
+            'up': {'slider': None, 'ax': None},
             'checkbox': {'box': None, 'ax': None},
         }
 
         self.controlpanel()
         self.activate_slicers()
-        print(self.vp.V[self.vp.xli, :, :].shape)
         plt.show(block=True)
 
     def controlpanel(self):
@@ -423,7 +434,7 @@ class VolumeExploration:
                                             valstep=np.diff(self.vp.Y)[0])
 
         self.slices['z']['ax'] = self.cp.add_subplot(self.gs[2, :])
-        self.slices['z']['slider'] = Slider(self.slices['z']['ax'], r'y_l',
+        self.slices['z']['slider'] = Slider(self.slices['z']['ax'], r'z_l',
                                             self.vp.minZ, self.vp.maxZ,
                                             valinit=np.mean(self.vp.Z),
                                             valfmt='%d',
@@ -440,6 +451,15 @@ class VolumeExploration:
         self.cmap['neg']['slider'] = Slider(self.cmap['neg']['ax'], r'-',
                                             self.vp.minV, -1e-10,
                                             valinit=self.vp.minV)
+        self.cmap['low']['ax'] = self.cp.add_subplot(self.gs[6, :])
+        self.cmap['low']['slider'] = Slider(self.cmap['low']['ax'], 'low',
+                                            self.vp.minV*.25, -1e-10,
+                                            valinit=-1e-10)
+        self.cmap['up']['ax'] = self.cp.add_subplot(self.gs[7, :])
+        self.cmap['up']['slider'] = Slider(
+            self.cmap['up']['ax'], 'up',
+            1e-10, self.vp.maxV*.25,
+            valinit=1e-10)
         plt.subplots_adjust(hspace=2)
 
         # Slider(slidercmin, 'ColorMin', -3 * np.max(np.abs(RF_PLOT)),
@@ -454,6 +474,8 @@ class VolumeExploration:
         self.slices['z']['slider'].on_changed(self.vp.update_zslice)
         self.cmap['pos']['slider'].on_changed(self.update_pos)
         self.cmap['neg']['slider'].on_changed(self.update_neg)
+        self.cmap['low']['slider'].on_changed(self.update_low)
+        self.cmap['up']['slider'].on_changed(self.update_up)
         self.cmap['checkbox']['box'].on_clicked(self.update_sym)
 
     def update_pos(self, val):
@@ -463,8 +485,7 @@ class VolumeExploration:
         else:
             vmin = self.vp.vmin
         vmax = val
-        vcenter = 0
-        self.vp.update_cmap(vmin, vcenter, vmax)
+        self.vp.update_cmap(vmin, vmax, self.vp.low, self.vp.up)
 
     def update_neg(self, val):
         if self.cmap['checkbox']['box'].get_status()[0]:
@@ -473,8 +494,25 @@ class VolumeExploration:
         else:
             vmax = self.vp.vmax
         vmin = val
-        vcenter = 0
-        self.vp.update_cmap(vmin, vcenter, vmax)
+        self.vp.update_cmap(vmin, vmax, self.vp.low, self.vp.up)
+
+    def update_low(self, val):
+        if self.cmap['checkbox']['box'].get_status()[0]:
+            up = abs(val)
+            set_sliderval_no_callback(self.cmap['up']['slider'], up)
+        else:
+            up = self.vp.up
+        low = val
+        self.vp.update_cmap(self.vp.vmin, self.vp.vmax, low, up)
+
+    def update_up(self, val):
+        if self.cmap['checkbox']['box'].get_status()[0]:
+            low = -val
+            set_sliderval_no_callback(self.cmap['low']['slider'], low)
+        else:
+            low = self.vp.low
+        up = val
+        self.vp.update_cmap(self.vp.vmin, self.vp.vmax, low, up)
 
     def update_sym(self, val):
         if val[0]:

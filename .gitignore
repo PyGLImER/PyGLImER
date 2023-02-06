@@ -13,7 +13,7 @@ examples/database
 .vscode
 *.pdf
 .DS_Store
-PyGLImER.egg-info/
+*.egg-info
 .idea/
 ccp*.pkl
 .coverage
@@ -22,3 +22,4 @@ examples/tutorials/database_sac
 **/tmp/**
 docs/_build
 docs/tutorials
+dist
