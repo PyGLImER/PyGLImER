@@ -5,14 +5,14 @@
 
 Computation times
 =================
-**04:12.097** total execution time for **tutorials** files:
+**02:22.779** total execution time for **tutorials** files:
 
 +-------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_tutorials_DataCollectionSAC.py` (``DataCollectionSAC.py``)                 | 02:10.188 | 0.0 MB |
+| :ref:`sphx_glr_tutorials_DataCollectionSAC.py` (``DataCollectionSAC.py``)                 | 01:11.635 | 0.0 MB |
 +-------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_tutorials_DataCollectionHDF5.py` (``DataCollectionHDF5.py``)               | 01:18.563 | 0.0 MB |
+| :ref:`sphx_glr_tutorials_DataCollectionHDF5.py` (``DataCollectionHDF5.py``)               | 00:35.831 | 0.0 MB |
 +-------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_tutorials_nc_CCPStack_SingleStation.py` (``nc_CCPStack_SingleStation.py``) | 00:40.926 | 0.0 MB |
+| :ref:`sphx_glr_tutorials_nc_CCPStack_SingleStation.py` (``nc_CCPStack_SingleStation.py``) | 00:33.628 | 0.0 MB |
 +-------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_tutorials_ImportLocalDatabase.py` (``ImportLocalDatabase.py``)             | 00:02.420 | 0.0 MB |
+| :ref:`sphx_glr_tutorials_ImportLocalDatabase.py` (``ImportLocalDatabase.py``)             | 00:01.685 | 0.0 MB |
 +-------------------------------------------------------------------------------------------+-----------+--------+

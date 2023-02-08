@@ -7,24 +7,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>The Request Class</title>
-  <script>
+  
+  
+  
+  <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+  <link href="../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
 
   
-  <link rel="stylesheet"
-    href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
@@ -34,7 +34,8 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
@@ -55,6 +56,10 @@
   
   
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   
   <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
@@ -118,39 +123,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../introduction/introduction.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../introduction/introduction.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../introduction/installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../introduction/installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../tutorials/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../tutorials/index.html">
                         Tutorials
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
                         Receiver Functions
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../receiver_functions/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../receiver_functions/index.html">
                         RF Handling
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
             <div class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -158,30 +163,33 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                <li class="nav-item">
-                    <a class="nav-link" href="../ccp/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../ccp/index.html">
                         CCP
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../plotting/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../plotting/index.html">
                         Plotting
-                    </a>
-                </li>
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
+                        API
+                      </a>
+                    </li>
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../api/index.html">
-                        API
-                    </a>
+                  <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">
+                    GLImER
+                  </a>
                 </li>
                 
-
-            <li class="nav-item">
-                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fa-solid fa-up-right-from-square"></i></a>
-            </li>
                 </div>
             </div>
             
@@ -192,19 +200,21 @@
     </div>
 
     <div id="navbar-end">
-      <div class="navbar-end-item navbar-end__search-button-container">
-        
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-      </div>
+        </div>
+      
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -228,11 +238,13 @@
 
 
   
-  <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-  </div>
+    </div>
+  
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
@@ -262,39 +274,39 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../introduction/introduction.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../introduction/introduction.html">
                         Introduction
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../introduction/installation.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../introduction/installation.html">
                         Installation
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../../tutorials/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../tutorials/index.html">
                         Tutorials
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
                         Receiver Functions
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../receiver_functions/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../receiver_functions/index.html">
                         RF Handling
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
             <div class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -302,30 +314,33 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                <li class="nav-item">
-                    <a class="nav-link" href="../ccp/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../ccp/index.html">
                         CCP
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../plotting/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../plotting/index.html">
                         Plotting
-                    </a>
-                </li>
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
+                        API
+                      </a>
+                    </li>
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../api/index.html">
-                        API
-                    </a>
+                  <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">
+                    GLImER
+                  </a>
                 </li>
                 
-
-            <li class="nav-item">
-                <a class="nav-link nav-external" href="http://www.stephanerondenay.com/glimer-web.html">GLImER<i class="fa-solid fa-up-right-from-square"></i></a>
-            </li>
                 </div>
             </div>
             
@@ -341,11 +356,11 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
-    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
-</span>
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
       </div>
       
       <div class="navbar-end-item">
@@ -393,8 +408,11 @@
     </div>
   </div>
 
+  
+  <div id="rtd-footer-container"></div>
+
       </div>
-      <main class="bd-main">
+      <main id="main-content" class="bd-main">
         
         
         <div class="bd-content">
@@ -484,64 +502,64 @@ utilises the <a class="reference external" href="https://docs.obspy.org/packages
 <p>The parameters for preprocessing and download are set when initialising the
 <a class="reference internal" href="../api/waveform.html#pyglimer.waveform.request.Request" title="pyglimer.waveform.request.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> object. Probably the most convenient way to define them
 is to create a <em>yaml</em> file with the parameters. An example comes with this repository in <cite>params.yaml</cite>:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># This file is used to define the parameters used for PyGLImER</span><span class="w"></span>
-<span class="linenos"> 2</span><span class="c1"># ### Project wide parameters ###</span><span class="w"></span>
-<span class="linenos"> 3</span><span class="c1"># lowest level project directory</span><span class="w"></span>
-<span class="linenos"> 4</span><span class="nt">proj_dir </span><span class="p">:</span><span class="w"> </span><span class="s">&#39;database&#39;</span><span class="w"></span>
-<span class="linenos"> 5</span><span class="c1"># raw waveforms</span><span class="w"></span>
-<span class="linenos"> 6</span><span class="nt">raw_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;waveforms/raw&#39;</span><span class="w"></span>
-<span class="linenos"> 7</span><span class="c1"># preprocessed subdir, only in use if fileformat = &#39;mseed&#39;</span><span class="w"></span>
-<span class="linenos"> 8</span><span class="nt">prepro_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;waveforms/preprocessed&#39;</span><span class="w"></span>
-<span class="linenos"> 9</span><span class="c1"># receiver function subdir</span><span class="w"></span>
-<span class="linenos">10</span><span class="nt">rf_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;waveforms/RF&#39;</span><span class="w"></span>
-<span class="linenos">11</span><span class="c1"># statxml subdir</span><span class="w"></span>
-<span class="linenos">12</span><span class="nt">statloc_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;stations&#39;</span><span class="w"></span>
-<span class="linenos">13</span><span class="c1"># subdir for event catalogues</span><span class="w"></span>
-<span class="linenos">14</span><span class="nt">evt_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;event_catalogs&#39;</span><span class="w"></span>
-<span class="linenos">15</span><span class="c1"># directory for logging information</span><span class="w"></span>
-<span class="linenos">16</span><span class="nt">log_subdir </span><span class="p">:</span><span class="w"> </span><span class="s">&#39;log&#39;</span><span class="w"></span>
-<span class="linenos">17</span><span class="c1"># levels:</span><span class="w"></span>
-<span class="linenos">18</span><span class="c1"># &#39;DEBUG&#39;, &#39;INFO&#39;, &#39;WARNING&#39;, &#39;ERROR&#39;, or &#39;CRITICAL&#39;</span><span class="w"></span>
-<span class="linenos">19</span><span class="nt">loglvl</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;WARNING&#39;</span><span class="w"></span>
-<span class="linenos">20</span><span class="c1"># format, either mseed or hdf5</span><span class="w"></span>
-<span class="linenos">21</span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;hdf5&#39;</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># This file is used to define the parameters used for PyGLImER</span>
+<span class="linenos"> 2</span><span class="c1"># ### Project wide parameters ###</span>
+<span class="linenos"> 3</span><span class="c1"># lowest level project directory</span>
+<span class="linenos"> 4</span><span class="nt">proj_dir </span><span class="p">:</span><span class="w"> </span><span class="s">&#39;database&#39;</span>
+<span class="linenos"> 5</span><span class="c1"># raw waveforms</span>
+<span class="linenos"> 6</span><span class="nt">raw_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;waveforms/raw&#39;</span>
+<span class="linenos"> 7</span><span class="c1"># preprocessed subdir, only in use if fileformat = &#39;mseed&#39;</span>
+<span class="linenos"> 8</span><span class="nt">prepro_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;waveforms/preprocessed&#39;</span>
+<span class="linenos"> 9</span><span class="c1"># receiver function subdir</span>
+<span class="linenos">10</span><span class="nt">rf_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;waveforms/RF&#39;</span>
+<span class="linenos">11</span><span class="c1"># statxml subdir</span>
+<span class="linenos">12</span><span class="nt">statloc_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;stations&#39;</span>
+<span class="linenos">13</span><span class="c1"># subdir for event catalogues</span>
+<span class="linenos">14</span><span class="nt">evt_subdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;event_catalogs&#39;</span>
+<span class="linenos">15</span><span class="c1"># directory for logging information</span>
+<span class="linenos">16</span><span class="nt">log_subdir </span><span class="p">:</span><span class="w"> </span><span class="s">&#39;log&#39;</span>
+<span class="linenos">17</span><span class="c1"># levels:</span>
+<span class="linenos">18</span><span class="c1"># &#39;DEBUG&#39;, &#39;INFO&#39;, &#39;WARNING&#39;, &#39;ERROR&#39;, or &#39;CRITICAL&#39;</span>
+<span class="linenos">19</span><span class="nt">loglvl</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;WARNING&#39;</span>
+<span class="linenos">20</span><span class="c1"># format, either mseed or hdf5</span>
+<span class="linenos">21</span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;hdf5&#39;</span>
 <span class="linenos">22</span>
-<span class="linenos">23</span><span class="c1"># The teleseismic phase to use (P or S or also more exotic ones like SKS, PKP, ScS)</span><span class="w"></span>
-<span class="linenos">24</span><span class="nt">phase</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;S&#39;</span><span class="w"></span>
+<span class="linenos">23</span><span class="c1"># The teleseismic phase to use (P or S or also more exotic ones like SKS, PKP, ScS)</span>
+<span class="linenos">24</span><span class="nt">phase</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;S&#39;</span>
 <span class="linenos">25</span>
-<span class="linenos">26</span><span class="c1">### Request parameters</span><span class="w"></span>
-<span class="linenos">27</span><span class="c1">## First, everything concerning the download</span><span class="w"></span>
-<span class="linenos">28</span><span class="c1"># waveform client, list of strings</span><span class="w"></span>
-<span class="linenos">29</span><span class="c1"># use None if you want to download from all available FDSN servers</span><span class="w"></span>
-<span class="linenos">30</span><span class="nt">waveform_client</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;IRIS&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="linenos">31</span><span class="c1"># Use an already downloaded event catalog</span><span class="w"></span>
-<span class="linenos">32</span><span class="c1"># If so insert path+filename here.</span><span class="w"></span>
-<span class="linenos">33</span><span class="nt">evtcat</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span><span class="w"></span>
-<span class="linenos">34</span><span class="c1"># earliest event</span><span class="w"></span>
-<span class="linenos">35</span><span class="nt">starttime</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2009-06-1</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span><span class="w"></span>
-<span class="linenos">36</span><span class="c1"># latest event</span><span class="w"></span>
-<span class="linenos">37</span><span class="nt">endtime</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2011-12-31</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span><span class="w"></span>
-<span class="linenos">38</span><span class="c1"># Minumum Magnitude</span><span class="w"></span>
-<span class="linenos">39</span><span class="nt">minmag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.5</span><span class="w"></span>
-<span class="linenos">40</span><span class="c1"># Network and station to use, unix-style wildcards are allowed</span><span class="w"></span>
-<span class="linenos">41</span><span class="c1"># if you use the Request.download_waveforms_small_db method,</span><span class="w"></span>
-<span class="linenos">42</span><span class="c1"># you can also provide a list of networks and/or a list of stations</span><span class="w"></span>
-<span class="linenos">43</span><span class="nt">network</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;YP&#39;</span><span class="w"></span>
-<span class="linenos">44</span><span class="nt">station</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;*&#39;</span><span class="w"></span>
+<span class="linenos">26</span><span class="c1">### Request parameters</span>
+<span class="linenos">27</span><span class="c1">## First, everything concerning the download</span>
+<span class="linenos">28</span><span class="c1"># waveform client, list of strings</span>
+<span class="linenos">29</span><span class="c1"># use None if you want to download from all available FDSN servers</span>
+<span class="linenos">30</span><span class="nt">waveform_client</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;IRIS&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">31</span><span class="c1"># Use an already downloaded event catalog</span>
+<span class="linenos">32</span><span class="c1"># If so insert path+filename here.</span>
+<span class="linenos">33</span><span class="nt">evtcat</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">34</span><span class="c1"># earliest event</span>
+<span class="linenos">35</span><span class="nt">starttime</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2009-06-1</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span>
+<span class="linenos">36</span><span class="c1"># latest event</span>
+<span class="linenos">37</span><span class="nt">endtime</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2011-12-31</span><span class="nv"> </span><span class="s">00:00:00.0&#39;</span>
+<span class="linenos">38</span><span class="c1"># Minumum Magnitude</span>
+<span class="linenos">39</span><span class="nt">minmag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.5</span>
+<span class="linenos">40</span><span class="c1"># Network and station to use, unix-style wildcards are allowed</span>
+<span class="linenos">41</span><span class="c1"># if you use the Request.download_waveforms_small_db method,</span>
+<span class="linenos">42</span><span class="c1"># you can also provide a list of networks and/or a list of stations</span>
+<span class="linenos">43</span><span class="nt">network</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;YP&#39;</span>
+<span class="linenos">44</span><span class="nt">station</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;*&#39;</span>
 <span class="linenos">45</span>
-<span class="linenos">46</span><span class="c1">## concerning preprocessing</span><span class="w"></span>
-<span class="linenos">47</span><span class="c1"># Coordinate system to rotate the seismogram to before deconvolution</span><span class="w"></span>
-<span class="linenos">48</span><span class="c1"># RTZ, LQT, or PSS</span><span class="w"></span>
-<span class="linenos">49</span><span class="nt">rot</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;PSS&#39;</span><span class="w"></span>
-<span class="linenos">50</span><span class="c1"># Polarisation, use v for v/q receiver functions</span><span class="w"></span>
-<span class="linenos">51</span><span class="c1"># and h for transverse (SH)</span><span class="w"></span>
-<span class="linenos">52</span><span class="nt">pol</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;v&#39;</span><span class="w"></span>
-<span class="linenos">53</span><span class="c1"># Deconvolution method to use</span><span class="w"></span>
-<span class="linenos">54</span><span class="c1"># Iterative time domain: &#39;it&#39;</span><span class="w"></span>
-<span class="linenos">55</span><span class="c1"># Waterlevel Spectral Division: &#39;waterlevel&#39;</span><span class="w"></span>
-<span class="linenos">56</span><span class="nt">deconmeth</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;it&#39;</span><span class="w"></span>
-<span class="linenos">57</span><span class="c1"># Remove the station response. Set to False if you don&#39;t have access to the response</span><span class="w"></span>
-<span class="linenos">58</span><span class="nt">remove_response</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
+<span class="linenos">46</span><span class="c1">## concerning preprocessing</span>
+<span class="linenos">47</span><span class="c1"># Coordinate system to rotate the seismogram to before deconvolution</span>
+<span class="linenos">48</span><span class="c1"># RTZ, LQT, or PSS</span>
+<span class="linenos">49</span><span class="nt">rot</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;PSS&#39;</span>
+<span class="linenos">50</span><span class="c1"># Polarisation, use v for v/q receiver functions</span>
+<span class="linenos">51</span><span class="c1"># and h for transverse (SH)</span>
+<span class="linenos">52</span><span class="nt">pol</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;v&#39;</span>
+<span class="linenos">53</span><span class="c1"># Deconvolution method to use</span>
+<span class="linenos">54</span><span class="c1"># Iterative time domain: &#39;it&#39;</span>
+<span class="linenos">55</span><span class="c1"># Waterlevel Spectral Division: &#39;waterlevel&#39;</span>
+<span class="linenos">56</span><span class="nt">deconmeth</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;it&#39;</span>
+<span class="linenos">57</span><span class="c1"># Remove the station response. Set to False if you don&#39;t have access to the response</span>
+<span class="linenos">58</span><span class="nt">remove_response</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 </pre></div>
 </div>
 <p>You can then read the yaml file using <em>pyyaml</em> like so:</p>
@@ -666,7 +684,8 @@ object.</p>
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -678,6 +697,16 @@ object.</p>
 
 </p>
 
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
   </div>
   
   <div class="footer-item">
