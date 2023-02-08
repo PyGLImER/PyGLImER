@@ -93,7 +93,7 @@ PyGLImER also comes with a toolset to create publication ready figures:
 This version is an early release. If you encounter any issues or unexpected behaviour, please [open an issue](https://github.com/PyGLImER/PyGLImER/issues/new) here on GitHub or [contact the developers](mailto:makus@gfz-potsdam.de).
 
 ## Citing PyGLImER
-If you use PyGLImER to produce content for your publication, please consider citing us. For the time being, please cite our [AGU abstract](https://www.essoar.org/doi/10.1002/essoar.10506417.1).
+If you use PyGLImER to produce content for your publication, please consider citing us. For the time being, please cite our [AGU abstract](https://doi.org/10.1002/essoar.10506417.1).
 
 ## Latest
 We are happy to announced that PyGLImER has been awarded an [ORFEUS](http://orfeus-eu.org/) software development grant and are looking forward to further develop this project.
