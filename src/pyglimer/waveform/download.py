@@ -728,7 +728,8 @@ def downloadwav(
     phase: str, min_epid: float, max_epid: float, model: TauPyModel,
     event_cat: Catalog, tz: float, ta: float, statloc: str,
     rawloc: str, clients: list, evtfile: str, network: str = None,
-    station: str = None, saveasdf: bool = False,
+    station: str = None, inventory_restriction: Inventory = None,
+    saveasdf: bool = False,
     log_fh: logging.FileHandler = None, loglvl: int = logging.WARNING,
         verbose: bool = False, fast_redownload: bool = False):
     """
@@ -767,6 +768,9 @@ def downloadwav(
         Only allowed if network != None. Station restrictions.
         Only download from these stations, wildcards are allowed.
         The default is None.
+    inventory_restriction : Inventory, optional
+        If not None the provided inventory will be used to restrict the
+        retrieval of station data and waveforms to the provided inventory.
     saveasdf : bool, optional
         Save the dataset as Adaptable Seismic Data Format (asdf; recommended).
         Else, one will be left with .mseeds.
@@ -813,7 +817,7 @@ def downloadwav(
     # # Create handler to the log
     if log_fh is None:
         fh = logging.FileHandler(os.path.join('logs', 'download.log'))
-        fh.setLevel(logging.INFO)
+        fh.setLevel(logging.info)
         fh.setLevel(loglvl)
         # Create Formatter
         fmt = logging.Formatter(
@@ -830,6 +834,7 @@ def downloadwav(
     # Loop over each event
     global event
     global evt_id
+
     for ii, event in enumerate(tqdm(event_cat)):
         # fetch event-data
         origin_time = (event.preferred_origin() or event.origins[0]).time
@@ -882,10 +887,13 @@ def downloadwav(
             # Location codes are arbitrary and there is no rule as to which
             # location is best. Same logic as for the previous setting.
             # location_priorities=["", "00", "10"],
-            sanitize=False
+            sanitize=False,
             # discards all mseeds for which no station information is available
             # I changed it too False because else it will redownload over and
             # over and slow down the script
+            # Should restrict the only to stations with the provided inventory
+            # if From my first test it does not look like it.
+            limit_stations_to_inventory=inventory_restriction
         )
 
         # The data will be downloaded to the ``./waveforms/`` and
@@ -897,11 +905,12 @@ def downloadwav(
                     domain, restrictions,
                     mseed_storage=get_mseed_storage,
                     stationxml_storage=statloc,
-                    threads_per_client=3, download_chunk_size_in_mb=50)
+                    threads_per_client=3, download_chunk_size_in_mb=500)
                 incomplete = False
             except IncompleteRead:
                 continue  # Just retry for poor connection
-            except Exception:
+            except Exception as e:
+                fdsn_mass_logger.info(e)
                 incomplete = False  # Any other error: continue
 
         # 2021.02.15 Here, we write everything to hdf5
@@ -985,6 +994,7 @@ def wav_in_hdf5(
         rawloc: str, network: str, station: str, location: str,
         channel: str) -> bool:
     """Is the waveform already in the Raw hdf5 database?"""
+
     # H5 file location
     h5_file = os.path.join(rawloc, '%s.%s.h5' % (
         network, station))
