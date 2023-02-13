@@ -817,7 +817,7 @@ def downloadwav(
     # # Create handler to the log
     if log_fh is None:
         fh = logging.FileHandler(os.path.join('logs', 'download.log'))
-        fh.setLevel(logging.info)
+        fh.setLevel(logging.INFO)
         fh.setLevel(loglvl)
         # Create Formatter
         fmt = logging.Formatter(
@@ -905,7 +905,7 @@ def downloadwav(
                     domain, restrictions,
                     mseed_storage=get_mseed_storage,
                     stationxml_storage=statloc,
-                    threads_per_client=3, download_chunk_size_in_mb=500)
+                    threads_per_client=3, download_chunk_size_in_mb=50)
                 incomplete = False
             except IncompleteRead:
                 continue  # Just retry for poor connection
@@ -995,17 +995,24 @@ def wav_in_hdf5(
         channel: str) -> bool:
     """Is the waveform already in the Raw hdf5 database?"""
 
+    fdsn_mass_logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
+    # fdsn_mass_logger.setLevel('DEBUG')
+
     # H5 file location
     h5_file = os.path.join(rawloc, '%s.%s.h5' % (
         network, station))
 
     # First check dictionary
     try:
+        fdsn_mass_logger.info(f"Checking whether {evt_id} is in {network}.{station}..{channel}")
         if evt_id in av_data[network][station][channel]:
+            fdsn_mass_logger.info(f"   ... found.")
             return True
         else:
+            fdsn_mass_logger.info(f"   ... not found.")
             return False
     except KeyError:
+        fdsn_mass_logger.info(f"   ... key not found.")
         pass
 
     # Check whether there is data from this station at all
@@ -1013,16 +1020,25 @@ def wav_in_hdf5(
     av_data[network].setdefault(station, {})
 
     if not os.path.isfile(h5_file):
-        logging.debug(f'{h5_file} not found')
+        logging.info(f'{h5_file} not found')
         av_data[network][station][channel] = []
+        fdsn_mass_logger.info(f"   ... file not found.")
         return False
 
     # The file exists, so we will have to open it and get the dictionary
+    fdsn_mass_logger.info(f"   ... file found, checking content.")
+
     with RawDatabase(h5_file) as rdb:
+        #
         av_data[network][station] = rdb._get_table_of_contents()
 
         # Safety net for when the channel list is empty for some reason.
         if not av_data[network][station]:
+            fdsn_mass_logger.info(f"   ... channel list empty, adding list.")
+            av_data[network][station][channel] = []
+
+        # Maybe the channel is just not in there...
+        if channel not in av_data[network][station]:
             av_data[network][station][channel] = []
 
     # execute this again to check
