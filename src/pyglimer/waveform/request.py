@@ -15,7 +15,7 @@ time domain receiver functions.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Monday, 27th April 2020 10:55:03 pm
-Last Modified: Friday, 20th January 2023 03:50:29 pm
+Last Modified: Friday, 24th February 2023 10:54:51 am
 '''
 import os
 from http.client import IncompleteRead
@@ -265,7 +265,9 @@ class Request(object):
         # Server settings
         # 2021/02/16 Events only from IRIS as the USGS webserice tends to be
         # unstable and mixing different services will lead to a messed db
-        self.webclient = Webclient('IRIS')
+        # 2023/02/24 Increase timeout, maybe with a long enough timeout,
+        # the catalogue won't be needed to be split anymore?
+        self.webclient = Webclient('IRIS', timeout=240)
         event_cat_done = False
 
         # 05.07.2021: Shorten length of a to one year, which is a lot
