@@ -139,7 +139,7 @@ Now that all parameters are in place, let's initialize the
 
  .. code-block:: none
 
-    2023-03-29 10:17:27,683 - INFO - Successfully obtained 1 events
+    2023-03-29 10:18:18,030 - INFO - Successfully obtained 1 events
 
 
 
@@ -319,10 +319,10 @@ This method will do the following:
 
  .. code-block:: none
 
-    2023-03-29 10:17:27,958 - INFO - Computing theoretical times of arrival. Save Inventories
-    2023-03-29 10:17:27,965 - INFO - Checking IU.HRV
-    2023-03-29 10:17:27,966 - DEBUG - IU.HRV
-    2023-03-29 10:17:27,988 - INFO - Slice data in chunks and save them into PyGLImER database.
+    2023-03-29 10:18:18,279 - INFO - Computing theoretical times of arrival. Save Inventories
+    2023-03-29 10:18:18,286 - INFO - Checking IU.HRV
+    2023-03-29 10:18:18,286 - DEBUG - IU.HRV
+    2023-03-29 10:18:18,308 - INFO - Slice data in chunks and save them into PyGLImER database.
 
 
 
@@ -404,26 +404,26 @@ expression is needed for running this examples
 
  .. code-block:: none
 
-    2023-03-29 10:17:28,011 - INFO - 
+    2023-03-29 10:18:18,327 - INFO - 
 
 
     ...Preprocessing initialiased...
 
-    2023-03-29 10:17:28,012 - DEBUG - USING SINGLE CORE BACKEND
-      0%|          | 0/1 [00:00<?, ?it/s]2023-03-29 10:17:28,012 - INFO - Processing waveforms for event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293.
-    2023-03-29 10:17:28,028 - DEBUG - Before cut and resample
-    2023-03-29 10:17:28,028 - DEBUG -    Time elapsed: 0.0 s
-    2023-03-29 10:17:28,053 - INFO - Stream accepted. Preprocessing successful
-    2023-03-29 10:17:28,053 - INFO - File preprocessed.
+    2023-03-29 10:18:18,327 - DEBUG - USING SINGLE CORE BACKEND
+      0%|          | 0/1 [00:00<?, ?it/s]2023-03-29 10:18:18,328 - INFO - Processing waveforms for event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293.
+    2023-03-29 10:18:18,343 - DEBUG - Before cut and resample
+    2023-03-29 10:18:18,343 - DEBUG -    Time elapsed: 0.0 s
+    2023-03-29 10:18:18,368 - INFO - Stream accepted. Preprocessing successful
+    2023-03-29 10:18:18,368 - INFO - File preprocessed.
     Station IU.HRV
     Event smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293
-    2023-03-29 10:17:28,053 - DEBUG -    Time elapsed: 0.0 s
-    2023-03-29 10:17:28,065 - INFO - RF created.
+    2023-03-29 10:18:18,368 - DEBUG -    Time elapsed: 0.0 s
+    2023-03-29 10:18:18,379 - INFO - RF created.
     Station IU.HRV
     Event: smi:service.iris.edu/fdsnws/event/1/query?eventid=11363293
-    2023-03-29 10:17:28,065 - DEBUG -    Time elapsed: 0.0 s
-    100%|##########| 1/1 [00:00<00:00, 17.97it/s]
-    2023-03-29 10:17:28,068 - INFO - Preprocessing finished.
+    2023-03-29 10:18:18,379 - DEBUG -    Time elapsed: 0.0 s
+    100%|##########| 1/1 [00:00<00:00, 18.53it/s]
+    2023-03-29 10:18:18,382 - INFO - Preprocessing finished.
 
 
 
@@ -685,7 +685,7 @@ just a single smalle script.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.874 seconds)
+   **Total running time of the script:** ( 0 minutes  1.650 seconds)
 
 
 .. _sphx_glr_download_tutorials_ImportLocalDatabase.py:
