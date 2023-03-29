@@ -90,7 +90,13 @@ PyGLImER also comes with a toolset to create publication ready figures:
 | *FIG: Distribution of back-azimuth and rayparameter for the P receiver functions from GE.DAG as shown above.* |
 
 ## Reporting Bugs / Contact the developers
-This version is an early release. If you encounter any issues or unexpected behaviour, please [open an issue](https://github.com/PyGLImER/PyGLImER/issues/new) here on GitHub or [contact the developers](mailto:makus@gfz-potsdam.de).
+This version is an early release. If you encounter any issues or unexpected behaviour, please [open an issue](https://github.com/PyGLImER/PyGLImER/issues/new/choose) here on GitHub.
+
+## Questions?
+If you have any questions that do not require any changes in the source code, please use the [discussions feature](https://github.com/PyGLImER/PyGLImER/discussions)
+
+## Contributing
+Thank you for contributing to PyGLImER! Have a look at our [guidelines for contributors](https://github.com/PyGLImER/PyGLImER/blob/master/CONTRIBUTING.md)
 
 ## Citing PyGLImER
 If you use PyGLImER to produce content for your publication, please consider citing us. For the time being, please cite our [AGU abstract](https://doi.org/10.1002/essoar.10506417.1).
