@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_tutorials_nc_CCPStack_SingleStation.py>`
+        :ref:`Go to the end <sphx_glr_download_tutorials_nc_CCPStack_SingleStation.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -145,7 +145,7 @@ This is similar to the single station stacks.
 
  .. code-block:: none
 
-      0%|          | 0/2 [00:00<?, ?it/s]     50%|#####     | 1/2 [00:00<00:00,  7.72it/s]    100%|##########| 2/2 [00:00<00:00, 15.18it/s]
+      0%|          | 0/2 [00:00<?, ?it/s]     50%|#####     | 1/2 [00:00<00:00,  6.68it/s]    100%|##########| 2/2 [00:00<00:00, 13.22it/s]
 
 
 
@@ -451,7 +451,7 @@ as the 'clean' stacking.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  33.628 seconds)
+   **Total running time of the script:** ( 0 minutes  35.769 seconds)
 
 
 .. _sphx_glr_download_tutorials_nc_CCPStack_SingleStation.py:
@@ -459,6 +459,8 @@ as the 'clean' stacking.
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+
 
 
     .. container:: sphx-glr-download sphx-glr-download-python

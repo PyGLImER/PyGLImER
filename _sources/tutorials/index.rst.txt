@@ -18,7 +18,7 @@ A set of tutorials to make you familiar with the package.
 .. only:: html
 
   .. image:: /tutorials/images/thumb/sphx_glr_nc_CCPStack_SingleStation_thumb.png
-    :alt: Common Conversion Point Stack of a Single Station
+    :alt:
 
   :ref:`sphx_glr_tutorials_nc_CCPStack_SingleStation.py`
 
@@ -35,7 +35,7 @@ A set of tutorials to make you familiar with the package.
 .. only:: html
 
   .. image:: /tutorials/images/thumb/sphx_glr_DataCollectionSAC_thumb.png
-    :alt: SAC Database
+    :alt:
 
   :ref:`sphx_glr_tutorials_DataCollectionSAC.py`
 
@@ -52,7 +52,7 @@ A set of tutorials to make you familiar with the package.
 .. only:: html
 
   .. image:: /tutorials/images/thumb/sphx_glr_DataCollectionHDF5_thumb.png
-    :alt: HDF5 Database
+    :alt:
 
   :ref:`sphx_glr_tutorials_DataCollectionHDF5.py`
 
@@ -69,7 +69,7 @@ A set of tutorials to make you familiar with the package.
 .. only:: html
 
   .. image:: /tutorials/images/thumb/sphx_glr_ImportLocalDatabase_thumb.png
-    :alt: Import from Local DataBase
+    :alt:
 
   :ref:`sphx_glr_tutorials_ImportLocalDatabase.py`
 
