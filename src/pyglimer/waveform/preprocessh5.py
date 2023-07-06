@@ -116,7 +116,14 @@ def preprocessh5(
 
     # Open ds
     fpattern = '%s.%s.h5' % (netrestr or '*', statrestr or '*')
-    flist = list(glob(os.path.join(rawloc, fpattern)))
+    globstr = os.path.join(rawloc, fpattern)
+    flist = list(glob(globstr))
+
+
+    # Checking whether file list is actually seen
+    logger.debug(f'RAWLOC: {rawloc}')
+    logger.debug(f'GLOBSTRING: {globstr}')
+    logger.debug(f'# of Files found: {len(flist)}')
 
     # Perform processing depending on client
     if client.lower() == 'mpi':
