@@ -1004,15 +1004,16 @@ def wav_in_hdf5(
 
     # First check dictionary
     try:
-        fdsn_mass_logger.debug(f"Checking whether {evt_id} is in {network}.{station}..{channel}")
+        fdsn_mass_logger.debug(
+            f"Checking whether {evt_id} is in {network}.{station}..{channel}")
         if evt_id in av_data[network][station][channel]:
-            fdsn_mass_logger.debug(f"   ... found.")
+            fdsn_mass_logger.debug("   ... found.")
             return True
         else:
-            fdsn_mass_logger.debug(f"   ... not found.")
+            fdsn_mass_logger.debug("   ... not found.")
             return False
     except KeyError:
-        fdsn_mass_logger.debug(f"   ... key not found.")
+        fdsn_mass_logger.debug("   ... key not found.")
         pass
 
     # Check whether there is data from this station at all
@@ -1022,11 +1023,11 @@ def wav_in_hdf5(
     if not os.path.isfile(h5_file):
         logging.info(f'{h5_file} not found')
         av_data[network][station][channel] = []
-        fdsn_mass_logger.debug(f"   ... file not found.")
+        fdsn_mass_logger.debug("   ... file not found.")
         return False
 
     # The file exists, so we will have to open it and get the dictionary
-    fdsn_mass_logger.debug(f"   ... file found, checking content.")
+    fdsn_mass_logger.debug("   ... file found, checking content.")
 
     with RawDatabase(h5_file) as rdb:
         #
@@ -1034,7 +1035,7 @@ def wav_in_hdf5(
 
         # Safety net for when the channel list is empty for some reason.
         if not av_data[network][station]:
-            fdsn_mass_logger.debug(f"   ... channel list empty, adding list.")
+            fdsn_mass_logger.debug("   ... channel list empty, adding list.")
             av_data[network][station][channel] = []
 
         # Maybe the channel is just not in there...
