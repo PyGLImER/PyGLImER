@@ -32,7 +32,7 @@ from obspy.core.event.catalog import Catalog
 from obspy.core.inventory.inventory import Inventory
 from obspy.taup import TauPyModel
 
-from pyglimer.database.raw import RawDatabase, mseed_to_hdf5
+from pyglimer.database.raw import RawDatabase, mseed_to_hdf5, statxml_to_hdf5
 from pyglimer import tmp
 from pyglimer.utils.roundhalf import roundhalf
 from pyglimer.utils import utils as pu
@@ -817,7 +817,6 @@ def downloadwav(
     # # Create handler to the log
     if log_fh is None:
         fh = logging.FileHandler(os.path.join('logs', 'download.log'))
-        fh.setLevel(logging.INFO)
         fh.setLevel(loglvl)
         # Create Formatter
         fmt = logging.Formatter(
@@ -931,6 +930,7 @@ def downloadwav(
         fdsn_mass_logger.info('Rewriting mseed and xmls to hdf5.....')
         mseed_to_hdf5(rawloc, save_statxml=True, statloc=statloc)
         fdsn_mass_logger.info('...Done')
+        statxml_to_hdf5(rawloc, statloc)
     tmp.folder = "finished"  # removes the restriction for preprocess.py
 
 
