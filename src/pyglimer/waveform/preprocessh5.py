@@ -72,6 +72,7 @@ class ProgressParallel(Parallel):
         self._pbar.n = self.n_completed_tasks
         self._pbar.refresh()
 
+
 def preprocessh5(
     phase: str, rot: str, pol: str, taper_perc: float,
     model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
@@ -130,7 +131,6 @@ def preprocessh5(
     globstr = os.path.join(rawloc, fpattern)
     flist = list(glob(globstr))
 
-
     # Checking whether file list is actually seen
     logger.debug(f'RAWLOC: {rawloc}')
     logger.debug(f'GLOBSTRING: {globstr}')
@@ -159,9 +159,9 @@ def preprocessh5(
     elif client.lower() == 'joblib':
         ProgressParallel(n_jobs=-1,)(
             delayed(_preprocessh5_single)(
-            phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-            deconmeth, hc_filt, logger, rflogger,
-            f, evtcat, remove_response) for f in tqdm(flist))
+                phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
+                deconmeth, hc_filt, logger, rflogger,
+                f, evtcat, remove_response) for f in tqdm(flist))
 
     elif client.lower() == 'single':
         for f in tqdm(flist):
@@ -176,11 +176,11 @@ def preprocessh5(
 
 
 def _preprocessh5_single(
-    phase: str, rot: str, pol: str, taper_perc: float,
-    model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
-    rfloc: str, deconmeth: str, hc_filt: float,
-    logger: logging.Logger, rflogger: logging.Logger,
-    hdf5_file: str, evtcat: obspy.Catalog, remove_response: bool):
+        phase: str, rot: str, pol: str, taper_perc: float,
+        model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
+        rfloc: str, deconmeth: str, hc_filt: float,
+        logger: logging.Logger, rflogger: logging.Logger,
+        hdf5_file: str, evtcat: obspy.Catalog, remove_response: bool):
     """
     Single core processing of one single hdf5 file.
 
@@ -238,11 +238,7 @@ def _preprocessh5_single(
         # c_date = inv[0][0].creation_date
         # t_date = inv[0][0].termination_date
 
-        Nevt = len(evtcat)
-        Nevtstrlen = len(str(Nevt))
-        for i, evt in (pbar := tqdm(enumerate(evtcat))):
-            # Add description
-            # pbar.set_description(f"Event loop {i:>{Nevtstrlen}d}/{Nevt}")
+        for i, evt in tqdm(enumerate(evtcat)):
             # Already processed?
             ot = (evt.preferred_origin() or evt.origins[0]).time
             ot_fiss = UTCDateTime(ot).format_fissures()

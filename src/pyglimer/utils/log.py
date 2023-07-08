@@ -47,9 +47,6 @@ def start_logger_if_necessary(
     logger.addHandler(fh)
     return logger
 
-def start_smart_logger(name: str):
-
-    logger = logging.getLogger(name)
 
 def create_mpi_logger(logger: logging.Logger, rank: int) -> logging.Logger:
     """
