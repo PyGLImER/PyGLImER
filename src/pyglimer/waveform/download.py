@@ -32,7 +32,7 @@ from obspy.core.event.catalog import Catalog
 from obspy.core.inventory.inventory import Inventory
 from obspy.taup import TauPyModel
 
-from pyglimer.database.raw import RawDatabase, mseed_to_hdf5
+from pyglimer.database.raw import RawDatabase, mseed_to_hdf5, statxml_to_hdf5
 from pyglimer import tmp
 from pyglimer.utils.roundhalf import roundhalf
 from pyglimer.utils import utils as pu
@@ -728,7 +728,8 @@ def downloadwav(
     phase: str, min_epid: float, max_epid: float, model: TauPyModel,
     event_cat: Catalog, tz: float, ta: float, statloc: str,
     rawloc: str, clients: list, evtfile: str, network: str = None,
-    station: str = None, saveasdf: bool = False,
+    station: str = None, inventory_restriction: Inventory = None,
+    saveasdf: bool = False,
     log_fh: logging.FileHandler = None, loglvl: int = logging.WARNING,
         verbose: bool = False, fast_redownload: bool = False):
     """
@@ -767,6 +768,9 @@ def downloadwav(
         Only allowed if network != None. Station restrictions.
         Only download from these stations, wildcards are allowed.
         The default is None.
+    inventory_restriction : Inventory, optional
+        If not None the provided inventory will be used to restrict the
+        retrieval of station data and waveforms to the provided inventory.
     saveasdf : bool, optional
         Save the dataset as Adaptable Seismic Data Format (asdf; recommended).
         Else, one will be left with .mseeds.
@@ -813,7 +817,6 @@ def downloadwav(
     # # Create handler to the log
     if log_fh is None:
         fh = logging.FileHandler(os.path.join('logs', 'download.log'))
-        fh.setLevel(logging.INFO)
         fh.setLevel(loglvl)
         # Create Formatter
         fmt = logging.Formatter(
@@ -830,6 +833,7 @@ def downloadwav(
     # Loop over each event
     global event
     global evt_id
+
     for ii, event in enumerate(tqdm(event_cat)):
         # fetch event-data
         origin_time = (event.preferred_origin() or event.origins[0]).time
@@ -882,10 +886,13 @@ def downloadwav(
             # Location codes are arbitrary and there is no rule as to which
             # location is best. Same logic as for the previous setting.
             # location_priorities=["", "00", "10"],
-            sanitize=False
+            sanitize=False,
             # discards all mseeds for which no station information is available
             # I changed it too False because else it will redownload over and
             # over and slow down the script
+            # Should restrict the only to stations with the provided inventory
+            # if From my first test it does not look like it.
+            limit_stations_to_inventory=inventory_restriction
         )
 
         # The data will be downloaded to the ``./waveforms/`` and
@@ -901,7 +908,8 @@ def downloadwav(
                 incomplete = False
             except IncompleteRead:
                 continue  # Just retry for poor connection
-            except Exception:
+            except Exception as e:
+                fdsn_mass_logger.info(e)
                 incomplete = False  # Any other error: continue
 
         # 2021.02.15 Here, we write everything to hdf5
@@ -922,6 +930,7 @@ def downloadwav(
         fdsn_mass_logger.info('Rewriting mseed and xmls to hdf5.....')
         mseed_to_hdf5(rawloc, save_statxml=True, statloc=statloc)
         fdsn_mass_logger.info('...Done')
+        statxml_to_hdf5(rawloc, statloc)
     tmp.folder = "finished"  # removes the restriction for preprocess.py
 
 
@@ -985,17 +994,26 @@ def wav_in_hdf5(
         rawloc: str, network: str, station: str, location: str,
         channel: str) -> bool:
     """Is the waveform already in the Raw hdf5 database?"""
+
+    fdsn_mass_logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
+    # fdsn_mass_logger.setLevel('DEBUG')
+
     # H5 file location
     h5_file = os.path.join(rawloc, '%s.%s.h5' % (
         network, station))
 
     # First check dictionary
     try:
+        fdsn_mass_logger.debug(
+            f"Checking whether {evt_id} is in {network}.{station}..{channel}")
         if evt_id in av_data[network][station][channel]:
+            fdsn_mass_logger.debug("   ... found.")
             return True
         else:
+            fdsn_mass_logger.debug("   ... not found.")
             return False
     except KeyError:
+        fdsn_mass_logger.debug("   ... key not found.")
         pass
 
     # Check whether there is data from this station at all
@@ -1003,16 +1021,25 @@ def wav_in_hdf5(
     av_data[network].setdefault(station, {})
 
     if not os.path.isfile(h5_file):
-        logging.debug(f'{h5_file} not found')
+        logging.info(f'{h5_file} not found')
         av_data[network][station][channel] = []
+        fdsn_mass_logger.debug("   ... file not found.")
         return False
 
     # The file exists, so we will have to open it and get the dictionary
+    fdsn_mass_logger.debug("   ... file found, checking content.")
+
     with RawDatabase(h5_file) as rdb:
+        #
         av_data[network][station] = rdb._get_table_of_contents()
 
         # Safety net for when the channel list is empty for some reason.
         if not av_data[network][station]:
+            fdsn_mass_logger.debug("   ... channel list empty, adding list.")
+            av_data[network][station][channel] = []
+
+        # Maybe the channel is just not in there...
+        if channel not in av_data[network][station]:
             av_data[network][station][channel] = []
 
     # execute this again to check

@@ -26,7 +26,7 @@ from typing import Iterable, Tuple, List
 import warnings
 import time
 
-from obspy import Stream, read_events, Catalog, Inventory
+from obspy import Stream, read_events, read_inventory, Catalog, Inventory
 from obspy.clients.fdsn import Client as Webclient
 from obspy.clients.fdsn.header import FDSNException
 from obspy.core.utcdatetime import UTCDateTime
@@ -54,6 +54,7 @@ class Request(object):
         event_coords: Tuple[float, float, float, float] = None,
         network: tp.Union[str, List[str], None] = None,
         station: tp.Union[str, List[str], None] = None,
+        stationxml_restriction: tp.Union[str, None] = None,
         waveform_client: list = None, evtcat: str = None,
         continue_download: bool = False, loglvl: int = logging.WARNING,
             format: str = 'hdf5', remove_response: bool = True, **kwargs):
@@ -122,6 +123,9 @@ class Request(object):
             station or several stations. Use only if network!=None.
             Wildcards are allowed, by default None.
         :type station: str, optional
+        :param stationxml_restriction: Limit the download of waveforms using a
+            STATIONXML
+        :type stationxml_restriction: Inventory, optional
         :param waveform_client: List of FDSN compatible servers to download
             waveforms from.
             See obspy documentation for obspy.Client for allowed acronyms.
@@ -245,6 +249,15 @@ class Request(object):
         self.network = network
         self.station = station
 
+        # Add stationxml filte r=
+        if stationxml_restriction is not None:
+            self.stationxml_file = stationxml_restriction
+            self.inventory_restriction = read_inventory(self.stationxml_file)
+            print("Inventory is read!")
+        else:
+            self.stationxml_file = None
+            self.inventory_restriction = None
+
         self.waveform_client = waveform_client
 
         # Download or process available data?
@@ -339,9 +352,19 @@ class Request(object):
                     self.logger.warning(msg)
                     continue
 
+        # Sort event catalog
+        self.evtcat.events = sorted(
+            self.evtcat.events,
+            key=lambda x: x.preferred_origin().time, reverse=False)
+
+        # Make directories to store catalog
         os.makedirs(self.evtloc, exist_ok=True)
+
+        # Define filname based on storetime.
         self.evtfile = os.path.join(
             self.evtloc, datetime.now().strftime("%Y%m%dT%H%M%S"))
+
+        # Write catalog to file
         self.evtcat.write(self.evtfile, format="QUAKEML")
         msg = 'Successfully obtained %s events' % str(self.evtcat.count())
         self.logger.info(msg)
@@ -366,6 +389,7 @@ class Request(object):
             self.phase, self.min_epid, self.max_epid, self.model, self.evtcat,
             self.tz, self.ta, self.statloc, self.rawloc, self.waveform_client,
             self.evtfile, network=self.network, station=self.station,
+            inventory_restriction=self.inventory_restriction,
             log_fh=self.fh, loglvl=self.loglvl, verbose=verbose,
             saveasdf=self.h5, fast_redownload=self.continue_download)
 

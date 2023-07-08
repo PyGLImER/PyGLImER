@@ -22,6 +22,7 @@ from typing import List, Tuple
 
 import numpy as np
 from joblib import Parallel, delayed
+from tqdm.auto import tqdm as tqdm_auto
 import obspy
 from obspy import Stream, UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
@@ -59,6 +60,17 @@ class StreamLengthError(Exception):
 
     def __str__(self):
         return repr(self.value)
+
+
+class ProgressParallel(Parallel):
+    def __call__(self, *args, **kwargs):
+        with tqdm_auto() as self._pbar:
+            return Parallel.__call__(self, *args, **kwargs)
+
+    def print_progress(self):
+        self._pbar.total = self.n_dispatched_tasks
+        self._pbar.n = self.n_completed_tasks
+        self._pbar.refresh()
 
 
 def preprocessh5(
@@ -116,7 +128,13 @@ def preprocessh5(
 
     # Open ds
     fpattern = '%s.%s.h5' % (netrestr or '*', statrestr or '*')
-    flist = list(glob(os.path.join(rawloc, fpattern)))
+    globstr = os.path.join(rawloc, fpattern)
+    flist = list(glob(globstr))
+
+    # Checking whether file list is actually seen
+    logger.debug(f'RAWLOC: {rawloc}')
+    logger.debug(f'GLOBSTRING: {globstr}')
+    logger.debug(f'# of Files found: {len(flist)}')
 
     # Perform processing depending on client
     if client.lower() == 'mpi':
@@ -139,10 +157,11 @@ def preprocessh5(
                 remove_response)
 
     elif client.lower() == 'joblib':
-        Parallel(n_jobs=-1)(delayed(_preprocessh5_single)(
-            phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-            deconmeth, hc_filt, logger, rflogger,
-            f, evtcat, remove_response) for f in tqdm(flist))
+        ProgressParallel(n_jobs=-1,)(
+            delayed(_preprocessh5_single)(
+                phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
+                deconmeth, hc_filt, logger, rflogger,
+                f, evtcat, remove_response) for f in tqdm(flist))
 
     elif client.lower() == 'single':
         for f in tqdm(flist):
@@ -157,10 +176,10 @@ def preprocessh5(
 
 
 def _preprocessh5_single(
-    phase: str, rot: str, pol: str, taper_perc: float,
-    model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
-    rfloc: str, deconmeth: str, hc_filt: float,
-    logger: logging.Logger, rflogger: logging.Logger,
+        phase: str, rot: str, pol: str, taper_perc: float,
+        model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
+        rfloc: str, deconmeth: str, hc_filt: float,
+        logger: logging.Logger, rflogger: logging.Logger,
         hdf5_file: str, evtcat: obspy.Catalog, remove_response: bool):
     """
     Single core processing of one single hdf5 file.
@@ -168,11 +187,18 @@ def _preprocessh5_single(
     .. warning:: Should not be called use
         :func:`~seismic.waveform.preprocessh5.preprocess_h5`!
     """
+
     f = hdf5_file
     net, stat, _ = os.path.basename(f).split('.')
     code = '%s.%s' % (net, stat)
 
     outf = os.path.join(rfloc, code)
+
+    # Local logger reset
+    logger = logging.getLogger(logger.name)
+    rflogger = logging.getLogger(rflogger.name)
+
+    rflogger.info(f'Processing Station {code}')
 
     # Find out which files have already been processed:
     if os.path.isfile(outf+'.h5'):
@@ -183,7 +209,7 @@ def _preprocessh5_single(
     else:
         ret = []
         rej = []
-    rflogger.info(f'Processing Station {code}')
+
     with RawDatabase(f, mode='r') as rdb:
         # get station inventory
         try:
@@ -191,6 +217,9 @@ def _preprocessh5_single(
         except KeyError:
             logger.exception(
                 f'Could not find station inventory for Station {net}.{stat}')
+            # Can't process without Inventory
+            return
+
         rf = RFStream()
         # There has to be a smarter way to do this. Only some events
         # have a corresponding waveform
@@ -198,13 +227,18 @@ def _preprocessh5_single(
         # thresholds
 
         # Which times are available as raw data?
-        t_raw = list(rdb._get_table_of_contents().values())[0]
+        list_of_times = list(rdb._get_table_of_contents().values())
+        if len(list_of_times) == 0:
+            rflogger.debug(f'No waveforms in {code}')
+            return
+        t_raw = list_of_times[0]
         t_raw = [UTCDateTime(t) for t in t_raw]
         t_raw_min = min(t_raw) - 600
         t_raw_max = max(t_raw) + 600
         # c_date = inv[0][0].creation_date
         # t_date = inv[0][0].termination_date
-        for evt in tqdm(evtcat):
+
+        for i, evt in tqdm(enumerate(evtcat)):
             # Already processed?
             ot = (evt.preferred_origin() or evt.origins[0]).time
             ot_fiss = UTCDateTime(ot).format_fissures()
