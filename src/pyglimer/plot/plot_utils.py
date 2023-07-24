@@ -11,7 +11,7 @@ Plot utilities not to modify plots or base plots.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 05:05:08 pm
-Last Modified: Monday, 24th July 2023 10:32:59 am
+Last Modified: Monday, 24th July 2023 10:45:28 am
 '''
 
 import os
@@ -525,7 +525,8 @@ def plot_section(
 
 
 def combined_single_station_plot(
-    rfst, stack, ylim: Tuple[float, float] = None, std: np.ndarray = None,
+    rfst, stack, ylim: Tuple[float, float] = None,
+    epilimits: Tuple[float, float] = None, std: np.ndarray = None,
     scalingfactor: float = 6, outputfile: str = None, fmt: str = None, dpi=300,
     title: str = None, color: str = 'seismic', bold: bool = False,
     width_ratios: Tuple[float, float] = (1, 2)) -> Tuple[
@@ -540,6 +541,8 @@ def combined_single_station_plot(
     :type stack: RFTrace
     :param ylim: ylim, defaults to None
     :type ylim: Tuple[float, float], optional
+    :param epilimits: epicentral distance limits, defaults to None
+    :type epilimits: Tuple[float, float], optional
     :param std: standard deviation computated via bootstrap
         in RFStream.bootstrap(), defaults to None
     :type std: np.ndarray, optional
@@ -572,7 +575,6 @@ def combined_single_station_plot(
     # no space between panels
     plt.subplots_adjust(wspace=0, hspace=0)
 
-    # ax0 = plt.subplot(121)
     plot_single_rf(
         stack, flipxy=True, std=std, ax=ax0, color=color, show=False,
         bold=bold)
@@ -591,11 +593,10 @@ def combined_single_station_plot(
         txt.remove()
 
     # Section plot
-    # ax1 = plt.subplot(122, sharey=ax0)
     ax1 = plot_section(
         rfst, line=False, scalingfactor=scalingfactor, timelimits=ylim, ax=ax1,
         show=False, title='Individual Receiver Functions', color=color,
-        bold=bold)
+        bold=bold, epilimits=epilimits)
     ax1.spines['right'].set_visible(True)
     ax1.spines['top'].set_visible(True)
     ax1.set_xlabel(r'Epicentral Distance, $\Delta$ [$^{\circ}$]')
