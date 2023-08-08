@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Friday, 20th January 2023 03:50:29 pm
+Last Modified: Tuesday, 8th August 2023 03:00:05 pm
 '''
 
 import fnmatch
@@ -212,7 +212,7 @@ def preprocess(
                 continue
             if key in masterdict:
                 for k in d:
-                    if type(d[k]) == list:
+                    if isinstance(d[k], list):
                         masterdict[key].setdefault(k, []).extend(d[k])
             else:
                 masterdict[key] = d

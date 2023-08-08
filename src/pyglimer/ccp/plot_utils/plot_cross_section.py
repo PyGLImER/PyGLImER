@@ -13,7 +13,7 @@ from cartopy.mpl.geoaxes import GeoAxes, GeoAxesSubplot
 # Internal
 from pyglimer.ccp.plot_utils.plot_map import plot_map
 from pyglimer.ccp.plot_utils.plot_line_buffer import plot_line_buffer
-from pyglimer.ccp.plot_utils.midpointcolornorm import MidpointNormalize,\
+from pyglimer.ccp.plot_utils.midpointcolornorm import MidpointNormalize, \
     StretchOutNormalize
 from pyglimer.plot.plot_utils import set_mpl_params
 

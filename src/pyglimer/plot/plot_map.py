@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 4th August 2020 11:02:52 am
-Last Modified: Friday, 20th January 2023 03:51:52 pm
+Last Modified: Tuesday, 8th August 2023 02:55:05 pm
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -99,7 +99,7 @@ def plot_map(
         ax.add_feature(feature=cartopy.feature.STATES,
                        linewidth=0.25, zorder=-2)
     if profile:
-        if type(profile) == tuple:
+        if isinstance(profile, tuple):
             if p_direct:
                 plt.plot((profile[0], profile[1]), (profile[2], profile[3]),
                          color='blue', linewidth=1.5, transform=PlateCarree(),

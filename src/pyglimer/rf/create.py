@@ -14,7 +14,7 @@ Database management and overview for the PyGLImER database.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Friday, 20th January 2023 03:50:29 pm
+Last Modified: Tuesday, 8th August 2023 02:55:58 pm
 
 
 **The file is split and has a second copyright disclaimer**
@@ -41,7 +41,7 @@ from scipy.signal.windows import hann
 from pyglimer.data.finddir import finddir
 
 from pyglimer.rf.deconvolve import it, spectraldivision, multitaper
-from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table,\
+from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table, \
     dt_table_3D
 from pyglimer.plot.plot_utils import plot_section, plot_single_rf, stream_dist
 from pyglimer.utils.geo_utils import fix_map_extent
@@ -123,7 +123,7 @@ def createRF(
 
     # taper traces
     if trim:
-        if not type(trim) == list and len(trim) != 2:
+        if not isinstance(trim, list) and len(trim) != 2:
             raise Exception(
                 """Trim has to be given as list with two elements
                 [a, b]. Where a and b are the taper length in s

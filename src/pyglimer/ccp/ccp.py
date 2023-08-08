@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Friday, 20th January 2023 03:50:29 pm
+Last Modified: Tuesday, 8th August 2023 02:53:01 pm
 '''
 
 # !/usr/bin/env python3
@@ -488,7 +488,7 @@ class CCPStack(object):
                 in_format.lower() == 'sac':
             # Loop over fewer files
             folder = os.path.join(folder, network)
-            if station and type(station) == str:
+            if station and isinstance(station, str):
                 folder = os.path.join(folder, station)
 
         elif geocoords and not pattern:
@@ -522,9 +522,9 @@ class CCPStack(object):
 
         # Set filter patterns
         elif network:
-            if type(network) == list:
+            if isinstance(network, list):
                 if station:
-                    if type(station) == list:
+                    if isinstance(station, list):
                         for net in network:
                             for stat in station:
                                 pattern.append('*%s.%s*.%s' % (
@@ -535,12 +535,12 @@ class CCPStack(object):
                 else:
                     for net in network:
                         pattern.append('*%s.*.%s' % (net, in_format))
-            elif type(network) == str:
+            elif isinstance(network, str):
                 if station:
-                    if type(station) == str:
+                    if isinstance(station, str):
                         pattern.append('*%s.%s*.%s' % (
                             network, station, in_format))
-                    elif type(station) == list:
+                    elif isinstance(station, list):
                         for stat in station:
                             pattern.append('*%s.%s*.%s' % (
                                 net, stat, in_format))
