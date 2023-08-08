@@ -11,7 +11,7 @@ Plot utilities not to modify plots or base plots.
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 05:05:08 pm
-Last Modified: Monday, 24th July 2023 10:45:28 am
+Last Modified: Tuesday, 8th August 2023 01:32:25 pm
 '''
 
 import os
@@ -529,7 +529,8 @@ def combined_single_station_plot(
     epilimits: Tuple[float, float] = None, std: np.ndarray = None,
     scalingfactor: float = 6, outputfile: str = None, fmt: str = None, dpi=300,
     title: str = None, color: str = 'seismic', bold: bool = False,
-    width_ratios: Tuple[float, float] = (1, 2)) -> Tuple[
+    width_ratios: Tuple[float, float] = (1, 2),
+    plot_lines: bool = False, linewidth: float = 0.25) -> Tuple[
         plt.Axes, plt.Axes]:
     """
     Creates a combined plot of the stack and the individual receiver functions
@@ -564,11 +565,17 @@ def combined_single_station_plot(
     :param width_ratios: Width ratio stack ad individual functions
         subplot, defaults to (1, 2)
     :type width_ratios: Tuple[float, float], optional
+    :param plot_lines: Plot lines in the section plot, defaults to False
+    :type plot_lines: bool, optional
+    :param linewidth: Linewidth of the lines in the section plot,
+        defaults to 0.25
+    :type linewidth: float, optional
     """
     set_mpl_params(bold)
 
     fig, (ax0, ax1) = plt.subplots(
-        1, 2, gridspec_kw={'width_ratios': width_ratios}, figsize=(10, 10))
+        1, 2, gridspec_kw={'width_ratios': width_ratios}, figsize=(10, 10),
+        sharey=True)
     if title:
         fig.suptitle(title, fontsize=16, fontweight='bold')
 
@@ -577,7 +584,7 @@ def combined_single_station_plot(
 
     plot_single_rf(
         stack, flipxy=True, std=std, ax=ax0, color=color, show=False,
-        bold=bold)
+        bold=bold, tlim=ylim)
     ax0.set_title('Stack')
 
     # Full Box
@@ -594,9 +601,9 @@ def combined_single_station_plot(
 
     # Section plot
     ax1 = plot_section(
-        rfst, line=False, scalingfactor=scalingfactor, timelimits=ylim, ax=ax1,
-        show=False, title='Individual Receiver Functions', color=color,
-        bold=bold, epilimits=epilimits)
+        rfst, line=plot_lines, scalingfactor=scalingfactor, timelimits=ylim,
+        ax=ax1, show=False, title='Individual Receiver Functions', color=color,
+        bold=bold, epilimits=epilimits, linewidth=linewidth)
     ax1.spines['right'].set_visible(True)
     ax1.spines['top'].set_visible(True)
     ax1.set_xlabel(r'Epicentral Distance, $\Delta$ [$^{\circ}$]')
