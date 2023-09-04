@@ -194,12 +194,10 @@ def _preprocessh5_single(
 
     outf = os.path.join(rfloc, code)
 
-
-
     rflogger.info(f'Processing Station {code}')
 
     # Find out which files have already been processed:
-    if os.path.isfile(outf+'.h5'):
+    if os.path.isfile(outf + '.h5'):
         with RFDataBase(outf) as rfdb:
             ret, rej = rfdb._get_known_waveforms()
             rflogger.debug('Already processed waveforms: %s' % str(ret))
