@@ -194,14 +194,10 @@ def _preprocessh5_single(
 
     outf = os.path.join(rfloc, code)
 
-    # Local logger reset
-    logger = logging.getLogger(logger.name)
-    rflogger = logging.getLogger(rflogger.name)
-
     rflogger.info(f'Processing Station {code}')
 
     # Find out which files have already been processed:
-    if os.path.isfile(outf+'.h5'):
+    if os.path.isfile(outf + '.h5'):
         with RFDataBase(outf) as rfdb:
             ret, rej = rfdb._get_known_waveforms()
             rflogger.debug('Already processed waveforms: %s' % str(ret))
@@ -211,14 +207,22 @@ def _preprocessh5_single(
         rej = []
 
     with RawDatabase(f, mode='r') as rdb:
-        # get station inventory
+
+        # Get station inventory
         try:
             inv = rdb.get_response(net, stat)
         except KeyError:
             logger.exception(
                 f'Could not find station inventory for Station {net}.{stat}')
-            # Can't process without Inventory
-            return
+            return None
+
+        # Get list of times for which data is available
+        try:
+            t_raw = list(rdb._get_table_of_contents().values())[0]
+        except IndexError:
+            logger.exception(
+                f'No data found for Station {net}.{stat}')
+            return None
 
         rf = RFStream()
         # There has to be a smarter way to do this. Only some events
@@ -227,11 +231,6 @@ def _preprocessh5_single(
         # thresholds
 
         # Which times are available as raw data?
-        list_of_times = list(rdb._get_table_of_contents().values())
-        if len(list_of_times) == 0:
-            rflogger.debug(f'No waveforms in {code}')
-            return
-        t_raw = list_of_times[0]
         t_raw = [UTCDateTime(t) for t in t_raw]
         t_raw_min = min(t_raw) - 600
         t_raw_max = max(t_raw) + 600

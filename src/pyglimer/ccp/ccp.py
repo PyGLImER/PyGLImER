@@ -36,8 +36,11 @@ import scipy.io as sio
 from global_land_mask import globe
 from psutil import virtual_memory
 from tqdm import tqdm
-import pyvista as pv
-import vtk
+try:
+    import pyvista as pv
+    import vtk
+except ImportError:
+    pass
 
 from pyglimer.ccp.compute.bin import BinGrid
 from pyglimer.ccp.plot_utils.plot_bins import plot_bins
@@ -1418,6 +1421,15 @@ misspelled or not yet implemented')
         VTK.UnstructuredGrid
             outputs a vtk mesh that can be opened in, e.g., Paraview.
         """
+
+        if 'vtk' not in sys.modules:
+            raise ImportError(
+                "VTK is not installed. Please install it to use this function")
+
+        if 'pv' not in sys.modules:
+            raise ImportError(
+                "PyVista is not installed. Please install it to use this "
+                "function")
 
         # Get coordinates
         lat = np.squeeze(self.coords_new[0])
