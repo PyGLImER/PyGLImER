@@ -96,6 +96,55 @@ def download_full_inventory(statloc: str, fdsn_client: list):
         delayed(__client__loop__)(client, statloc, bulk)
         for client in fdsn_client)
 
+def download_full_inventory_from_raw(rawloc: str, statloc: str,
+                                     fdsn_client: list,
+                                     parallel: bool = True,
+                                     split: int or None = None):
+    """
+    This utility loops through rawloc and redownloads the whole response
+    (i.e., all channels and all times) for every station to statloc.
+    Thus, overwriting the old xml file.
+
+    :param rawloc: Folder, in which the old <net><sta>.h5 files are saved
+    :type rawloc: str
+    :param fdsn_client: List of FDSN providers that should be queried.
+    :type fdsn_client: list
+    """
+
+    bulk = []
+    for fi in os.listdir(rawloc):
+        f = fi.split('.')
+        if f[-1].lower() != 'h5':
+            continue
+        bulk.append((f[0], f[1], '*', '*', '*', '*'))
+    fdsn_client = get_multiple_fdsn_clients(fdsn_client)
+
+    # Downloading more than 1000 stations at once often results in a timeout
+    # so we split the stations in bulk of 1000
+    if split is None:
+        bulks = [bulk, ]
+        split = len(bulk)
+    else:
+        bulks = list(chunks(bulk, split))
+
+    print(f"Downloading {len(bulks)} chunks of {split} stations...")
+
+    Nbulk = len(bulks)
+    Nstr = len(str(Nbulk))
+
+    # Loop over bulks
+    for _i, _bulk in enumerate(bulks):
+        if parallel:
+            _ = Parallel(n_jobs=-1, prefer='threads')(
+                delayed(__client__loop__)(client, statloc, _bulk)
+                for client in fdsn_client)
+        else:
+            for client in fdsn_client:
+                __client__loop__(client, statloc, _bulk)
+
+        # Print chunk statement
+        print(f"Done {_i+1:>0{Nstr}d}/{Nbulk:d} chunks")
+
 
 def join_inv(invlist=List[Inventory]) -> Inventory:
     inv = invlist.pop(0)
@@ -165,9 +214,10 @@ def __client__loop__(
 
         if not isinstance(client, Client):
             client = Client(client)
-
+        print(f"Download started ...")
         stat_inv = client.get_stations_bulk(
             bulk, level='response')
+        print(f"Download finished.")
     except (
         header.FDSNNoDataException, header.FDSNException, ValueError,
             TypeError) as e:
@@ -184,7 +234,7 @@ def __client__loop__(
 
             statcode = station.code
 
-            logger.debug(f"{netcode}.{statcode}")
+            print(f"{netcode}.{statcode}")
 
             out = os.path.join(statloc, '%s.%s.xml' % (netcode, statcode))
 

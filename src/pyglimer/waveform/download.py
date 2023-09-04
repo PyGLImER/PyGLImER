@@ -807,7 +807,9 @@ def downloadwav(
                                       distance_in_degree=max_epid,
                                       phase_list=[phase])[0].time
 
-    mdl = MassDownloader(providers=clients)
+    # Set Massdownloader loglevel
+    debug_mdl = True if loglvl == logging.DEBUG else False
+    mdl = MassDownloader(debug=debug_mdl, providers=clients)
 
     ###########
     # logging for the download
@@ -863,6 +865,11 @@ def downloadwav(
             # Note: All the traces will still have the same length
             starttime=origin_time + min_time - tz,
             endtime=origin_time + max_time + ta,
+            # Added total duration longer than stations have existed to download
+            # entire station xml.
+            station_starttime=UTCDateTime(1900, 1, 1),
+            station_endtime=UTCDateTime(2900, 1, 1),
+            # Set station restrictions
             network=network, station=station,
             # You might not want to deal with gaps in the data.
             # If this setting is

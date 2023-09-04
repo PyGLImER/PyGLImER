@@ -37,7 +37,10 @@ from pyglimer.utils.signalproc import resample_or_decimate
 
 
 hierarchy = "/{tag}/{network}/{station}/{evt_id}/{channel}"
+
+# Hard coded for now! This is no longer doing anything
 hierarchy_xml = '/{tag}/{network}/{station}'
+
 h5_FMTSTR = os.path.join("{dir}", "{network}.{station}.h5")
 
 
@@ -141,7 +144,8 @@ class DBHandler(h5py.File):
                 warnings.warn("The dataset %s is already in file and will be \
 omitted." % path, category=UserWarning)
 
-    def add_response(self, inv: Inventory, tag: str = 'response'):
+    def add_response(self, inv: Inventory, tag: str = 'response',
+                     overwrite: bool = False):
         """
         Add the response information (i.e., stationxml).
 
@@ -157,19 +161,50 @@ omitted." % path, category=UserWarning)
         network = inv[0].code
         station = inv[0][0].code
         path = hierarchy_xml.format(tag=tag, network=network, station=station)
+
         # Writing as bytes to avoid slow xml in hdf5
         with BytesIO() as b:
+
+            # Write inventory to bytes object
             inv.write(b, format='stationxml')
+
+            # Put pointer to start of object
             b.seek(0, 0)
+
             try:
-                self.create_dataset(
-                    path, data=np.frombuffer(b.read(), dtype=np.dtype('byte')),
+
+                # Create response group it does not exist
+                if 'response' not in self:
+                    resp = self.create_group('response')
+                else:
+                    resp = self['response']
+
+                # Create network group it does not exist
+                if f"{network}" not in resp:
+                    net = resp.create_group(f"{network}")
+                else:
+                    net = resp[f"{network}"]
+
+                # Finally add station if doesnt exist
+                if f"{station}" in net:
+
+                    if overwrite:
+                        del net[f"{station}"]
+                    else:
+                        warnings.warn("The dataset %s is already in file and will \
+                                       be omitted." % path, category=UserWarning)
+                        return
+
+                # Create or rewrite XML by writing bytes to HDF5 file.
+                net.create_dataset(
+                    f"{station}", data=np.frombuffer(b.read(), dtype=np.dtype('byte')),
                     compression=self.compression,
                     compression_opts=self.compression_opts)
+
             except ValueError as e:
                 print(e)
                 warnings.warn("The dataset %s is already in file and will be \
-omitted." % path, category=UserWarning)
+                              omitted." % path, category=UserWarning)
 
     def get_data(
         self, network: str, station: str, evt_id: UTCDateTime or str,
@@ -535,7 +570,7 @@ def mseed_to_hdf5(
         for d in evt_dirs:
             os.rmdir(d)
         if save_statxml:
-            statxml_to_hdf5(rawfolder, statloc)
+            statxml_to_hdf5(rawfolder, statloc, overwrite=True)
         return
 
     net, stat, _ = os.path.basename(av_mseed[0]).split('.')
@@ -594,7 +629,7 @@ def mseed_to_hdf5(
 
         if save_statxml:
             statxml = os.path.join(statloc, f'{net}.{stat}.xml')
-            rdb.add_response(read_inventory(statxml))
+            rdb.add_response(read_inventory(statxml), overwrite=True)
 
     if save_statxml:
         os.remove(statxml)
@@ -604,7 +639,8 @@ def mseed_to_hdf5(
 
 
 def statxml_to_hdf5(
-        rawfolder: str or os.PathLike, statloc: str or os.PathLike):
+        rawfolder: str or os.PathLike, statloc: str or os.PathLike,
+        overwrite: bool = False):
     """
     Write a statxml database to h5 files
 
@@ -612,21 +648,37 @@ def statxml_to_hdf5(
     :type rawfolder: stroros.PathLike
     :param statloc: location where the stationxmls are stored
     :type statloc: stroros.PathLike
+    :param overwrite: whether to overwrite existing files
+    :type overwrite: bool
     """
 
+    # Get all available station xmls
     av_xml = glob.glob(os.path.join(statloc, '*.xml'))
 
+    # Sort the station xmls
+    av_xml.sort()
+
+    # Loop over the station xmls
     for xml in av_xml:
+
         try:
             inv = read_inventory(xml)
             net = inv[0].code
             stat = inv[0][0].code
             h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
+
+            # Open DB and add response
             with RawDatabase(h5_file) as rdb:
-                rdb.add_response(inv)
+
+                # Add response
+                rdb.add_response(inv, overwrite=overwrite)
+
+                # Remove the station xml if everything went well
                 os.remove(xml)
+
         except Exception as e:
             logging.warning(f'Station XML could not be added to h5 file. {e}')
+            print(e)
 
 
 def save_raw_DB_single_station(
