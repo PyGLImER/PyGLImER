@@ -19,7 +19,6 @@ from glob import glob
 import logging
 import os
 from typing import List, Tuple
-import traceback
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -195,9 +194,7 @@ def _preprocessh5_single(
 
     outf = os.path.join(rfloc, code)
 
-    # Local logger reset
-    logger = logging.getLogger(logger.name)
-    rflogger = logging.getLogger(rflogger.name)
+
 
     rflogger.info(f'Processing Station {code}')
 

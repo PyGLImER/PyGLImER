@@ -1,25 +1,31 @@
 from sys import argv, stdout, stderr, exit
 from datetime import datetime
 
+
 class Logger:
+
+    name: str = ""
 
     def __init__(self):
         pass
 
-    def info(self, *args):
+    def info(self, *args, **kwargs):
         print(f"INFO      [{datetime.now()}]:", *args, file=stdout)
 
-    def debug(self, *args):
+    def debug(self, *args, **kwargs):
         print(f"DEBUG     [{datetime.now()}]:", *args, file=stdout)
 
-    def warning(self, *args):
+    def warning(self, *args, **kwargs):
         print(f"WARNING   [{datetime.now()}]:", *args, file=stdout)
 
-    def error(self, *args):
+    def error(self, *args, **kwargs):
         print(f"ERROR     [{datetime.now()}]:", *args, file=stderr)
 
-    def exception(self, *args):
+    def exception(self, *args, **kwargs):
         print(f"EXCEPTION [{datetime.now()}]:", *args, file=stderr)
+
+    def get_logger(self, *args, **kwargs):
+        return self
 
 
 def main():
@@ -43,11 +49,11 @@ def main():
     # Parse arguments
     phase = argv[1]
     rot = argv[2]
-    pol =  argv[3]
+    pol = argv[3]
     taper_perc = float(argv[4])
     model = TauPyModel('iasp91')
     taper = argv[5]
-    ta  = 120.0
+    ta = 120.0
     tz = constants.onset[phase.upper()]
     rfloc = argv[6]
     deconmeth = argv[7]
@@ -81,6 +87,3 @@ def main():
     logger.info("Finished preprocessh5.py")
 
     exit(0)
-
-
-

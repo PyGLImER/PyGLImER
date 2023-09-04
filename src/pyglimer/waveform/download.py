@@ -865,8 +865,8 @@ def downloadwav(
             # Note: All the traces will still have the same length
             starttime=origin_time + min_time - tz,
             endtime=origin_time + max_time + ta,
-            # Added total duration longer than stations have existed to download
-            # entire station xml.
+            # Added total duration longer than stations have existed to
+            # downloa entire station xml.
             station_starttime=UTCDateTime(1900, 1, 1),
             station_endtime=UTCDateTime(2900, 1, 1),
             # Set station restrictions

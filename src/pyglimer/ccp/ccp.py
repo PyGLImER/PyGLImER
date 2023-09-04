@@ -39,7 +39,7 @@ from tqdm import tqdm
 try:
     import pyvista as pv
     import vtk
-except:
+except ImportError:
     pass
 
 from pyglimer.ccp.compute.bin import BinGrid
@@ -1428,7 +1428,8 @@ misspelled or not yet implemented')
 
         if 'pv' not in sys.modules:
             raise ImportError(
-                "PyVista is not installed. Please install it to use this function")
+                "PyVista is not installed. Please install it to use this "
+                "function")
 
         # Get coordinates
         lat = np.squeeze(self.coords_new[0])

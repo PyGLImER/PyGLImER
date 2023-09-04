@@ -191,13 +191,15 @@ omitted." % path, category=UserWarning)
                     if overwrite:
                         del net[f"{station}"]
                     else:
-                        warnings.warn("The dataset %s is already in file and will \
-                                       be omitted." % path, category=UserWarning)
+                        warnings.warn(
+                            "The dataset %s is already in file and will "
+                            "be omitted." % path, category=UserWarning)
                         return
 
                 # Create or rewrite XML by writing bytes to HDF5 file.
                 net.create_dataset(
-                    f"{station}", data=np.frombuffer(b.read(), dtype=np.dtype('byte')),
+                    f"{station}",
+                    data=np.frombuffer(b.read(), dtype=np.dtype('byte')),
                     compression=self.compression,
                     compression_opts=self.compression_opts)
 

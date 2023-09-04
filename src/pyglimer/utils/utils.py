@@ -96,6 +96,7 @@ def download_full_inventory(statloc: str, fdsn_client: list):
         delayed(__client__loop__)(client, statloc, bulk)
         for client in fdsn_client)
 
+
 def download_full_inventory_from_raw(rawloc: str, statloc: str,
                                      fdsn_client: list,
                                      parallel: bool = True,
@@ -214,10 +215,14 @@ def __client__loop__(
 
         if not isinstance(client, Client):
             client = Client(client)
-        print(f"Download started ...")
+
+        print("Download started ...")
+
         stat_inv = client.get_stations_bulk(
             bulk, level='response')
-        print(f"Download finished.")
+
+        print("Download finished.")
+
     except (
         header.FDSNNoDataException, header.FDSNException, ValueError,
             TypeError) as e:
