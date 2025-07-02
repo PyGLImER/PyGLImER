@@ -10,7 +10,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 2nd July 2025 02:16:39 pm
+Last Modified: Wednesday, 2nd July 2025 02:23:14 pm
 '''
 
 from multiprocessing import Event
@@ -297,7 +297,7 @@ def __check_times_small_db_sub(
             inv, net, stat, channels)
 
         # Run parallel event loop
-        out = Parallel(n_jobs=NCPU, backend='processing')(
+        out = Parallel(n_jobs=NCPU, backend='multiprocessing')(
             delayed(dsub)(_evt, av_data_manual)
             for _evt in event_cat)
 
@@ -597,7 +597,7 @@ def download_small_db(
     # or run parallel station loop.
     else:
         logger.debug('Running parallel station loop')
-        out = Parallel(n_jobs=NCPU, prefer='processing')(
+        out = Parallel(n_jobs=NCPU, backend='multiprocessing')(
             delayed(pu.__client__loop__)(client, statloc, bulk_stat)
             for client in clients)
         inv = pu.join_inv([inv for inv in out])
@@ -643,7 +643,7 @@ def download_small_db(
 
         # Run partial function in parallel, resulting in one
         # dictionary per net/sta combo
-        netsta_d = Parallel(n_jobs=NCPU, backend='processing')(
+        netsta_d = Parallel(n_jobs=NCPU, backend='multiprocessing')(
             delayed(dsub)(_subinv, _net, _sta, _channels)
             for _subinv, _net, _sta, _channels in
             zip(subinvs, networks, stations, channels))
@@ -693,7 +693,7 @@ def download_small_db(
         else:
 
             # Download multiple stations in parallel
-            Parallel(n_jobs=NCPU, backend='processing')(
+            Parallel(n_jobs=NCPU, backend='multiprocessing')(
                 delayed(pu.__client__loop_wav__)(
                     clients[0], rawloc, _bulk_dict, saveh5,
                     _subinv, network=_net, station=_sta)
@@ -715,7 +715,7 @@ def download_small_db(
             logger.info(f"Downloading ... {_i:{Nd}d}/{N:d}")
 
             # Download
-            Parallel(n_jobs=NCPU, backend='processing')(
+            Parallel(n_jobs=NCPU, backend='multiprocessing')(
                 delayed(pu.__client__loop_wav__)(
                     client, rawloc, _bulk_dict, saveh5, _subinv,
                     network=_net.code,

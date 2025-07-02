@@ -11,7 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 2nd July 2025 02:16:51 pm
+Last Modified: Wednesday, 2nd July 2025 02:20:55 pm
 '''
 
 import logging
@@ -434,7 +434,7 @@ def __client__loop_wav__(
             f"    Downloading {N} chunks with each chunk  "
             f"<= 100 requests dowloaded in Parallel")
 
-        with Parallel(n_jobs=NCPU, backend='processing') as PARALLEL:
+        with Parallel(n_jobs=NCPU, backend='multiprocessing') as PARALLEL:
 
             # Loop of chunk subsets
             for _i, _saved in enumerate(saved):

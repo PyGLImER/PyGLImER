@@ -11,7 +11,7 @@ objects resulting from such.
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 10th April 2020 05:30:18 pm
-Last Modified: Wednesday, 2nd July 2025 02:16:04 pm
+Last Modified: Wednesday, 2nd July 2025 02:20:46 pm
 '''
 
 # !/usr/bin/env python3
@@ -408,7 +408,7 @@ class CCPStack(object):
             ccp stack. Will result in a longer computation time.
         :type multiple: bool, optional
         :param mc_backend: Multi-core backend to use for the computations.
-            Can be either `"joblib"` (processing) or `"MPI"`. Not that
+            Can be either `"joblib"` (multiprocessing) or `"MPI"`. Not that
             MPI compatibility is only implemented with hdf5 files.
         :raises ValueError: For wrong inputs
 
@@ -629,7 +629,7 @@ code if you want to filter by station")
         """
         # note that streams are actually files - confusing variable name
         if mc_backend.lower() == 'joblib':
-            out = Parallel(n_jobs=-1, backend='processing')(
+            out = Parallel(n_jobs=-1, backend='multiprocessing')(
                 delayed(self._create_ccp_from_hdf5)(
                     f, multiple, append_pp, n_closest_points, vel_model,
                     latb, lonb, filt)
@@ -833,7 +833,7 @@ code if you want to filter by station")
                     len_split = int(np.ceil(len_split/(len_split/10)))
             num_split = int(np.ceil(len(stream_chunk)/len_split))
 
-            out = Parallel(n_jobs=num_cores, backend='processing')(
+            out = Parallel(n_jobs=num_cores, backend='multiprocessing')(
                 delayed(self.multicore_stack)(
                     st, append_pp, n_closest_points, vel_model,
                     latb, lonb, filt, multiple)
@@ -1856,7 +1856,7 @@ def init_ccp(
         Defaults to hdf5.
     :type format: str
     :param mc_backend: Multi-core backend to use for the computations.
-        Can be either `"joblib"` (processing) or `"MPI"`. Not that MPI
+        Can be either `"joblib"` (multiprocessing) or `"MPI"`. Not that MPI
         compatibility is only implemented with hdf5 files.
     :raises TypeError: For wrong inputs.
     :return: CCPStack object.
