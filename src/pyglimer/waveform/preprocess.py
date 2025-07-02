@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Tuesday, 8th August 2023 03:00:05 pm
+Last Modified: Wednesday, 2nd July 2025 02:16:45 pm
 '''
 
 import fnmatch
@@ -141,7 +141,7 @@ def preprocess(
 
         if client.lower() == 'joblib':
             logger.debug('USING JOBLIB AS BACKEND')
-            out = Parallel(n_jobs=-1, backend='multiprocessing')(
+            out = Parallel(n_jobs=-1, backend='processing')(
                 delayed(__event_loop)(
                     phase, rot, pol, event, taper_perc,
                     taper_type, model, logger, rflogger, eh, tz,

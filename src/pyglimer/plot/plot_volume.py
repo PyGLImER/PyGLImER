@@ -17,7 +17,6 @@ import matplotlib.gridspec as gridspec
 from matplotlib import cm
 from matplotlib import colors as matcolors
 from matplotlib.widgets import Slider, CheckButtons
-from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
 import numpy as np
 from cartopy.crs import PlateCarree
 import cartopy.feature as cfeature
@@ -230,23 +229,32 @@ class VolumePlot:
         plt.setp(self.ax['z'].get_xticklabels(), visible=False)
 
     def plot_map(self):
-        self.ax['m']['main'].axis("off")
-        # inset location relative to main plot (ax) in normalized units
+        main_ax = self.ax['m']['main']
+        main_ax.axis("off")
+        
+        # Normalized inset position and size (relative to the main axis)
         inset_x = 0.5
         inset_y = 0.5
         inset_size = 0.8
-        inset_dim = [inset_x - inset_size / 2,
-                     inset_y - inset_size / 2,
-                     inset_size, inset_size]
+        inset_bounds = [
+            inset_x - inset_size / 2,
+            inset_y - inset_size / 2,
+            inset_size,
+            inset_size
+        ]  # [x0, y0, width, height] in axis coordinates
 
-        self.ax['m']['inset'] = plt.axes([0, 0, 1, 1],
-                                         projection=PlateCarree())
-        self.ax['m']['inset'].add_feature(cfeature.LAND)
-        self.ax['m']['inset'].add_feature(cfeature.OCEAN)
-        self.ax['m']['inset'].add_feature(cfeature.COASTLINE)
-        ip = InsetPosition(self.ax['m']['main'], inset_dim)
-        self.ax['m']['inset'].set_axes_locator(ip)
-        self.ax['m']['inset'].set_extent(self.mapextent)
+        # Create the inset axis directly using inset_axes()
+        inset_ax = main_ax.inset_axes(
+            inset_bounds, transform=main_ax.transAxes,
+            projection=PlateCarree())
+
+        # Add map features
+        inset_ax.add_feature(cfeature.LAND)
+        inset_ax.add_feature(cfeature.OCEAN)
+        inset_ax.add_feature(cfeature.COASTLINE)
+
+        # Set map extent
+        inset_ax.set_extent(self.mapextent, crs=PlateCarree())
 
     def plot_xlines(self):
         self.lines['y']['x'] = self.ax['y'].plot(
