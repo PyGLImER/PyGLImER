@@ -9,6 +9,6 @@ API
    waveform
    rf
    database
-   test
    utils
    ccp
+   plot

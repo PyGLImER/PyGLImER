@@ -9,10 +9,10 @@ pyglimer.database.stations
     :members:
     :show-inheritance:
 
-pyglimer.database.asdf
-======================
+pyglimer.database.raw
+=====================
 
-.. automodule:: pyglimer.database.asdf
+.. automodule:: pyglimer.database.raw
     :members:
     :show-inheritance:
 

@@ -12,8 +12,6 @@ can simply read and plot them using
 .. code-block:: python
     :linenos:
 
-    from pyglimer.plot.plot_utils import set_mpl_params
-    from pyglimer.plot.plot_utils import plot_single_rf
     from pyglimer.rf.create import read_rf
     set_mpl_params()
 
@@ -24,7 +22,7 @@ can simply read and plot them using
     N = 753
 
     # Plot RF and save its output.
-    plot_single_rf(rfst[N])
+    rfst[N].plot()
 
 which results in the following image:
 
@@ -34,7 +32,7 @@ We can time limit the figure as well
 
 .. code:: python
 
-    plot_single_rf(rfst[N], tlim=[0, 20])
+    rfst[N].plot(tlim=[0, 20])
 
 which cuts out the RF between 0 and 20 seconds
 
@@ -44,11 +42,14 @@ If you feel artsy and only want the trace
 
 .. code:: python
 
-    plot_single_rf(rfst[N], tlim=[0, 20], clean=True)
+    rfst[N].plot(tlim=[0, 20], clean=True)
 
 which removes all labels, axes etc.
 
 .. image:: figures/IU.HRV.00.PRF_timelimit.svg
+
+Refer to :py:meth:`~pyglimer.rf.create.RFStream.plot()` and :py:meth:`~pyglimer.rf.create.RFTrace.plot()`
+for all possible plotting arguments.
 
 
 Receiver Function Section
@@ -60,7 +61,7 @@ on epicentral distance.
 .. code-block:: python
 
     # Plot section
-    plot_section(rfst, scalingfactor=1)
+    rfst.plot(scalingfactor=1)
 
 This plots all available RFs in the Stream into a section
 
@@ -74,8 +75,10 @@ Also this plot can be limited using the right arguments
     # Plot section with limits
     timelimits = (0, 20)  # seconds
     epilimits = (32, 36)  # epicentral distance
-    plot_section(rfst, scalingfactor=0.25, linewidth=0.75,
-                 timelimits=timelimits, epilimits=epilimits)
+    rfst.plot(
+        scalingfactor=0.25, linewidth=0.75,
+        timelimits=timelimits, epilimits=epilimits
+        )
 
 which provides a more detailed view of the receiver functions
 

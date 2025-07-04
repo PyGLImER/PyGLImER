@@ -112,7 +112,7 @@ class DBHandler(h5py.File):
         :param data: Data to save.
         :type data: Trace or Stream
         :param evt_id: Event identifier. Defined by the origin time of the
-            event rounded using :fun:`~pyglimer.utils.utils.utc_save_str()`
+            event rounded using :func:`~pyglimer.utils.utils.utc_save_str()`
         :param tag: The tag that the data should be saved under. Defaults to
             'raw'
         :raises TypeError: for wrong data type.

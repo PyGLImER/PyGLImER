@@ -11,7 +11,7 @@ This document gives an overview of how to contribute to PyGLImER or its communit
  * Make sure you have a GitHub account
  * [Download](https://git-scm.com/downloads) and install git
  * Read the [git documentation](https://git-scm.com/book/en/Git-Basics)
- * Install a [development version of PyGLImER](https://PyGLImER.github.io/PyGLImER/modules/get_started.html#download-and-installation)
+ * Install a [development version of PyGLImER](https://pyglimer.github.io/PyGLImER/chapters/introduction/installation.html#installation-from-source-code)
 
 ## Submitting a Pull Request
 
@@ -32,7 +32,7 @@ Additionally take care to not add big files. Even for tests we generally only ac
 If you want to ask a question about a PyGLImER aspect, please first of all..
 
  * search the [docs](https://PyGLImER.github.io/PyGLImER/)
- * if you cannot find an answer, open an [issue](https://github.com/PyGLImER/PyGLImER/issues/new)
+ * if you cannot find an answer, open an [issue](https://github.com/PyGLImER/PyGLImER/issues/new/choose)
 
 If you want to post a problem/bug, to help us understand and resolve your issue
 please check that you have provided the information below:

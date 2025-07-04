@@ -50,7 +50,7 @@ Using :py:func:`~pyglimer.ccp.ccp.init_ccp()`, there are two ways to create a
 :py:class:`~pyglimer.ccp.ccp.CCPStack` object:
 
     1. By Creating a bingrid tailored to be used with data from predefined
-       networks and stations (i.e. onehas to know network and station codes for
+       networks and stations (i.e. one has to know network and station codes for
        the desired stack.
     2. More commonly, one would like to create a CCP stack containing all
        available data for a given area. In order to that,

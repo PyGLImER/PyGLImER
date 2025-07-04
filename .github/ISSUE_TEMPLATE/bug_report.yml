@@ -48,7 +48,7 @@ body:
   - type: input
     id: PyGLImER-version
     attributes:
-      label: SiesMIC Version?
+      label: PyGLImER Version?
       description: |
         - On console: `python -c "import pyglimer; print(pyglimer.__version__)"`
         - In Python prompt: `import pyglimer; print(pyglimer.__version__)`

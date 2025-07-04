@@ -26,6 +26,7 @@ author = 'Peter Makus, Lucas Sawade'
 release = '0.4.5'
 
 
+
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
