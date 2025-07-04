@@ -8,7 +8,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 19th May 2019 8:59:40 pm
-Last Modified: Wednesday, 2nd July 2025 02:21:26 pm
+Last Modified: Friday, 4th July 2025 01:40:49 pm
 '''
 
 import fnmatch
@@ -169,7 +169,7 @@ def preprocess(
                     phase, rot, pol, evtcat[ii], taper_perc, taper_type,
                     model, logger, rflogger, eh, tz, ta, statloc, rawloc,
                     preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr,
-                    remove_response)
+                    remove_response, single_core=False)
 
         # Use single core only
         elif client.lower() == 'single':
@@ -418,7 +418,7 @@ def __waveform_loop(
                 infodict.setdefault('ot_all', []).append(ot_fiss)
 
             if single_core:
-                write_info(network, station, infodict)
+                write_info(network, station, infodict, preproloc)
                 return
             return infodict
 

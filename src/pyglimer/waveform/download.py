@@ -10,7 +10,7 @@
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 2nd July 2025 02:23:14 pm
+Last Modified: Friday, 4th July 2025 03:17:14 pm
 '''
 
 from multiprocessing import Event
@@ -139,8 +139,7 @@ def ____check_times_small_db_event(
 
     # If dataformat is mseed
     else:
-        ot_loc = UTCDateTime(
-            o.time, precision=-1).format_fissures()[:-6]
+        ot_loc = pu.utc_save_str(o.time)
         evtlat_loc = str(roundhalf(o.latitude))
         evtlon_loc = str(roundhalf(o.longitude))
         tmp.folder = os.path.join(
@@ -718,8 +717,8 @@ def download_small_db(
             Parallel(n_jobs=NCPU, backend='multiprocessing')(
                 delayed(pu.__client__loop_wav__)(
                     client, rawloc, _bulk_dict, saveh5, _subinv,
-                    network=_net.code,
-                    station=_sta.code) for client in clients)
+                    network=_net,
+                    station=_sta) for client in clients)
 
             logger.info(f"Downloaded {_i:{Nd}d}/{N:d}")
 
@@ -836,16 +835,18 @@ def downloadwav(
 
     for ii, event in enumerate(tqdm(event_cat)):
         # fetch event-data
-        origin_time = (event.preferred_origin() or event.origins[0]).time
+        origin = event.preferred_origin() or event.origins[0]
+        origin_time = origin.time
         ot_fiss = UTCDateTime(origin_time).format_fissures()
         fdsn_mass_logger.info('Downloading event: '+ot_fiss)
         evtlat = event.origins[0].latitude
         evtlon = event.origins[0].longitude
 
         evt_id = pu.utc_save_str(origin_time)
-
-        # Download location
-        tmp.folder = os.path.join(rawloc, f'{evt_id}')
+        evtlat_loc = str(roundhalf(origin.latitude))
+        evtlon_loc = str(roundhalf(origin.longitude))
+        tmp.folder = os.path.join(
+            rawloc, '%s_%s_%s' % (evt_id, evtlat_loc, evtlon_loc))
 
         # create folder for each event
         os.makedirs(tmp.folder, exist_ok=True)

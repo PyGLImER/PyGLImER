@@ -11,7 +11,7 @@
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Wednesday, 2nd July 2025 02:20:55 pm
+Last Modified: Wednesday, 2nd July 2025 02:48:15 pm
 '''
 
 import logging
@@ -98,10 +98,24 @@ def download_full_inventory(statloc: str, fdsn_client: list):
 
 
 def join_inv(invlist=List[Inventory]) -> Inventory:
-    inv = invlist.pop(0)
+    inv = None
+    while inv is None:
+        try:
+            # Try to pop the first inventory
+            inv = invlist.pop(0)
+        except IndexError:
+            # No more inventories available
+            break
     for ii in invlist:
+        if ii is None or len(ii) == 0:
+            # no data available from this client station combination
+            continue
         for net in ii:
             inv.extend([net])
+    if inv is None or len(inv) == 0:
+        # no data available from any client station combination
+        warn('No data available from any client station combination.')
+        return None
     return inv
 
 
