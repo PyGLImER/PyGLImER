@@ -2,14 +2,14 @@
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Peter Makus (makus@gfz-potsdam.de)
     Lucas Sawade (lsawade@princeton.edu)
 
 Created: November 2019
-Last Modified: Thursday, 21st October 2021 10:05:06 am
+Last Modified: Friday, 20th January 2023 03:50:29 pm
 '''
 
 import logging

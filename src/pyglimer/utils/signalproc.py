@@ -6,13 +6,13 @@
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Sunday, 20th October 2019 10:31:03 am
-Last Modified: Wednesday, 13th April 2022 02:55:06 pm
+Last Modified: Friday, 20th January 2023 03:50:29 pm
 '''
 import warnings
 

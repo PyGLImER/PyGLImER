@@ -6,13 +6,13 @@ Rounds to next 0.5
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Saturday, 02nd May 2020 01:48:03 pm
-Last Modified: Thursday, 25th March 2021 04:00:02 pm
+Last Modified: Friday, 20th January 2023 03:50:29 pm
 '''
 
 

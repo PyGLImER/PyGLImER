@@ -5,13 +5,13 @@ to the data format saving receiver functions.
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
    Peter Makus (makus@gfz-potsdam.de)
 
 Created: Tuesday, 6th September 2022 10:37:12 am
-Last Modified: Thursday, 27th October 2022 03:07:39 pm
+Last Modified: Tuesday, 8th August 2023 02:54:35 pm
 '''
 
 import fnmatch
@@ -334,13 +334,13 @@ def h5_tree(val, pre=''):
         items -= 1
         if items == 0:
             # the last item
-            if type(val) == h5py._hl.group.Group:
+            if isinstance(val, h5py._hl.group.Group):
                 print(pre + '└── ' + key)
                 h5_tree(val, pre+'    ')
             else:
                 print(pre + '└── ' + key + ' (%d)' % len(val))
         else:
-            if type(val) == h5py._hl.group.Group:
+            if isinstance(val, h5py._hl.group.Group):
                 print(pre + '├── ' + key)
                 h5_tree(val, pre+'│   ')
             else:
@@ -352,7 +352,7 @@ def h5_dict(val):
     h5dict = dict()
     for key, val in val.items():
         # the last item
-        if type(val) == h5py._hl.group.Group:
+        if isinstance(val, h5py._hl.group.Group):
             h5dict[key] = h5_dict(val)
         else:
             h5dict[key] = len(val)

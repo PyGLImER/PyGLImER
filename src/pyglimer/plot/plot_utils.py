@@ -4,14 +4,14 @@ Plot utilities not to modify plots or base plots.
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Lucas Sawade (lsawade@princeton.edu)
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Wednesday, 20th October 2021 05:05:08 pm
-Last Modified: Wednesday, 19th October 2022 11:29:22 am
+Last Modified: Tuesday, 8th August 2023 01:32:25 pm
 '''
 
 import os
@@ -525,23 +525,66 @@ def plot_section(
 
 
 def combined_single_station_plot(
-    rfst, stack, ylim: Tuple[float, float] = None, std: np.ndarray = None,
+    rfst, stack, ylim: Tuple[float, float] = None,
+    epilimits: Tuple[float, float] = None, std: np.ndarray = None,
     scalingfactor: float = 6, outputfile: str = None, fmt: str = None, dpi=300,
-        title: str = None, color: str = 'seismic', bold: bool = False):
+    title: str = None, color: str = 'seismic', bold: bool = False,
+    width_ratios: Tuple[float, float] = (1, 2),
+    plot_lines: bool = False, linewidth: float = 0.25) -> Tuple[
+        plt.Axes, plt.Axes]:
+    """
+    Creates a combined plot of the stack and the individual receiver functions
+    (both depth-migrated).
+
+    :param rfst: Stream of receiver functions in depth-domain
+    :type rfst: RFStream
+    :param stack: trace holding the stack
+    :type stack: RFTrace
+    :param ylim: ylim, defaults to None
+    :type ylim: Tuple[float, float], optional
+    :param epilimits: epicentral distance limits, defaults to None
+    :type epilimits: Tuple[float, float], optional
+    :param std: standard deviation computated via bootstrap
+        in RFStream.bootstrap(), defaults to None
+    :type std: np.ndarray, optional
+    :param scalingfactor: Scalingfactor of the individual receiver functions,
+        defaults to 6
+    :type scalingfactor: float, optional
+    :param outputfile: save figure file to, defaults to None
+    :type outputfile: str, optional
+    :param fmt: format to save in, defaults to None
+    :type fmt: str, optional
+    :param dpi: dpis, defaults to 300
+    :type dpi: int, optional
+    :param title: Title of the figure, defaults to None
+    :type title: str, optional
+    :param color: colour scaling to use, defaults to 'seismic'
+    :type color: str, optional
+    :param bold: Print labels bold, defaults to False
+    :type bold: bool, optional
+    :param width_ratios: Width ratio stack ad individual functions
+        subplot, defaults to (1, 2)
+    :type width_ratios: Tuple[float, float], optional
+    :param plot_lines: Plot lines in the section plot, defaults to False
+    :type plot_lines: bool, optional
+    :param linewidth: Linewidth of the lines in the section plot,
+        defaults to 0.25
+    :type linewidth: float, optional
+    """
     set_mpl_params(bold)
 
     fig, (ax0, ax1) = plt.subplots(
-        1, 2, gridspec_kw={'width_ratios': [1, 2]}, figsize=(10, 10))
+        1, 2, gridspec_kw={'width_ratios': width_ratios}, figsize=(10, 10),
+        sharey=True)
     if title:
         fig.suptitle(title, fontsize=16, fontweight='bold')
 
     # no space between panels
     plt.subplots_adjust(wspace=0, hspace=0)
 
-    # ax0 = plt.subplot(121)
     plot_single_rf(
         stack, flipxy=True, std=std, ax=ax0, color=color, show=False,
-        bold=bold)
+        bold=bold, tlim=ylim)
     ax0.set_title('Stack')
 
     # Full Box
@@ -557,11 +600,10 @@ def combined_single_station_plot(
         txt.remove()
 
     # Section plot
-    # ax1 = plt.subplot(122, sharey=ax0)
     ax1 = plot_section(
-        rfst, line=False, scalingfactor=scalingfactor, timelimits=ylim, ax=ax1,
-        show=False, title='Individual Receiver Functions', color=color,
-        bold=bold)
+        rfst, line=plot_lines, scalingfactor=scalingfactor, timelimits=ylim,
+        ax=ax1, show=False, title='Individual Receiver Functions', color=color,
+        bold=bold, epilimits=epilimits, linewidth=linewidth)
     ax1.spines['right'].set_visible(True)
     ax1.spines['top'].set_visible(True)
     ax1.set_xlabel(r'Epicentral Distance, $\Delta$ [$^{\circ}$]')
@@ -571,6 +613,7 @@ def combined_single_station_plot(
     plt.ylabel(None)
     if outputfile is not None:
         plt.savefig(outputfile, transparent=True, format=fmt, dpi=dpi)
+    return ax0, ax1
 
 
 def baz_hist(az, nbins, bold=False):

@@ -3,15 +3,15 @@
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Lucas Sawade (lsawade@princeton.edu)
     Peter Makus (makus@gfz-potsdam.de)
 
 
 Created: Tue May 26 2019 13:31:30
-Last Modified: Monday, 26th September 2022 10:45:48 am
+Last Modified: Wednesday, 2nd July 2025 02:48:15 pm
 '''
 
 import logging
@@ -98,10 +98,24 @@ def download_full_inventory(statloc: str, fdsn_client: list):
 
 
 def join_inv(invlist=List[Inventory]) -> Inventory:
-    inv = invlist.pop(0)
+    inv = None
+    while inv is None:
+        try:
+            # Try to pop the first inventory
+            inv = invlist.pop(0)
+        except IndexError:
+            # No more inventories available
+            break
     for ii in invlist:
+        if ii is None or len(ii) == 0:
+            # no data available from this client station combination
+            continue
         for net in ii:
             inv.extend([net])
+    if inv is None or len(inv) == 0:
+        # no data available from any client station combination
+        warn('No data available from any client station combination.')
+        return None
     return inv
 
 
@@ -650,9 +664,9 @@ def create_bulk_str(
                 'If network and station are provided as lists, they have to\
  have the same length!')
         if (isinstance(t1, list) and isinstance(t0, list)) \
-                or type(t1) != type(t0):
+                or type(t1) is not type(t0):
             if len(stations) != len(t1) or len(t1) != len(t0) \
-                    or type(t1) != type(t0):
+                    or type(t1) is not type(t0):
                 raise ValueError('Time Lists have to have same length!')
             for net, stat, st, et in zip(networks, stations, t0, t1):
                 bulk.append((net, stat, location, channel, st, et))
@@ -663,9 +677,9 @@ def create_bulk_str(
                 bulk.append((net, stat, location, channel, t0, t1))
     elif isinstance(networks, list) and stations == '*':
         if (isinstance(t1, list) and isinstance(t0, list)) \
-                or type(t1) != type(t0):
+                or type(t1) is not type(t0):
             if len(networks) != len(t1) or len(t1) != len(t0) \
-                    or type(t1) != type(t0):
+                    or type(t1) is not type(t0):
                 raise ValueError('Time Lists have to have same length!')
             for net, st, et in zip(networks, t0, t1):
                 bulk.append((net, stations, location, channel, st, et))
@@ -676,9 +690,9 @@ def create_bulk_str(
                 bulk.append((net, stations, location, channel, t0, t1))
     elif isinstance(stations, list) and isinstance(networks, str):
         if (isinstance(t1, list) and isinstance(t0, list)) \
-                or type(t0) != type(t1):
+                or type(t0) is not type(t1):
             if len(stations) != len(t1) or len(t1) != len(t0) \
-                    or type(t0) != type(t1):
+                    or type(t0) is not type(t1):
                 raise ValueError('Time Lists have to have same length!')
             for stat, st, et in zip(stations, t0, t1):
                 bulk.append((networks, stat, location, channel, st, et))
@@ -688,8 +702,8 @@ def create_bulk_str(
                 bulk.append((networks, stat, location, channel, t0, t1))
     elif isinstance(stations, str) and isinstance(networks, str):
         if (isinstance(t1, list) and isinstance(t0, list)) \
-                or type(t1) != type(t0):
-            if len(t1) != len(t0) or type(t1) != type(t0):
+                or type(t1) is not type(t0):
+            if len(t1) != len(t0) or type(t1) is not type(t0):
                 raise ValueError('Time Lists have to have same length!')
             for st, et in zip(t0, t1):
                 bulk.append((networks, stations, location, channel, st, et))

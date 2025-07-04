@@ -8,13 +8,13 @@ Database management and overview for the PyGLImER database.
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
 :license:
-   GNU Lesser General Public License, Version 3
-   (https://www.gnu.org/copyleft/lesser.html)
+    EUROPEAN UNION PUBLIC LICENCE v. 1.2
+   (https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 :author:
     Peter Makus (makus@gfz-potsdam.de)
 
 Created: Friday, 12th February 2020 03:24:30 pm
-Last Modified: Wednesday, 19th October 2022 11:28:13 am
+Last Modified: Tuesday, 8th August 2023 02:55:58 pm
 
 
 **The file is split and has a second copyright disclaimer**
@@ -41,7 +41,7 @@ from scipy.signal.windows import hann
 from pyglimer.data.finddir import finddir
 
 from pyglimer.rf.deconvolve import it, spectraldivision, multitaper
-from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table,\
+from pyglimer.rf.moveout import DEG2KM, maxz, maxzm, res, moveout, dt_table, \
     dt_table_3D
 from pyglimer.plot.plot_utils import plot_section, plot_single_rf, stream_dist
 from pyglimer.utils.geo_utils import fix_map_extent
@@ -123,7 +123,7 @@ def createRF(
 
     # taper traces
     if trim:
-        if not type(trim) == list and len(trim) != 2:
+        if not isinstance(trim, list) and len(trim) != 2:
             raise Exception(
                 """Trim has to be given as list with two elements
                 [a, b]. Where a and b are the taper length in s
