@@ -33,7 +33,7 @@ from scipy.signal.windows import gaussian
 
 from pyglimer.ccp.compute import bin as ccpbin
 from pyglimer.rf import create
-from pyglimer.rf.deconvolve import it
+from pyglimer.rf.deconvolve import it, multitaper as mt
 from pyglimer.utils import signalproc as sp
 from pyglimer.utils.SphericalNN import SphericalNN
 from pyglimer.waveform import rotate
@@ -96,6 +96,21 @@ class TestGoldenMoveout(unittest.TestCase):
             'moveout_1d', z2=z2, RF2=mo.data,
             pp_lat=np.asarray(mo.stats.pp_latitude),
             pp_lon=np.asarray(mo.stats.pp_longitude))
+
+    def test_moveout_multiple(self):
+        tr = create.read_rf()[0]
+        z2, mo, RFm1, RFm2 = tr.moveout('iasp91.dat', multiple=True)
+        self.assertEqual(mo.stats.type, 'depth')
+        _golden(
+            'moveout_multiple', z2=z2, RF2=mo.data,
+            RFm1=np.asarray(RFm1.data), RFm2=np.asarray(RFm2.data))
+
+
+class TestGoldenMultitaper(unittest.TestCase):
+    def test_multitaper_deconvolution(self):
+        g, s, _ = _wavelet_setup()
+        rf, lrf, _, _ = mt(g, s, 1, 0, "con")
+        _golden('deconvolve_multit', rf=rf, lrf=lrf)
 
 
 class TestGoldenDeconvolve(unittest.TestCase):
