@@ -14,12 +14,60 @@ program-specific exceptions and the rotation + SNR quality control core.
 
 Created: Thursday, 6th November 2025
 '''
+import logging
+from dataclasses import dataclass
 from typing import Tuple
 
 import numpy as np
+import obspy
 from obspy import Stream
+from obspy.core.utcdatetime import UTCDateTime
 
 from .qc import qcp, qcs
+
+
+@dataclass
+class PreprocessConfig:
+    """
+    Static settings of a preprocessing run. Bundles the parameters that
+    are passed down unchanged through the event and waveform loops of
+    both preprocessing pipelines.
+    """
+    phase: str
+    rot: str
+    pol: str
+    taper_perc: float
+    taper_type: str
+    model: obspy.taup.TauPyModel
+    logger: logging.Logger
+    rflogger: logging.Logger
+    eh: bool
+    tz: float
+    ta: float
+    statloc: str
+    rawloc: str
+    preproloc: str
+    rfloc: str
+    deconmeth: str
+    hc_filt: float
+    netrestr: str
+    statrestr: str
+    remove_response: bool
+
+
+@dataclass
+class EventContext:
+    """
+    Per-event data and paths used by the mseed preprocessing loop.
+    """
+    event: obspy.core.event.Event
+    origin_time: UTCDateTime
+    ot_fiss: str
+    evtlat: float
+    evtlon: float
+    depth: float
+    prepro_folder: str
+    by_event: str
 
 
 class SNRError(Exception):

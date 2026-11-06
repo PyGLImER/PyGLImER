@@ -32,8 +32,8 @@ from pyglimer.waveform.preprocessh5 import preprocessh5
 from pyglimer.utils.signalproc import resample_or_decimate
 from .errorhandler import redownload, redownload_statxml, \
     NoMatchingResponseHandler
-from .preproc_utils import SNRError, StreamLengthError, rotate_and_snr_qc, \
-    set_station_info
+from .preproc_utils import EventContext, PreprocessConfig, SNRError, \
+    StreamLengthError, rotate_and_snr_qc, set_station_info
 from .rotate import rotate_LQT_min, rotate_PSV
 from ..rf.create import createRF
 from ..utils.roundhalf import roundhalf
@@ -145,6 +145,15 @@ def preprocess(
     else:
         eh = True
 
+    # Static settings passed down through the event and waveform loops
+    cfg = PreprocessConfig(
+        phase=phase, rot=rot, pol=pol, taper_perc=taper_perc,
+        taper_type=taper_type, model=model, logger=logger, rflogger=rflogger,
+        eh=eh, tz=tz, ta=ta, statloc=statloc, rawloc=rawloc,
+        preproloc=preproloc, rfloc=rfloc, deconmeth=deconmeth,
+        hc_filt=hc_filt, netrestr=netrestr, statrestr=statrestr,
+        remove_response=remove_response)
+
     # Returns generator object with evtcats with each 100 events
     evtcats = chunks(event_cat, n_split)
     for evtcat in evtcats:
@@ -153,11 +162,7 @@ def preprocess(
             logger.debug('USING JOBLIB AS BACKEND')
             out = Parallel(n_jobs=-1, backend='multiprocessing')(
                 delayed(__event_loop)(
-                    phase, rot, pol, event, taper_perc,
-                    taper_type, model, logger, rflogger, eh, tz,
-                    ta, statloc, rawloc, preproloc, rfloc, deconmeth,
-                    hc_filt, netrestr, statrestr, remove_response,
-                    single_core=False)
+                    cfg, event, single_core=False)
                 for event in tqdm(evtcat))
         elif client.lower() == 'mpi':
             logger.debug('USING MPI AS BACKEND')
@@ -174,12 +179,10 @@ def preprocess(
             logger = create_mpi_logger(logger, rank)
             rflogger = logging.getLogger("%s.RF" % logger.name)
             # rflogger.debug(f'Rank/Size: {rank}/{psize}')
+            cfg.logger = logger
+            cfg.rflogger = rflogger
             for ii in tqdm(ind):
-                __event_loop(
-                    phase, rot, pol, evtcat[ii], taper_perc, taper_type,
-                    model, logger, rflogger, eh, tz, ta, statloc, rawloc,
-                    preproloc, rfloc, deconmeth, hc_filt, netrestr, statrestr,
-                    remove_response, single_core=False)
+                __event_loop(cfg, evtcat[ii], single_core=False)
 
         # Use single core only
         elif client.lower() == 'single':
@@ -187,12 +190,7 @@ def preprocess(
             out = []
             for event in tqdm(evtcat):
                 out.append(
-                    __event_loop(
-                        phase, rot, pol, event, taper_perc,
-                        taper_type, model, logger, rflogger, eh, tz,
-                        ta, statloc, rawloc, preproloc, rfloc, deconmeth,
-                        hc_filt, netrestr, statrestr, remove_response,
-                        single_core=True))
+                    __event_loop(cfg, event, single_core=True))
 
         else:
             raise NotImplementedError('Unknown client %s' % client)
@@ -240,15 +238,34 @@ def preprocess(
 
 
 def __event_loop(
-    phase: str, rot: str, pol: str, event: obspy.core.event.Event,
-    taper_perc: float, taper_type: str, model: obspy.taup.TauPyModel,
-    logger: logging.Logger, rflogger: logging.Logger, eh: bool, tz: float,
-    ta: float, statloc: str, rawloc: str, preproloc: str, rfloc: str,
-    deconmeth: str, hc_filt: float, netrestr: str, statrestr: str,
-        remove_response: bool, single_core: bool):
+    cfg: PreprocessConfig, event: obspy.core.event.Event,
+        single_core: bool):
     """
     Loops over each event in the event catalogue
     """
+    # Shorthand for the config settings (the loop bodies predate the
+    # config object)
+    phase = cfg.phase
+    rot = cfg.rot
+    pol = cfg.pol
+    taper_perc = cfg.taper_perc
+    taper_type = cfg.taper_type
+    model = cfg.model
+    logger = cfg.logger
+    rflogger = cfg.rflogger
+    eh = cfg.eh
+    tz = cfg.tz
+    ta = cfg.ta
+    statloc = cfg.statloc
+    rawloc = cfg.rawloc
+    preproloc = cfg.preproloc
+    rfloc = cfg.rfloc
+    deconmeth = cfg.deconmeth
+    hc_filt = cfg.hc_filt
+    netrestr = cfg.netrestr
+    statrestr = cfg.statrestr
+    remove_response = cfg.remove_response
+
     logger.info('Processing waveforms for event %s.' % event.resource_id)
 
     # create list for what will later be the info files
@@ -295,14 +312,14 @@ def __event_loop(
     else:
         files = os.listdir(prepro_folder)
 
+    evt = EventContext(
+        event=event, origin_time=origin_time, ot_fiss=ot_fiss,
+        evtlat=evtlat, evtlon=evtlon, depth=depth,
+        prepro_folder=prepro_folder, by_event=by_event)
+
     for filestr in files:
         try:
-            info = __waveform_loop(
-                phase, rot, pol, filestr, taper_perc, taper_type,
-                model, origin_time, ot_fiss, evtlat, evtlon, depth,
-                prepro_folder, event, logger, rflogger, by_event, eh, tz, ta,
-                statloc, preproloc, rfloc, deconmeth, hc_filt, remove_response,
-                single_core)
+            info = __waveform_loop(cfg, evt, filestr, single_core)
             infolist.append(info)
         except Exception as e:
             # Unhandled exceptions should not cause the loop to quit
@@ -314,17 +331,40 @@ def __event_loop(
 
 
 def __waveform_loop(
-    phase: str, rot: str, pol: str, filestr: str, taper_perc: float,
-    taper_type: str, model: obspy.taup.TauPyModel, origin_time: UTCDateTime,
-    ot_fiss: str, evtlat: float, evtlon: float, depth: float,
-    prepro_folder: str, event: obspy.core.event.event.Event,
-    logger: logging.Logger, rflogger: logging.Logger, by_event, eh: bool,
-    tz: float, ta: float, statloc: str, preproloc: str, rfloc: str,
-    deconmeth: str, hc_filt: float, remove_response: bool,
-        single_core=bool):
+    cfg: PreprocessConfig, evt: EventContext, filestr: str,
+        single_core: bool):
     """
     Loops over each waveform for a specific event and a specific station
     """
+    # Shorthand for the config settings (the loop bodies predate the
+    # config object)
+    phase = cfg.phase
+    rot = cfg.rot
+    pol = cfg.pol
+    taper_perc = cfg.taper_perc
+    taper_type = cfg.taper_type
+    model = cfg.model
+    logger = cfg.logger
+    rflogger = cfg.rflogger
+    eh = cfg.eh
+    tz = cfg.tz
+    ta = cfg.ta
+    statloc = cfg.statloc
+    preproloc = cfg.preproloc
+    rfloc = cfg.rfloc
+    deconmeth = cfg.deconmeth
+    hc_filt = cfg.hc_filt
+    remove_response = cfg.remove_response
+
+    event = evt.event
+    origin_time = evt.origin_time
+    ot_fiss = evt.ot_fiss
+    evtlat = evt.evtlat
+    evtlon = evt.evtlon
+    depth = evt.depth
+    prepro_folder = evt.prepro_folder
+    by_event = evt.by_event
+
     infodict = {}  # empty dictionary that will be dumped in a shelve file
     # at the end of the program
 
