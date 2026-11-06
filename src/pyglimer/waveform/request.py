@@ -481,4 +481,5 @@ class Request(object):
             'hann', self.tz, self.ta, self.statloc, self.rawloc,
             self.preproloc, self.rfloc, self.deconmeth, hc_filt,
             netrestr=self.network, statrestr=self.station, client=client,
-            saveasdf=self.h5, remove_response=self.remove_response)
+            saveasdf=self.h5, remove_response=self.remove_response,
+            clients=self.waveform_client)

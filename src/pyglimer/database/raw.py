@@ -724,7 +724,9 @@ def save_raw_DB_single_station(
                 event_ids.append(evt_id)
 
             except Exception as e:
-                logger.error(e)
+                logger.exception(
+                    'Failed to write %s.%s to hdf5 (event %s): %s',
+                    net, stat, evt_id, e)
 
         # Create table of new contents
         new_cont = {}

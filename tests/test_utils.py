@@ -189,9 +189,12 @@ class TestSaveRaw(unittest.TestCase):
             sel_mock.side_effect = Exception('Test')
             with self.assertLogs("", level='ERROR') as cm:
                 pu.save_raw(self.saved, self.st, 'rawloc', inv, True)
-                self.assertEqual(
-                    cm.output,
-                    ['ERROR:root:Test', 'ERROR:root:Test', 'ERROR:root:Test'])
+                # The error is logged (with traceback and context) once
+                # per failed event, and must not raise on its own.
+                self.assertEqual(len(cm.output), 3)
+                for line in cm.output:
+                    self.assertIn('Test', line)
+                    self.assertIn('Traceback', line)
 
 
 class TestSaveRawMseed(unittest.TestCase):

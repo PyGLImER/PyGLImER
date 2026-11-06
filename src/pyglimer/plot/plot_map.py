@@ -56,7 +56,9 @@ def plot_map(
     else:
         ax.set_global()
     ax.frameon = True
-    ax.outline_patch.set_linewidth(0.75)
+    # cartopy removed GeoAxes.outline_patch in 0.20; spines['geo'] works
+    # in both old and new versions.
+    ax.spines['geo'].set_linewidth(0.75)
 
     # Set gridlines. NO LABELS HERE, there is a bug in the gridlines
     # function around 180deg

@@ -85,16 +85,15 @@ def load_velocity_model(filename):
 
     """
 
-    try:
-        with h5py.File(filename, 'r') as f:
-            vlat = f['lat'][()].flatten()
-            vlon = f['lon'][()].flatten()
-            vdep = f['dep'][()].flatten()
-            vp = f['vp'][()].transpose()
-            vs = f['vs'][()].transpose()
-    except Exception as e:
-        print(e)
-        print()
+    # Errors (missing dataset, unreadable file, ...) propagate to the
+    # caller. The previous broad except printed the error and then raised
+    # a NameError on the undefined return values, hiding the real cause.
+    with h5py.File(filename, 'r') as f:
+        vlat = f['lat'][()].flatten()
+        vlon = f['lon'][()].flatten()
+        vdep = f['dep'][()].flatten()
+        vp = f['vp'][()].transpose()
+        vs = f['vs'][()].transpose()
 
     return vlat, vlon, vdep, vp, vs
 

@@ -26,6 +26,7 @@ from obspy import read, read_inventory, Stream, UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from tqdm.std import tqdm
 
+from pyglimer import tmp
 from pyglimer.utils.log import create_mpi_logger
 from pyglimer.waveform.preprocessh5 import preprocessh5
 from pyglimer.utils.signalproc import resample_or_decimate
@@ -44,7 +45,8 @@ def preprocess(
     taper_type: str, tz: int, ta: int, statloc: str, rawloc: str,
     preproloc: str, rfloc: str, deconmeth: str, hc_filt: float or None,
     saveasdf: bool = False, netrestr=None, statrestr=None,
-        client: str = 'joblib', remove_response: bool = True):
+        client: str = 'joblib', remove_response: bool = True,
+        clients=None):
     """
      Preprocesses waveforms to create receiver functions
 
@@ -96,6 +98,11 @@ def preprocess(
         Set the directory to where the download log is saved
     loglvl : int, optional
         Set logger to this level.
+    clients : list of str, optional
+        Names of the FDSN data centres that the waveforms were downloaded
+        from (e.g. ``['IRIS', 'ORFEUS']``). The error handlers use this
+        list to redownload incomplete waveforms. ``None`` (the default)
+        keeps the previously registered clients, if any.
 
     Returns
     -------
@@ -106,6 +113,9 @@ def preprocess(
     # logging
     logger = logging.getLogger("pyglimer.request.preprocess")
     logger.info('\n\n\n...Preprocessing initialiased...\n')
+
+    tmp.set_clients(clients)
+
 
     # Logging for RF creation
     rflogger = logging.getLogger("pyglimer.request.preprocess.RF")
@@ -208,7 +218,7 @@ def preprocess(
                 stat = d['station']
                 key = net + '.' + stat
             except (ValueError, KeyError) as e:
-                logger.exception([e, d])
+                logger.exception('Malformed dictionary %s: %s', d, e)
                 continue
             if key in masterdict:
                 for k in d:
@@ -223,7 +233,7 @@ def preprocess(
                 net, stat = d.split('.')
                 write_info(net, stat, masterdict[d], preproloc)
             except (ValueError, KeyError) as e:
-                logger.exception([e, d])
+                logger.exception('Malformed dictionary %s: %s', d, e)
                 continue
 
     logger.info("Preprocessing finished.")
@@ -297,7 +307,7 @@ def __event_loop(
         except Exception as e:
             # Unhandled exceptions should not cause the loop to quit
             # processing one event
-            logger.exception([filestr, e])
+            logger.exception('Error processing %s: %s', filestr, e)
             continue
 
     return infolist
@@ -325,7 +335,8 @@ def __waveform_loop(
     except FileNotFoundError:  # file has not been downloaded yet
         return  # I will still want to have the RFs
     except Exception as e:  # Unknown erros
-        logger.exception([prepro_folder, filestr, e])
+        logger.exception('Error reading %s in %s: %s', filestr,
+                         prepro_folder, e)
         return
     station = st[0].stats.station
     network = st[0].stats.network
@@ -423,10 +434,11 @@ def __waveform_loop(
             return infodict
 
         except StreamLengthError as e:
-            logger.debug([filestr, e])
+            logger.debug('%s: %s', filestr, e)
         # Everything else that might have gone wrong
         except Exception as e:
-            logger.exception([prepro_folder, filestr, e])
+            logger.exception('Error processing %s in %s: %s', filestr,
+                             prepro_folder, e)
 
         finally:
             end = time.time()
@@ -527,8 +539,8 @@ def __waveform_loop(
             rflogger.info(e)
 
         except Exception as e:
-            print("RF creation failed")
-            rflogger.exception([network, station, ot_loc, e])
+            rflogger.exception('RF creation failed for %s.%s at %s: %s',
+                               network, station, ot_loc, e)
 
         finally:
             if single_core:

@@ -791,6 +791,10 @@ def downloadwav(
     global asdfsave
     asdfsave = saveasdf
 
+    # Register the data centres so that the error handlers can retry
+    # failed downloads with other clients.
+    tmp.set_clients(clients)
+
     global av_data
     # Dictionary holding available data - needed in download functions
     # Keys are {network}{station}
@@ -910,7 +914,8 @@ def downloadwav(
             except IncompleteRead:
                 continue  # Just retry for poor connection
             except Exception as e:
-                fdsn_mass_logger.info(e)
+                fdsn_mass_logger.exception(
+                    'Download failed for event %s: %s', evt_id, e)
                 incomplete = False  # Any other error: continue
 
         # 2021.02.15 Here, we write everything to hdf5

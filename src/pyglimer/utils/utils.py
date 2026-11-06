@@ -97,7 +97,7 @@ def download_full_inventory(statloc: str, fdsn_client: list):
         for client in fdsn_client)
 
 
-def join_inv(invlist=List[Inventory]) -> Inventory:
+def join_inv(invlist: List[Inventory]) -> Inventory:
     inv = None
     while inv is None:
         try:
@@ -531,7 +531,9 @@ def save_raw(
             else:
                 save_raw_mseed(evt, sslst, rawloc, net, stat)
         except Exception as e:
-            logging.error(e)
+            logging.exception(
+                'Failed to save waveforms for %s.%s (event %s): %s',
+                net, stat, evt, e)
 
 
 def save_raw_mseed(evt: Event, slst: Stream, rawloc: str, net: str, stat: str):
