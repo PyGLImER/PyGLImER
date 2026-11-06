@@ -42,17 +42,16 @@ def fibonacci_sphere(epi: float = 1):
     # distance d
     d = 2 * np.sin(epi / 180 * np.pi / 2)
     samples = int(np.round(1 / (d / np.sqrt(10)) ** 2))
-    points = []
+    # Vectorised (bit-identical to the former per-point loop)
+    i = np.arange(samples)
     offset = 2. / samples
     increment = np.pi * (3. - np.sqrt(5.))
-    for i in range(samples):
-        y = ((i * offset) - 1) + (offset / 2)
-        r = np.sqrt(1 - y ** 2)
-        phi = ((i + 1) % samples) * increment
-        x = np.cos(phi) * r
-        z = np.sin(phi) * r
-        points.append([x, y, z])
-    return np.array(points)
+    y = ((i * offset) - 1) + (offset / 2)
+    r = np.sqrt(1 - y ** 2)
+    phi = ((i + 1) % samples) * increment
+    x = np.cos(phi) * r
+    z = np.sin(phi) * r
+    return np.column_stack((x, y, z))
 
 
 class BinGrid(object):
