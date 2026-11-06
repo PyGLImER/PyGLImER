@@ -18,7 +18,7 @@ jobs:
 
       # https://github.com/marketplace/actions/checkout
       - name: Start actions
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           lfs: true
@@ -45,13 +45,13 @@ jobs:
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
       - name: Prepare Environment
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: pyglimer
           environment-file: environment.yml
           # python-version: 3.8
           auto-activate-base: false
-          use-only-tar-bz2: true
+          
       
       # To keep Conda activated you have to use 'shell: bash -l {0}' line
       # To specifiy the shell

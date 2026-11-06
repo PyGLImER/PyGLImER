@@ -1,6 +1,81 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
-]
+requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyglimer"
+version = "0.4.6"
+description = "Pythonic Lithospheric Imaging using Earthquake Records"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "EUPL-1.2" }
+authors = [
+    { name = "Peter Makus", email = "makus@gfz-potsdam.de" },
+    { name = "Lucas Sawade" },
+]
+keywords = [
+    "Seismology", "Receiver Function", "Earth Sciences",
+    "Lithosphere", "Imaging", "converted wave imaging",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "cartopy",
+    "global-land-mask",
+    "geographiclib",
+    "h5py",
+    "joblib",
+    "matplotlib",
+    "numpy",
+    "obspy>=1.3.1",
+    "pandas",
+    "plotly",
+    "psutil",
+    "pyvista",
+    "scipy",
+    "tqdm",
+]
+
+[project.urls]
+Homepage = "https://github.com/PyGLImER/PyGLImER"
+Documentation = "https://pyglimer.github.io/PyGLImER/"
+
+[project.optional-dependencies]
+tests = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+]
+docs = [
+    "sphinx<6.0",
+    "pydata-sphinx-theme",
+    "sphinx-copybutton",
+    "sphinx-gallery",
+    "jinja2<3.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pyglimer = [
+    "data/examples/*",
+    "data/plot_data/*",
+    "data/velocity_models/**",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 79
+
+# Start narrow: mechanical errors only. Widen (E501, F401, ...) once the
+# legacy code has been cleaned up.
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82"]
