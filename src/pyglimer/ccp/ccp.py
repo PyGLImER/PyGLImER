@@ -27,35 +27,29 @@ import warnings
 
 from copy import deepcopy
 from typing import List, Tuple
-from joblib import Parallel, delayed, cpu_count
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
 import scipy.io as sio
 from global_land_mask import globe
-from psutil import virtual_memory
-from tqdm import tqdm
 
 from pyglimer.ccp.compute.bin import BinGrid
+from pyglimer.ccp.ingest import CCPStackIngestMixin
 from pyglimer.ccp.io import _load_ccp_npz, _save_ccp_npz, read_ccp
 from pyglimer.ccp.plotting import CCPStackPlotMixin, PhasePick
 from pyglimer.ccp.volume import CCPStackVolumeMixin
-from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.database.stations import StationDB
-from pyglimer.rf.create import RFStream, read_rf
 from pyglimer.rf.moveout import res, maxz, maxzm
-from pyglimer.utils.createvmodel import ComplexModel
 from pyglimer.utils.geo_utils import epi2euc
 from pyglimer.utils.geo_utils import gctrack
 from pyglimer.utils.geo_utils import fix_map_extent
 from pyglimer.utils.SphericalNN import SphericalNN
-from pyglimer.utils.log import create_mpi_logger
-from pyglimer.utils.utils import dt_string, chunks
+from pyglimer.utils.utils import dt_string
 
 __all__ = ['CCPStack', 'PhasePick', 'read_ccp', 'init_ccp']
 
 
-class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin):
+class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin, CCPStackIngestMixin):
     """Is a CCP Stack matrix. Its size depends upon stations that are used as
     input."""
 
@@ -272,7 +266,8 @@ class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin):
         pattern: list or None = None, save: str or bool = False,
         filt: tuple or None = None,
         binrad: float = 1/(2*np.cos(np.radians(30))), append_pp: bool = False,
-            multiple: bool = False, mc_backend: str = 'joblib'):
+            multiple: bool = False, mc_backend: str = 'joblib',
+            n_jobs: int = -1):
         """
         Computes a ccp stack in self.ccp, using the data from rfloc.
         The stack can be limited to some networks and stations.
@@ -336,6 +331,9 @@ class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin):
         :param mc_backend: Multi-core backend to use for the computations.
             Can be either `"joblib"` (multiprocessing) or `"MPI"`. Not that
             MPI compatibility is only implemented with hdf5 files.
+        :param n_jobs: Number of parallel jobs for the joblib backend.
+            -1 uses all cores, defaults to -1. Ignored by the MPI backend.
+        :type n_jobs: int, optional
         :raises ValueError: For wrong inputs
 
 
@@ -436,7 +434,7 @@ class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin):
         else:
             pattern = ["*{}*%s".format(_a) % in_format for _a in pattern]
 
-        streams = []  # List of files filtered for input criteria
+        files = []  # List of files filtered for input criteria
 
         # List of all input files in the desired format
         infiles = glob(os.path.join(
@@ -479,7 +477,7 @@ code if you want to filter by station")
 
         # Do filtering
         for pat in pattern:
-            streams.extend(fnmatch.filter(infiles, pat))
+            files.extend(fnmatch.filter(infiles, pat))
 
         # clear memory
         del pattern, infiles
@@ -490,7 +488,7 @@ code if you want to filter by station")
             filt = [.03, 1.5]  # bandpass frequencies
 
         self.logger.debug('Using data from the following files: %s' % (
-            str(streams)))
+            str(files)))
 
         # Define grid boundaries for 3D RT
         latb = (self.coords[0].min(), self.coords[0].max())
@@ -498,8 +496,8 @@ code if you want to filter by station")
 
         if in_format.lower() == 'h5':
             self._create_ccp_from_hdf5_mc(
-                streams, multiple, append_pp, n_closest_points, vel_model,
-                latb, lonb, filt, endi, mc_backend)
+                files, multiple, append_pp, n_closest_points, vel_model,
+                latb, lonb, filt, endi, mc_backend, n_jobs)
 
         elif in_format.lower() == 'sac':
             warnings.warn(
@@ -508,8 +506,8 @@ code if you want to filter by station")
                 'the hdf5 database format (in_format="h5") instead.',
                 DeprecationWarning, stacklevel=2)
             self._create_ccp_from_sac(
-                streams, multiple, append_pp, n_closest_points, vel_model,
-                latb, lonb, filt, endi, mc_backend)
+                files, multiple, append_pp, n_closest_points, vel_model,
+                latb, lonb, filt, endi, mc_backend, n_jobs)
         else:
             raise NotImplementedError(
                 'Unknown input format %s.' % in_format
@@ -524,471 +522,6 @@ code if you want to filter by station")
         if save:
             self.write(filename=save)
 
-    def _create_ccp_from_hdf5_mc(
-        self, streams: List[str], multiple: bool, append_pp: bool,
-        n_closest_points: int, vel_model: str, latb: Tuple[float, float],
-        lonb: Tuple[float, float], filt: Tuple[float, float], endi,
-            mc_backend: str):
-        """
-        Computes a CCP stack by reading a rf database in hdf5.
-
-        :param streams: List of hdf5 files to read.
-        :type streams: List[str]
-        :param multiple: Regard crustal multiples for stack?
-        :type multiple: bool
-        :param append_pp: Append ppoints to the object?
-        :type append_pp: bool
-        :param n_closest_points: number of closest points to query from kd-tree
-        :type n_closest_points: int
-        :param vel_model: The velocity mdoel to use for depth migration.
-        :type vel_model: str
-        :param latb: Boundary for the CCP calculation in form
-            `(minlat, maxlat)`.
-        :type latb: Tuple[float, float]
-        :param lonb: Boundary for the CCP calculation in form
-            `(minlon, maxlon)`.
-        :type lonb: Tuple[float, float]
-        :param filt: Filter to impose on rfs before migration. Either False
-            or tuple in form (minfreq, maxfreq).
-        :type filt: Tuple[float, float]
-        :param endi: Only relevant if `multiple=True`. Last depth index to
-            consider for multiple computation.
-        :type endi: int
-        :param mc_backend: Multi-core backend to Use. **This does only support
-            `joblib`**
-        :type mc_backend: str
-        """
-        # note that streams are actually files - confusing variable name
-        if mc_backend.lower() == 'joblib':
-            out = Parallel(n_jobs=-1, backend='multiprocessing')(
-                delayed(self._create_ccp_from_hdf5)(
-                    f, multiple, append_pp, n_closest_points, vel_model,
-                    latb, lonb, filt)
-                for f in tqdm(streams))
-
-            # Awful way to solve it, but the best I could find
-            self._unpack_joblib_output(multiple, endi, out)
-
-        elif mc_backend.upper() == 'MPI':
-            from mpi4py import MPI
-            comm = MPI.COMM_WORLD
-            psize = comm.Get_size()
-            rank = comm.Get_rank()
-            pmap = (np.arange(len(streams))*psize)/len(streams)
-            pmap = pmap.astype(np.int32)
-            ind = pmap == rank
-            ind = np.arange(len(streams), dtype=int)[ind]
-
-            # get new MPI compatible loggers
-            self.logger = create_mpi_logger(self.logger, rank)
-            for ii in ind:
-                try:
-                    kk, jj, datal, datalm1, datalm2, N =\
-                        self._create_ccp_from_hdf5(
-                            streams[ii], multiple, append_pp, n_closest_points,
-                            vel_model, latb, lonb, filt)
-                except KeyError:
-                    self.logger.warning(
-                        f'No Receiver Functions in file {streams[ii]}.')
-                    continue
-                self.N += N
-                if multiple:
-                    self._unpack_output_multiple(
-                        kk, jj, datal, datalm1, datalm2, endi)
-                else:
-                    self._unpack_output(kk, jj, datal)
-
-            # Gather results. mpi4py's buffer-map collectives infer the
-            # datatype from the numpy array, which keeps the integer hit
-            # counters intact (the former explicit MPI.DOUBLE declarations
-            # mismatched the int dtype of illum/illumm).
-            self.N = comm.allreduce(self.N, op=MPI.SUM)
-            self.illum = comm.allreduce(self.illum, op=MPI.SUM)
-            self.bins = comm.allreduce(self.bins, op=MPI.SUM)
-            if multiple:
-                self.illumm = comm.allreduce(self.illumm, op=MPI.SUM)
-                self.bins_m1 = comm.allreduce(self.bins_m1, op=MPI.SUM)
-                self.bins_m2 = comm.allreduce(self.bins_m2, op=MPI.SUM)
-
-        self.logger.info('Number of receiver functions used: '+str(self.N))
-
-    def _create_ccp_from_hdf5(
-        self, f: str, multiple: bool, append_pp: bool,
-        n_closest_points: int, vel_model: str, latb: Tuple[float, float],
-        lonb: Tuple[float, float], filt: Tuple[float, float]) -> Tuple[
-            List[np.ndarray], List[np.ndarray], List[np.ndarray],
-            List[np.ndarray], List[np.ndarray]]:
-        """
-        Does ppoint calculation and depth migration for rf-functions in hdf5
-        format. (per file based)
-        Subsequently, computes the closest gridpoints in the ccp object.
-
-        :param f: HDF5 file to read.
-        :type f: str
-        :param multiple: Regard crustal multiples for stack?
-        :type multiple: bool
-        :param append_pp: Append ppoints to the object?
-        :type append_pp: bool
-        :param n_closest_points: number of closest points to query from kd-tree
-        :type n_closest_points: int
-        :param vel_model: The velocity mdoel to use for depth migration.
-        :type vel_model: str
-        :param latb: Boundary for the CCP calculation in form
-            `(minlat, maxlat)`.
-        :type latb: Tuple[float, float]
-        :param lonb: Boundary for the CCP calculation in form
-            `(minlon, maxlon)`.
-        :type lonb: Tuple[float, float]
-        :param filt: Filter to impose on rfs before migration. Either False
-            or tuple in form (minfreq, maxfreq).
-        :type filt: Tuple[float, float]
-        :return: (List of lateral indices of closest bins,  List of depth
-            indices of closest gridpoint, list of rf data to stack for each
-            of those indices, list of multiple data (pps), list of multiple
-            data (pss))
-        :rtype: Tuple[ List[np.ndarray], List[np.ndarray], List[np.ndarray],
-            List[np.ndarray], List[np.ndarray]]
-        """
-        # note that those are actually files - confusing variable name
-        net, stat, _ = os.path.basename(f).split('.')
-        kk = []
-        jj = []
-        datal = []
-        datalm1 = []
-        datalm2 = []
-        # number of rfs
-        N = 0
-        with RFDataBase(f, mode='r') as rfdb:
-            for rftr in rfdb.walk('rf', net, stat, self.bingrid.phase):
-                rfst = RFStream([rftr])
-                out = self._ccp_process_rftr(
-                    rfst, filt, vel_model, latb, lonb, multiple, append_pp,
-                    n_closest_points)
-                if not out:
-                    continue
-                N += 1
-                kk.append(out[0])
-                jj.append(out[1])
-                datal.append(out[2])
-                if multiple:
-                    datalm1.append(out[3])
-                    datalm2.append(out[4])
-        return kk, jj, datal, datalm1, datalm2, N
-
-    def _create_ccp_from_sac(
-        self, streams: List[str], multiple: bool, append_pp: bool,
-        n_closest_points: int, vel_model: str, latb: Tuple[float, float],
-        lonb: Tuple[float, float], filt: Tuple[float, float], endi: int,
-            mc_backend: str):
-        """
-        Computes a CCP stack by reading a rf database in sac.
-
-        :param streams: List of SAC files to read.
-        :type streams: List[str]
-        :param multiple: Regard crustal multiples for stack?
-        :type multiple: bool
-        :param append_pp: Append ppoints to the object?
-        :type append_pp: bool
-        :param n_closest_points: number of closest points to query from kd-tree
-        :type n_closest_points: int
-        :param vel_model: The velocity mdoel to use for depth migration.
-        :type vel_model: str
-        :param latb: Boundary for the CCP calculation in form
-            `(minlat, maxlat)`.
-        :type latb: Tuple[float, float]
-        :param lonb: Boundary for the CCP calculation in form
-            `(minlon, maxlon)`.
-        :type lonb: Tuple[float, float]
-        :param filt: Filter to impose on rfs before migration. Either False
-            or tuple in form (minfreq, maxfreq).
-        :type filt: Tuple[float, float]
-        :param endi: Only relevant if `multiple=True`. Last depth index to
-            consider for multiple computation.
-        :type endi: int
-        :param mc_backend: Multi-core backend to Use. **This does only support
-            `joblib`**
-        :type mc_backend: str
-        :raises NotImplementedError: For uknown mc backends.
-        """
-        if mc_backend.upper() == 'MPI':
-            raise NotImplementedError(
-                'MPI in conjunction with sac is not implemented.'
-            )
-
-        self.logger.info('Number of receiver functions used: '+str(self.N))
-
-        # Split job into n chunks
-        num_cores = cpu_count()
-
-        self.logger.info('Number of cores used: '+str(num_cores))
-
-        mem = virtual_memory()
-
-        self.logger.info('Available system memory: '+str(mem.total*1e-6)+'MB')
-        # How many tasks should the main process be split in?
-        # If the number is too high, it will need unnecessarily
-        # much disk space or caching (probably also slower).
-        # If it's too low, the progressbar won't work anymore.
-        # !Memmap arrays are getting extremely big, size in byte
-        # is given by: nrows*ncolumns*nbands
-        # with 64 cores and 10 bands/core that results in about
-        # 90 GB for each of the arrays for a finely gridded
-        # CCP stack of North-America
-
-        # Check maximum information that can be saved
-        # using half of the RAM.
-        # approximately 8 byte per element in RF + 8 byte for idx
-        mem_needed = 3*8*850*len(streams)*100
-        # For stacking with multiple modes, we'll need more memory
-        if multiple:
-            mem_needed = mem_needed*1.75
-
-        # Split into several jobs if too much data
-        if mem_needed > mem.total:
-            N_splits = int(np.ceil(mem_needed/mem.total))
-            split_size = int(np.ceil(len(streams)/N_splits))
-            print(
-                'Splitting RFs into %s chunks due to insufficient memory.'
-                + 'Each progressbar will only show the progress per chunk.' %
-                str(N_splits))
-        else:
-            split_size = len(streams)
-
-        for stream_chunk in chunks(streams, split_size):
-            num_split_max = num_cores*100  # maximal no of jobs
-            len_split = int(np.ceil(len(stream_chunk)/num_cores))
-            if len_split > 10:
-                if int(np.ceil(len(stream_chunk)/len_split)) > num_split_max:
-                    len_split = int(np.ceil(len_split/num_split_max))
-                else:
-                    len_split = int(np.ceil(len_split/(len_split/10)))
-            num_split = int(np.ceil(len(stream_chunk)/len_split))
-
-            out = Parallel(n_jobs=num_cores, backend='multiprocessing')(
-                delayed(self.multicore_stack)(
-                    st, append_pp, n_closest_points, vel_model,
-                    latb, lonb, filt, multiple)
-                for _, st in zip(
-                    tqdm(range(num_split)),
-                    chunks(stream_chunk, len_split)))
-
-            self._unpack_joblib_output(multiple, endi, out)
-
-    def _unpack_joblib_output(self, multiple: bool, endi: int, out: Tuple):
-        """
-        Unpack the output that comes from joblib and add stack them in the CCP
-        object.
-        """
-        # Awful way to solve it, but the best I could find
-        if multiple:
-            for kk, jj, datal, datalm1, datalm2, N in out:
-                self._unpack_output_multiple(
-                    kk, jj, datal, datalm1, datalm2, endi)
-                self.N += N
-        else:
-            for kk, jj, datal, _, _, N in out:
-                self._unpack_output(kk, jj, datal)
-                self.N += N
-
-    def _unpack_output_multiple(
-        self, kk: List[int], jj: List[int], datal: List[float],
-            datalm1: List[float], datalm2: List[float], endi: int):
-        """
-        Unpack the output of the kdtree and stack them into the CCP object.
-        Use this function if `multiple=True`
-
-        .. note::
-            The RF count ``self.N`` is accounted by the callers
-            (``_unpack_joblib_output`` and the MPI loop) from the RF count
-            returned by ``_create_ccp_from_hdf5``. This method must not
-            modify it.
-        """
-        for k, j, data, datam1, datam2 in zip(kk, jj, datal, datalm1, datalm2):
-            self.bins[k, j] = self.bins[k, j] + data[j]
-
-            # hit counter + 1
-            self.illum[k, j] = self.illum[k, j] + 1
-
-            # multiples
-            iii = np.where(j <= endi-1)[0]
-            jm = j[iii]
-            km = k[iii]
-            try:
-                self.bins_m1[
-                    km, jm] = self.bins_m1[km, jm] + datam1[jm]
-                self.bins_m2[
-                    km, jm] = self.bins_m2[km, jm] + datam2[jm]
-                self.illumm[km, jm] = self.illum[km, jm] + 1
-            except IndexError as e:
-                if not len(datam1) or not len(datam2):
-                    continue
-                else:
-                    raise IndexError(e)
-
-    def _unpack_output(self, kk: List[int], jj: List[int], datal: List[float]):
-        """
-        Unpack the output of the kdtree and stack them into the CCP object.
-        Use this function if `multiple=False`.
-
-        .. note::
-            The RF count ``self.N`` is accounted by the callers
-            (``_unpack_joblib_output`` and the MPI loop) from the RF count
-            returned by ``_create_ccp_from_hdf5``. This method must not
-            modify it.
-        """
-        for k, j, data in zip(kk, jj, datal):
-            self.bins[k, j] = self.bins[k, j] + data[j]
-
-            # hit counter + 1
-            self.illum[k, j] = self.illum[k, j] + 1
-
-    def multicore_stack(
-        self, stream: List[str], append_pp: bool, n_closest_points: int,
-        vmodel: str, latb: Tuple[float, float], lonb: Tuple[float, float],
-        filt: Tuple[float, float], multiple: bool) -> Tuple[
-        List[int], List[int], List[np.ndarray], List[np.ndarray], List[
-            np.ndarray]]:
-        """
-        Takes in chunks of data to be processed on one core.
-
-        :param stream: List of file locations.
-        :type stream: list
-        :param append_pp: Should piercing points be appended?.
-        :type append_pp: Bool
-        :param n_closest_points: Number of Closest points that the KDTree
-            should query.
-        :type n_closest_points: int
-        :param vmodel: Name of the velocity model that should be used for the
-            raytraycing.
-        :type vmodel: str
-        :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
-            raytraycing. Will remain unused for 1D RT.
-        :type latb: Tuple
-        :param lonb: Tuple in Form (minlon, maxlon). To save RAM on 3D
-            raytraycing. Will remain unused for 1D RT
-        :type lonb: Tuple
-        :param filt: Should the RFs be filtered before the ccp stack?
-            If so, provide (lowcof, highcof).
-        :type filt: bool or tuple]
-        :return: Three lists containing indices and rf-data.
-        :rtype: list, list, list
-        """
-
-        kk = []
-        jj = []
-        datal = []
-        datalm1 = []
-        datalm2 = []
-        N = 0
-
-        for st in stream:
-            rft = read_rf(st)
-            out = self._ccp_process_rftr(
-                rft, filt, vmodel, latb, lonb, multiple, append_pp,
-                n_closest_points)
-            if not out:
-                continue
-            N += 1
-            if multiple:
-                k, j, data, lm1, lm2 = out
-                datalm1.append(lm1)
-                datalm2.append(lm2)
-            else:
-                k, j, data = out
-            kk.append(k)
-            jj.append(j)
-            datal.append(data)
-
-        return kk, jj, datal, datalm1, datalm2, N
-
-    def _ccp_process_rftr(
-        self, rfst: RFStream, filt: Tuple[float, float], vmodel: str,
-        latb: Tuple[float, float], lonb: Tuple[float, float], multiple: bool,
-        append_pp: bool, n_closest_points: int) -> Tuple[
-            np.ndarray, np.ndarray, np.ndarray]:
-        """
-        Do the depth migration and the piercing point computation for
-        a single receiver function. Then, find the laterally closest bin
-        to the ppoint.
-
-        :param rfst: Input receiver function
-        :type rfst: RFStream
-        :param filt: Filter the receiver function? If so, provide high- and
-            lowpass frequency as a Tuple (in Hz).
-        :type filt: Tuple[float, float]
-        :param vmodel: The velocity model to use.
-        :type vmodel: str
-        :param latb: boundaries for the moveout correction in the form
-            (minlat, maxlat).
-        :type latb: Tuple[float, float]
-        :param lonb: boundaries for the moveout correction in the form
-            (minlon, maxlon).
-        :type lonb: Tuple[float, float]
-        :param multiple: Should the moveout correction be done for crustal
-            multiples as well?
-        :type multiple: bool
-        :param append_pp: Should the coordinates of the ppoint be saved?
-        :type append_pp: bool
-        :param n_closest_points: Number of closest bin points to return.
-        :type n_closest_points: int
-        :return: The indices of the closest bins k and the depth index j.
-            the Receiver fnction data. If multiples also multiple data.
-        :rtype: Tuple[np.ndarray[int], np.ndarray[int], np.ndarray]
-        """
-        if filt:
-            rfst.filter(
-                'bandpass', freqmin=filt[0], freqmax=filt[1],
-                zerophase=True, corners=2)
-        try:
-            z, rf, rfm1, rfm2 = rfst[0].moveout(
-                vmodel, latb=latb, lonb=lonb, taper=False,
-                multiple=multiple)
-        except ComplexModel.CoverageError as e:
-            # Wrong stations codes can raise this
-            self.logger.warning(e)
-            return
-        except (ValueError, IndexError, np.linalg.LinAlgError) as e:
-            # Interpolation/migration failures on malformed RFs. Skip the
-            # RF, but log with traceback so systematic failures remain
-            # visible; anything else propagates and kills the stack loudly.
-            self.logger.exception(
-                'Failed to migrate RF %s.%s: %s',
-                rfst[0].stats.network, rfst[0].stats.station, e)
-            return
-
-        lat = np.array(rf.stats.pp_latitude)
-        lon = np.array(rf.stats.pp_longitude)
-        # Above-surface depths have no piercing points (NaN); they can
-        # neither be binned nor stacked.
-        m = np.isfinite(lat) & np.isfinite(lon)
-        lat = lat[m]
-        lon = lon[m]
-        if append_pp:
-            plat = np.pad(
-                lat, (0, len(self.z)-len(lat)), constant_values=np.nan)
-            plon = np.pad(
-                lon, (0, len(self.z)-len(lon)), constant_values=np.nan)
-            self.pplat.append(plat)
-            self.pplon.append(plon)
-        k, j = self.query_bin_tree(lat, lon, n_closest_points)
-
-        if multiple:
-            depthi = np.where(z == maxzm)[0][0]
-            try:
-                lm1 = (rfm1.data[:depthi+1])
-                lm2 = (rfm2.data[:depthi+1])
-            except AttributeError as e:
-                # for Interpolationerrors
-                self.logger.exception(
-                    'Error in multiple computation. Mostly caused by issue '
-                    + 'during the interpolation. Origninal Error message '
-                    + 'below.')
-                self.logger.exception(e)
-                lm1 = None
-                lm2 = None
-            return k, j, rf.data, lm1, lm2
-
-        return k, j, rf.data
 
     def conclude_ccp(
         self, keep_empty: bool = False, keep_water: bool = False, r: int = 0,
