@@ -243,28 +243,13 @@ def __event_loop(
     """
     Loops over each event in the event catalogue
     """
-    # Shorthand for the config settings (the loop bodies predate the
-    # config object)
-    phase = cfg.phase
-    rot = cfg.rot
-    pol = cfg.pol
-    taper_perc = cfg.taper_perc
-    taper_type = cfg.taper_type
-    model = cfg.model
+    # Shorthand for the config settings used in this loop (the rest is
+    # passed down via cfg)
     logger = cfg.logger
-    rflogger = cfg.rflogger
-    eh = cfg.eh
-    tz = cfg.tz
-    ta = cfg.ta
-    statloc = cfg.statloc
-    rawloc = cfg.rawloc
     preproloc = cfg.preproloc
-    rfloc = cfg.rfloc
-    deconmeth = cfg.deconmeth
-    hc_filt = cfg.hc_filt
+    rawloc = cfg.rawloc
     netrestr = cfg.netrestr
     statrestr = cfg.statrestr
-    remove_response = cfg.remove_response
 
     logger.info('Processing waveforms for event %s.' % event.resource_id)
 

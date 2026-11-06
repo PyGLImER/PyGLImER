@@ -12,10 +12,8 @@ serialisation of the :class:`~pyglimer.ccp.ccp.CCPStack` object.
    Lucas Sawade (lsawade@princeton.edu)
 
 """
-import os
 import pickle
 from copy import deepcopy
-from typing import List, Tuple
 
 import h5py
 import numpy as np

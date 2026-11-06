@@ -32,7 +32,6 @@ from obspy import read
 from scipy.signal.windows import gaussian
 
 from pyglimer.ccp.compute import bin as ccpbin
-from pyglimer.data.finddir import finddir
 from pyglimer.rf import create
 from pyglimer.rf.deconvolve import it
 from pyglimer.utils import signalproc as sp

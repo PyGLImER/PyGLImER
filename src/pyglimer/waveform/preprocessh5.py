@@ -24,7 +24,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from tqdm.auto import tqdm as tqdm_auto
 import obspy
-from obspy import Stream, UTCDateTime
+from obspy import UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from tqdm.std import tqdm
 
@@ -32,7 +32,7 @@ from pyglimer import constants
 from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.database.raw import RawDatabase
 from pyglimer.utils.log import create_mpi_logger
-from .preproc_utils import SNRError, StreamLengthError, rotate_and_snr_qc, \
+from .preproc_utils import SNRError, rotate_and_snr_qc, \
     set_station_info
 from .rotate import rotate_LQT_min, rotate_PSV
 from ..rf.create import RFStream, createRF

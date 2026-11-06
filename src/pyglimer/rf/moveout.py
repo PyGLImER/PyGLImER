@@ -493,8 +493,12 @@ def dt_table(
     delta = np.zeros(np.shape(htab))
 
     # vertical slownesses
-    q_a = np.sqrt(vp**-2 - p**2)
-    q_b = np.sqrt(vs**-2 - p**2)
+    # The expression under the root is negative for ray parameters that
+    # do not allow a P-to-S (or S-to-P) conversion in a given layer; the
+    # resulting NaNs are expected and handled by the caller.
+    with np.errstate(invalid='ignore'):
+        q_a = np.sqrt(vp**-2 - p**2)
+        q_b = np.sqrt(vs**-2 - p**2)
 
     # Numerical integration
     for kk, h in enumerate(htab_f[1:]):

@@ -58,8 +58,11 @@ def rotate_PSV(
     # Do the rotation as in Rondenay (2009)
     # Note that in contrast to the paper the z-components have to be
     # negated as it uses a definition, where depth is positive
-    qa = np.sqrt(1/avp**2 - rayp**2)
-    qb = np.sqrt(1/avs**2 - rayp**2)
+    # The expression under the root is negative for some ray parameters;
+    # the resulting NaNs are expected (no conversion possible).
+    with np.errstate(invalid='ignore'):
+        qa = np.sqrt(1/avp**2 - rayp**2)
+        qb = np.sqrt(1/avs**2 - rayp**2)
     a = avs**2*rayp**2 - .5
     rotmat = np.array([[-a/(avp*qa), rayp*avs**2/avp, 0],
                        [-rayp*avs, -a/(avs*qb), 0],
