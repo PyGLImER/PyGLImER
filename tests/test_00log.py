@@ -38,7 +38,7 @@ class TestStartLoggerIfNecessary(unittest.TestCase):
             if hasattr(h, 'baseFilename'):
                 self.assertEqual(os.path.basename(h.baseFilename), 'myfile')
         # cleanup
-        while logger.hasHandlers():
+        while logger.handlers:
             logger.removeHandler(logger.handlers[0])
 
     @patch('builtins.open', m)
@@ -53,7 +53,7 @@ class TestStartLoggerIfNecessary(unittest.TestCase):
         for h in logger.handlers:
             if hasattr(h, 'baseFilename'):
                 self.assertEqual(os.path.basename(h.baseFilename), 'myfile')
-        while logger.hasHandlers():
+        while logger.handlers:
             logger.removeHandler(logger.handlers[0])
 
 
@@ -73,9 +73,9 @@ class TestCreateMPILogger(unittest.TestCase):
         for h in mpilog.handlers:
             if hasattr(h, 'baseFilename'):
                 self.assertEqual(os.path.basename(h.baseFilename), exp_fname)
-        while logger.hasHandlers():
+        while logger.handlers:
             logger.removeHandler(logger.handlers[0])
-        while mpilog.hasHandlers():
+        while mpilog.handlers:
             mpilog.removeHandler(mpilog.handlers[0])
 
     def test_no_fh(self):

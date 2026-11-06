@@ -61,20 +61,12 @@ def create_mpi_logger(logger: logging.Logger, rank: int) -> logging.Logger:
     lvl = logger.level
     rankstr = str(rank).zfill(3)
     name = '%srank%s' % (logger.name, rankstr)
-    while not logger.hasHandlers() or not (
-            any(hasattr(h, 'baseFilename') for h in logger.handlers)):
-        if logger.name == 'root':
-            raise ValueError(
-                'The logger used as input has to have a configured'
-                + 'FileHandler.')
-        logger = logger.parent
+    fn = None
     for h in logger.handlers:
         if hasattr(h, 'baseFilename'):
             fn = '%srank%s.log' % (h.baseFilename.split('.')[0], rankstr)
-    try:
-        return start_logger_if_necessary(name, fn, lvl)
-    except UnboundLocalError as e:
-        print(e)
+    if fn is None:
         raise ValueError(
             'The logger used as input has to have a configured FileHandler.'
         )
+    return start_logger_if_necessary(name, fn, lvl)

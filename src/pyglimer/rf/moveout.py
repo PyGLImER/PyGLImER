@@ -35,6 +35,24 @@ from pyglimer.utils.createvmodel import load_gyps
 _MODEL_CACHE = {}
 
 
+def _neg_depths(zmin: float, step: float = .1) -> np.ndarray:
+    """
+    Negative depth grid from ``zmin`` (inclusive) to 0 (exclusive) in
+    steps of ``step``.
+
+    Guards against a floating-point ghost element: if ``-zmin`` is only
+    numerically an integer multiple of ``step`` (e.g. a float32 value
+    propagated through interpolation), numpy's arange can emit a final
+    element just below zero (e.g. -3e-09). That element duplicates the
+    first value of the non-negative grid that follows, shifting every
+    deeper sample of the migrated RF by one grid point.
+    """
+    neg = np.arange(zmin, 0, step)
+    if neg.size and np.isclose(neg[-1], 0, rtol=0, atol=step*1e-5):
+        neg = neg[:-1]
+    return neg
+
+
 def moveout(
     data: np.ndarray, st: obspy.core.trace.Stats, fname: str, latb: tuple,
         lonb: tuple, taper: bool, multiple: bool = False):
@@ -133,7 +151,7 @@ def moveout(
 
     if round(min(z), int(-np.log10(res))) <= 0:
         zq = np.hstack(
-            (np.arange(min(z), 0, .1), np.arange(0, max(z)+res, res)))
+            (_neg_depths(min(z)), np.arange(0, max(z)+res, res)))
     else:
         zq = np.arange(round(min(z), int(-np.log10(res))), max(z)+res)
 
@@ -193,9 +211,9 @@ def moveout(
         # query depths
         if round(min(zm1), int(-np.log10(res))) <= 0:
             zqm1 = np.hstack(
-                (np.arange(min(zm1), 0, .1), np.arange(0, max(zm1)+res, res)))
+                (_neg_depths(min(zm1)), np.arange(0, max(zm1)+res, res)))
             zqm2 = np.hstack(
-                (np.arange(min(zm2), 0, .1), np.arange(0, max(zm2)+res, res)))
+                (_neg_depths(min(zm2)), np.arange(0, max(zm2)+res, res)))
         else:
             zqm1 = np.arange(
                 round(min(zm1), int(-np.log10(res))), max(zm1)+res)
@@ -298,7 +316,7 @@ def dt_table_3D(
     # hypothetical conversion depth tables
     if el > 0:
         htab = np.hstack(  # spherical
-            (np.arange(-round(el/1000, 1), 0, .1),
+            (_neg_depths(-round(el/1000, 1)),
              np.arange(0, maxz+res, res)))
     else:
         htab = np.arange(-round(el/1000), maxz+res, res)
@@ -454,7 +472,7 @@ def dt_table(
     # hypothetical conversion depth tables
     if el > 0:
         htab = np.hstack(  # spherical
-            (np.arange(-round(el/1000, 1), 0, .1),
+            (_neg_depths(-round(el/1000, 1)),
              np.arange(0, maxz+res, res)))
     else:
         htab = np.arange(-round(el/1000), maxz+res, res)
