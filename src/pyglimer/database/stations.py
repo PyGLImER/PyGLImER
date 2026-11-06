@@ -119,6 +119,7 @@ class StationDB(object):
 
         self.dir = dir
 
+        self.phase = None
         if phase:
             self.phase = phase.upper()
 
@@ -215,11 +216,15 @@ class StationDB(object):
 
             # Check data availability
             for root, _, files in os.walk(folder):
-                if len(fnmatch.filter(files, 'info.*')) == 0:
-                    continue  # Skip parent folders
                 infof = (os.path.join(root, 'info'))
-
-                with shelve.open(infof, flag='r') as info:
+                # The shelf's on-disk name depends on the dbm backend
+                # ('info', 'info.dat', 'info.db', ...), so just try to
+                # open it instead of matching file names
+                try:
+                    info = shelve.open(infof, flag='r')
+                except Exception:
+                    continue  # Skip parent folders
+                with info:
                     data['code'].append(info['network']+'.'+info['station'])
                     data['network'].append(info['network'])
                     data['station'].append(info['station'])
@@ -252,11 +257,12 @@ class StationDB(object):
 
         # Check data availability of PRFs
         for root, _, files in os.walk(folderP):
-            if 'info.dat' not in files:
-                continue  # Skip parent folders
             infof = (os.path.join(root, 'info'))
-
-            with shelve.open(infof, flag='r') as info:
+            try:
+                info = shelve.open(infof, flag='r')
+            except Exception:
+                continue  # Skip parent folders
+            with info:
                 dataP['code'].append(info['network']+'.'+info['station'])
                 dataP['network'].append(info['network'])
                 dataP['station'].append(info['station'])
@@ -276,11 +282,12 @@ class StationDB(object):
 
         # Check data availability of SRFs
         for root, _, files in os.walk(folderS):
-            if 'info.dat' not in files:
-                continue  # Skip parent folders or empty folders
             infof = (os.path.join(root, 'info'))
-
-            with shelve.open(infof, flag='r') as info:
+            try:
+                info = shelve.open(infof, flag='r')
+            except Exception:
+                continue  # Skip parent folders or empty folders
+            with info:
                 dataS['code'].append(info['network']+'.'+info['station'])
                 dataS['network'].append(info['network'])
                 dataS['station'].append(info['station'])
@@ -305,7 +312,7 @@ class StationDB(object):
             else:
                 dataP['code'].append(c)
                 dataP['network'].append(dataS['network'][i])
-                dataP['station'].append(dataS['station'])
+                dataP['station'].append(dataS['station'][i])
                 dataP['lat'].append(dataS['lat'][i])
                 dataP['lon'].append(dataS['lon'][i])
                 dataP['elevation'].append(dataS['elevation'][i])

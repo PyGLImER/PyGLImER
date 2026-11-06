@@ -158,10 +158,15 @@ class Request(object):
         """
 
         # Allocate variables in self
-        loglvl = pu.log_lvl[loglvl.upper()]
+        # Accept both logging-level strings ('WARNING') and ints
+        # (logging.WARNING -- also the default of this function)
+        if isinstance(loglvl, str):
+            loglvl = pu.log_lvl[loglvl.upper()]
+        else:
+            loglvl = int(loglvl)
         self.loglvl = loglvl
 
-        if format.lower() == ('hdf5' or 'h5'):
+        if format.lower() in ('hdf5', 'h5'):
             self.h5 = True
         elif format.lower() in ('sac', 'mseed'):
             self.h5 = False
@@ -197,6 +202,11 @@ class Request(object):
         # logger for the download steps
         self.logger = logging.getLogger('pyglimer.request')
         self.logger.setLevel(loglvl)
+        # Remove handlers left over from previous Request instantiations
+        # (the logger is shared and handlers would otherwise accumulate,
+        # duplicating every message)
+        while self.logger.handlers:
+            self.logger.removeHandler(self.logger.handlers[0])
         self.fh = logging.FileHandler(
             os.path.join(self.logdir, 'request.log'))
         self.fh.setLevel(loglvl)

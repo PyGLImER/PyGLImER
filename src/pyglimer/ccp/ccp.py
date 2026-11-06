@@ -1020,6 +1020,11 @@ code if you want to filter by station")
 
         lat = np.array(rf.stats.pp_latitude)
         lon = np.array(rf.stats.pp_longitude)
+        # Above-surface depths have no piercing points (NaN); they can
+        # neither be binned nor stacked.
+        m = np.isfinite(lat) & np.isfinite(lon)
+        lat = lat[m]
+        lon = lon[m]
         if append_pp:
             plat = np.pad(
                 lat, (0, len(self.z)-len(lat)), constant_values=np.nan)
@@ -1149,7 +1154,9 @@ misspelled or not yet implemented')
         if keep_water and keep_empty:
             try:
                 del self.coords_new
-            except NameError:
+            except AttributeError:
+                # coords_new does not exist (e.g. keep_empty was True but
+                # the not-keep_water branch never created it)
                 pass
 
     def write(self, filename=None, folder='.', fmt="pickle"):
