@@ -8,13 +8,14 @@ jobs:
     strategy:
         matrix:
             os: ["ubuntu-latest", "windows-latest"]
+            python-version: ["3.11", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: pyglimer
           environment-file: environment.yml
-          python-version: '3.13'
+          python-version: ${{ matrix.python-version }}
           auto-activate-base: false
       - shell: bash -l {0}
         run: |
