@@ -142,11 +142,11 @@ def ____check_times_small_db_event(
         ot_loc = pu.utc_save_str(o.time)
         evtlat_loc = str(roundhalf(o.latitude))
         evtlon_loc = str(roundhalf(o.longitude))
-        tmp.folder = os.path.join(
+        evt_folder = os.path.join(
             rawloc, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
 
         # create folder for each event
-        os.makedirs(tmp.folder, exist_ok=True)
+        os.makedirs(evt_folder, exist_ok=True)
 
         # Check if all expected channels are in saved already
         checklist = []
@@ -155,7 +155,7 @@ def ____check_times_small_db_event(
             # Here we don't need a separate function because each event just
             # checks the existence of a file, which requires
             # no parallel access.
-            checklist.append(wav_in_db(net, stat, '*', _channel))
+            checklist.append(wav_in_db(net, stat, '*', _channel, evt_folder))
 
         if all(checklist):
             logger.info(
@@ -787,10 +787,6 @@ def downloadwav(
 
     """
 
-    # needed to check whether data is already in the asdf
-    global asdfsave
-    asdfsave = saveasdf
-
     # Register the data centres so that the error handlers can retry
     # failed downloads with other clients.
     tmp.set_clients(clients)
@@ -849,11 +845,34 @@ def downloadwav(
         evt_id = pu.utc_save_str(origin_time)
         evtlat_loc = str(roundhalf(origin.latitude))
         evtlon_loc = str(roundhalf(origin.longitude))
-        tmp.folder = os.path.join(
+        evt_folder = os.path.join(
             rawloc, '%s_%s_%s' % (evt_id, evtlat_loc, evtlon_loc))
 
         # create folder for each event
-        os.makedirs(tmp.folder, exist_ok=True)
+        os.makedirs(evt_folder, exist_ok=True)
+
+        # The MassDownloader calls back into this function for every chunk
+        # it considers. It is defined here as a closure so that it can
+        # access the current event's folder without module-level globals.
+        def get_mseed_storage(
+            network: str, station: str, location: str, channel: str,
+                starttime: UTCDateTime, endtime: UTCDateTime) -> str:
+            """Stores the files and checks if files are already downloaded"""
+            # Returning True means that neither the data nor the StationXML
+            # file will be downloaded.
+            if saveasdf:
+                if wav_in_hdf5(
+                        os.path.join(evt_folder, os.pardir),
+                        network, station, location, channel):
+                    return True
+            else:
+                if wav_in_db(
+                        network, station, location, channel, evt_folder):
+                    return True
+
+            # If a string is returned the file will be saved in that
+            # location.
+            return os.path.join(evt_folder, "%s.%s.mseed" % (network, station))
 
         # Circular domain around the epicenter. This module also offers
         # rectangular and global domains. More complex domains can be
@@ -937,27 +956,6 @@ def downloadwav(
         mseed_to_hdf5(rawloc, save_statxml=True, statloc=statloc)
         fdsn_mass_logger.info('...Done')
         statxml_to_hdf5(rawloc, statloc)
-    tmp.folder = "finished"  # removes the restriction for preprocess.py
-
-
-def get_mseed_storage(
-    network: str, station: str, location: str, channel: str,
-        starttime: UTCDateTime, endtime: UTCDateTime) -> str:
-    """Stores the files and checks if files are already downloaded"""
-    # Returning True means that neither the data nor the StationXML file
-    # will be downloaded.
-
-    if asdfsave:
-        if wav_in_hdf5(
-                os.path.join(tmp.folder, os.pardir),
-                network, station, location, channel):
-            return True
-    else:
-        if wav_in_db(network, station, location, channel):
-            return True
-
-    # If a string is returned the file will be saved in that location.
-    return os.path.join(tmp.folder, "%s.%s.mseed" % (network, station))
 
 
 def get_stationxml_storage(network: str, station: str, statloc: str):
@@ -974,10 +972,11 @@ def get_stationxml_storage(network: str, station: str, statloc: str):
 
 
 def wav_in_db(
-        network: str, station: str, location: str, channel: str) -> bool:
+        network: str, station: str, location: str, channel: str,
+        folder: str) -> bool:
 
     """Checks if waveform is already downloaded."""
-    path = os.path.join(tmp.folder, "%s.%s.mseed" % (network, station))
+    path = os.path.join(folder, "%s.%s.mseed" % (network, station))
 
     if os.path.isfile(path):
         st = read(path)

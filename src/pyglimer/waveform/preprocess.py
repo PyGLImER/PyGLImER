@@ -68,7 +68,6 @@ def preprocess(
 
         Only starts after all waveforms of the event have been
         downloaded by download.py.
-        (checked over the dynamic variables prepro_folder and tmp.folder)
 
         Saves preprocessed waveform files.
         Creates info file to save parameters.
