@@ -32,34 +32,10 @@ from pyglimer import constants
 from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.database.raw import RawDatabase
 from pyglimer.utils.log import create_mpi_logger
-from .qc import qcp, qcs
+from .preproc_utils import SNRError, StreamLengthError, rotate_and_snr_qc, \
+    set_station_info
 from .rotate import rotate_LQT_min, rotate_PSV
 from ..rf.create import RFStream, createRF
-
-
-# program-specific Exceptions
-class SNRError(Exception):
-    """raised when the SNR is too high"""
-    # Constructor method
-
-    def __init__(self, value):
-        self.value = value
-    # __str__ display function
-
-    def __str__(self):
-        return repr(self.value)
-
-
-class StreamLengthError(Exception):
-    """raised when stream has fewer than 3 components"""
-    # Constructor method
-
-    def __init__(self, value):
-        self.value = value
-    # __str__ display function
-
-    def __str__(self):
-        return repr(self.value)
 
 
 class ProgressParallel(Parallel):
@@ -440,51 +416,13 @@ def __rotate_qc(
     REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
     """
 
-    st.rotate(method='->ZNE', inventory=station_inv)
+    st, crit, f, noisemat, dt, sampling_f = rotate_and_snr_qc(
+        phase, st, station_inv, baz, tz)
 
-    st.rotate(method='NE->RT', inventory=station_inv,
-              back_azimuth=baz)
-    st.normalize()
+    set_station_info(infodict, network, station, station_inv, dt, sampling_f)
 
-    # Sometimes streams contain more than 3 traces:
-    if st.count() > 3:
-        stream = {}
-        for tr in st:
-            stream[tr.stats.component] = tr
-        if "Z" in stream:
-            st = Stream([stream["Z"], stream["R"], stream["T"]])
-        elif "3" in stream:
-            st = Stream([stream["3"], stream["R"], stream["T"]])
-        del stream
-
-    # SNR CRITERIA
-    dt = st[0].stats.delta  # sampling interval
-    sampling_f = st[0].stats.sampling_rate
-
-    if phase[-1] == "P":
-        st, crit, f, noisemat = qcp(st, dt, sampling_f, tz)
-        if not crit:
-            infodict['dt'] = dt
-            infodict['sampling_rate'] = sampling_f
-            infodict['network'] = network
-            infodict['station'] = station
-            infodict['statlat'] = station_inv[0][0][0].latitude
-            infodict['statlon'] = station_inv[0][0][0].longitude
-            infodict['statel'] = station_inv[0][0][0].elevation
-            raise SNRError('QC rejected %s' % np.array2string(noisemat))
-
-    elif phase[-1] == "S":
-        st, crit, f, noisemat = qcs(st, dt, sampling_f, tz)
-
-        if not crit:
-            infodict['dt'] = dt
-            infodict['sampling_rate'] = sampling_f
-            infodict['network'] = network
-            infodict['station'] = station
-            infodict['statlat'] = station_inv[0][0][0].latitude
-            infodict['statlon'] = station_inv[0][0][0].longitude
-            infodict['statel'] = station_inv[0][0][0].elevation
-            raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    if not crit:
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
 
     # WRITE AN INFO FILE
     append_inf = [
@@ -509,14 +447,6 @@ def __rotate_qc(
     # Check if values are already in dict
     for key, value in append_inf:
         infodict.setdefault(key, []).append(value)
-
-    infodict['dt'] = dt
-    infodict['sampling_rate'] = sampling_f
-    infodict['network'] = network
-    infodict['station'] = station
-    infodict['statlat'] = station_inv[0][0][0].latitude
-    infodict['statlon'] = station_inv[0][0][0].longitude
-    infodict['statel'] = station_inv[0][0][0].elevation
 
     logger.info(f"Stream accepted {ot_fiss}. Preprocessing successful")
 
