@@ -23,6 +23,7 @@ import os
 import pickle
 import logging
 import time
+import warnings
 
 from copy import deepcopy
 from typing import List, Tuple
@@ -284,7 +285,9 @@ class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin):
             time domain are. The default is 'output/waveforms/RF.
         :type rfloc: str, optional
         :param in_format: **INPUT FORMAT** of receiver functions. Either
-            `'sac'` or `'hdf5'`. Defaults to 'hdf5'.
+            `'sac'` or `'hdf5'`. Defaults to 'hdf5'. **`'sac'` is
+            deprecated** and will be removed in a future release; convert
+            your receiver functions to the hdf5 database format instead.
         :type in_format: str, optional
         :param preproloc: Parental folder containing the preprocessed mseeds.
             Only needed if option geocoords is used. The default is
@@ -499,6 +502,11 @@ code if you want to filter by station")
                 latb, lonb, filt, endi, mc_backend)
 
         elif in_format.lower() == 'sac':
+            warnings.warn(
+                'Stacking from SAC files is deprecated and will be removed '
+                'in a future release. Convert your receiver functions to '
+                'the hdf5 database format (in_format="h5") instead.',
+                DeprecationWarning, stacklevel=2)
             self._create_ccp_from_sac(
                 streams, multiple, append_pp, n_closest_points, vel_model,
                 latb, lonb, filt, endi, mc_backend)
