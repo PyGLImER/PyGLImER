@@ -590,17 +590,17 @@ code if you want to filter by station")
                 else:
                     self._unpack_output(kk, jj, datal)
 
-            # Gather results
+            # Gather results. mpi4py's buffer-map collectives infer the
+            # datatype from the numpy array, which keeps the integer hit
+            # counters intact (the former explicit MPI.DOUBLE declarations
+            # mismatched the int dtype of illum/illumm).
             self.N = comm.allreduce(self.N, op=MPI.SUM)
-            comm.Allreduce(MPI.IN_PLACE, [self.illum, MPI.DOUBLE], op=MPI.SUM)
-            comm.Allreduce(MPI.IN_PLACE, [self.bins, MPI.DOUBLE], op=MPI.SUM)
+            self.illum = comm.allreduce(self.illum, op=MPI.SUM)
+            self.bins = comm.allreduce(self.bins, op=MPI.SUM)
             if multiple:
-                comm.Allreduce(
-                    MPI.IN_PLACE, [self.illumm, MPI.DOUBLE], op=MPI.SUM)
-                comm.Allreduce(
-                    MPI.IN_PLACE, [self.bins_m1, MPI.DOUBLE], op=MPI.SUM)
-                comm.Allreduce(
-                    MPI.IN_PLACE, [self.bins_m2, MPI.DOUBLE], op=MPI.SUM)
+                self.illumm = comm.allreduce(self.illumm, op=MPI.SUM)
+                self.bins_m1 = comm.allreduce(self.bins_m1, op=MPI.SUM)
+                self.bins_m2 = comm.allreduce(self.bins_m2, op=MPI.SUM)
 
         self.logger.info('Number of receiver functions used: '+str(self.N))
 
@@ -788,11 +788,14 @@ code if you want to filter by station")
         """
         Unpack the output of the kdtree and stack them into the CCP object.
         Use this function if `multiple=True`
+
+        .. note::
+            The RF count ``self.N`` is accounted by the callers
+            (``_unpack_joblib_output`` and the MPI loop) from the RF count
+            returned by ``_create_ccp_from_hdf5``. This method must not
+            modify it.
         """
         for k, j, data, datam1, datam2 in zip(kk, jj, datal, datalm1, datalm2):
-            if 0 in j:
-                # Count RFs
-                self.N += self.N
             self.bins[k, j] = self.bins[k, j] + data[j]
 
             # hit counter + 1
@@ -818,17 +821,18 @@ code if you want to filter by station")
         """
         Unpack the output of the kdtree and stack them into the CCP object.
         Use this function if `multiple=False`.
+
+        .. note::
+            The RF count ``self.N`` is accounted by the callers
+            (``_unpack_joblib_output`` and the MPI loop) from the RF count
+            returned by ``_create_ccp_from_hdf5``. This method must not
+            modify it.
         """
-        # Count RFs
         for k, j, data in zip(kk, jj, datal):
             self.bins[k, j] = self.bins[k, j] + data[j]
 
             # hit counter + 1
             self.illum[k, j] = self.illum[k, j] + 1
-
-            # We only add the RF once
-            if 0 in j:
-                self.N += self.N
 
     def multicore_stack(
         self, stream: List[str], append_pp: bool, n_closest_points: int,
@@ -935,10 +939,13 @@ code if you want to filter by station")
             # Wrong stations codes can raise this
             self.logger.warning(e)
             return
-        except Exception as e:
-            # Just so the script does not interrupt. Did not occur up
-            # to now
-            self.logger.exception(e)
+        except (ValueError, IndexError, np.linalg.LinAlgError) as e:
+            # Interpolation/migration failures on malformed RFs. Skip the
+            # RF, but log with traceback so systematic failures remain
+            # visible; anything else propagates and kills the stack loudly.
+            self.logger.exception(
+                'Failed to migrate RF %s.%s: %s',
+                rfst[0].stats.network, rfst[0].stats.station, e)
             return
 
         lat = np.array(rf.stats.pp_latitude)

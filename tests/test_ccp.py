@@ -111,6 +111,24 @@ class TestProcessRF(CCPStackTest):
         self.assertGreater(k.size, 0)
         self.assertLessEqual(k.max(), st.bins.shape[0])
 
+    def test_unpack_output_stacks_and_leaves_N(self):
+        st = self.st
+        st.binrad = 2.3
+        st.binrad_eucl = epi2euc(st.binrad)
+        # Two RFs; data arrays are indexed by depth index, so span max(j)
+        kk = [np.zeros(3, dtype=int), np.ones(3, dtype=int)]
+        jj = [np.array([0, 1, 2]), np.array([0, 5, 10])]
+        datal = [np.arange(11, dtype=float), 2 * np.arange(11, dtype=float)]
+        st._unpack_output(kk, jj, datal)
+        # Stacking and hit counting happened
+        self.assertEqual(st.illum[0, 0], 1)
+        self.assertEqual(st.illum[1, 0], 1)
+        self.assertEqual(st.bins[0, 2], 2.0)
+        # The former `self.N += self.N` here was dead code that double-
+        # counted once "fixed"; N is owned by the callers via the returned
+        # RF count, so unpacking must leave it untouched
+        self.assertEqual(st.N, 0)
+
     def test_process_rftr_append_pp(self):
         st = self.st
         st.binrad = 2.3

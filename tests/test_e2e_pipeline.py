@@ -177,6 +177,8 @@ class TestSyntheticPipeline(unittest.TestCase):
             station='SYNT')
         # both RFs were binned and illuminated the stack
         self.assertGreater(st.illum.sum(), 0)
+        # N counts the RFs that reached the surface depth index
+        self.assertEqual(st.N, 2)
         self.assertTrue(np.isfinite(st.ccp).all())
         # conclude_ccp ran inside compute_stack
         self.assertTrue(hasattr(st, 'ccp'))
