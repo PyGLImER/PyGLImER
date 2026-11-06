@@ -42,7 +42,10 @@ def fibonacci_sphere(epi: float = 1):
     # distance d
     d = 2 * np.sin(epi / 180 * np.pi / 2)
     samples = int(np.round(1 / (d / np.sqrt(10)) ** 2))
-    # Vectorised (bit-identical to the former per-point loop)
+    # Vectorised. Numerically equivalent to the former per-point loop
+    # (identical per-element operations; the array form of y**2 can
+    # differ from libm's pow by a few ulp on a small fraction of points,
+    # which is far below the precision of any downstream computation)
     i = np.arange(samples)
     offset = 2. / samples
     increment = np.pi * (3. - np.sqrt(5.))

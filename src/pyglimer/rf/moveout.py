@@ -341,8 +341,11 @@ def dt_table_3D(
 
     vpf, vsf = model.query(lat, lon, 0)
 
-    q_a[0] = np.sqrt(vpf**-2 - p**2)
-    q_b[0] = np.sqrt(vsf**-2 - p**2)
+    # NaNs from a supercritical ray parameter are expected here and
+    # handled by the caller (see dt_table)
+    with np.errstate(invalid='ignore'):
+        q_a[0] = np.sqrt(vpf**-2 - p**2)
+        q_b[0] = np.sqrt(vsf**-2 - p**2)
 
     # Numerical integration
     for kk, _ in enumerate(htab_f[1:]):

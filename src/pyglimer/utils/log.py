@@ -61,6 +61,16 @@ def create_mpi_logger(logger: logging.Logger, rank: int) -> logging.Logger:
     lvl = logger.level
     rankstr = str(rank).zfill(3)
     name = '%srank%s' % (logger.name, rankstr)
+    # The FileHandler may be configured on an ancestor logger (e.g. the
+    # FileHandler for request.log lives on 'pyglimer.request', not on the
+    # child logger that reaches this function)
+    while not logger.hasHandlers() or not (
+            any(hasattr(h, 'baseFilename') for h in logger.handlers)):
+        if logger.name == 'root':
+            raise ValueError(
+                'The logger used as input has to have a configured FileHandler.'
+            )
+        logger = logger.parent
     fn = None
     for h in logger.handlers:
         if hasattr(h, 'baseFilename'):

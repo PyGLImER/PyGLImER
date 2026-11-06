@@ -105,8 +105,11 @@ class TestProcessRF(CCPStackTest):
             rfst, None, 'iasp91.dat', None, None, False, False, 5)
         # Depth-migrated RF has the length of the stack's depth axis
         self.assertEqual(data.shape, (851,))
-        self.assertEqual(k.shape, data.shape[:0] or k.shape)  # any shape ok
-        self.assertGreaterEqual(k.size, 0)
+        # k holds one bin index per finite piercing point (one per depth
+        # sample per RF, so it can exceed the depth-axis length); every
+        # index must point at an existing bin
+        self.assertGreater(k.size, 0)
+        self.assertLessEqual(k.max(), st.bins.shape[0])
 
     def test_process_rftr_append_pp(self):
         st = self.st
