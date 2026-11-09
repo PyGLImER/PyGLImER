@@ -81,6 +81,24 @@ class TestComplexModel(unittest.TestCase):
             self.model.write('thisfile')
             pickle_mock.assert_called_once_with(self.model, mf(), mock.ANY)
 
+    def test_flatten_cache_key(self):
+        # Regression: load_gyps' model cache used to ignore the flatten
+        # flag, so a full model compiled with flatten=False was silently
+        # reused as the parent of a submodel requested with the default
+        # flatten=True (making results depend on what was loaded before).
+        latb, lonb = (-10, 10), (-10, 10)
+        sub_cart = cvm.load_gyps(latb=latb, lonb=lonb, flatten=False)
+        sub_flat = cvm.load_gyps(latb=latb, lonb=lonb)
+        lat = np.random.randint(-9, 9) + np.random.randint(-49, 49)/100
+        lon = np.random.randint(-9, 9) + np.random.randint(-49, 49)/100
+        z = np.random.randint(1, 750)
+        # A submodel inherits the velocity values of its parent: spherical
+        # for flatten=False, earth-flattened (Shearer) for flatten=True
+        vp, vs = sub_cart.query(lat, lon, z)
+        vpf, vsf = sub_flat.query(lat, lon, z)
+        self.assertAlmostEqual(vp*6371/(6371-z), vpf)
+        self.assertAlmostEqual(vs*6371/(6371-z), vsf)
+
 
 class TestAVVModel(unittest.TestCase):
     def setUp(self):
