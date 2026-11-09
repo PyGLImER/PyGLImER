@@ -34,6 +34,7 @@ from scipy.signal.windows import gaussian
 from pyglimer.ccp.compute import bin as ccpbin
 from pyglimer.rf import create
 from pyglimer.rf.deconvolve import it, multitaper as mt
+from pyglimer.rf.moveout import dt_table, dt_table_3D
 from pyglimer.utils import signalproc as sp
 from pyglimer.utils.SphericalNN import SphericalNN
 from pyglimer.waveform import rotate
@@ -104,6 +105,39 @@ class TestGoldenMoveout(unittest.TestCase):
         _golden(
             'moveout_multiple', z2=z2, RF2=mo.data,
             RFm1=np.asarray(RFm1.data), RFm2=np.asarray(RFm2.data))
+
+
+class TestGoldenMoveoutTables(unittest.TestCase):
+    """Pin dt_table/dt_table_3D directly (moveout() pins them indirectly,
+    but only for a single ray parameter/phase combination)."""
+
+    def test_dt_table_1d(self):
+        for tag, args in {
+            'p_mult': (6.4, 'iasp91.dat', 'P', 500., True),
+            's_nomult': (12.0, 'iasp91.dat', 'S', 100., False),
+            'p_raysum': (6.4, 'raysum.dat', 'P', 0., False, True),
+        }.items():
+            htab, dt, delta, m1, m2 = dt_table(*args)
+            arrays = {'htab': htab, 'dt': dt, 'delta': delta}
+            if m1 is not None:
+                arrays['m1'] = m1
+            if m2 is not None:
+                arrays['m2'] = m2
+            _golden('dt_table_1d_' + tag, **arrays)
+
+    def test_dt_table_3d(self):
+        for tag, args in {
+            'p': (6.4, 'P', 10., 20., 30., 500., (0., 30.), (10., 40.), True),
+            's': (12.0, 'S', 10., 20., 30., 100., (0., 30.), (10., 40.),
+                  False),
+        }.items():
+            htab, dt, delta, m1, m2 = dt_table_3D(*args)
+            arrays = {'htab': htab, 'dt': dt, 'delta': delta}
+            if m1 is not None:
+                arrays['m1'] = m1
+            if m2 is not None:
+                arrays['m2'] = m2
+            _golden('dt_table_3d_' + tag, **arrays)
 
 
 class TestGoldenMultitaper(unittest.TestCase):
