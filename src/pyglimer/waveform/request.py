@@ -472,7 +472,7 @@ class Request(object):
 
     def preprocess(
         self, client: str = 'joblib',
-            hc_filt: float or int or None = None):
+            hc_filt: float or int or None = None, n_jobs: int = -1):
         """
         Preprocess an existing database. With parameters defined in self.
 
@@ -485,6 +485,10 @@ class Request(object):
             set in :func:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`).
             Value for PRFs should usually be lower than 2 Hz and for SRFs lower
             than .4 Hz, by default None.
+        n_jobs : int, optional
+            Number of parallel jobs for the ``'joblib'`` backend (see
+            :func:`joblib.Parallel`). ``-1`` (the default) uses all
+            cores. Ignored for the ``'mpi'`` and ``'single'`` backends.
         """
         preprocess(
             self.phase, self.rot, self.pol, 0.05, self.evtcat, self.model,
@@ -492,4 +496,4 @@ class Request(object):
             self.preproloc, self.rfloc, self.deconmeth, hc_filt,
             netrestr=self.network, statrestr=self.station, client=client,
             saveasdf=self.h5, remove_response=self.remove_response,
-            clients=self.waveform_client)
+            clients=self.waveform_client, n_jobs=n_jobs)

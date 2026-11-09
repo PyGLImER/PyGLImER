@@ -47,7 +47,7 @@ def preprocess(
     preproloc: str, rfloc: str, deconmeth: str, hc_filt: float or None,
     saveasdf: bool = False, netrestr=None, statrestr=None,
         client: str = 'joblib', remove_response: bool = True,
-        clients=None):
+        clients=None, n_jobs: int = -1):
     """
      Preprocesses waveforms to create receiver functions
 
@@ -103,6 +103,10 @@ def preprocess(
         from (e.g. ``['IRIS', 'ORFEUS']``). The error handlers use this
         list to redownload incomplete waveforms. ``None`` (the default)
         keeps the previously registered clients, if any.
+    n_jobs : int, optional
+        Number of parallel jobs for the ``'joblib'`` backend (see
+        :func:`joblib.Parallel`). ``-1`` (the default) uses all cores.
+        Ignored for the ``'mpi'`` and ``'single'`` backends.
 
     Returns
     -------
@@ -126,7 +130,8 @@ def preprocess(
         preprocessh5(
             phase, rot, pol, taper_perc, model, taper_type, tz, ta,
             rawloc, rfloc, deconmeth, hc_filt, netrestr,
-            statrestr, logger, rflogger, client, event_cat, remove_response)
+            statrestr, logger, rflogger, client, event_cat, remove_response,
+            n_jobs)
         return
     # else:
     # Here, we work with all available cores to speed things up
@@ -160,7 +165,7 @@ def preprocess(
 
         if client.lower() == 'joblib':
             logger.debug('USING JOBLIB AS BACKEND')
-            out = Parallel(n_jobs=-1, backend='multiprocessing')(
+            out = Parallel(n_jobs=n_jobs, backend='multiprocessing')(
                 delayed(__event_loop)(
                     cfg, event, single_core=False)
                 for event in tqdm(evtcat))

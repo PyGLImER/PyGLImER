@@ -53,6 +53,55 @@ def _neg_depths(zmin: float, step: float = .1) -> np.ndarray:
     return neg
 
 
+def _conversion_grid(el: float) -> np.ndarray:
+    """
+    Hypothetical conversion-depth grid [km] shared by ``dt_table`` and
+    ``dt_table_3D``: negative depths down to the station elevation
+    (rounded to 100 m) followed by the regular grid from 0 to ``maxz``.
+    """
+    if el > 0:
+        return np.hstack(  # spherical
+            (_neg_depths(-round(el/1000, 1)),
+             np.arange(0, maxz+res, res)))
+    return np.arange(-round(el/1000), maxz+res, res)
+
+
+def _flat_earth_grid(htab: np.ndarray) -> tuple:
+    """
+    Flat-earth transformed depths and the resulting layer thicknesses
+    (Shearer's earth-flattening approximation).
+    """
+    htab_f = -R_EARTH*np.log((R_EARTH-htab)/R_EARTH)  # flat earth depth
+    return htab_f, np.diff(htab_f)  # earth flattened resolution
+
+
+def _multiple_times(
+        dt_a: np.ndarray, dt_b: np.ndarray,
+        multiple: bool) -> tuple:
+    """
+    Travel-time tables for the multiples (mphase 1 is PPs for P, mphase 2
+    is PSs), truncated at 100 s. ``None, None`` if ``multiple`` is False.
+
+    .. note::
+        Assumes that the elevation is the same as at the station location
+        - possible weakspot! Maybe a lookup should be done instead?
+    """
+    if not multiple:
+        return None, None
+    dt_mphase1 = dt_b + dt_a
+    dt_mphase2 = 2*dt_b
+    # Truncate the travel time table for multiples
+    try:
+        dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 >= 100)[0][0]]
+    except IndexError:
+        pass
+    try:
+        dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
+    except IndexError:
+        pass
+    return dt_mphase1, dt_mphase2
+
+
 def moveout(
     data: np.ndarray, st: obspy.core.trace.Stats, fname: str, latb: tuple,
         lonb: tuple, taper: bool, multiple: bool = False):
@@ -314,19 +363,13 @@ def dt_table_3D(
     model = load_gyps(latb=latb, lonb=lonb)
 
     # hypothetical conversion depth tables
-    if el > 0:
-        htab = np.hstack(  # spherical
-            (_neg_depths(-round(el/1000, 1)),
-             np.arange(0, maxz+res, res)))
-    else:
-        htab = np.arange(-round(el/1000), maxz+res, res)
+    htab = _conversion_grid(el)
 
-    htab_f = -R_EARTH*np.log((R_EARTH-htab)/R_EARTH)  # flat earth depth
+    htab_f, res_f = _flat_earth_grid(htab)
 
     if test:  # then cartesian
         htab_f = htab
-
-    res_f = np.diff(htab_f)  # earth flattened resolution
+        res_f = np.diff(htab)
 
     # travel times for alpha (P) and beta (S)
     dt_a = np.zeros(np.shape(htab))
@@ -393,26 +436,7 @@ def dt_table_3D(
     # Find travel times for multiples
     # We will have to assume that the multiples don't cross into a different
     # bin of the velocity model. Else the computation would be blown up crazily
-    if multiple:
-        # This assumes that the elevation is the same as at the station
-        # location possible weakspot! Maybe I should do a lookup?
-        # mphase 1 is PPs for P
-        # mphase 2 is PSs
-        dt_mphase1 = dt_b + dt_a
-        dt_mphase2 = 2*dt_b
-
-        # Truncate The travel time table for multiples
-        try:
-            dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 >= 100)[0][0]]
-        except IndexError:
-            pass
-        try:
-            dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
-        except IndexError:
-            pass
-    else:
-        dt_mphase1 = None
-        dt_mphase2 = None
+    dt_mphase1, dt_mphase2 = _multiple_times(dt_a, dt_b, multiple)
 
     return htab[:len(delta)], dt, delta, dt_mphase1, dt_mphase2
 
@@ -473,16 +497,9 @@ def dt_table(
     z = np.append(z, maxz)
 
     # hypothetical conversion depth tables
-    if el > 0:
-        htab = np.hstack(  # spherical
-            (_neg_depths(-round(el/1000, 1)),
-             np.arange(0, maxz+res, res)))
-    else:
-        htab = np.arange(-round(el/1000), maxz+res, res)
+    htab = _conversion_grid(el)
 
-    htab_f = -R_EARTH*np.log((R_EARTH-htab)/R_EARTH)  # flat earth depth
-
-    res_f = np.diff(htab_f)  # earth flattened resolution
+    htab_f, res_f = _flat_earth_grid(htab)
 
     if fname == "raysum.dat" or debug:
         htab_f = htab
@@ -527,25 +544,7 @@ def dt_table(
 
     # Find travel times for multiples
     # In the 1D vel model ppoint don't play any role for multiples
-    if multiple:
-        # This assumes that the elevation is the same as at the station
-        # location possible weakspot! Maybe I should do a lookup?
-        # mphase 1 is PPs for P
-        # mphase 2 is PSs
-        dt_mphase1 = dt_b + dt_a
-        dt_mphase2 = 2*dt_b
-        # Truncate The travel time table for multiples
-        try:
-            dt_mphase1 = dt_mphase1[:np.where(dt_mphase1 >= 100)[0][0]]
-        except IndexError:
-            pass
-        try:
-            dt_mphase2 = dt_mphase2[:np.where(dt_mphase2 >= 100)[0][0]]
-        except IndexError:
-            pass
-    else:
-        dt_mphase1 = None
-        dt_mphase2 = None
+    dt_mphase1, dt_mphase2 = _multiple_times(dt_a, dt_b, multiple)
 
     return htab[:index], dt[:index], delta[:index], dt_mphase1, dt_mphase2
 

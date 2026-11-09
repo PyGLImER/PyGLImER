@@ -35,6 +35,7 @@ from pyglimer.ccp.compute import bin as ccpbin
 from pyglimer.rf import create
 from pyglimer.rf.deconvolve import it, multitaper as mt
 from pyglimer.rf.moveout import dt_table, dt_table_3D
+from pyglimer.utils import createvmodel as cvm
 from pyglimer.utils import signalproc as sp
 from pyglimer.utils.SphericalNN import SphericalNN
 from pyglimer.waveform import rotate
@@ -126,6 +127,13 @@ class TestGoldenMoveoutTables(unittest.TestCase):
             _golden('dt_table_1d_' + tag, **arrays)
 
     def test_dt_table_3d(self):
+        # test_createvmodel caches the full GyPSuM model with
+        # flatten=False. load_gyps' cache key ignores the flatten flag,
+        # so without this reset the submodel here would silently be
+        # derived from the non-flattened model and the table would
+        # differ depending on test order. Production (dt_table_3D)
+        # always uses the default flatten=True.
+        cvm._MODEL_CACHE.clear()
         for tag, args in {
             'p': (6.4, 'P', 10., 20., 30., 500., (0., 30.), (10., 40.), True),
             's': (12.0, 'S', 10., 20., 30., 100., (0., 30.), (10., 40.),

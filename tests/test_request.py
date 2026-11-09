@@ -20,6 +20,7 @@ import logging
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 
 from obspy import Catalog, UTCDateTime
 from obspy.core.event import Event
@@ -113,6 +114,18 @@ class TestRequestInit(RequestTest):
         self._make()
         log = logging.getLogger('pyglimer.request')
         self.assertEqual(len(log.handlers), 2)  # file + console
+
+
+class TestRequestPreprocess(RequestTest):
+    def test_n_jobs_forwarded(self):
+        # Request.preprocess must expose n_jobs and forward it to
+        # pyglimer.waveform.preprocess.preprocess
+        with mock.patch('pyglimer.waveform.request.preprocess') as pp:
+            req = self._make()
+            req.preprocess(n_jobs=4)
+            self.assertEqual(pp.call_args.kwargs['n_jobs'], 4)
+            req.preprocess()
+            self.assertEqual(pp.call_args.kwargs['n_jobs'], -1)
 
 
 if __name__ == "__main__":

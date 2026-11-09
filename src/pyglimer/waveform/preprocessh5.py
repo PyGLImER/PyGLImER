@@ -54,7 +54,8 @@ def preprocessh5(
     model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
     rawloc: str, rfloc: str, deconmeth: str, hc_filt: float, netrestr: str,
     statrestr: str, logger: logging.Logger, rflogger: logging.Logger,
-        client: str, evtcat: obspy.Catalog, remove_response: bool):
+        client: str, evtcat: obspy.Catalog, remove_response: bool,
+        n_jobs: int = -1):
     """
     Preprocess files saved in hdf5 (pyasdf) format. Will save the computed
     receiver functions in hdf5 format as well.
@@ -98,6 +99,10 @@ def preprocessh5(
     :type client: str
     :param evtcat: event Catalogue
     :type evtcat: obspy.catalog
+    :param n_jobs: Number of parallel jobs for the joblib backend (see
+        :func:`joblib.Parallel`). ``-1`` uses all cores. Ignored for the
+        mpi and single backends.
+    :type n_jobs: int, optional
     :raises NotImplementedError: For uknowns multiprocessing backends.
     """
     os.makedirs(rfloc, exist_ok=True)
@@ -133,7 +138,7 @@ def preprocessh5(
                 remove_response)
 
     elif client.lower() == 'joblib':
-        ProgressParallel(n_jobs=-1,)(
+        ProgressParallel(n_jobs=n_jobs,)(
             delayed(_preprocessh5_single)(
                 phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
                 deconmeth, hc_filt, logger, rflogger,
