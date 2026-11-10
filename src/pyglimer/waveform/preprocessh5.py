@@ -32,8 +32,8 @@ from pyglimer import constants
 from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.database.raw import RawDatabase
 from pyglimer.utils.log import create_mpi_logger
-from .preproc_utils import SNRError, append_event_info, rotate_and_snr_qc, \
-    set_station_info
+from .preproc_utils import PreprocessConfig, SNRError, append_event_info, \
+    rotate_and_snr_qc, set_station_info
 from .rotate import rotate_LQT_min, rotate_PSV
 from ..rf.create import RFStream, createRF
 
@@ -134,6 +134,16 @@ def preprocessh5(
     logger.debug(f'GLOBSTRING: {globstr}')
     logger.debug(f'# of Files found: {len(flist)}')
 
+    # Static settings passed down through the event and waveform loops
+    # (the error-handler and mseed-output fields do not apply to the hdf5
+    # pipeline)
+    cfg = PreprocessConfig(
+        phase=phase, rot=rot, pol=pol, taper_perc=taper_perc,
+        taper_type=taper_type, model=model, logger=logger, rflogger=rflogger,
+        eh=False, tz=tz, ta=ta, statloc=None, rawloc=rawloc, preproloc=None,
+        rfloc=rfloc, deconmeth=deconmeth, hc_filt=hc_filt, netrestr=netrestr,
+        statrestr=statrestr, remove_response=remove_response)
+
     # Perform processing depending on client
     if client.lower() == 'mpi':
         from mpi4py import MPI
@@ -146,27 +156,19 @@ def preprocessh5(
         ind = np.arange(len(flist))[ind]
 
         # get new MPI compatible loggers
-        logger = create_mpi_logger(logger, rank)
-        rflogger = logging.getLogger("%s.RF" % logger.name)
+        cfg.logger = create_mpi_logger(cfg.logger, rank)
+        cfg.rflogger = logging.getLogger("%s.RF" % cfg.logger.name)
         for ii in ind:
-            _preprocessh5_single(
-                phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, logger, rflogger, flist[ii], evtcat,
-                remove_response)
+            _preprocessh5_single(cfg, flist[ii], evtcat)
 
     elif client.lower() == 'joblib':
         ProgressParallel(n_jobs=n_jobs,)(
-            delayed(_preprocessh5_single)(
-                phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, logger, rflogger,
-                f, evtcat, remove_response) for f in tqdm(flist))
+            delayed(_preprocessh5_single)(cfg, f, evtcat)
+            for f in tqdm(flist))
 
     elif client.lower() == 'single':
         for f in tqdm(flist):
-            _preprocessh5_single(
-                phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, logger, rflogger,
-                f, evtcat, remove_response)
+            _preprocessh5_single(cfg, f, evtcat)
     else:
         raise NotImplementedError(
             'Unknown multiprocessing backend %s.' % client
@@ -174,17 +176,22 @@ def preprocessh5(
 
 
 def _preprocessh5_single(
-        phase: str, rot: str, pol: str, taper_perc: float,
-        model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
-        rfloc: str, deconmeth: str, hc_filt: float,
-        logger: logging.Logger, rflogger: logging.Logger,
-        hdf5_file: str, evtcat: obspy.Catalog, remove_response: bool):
+        cfg: PreprocessConfig, hdf5_file: str, evtcat: obspy.Catalog):
     """
     Single core processing of one single hdf5 file.
 
     .. warning:: Should not be called use
         :func:`~seismic.waveform.preprocessh5.preprocess_h5`!
     """
+    # Shorthand for the config settings (the loop body predates the
+    # config object)
+    phase = cfg.phase
+    model = cfg.model
+    tz = cfg.tz
+    ta = cfg.ta
+    rfloc = cfg.rfloc
+    logger = cfg.logger
+    rflogger = cfg.rflogger
 
     f = hdf5_file
     net, stat, _ = os.path.basename(f).split('.')
@@ -271,9 +278,8 @@ def _preprocessh5_single(
                 continue
             try:
                 rf_temp = __station_process__(
-                    st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
-                    ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
-                    distance, rayp, rayp_s_deg, toa, rej, ret, remove_response)
+                    cfg, st, inv, evt, net, stat, baz, distance, rayp,
+                    rayp_s_deg, toa, rej, ret)
             except Exception as e:
                 rflogger.exception(
                     'RF Creation failed. Waveform Data:\n'
@@ -352,13 +358,24 @@ def compute_toa(
 
 
 def __station_process__(
-    st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz, ta,  deconmeth,
-    hc_filt, logger, rflogger, net, stat, baz, distance, rayp,
-    rayp_s_deg, toa, rej: List[str], ret: List[str],
-        remove_response: bool):
+    cfg: PreprocessConfig, st, inv, evt, net, stat, baz, distance, rayp,
+    rayp_s_deg, toa, rej: List[str], ret: List[str]):
     """
     Processing that is equal for each waveform recorded on one station
     """
+    # Shorthand for the config settings (the loop body predates the
+    # config object)
+    phase = cfg.phase
+    rot = cfg.rot
+    pol = cfg.pol
+    taper_perc = cfg.taper_perc
+    taper_type = cfg.taper_type
+    ta = cfg.ta
+    deconmeth = cfg.deconmeth
+    hc_filt = cfg.hc_filt
+    rflogger = cfg.rflogger
+    remove_response = cfg.remove_response
+
     # Is the data already processed?
     origin = (evt.preferred_origin() or evt.origins[0])
     ot_fiss = UTCDateTime(origin.time).format_fissures()
@@ -381,9 +398,8 @@ def __station_process__(
     # create RF
     try:
         st, _, infodict = __rotate_qc(
-            phase, st, inv, net, stat, baz, distance, ot_fiss, evt,
-            origin.latitude, origin.longitude, origin.depth, rayp_s_deg, toa,
-            logger, infodict, tz, pol)
+            cfg, st, inv, net, stat, baz, distance, evt, ot_fiss,
+            rayp_s_deg, toa, infodict)
         if hc_filt:
             st.filter('lowpass', freq=hc_filt, zerophase=True, corners=2)
         # Rotate to LQT or PSS
@@ -432,15 +448,15 @@ def __station_process__(
 
 
 def __rotate_qc(
-    phase, st, station_inv, network, station, baz, distance, ot_fiss,
-    event, evtlat, evtlon, depth, rayp_s_deg, first_arrival, logger, infodict,
-        tz, pol):
+    cfg: PreprocessConfig, st, station_inv, network, station, baz, distance,
+        evt, ot_fiss, rayp_s_deg, first_arrival, infodict):
     """
     REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
     """
+    origin = (evt.preferred_origin() or evt.origins[0])
 
     st, crit, f, noisemat, dt, sampling_f = rotate_and_snr_qc(
-        phase, st, station_inv, baz, tz)
+        cfg.phase, st, station_inv, baz, cfg.tz)
 
     set_station_info(infodict, network, station, station_inv, dt, sampling_f)
 
@@ -449,9 +465,10 @@ def __rotate_qc(
 
     # WRITE AN INFO FILE
     append_event_info(
-        infodict, event, ot_fiss, evtlat, evtlon, depth, noisemat, f, st,
-        baz, distance, rayp_s_deg, first_arrival, extra=[['pol', pol]])
+        infodict, evt, ot_fiss, origin.latitude, origin.longitude,
+        origin.depth, noisemat, f, st, baz, distance, rayp_s_deg,
+        first_arrival, extra=[['pol', cfg.pol]])
 
-    logger.info(f"Stream accepted {ot_fiss}. Preprocessing successful")
+    cfg.logger.info(f"Stream accepted {ot_fiss}. Preprocessing successful")
 
     return st, crit, infodict

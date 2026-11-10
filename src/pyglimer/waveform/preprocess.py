@@ -333,20 +333,16 @@ def __waveform_loop(
     phase = cfg.phase
     rot = cfg.rot
     pol = cfg.pol
-    taper_perc = cfg.taper_perc
-    taper_type = cfg.taper_type
     model = cfg.model
     logger = cfg.logger
     rflogger = cfg.rflogger
     eh = cfg.eh
-    tz = cfg.tz
     ta = cfg.ta
     statloc = cfg.statloc
     preproloc = cfg.preproloc
     rfloc = cfg.rfloc
     deconmeth = cfg.deconmeth
     hc_filt = cfg.hc_filt
-    remove_response = cfg.remove_response
 
     event = evt.event
     origin_time = evt.origin_time
@@ -355,7 +351,6 @@ def __waveform_loop(
     evtlon = evt.evtlon
     depth = evt.depth
     prepro_folder = evt.prepro_folder
-    by_event = evt.by_event
 
     infodict = {}  # empty dictionary that will be dumped in a shelve file
     # at the end of the program
@@ -431,15 +426,13 @@ def __waveform_loop(
             # Check if step is already done
             if st[0].stats.sampling_rate != 10:
                 st = __cut_resample(
-                    st, logger, first_arrival, network, station, prepro_folder,
-                    filestr, taper_perc, taper_type, eh, tz, ta)
+                    cfg, st, first_arrival, network, station, prepro_folder,
+                    filestr)
 
             # Finalise preprocessing
             st, crit, infodict = __rotate_qc(
-                phase, st, station_inv, network, station, baz,
-                distance, outf, ot_fiss, event, evtlat, evtlon, depth,
-                rayp_s_deg, first_arrival, infof, logger, infodict, by_event,
-                eh, tz, statloc, remove_response)
+                cfg, evt, st, station_inv, network, station, baz,
+                distance, outf, first_arrival, rayp_s_deg, infodict)
 
         # Exceptions & logging
 
@@ -583,21 +576,21 @@ def __waveform_loop(
 
 
 def __cut_resample(
-    st: obspy.Stream, logger: logging.Logger, first_arrival: UTCDateTime,
-    network: str, station: str, prepro_folder: str, filestr: str,
-    taper_perc: float, taper_type: str, eh: bool, tz: float,
-        ta: float) -> obspy.Stream:
+    cfg: PreprocessConfig, st: obspy.Stream, first_arrival: UTCDateTime,
+        network: str, station: str, prepro_folder: str,
+        filestr: str) -> obspy.Stream:
     """Cut and resample raw file. Will overwrite original raw"""
 
     start = time.time()
+    logger = cfg.logger
 
     # Trim TO RIGHT LENGTH BEFORE AND AFTER FIRST ARRIVAL  #
     # start and endtime of stream
-    starttime = first_arrival - tz
-    endtime = first_arrival + ta
+    starttime = first_arrival - cfg.tz
+    endtime = first_arrival + cfg.ta
 
     if st.count() < 3:
-        if not eh:
+        if not cfg.eh:
             raise StreamLengthError(
                 ["The stream contains less than three traces.", filestr])
         st = redownload(network, station, starttime, endtime, st)
@@ -625,7 +618,7 @@ def __cut_resample(
     st.detrend(type='demean')
 
     # TAPER #
-    st.taper(max_percentage=taper_perc, type=taper_type,
+    st.taper(max_percentage=cfg.taper_perc, type=cfg.taper_type,
              max_length=None, side='both')
 
     # Write trimmed and resampled files into raw-file folder
@@ -647,34 +640,32 @@ def __cut_resample(
 
 
 def __rotate_qc(
-    phase: str, st: obspy.Stream, station_inv: obspy.Inventory, network: str,
-    station: str, baz: float, distance: float, outf: str, ot_fiss: str,
-    event: obspy.core.event.event.Event, evtlat: float, evtlon: float,
-    depth: float, rayp_s_deg: float, first_arrival: UTCDateTime, infof: str,
-    logger: logging.Logger, infodict: dict, by_event, eh: bool, tz: float,
-        statloc: str, remove_response: bool) -> Tuple[Stream, bool, dict]:
+    cfg: PreprocessConfig, evt: EventContext, st: obspy.Stream,
+    station_inv: obspy.Inventory, network: str, station: str, baz: float,
+    distance: float, outf: str, first_arrival: UTCDateTime,
+        rayp_s_deg: float, infodict: dict) -> Tuple[Stream, bool, dict]:
     """REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
     Bugs occur here due to station inventories without response information
     Looks like the bulk downloader sometimes donwnloads
     station inventories without response files. I could fix that here by
     redownloading the response file (alike to the 3 traces problem)"""
-    if remove_response:
+    if cfg.remove_response:
         try:
             st.attach_response(station_inv)
             st.remove_response()
         except ValueError:
             # Occurs for "No matching response file found"
 
-            if eh:
+            if cfg.eh:
                 station_inv, st = NoMatchingResponseHandler(
-                    st, network, station, statloc)
+                    st, network, station, cfg.statloc)
 
-            if not eh or not station_inv:
+            if not cfg.eh or not station_inv:
                 raise ValueError(
                     ["No matching response file found for", network, station])
 
     st, crit, f, noisemat, dt, sampling_f = rotate_and_snr_qc(
-        phase, st, station_inv, baz, tz)
+        cfg.phase, st, station_inv, baz, cfg.tz)
 
     set_station_info(infodict, network, station, station_inv, dt, sampling_f)
 
@@ -692,16 +683,16 @@ def __rotate_qc(
 
     # create softlink
     try:
-        os.symlink(outf, by_event)
+        os.symlink(outf, evt.by_event)
     except FileExistsError:
         pass
 
     # WRITE AN INFO FILE
     append_event_info(
-        infodict, event, ot_fiss, evtlat, evtlon, depth, noisemat, f, st,
-        baz, distance, rayp_s_deg, first_arrival)
+        infodict, evt.event, evt.ot_fiss, evt.evtlat, evt.evtlon, evt.depth,
+        noisemat, f, st, baz, distance, rayp_s_deg, first_arrival)
 
-    logger.info("Stream accepted. Preprocessing successful")
+    cfg.logger.info("Stream accepted. Preprocessing successful")
 
     return st, crit, infodict
 

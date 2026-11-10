@@ -72,8 +72,7 @@ class DBHandlerBase(h5py.File):
 
 
 def all_traces_recursive(
-    group: h5py._hl.group.Group, stream, pattern: str,
-        trace_cls) -> 'Stream':
+    group: h5py._hl.group.Group, stream, pattern: str, trace_cls):
     """
     Recursively, appends all traces in a h5py group to the input stream.
     In addition this will check whether the data matches a certain pattern.

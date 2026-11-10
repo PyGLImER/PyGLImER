@@ -37,6 +37,7 @@ from pyglimer.rf import create
 from pyglimer.utils import utils as pu
 from pyglimer.utils.geo_utils import reckon
 from pyglimer.waveform.preprocessh5 import _preprocessh5_single
+from pyglimer.waveform.preproc_utils import PreprocessConfig
 
 SLAT, SLON = 42.6, -71.6
 DT = 0.1
@@ -147,9 +148,13 @@ class TestSyntheticPipeline(unittest.TestCase):
             lg.setLevel(logging.CRITICAL)
             lg.addHandler(logging.NullHandler())
 
-        _preprocessh5_single(
-            'P', 'RT', 'v', 0.05, model, 'cosine', 30, 150, rfloc_phase,
-            'it', False, logger, rflogger, rawf, cat, False)
+        cfg = PreprocessConfig(
+            phase='P', rot='RT', pol='v', taper_perc=0.05, taper_type='cosine',
+            model=model, logger=logger, rflogger=rflogger, eh=False, tz=30,
+            ta=150, statloc=None, rawloc=cls.rawdir, preproloc=None,
+            rfloc=rfloc_phase, deconmeth='it', hc_filt=False, netrestr=None,
+            statrestr=None, remove_response=False)
+        _preprocessh5_single(cfg, rawf, cat)
 
     @classmethod
     def tearDownClass(cls):
