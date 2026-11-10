@@ -931,12 +931,21 @@ def downloadwav(
             mseed_to_hdf5(rawloc, False)
             jj = ii
             fdsn_mass_logger.info('...Done')
-        if fast_redownload:
+        # Rewrite the remaining event catalog as a resume checkpoint, but
+        # not for every single event (same reasoning as for the hdf5
+        # checkpoint above): already-downloaded waveforms are skipped on a
+        # re-run, so a crash costs at most the re-iteration of one
+        # checkpoint interval.
+        if fast_redownload and ii % 100 == 0:
             event_cat[ii:].write(evtfile, format="QUAKEML")
 
     # Always issues with the massdownlaoder inventory, so lets fix it here
     fdsn_mass_logger.info('Downloading all response files.....')
     download_full_inventory(statloc, clients)
+    if fast_redownload and len(event_cat):
+        # Final resume checkpoint so that the last < 100 events are
+        # recorded as done, too.
+        event_cat[ii:].write(evtfile, format="QUAKEML")
     if saveasdf:
         fdsn_mass_logger.info('Rewriting mseed and xmls to hdf5.....')
         mseed_to_hdf5(rawloc, save_statxml=True, statloc=statloc)
@@ -1035,17 +1044,3 @@ def wav_in_hdf5(
     # execute this again to check
     return wav_in_hdf5(
         rawloc, network, station, location, channel, av_data, evt_id)
-
-
-def wav_in_hdf5_no_global(
-        av_data: dict, network: str, station: str, channel: str,
-        evt_id) -> bool:
-    """Is the waveform already in the Raw hdf5 database?"""
-
-    if channel not in av_data[network][station]:
-        return False
-
-    if evt_id in av_data[network][station][channel]:
-        return True
-    else:
-        return False
