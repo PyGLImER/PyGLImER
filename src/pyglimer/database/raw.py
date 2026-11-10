@@ -441,11 +441,15 @@ def mseed_to_hdf5(
     :type statloc: str, optional
     """
 
-    # Find all miniseed related to that
-    av_mseed = glob.glob(os.path.join(rawfolder, '*', '*.mseed'))
+    # Find all miniseed related to that, grouped by station in
+    # first-appearance order (one directory scan instead of one per station)
+    all_mseed = glob.glob(os.path.join(rawfolder, '*', '*.mseed'))
+    stations = {}
+    for mseed in all_mseed:
+        net, stat, _ = os.path.basename(mseed).split('.')
+        stations.setdefault((net, stat), []).append(mseed)
 
-    # We do that for every single station
-    if len(av_mseed) == 0:
+    if not all_mseed:
         # Delete empty folders
         evt_dirs = glob.glob(os.path.join(rawfolder, '??????????????'))
         for d in evt_dirs:
@@ -454,69 +458,63 @@ def mseed_to_hdf5(
             statxml_to_hdf5(rawfolder, statloc)
         return
 
-    net, stat, _ = os.path.basename(av_mseed[0]).split('.')
+    for (net, stat), mseeds in stations.items():
 
-    h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
+        h5_file = os.path.join(rawfolder, f'{net}.{stat}.h5')
 
-    # Now, read all available files for this station
-    mseeds = glob.glob(os.path.join(rawfolder, '*', f'{net}.{stat}.mseed'))
+        # Create table of new contents
+        new_cont = {}
 
-    # Create table of new contents
-    new_cont = {}
+        with RawDatabase(h5_file) as rdb:
 
-    with RawDatabase(h5_file) as rdb:
+            for mseed in mseeds:
+                # event ID string, used to save the data in hdf5
+                evt_str = os.path.basename(os.path.dirname(mseed))
 
-        for mseed in mseeds:
-            # event ID string, used to save the data in hdf5
-            evt_str = os.path.basename(os.path.dirname(mseed))
+                try:
+                    st = read(mseed)
 
-            try:
-                st = read(mseed)
+                except obspy.io.mseed.InternalMSEEDError:
 
-            except obspy.io.mseed.InternalMSEEDError:
+                    logger = logging.getLogger('pyglimer.request')
+                    logger.warning(
+                        f'File {mseed} is corrupt. Skipping this file..')
+                    os.remove(mseed)
+                    continue
+                # Decimate
+                try:
+                    st = resample_or_decimate(st, 10)
+                except ValueError:
+                    logger = logging.getLogger('pyglimer.request')
+                    logger.warning(
+                        f'File {mseed}. Native sampling rate below 10Hz.'
+                        'Skipping this file..')
+                    os.remove(mseed)
+                    continue
+                rdb.add_waveform(st, evt_str)
 
-                logger = logging.getLogger('pyglimer.request')
-                logger.warning(
-                    f'File {mseed} is corrupt. Skipping this file..')
+                # Everything went well
                 os.remove(mseed)
-                continue
-            # Decimate
-            try:
-                st = resample_or_decimate(st, 10)
-            except ValueError:
-                logger = logging.getLogger('pyglimer.request')
-                logger.warning(
-                    f'File {mseed}. Native sampling rate below 10Hz.'
-                    'Skipping this file..')
-                os.remove(mseed)
-                continue
-            rdb.add_waveform(st, evt_str)
 
-            # Everything went well
-            os.remove(mseed)
+                for tr in st:
+                    new_cont.setdefault(tr.stats.channel, [])
+                    new_cont[tr.stats.channel].append(evt_str)
 
-            for tr in st:
-                new_cont.setdefault(tr.stats.channel, [])
-                new_cont[tr.stats.channel].append(evt_str)
+            # Write content to the hdf5 file
+            old_cont = rdb._get_table_of_contents()
+            for k, v in old_cont.items():
+                try:
+                    new_cont[k].extend(v)
+                except KeyError:
+                    new_cont[k] = v
+            rdb._define_content(new_cont)
 
-        # Write content to the hdf5 file
-        old_cont = rdb._get_table_of_contents()
-        for k, v in old_cont.items():
-            try:
-                new_cont[k].extend(v)
-            except KeyError:
-                new_cont[k] = v
-        rdb._define_content(new_cont)
+            if save_statxml:
+                statxml = os.path.join(statloc, f'{net}.{stat}.xml')
+                rdb.add_response(read_inventory(statxml))
 
         if save_statxml:
-            statxml = os.path.join(statloc, f'{net}.{stat}.xml')
-            rdb.add_response(read_inventory(statxml))
-
-    if save_statxml:
-        os.remove(statxml)
-
-    # next station
-    mseed_to_hdf5(rawfolder, save_statxml, statloc=statloc)
+            os.remove(statxml)
 
 
 def statxml_to_hdf5(
