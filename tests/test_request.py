@@ -95,10 +95,13 @@ class TestRequestInit(RequestTest):
             req = self._make(format=fmt)
             self.assertTrue(req.h5)
 
-    def test_format_sac_requires_prepro_subdir(self):
-        with self.assertRaises(ValueError):
+    def test_format_sac_removed(self):
+        # format='sac' used to select the mseed pipeline with SAC RF
+        # output; receiver functions are now always written to the hdf5
+        # database, so 'sac' raises with a pointer to the valid options
+        with self.assertRaises(NotImplementedError):
             self._make(format='sac')
-        req = self._make(format='sac', prepro_subdir='prepro')
+        req = self._make(format='mseed', prepro_subdir='prepro')
         self.assertFalse(req.h5)
 
     def test_unknown_format(self):

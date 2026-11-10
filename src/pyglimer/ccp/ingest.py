@@ -2,10 +2,10 @@
 Receiver-function ingestion backends for the CCP stack.
 
 This module hosts the :class:`CCPStackIngestMixin`, which implements
-reading receiver-function databases (hdf5, and the deprecated SAC path),
-the per-trace depth migration/piercing-point worker, and the stacking
-backend dispatch (joblib multiprocessing and MPI). The methods are mixed
-into :class:`pyglimer.ccp.ccp.CCPStack`, so the public API is unchanged.
+reading the hdf5 receiver-function database, the per-trace depth
+migration/piercing-point worker, and the stacking backend dispatch
+(joblib multiprocessing and MPI). The methods are mixed into
+:class:`pyglimer.ccp.ccp.CCPStack`, so the public API is unchanged.
 
 :copyright:
    The PyGLImER development team (makus@gfz-potsdam.de).
@@ -21,17 +21,15 @@ Created: Thursday, 6th November 2025
 import os
 from typing import List, Tuple
 
-from joblib import Parallel, delayed, cpu_count
+from joblib import Parallel, delayed
 import numpy as np
-from psutil import virtual_memory
 from tqdm import tqdm
 
 from pyglimer.database.rfh5 import RFDataBase
-from pyglimer.rf.create import RFStream, read_rf
+from pyglimer.rf.create import RFStream
 from pyglimer.rf.moveout import maxzm
 from pyglimer.utils.createvmodel import ComplexModel
 from pyglimer.utils.log import create_mpi_logger
-from pyglimer.utils.utils import chunks
 
 
 class CCPStackIngestMixin(object):
@@ -333,167 +331,3 @@ class CCPStackIngestMixin(object):
 
         self.logger.info('Number of receiver functions used: '+str(self.N))
 
-    def multicore_stack(
-        self, files: List[str], append_pp: bool, n_closest_points: int,
-        vmodel: str, latb: Tuple[float, float], lonb: Tuple[float, float],
-        filt: Tuple[float, float], multiple: bool) -> Tuple[
-        List[int], List[int], List[np.ndarray], List[np.ndarray], List[
-            np.ndarray]]:
-        """
-        Takes in chunks of data to be processed on one core.
-
-        :param files: List of file locations.
-        :type files: list
-        :param append_pp: Should piercing points be appended?.
-        :type append_pp: Bool
-        :param n_closest_points: Number of Closest points that the KDTree
-            should query.
-        :type n_closest_points: int
-        :param vmodel: Name of the velocity model that should be used for the
-            raytraycing.
-        :type vmodel: str
-        :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
-            raytraycing. Will remain unused for 1D RT.
-        :type latb: Tuple
-        :param lonb: Tuple in Form (minlon, maxlon). To save RAM on 3D
-            raytraycing. Will remain unused for 1D RT
-        :type lonb: Tuple
-        :param filt: Should the RFs be filtered before the ccp stack?
-            If so, provide (lowcof, highcof).
-        :type filt: bool or tuple]
-        :return: Three lists containing indices and rf-data.
-        :rtype: list, list, list
-        """
-
-        kk = []
-        jj = []
-        datal = []
-        datalm1 = []
-        datalm2 = []
-        N = 0
-
-        for filename in files:
-            rft = read_rf(filename)
-            out = self._ccp_process_rftr(
-                rft, filt, vmodel, latb, lonb, multiple, append_pp,
-                n_closest_points)
-            if not out:
-                continue
-            N += 1
-            if multiple:
-                k, j, data, lm1, lm2 = out
-                datalm1.append(lm1)
-                datalm2.append(lm2)
-            else:
-                k, j, data = out
-            kk.append(k)
-            jj.append(j)
-            datal.append(data)
-
-        return kk, jj, datal, datalm1, datalm2, N
-
-    def _create_ccp_from_sac(
-        self, files: List[str], multiple: bool, append_pp: bool,
-        n_closest_points: int, vel_model: str, latb: Tuple[float, float],
-        lonb: Tuple[float, float], filt: Tuple[float, float], endi: int,
-            mc_backend: str, n_jobs: int = -1):
-        """
-        Computes a CCP stack by reading a rf database in sac.
-
-        .. deprecated::
-            Stacking from SAC files is deprecated and will be removed in
-            a future release; use the hdf5 database format instead.
-
-        :param files: List of SAC files to read.
-        :type files: List[str]
-        :param multiple: Regard crustal multiples for stack?
-        :type multiple: bool
-        :param append_pp: Append ppoints to the object?
-        :type append_pp: bool
-        :param n_closest_points: number of closest points to query from kd-tree
-        :type n_closest_points: int
-        :param vel_model: The velocity mdoel to use for depth migration.
-        :type vel_model: str
-        :param latb: Boundary for the CCP calculation in form
-            `(minlat, maxlat)`.
-        :type latb: Tuple[float, float]
-        :param lonb: Boundary for the CCP calculation in form
-            `(minlon, maxlon)`.
-        :type lonb: Tuple[float, float]
-        :param filt: Filter to impose on rfs before migration. Either False
-            or tuple in form (minfreq, maxfreq).
-        :type filt: Tuple[float, float]
-        :param endi: Only relevant if `multiple=True`. Last depth index to
-            consider for multiple computation.
-        :type endi: int
-        :param mc_backend: Multi-core backend to Use. **This does only support
-            `joblib`**
-        :type mc_backend: str
-        :param n_jobs: Number of parallel jobs. -1 uses all cores,
-            defaults to -1.
-        :type n_jobs: int, optional
-        :raises NotImplementedError: For uknown mc backends.
-        """
-        if mc_backend.upper() == 'MPI':
-            raise NotImplementedError(
-                'MPI in conjunction with sac is not implemented.'
-            )
-
-        self.logger.info('Number of receiver functions used: '+str(self.N))
-
-        # Split job into n chunks
-        num_cores = cpu_count() if n_jobs == -1 else n_jobs
-
-        self.logger.info('Number of cores used: '+str(num_cores))
-
-        mem = virtual_memory()
-
-        self.logger.info('Available system memory: '+str(mem.total*1e-6)+'MB')
-        # How many tasks should the main process be split in?
-        # If the number is too high, it will need unnecessarily
-        # much disk space or caching (probably also slower).
-        # If it's too low, the progressbar won't work anymore.
-        # !Memmap arrays are getting extremely big, size in byte
-        # is given by: nrows*ncolumns*nbands
-        # with 64 cores and 10 bands/core that results in about
-        # 90 GB for each of the arrays for a finely gridded
-        # CCP stack of North-America
-
-        # Check maximum information that can be saved
-        # using half of the RAM.
-        # approximately 8 byte per element in RF + 8 byte for idx
-        mem_needed = 3*8*850*len(files)*100
-        # For stacking with multiple modes, we'll need more memory
-        if multiple:
-            mem_needed = mem_needed*1.75
-
-        # Split into several jobs if too much data
-        if mem_needed > mem.total:
-            N_splits = int(np.ceil(mem_needed/mem.total))
-            split_size = int(np.ceil(len(files)/N_splits))
-            print(
-                'Splitting RFs into %s chunks due to insufficient memory.'
-                + 'Each progressbar will only show the progress per chunk.' %
-                str(N_splits))
-        else:
-            split_size = len(files)
-
-        for file_chunk in chunks(files, split_size):
-            num_split_max = num_cores*100  # maximal no of jobs
-            len_split = int(np.ceil(len(file_chunk)/num_cores))
-            if len_split > 10:
-                if int(np.ceil(len(file_chunk)/len_split)) > num_split_max:
-                    len_split = int(np.ceil(len_split/num_split_max))
-                else:
-                    len_split = int(np.ceil(len_split/(len_split/10)))
-            num_split = int(np.ceil(len(file_chunk)/len_split))
-
-            out = Parallel(n_jobs=num_cores, backend='multiprocessing')(
-                delayed(self.multicore_stack)(
-                    chunk, append_pp, n_closest_points, vel_model,
-                    latb, lonb, filt, multiple)
-                for _, chunk in zip(
-                    tqdm(range(num_split)),
-                    chunks(file_chunk, len_split)))
-
-            self._unpack_joblib_output(multiple, endi, out)

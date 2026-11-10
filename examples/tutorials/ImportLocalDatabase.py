@@ -63,7 +63,9 @@ request_dict = {
     'evt_subdir': 'events',       # Directory of the events
     'log_subdir': 'log',          # Directory for the logs
     'loglvl': 'DEBUG',          # logging level, for more info use 'INFO' or 'DEBUG'
-    'format': 'sac',              # Format to save database in
+    'format': 'mseed',            # Format to save the raw waveforms in
+                                  # (receiver functions are always saved
+                                  # to the hdf5 database)
     "phase": "P",                 # 'P' or 'S' receiver functions
     "rot": "RTZ",                 # Coordinate system to rotate to
     "deconmeth": "waterlevel",    # Deconvolution method
@@ -245,10 +247,15 @@ R.preprocess(hc_filt=1.5, client='single')
 # (i.e. let's look at what data a Receiver function trace contains
 # and how we can use it!)
 
-from pyglimer.rf.create import read_rf
+from pyglimer.database.rfh5 import RFDataBase
+from pyglimer.rf.create import RFStream
 
-path_to_rf = os.path.join(proj_dir, 'waveforms','RF','P','*','*','*.sac')
-rfstream = read_rf(path_to_rf)
+rfstream = RFStream()
+for rf_file in glob(
+        os.path.join(proj_dir, 'waveforms', 'RF', 'P', '*.h5')):
+    net, sta, _ = os.path.basename(rf_file).split('.')
+    with RFDataBase(rf_file, mode='r') as rfdb:
+        rfstream += rfdb.get_data(net, sta, 'P', evt_time=None)
 
 print(f"Number of RFs: {len(rfstream)}")
 

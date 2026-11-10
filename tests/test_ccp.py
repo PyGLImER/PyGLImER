@@ -72,12 +72,19 @@ class TestComputeStackValidation(CCPStackTest):
     def test_binrad_too_small(self):
         with self.assertRaises(ValueError):
             self.st.compute_stack(
-                'iasp91.dat', self.tmpdir, in_format='sac', binrad=0.5)
+                'iasp91.dat', self.tmpdir, in_format='h5', binrad=0.5)
 
     def test_binrad_too_big(self):
         with self.assertRaises(ValueError):
             self.st.compute_stack(
-                'iasp91.dat', self.tmpdir, in_format='sac', binrad=5)
+                'iasp91.dat', self.tmpdir, in_format='h5', binrad=5)
+
+    def test_sac_format_removed(self):
+        # Stacking from SAC files was removed; must raise before any
+        # file system access
+        with self.assertRaises(NotImplementedError):
+            self.st.compute_stack(
+                'iasp91.dat', self.tmpdir, in_format='sac', binrad=1.3)
 
 
 class TestQueryBinTree(CCPStackTest):

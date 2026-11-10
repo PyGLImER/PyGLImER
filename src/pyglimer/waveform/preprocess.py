@@ -20,6 +20,7 @@ import itertools
 from typing import Tuple
 
 import numpy as np
+import h5py
 from joblib import Parallel, delayed, cpu_count
 import obspy
 from obspy import read, read_inventory, Stream, UTCDateTime
@@ -27,6 +28,7 @@ from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from tqdm.std import tqdm
 
 from pyglimer import tmp
+from pyglimer.database.rfh5 import RFDataBase, hierarchy, h5_FMTSTR
 from pyglimer.utils.log import create_mpi_logger
 from pyglimer.waveform.preprocessh5 import preprocessh5
 from pyglimer.utils.signalproc import resample_or_decimate
@@ -500,9 +502,8 @@ def __waveform_loop(
 
     # Check if RF was already computed and if it should be
     # computed at all, and if the waveform was retained (SNR)
-    if deconmeth and not __file_in_db(
-        os.path.join(rfloc, network, station), '%s.%s.%s.sac' % (
-            network, station, ot_loc)) and crit:
+    if deconmeth and not __rf_in_db(
+        rfloc, network, station, ot_fiss, phase, pol) and crit:
 
         # 21.04.2020 Second highcut filter
         if hc_filt:
@@ -550,15 +551,11 @@ def __waveform_loop(
                     method=deconmeth)
 
         # Write RF
-            rfdir = os.path.join(rfloc, network, station)
-            if pol == 'h' and phase == 'P':
-                rfdir = rfdir + pol
-
-            os.makedirs(rfdir, exist_ok=True)
-
-            RF.write(os.path.join(
-                rfdir, '%s.%s.%s.sac' % (network, station, ot_loc)),
-                format='SAC')
+            rf_filename = h5_FMTSTR.format(
+                dir=rfloc, network=network, station=station)
+            os.makedirs(rfloc, exist_ok=True)
+            with RFDataBase(rf_filename) as rfdb:
+                rfdb.add_rf(RF)
 
             end = time.time()
             rflogger.info(
@@ -717,6 +714,21 @@ def __file_in_db(loc: str, filename: str) -> bool:
         return True
     else:
         return False
+
+
+def __rf_in_db(
+        rfloc: str, network: str, station: str, ot_fiss: str, phase: str,
+        pol: str) -> bool:
+    """Checks if the receiver function for the given event is already
+    saved in the station's hdf5 database file."""
+    rf_file = h5_FMTSTR.format(dir=rfloc, network=network, station=station)
+    if not os.path.isfile(rf_file):
+        return False
+    path = hierarchy.format(
+        tag='rf', network=network, station=station, phase=phase, pol=pol,
+        evt_time=ot_fiss)
+    with h5py.File(rf_file, 'r') as f:
+        return path in f
 
 
 def write_info(network: str, station: str, dictionary: dict, preproloc: str):

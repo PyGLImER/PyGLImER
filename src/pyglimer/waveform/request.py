@@ -71,7 +71,7 @@ class Request(object):
             waveform data (mseed). **Irrelevant if format is hdf5**.
         :type prepro_subdir: str or None
         :param rf_subdir: Directory, in which to store the receiver functions
-            in time domain (sac).
+            in time domain (hdf5 database).
         :type rf_subdir: str
         :param statloc_subdir: Directory, in which to store the station
             inventories (xml).
@@ -168,7 +168,13 @@ class Request(object):
 
         if format.lower() in ('hdf5', 'h5'):
             self.h5 = True
-        elif format.lower() in ('sac', 'mseed'):
+        elif format.lower() == 'sac':
+            raise NotImplementedError(
+                'format="sac" is no longer supported. Receiver functions '
+                'are always saved to the hdf5 database. Use format="mseed" '
+                '(raw waveforms as mseeds) or format="hdf5" (raw waveforms '
+                'in the hdf5 database) instead.')
+        elif format.lower() == 'mseed':
             self.h5 = False
         else:
             raise NotImplementedError(
@@ -191,8 +197,8 @@ class Request(object):
         self.rawloc = os.path.join(proj_dir, raw_subdir, self.phase)
         if prepro_subdir is None and not self.h5:
             raise ValueError(
-                'Prepro_subdir has to be defined if the output format is '
-                f'{format}.')
+                'Prepro_subdir has to be defined if the raw waveforms are '
+                f'stored as {format}.')
         if prepro_subdir is None:
             self.preproloc = None
         else:

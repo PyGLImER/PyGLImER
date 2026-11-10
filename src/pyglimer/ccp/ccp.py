@@ -23,7 +23,6 @@ import os
 import pickle
 import logging
 import time
-import warnings
 
 from copy import deepcopy
 from typing import List, Tuple
@@ -280,9 +279,7 @@ class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin, CCPStackIngestMixin):
             time domain are. The default is 'output/waveforms/RF.
         :type rfloc: str, optional
         :param in_format: **INPUT FORMAT** of receiver functions. Either
-            `'sac'` or `'hdf5'`. Defaults to 'hdf5'. **`'sac'` is
-            deprecated** and will be removed in a future release; convert
-            your receiver functions to the hdf5 database format instead.
+            `'h5'` or `'hdf5'`. Defaults to 'hdf5'.
         :type in_format: str, optional
         :param preproloc: Parental folder containing the preprocessed mseeds.
             Only needed if option geocoords is used. The default is
@@ -359,6 +356,11 @@ class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin, CCPStackIngestMixin):
         """
         if in_format.lower() == 'hdf5':
             in_format = 'h5'
+        elif in_format.lower() == 'sac':
+            raise NotImplementedError(
+                'Stacking from SAC files is no longer supported. Convert '
+                'your receiver functions to the hdf5 database format '
+                '(in_format="h5") instead.')
 
         if binrad < 1/(2*np.cos(np.radians(30))):
             raise ValueError(
@@ -407,14 +409,7 @@ class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin, CCPStackIngestMixin):
         else:
             endi = None
 
-        if network and isinstance(network, str) and not pattern and\
-                in_format.lower() == 'sac':
-            # Loop over fewer files
-            folder = os.path.join(folder, network)
-            if station and isinstance(station, str):
-                folder = os.path.join(folder, station)
-
-        elif geocoords and not pattern:
+        if geocoords and not pattern:
             # Stations by coordinates
             # create empty lists for station latitude and longitude
             lat = (geocoords[0], geocoords[1])
@@ -439,12 +434,8 @@ class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin, CCPStackIngestMixin):
         infiles = glob(os.path.join(
             folder, '**', '*.%s' % in_format), recursive=True)
 
-        # Special rule for files imported from Matlab
-        if network in ('matlab', 'raysum'):
-            pattern.append('*.sac')
-
         # Set filter patterns
-        elif network:
+        if network:
             if isinstance(network, list):
                 if station:
                     if isinstance(station, list):
@@ -498,15 +489,6 @@ code if you want to filter by station")
                 files, multiple, append_pp, n_closest_points, vel_model,
                 latb, lonb, filt, endi, mc_backend, n_jobs)
 
-        elif in_format.lower() == 'sac':
-            warnings.warn(
-                'Stacking from SAC files is deprecated and will be removed '
-                'in a future release. Convert your receiver functions to '
-                'the hdf5 database format (in_format="h5") instead.',
-                DeprecationWarning, stacklevel=2)
-            self._create_ccp_from_sac(
-                files, multiple, append_pp, n_closest_points, vel_model,
-                latb, lonb, filt, endi, mc_backend, n_jobs)
         else:
             raise NotImplementedError(
                 'Unknown input format %s.' % in_format

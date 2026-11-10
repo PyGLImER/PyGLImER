@@ -72,7 +72,7 @@ ccp_init_dict = {
     "station": "HRV",
     "compute_stack": True,
     "save": 'ccp_IU_HRV.pkl',
-    'format': 'sac',
+    'format': 'hdf5',
     'mc_backend': 'joblib',
 }
 
