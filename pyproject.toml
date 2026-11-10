@@ -70,13 +70,6 @@ pyglimer = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-filterwarnings = [
-    # Upstream pyproj (<=3.7.1): its scalar fast-path `_inv_point` succeeds
-    # on length-1 arrays via a deprecated float() conversion. Triggered
-    # through cartopy's Geodesic.inverse (e.g. geodiff). Fix in pyproj, not
-    # in our code.
-    "ignore:Conversion of an array with ndim > 0 to a scalar:DeprecationWarning:pyproj.geod",
-]
 
 [tool.ruff]
 line-length = 79
