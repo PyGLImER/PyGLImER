@@ -33,7 +33,7 @@ from pyglimer.utils.signalproc import resample_or_decimate
 from .errorhandler import redownload, redownload_statxml, \
     NoMatchingResponseHandler
 from .preproc_utils import EventContext, PreprocessConfig, SNRError, \
-    StreamLengthError, rotate_and_snr_qc, set_station_info
+    StreamLengthError, append_event_info, rotate_and_snr_qc, set_station_info
 from .rotate import rotate_LQT_min, rotate_PSV
 from ..rf.create import createRF
 from ..utils.roundhalf import roundhalf
@@ -698,28 +698,9 @@ def __rotate_qc(
         pass
 
     # WRITE AN INFO FILE
-    # append_info: [key,value]
-    append_inf = [
-        ['magnitude', (
-            event.preferred_magnitude() or event.magnitudes[0])['mag']],
-        ['magnitude_type', (
-            event.preferred_magnitude() or event.magnitudes[0])[
-                'magnitude_type']],
-        ['evtlat', evtlat], ['evtlon', evtlon],
-        ['ot_ret', ot_fiss], ['ot_all', ot_fiss],
-        ['evt_depth', depth],
-        ['evt_id', event.get('resource_id')],
-        ['noisemat', noisemat],
-        ['co_f', f], ['npts', st[1].stats.npts],
-        ['rbaz', baz],
-        ['rdelta', distance],
-        ['rayp_s_deg', rayp_s_deg],
-        ['onset', first_arrival],
-        ['starttime', st[0].stats.starttime]]
-
-    # Check if values are already in dict
-    for key, value in append_inf:
-        infodict.setdefault(key, []).append(value)
+    append_event_info(
+        infodict, event, ot_fiss, evtlat, evtlon, depth, noisemat, f, st,
+        baz, distance, rayp_s_deg, first_arrival)
 
     logger.info("Stream accepted. Preprocessing successful")
 

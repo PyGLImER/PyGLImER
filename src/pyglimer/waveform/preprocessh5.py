@@ -32,10 +32,27 @@ from pyglimer import constants
 from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.database.raw import RawDatabase
 from pyglimer.utils.log import create_mpi_logger
-from .preproc_utils import SNRError, rotate_and_snr_qc, \
+from .preproc_utils import SNRError, append_event_info, rotate_and_snr_qc, \
     set_station_info
 from .rotate import rotate_LQT_min, rotate_PSV
 from ..rf.create import RFStream, createRF
+
+
+class _MembershipList(list):
+    """A list that keeps a set of its items alongside, so that repeated
+    membership tests stay O(1) when the list grows long (used for the
+    known/processed waveform lists, which are tested once per event).
+    All list semantics (duplicates included) are preserved."""
+    def __init__(self, *args):
+        super().__init__(*args)
+        self._items = set(self)
+
+    def append(self, item):
+        super().append(item)
+        self._items.add(item)
+
+    def __contains__(self, item):
+        return item in self._items
 
 
 class ProgressParallel(Parallel):
@@ -185,11 +202,12 @@ def _preprocessh5_single(
     if os.path.isfile(outf+'.h5'):
         with RFDataBase(outf) as rfdb:
             ret, rej = rfdb._get_known_waveforms()
+            ret, rej = _MembershipList(ret), _MembershipList(rej)
             rflogger.debug('Already processed waveforms: %s' % str(ret))
             rflogger.debug('\nAlready rejected waveforms: %s' % str(rej))
     else:
-        ret = []
-        rej = []
+        ret = _MembershipList()
+        rej = _MembershipList()
 
     with RawDatabase(f, mode='r') as rdb:
         # get station inventory
@@ -430,28 +448,9 @@ def __rotate_qc(
         raise SNRError('QC rejected %s' % np.array2string(noisemat))
 
     # WRITE AN INFO FILE
-    append_inf = [
-        ['magnitude', (
-            event.preferred_magnitude() or event.magnitudes[0])['mag']],
-        ['magnitude_type', (
-            event.preferred_magnitude() or event.magnitudes[0])[
-                'magnitude_type']],
-        ['evtlat', evtlat], ['evtlon', evtlon],
-        ['ot_ret', ot_fiss], ['ot_all', ot_fiss],
-        ['evt_depth', depth],
-        ['evt_id', event.get('resource_id')],
-        ['noisemat', noisemat],
-        ['co_f', f], ['npts', st[1].stats.npts],
-        ['rbaz', baz],
-        ['rdelta', distance],
-        ['rayp_s_deg', rayp_s_deg],
-        ['onset', first_arrival],
-        ['starttime', st[0].stats.starttime],
-        ['pol', pol]]
-
-    # Check if values are already in dict
-    for key, value in append_inf:
-        infodict.setdefault(key, []).append(value)
+    append_event_info(
+        infodict, event, ot_fiss, evtlat, evtlon, depth, noisemat, f, st,
+        baz, distance, rayp_s_deg, first_arrival, extra=[['pol', pol]])
 
     logger.info(f"Stream accepted {ot_fiss}. Preprocessing successful")
 

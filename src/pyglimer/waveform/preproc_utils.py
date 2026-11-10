@@ -153,3 +153,37 @@ def set_station_info(
     infodict['statlat'] = station_inv[0][0][0].latitude
     infodict['statlon'] = station_inv[0][0][0].longitude
     infodict['statel'] = station_inv[0][0][0].elevation
+
+
+def append_event_info(
+        infodict: dict, event: obspy.core.event.Event, ot_fiss: str,
+        evtlat: float, evtlon: float, depth: float, noisemat: np.ndarray,
+        f: float, st: Stream, baz: float, distance: float,
+        rayp_s_deg: float, first_arrival: UTCDateTime, extra=()):
+    """
+    Append the per-event metadata (magnitude, location, timing, processing
+    parameters) to the info dictionary that is later written into the shelve
+    info files. `extra` is an iterable of additional [key, value] pairs
+    (e.g., the polarisation in the hdf5 pipeline).
+    """
+    append_inf = [
+        ['magnitude', (
+            event.preferred_magnitude() or event.magnitudes[0])['mag']],
+        ['magnitude_type', (
+            event.preferred_magnitude() or event.magnitudes[0])[
+                'magnitude_type']],
+        ['evtlat', evtlat], ['evtlon', evtlon],
+        ['ot_ret', ot_fiss], ['ot_all', ot_fiss],
+        ['evt_depth', depth],
+        ['evt_id', event.get('resource_id')],
+        ['noisemat', noisemat],
+        ['co_f', f], ['npts', st[1].stats.npts],
+        ['rbaz', baz],
+        ['rdelta', distance],
+        ['rayp_s_deg', rayp_s_deg],
+        ['onset', first_arrival],
+        ['starttime', st[0].stats.starttime]] + list(extra)
+
+    # Check if values are already in dict
+    for key, value in append_inf:
+        infodict.setdefault(key, []).append(value)
