@@ -40,8 +40,49 @@ def _rf_colors(color):
         raise ValueError(f'Unknown argument for color: {color}.') from None
 
 
-def set_mpl_params(bold=False):
-    params = {
+# Compact style for the cartopy map plots (pyglimer.plot.plot_map):
+# smaller fonts and ticks pointing inwards.
+_MAP_STYLE_PARAMS = {
+    'font.weight': 'bold',
+    'axes.labelweight': 'bold',
+    'axes.labelsize': 10,
+    'xtick.labelsize': 7,
+    'xtick.direction': 'in',
+    'xtick.top': True,  # draw label on the top
+    'xtick.bottom': True,  # draw label on the bottom
+    'xtick.minor.visible': True,
+    'xtick.major.top': True,  # draw x axis top major ticks
+    'xtick.major.bottom': True,  # draw x axis bottom major ticks
+    'xtick.minor.top': True,  # draw x axis top minor ticks
+    'xtick.minor.bottom': True,  # draw x axis bottom minor ticks
+    'ytick.labelsize': 7,
+    'ytick.direction': 'in',
+    'ytick.left': True,  # draw label on the top
+    'ytick.right': True,  # draw label on the bottom
+    'ytick.minor.visible': True,
+    'ytick.major.left': True,  # draw x axis top major ticks
+    'ytick.major.right': True,  # draw x axis bottom major ticks
+    'ytick.minor.left': True,  # draw x axis top minor ticks
+    'ytick.minor.right': True,  # draw x axis bottom minor ticks
+}
+
+
+def set_mpl_params(bold=False, style='default'):
+    """
+    Update the global matplotlib rcParams to PyGLImER's plot style.
+
+    :param bold: Bolder, larger fonts (e.g., for presentation figures),
+        defaults to False.
+    :type bold: bool, optional
+    :param style: ``'default'`` for the general plot style or ``'map'``
+        for the compact style used by the cartopy map plots (smaller
+        fonts, ticks pointing inwards), defaults to 'default'.
+    :type style: str, optional
+    """
+    if style == 'map':
+        params = _MAP_STYLE_PARAMS
+    elif style == 'default':
+        params = {
         'font.family': "DejaVu Sans",
         'font.size': 14 if bold else 12,
         # 'pdf.fonttype': 3,
@@ -98,7 +139,10 @@ def set_mpl_params(bold=False):
         'mathtext.rm': 'DejaVu Sans',
         'mathtext.it': 'DejaVu Sans:italic',
         'mathtext.bf': 'DejaVu Sans:bold'
-    }
+        }
+    else:
+        raise ValueError(f"Unknown argument for style: {style}. "
+                         + "Use 'default' or 'map'.")
     matplotlib.rcParams.update(params)
 
 
