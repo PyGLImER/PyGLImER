@@ -828,25 +828,30 @@ def init_ccp(
     lons = list(subset['lon'])
 
     # Filter
+    # All branches keep the database order of codes (like fnmatch.filter
+    # does) so that the bingrid point order is deterministic -- a plain
+    # set intersection would order the stations arbitrarily.
     if isinstance(network, str) and not isinstance(station, list):
         codef = fnmatch.filter(codes, '%s.%s' % (network, station or '*'))
     elif isinstance(network, str) and isinstance(station, list):
-        codef = list(set(codes).intersection([
-            '%s.%s' % (network, stat) for stat in station]))
+        wanted = {'%s.%s' % (network, stat) for stat in station}
+        codef = [c for c in dict.fromkeys(codes) if c in wanted]
     elif isinstance(network, list):
         if station is not None and not isinstance(station, list):
             raise TypeError(
                 """Provide a list of stations, when using a list of
                 networks as parameter.""")
         elif not station:
-            codef = list(set(codes).intersection([
-                '%s.*' % net for net in network]))
+            patterns = ['%s.*' % net for net in network]
+            codef = [c for c in dict.fromkeys(codes)
+                     if any(fnmatch.fnmatch(c, p) for p in patterns)]
         elif isinstance(station, list):
             if len(station) != len(network):
                 raise ValueError(
                     'Length of network and station list have to be equal.')
-            codef = list(set(codes).intersection([
-                '%s.%s' % (net, stat) for net, stat in zip(network, station)]))
+            wanted = {'%s.%s' % (net, stat)
+                      for net, stat in zip(network, station)}
+            codef = [c for c in dict.fromkeys(codes) if c in wanted]
 
     if (network and station) is None:
         codef = codes

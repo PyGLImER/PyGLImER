@@ -206,11 +206,23 @@ class TestInitCCPStationFilter(unittest.TestCase):
         np.testing.assert_allclose(lats, [42.6, 42.7, 42.8])
 
     def test_station_list_filters(self):
-        # Note: init_ccp's list branches intersect Python sets, so the
-        # station order is nondeterministic (pre-existing behaviour) --
-        # compare sorted.
+        # Station order is deterministic (database order), so compare
+        # without sorting.
         lats, _ = self._init(network='YP', station=['NE1', 'NE3'])
-        np.testing.assert_allclose(sorted(lats), [42.6, 42.8])
+        np.testing.assert_allclose(lats, [42.6, 42.8])
+
+    def test_network_list_no_station(self):
+        # This branch used to intersect codes with the literal pattern
+        # strings ('YP.*'), which can never match a real station code --
+        # it always returned an empty selection. Now it fnmatches.
+        lats, _ = self._init(network=['YP'], station=None)
+        np.testing.assert_allclose(lats, [42.6, 42.7, 42.8])
+
+    def test_network_station_lists(self):
+        # Order follows the database, not the request lists
+        lats, lons = self._init(network=['YP', 'YP'],
+                                station=['NE2', 'NE1'])
+        np.testing.assert_allclose(lats, [42.6, 42.7])
 
 
 class TestAverageVelModelWrite(unittest.TestCase):
