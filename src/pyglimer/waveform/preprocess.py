@@ -186,8 +186,9 @@ def preprocess(
             # rflogger.debug(f'Rank/Size: {rank}/{psize}')
             cfg.logger = logger
             cfg.rflogger = rflogger
+            out = []
             for ii in tqdm(ind):
-                __event_loop(cfg, evtcat[ii], single_core=False)
+                out.append(__event_loop(cfg, evtcat[ii], single_core=False))
 
         # Use single core only
         elif client.lower() == 'single':
@@ -613,7 +614,7 @@ def __cut_resample(
 
     # Change dtype
     for tr in st:
-        np.require(tr.data, dtype=np.float64)
+        tr.data = np.require(tr.data, dtype=np.float64)
         tr.stats.mseed.encoding = 'FLOAT64'
 
     # trim to according length

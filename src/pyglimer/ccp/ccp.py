@@ -373,11 +373,10 @@ class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin, CCPStackIngestMixin):
         # sum of squares for 2 squares for max binrad=4
         # Using the ceiling function to account for inaccuracies
         sosq = [1, 4, 4, 0, 4, 8, 0, 0, 4, 4, 8, 0, 0, 8, 0, 0, 4]
-        try:
-            n_closest_points = sum(sosq[0:int(np.ceil(binrad**2+1))])
-        except IndexError:
+        if int(np.ceil(binrad**2+1)) > len(sosq):
             raise ValueError(
                 """Maximum allowed binradius is 4 times the bin distance""")
+        n_closest_points = sum(sosq[0:int(np.ceil(binrad**2+1))])
 
         # Compute maxdist in euclidean space
         self.binrad_eucl = epi2euc(self.binrad)
@@ -467,7 +466,7 @@ class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin, CCPStackIngestMixin):
                     elif isinstance(station, list):
                         for stat in station:
                             pattern.append('*%s.%s*.%s' % (
-                                net, stat, in_format))
+                                network, stat, in_format))
                 else:
                     pattern.append('*%s.*.%s' % (network, in_format))
         elif station:
@@ -848,7 +847,7 @@ def init_ccp(
 
     # Filter
     if isinstance(network, str) and not isinstance(station, list):
-        codef = fnmatch.filter(codes, '%s.%s' % (network, '*' or station))
+        codef = fnmatch.filter(codes, '%s.%s' % (network, station or '*'))
     elif isinstance(network, str) and isinstance(station, list):
         codef = list(set(codes).intersection([
             '%s.%s' % (network, stat) for stat in station]))

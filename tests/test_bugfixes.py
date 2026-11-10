@@ -155,5 +155,102 @@ class TestErrorHandlerRetry(unittest.TestCase):
         self.assertEqual(out, client.get_stations.return_value)
 
 
+class TestInitCCPStationFilter(unittest.TestCase):
+    """
+    init_ccp built its station fnmatch pattern as ``'*' or station``, so a
+    string station was silently ignored (the pattern always matched every
+    station of the network). These tests pin the fix (``station or '*'``).
+    """
+    def setUp(self):
+        # rfloc two levels below the tmpdir so that init_ccp's logdir
+        # (dirname(dirname(rfloc))) stays inside the tmpdir
+        self.tmpdir = tempfile.mkdtemp()
+        self.rfloc = os.path.join(self.tmpdir, 'waveforms', 'rf')
+        os.makedirs(os.path.join(self.tmpdir, 'logs'))
+
+    def tearDown(self):
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    @staticmethod
+    def _db():
+        import pandas as pd
+        return pd.DataFrame({
+            'code': ['YP.NE1', 'YP.NE2', 'YP.NE3'],
+            'network': ['YP', 'YP', 'YP'],
+            'station': ['NE1', 'NE2', 'NE3'],
+            'lat': [42.6, 42.7, 42.8],
+            'lon': [-71.6, -71.5, -71.4],
+            'elevation': [0., 0., 0.]})
+
+    def _init(self, **kwargs):
+        from pyglimer.ccp.ccp import init_ccp
+        db = mock.Mock(db=self._db())
+        with mock.patch('pyglimer.ccp.ccp.StationDB', return_value=db), \
+                mock.patch('pyglimer.ccp.ccp.CCPStack') as ccpstack:
+            init_ccp(self.rfloc, 2, 'iasp91', 'P', verbose=False, **kwargs)
+        # (lats, lons, spacing) positional args of the CCPStack call
+        args = ccpstack.call_args[0]
+        return np.asarray(args[0]), np.asarray(args[1])
+
+    def test_station_str_filters(self):
+        lats, lons = self._init(network='YP', station='NE2')
+        np.testing.assert_allclose(lats, [42.7])
+        np.testing.assert_allclose(lons, [-71.5])
+
+    def test_station_none_matches_all(self):
+        lats, _ = self._init(network='YP', station=None)
+        np.testing.assert_allclose(lats, [42.6, 42.7, 42.8])
+
+    def test_no_filter_matches_all(self):
+        lats, _ = self._init(network=None, station=None)
+        np.testing.assert_allclose(lats, [42.6, 42.7, 42.8])
+
+    def test_station_list_filters(self):
+        # Note: init_ccp's list branches intersect Python sets, so the
+        # station order is nondeterministic (pre-existing behaviour) --
+        # compare sorted.
+        lats, _ = self._init(network='YP', station=['NE1', 'NE3'])
+        np.testing.assert_allclose(sorted(lats), [42.6, 42.8])
+
+
+class TestAverageVelModelWrite(unittest.TestCase):
+    """
+    AverageVelModel.write contained ``filename + '.' - x[-1]`` (str minus
+    str -> TypeError), so saving a model with a dotted filename always
+    crashed after the ~1 h compilation. The fix strips the extension like
+    the sibling ComplexModel.write does.
+    """
+    def setUp(self):
+        self.tmpdir = tempfile.mkdtemp()
+        self.model = mock.Mock(spec=['latv', 'lonv', 'avpP', 'avsP',
+                                     'avpS', 'avsS'])
+
+    def tearDown(self):
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def _write(self, filename):
+        from pyglimer.utils.createvmodel import AverageVelModel
+        with mock.patch('pyglimer.utils.createvmodel.finddir',
+                        return_value=self.tmpdir), \
+                mock.patch('pyglimer.utils.createvmodel.np.savez') as savez:
+            AverageVelModel.write(self.model, filename)
+        return savez.call_args[0][0]
+
+    def test_dotted_filename(self):
+        oloc = self._write('mymodel.npz')
+        self.assertEqual(
+            oloc, os.path.join(self.tmpdir, 'velocity_models', 'mymodel'))
+
+    def test_plain_filename(self):
+        oloc = self._write('mymodel')
+        self.assertEqual(
+            oloc, os.path.join(self.tmpdir, 'velocity_models', 'mymodel'))
+
+    def test_multiple_dots(self):
+        oloc = self._write('my.model.v2.npz')
+        self.assertEqual(
+            oloc, os.path.join(self.tmpdir, 'velocity_models', 'my.model.v2'))
+
+
 if __name__ == "__main__":
     unittest.main()

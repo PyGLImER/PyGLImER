@@ -352,9 +352,7 @@ class AverageVelModel(object):
         """
         folder = os.path.join(finddir(), 'velocity_models')
         # Remove filetype identifier if provided
-        x = filename.split('.')
-        if len(x) > 1:
-            filename = filename + '.' - x[-1]
+        filename = filename.rsplit('.', 1)[0]
         oloc = os.path.join(folder, filename)
         os.makedirs(oloc, exist_ok=True)
 
