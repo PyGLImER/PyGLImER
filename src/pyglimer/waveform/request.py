@@ -38,6 +38,7 @@ from pyglimer.waveform.download import download_small_db, downloadwav
 from pyglimer.waveform.preprocess import preprocess
 from pyglimer.waveform.filesystem import import_database
 from pyglimer.utils import utils as pu
+from pyglimer.utils.log import clear_handlers, file_handler
 
 
 class Request(object):
@@ -211,15 +212,12 @@ class Request(object):
         # Remove handlers left over from previous Request instantiations
         # (the logger is shared and handlers would otherwise accumulate,
         # duplicating every message)
-        while self.logger.handlers:
-            self.logger.removeHandler(self.logger.handlers[0])
-        self.fh = logging.FileHandler(
-            os.path.join(self.logdir, 'request.log'))
-        self.fh.setLevel(loglvl)
+        clear_handlers(self.logger)
+        self.fh = file_handler(
+            os.path.join(self.logdir, 'request.log'), level=loglvl)
         self.logger.addHandler(self.fh)
         fmt = logging.Formatter(
             fmt='%(asctime)s - %(levelname)s - %(message)s')
-        self.fh.setFormatter(fmt)
         consoleHandler = logging.StreamHandler()
         consoleHandler.setLevel(loglvl)
         consoleHandler.setFormatter(fmt)

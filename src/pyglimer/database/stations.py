@@ -29,6 +29,7 @@ import pandas as pd
 from pyglimer.data import finddir
 from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.plot.plot_map import plot_station_db
+from pyglimer.utils.log import file_handler
 
 
 def redownload_missing_statxmls(clients, phase, statloc, rawdir, verbose=True):
@@ -130,24 +131,21 @@ class StationDB(object):
         # FileHandler
         if not logdir:
             try:
-                fh = logging.FileHandler(
+                fh = file_handler(
                     os.path.join(
-                        dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
+                        dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'),
+                    level=logging.WARNING)
             except FileNotFoundError:
                 os.makedirs(os.path.join(
                     dir, os.pardir, os.pardir, 'logs'), exist_ok=True)
-                fh = logging.FileHandler(
+                fh = file_handler(
                     os.path.join(
-                        dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
+                        dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'),
+                    level=logging.WARNING)
         else:
-            fh = logging.FileHandler(os.path.join(logdir, 'StationDBase.log'))
-        fh.setLevel(logging.WARNING)
+            fh = file_handler(
+                os.path.join(logdir, 'StationDBase.log'), level=logging.WARNING)
         self.logger.addHandler(fh)
-
-        # Formatter
-        fmt = logging.Formatter(
-            fmt='%(asctime)s - %(levelname)s - %(message)s')
-        fh.setFormatter(fmt)
 
         # Check if there is already a saved database
         oloc = os.path.join(finddir(), 'database.csv')

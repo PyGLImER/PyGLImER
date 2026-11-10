@@ -42,6 +42,7 @@ from pyglimer.rf.moveout import res, maxz, maxzm
 from pyglimer.utils.geo_utils import epi2euc
 from pyglimer.utils.geo_utils import gctrack
 from pyglimer.utils.geo_utils import fix_map_extent
+from pyglimer.utils.log import file_handler
 from pyglimer.utils.SphericalNN import SphericalNN
 from pyglimer.utils.utils import dt_string
 
@@ -91,16 +92,10 @@ class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin, CCPStackIngestMixin):
         # Create handler to the log
         if not logdir:
             os.makedirs('logs', exist_ok=True)
-            fh = logging.FileHandler(os.path.join('logs', 'ccp.log'))
+            fh = file_handler(os.path.join('logs', 'ccp.log'))
         else:
-            fh = logging.FileHandler(os.path.join(logdir, 'ccp.log'))
-        fh.setLevel(logging.INFO)
+            fh = file_handler(os.path.join(logdir, 'ccp.log'))
         self.logger.addHandler(fh)
-
-        # Create Formatter
-        fmt = logging.Formatter(
-            fmt='%(asctime)s - %(levelname)s - %(message)s')
-        fh.setFormatter(fmt)
 
         # Create bingrid
         self.bingrid = BinGrid(
@@ -395,9 +390,7 @@ class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin, CCPStackIngestMixin):
             self.logger.setLevel(logging.INFO)
 
             # Create handler to the log
-            fh = logging.FileHandler('logs/ccp.log')
-            fh.setLevel(logging.INFO)
-            self.logger.addHandler(fh)
+            self.logger.addHandler(file_handler('logs/ccp.log'))
             self.logger.info('Stacking started')
 
         if multiple:

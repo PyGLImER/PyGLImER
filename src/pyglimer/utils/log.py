@@ -14,6 +14,38 @@ Last Modified: Friday, 7th January 2022 11:05:39 am
 import logging
 
 
+# PyGLImER's standard log format, shared by all FileHandlers below.
+LOG_FMT = '%(asctime)s - %(levelname)s - %(message)s'
+
+
+def file_handler(
+        logfile: str, level: int = logging.INFO) -> logging.FileHandler:
+    """
+    Create a FileHandler with PyGLImER's standard log format.
+
+    :param logfile: File to log to.
+    :type logfile: str
+    :param level: Handler level, defaults to logging.INFO.
+    :type level: int, optional
+    :return: the configured handler
+    :rtype: logging.FileHandler
+    """
+    fh = logging.FileHandler(logfile)
+    fh.setLevel(level)
+    fh.setFormatter(logging.Formatter(fmt=LOG_FMT))
+    return fh
+
+
+def clear_handlers(logger: logging.Logger) -> None:
+    """
+    Remove all handlers attached to the logger. Handlers must be cleared
+    before reconfiguring a shared (module-level) logger -- they would
+    otherwise accumulate and duplicate every message.
+    """
+    while logger.handlers:
+        logger.removeHandler(logger.handlers[0])
+
+
 def start_logger_if_necessary(
         name: str, logfile: str, loglvl: int) -> logging.Logger:
     """

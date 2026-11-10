@@ -36,6 +36,7 @@ from pyglimer.database.raw import RawDatabase, mseed_to_hdf5, statxml_to_hdf5
 from pyglimer import tmp
 from pyglimer.utils.roundhalf import roundhalf
 from pyglimer.utils import utils as pu
+from pyglimer.utils.log import file_handler
 from pyglimer.utils.utils import download_full_inventory
 from pyglimer.waveform.preprocessh5 import compute_toa
 
@@ -804,12 +805,7 @@ def downloadwav(
 
     # # Create handler to the log
     if log_fh is None:
-        fh = logging.FileHandler(os.path.join('logs', 'download.log'))
-        fh.setLevel(loglvl)
-        # Create Formatter
-        fmt = logging.Formatter(
-            fmt='%(asctime)s - %(levelname)s - %(message)s')
-        fh.setFormatter(fmt)
+        fh = file_handler(os.path.join('logs', 'download.log'), level=loglvl)
     else:
         fh = log_fh
 
