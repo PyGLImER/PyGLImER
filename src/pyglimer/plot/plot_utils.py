@@ -24,6 +24,21 @@ from cartopy.crs import PlateCarree
 
 from pyglimer.constants import maxz, res
 
+# Named color palettes for positive/negative RF amplitudes
+RF_COLORS = {
+    'seismic': ((0.9, 0.2, 0.2), (0.2, 0.2, 0.7)),
+    'pyglimer': ("#f7931e", "#008edd"),
+    'mono': ('k', 'grey'),
+}
+
+
+def _rf_colors(color):
+    """Return the (positive, negative) color pair for a palette name."""
+    try:
+        return RF_COLORS[color]
+    except KeyError:
+        raise ValueError(f'Unknown argument for color: {color}.') from None
+
 
 def set_mpl_params(bold=False):
     params = {
@@ -214,17 +229,7 @@ def plot_single_rf(
     """
     set_mpl_params(bold)
 
-    if color == 'seismic':
-        colorp = (0.9, 0.2, 0.2)
-        colorn = (0.2, 0.2, 0.7)
-    elif color == 'pyglimer':
-        colorp = "#f7931e"
-        colorn = "#008edd"
-    elif color == 'mono':
-        colorp = 'k'
-        colorn = 'grey'
-    else:
-        raise ValueError(f'Unknown argument for color: {color}.')
+    colorp, colorn = _rf_colors(color)
 
     # Get figure/axes dimensions
     if ax is None:
@@ -436,17 +441,7 @@ def plot_section(
     """
     set_mpl_params(bold)
 
-    if color == 'seismic':
-        colorp = (0.9, 0.2, 0.2)
-        colorn = (0.2, 0.2, 0.7)
-    elif color == 'pyglimer':
-        colorp = "#f7931e"
-        colorn = "#008edd"
-    elif color == 'mono':
-        colorp = 'k'
-        colorn = 'grey'
-    else:
-        raise ValueError(f'Unknown argument for color: {color}.')
+    colorp, colorn = _rf_colors(color)
 
     # Create figure if no axes is specified
     if ax is None:
@@ -487,10 +482,7 @@ def plot_section(
             ax.plot(rftmp, times, 'k', lw=linewidth, zorder=-_i + 0.1)
 
     # Set limits
-    if epilimits is None:
-        plt.xlim(epilimits)
-    else:
-        plt.xlim(epilimits)
+    plt.xlim(epilimits)
 
     if timelimits is None:
         if rfst[0].stats.type == 'time':
@@ -709,7 +701,6 @@ def rayp_hist(rayp, nbins, v=5.8, bold=False):
     wbaz = np.diff(edges)
 
     # Plot colored histogram
-    bars = plt.bar(xbaz, cts, wbaz, bottom=0.0)
     bars = plt.bar(xbaz, cts, wbaz, bottom=0.0)
     for r, bar in zip(cts, bars):
         bar.set_facecolor(plt.cm.magma_r(r / np.max(cts)))

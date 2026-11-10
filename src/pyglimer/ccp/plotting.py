@@ -20,6 +20,11 @@ from pyglimer.ccp.plot_utils.plot_cross_section import plot_cross_section
 from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
 
 
+def _pad_extent(coord):
+    """Floor/ceil a coordinate sequence to integer-padded map bounds."""
+    return (np.floor(min(coord)) - 1, np.ceil(max(coord)) + 1)
+
+
 class PhasePick(object):
     """
     A phasepick object, just created for more convenient plotting.
@@ -75,11 +80,8 @@ class PhasePick(object):
             Plot geological map.
         title
         """
-        lat = (
-            np.floor(min(self.coords[0][0]))-1,
-            np.ceil(max(self.coords[0][0])+1))
-        lon = (np.floor(min(self.coords[1][0]))-1,
-               np.ceil(max(self.coords[1][0])+1))
+        lat = _pad_extent(self.coords[0][0])
+        lon = _pad_extent(self.coords[1][0])
 
         plot_vel_grad(
             self.coords, self.a, self.z, plot_amplitude, lat, lon, outputfile,
@@ -149,10 +151,8 @@ class CCPStackPlotMixin(object):
         else:
             bincoords = self.coords
         # Set boundaries for map:
-        lat = (
-            np.floor(min(bincoords[0][0]))-1, np.ceil(max(bincoords[0][0])+1))
-        lon = (np.floor(min(bincoords[1][0]))-1,
-               np.ceil(max(bincoords[1][0])+1))
+        lat = _pad_extent(bincoords[0][0])
+        lon = _pad_extent(bincoords[1][0])
         plot_map_ccp(
             lat, lon, plot_stations, self.bingrid.latitude,
             self.bingrid.longitude, plot_bins, bincoords, self.bingrid.edist,

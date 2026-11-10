@@ -16,6 +16,23 @@ import matplotlib
 from cartopy.crs import PlateCarree
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 import cartopy.crs as ccrs
+
+
+def _shift_lon(lons, cl):
+    """Weird fix because cartopy is weird: shift longitudes relative to the
+    central meridian."""
+    if cl == 180.0:
+        return [sl + cl if sl <= 0 else sl - cl for sl in lons]
+    return lons
+
+
+def _finish_figure(outputfile, format, dpi):
+    if outputfile is None:
+        plt.show()
+    else:
+        if format in ["pdf", "epsg", "svg", "ps"]:
+            dpi = None
+        plt.savefig(outputfile, format=format, dpi=dpi, bbox_inches='tight')
 import cartopy
 
 
@@ -135,11 +152,7 @@ def plot_stations(slat, slon, cl=0.0):
     """Plots stations into a map
     """
 
-    # Weird fix because cartopy is weird
-    if cl == 180.0:
-        slon = [sl + cl if sl <= 0
-                else sl - cl
-                for sl in slon]
+    slon = _shift_lon(slon, cl)
     ax = plt.gca()
     ax.scatter(slon, slat, s=13, marker='v', c=((0.7, 0.2, 0.2),),
                edgecolors='k', linewidths=0.25, zorder=-1, label='stations')
@@ -150,11 +163,7 @@ def plot_bins(binlat, binlon, cl=0.0):
     Plots bins into a map
     """
 
-    # Weird fix because cartopy is weird
-    if cl == 180.0:
-        binlon = [bl + cl if bl <= 0
-                  else bl - cl
-                  for bl in binlon]
+    binlon = _shift_lon(binlon, cl)
 
     ax = plt.gca()
     ax.scatter(binlon, binlat, s=3, marker='.', c='b',
@@ -163,10 +172,7 @@ def plot_bins(binlat, binlon, cl=0.0):
 
 
 def plot_illum(binlat, binlon, dbin, illum, cl=0.0):
-    if cl == 180.0:
-        binlon = [bl + cl if bl <= 0
-                  else bl - cl
-                  for bl in binlon]
+    binlon = _shift_lon(binlon, cl)
 
     ax = plt.gca()
     # Create histogram
@@ -209,12 +215,7 @@ def plot_station_db(
              geology=geology)
     plot_stations(slat, slon, cl=cl)
     plt.tight_layout()
-    if outputfile is None:
-        plt.show()
-    else:
-        if format in ["pdf", "epsg", "svg", "ps"]:
-            dpi = None
-        plt.savefig(outputfile, format=format, dpi=dpi, bbox_inches='tight')
+    _finish_figure(outputfile, format, dpi)
 
 
 def plot_map_ccp(
@@ -278,12 +279,7 @@ def plot_map_ccp(
     if title:
         plt.title(title, fontdict={'fontweight': 'bold'}, y=1.1)
     plt.tight_layout()
-    if outputfile is None:
-        plt.show()
-    else:
-        if format in ["pdf", "epsg", "svg", "ps"]:
-            dpi = None
-        plt.savefig(outputfile, format=format, dpi=dpi, bbox_inches='tight')
+    _finish_figure(outputfile, format, dpi)
 
 
 def plot_vel_grad(
@@ -336,9 +332,4 @@ def plot_vel_grad(
     plt.tight_layout()
 
     # Write file
-    if outputfile is None:
-        plt.show()
-    else:
-        if format in ["pdf", "epsg", "svg", "ps"]:
-            dpi = None
-        plt.savefig(outputfile, format=format, dpi=dpi, bbox_inches='tight')
+    _finish_figure(outputfile, format, dpi)
