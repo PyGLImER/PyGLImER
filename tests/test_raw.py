@@ -17,6 +17,8 @@ from unittest import mock
 from unittest.mock import call, patch, MagicMock
 import warnings
 import os
+import shutil
+import tempfile
 
 from obspy import read, UTCDateTime, Stream, read_inventory
 import numpy as np
@@ -143,11 +145,21 @@ class TestAllTracesRecursive(unittest.TestCase):
 
 
 class TestDBHandler(unittest.TestCase):
+    def _tmpfile(self):
+        return os.path.join(self.tmpdir, 'db.h5')
+
     @patch('pyglimer.database.raw.h5py.File.__init__')
     def setUp(self, super_mock):
+        # The compression-parsing tests patch the module-level `super` of
+        # pyglimer.database.raw, but DBHandlerBase.__init__ calls the real
+        # super() from pyglimer.database.h5common -- the underlying
+        # h5py.File really opens (and creates) the file. Use a tmpdir so
+        # that no file 'a' is left behind in the working directory.
+        self.tmpdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmpdir, ignore_errors=True)
         self.file_mock = MagicMock()
         super_mock.return_value = self.file_mock
-        self.dbh = raw.DBHandler('a', 'r', 'gzip9')
+        self.dbh = raw.DBHandler(self._tmpfile(), 'r', 'gzip9')
         tr = read()[0]
         tr.data = np.ones_like(tr.data, dtype=int)
         tr.stats['phase'] = 'P'
@@ -170,13 +182,13 @@ class TestDBHandler(unittest.TestCase):
     def test_forbidden_compression(self, super_mock):
         super_mock.return_value = None
         with self.assertRaises(ValueError):
-            _ = raw.DBHandler('a', 'a', 'notexisting5')
+            _ = raw.DBHandler(self._tmpfile(), 'a', 'notexisting5')
 
     @patch('pyglimer.database.raw.super')
     def test_forbidden_compression_level(self, super_mock):
         super_mock.return_value = None
         with warnings.catch_warnings(record=True) as w:
-            dbh = raw.DBHandler('a', 'a', 'gzip10')
+            dbh = raw.DBHandler(self._tmpfile(), 'a', 'gzip10')
             self.assertEqual(dbh.compression_opts, 9)
             self.assertEqual(len(w), 1)
 
@@ -184,13 +196,13 @@ class TestDBHandler(unittest.TestCase):
     def test_no_compression_level(self, super_mock):
         super_mock.return_value = None
         with self.assertRaises(IndexError):
-            _ = raw.DBHandler('a', 'a', 'gzip')
+            _ = raw.DBHandler(self._tmpfile(), 'a', 'gzip')
 
     @patch('pyglimer.database.raw.super')
     def test_no_compression_name(self, super_mock):
         super_mock.return_value = None
         with self.assertRaises(IndexError):
-            _ = raw.DBHandler('a', 'a', '9')
+            _ = raw.DBHandler(self._tmpfile(), 'a', '9')
 
     def test_define_content(self):
         cont = {'Z': ['0', '1'], 'N': ['3', '4']}
@@ -250,7 +262,7 @@ class TestDBHandler(unittest.TestCase):
     @patch('pyglimer.database.raw.super')
     def test_add_different_object(self, super_mock):
         super_mock.return_value = None
-        dbh = raw.DBHandler('a', 'r', 'gzip9')
+        dbh = raw.DBHandler(self._tmpfile(), 'a', 'gzip9')
         with self.assertRaises(TypeError):
             dbh.add_waveform(unittest.TestCase())
 
