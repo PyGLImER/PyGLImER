@@ -40,8 +40,11 @@ class TestRotatePSV(unittest.TestCase):
         ia = iad*np.pi/180
         rayp = np.sin(ia) * 1/avp
         a = avs**2*rayp**2 - .5
-        qa = np.sqrt(1/avp**2 - rayp**2)
-        qb = np.sqrt(1/avs**2 - rayp**2)
+        # qb can go negative for small avs -- mirrors the production code,
+        # where the NaN is expected
+        with np.errstate(invalid='ignore'):
+            qa = np.sqrt(1/avp**2 - rayp**2)
+            qb = np.sqrt(1/avs**2 - rayp**2)
         A_rot = np.array([
             [-a/(avp*qa), rayp*avs**2/avp, 0],
             [-rayp*avs, -a/(avs*qb), 0],
@@ -66,8 +69,11 @@ class TestRotatePSV(unittest.TestCase):
         ia = iad*np.pi/180
         rayp = np.sin(ia) * 1/avp
         a = avs**2*rayp**2 - .5
-        qa = np.sqrt(1/avp**2 - rayp**2)
-        qb = np.sqrt(1/avs**2 - rayp**2)
+        # qb can go negative for small avs -- mirrors the production code,
+        # where the NaN is expected
+        with np.errstate(invalid='ignore'):
+            qa = np.sqrt(1/avp**2 - rayp**2)
+            qb = np.sqrt(1/avs**2 - rayp**2)
         A_rot = np.array([
             [-a/(avp*qa), rayp*avs**2/avp, 0],
             [-rayp*avs, -a/(avs*qb), 0],

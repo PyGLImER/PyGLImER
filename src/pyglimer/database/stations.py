@@ -15,7 +15,6 @@ Created: Friday, 12th February 2020 03:24:30 pm
 Last Modified: Friday, 20th January 2023 03:50:29 pm
 '''
 
-import fnmatch
 import logging
 import os
 import shelve
@@ -30,6 +29,7 @@ import pandas as pd
 from pyglimer.data import finddir
 from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.plot.plot_map import plot_station_db
+from pyglimer.utils.log import file_handler
 
 
 def redownload_missing_statxmls(clients, phase, statloc, rawdir, verbose=True):
@@ -119,6 +119,7 @@ class StationDB(object):
 
         self.dir = dir
 
+        self.phase = None
         if phase:
             self.phase = phase.upper()
 
@@ -130,24 +131,21 @@ class StationDB(object):
         # FileHandler
         if not logdir:
             try:
-                fh = logging.FileHandler(
+                fh = file_handler(
                     os.path.join(
-                        dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
+                        dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'),
+                    level=logging.WARNING)
             except FileNotFoundError:
                 os.makedirs(os.path.join(
                     dir, os.pardir, os.pardir, 'logs'), exist_ok=True)
-                fh = logging.FileHandler(
+                fh = file_handler(
                     os.path.join(
-                        dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'))
+                        dir, os.pardir, os.pardir, 'logs', 'StationDBase.log'),
+                    level=logging.WARNING)
         else:
-            fh = logging.FileHandler(os.path.join(logdir, 'StationDBase.log'))
-        fh.setLevel(logging.WARNING)
+            fh = file_handler(
+                os.path.join(logdir, 'StationDBase.log'), level=logging.WARNING)
         self.logger.addHandler(fh)
-
-        # Formatter
-        fmt = logging.Formatter(
-            fmt='%(asctime)s - %(levelname)s - %(message)s')
-        fh.setFormatter(fmt)
 
         # Check if there is already a saved database
         oloc = os.path.join(finddir(), 'database.csv')
@@ -215,11 +213,15 @@ class StationDB(object):
 
             # Check data availability
             for root, _, files in os.walk(folder):
-                if len(fnmatch.filter(files, 'info.*')) == 0:
-                    continue  # Skip parent folders
                 infof = (os.path.join(root, 'info'))
-
-                with shelve.open(infof, flag='r') as info:
+                # The shelf's on-disk name depends on the dbm backend
+                # ('info', 'info.dat', 'info.db', ...), so just try to
+                # open it instead of matching file names
+                try:
+                    info = shelve.open(infof, flag='r')
+                except Exception:
+                    continue  # Skip parent folders
+                with info:
                     data['code'].append(info['network']+'.'+info['station'])
                     data['network'].append(info['network'])
                     data['station'].append(info['station'])
@@ -252,11 +254,12 @@ class StationDB(object):
 
         # Check data availability of PRFs
         for root, _, files in os.walk(folderP):
-            if 'info.dat' not in files:
-                continue  # Skip parent folders
             infof = (os.path.join(root, 'info'))
-
-            with shelve.open(infof, flag='r') as info:
+            try:
+                info = shelve.open(infof, flag='r')
+            except Exception:
+                continue  # Skip parent folders
+            with info:
                 dataP['code'].append(info['network']+'.'+info['station'])
                 dataP['network'].append(info['network'])
                 dataP['station'].append(info['station'])
@@ -276,11 +279,12 @@ class StationDB(object):
 
         # Check data availability of SRFs
         for root, _, files in os.walk(folderS):
-            if 'info.dat' not in files:
-                continue  # Skip parent folders or empty folders
             infof = (os.path.join(root, 'info'))
-
-            with shelve.open(infof, flag='r') as info:
+            try:
+                info = shelve.open(infof, flag='r')
+            except Exception:
+                continue  # Skip parent folders or empty folders
+            with info:
                 dataS['code'].append(info['network']+'.'+info['station'])
                 dataS['network'].append(info['network'])
                 dataS['station'].append(info['station'])
@@ -296,16 +300,22 @@ class StationDB(object):
                         'No S-waveforms obtaimed for station %s.%s' % (
                             info['network'], info['station']))
 
-        # Merge the two dictionaries
+        # Merge the two dictionaries (index of the first occurrence per
+        # code, so lookups stay O(1) instead of a linear scan per station)
+        p_index = {}
+        for j, c in enumerate(dataP['code']):
+            if c not in p_index:
+                p_index[c] = j
         for i, c in enumerate(dataS['code']):
-            if c in dataP['code']:
-                j = dataP['code'].index(c)
+            if c in p_index:
+                j = p_index[c]
                 dataP['NS'][j] = dataS['NS'][i]
                 dataP['NSret'][j] = dataS['NSret'][i]
             else:
+                p_index[c] = len(dataP['code'])
                 dataP['code'].append(c)
                 dataP['network'].append(dataS['network'][i])
-                dataP['station'].append(dataS['station'])
+                dataP['station'].append(dataS['station'][i])
                 dataP['lat'].append(dataS['lat'][i])
                 dataP['lon'].append(dataS['lon'][i])
                 dataP['elevation'].append(dataS['elevation'][i])

@@ -10,7 +10,10 @@
 Created: Thursday, 19th August 2021 04:01:26 pm
 Last Modified: Friday, 8th April 2022 02:07:31 pm
 '''
+import logging
 import os
+import shutil
+import tempfile
 import unittest
 from unittest.mock import MagicMock, call, patch, DEFAULT, ANY
 from unittest import mock
@@ -25,6 +28,39 @@ from obspy.clients.fdsn.header import URL_MAPPINGS
 
 from pyglimer.utils import utils as pu
 from pyglimer.utils.roundhalf import roundhalf
+
+
+class TestMPILogger(unittest.TestCase):
+    def test_parent_handler_used(self):
+        """The FileHandler may be configured on an ancestor logger (e.g.
+        request.log lives on 'pyglimer.request'); create_mpi_logger must
+        walk up to find it instead of raising."""
+        from pyglimer.utils.log import create_mpi_logger
+        tmpdir = tempfile.mkdtemp()
+        try:
+            parent = logging.getLogger('pyglimer.request')
+            fh = logging.FileHandler(os.path.join(tmpdir, 'req.log'))
+            parent.addHandler(fh)
+            child = logging.getLogger('pyglimer.request.preprocess')
+            child.handlers = []
+            new = create_mpi_logger(child, 3)
+            self.assertTrue(new.name.endswith('rank003'))
+            parent.removeHandler(fh)
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_no_handler_raises(self):
+        from pyglimer.utils.log import create_mpi_logger
+        # A fully mocked logger isolated from the logging tree (pytest
+        # attaches capture handlers to the real root logger)
+        lg = mock.MagicMock()
+        lg.name = 'pyglimer.request.preprocess'
+        lg.hasHandlers.return_value = False
+        root = mock.MagicMock()
+        root.name = 'root'
+        lg.parent = root
+        with self.assertRaises(ValueError):
+            create_mpi_logger(lg, 0)
 
 
 class TestDTString(unittest.TestCase):
@@ -189,9 +225,12 @@ class TestSaveRaw(unittest.TestCase):
             sel_mock.side_effect = Exception('Test')
             with self.assertLogs("", level='ERROR') as cm:
                 pu.save_raw(self.saved, self.st, 'rawloc', inv, True)
-                self.assertEqual(
-                    cm.output,
-                    ['ERROR:root:Test', 'ERROR:root:Test', 'ERROR:root:Test'])
+                # The error is logged (with traceback and context) once
+                # per failed event, and must not raise on its own.
+                self.assertEqual(len(cm.output), 3)
+                for line in cm.output:
+                    self.assertIn('Test', line)
+                    self.assertIn('Traceback', line)
 
 
 class TestSaveRawMseed(unittest.TestCase):

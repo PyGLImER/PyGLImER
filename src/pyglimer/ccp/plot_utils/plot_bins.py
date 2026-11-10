@@ -17,6 +17,8 @@ Last Update: November 2019
 from cartopy.crs import PlateCarree
 import matplotlib.pyplot as plt
 import numpy as np
+
+from pyglimer.utils.geo_utils import fix_map_extent
 from .plot_map import plot_map
 
 
@@ -65,13 +67,9 @@ def plot_bins(stations, bins, ax=None, kwargsS=None, kwargsB=None):
                **markerkwarg, c=((0.8, 0.2, 0.2),), **kwargsS)
 
     # Set extent
-    minX, maxX = np.min(bins[1]), np.max(bins[1])
-    minY, maxY = np.min(bins[0]), np.max(bins[0])
-    buffer = 0.1  # in fraction
-    xbuffer = (maxX - minX) * buffer
-    ybuffer = (maxY - minY) * buffer
-    mapextent = [minX - xbuffer, maxX + xbuffer,
-                 minY - ybuffer, maxY + ybuffer]
+    mapextent = fix_map_extent(
+        [np.min(bins[1]), np.max(bins[1]),
+         np.min(bins[0]), np.max(bins[0])], fraction=0.1)
     ax.set_extent(mapextent)
 
     # Get location on map in textbox

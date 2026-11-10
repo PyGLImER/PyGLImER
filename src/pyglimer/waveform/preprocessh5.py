@@ -24,7 +24,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from tqdm.auto import tqdm as tqdm_auto
 import obspy
-from obspy import Stream, UTCDateTime
+from obspy import UTCDateTime
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from tqdm.std import tqdm
 
@@ -32,34 +32,27 @@ from pyglimer import constants
 from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.database.raw import RawDatabase
 from pyglimer.utils.log import create_mpi_logger
-from .qc import qcp, qcs
+from .preproc_utils import PreprocessConfig, SNRError, append_event_info, \
+    rotate_and_snr_qc, set_station_info
 from .rotate import rotate_LQT_min, rotate_PSV
 from ..rf.create import RFStream, createRF
 
 
-# program-specific Exceptions
-class SNRError(Exception):
-    """raised when the SNR is too high"""
-    # Constructor method
+class _MembershipList(list):
+    """A list that keeps a set of its items alongside, so that repeated
+    membership tests stay O(1) when the list grows long (used for the
+    known/processed waveform lists, which are tested once per event).
+    All list semantics (duplicates included) are preserved."""
+    def __init__(self, *args):
+        super().__init__(*args)
+        self._items = set(self)
 
-    def __init__(self, value):
-        self.value = value
-    # __str__ display function
+    def append(self, item):
+        super().append(item)
+        self._items.add(item)
 
-    def __str__(self):
-        return repr(self.value)
-
-
-class StreamLengthError(Exception):
-    """raised when stream has fewer than 3 components"""
-    # Constructor method
-
-    def __init__(self, value):
-        self.value = value
-    # __str__ display function
-
-    def __str__(self):
-        return repr(self.value)
+    def __contains__(self, item):
+        return item in self._items
 
 
 class ProgressParallel(Parallel):
@@ -78,7 +71,8 @@ def preprocessh5(
     model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
     rawloc: str, rfloc: str, deconmeth: str, hc_filt: float, netrestr: str,
     statrestr: str, logger: logging.Logger, rflogger: logging.Logger,
-        client: str, evtcat: obspy.Catalog, remove_response: bool):
+        client: str, evtcat: obspy.Catalog, remove_response: bool,
+        n_jobs: int = -1):
     """
     Preprocess files saved in hdf5 (pyasdf) format. Will save the computed
     receiver functions in hdf5 format as well.
@@ -122,6 +116,10 @@ def preprocessh5(
     :type client: str
     :param evtcat: event Catalogue
     :type evtcat: obspy.catalog
+    :param n_jobs: Number of parallel jobs for the joblib backend (see
+        :func:`joblib.Parallel`). ``-1`` uses all cores. Ignored for the
+        mpi and single backends.
+    :type n_jobs: int, optional
     :raises NotImplementedError: For uknowns multiprocessing backends.
     """
     os.makedirs(rfloc, exist_ok=True)
@@ -136,6 +134,16 @@ def preprocessh5(
     logger.debug(f'GLOBSTRING: {globstr}')
     logger.debug(f'# of Files found: {len(flist)}')
 
+    # Static settings passed down through the event and waveform loops
+    # (the error-handler and mseed-output fields do not apply to the hdf5
+    # pipeline)
+    cfg = PreprocessConfig(
+        phase=phase, rot=rot, pol=pol, taper_perc=taper_perc,
+        taper_type=taper_type, model=model, logger=logger, rflogger=rflogger,
+        eh=False, tz=tz, ta=ta, statloc=None, rawloc=rawloc, preproloc=None,
+        rfloc=rfloc, deconmeth=deconmeth, hc_filt=hc_filt, netrestr=netrestr,
+        statrestr=statrestr, remove_response=remove_response)
+
     # Perform processing depending on client
     if client.lower() == 'mpi':
         from mpi4py import MPI
@@ -148,27 +156,19 @@ def preprocessh5(
         ind = np.arange(len(flist))[ind]
 
         # get new MPI compatible loggers
-        logger = create_mpi_logger(logger, rank)
-        rflogger = logging.getLogger("%s.RF" % logger.name)
+        cfg.logger = create_mpi_logger(cfg.logger, rank)
+        cfg.rflogger = logging.getLogger("%s.RF" % cfg.logger.name)
         for ii in ind:
-            _preprocessh5_single(
-                phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, logger, rflogger, flist[ii], evtcat,
-                remove_response)
+            _preprocessh5_single(cfg, flist[ii], evtcat)
 
     elif client.lower() == 'joblib':
-        ProgressParallel(n_jobs=-1,)(
-            delayed(_preprocessh5_single)(
-                phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, logger, rflogger,
-                f, evtcat, remove_response) for f in tqdm(flist))
+        ProgressParallel(n_jobs=n_jobs,)(
+            delayed(_preprocessh5_single)(cfg, f, evtcat)
+            for f in tqdm(flist))
 
     elif client.lower() == 'single':
         for f in tqdm(flist):
-            _preprocessh5_single(
-                phase, rot, pol, taper_perc, model, taper_type, tz, ta, rfloc,
-                deconmeth, hc_filt, logger, rflogger,
-                f, evtcat, remove_response)
+            _preprocessh5_single(cfg, f, evtcat)
     else:
         raise NotImplementedError(
             'Unknown multiprocessing backend %s.' % client
@@ -176,17 +176,22 @@ def preprocessh5(
 
 
 def _preprocessh5_single(
-        phase: str, rot: str, pol: str, taper_perc: float,
-        model: obspy.taup.TauPyModel, taper_type: str, tz: int, ta: int,
-        rfloc: str, deconmeth: str, hc_filt: float,
-        logger: logging.Logger, rflogger: logging.Logger,
-        hdf5_file: str, evtcat: obspy.Catalog, remove_response: bool):
+        cfg: PreprocessConfig, hdf5_file: str, evtcat: obspy.Catalog):
     """
     Single core processing of one single hdf5 file.
 
     .. warning:: Should not be called use
         :func:`~seismic.waveform.preprocessh5.preprocess_h5`!
     """
+    # Shorthand for the config settings (the loop body predates the
+    # config object)
+    phase = cfg.phase
+    model = cfg.model
+    tz = cfg.tz
+    ta = cfg.ta
+    rfloc = cfg.rfloc
+    logger = cfg.logger
+    rflogger = cfg.rflogger
 
     f = hdf5_file
     net, stat, _ = os.path.basename(f).split('.')
@@ -204,11 +209,12 @@ def _preprocessh5_single(
     if os.path.isfile(outf+'.h5'):
         with RFDataBase(outf) as rfdb:
             ret, rej = rfdb._get_known_waveforms()
+            ret, rej = _MembershipList(ret), _MembershipList(rej)
             rflogger.debug('Already processed waveforms: %s' % str(ret))
             rflogger.debug('\nAlready rejected waveforms: %s' % str(rej))
     else:
-        ret = []
-        rej = []
+        ret = _MembershipList()
+        rej = _MembershipList()
 
     with RawDatabase(f, mode='r') as rdb:
         # get station inventory
@@ -272,9 +278,8 @@ def _preprocessh5_single(
                 continue
             try:
                 rf_temp = __station_process__(
-                    st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz,
-                    ta, deconmeth, hc_filt, logger, rflogger, net, stat, baz,
-                    distance, rayp, rayp_s_deg, toa, rej, ret, remove_response)
+                    cfg, st, inv, evt, net, stat, baz, distance, rayp,
+                    rayp_s_deg, toa, rej, ret)
             except Exception as e:
                 rflogger.exception(
                     'RF Creation failed. Waveform Data:\n'
@@ -353,13 +358,24 @@ def compute_toa(
 
 
 def __station_process__(
-    st, inv, evt, phase, rot, pol, taper_perc, taper_type, tz, ta,  deconmeth,
-    hc_filt, logger, rflogger, net, stat, baz, distance, rayp,
-    rayp_s_deg, toa, rej: List[str], ret: List[str],
-        remove_response: bool):
+    cfg: PreprocessConfig, st, inv, evt, net, stat, baz, distance, rayp,
+    rayp_s_deg, toa, rej: List[str], ret: List[str]):
     """
     Processing that is equal for each waveform recorded on one station
     """
+    # Shorthand for the config settings (the loop body predates the
+    # config object)
+    phase = cfg.phase
+    rot = cfg.rot
+    pol = cfg.pol
+    taper_perc = cfg.taper_perc
+    taper_type = cfg.taper_type
+    ta = cfg.ta
+    deconmeth = cfg.deconmeth
+    hc_filt = cfg.hc_filt
+    rflogger = cfg.rflogger
+    remove_response = cfg.remove_response
+
     # Is the data already processed?
     origin = (evt.preferred_origin() or evt.origins[0])
     ot_fiss = UTCDateTime(origin.time).format_fissures()
@@ -382,9 +398,8 @@ def __station_process__(
     # create RF
     try:
         st, _, infodict = __rotate_qc(
-            phase, st, inv, net, stat, baz, distance, ot_fiss, evt,
-            origin.latitude, origin.longitude, origin.depth, rayp_s_deg, toa,
-            logger, infodict, tz, pol)
+            cfg, st, inv, net, stat, baz, distance, evt, ot_fiss,
+            rayp_s_deg, toa, infodict)
         if hc_filt:
             st.filter('lowpass', freq=hc_filt, zerophase=True, corners=2)
         # Rotate to LQT or PSS
@@ -433,91 +448,27 @@ def __station_process__(
 
 
 def __rotate_qc(
-    phase, st, station_inv, network, station, baz, distance, ot_fiss,
-    event, evtlat, evtlon, depth, rayp_s_deg, first_arrival, logger, infodict,
-        tz, pol):
+    cfg: PreprocessConfig, st, station_inv, network, station, baz, distance,
+        evt, ot_fiss, rayp_s_deg, first_arrival, infodict):
     """
     REMOVE INSTRUMENT RESPONSE + convert to vel + SIMULATE
     """
+    origin = (evt.preferred_origin() or evt.origins[0])
 
-    st.rotate(method='->ZNE', inventory=station_inv)
+    st, crit, f, noisemat, dt, sampling_f = rotate_and_snr_qc(
+        cfg.phase, st, station_inv, baz, cfg.tz)
 
-    st.rotate(method='NE->RT', inventory=station_inv,
-              back_azimuth=baz)
-    st.normalize()
+    set_station_info(infodict, network, station, station_inv, dt, sampling_f)
 
-    # Sometimes streams contain more than 3 traces:
-    if st.count() > 3:
-        stream = {}
-        for tr in st:
-            stream[tr.stats.component] = tr
-        if "Z" in stream:
-            st = Stream([stream["Z"], stream["R"], stream["T"]])
-        elif "3" in stream:
-            st = Stream([stream["3"], stream["R"], stream["T"]])
-        del stream
-
-    # SNR CRITERIA
-    dt = st[0].stats.delta  # sampling interval
-    sampling_f = st[0].stats.sampling_rate
-
-    if phase[-1] == "P":
-        st, crit, f, noisemat = qcp(st, dt, sampling_f, tz)
-        if not crit:
-            infodict['dt'] = dt
-            infodict['sampling_rate'] = sampling_f
-            infodict['network'] = network
-            infodict['station'] = station
-            infodict['statlat'] = station_inv[0][0][0].latitude
-            infodict['statlon'] = station_inv[0][0][0].longitude
-            infodict['statel'] = station_inv[0][0][0].elevation
-            raise SNRError('QC rejected %s' % np.array2string(noisemat))
-
-    elif phase[-1] == "S":
-        st, crit, f, noisemat = qcs(st, dt, sampling_f, tz)
-
-        if not crit:
-            infodict['dt'] = dt
-            infodict['sampling_rate'] = sampling_f
-            infodict['network'] = network
-            infodict['station'] = station
-            infodict['statlat'] = station_inv[0][0][0].latitude
-            infodict['statlon'] = station_inv[0][0][0].longitude
-            infodict['statel'] = station_inv[0][0][0].elevation
-            raise SNRError('QC rejected %s' % np.array2string(noisemat))
+    if not crit:
+        raise SNRError('QC rejected %s' % np.array2string(noisemat))
 
     # WRITE AN INFO FILE
-    append_inf = [
-        ['magnitude', (
-            event.preferred_magnitude() or event.magnitudes[0])['mag']],
-        ['magnitude_type', (
-            event.preferred_magnitude() or event.magnitudes[0])[
-                'magnitude_type']],
-        ['evtlat', evtlat], ['evtlon', evtlon],
-        ['ot_ret', ot_fiss], ['ot_all', ot_fiss],
-        ['evt_depth', depth],
-        ['evt_id', event.get('resource_id')],
-        ['noisemat', noisemat],
-        ['co_f', f], ['npts', st[1].stats.npts],
-        ['rbaz', baz],
-        ['rdelta', distance],
-        ['rayp_s_deg', rayp_s_deg],
-        ['onset', first_arrival],
-        ['starttime', st[0].stats.starttime],
-        ['pol', pol]]
+    append_event_info(
+        infodict, evt, ot_fiss, origin.latitude, origin.longitude,
+        origin.depth, noisemat, f, st, baz, distance, rayp_s_deg,
+        first_arrival, extra=[['pol', cfg.pol]])
 
-    # Check if values are already in dict
-    for key, value in append_inf:
-        infodict.setdefault(key, []).append(value)
-
-    infodict['dt'] = dt
-    infodict['sampling_rate'] = sampling_f
-    infodict['network'] = network
-    infodict['station'] = station
-    infodict['statlat'] = station_inv[0][0][0].latitude
-    infodict['statlon'] = station_inv[0][0][0].longitude
-    infodict['statel'] = station_inv[0][0][0].elevation
-
-    logger.info(f"Stream accepted {ot_fiss}. Preprocessing successful")
+    cfg.logger.info(f"Stream accepted {ot_fiss}. Preprocessing successful")
 
     return st, crit, infodict

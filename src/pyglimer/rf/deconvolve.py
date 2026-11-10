@@ -357,21 +357,29 @@ def multitaper(
             tmp1 = np.fft.fft(np.multiply(E[n, :], P))
             tmp2 = np.fft.fft(np.multiply(E[n, :], D))
 
-            NUM[k, :] = NUM[k, :] + np.multiply(lambdas[k]*tmp1.conj(), tmp2)
-            DEN[k, :] = DEN[k, :] + np.multiply(lambdas[k]*tmp1.conj(), tmp1)
+            # The accumulators are real on purpose: only the real parts of
+            # the spectral products are accumulated, matching the long-
+            # standing behaviour of this routine (translated from MATLAB).
+            # The .real calls are explicit to keep numpy from raising
+            # ComplexWarnings; Re(sum(z)) == sum(Re(z)), so this is exact.
+            NUM[k, :] = NUM[k, :] + np.real(
+                np.multiply(lambdas[k]*tmp1.conj(), tmp2))
+            DEN[k, :] = DEN[k, :] + np.real(
+                np.multiply(lambdas[k]*tmp1.conj(), tmp1))
 
-            ESTP[k, :] = ESTP[k, :] + lambdas[k]*tmp1
-            ESTD[k, :] = ESTD[k, :] + lambdas[k]*tmp2
+            ESTP[k, :] = ESTP[k, :] + np.real(lambdas[k]*tmp1)
+            ESTD[k, :] = ESTD[k, :] + np.real(lambdas[k]*tmp2)
 
             # DUM only from D trace (converted wave component) used in
             # coherence estimate
-            DUM[k, :] = DUM[k, :] + np.multiply(lambdas[k]*tmp2.conj(), tmp2)
+            DUM[k, :] = DUM[k, :] + np.real(
+                np.multiply(lambdas[k]*tmp2.conj(), tmp2))
 
             # pre-event noise
             # always stick to first time window
             tmp1n = np.fft.fft(np.multiply(E[n, :], Pn))
             DEN_noise[k, :] = DEN_noise[k, :] \
-                + np.multiply(lambdas[k]*tmp1n.conj(), tmp1n)
+                + np.real(np.multiply(lambdas[k]*tmp1n.conj(), tmp1n))
             n = n + 1
 
     # max_imag_ep = max(abs(np.imag(np.fft.ifft(sum(ESTP)))))

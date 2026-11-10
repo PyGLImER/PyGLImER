@@ -148,10 +148,8 @@ class ComplexModel(object):
         """
         folder = os.path.join(finddir(), 'velocity_models')
         # Remove filetype identifier if provided
-        x = filename.split('.')
-        if len(x) > 1:
-            if x[-1] == 'pkl':
-                filename = ''.join(x[:-1])
+        if filename.endswith('.pkl'):
+            filename = filename[:-4]
         oloc = os.path.join(folder, filename)
         with open(oloc + ".pkl", 'wb') as output:
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
@@ -352,9 +350,7 @@ class AverageVelModel(object):
         """
         folder = os.path.join(finddir(), 'velocity_models')
         # Remove filetype identifier if provided
-        x = filename.split('.')
-        if len(x) > 1:
-            filename = filename + '.' - x[-1]
+        filename = filename.rsplit('.', 1)[0]
         oloc = os.path.join(folder, filename)
         os.makedirs(oloc, exist_ok=True)
 
@@ -506,6 +502,12 @@ def load_gyps(
         Creates a submodel from the full model. In form (minlat, maxlat).
     lonb : Tuple, optional
         (minlon, maxlon)
+    flatten : Bool, optional
+        Apply the earth-flattening approximation (Shearer) to the full
+        model. Submodels inherit the velocity values of their parent, so
+        models compiled with ``flatten=False`` are kept strictly separate
+        from flattened ones in the cache (they would otherwise silently
+        return the wrong velocities). The default is True.
 
     Returns
     -------
@@ -518,49 +520,60 @@ def load_gyps(
             """"Provide either no geographic boundaries or both latitude
             and longitude boundaries.""")
 
+    # The cache keys must include the flatten flag: a submodel inherits
+    # the (spherical or earth-flattened) velocity values of its parent, so
+    # a full model compiled with flatten=False must never be reused as the
+    # parent of a submodel requested with flatten=True (and vice versa).
+    if flatten:
+        suffix = ''
+    else:
+        suffix = '_cart'
+    fullkey = 'gyps' + suffix
+
     if latb:
         # Changes the boundaries to ints (mainly for filenames)
         latb = (int(np.floor(latb[0])), int(np.ceil(latb[1])))
         lonb = (int(np.floor(lonb[0])), int(np.ceil(lonb[1])))
+        subkey = fullkey + str(latb) + str(lonb)
 
         try:
-            return _MODEL_CACHE['gyps' + str(latb) + str(lonb)]
+            return _MODEL_CACHE[subkey]
         except KeyError:
             pass
         try:
             with open(
                 os.path.join(
-                    'tmp', str(latb)+str(lonb)+'.pkl', 'rb')) as infile:
+                    finddir(), 'velocity_models', subkey + '.pkl'),
+                    'rb') as infile:
                 model = pickle.load(infile)
 
-            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model
+            _MODEL_CACHE[subkey] = model
             return model
         except FileNotFoundError:
             pass
 
     try:
-        model = _MODEL_CACHE['gyps']
+        model = _MODEL_CACHE[fullkey]
         if latb:
-            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model \
-                = model.submodel(latb, lonb)
+            _MODEL_CACHE[subkey] = model = model.submodel(latb, lonb)
             if save:
-                model.write(filename=str(latb)+str(lonb), folder='tmp')
+                model.write(filename=subkey)
         return model
     except KeyError:
         pass
 
     try:
-        filepath = os.path.join(finddir(), 'velocity_models', 'gypsum.pkl')
+        filepath = os.path.join(
+            finddir(), 'velocity_models', fullkey + '.pkl')
         with open(filepath, 'rb') as infile:
             model = pickle.load(infile)
         if not latb:
-            _MODEL_CACHE['gyps'] = model
+            _MODEL_CACHE[fullkey] = model
 
         else:
-            _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
-                model.submodel(latb, lonb)
+            _MODEL_CACHE[subkey] = model = model.submodel(latb, lonb)
             if save:
-                model.write(filename=str(latb)+str(lonb), folder='tmp')
+                model.write(filename=subkey)
             return model
 
     except FileNotFoundError:
@@ -634,14 +647,13 @@ def load_gyps(
 
     # Pickle model
     if save:
-        model.write()
+        model.write(filename=fullkey)
 
     if not latb:
-        _MODEL_CACHE['gyps'] = model
+        _MODEL_CACHE[fullkey] = model
     else:
-        _MODEL_CACHE['gyps' + str(latb) + str(lonb)] = model = \
-            model.submodel(latb, lonb)
+        _MODEL_CACHE[subkey] = model = model.submodel(latb, lonb)
         if save:
-            model.write(filename=str(latb)+str(lonb), folder='tmp')
+            model.write(filename=subkey)
 
     return model

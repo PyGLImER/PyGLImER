@@ -38,6 +38,7 @@ from pyglimer.waveform.download import download_small_db, downloadwav
 from pyglimer.waveform.preprocess import preprocess
 from pyglimer.waveform.filesystem import import_database
 from pyglimer.utils import utils as pu
+from pyglimer.utils.log import clear_handlers, file_handler
 
 
 class Request(object):
@@ -71,7 +72,7 @@ class Request(object):
             waveform data (mseed). **Irrelevant if format is hdf5**.
         :type prepro_subdir: str or None
         :param rf_subdir: Directory, in which to store the receiver functions
-            in time domain (sac).
+            in time domain (hdf5 database).
         :type rf_subdir: str
         :param statloc_subdir: Directory, in which to store the station
             inventories (xml).
@@ -158,12 +159,23 @@ class Request(object):
         """
 
         # Allocate variables in self
-        loglvl = pu.log_lvl[loglvl.upper()]
+        # Accept both logging-level strings ('WARNING') and ints
+        # (logging.WARNING -- also the default of this function)
+        if isinstance(loglvl, str):
+            loglvl = pu.log_lvl[loglvl.upper()]
+        else:
+            loglvl = int(loglvl)
         self.loglvl = loglvl
 
-        if format.lower() == ('hdf5' or 'h5'):
+        if format.lower() in ('hdf5', 'h5'):
             self.h5 = True
-        elif format.lower() in ('sac', 'mseed'):
+        elif format.lower() == 'sac':
+            raise NotImplementedError(
+                'format="sac" is no longer supported. Receiver functions '
+                'are always saved to the hdf5 database. Use format="mseed" '
+                '(raw waveforms as mseeds) or format="hdf5" (raw waveforms '
+                'in the hdf5 database) instead.')
+        elif format.lower() == 'mseed':
             self.h5 = False
         else:
             raise NotImplementedError(
@@ -186,8 +198,8 @@ class Request(object):
         self.rawloc = os.path.join(proj_dir, raw_subdir, self.phase)
         if prepro_subdir is None and not self.h5:
             raise ValueError(
-                'Prepro_subdir has to be defined if the output format is '
-                f'{format}.')
+                'Prepro_subdir has to be defined if the raw waveforms are '
+                f'stored as {format}.')
         if prepro_subdir is None:
             self.preproloc = None
         else:
@@ -197,13 +209,15 @@ class Request(object):
         # logger for the download steps
         self.logger = logging.getLogger('pyglimer.request')
         self.logger.setLevel(loglvl)
-        self.fh = logging.FileHandler(
-            os.path.join(self.logdir, 'request.log'))
-        self.fh.setLevel(loglvl)
+        # Remove handlers left over from previous Request instantiations
+        # (the logger is shared and handlers would otherwise accumulate,
+        # duplicating every message)
+        clear_handlers(self.logger)
+        self.fh = file_handler(
+            os.path.join(self.logdir, 'request.log'), level=loglvl)
         self.logger.addHandler(self.fh)
         fmt = logging.Formatter(
             fmt='%(asctime)s - %(levelname)s - %(message)s')
-        self.fh.setFormatter(fmt)
         consoleHandler = logging.StreamHandler()
         consoleHandler.setLevel(loglvl)
         consoleHandler.setFormatter(fmt)
@@ -462,7 +476,7 @@ class Request(object):
 
     def preprocess(
         self, client: str = 'joblib',
-            hc_filt: float or int or None = None):
+            hc_filt: float or int or None = None, n_jobs: int = -1):
         """
         Preprocess an existing database. With parameters defined in self.
 
@@ -475,10 +489,15 @@ class Request(object):
             set in :func:`~pyglimer.ccp.ccp.CCPStack.compute_stack()`).
             Value for PRFs should usually be lower than 2 Hz and for SRFs lower
             than .4 Hz, by default None.
+        n_jobs : int, optional
+            Number of parallel jobs for the ``'joblib'`` backend (see
+            :func:`joblib.Parallel`). ``-1`` (the default) uses all
+            cores. Ignored for the ``'mpi'`` and ``'single'`` backends.
         """
         preprocess(
             self.phase, self.rot, self.pol, 0.05, self.evtcat, self.model,
             'hann', self.tz, self.ta, self.statloc, self.rawloc,
             self.preproloc, self.rfloc, self.deconmeth, hc_filt,
             netrestr=self.network, statrestr=self.station, client=client,
-            saveasdf=self.h5, remove_response=self.remove_response)
+            saveasdf=self.h5, remove_response=self.remove_response,
+            clients=self.waveform_client, n_jobs=n_jobs)

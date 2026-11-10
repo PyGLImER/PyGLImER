@@ -10,40 +10,32 @@
 Created: Tuesday, 4th August 2020 11:02:52 am
 Last Modified: Tuesday, 8th August 2023 02:55:05 pm
 '''
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib
 from cartopy.crs import PlateCarree
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 import cartopy.crs as ccrs
+
+from pyglimer.plot.plot_utils import set_mpl_params
+
+
+def _shift_lon(lons, cl):
+    """Weird fix because cartopy is weird: shift longitudes relative to the
+    central meridian."""
+    if cl == 180.0:
+        return [sl + cl if sl <= 0 else sl - cl for sl in lons]
+    return lons
+
+
+def _finish_figure(outputfile, format, dpi):
+    if outputfile is None:
+        plt.show()
+    else:
+        if format in ["pdf", "epsg", "svg", "ps"]:
+            dpi = None
+        plt.savefig(outputfile, format=format, dpi=dpi, bbox_inches='tight')
 import cartopy
-
-
-def set_mpl_params():
-    params = {
-        'font.weight': 'bold',
-        'axes.labelweight': 'bold',
-        'axes.labelsize': 10,
-        'xtick.labelsize': 7,
-        'xtick.direction': 'in',
-        'xtick.top': True,  # draw label on the top
-        'xtick.bottom': True,  # draw label on the bottom
-        'xtick.minor.visible': True,
-        'xtick.major.top': True,  # draw x axis top major ticks
-        'xtick.major.bottom': True,  # draw x axis bottom major ticks
-        'xtick.minor.top': True,  # draw x axis top minor ticks
-        'xtick.minor.bottom': True,  # draw x axis bottom minor ticks
-        'ytick.labelsize': 7,
-        'ytick.direction': 'in',
-        'ytick.left': True,  # draw label on the top
-        'ytick.right': True,  # draw label on the bottom
-        'ytick.minor.visible': True,
-        'ytick.major.left': True,  # draw x axis top major ticks
-        'ytick.major.right': True,  # draw x axis bottom major ticks
-        'ytick.minor.left': True,  # draw x axis top minor ticks
-        'ytick.minor.right': True,  # draw x axis bottom minor ticks
-    }
-    matplotlib.rcParams.update(params)
 
 
 def plot_map(
@@ -56,7 +48,9 @@ def plot_map(
     else:
         ax.set_global()
     ax.frameon = True
-    ax.outline_patch.set_linewidth(0.75)
+    # cartopy removed GeoAxes.outline_patch in 0.20; spines['geo'] works
+    # in both old and new versions.
+    ax.spines['geo'].set_linewidth(0.75)
 
     # Set gridlines. NO LABELS HERE, there is a bug in the gridlines
     # function around 180deg
@@ -133,11 +127,7 @@ def plot_stations(slat, slon, cl=0.0):
     """Plots stations into a map
     """
 
-    # Weird fix because cartopy is weird
-    if cl == 180.0:
-        slon = [sl + cl if sl <= 0
-                else sl - cl
-                for sl in slon]
+    slon = _shift_lon(slon, cl)
     ax = plt.gca()
     ax.scatter(slon, slat, s=13, marker='v', c=((0.7, 0.2, 0.2),),
                edgecolors='k', linewidths=0.25, zorder=-1, label='stations')
@@ -148,11 +138,7 @@ def plot_bins(binlat, binlon, cl=0.0):
     Plots bins into a map
     """
 
-    # Weird fix because cartopy is weird
-    if cl == 180.0:
-        binlon = [bl + cl if bl <= 0
-                  else bl - cl
-                  for bl in binlon]
+    binlon = _shift_lon(binlon, cl)
 
     ax = plt.gca()
     ax.scatter(binlon, binlat, s=3, marker='.', c='b',
@@ -161,10 +147,7 @@ def plot_bins(binlat, binlon, cl=0.0):
 
 
 def plot_illum(binlat, binlon, dbin, illum, cl=0.0):
-    if cl == 180.0:
-        binlon = [bl + cl if bl <= 0
-                  else bl - cl
-                  for bl in binlon]
+    binlon = _shift_lon(binlon, cl)
 
     ax = plt.gca()
     # Create histogram
@@ -200,19 +183,14 @@ def plot_station_db(
         profile=None, p_direct=True, outputfile=None, format='pdf',
         dpi=300, geology=False):
     cl = 0.0
-    set_mpl_params()
+    set_mpl_params(style='map')
     plt.figure(figsize=(9, 4.5))
     plt.subplot(projection=PlateCarree(central_longitude=cl))
     plot_map(cl=cl, lat=lat, lon=lon, profile=profile, p_direct=p_direct,
              geology=geology)
     plot_stations(slat, slon, cl=cl)
     plt.tight_layout()
-    if outputfile is None:
-        plt.show()
-    else:
-        if format in ["pdf", "epsg", "svg", "ps"]:
-            dpi = None
-        plt.savefig(outputfile, format=format, dpi=dpi, bbox_inches='tight')
+    _finish_figure(outputfile, format, dpi)
 
 
 def plot_map_ccp(
@@ -257,7 +235,7 @@ def plot_map_ccp(
             Set title for plot.
     """
     cl = 0.0
-    set_mpl_params()
+    set_mpl_params(style='map')
     plt.figure(figsize=(9, 4.5))
     plt.subplot(projection=PlateCarree(central_longitude=cl))
     _ = plot_map(
@@ -276,12 +254,7 @@ def plot_map_ccp(
     if title:
         plt.title(title, fontdict={'fontweight': 'bold'}, y=1.1)
     plt.tight_layout()
-    if outputfile is None:
-        plt.show()
-    else:
-        if format in ["pdf", "epsg", "svg", "ps"]:
-            dpi = None
-        plt.savefig(outputfile, format=format, dpi=dpi, bbox_inches='tight')
+    _finish_figure(outputfile, format, dpi)
 
 
 def plot_vel_grad(
@@ -314,7 +287,7 @@ def plot_vel_grad(
         resolution for none-vector plots, by default 300
     """
     cl = 0.0
-    set_mpl_params()
+    set_mpl_params(style='map')
     _ = plt.figure(figsize=(9, 4.5))
 
     plt.subplot(projection=PlateCarree(central_longitude=cl))
@@ -334,9 +307,4 @@ def plot_vel_grad(
     plt.tight_layout()
 
     # Write file
-    if outputfile is None:
-        plt.show()
-    else:
-        if format in ["pdf", "epsg", "svg", "ps"]:
-            dpi = None
-        plt.savefig(outputfile, format=format, dpi=dpi, bbox_inches='tight')
+    _finish_figure(outputfile, format, dpi)

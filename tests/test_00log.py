@@ -38,7 +38,7 @@ class TestStartLoggerIfNecessary(unittest.TestCase):
             if hasattr(h, 'baseFilename'):
                 self.assertEqual(os.path.basename(h.baseFilename), 'myfile')
         # cleanup
-        while logger.hasHandlers():
+        while logger.handlers:
             logger.removeHandler(logger.handlers[0])
 
     @patch('builtins.open', m)
@@ -53,7 +53,7 @@ class TestStartLoggerIfNecessary(unittest.TestCase):
         for h in logger.handlers:
             if hasattr(h, 'baseFilename'):
                 self.assertEqual(os.path.basename(h.baseFilename), 'myfile')
-        while logger.hasHandlers():
+        while logger.handlers:
             logger.removeHandler(logger.handlers[0])
 
 
@@ -73,15 +73,26 @@ class TestCreateMPILogger(unittest.TestCase):
         for h in mpilog.handlers:
             if hasattr(h, 'baseFilename'):
                 self.assertEqual(os.path.basename(h.baseFilename), exp_fname)
-        while logger.hasHandlers():
+        while logger.handlers:
             logger.removeHandler(logger.handlers[0])
-        while mpilog.hasHandlers():
+        while mpilog.handlers:
             mpilog.removeHandler(mpilog.handlers[0])
 
     def test_no_fh(self):
         logger = logging.getLogger('testlogger')
-        with self.assertRaises(ValueError):
-            log.create_mpi_logger(logger, 10)
+        # pytest attaches a FileHandler('/dev/null') to the root logger,
+        # which create_mpi_logger's parent walk would find; detach root
+        # handlers for the duration of this test
+        root = logging.getLogger()
+        saved = root.handlers[:]
+        for h in saved:
+            root.removeHandler(h)
+        try:
+            with self.assertRaises(ValueError):
+                log.create_mpi_logger(logger, 10)
+        finally:
+            for h in saved:
+                root.addHandler(h)
 
 
 if __name__ == "__main__":

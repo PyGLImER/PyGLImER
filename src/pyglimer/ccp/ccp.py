@@ -20,111 +20,36 @@ Last Modified: Wednesday, 2nd July 2025 02:20:46 pm
 import fnmatch
 from glob import glob
 import os
-import sys
 import pickle
 import logging
 import time
 
-from functools import partial
 from copy import deepcopy
 from typing import List, Tuple
-from joblib import Parallel, delayed, cpu_count
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
 import scipy.io as sio
 from global_land_mask import globe
-from psutil import virtual_memory
-from tqdm import tqdm
-import pyvista as pv
-import vtk
 
 from pyglimer.ccp.compute.bin import BinGrid
-from pyglimer.ccp.plot_utils.plot_bins import plot_bins
-from pyglimer.ccp.plot_utils.plot_cross_section import plot_cross_section
-from pyglimer.constants import R_EARTH, DEG2KM, KM2DEG
-from pyglimer.database.rfh5 import RFDataBase
+from pyglimer.ccp.ingest import CCPStackIngestMixin
+from pyglimer.ccp.io import _load_ccp_npz, _save_ccp_npz, read_ccp
+from pyglimer.ccp.plotting import CCPStackPlotMixin, PhasePick
+from pyglimer.ccp.volume import CCPStackVolumeMixin
 from pyglimer.database.stations import StationDB
-from pyglimer.plot.plot_map import plot_map_ccp, plot_vel_grad
-from pyglimer.plot.plot_volume import VolumePlot, VolumeExploration
-from pyglimer.rf.create import RFStream, read_rf
 from pyglimer.rf.moveout import res, maxz, maxzm
-from pyglimer.utils.createvmodel import ComplexModel
-from pyglimer.utils.geo_utils import epi2euc, geo2cart
+from pyglimer.utils.geo_utils import epi2euc
 from pyglimer.utils.geo_utils import gctrack
 from pyglimer.utils.geo_utils import fix_map_extent
+from pyglimer.utils.log import file_handler
 from pyglimer.utils.SphericalNN import SphericalNN
-from pyglimer.utils.log import create_mpi_logger
-from pyglimer.utils.utils import dt_string, chunks
+from pyglimer.utils.utils import dt_string
+
+__all__ = ['CCPStack', 'PhasePick', 'read_ccp', 'init_ccp']
 
 
-class PhasePick(object):
-    """
-    A phasepick object, just created for more convenient plotting.
-    """
-
-    def __init__(
-        self, coords: np.ndarray, amplitudes: np.ndarray, polarity: str,
-            z: np.ndarray, depthrange: list = [None, None]):
-        """
-        Initialise object
-
-        Parameters
-        ----------
-        coords : np.ndarray
-            2-d array containing latitudes and longitudes.
-        amplitudes : np.ndarray
-            1-D array containg amplitude values of each bin
-        polarity : str
-            Either '+' for positive velocity gradients or '-' for negative
-        z : np.ndarray
-            1D array containing depth of maxima/minima per bin
-        depthrange : list, optional
-            list containing depth restrictions in form of [zmin, zmax],
-            by default [None, None]
-        """
-        # assign vars
-        self.coords = coords
-        self.a = amplitudes
-        self.z = z
-        self.pol = polarity
-        self.depthr = depthrange
-
-    def plot(
-        self, plot_amplitude: bool = False, outputfile: str or None = None,
-        format: str = 'pdf', dpi: int = 300, cmap: str = 'gist_rainbow',
-            geology: bool = False, title: str or None = None):
-        """
-        Plot heatmap containing depth or amplitude of picked phase.
-
-        Parameters
-        ----------
-        plot_amplitude : bool, optional
-            If True amplitude instead of depths is plotted, by default False
-        outputfile : str or None, optional
-            Write Figure to file, by default None
-        format : str, optional
-            File format, by default 'pdf'
-        dpi : int, optional
-            Resolution for non-vector graphics, by default 300
-        cmap : str, optional
-            Colormap
-        geology : bool, optional
-            Plot geological map.
-        title
-        """
-        lat = (
-            np.floor(min(self.coords[0][0]))-1,
-            np.ceil(max(self.coords[0][0])+1))
-        lon = (np.floor(min(self.coords[1][0]))-1,
-               np.ceil(max(self.coords[1][0])+1))
-
-        plot_vel_grad(
-            self.coords, self.a, self.z, plot_amplitude, lat, lon, outputfile,
-            dpi=dpi, format=format, cmap=cmap, geology=geology, title=title)
-
-
-class CCPStack(object):
+class CCPStack(CCPStackPlotMixin, CCPStackVolumeMixin, CCPStackIngestMixin):
     """Is a CCP Stack matrix. Its size depends upon stations that are used as
     input."""
 
@@ -167,16 +92,10 @@ class CCPStack(object):
         # Create handler to the log
         if not logdir:
             os.makedirs('logs', exist_ok=True)
-            fh = logging.FileHandler(os.path.join('logs', 'ccp.log'))
+            fh = file_handler(os.path.join('logs', 'ccp.log'))
         else:
-            fh = logging.FileHandler(os.path.join(logdir, 'ccp.log'))
-        fh.setLevel(logging.INFO)
+            fh = file_handler(os.path.join(logdir, 'ccp.log'))
         self.logger.addHandler(fh)
-
-        # Create Formatter
-        fmt = logging.Formatter(
-            fmt='%(asctime)s - %(levelname)s - %(message)s')
-        fh.setFormatter(fmt)
 
         # Create bingrid
         self.bingrid = BinGrid(
@@ -333,13 +252,6 @@ class CCPStack(object):
 
         return slat, slon, sdists, qlat, qlon, qdists, qz, qill, qccp, area
 
-    def plot_cross_section(self, *args, **kwargs):
-        """
-        See documentation for
-        :func:`~pyglimer.ccp.plot_utils.plot_cross_section.plot_cross_section`
-        """
-        return plot_cross_section(self, *args, **kwargs)
-
     def compute_stack(
         self, vel_model: str, rfloc: str,
         in_format: str = 'hdf5', preproloc: str = None,
@@ -348,7 +260,8 @@ class CCPStack(object):
         pattern: list or None = None, save: str or bool = False,
         filt: tuple or None = None,
         binrad: float = 1/(2*np.cos(np.radians(30))), append_pp: bool = False,
-            multiple: bool = False, mc_backend: str = 'joblib'):
+            multiple: bool = False, mc_backend: str = 'joblib',
+            n_jobs: int = -1):
         """
         Computes a ccp stack in self.ccp, using the data from rfloc.
         The stack can be limited to some networks and stations.
@@ -361,7 +274,7 @@ class CCPStack(object):
             time domain are. The default is 'output/waveforms/RF.
         :type rfloc: str, optional
         :param in_format: **INPUT FORMAT** of receiver functions. Either
-            `'sac'` or `'hdf5'`. Defaults to 'hdf5'.
+            `'h5'` or `'hdf5'`. Defaults to 'hdf5'.
         :type in_format: str, optional
         :param preproloc: Parental folder containing the preprocessed mseeds.
             Only needed if option geocoords is used. The default is
@@ -410,6 +323,9 @@ class CCPStack(object):
         :param mc_backend: Multi-core backend to use for the computations.
             Can be either `"joblib"` (multiprocessing) or `"MPI"`. Not that
             MPI compatibility is only implemented with hdf5 files.
+        :param n_jobs: Number of parallel jobs for the joblib backend.
+            -1 uses all cores, defaults to -1. Ignored by the MPI backend.
+        :type n_jobs: int, optional
         :raises ValueError: For wrong inputs
 
 
@@ -435,6 +351,11 @@ class CCPStack(object):
         """
         if in_format.lower() == 'hdf5':
             in_format = 'h5'
+        elif in_format.lower() == 'sac':
+            raise NotImplementedError(
+                'Stacking from SAC files is no longer supported. Convert '
+                'your receiver functions to the hdf5 database format '
+                '(in_format="h5") instead.')
 
         if binrad < 1/(2*np.cos(np.radians(30))):
             raise ValueError(
@@ -449,11 +370,10 @@ class CCPStack(object):
         # sum of squares for 2 squares for max binrad=4
         # Using the ceiling function to account for inaccuracies
         sosq = [1, 4, 4, 0, 4, 8, 0, 0, 4, 4, 8, 0, 0, 8, 0, 0, 4]
-        try:
-            n_closest_points = sum(sosq[0:int(np.ceil(binrad**2+1))])
-        except IndexError:
+        if int(np.ceil(binrad**2+1)) > len(sosq):
             raise ValueError(
                 """Maximum allowed binradius is 4 times the bin distance""")
+        n_closest_points = sum(sosq[0:int(np.ceil(binrad**2+1))])
 
         # Compute maxdist in euclidean space
         self.binrad_eucl = epi2euc(self.binrad)
@@ -470,9 +390,7 @@ class CCPStack(object):
             self.logger.setLevel(logging.INFO)
 
             # Create handler to the log
-            fh = logging.FileHandler('logs/ccp.log')
-            fh.setLevel(logging.INFO)
-            self.logger.addHandler(fh)
+            self.logger.addHandler(file_handler('logs/ccp.log'))
             self.logger.info('Stacking started')
 
         if multiple:
@@ -484,14 +402,7 @@ class CCPStack(object):
         else:
             endi = None
 
-        if network and isinstance(network, str) and not pattern and\
-                in_format.lower() == 'sac':
-            # Loop over fewer files
-            folder = os.path.join(folder, network)
-            if station and isinstance(station, str):
-                folder = os.path.join(folder, station)
-
-        elif geocoords and not pattern:
+        if geocoords and not pattern:
             # Stations by coordinates
             # create empty lists for station latitude and longitude
             lat = (geocoords[0], geocoords[1])
@@ -510,18 +421,14 @@ class CCPStack(object):
         else:
             pattern = ["*{}*%s".format(_a) % in_format for _a in pattern]
 
-        streams = []  # List of files filtered for input criteria
+        files = []  # List of files filtered for input criteria
 
         # List of all input files in the desired format
         infiles = glob(os.path.join(
             folder, '**', '*.%s' % in_format), recursive=True)
 
-        # Special rule for files imported from Matlab
-        if network in ('matlab', 'raysum'):
-            pattern.append('*.sac')
-
         # Set filter patterns
-        elif network:
+        if network:
             if isinstance(network, list):
                 if station:
                     if isinstance(station, list):
@@ -543,7 +450,7 @@ class CCPStack(object):
                     elif isinstance(station, list):
                         for stat in station:
                             pattern.append('*%s.%s*.%s' % (
-                                net, stat, in_format))
+                                network, stat, in_format))
                 else:
                     pattern.append('*%s.*.%s' % (network, in_format))
         elif station:
@@ -553,7 +460,7 @@ code if you want to filter by station")
 
         # Do filtering
         for pat in pattern:
-            streams.extend(fnmatch.filter(infiles, pat))
+            files.extend(fnmatch.filter(infiles, pat))
 
         # clear memory
         del pattern, infiles
@@ -564,7 +471,7 @@ code if you want to filter by station")
             filt = [.03, 1.5]  # bandpass frequencies
 
         self.logger.debug('Using data from the following files: %s' % (
-            str(streams)))
+            str(files)))
 
         # Define grid boundaries for 3D RT
         latb = (self.coords[0].min(), self.coords[0].max())
@@ -572,13 +479,9 @@ code if you want to filter by station")
 
         if in_format.lower() == 'h5':
             self._create_ccp_from_hdf5_mc(
-                streams, multiple, append_pp, n_closest_points, vel_model,
-                latb, lonb, filt, endi, mc_backend)
+                files, multiple, append_pp, n_closest_points, vel_model,
+                latb, lonb, filt, endi, mc_backend, n_jobs)
 
-        elif in_format.lower() == 'sac':
-            self._create_ccp_from_sac(
-                streams, multiple, append_pp, n_closest_points, vel_model,
-                latb, lonb, filt, endi, mc_backend)
         else:
             raise NotImplementedError(
                 'Unknown input format %s.' % in_format
@@ -593,459 +496,6 @@ code if you want to filter by station")
         if save:
             self.write(filename=save)
 
-    def _create_ccp_from_hdf5_mc(
-        self, streams: List[str], multiple: bool, append_pp: bool,
-        n_closest_points: int, vel_model: str, latb: Tuple[float, float],
-        lonb: Tuple[float, float], filt: Tuple[float, float], endi,
-            mc_backend: str):
-        """
-        Computes a CCP stack by reading a rf database in hdf5.
-
-        :param streams: List of hdf5 files to read.
-        :type streams: List[str]
-        :param multiple: Regard crustal multiples for stack?
-        :type multiple: bool
-        :param append_pp: Append ppoints to the object?
-        :type append_pp: bool
-        :param n_closest_points: number of closest points to query from kd-tree
-        :type n_closest_points: int
-        :param vel_model: The velocity mdoel to use for depth migration.
-        :type vel_model: str
-        :param latb: Boundary for the CCP calculation in form
-            `(minlat, maxlat)`.
-        :type latb: Tuple[float, float]
-        :param lonb: Boundary for the CCP calculation in form
-            `(minlon, maxlon)`.
-        :type lonb: Tuple[float, float]
-        :param filt: Filter to impose on rfs before migration. Either False
-            or tuple in form (minfreq, maxfreq).
-        :type filt: Tuple[float, float]
-        :param endi: Only relevant if `multiple=True`. Last depth index to
-            consider for multiple computation.
-        :type endi: int
-        :param mc_backend: Multi-core backend to Use. **This does only support
-            `joblib`**
-        :type mc_backend: str
-        """
-        # note that streams are actually files - confusing variable name
-        if mc_backend.lower() == 'joblib':
-            out = Parallel(n_jobs=-1, backend='multiprocessing')(
-                delayed(self._create_ccp_from_hdf5)(
-                    f, multiple, append_pp, n_closest_points, vel_model,
-                    latb, lonb, filt)
-                for f in tqdm(streams))
-
-            # Awful way to solve it, but the best I could find
-            self._unpack_joblib_output(multiple, endi, out)
-
-        elif mc_backend.upper() == 'MPI':
-            from mpi4py import MPI
-            comm = MPI.COMM_WORLD
-            psize = comm.Get_size()
-            rank = comm.Get_rank()
-            pmap = (np.arange(len(streams))*psize)/len(streams)
-            pmap = pmap.astype(np.int32)
-            ind = pmap == rank
-            ind = np.arange(len(streams), dtype=int)[ind]
-
-            # get new MPI compatible loggers
-            self.logger = create_mpi_logger(self.logger, rank)
-            for ii in ind:
-                try:
-                    kk, jj, datal, datalm1, datalm2, N =\
-                        self._create_ccp_from_hdf5(
-                            streams[ii], multiple, append_pp, n_closest_points,
-                            vel_model, latb, lonb, filt)
-                except KeyError:
-                    self.logger.warning(
-                        f'No Receiver Functions in file {streams[ii]}.')
-                    continue
-                self.N += N
-                if multiple:
-                    self._unpack_output_multiple(
-                        kk, jj, datal, datalm1, datalm2, endi)
-                else:
-                    self._unpack_output(kk, jj, datal)
-
-            # Gather results
-            self.N = comm.allreduce(self.N, op=MPI.SUM)
-            comm.Allreduce(MPI.IN_PLACE, [self.illum, MPI.DOUBLE], op=MPI.SUM)
-            comm.Allreduce(MPI.IN_PLACE, [self.bins, MPI.DOUBLE], op=MPI.SUM)
-            if multiple:
-                comm.Allreduce(
-                    MPI.IN_PLACE, [self.illumm, MPI.DOUBLE], op=MPI.SUM)
-                comm.Allreduce(
-                    MPI.IN_PLACE, [self.bins_m1, MPI.DOUBLE], op=MPI.SUM)
-                comm.Allreduce(
-                    MPI.IN_PLACE, [self.bins_m2, MPI.DOUBLE], op=MPI.SUM)
-
-        self.logger.info('Number of receiver functions used: '+str(self.N))
-
-    def _create_ccp_from_hdf5(
-        self, f: str, multiple: bool, append_pp: bool,
-        n_closest_points: int, vel_model: str, latb: Tuple[float, float],
-        lonb: Tuple[float, float], filt: Tuple[float, float]) -> Tuple[
-            List[np.ndarray], List[np.ndarray], List[np.ndarray],
-            List[np.ndarray], List[np.ndarray]]:
-        """
-        Does ppoint calculation and depth migration for rf-functions in hdf5
-        format. (per file based)
-        Subsequently, computes the closest gridpoints in the ccp object.
-
-        :param f: HDF5 file to read.
-        :type f: str
-        :param multiple: Regard crustal multiples for stack?
-        :type multiple: bool
-        :param append_pp: Append ppoints to the object?
-        :type append_pp: bool
-        :param n_closest_points: number of closest points to query from kd-tree
-        :type n_closest_points: int
-        :param vel_model: The velocity mdoel to use for depth migration.
-        :type vel_model: str
-        :param latb: Boundary for the CCP calculation in form
-            `(minlat, maxlat)`.
-        :type latb: Tuple[float, float]
-        :param lonb: Boundary for the CCP calculation in form
-            `(minlon, maxlon)`.
-        :type lonb: Tuple[float, float]
-        :param filt: Filter to impose on rfs before migration. Either False
-            or tuple in form (minfreq, maxfreq).
-        :type filt: Tuple[float, float]
-        :return: (List of lateral indices of closest bins,  List of depth
-            indices of closest gridpoint, list of rf data to stack for each
-            of those indices, list of multiple data (pps), list of multiple
-            data (pss))
-        :rtype: Tuple[ List[np.ndarray], List[np.ndarray], List[np.ndarray],
-            List[np.ndarray], List[np.ndarray]]
-        """
-        # note that those are actually files - confusing variable name
-        net, stat, _ = os.path.basename(f).split('.')
-        kk = []
-        jj = []
-        datal = []
-        datalm1 = []
-        datalm2 = []
-        # number of rfs
-        N = 0
-        with RFDataBase(f, mode='r') as rfdb:
-            for rftr in rfdb.walk('rf', net, stat, self.bingrid.phase):
-                rfst = RFStream([rftr])
-                out = self._ccp_process_rftr(
-                    rfst, filt, vel_model, latb, lonb, multiple, append_pp,
-                    n_closest_points)
-                if not out:
-                    continue
-                N += 1
-                kk.append(out[0])
-                jj.append(out[1])
-                datal.append(out[2])
-                if multiple:
-                    datalm1.append(out[3])
-                    datalm2.append(out[4])
-        return kk, jj, datal, datalm1, datalm2, N
-
-    def _create_ccp_from_sac(
-        self, streams: List[str], multiple: bool, append_pp: bool,
-        n_closest_points: int, vel_model: str, latb: Tuple[float, float],
-        lonb: Tuple[float, float], filt: Tuple[float, float], endi: int,
-            mc_backend: str):
-        """
-        Computes a CCP stack by reading a rf database in sac.
-
-        :param streams: List of SAC files to read.
-        :type streams: List[str]
-        :param multiple: Regard crustal multiples for stack?
-        :type multiple: bool
-        :param append_pp: Append ppoints to the object?
-        :type append_pp: bool
-        :param n_closest_points: number of closest points to query from kd-tree
-        :type n_closest_points: int
-        :param vel_model: The velocity mdoel to use for depth migration.
-        :type vel_model: str
-        :param latb: Boundary for the CCP calculation in form
-            `(minlat, maxlat)`.
-        :type latb: Tuple[float, float]
-        :param lonb: Boundary for the CCP calculation in form
-            `(minlon, maxlon)`.
-        :type lonb: Tuple[float, float]
-        :param filt: Filter to impose on rfs before migration. Either False
-            or tuple in form (minfreq, maxfreq).
-        :type filt: Tuple[float, float]
-        :param endi: Only relevant if `multiple=True`. Last depth index to
-            consider for multiple computation.
-        :type endi: int
-        :param mc_backend: Multi-core backend to Use. **This does only support
-            `joblib`**
-        :type mc_backend: str
-        :raises NotImplementedError: For uknown mc backends.
-        """
-        if mc_backend.upper() == 'MPI':
-            raise NotImplementedError(
-                'MPI in conjunction with sac is not implemented.'
-            )
-
-        self.logger.info('Number of receiver functions used: '+str(self.N))
-
-        # Split job into n chunks
-        num_cores = cpu_count()
-
-        self.logger.info('Number of cores used: '+str(num_cores))
-
-        mem = virtual_memory()
-
-        self.logger.info('Available system memory: '+str(mem.total*1e-6)+'MB')
-        # How many tasks should the main process be split in?
-        # If the number is too high, it will need unnecessarily
-        # much disk space or caching (probably also slower).
-        # If it's too low, the progressbar won't work anymore.
-        # !Memmap arrays are getting extremely big, size in byte
-        # is given by: nrows*ncolumns*nbands
-        # with 64 cores and 10 bands/core that results in about
-        # 90 GB for each of the arrays for a finely gridded
-        # CCP stack of North-America
-
-        # Check maximum information that can be saved
-        # using half of the RAM.
-        # approximately 8 byte per element in RF + 8 byte for idx
-        mem_needed = 3*8*850*len(streams)*100
-        # For stacking with multiple modes, we'll need more memory
-        if multiple:
-            mem_needed = mem_needed*1.75
-
-        # Split into several jobs if too much data
-        if mem_needed > mem.total:
-            N_splits = int(np.ceil(mem_needed/mem.total))
-            split_size = int(np.ceil(len(streams)/N_splits))
-            print(
-                'Splitting RFs into %s chunks due to insufficient memory.'
-                + 'Each progressbar will only show the progress per chunk.' %
-                str(N_splits))
-        else:
-            split_size = len(streams)
-
-        for stream_chunk in chunks(streams, split_size):
-            num_split_max = num_cores*100  # maximal no of jobs
-            len_split = int(np.ceil(len(stream_chunk)/num_cores))
-            if len_split > 10:
-                if int(np.ceil(len(stream_chunk)/len_split)) > num_split_max:
-                    len_split = int(np.ceil(len_split/num_split_max))
-                else:
-                    len_split = int(np.ceil(len_split/(len_split/10)))
-            num_split = int(np.ceil(len(stream_chunk)/len_split))
-
-            out = Parallel(n_jobs=num_cores, backend='multiprocessing')(
-                delayed(self.multicore_stack)(
-                    st, append_pp, n_closest_points, vel_model,
-                    latb, lonb, filt, multiple)
-                for _, st in zip(
-                    tqdm(range(num_split)),
-                    chunks(stream_chunk, len_split)))
-
-            self._unpack_joblib_output(multiple, endi, out)
-
-    def _unpack_joblib_output(self, multiple: bool, endi: int, out: Tuple):
-        """
-        Unpack the output that comes from joblib and add stack them in the CCP
-        object.
-        """
-        # Awful way to solve it, but the best I could find
-        if multiple:
-            for kk, jj, datal, datalm1, datalm2, N in out:
-                self._unpack_output_multiple(
-                    kk, jj, datal, datalm1, datalm2, endi)
-                self.N += N
-        else:
-            for kk, jj, datal, _, _, N in out:
-                self._unpack_output(kk, jj, datal)
-                self.N += N
-
-    def _unpack_output_multiple(
-        self, kk: List[int], jj: List[int], datal: List[float],
-            datalm1: List[float], datalm2: List[float], endi: int):
-        """
-        Unpack the output of the kdtree and stack them into the CCP object.
-        Use this function if `multiple=True`
-        """
-        for k, j, data, datam1, datam2 in zip(kk, jj, datal, datalm1, datalm2):
-            if 0 in j:
-                # Count RFs
-                self.N += self.N
-            self.bins[k, j] = self.bins[k, j] + data[j]
-
-            # hit counter + 1
-            self.illum[k, j] = self.illum[k, j] + 1
-
-            # multiples
-            iii = np.where(j <= endi-1)[0]
-            jm = j[iii]
-            km = k[iii]
-            try:
-                self.bins_m1[
-                    km, jm] = self.bins_m1[km, jm] + datam1[jm]
-                self.bins_m2[
-                    km, jm] = self.bins_m2[km, jm] + datam2[jm]
-                self.illumm[km, jm] = self.illum[km, jm] + 1
-            except IndexError as e:
-                if not len(datam1) or not len(datam2):
-                    continue
-                else:
-                    raise IndexError(e)
-
-    def _unpack_output(self, kk: List[int], jj: List[int], datal: List[float]):
-        """
-        Unpack the output of the kdtree and stack them into the CCP object.
-        Use this function if `multiple=False`.
-        """
-        # Count RFs
-        for k, j, data in zip(kk, jj, datal):
-            self.bins[k, j] = self.bins[k, j] + data[j]
-
-            # hit counter + 1
-            self.illum[k, j] = self.illum[k, j] + 1
-
-            # We only add the RF once
-            if 0 in j:
-                self.N += self.N
-
-    def multicore_stack(
-        self, stream: List[str], append_pp: bool, n_closest_points: int,
-        vmodel: str, latb: Tuple[float, float], lonb: Tuple[float, float],
-        filt: Tuple[float, float], multiple: bool) -> Tuple[
-        List[int], List[int], List[np.ndarray], List[np.ndarray], List[
-            np.ndarray]]:
-        """
-        Takes in chunks of data to be processed on one core.
-
-        :param stream: List of file locations.
-        :type stream: list
-        :param append_pp: Should piercing points be appended?.
-        :type append_pp: Bool
-        :param n_closest_points: Number of Closest points that the KDTree
-            should query.
-        :type n_closest_points: int
-        :param vmodel: Name of the velocity model that should be used for the
-            raytraycing.
-        :type vmodel: str
-        :param latb: Tuple in Form (minlat, maxlat). To save RAM on 3D
-            raytraycing. Will remain unused for 1D RT.
-        :type latb: Tuple
-        :param lonb: Tuple in Form (minlon, maxlon). To save RAM on 3D
-            raytraycing. Will remain unused for 1D RT
-        :type lonb: Tuple
-        :param filt: Should the RFs be filtered before the ccp stack?
-            If so, provide (lowcof, highcof).
-        :type filt: bool or tuple]
-        :return: Three lists containing indices and rf-data.
-        :rtype: list, list, list
-        """
-
-        kk = []
-        jj = []
-        datal = []
-        datalm1 = []
-        datalm2 = []
-        N = 0
-
-        for st in stream:
-            rft = read_rf(st)
-            out = self._ccp_process_rftr(
-                rft, filt, vmodel, latb, lonb, multiple, append_pp,
-                n_closest_points)
-            if not out:
-                continue
-            N += 1
-            if multiple:
-                k, j, data, lm1, lm2 = out
-                datalm1.append(lm1)
-                datalm2.append(lm2)
-            else:
-                k, j, data = out
-            kk.append(k)
-            jj.append(j)
-            datal.append(data)
-
-        return kk, jj, datal, datalm1, datalm2, N
-
-    def _ccp_process_rftr(
-        self, rfst: RFStream, filt: Tuple[float, float], vmodel: str,
-        latb: Tuple[float, float], lonb: Tuple[float, float], multiple: bool,
-        append_pp: bool, n_closest_points: int) -> Tuple[
-            np.ndarray, np.ndarray, np.ndarray]:
-        """
-        Do the depth migration and the piercing point computation for
-        a single receiver function. Then, find the laterally closest bin
-        to the ppoint.
-
-        :param rfst: Input receiver function
-        :type rfst: RFStream
-        :param filt: Filter the receiver function? If so, provide high- and
-            lowpass frequency as a Tuple (in Hz).
-        :type filt: Tuple[float, float]
-        :param vmodel: The velocity model to use.
-        :type vmodel: str
-        :param latb: boundaries for the moveout correction in the form
-            (minlat, maxlat).
-        :type latb: Tuple[float, float]
-        :param lonb: boundaries for the moveout correction in the form
-            (minlon, maxlon).
-        :type lonb: Tuple[float, float]
-        :param multiple: Should the moveout correction be done for crustal
-            multiples as well?
-        :type multiple: bool
-        :param append_pp: Should the coordinates of the ppoint be saved?
-        :type append_pp: bool
-        :param n_closest_points: Number of closest bin points to return.
-        :type n_closest_points: int
-        :return: The indices of the closest bins k and the depth index j.
-            the Receiver fnction data. If multiples also multiple data.
-        :rtype: Tuple[np.ndarray[int], np.ndarray[int], np.ndarray]
-        """
-        if filt:
-            rfst.filter(
-                'bandpass', freqmin=filt[0], freqmax=filt[1],
-                zerophase=True, corners=2)
-        try:
-            z, rf, rfm1, rfm2 = rfst[0].moveout(
-                vmodel, latb=latb, lonb=lonb, taper=False,
-                multiple=multiple)
-        except ComplexModel.CoverageError as e:
-            # Wrong stations codes can raise this
-            self.logger.warning(e)
-            return
-        except Exception as e:
-            # Just so the script does not interrupt. Did not occur up
-            # to now
-            self.logger.exception(e)
-            return
-
-        lat = np.array(rf.stats.pp_latitude)
-        lon = np.array(rf.stats.pp_longitude)
-        if append_pp:
-            plat = np.pad(
-                lat, (0, len(self.z)-len(lat)), constant_values=np.nan)
-            plon = np.pad(
-                lon, (0, len(self.z)-len(lon)), constant_values=np.nan)
-            self.pplat.append(plat)
-            self.pplon.append(plon)
-        k, j = self.query_bin_tree(lat, lon, n_closest_points)
-
-        if multiple:
-            depthi = np.where(z == maxzm)[0][0]
-            try:
-                lm1 = (rfm1.data[:depthi+1])
-                lm2 = (rfm2.data[:depthi+1])
-            except AttributeError as e:
-                # for Interpolationerrors
-                self.logger.exception(
-                    'Error in multiple computation. Mostly caused by issue '
-                    + 'during the interpolation. Origninal Error message '
-                    + 'below.')
-                self.logger.exception(e)
-                lm1 = None
-                lm2 = None
-            return k, j, rf.data, lm1, lm2
-
-        return k, j, rf.data
 
     def conclude_ccp(
         self, keep_empty: bool = False, keep_water: bool = False, r: int = 0,
@@ -1149,7 +599,9 @@ misspelled or not yet implemented')
         if keep_water and keep_empty:
             try:
                 del self.coords_new
-            except NameError:
+            except AttributeError:
+                # coords_new does not exist (e.g. keep_empty was True but
+                # the not-keep_water branch never created it)
                 pass
 
     def write(self, filename=None, folder='.', fmt="pickle"):
@@ -1253,538 +705,6 @@ misspelled or not yet implemented')
         # Unknown formats
         else:
             raise ValueError("The format type ", fmt, "is unkown.")
-
-    def plot_bins(self):
-        """
-        A simple map view of the bins.
-        """
-        if hasattr(self, 'coords_new'):
-            coords = self.coords_new
-        else:
-            coords = self.coords
-        plot_bins(self.bingrid.stations, coords)
-
-    def compute_kdtree_volume(
-        self, qlon: np.ndarray or list = None,
-        qlat: np.ndarray or list = None, zmax: float = None,
-            verbose: bool = True):
-        """Using the CCP kdtree, we get the closest few points and compute
-        the weighting using a distance metric. if points are too far away,
-        they aren't weighted
-
-
-        Parameters
-        ----------
-        qlon : np.ndarray or list
-            grid defining array for longitude
-        qlat : np.ndarray or list
-            grid defining array for latitude
-        zmax : float, optional
-            maximum depth to compute.
-        gz : np.array or list
-            grid defining array for z
-        r : float or None
-            outside r everything is nan
-        minillum: int or None, optional
-            Minimum number of illumation points use in the interpolation,
-            everything below is downweighted by the square reciprocal
-
-        Returns
-        -------
-        [type]
-            [description]
-        """
-
-        def vprint(verbose, *args, **kwargs):
-            print(*args, **kwargs)
-        verboseprint = partial(vprint, verbose)
-
-        # Area considered around profile points
-        area = 2 * self.binrad
-
-        # Get global bounds
-        if qlat is None or qlon is None:
-
-            minlat = np.min(self.coords_new[0])
-            maxlat = np.max(self.coords_new[0])
-            minlon = np.min(self.coords_new[1])
-            maxlon = np.max(self.coords_new[1])
-            minlon, maxlon, minlat, maxlat = fix_map_extent(
-                [minlon, maxlon, minlat, maxlat, ])
-
-            # Create mesh vectors
-            qlat = np.arange(minlat, maxlat + self.binrad/2, self.binrad/2)
-            qlon = np.arange(minlon, maxlon + self.binrad/2, self.binrad/2)
-
-        else:
-
-            minlat, maxlat = np.min(qlat), np.max(qlat)
-            minlon, maxlon = np.min(qlon), np.max(qlon)
-            minlon, maxlon, minlat, maxlat = fix_map_extent(
-                [minlon, maxlon, minlat, maxlat])
-
-        # Create mesh
-        mlat, mlon = np.meshgrid(qlat, qlon)
-
-        # smaller/larger is fine as the extent was fixed.
-        cpos = np.where(
-            (self.coords_new[0] > minlat)
-            & (self.coords_new[0] < maxlat)
-            & (self.coords_new[1] > minlon)
-            & (self.coords_new[1] < maxlon)
-        )[1]
-
-        # Get interpolation weights and rows.
-        verboseprint("Creating Spherical Nearest Neighbour class ...", end="")
-        snn = SphericalNN(
-            self.coords_new[0][:, cpos], self.coords_new[1][:, cpos])
-        verboseprint(" done.")
-        verboseprint("Creating interpolators ...", end="")
-        ccp_interpolator = snn.interpolator(
-            mlat, mlon, maximum_distance=area, k=10, p=2.0, no_weighting=False)
-        ill_interpolator = snn.interpolator(
-            mlat, mlon, maximum_distance=area, no_weighting=True)
-        verboseprint(" done.")
-        # Get coordinates array from CCPStack
-        qz = deepcopy(self.z)
-
-        if zmax is not None:
-            pos = np.argmin(np.abs(qz-zmax))
-            qz = qz[:pos]
-        else:
-            pos = len(qz)
-
-        # Get data arrays
-        Nz = pos
-        Nlat, Nlon = len(qlat), len(qlon)
-
-        # Interpolate
-        qccp = np.zeros((Nlat, Nlon, Nz))
-        qill = np.zeros((Nlat, Nlon, Nz))
-
-        # Interpolate each depth
-        maintext = "KDTree interpolation ... (intensive part)"
-        verboseprint(maintext)
-        for _i, (_ccpcol, _illumcol) in enumerate(
-                zip(self.ccp[cpos, :pos].T, self.hits[cpos, :pos].T)):
-            if _i % int((Nz/10)) == 0:
-                sys.stdout.write("\033[F")  # back to previous line
-                sys.stdout.write("\033[K")
-                verboseprint(
-                    maintext + f"--->  {_i+1:0{len(str(Nz))}d}/{Nz:d}")
-            qccp[:, :, _i] = ccp_interpolator(_ccpcol).T
-            qill[:, :, _i] = ill_interpolator(_illumcol).T
-        verboseprint("... done.")
-
-        # Interpolate onto regular depth grid for easy representation with
-        # imshow
-        verboseprint(
-            "Regular Grid interpolation ... (less intensive part)", end="")
-        ccp3D_interpolator = RegularGridInterpolator(
-            (qlat, qlon, qz), np.where(np.isnan(qccp), 0, qccp))
-        ill3D_interpolator = RegularGridInterpolator(
-            (qlat, qlon, qz), qill)
-
-        # Where to sample
-        qqz = np.arange(np.min(qz), np.max(qz), 1)
-        xqlat, xqlon, xqz = np.meshgrid(qlat, qlon, qqz)
-
-        # Interpolate
-        qccp = ccp3D_interpolator((xqlat, xqlon, xqz))
-        qill = ill3D_interpolator((xqlat, xqlon, xqz))
-        verboseprint(" done.")
-
-        return qlat, qlon, qqz, qill, qccp, area
-
-    def create_vtk_mesh(
-            self, geo=True, bbox: list = None, filename: str = None):
-        """Creates a mesh with given bounding box s
-
-        Parameters
-        ----------
-        geo : bool, optional
-            flag whether the output mesh is in geographical coordinates or
-            meters, by default True
-        bbox : list or None, optional
-            bounding box [minlon, maxlon, minlat, maxlat]. If None
-            No boundaries are taken, by default None
-        filename : str or None, optional
-            If set, the computed grid will be output as VTK file under the
-            given filename. This file can then later be opened using either the
-            plotting tool or, e.g., Paraview. If None, no file is written.
-            By default, None.
-
-        Returns
-        -------
-        VTK.UnstructuredGrid
-            outputs a vtk mesh that can be opened in, e.g., Paraview.
-        """
-
-        # Get coordinates
-        lat = np.squeeze(self.coords_new[0])
-        lon = np.squeeze(self.coords_new[1])
-
-        # Filter ccpstacks if not none
-        if bbox is None:
-            bbox = [-180, 180, -90, 90]
-        pos = np.where(((
-            bbox[0] <= lon) & (lon <= bbox[1])
-            & (bbox[2] <= lat) & (lat <= bbox[3])))[0]
-        lat = lat[pos]
-        lon = lon[pos]
-
-        # Create VTK point cloud at the surface to triangulate.
-        r = R_EARTH * np.ones_like(lat)
-        points = np.vstack((deepcopy(lon*DEG2KM).flatten(),
-                            deepcopy(lat*DEG2KM).flatten(),
-                            deepcopy(r).flatten())).T
-        pc = pv.PolyData(points)
-
-        # Triangulate 2D surface
-        mesh = pc.delaunay_2d(alpha=self.binrad*1.5*DEG2KM)
-
-        # Use triangles and their connectivity to create 3D Mesh of wedges
-        points = deepcopy(mesh.points)
-        n_points = mesh.n_points
-
-        # Get cells and create first layer of wedges at the surface
-        cells = mesh.faces.reshape(mesh.n_cells, 4)
-        cells[:, 0] = 6
-        cells = np.hstack((cells, n_points + cells[:, 1:]))
-        newcells = deepcopy(cells)
-
-        # Give second layer of points in the wedge the right depth!
-        zpoints = deepcopy(np.array(points))
-        zpoints[:, 2] = R_EARTH - self.z[1]
-        newpoints = np.vstack((points, zpoints))
-
-        # Loop over remaining depths to populated the mesh.
-        for _z in self.z[2:]:
-
-            # Add cells
-            extra_cells = cells
-            extra_cells[:, 1:] += n_points
-            newcells = np.vstack((newcells, extra_cells))
-
-            # Add points
-            zpoints = deepcopy(np.array(points))
-            zpoints[:, 2] = R_EARTH - _z
-            newpoints = np.vstack((newpoints, zpoints))
-
-        # Define Cell types
-        newcelltypes = np.array(
-            [vtk.VTK_WEDGE] * newcells.shape[0], dtype=np.uint8)
-
-        # Redefine location of the points if! Geo location is wanted instead of
-        # Cartesian(-ish)
-        if geo:
-            x, y, z = geo2cart(
-                newpoints[:, 2],
-                newpoints[:, 1] * KM2DEG,
-                newpoints[:, 0] * KM2DEG)
-
-            newpoints = np.vstack((x, y, z)).T
-
-        # Create Unstructured Grid
-        grid = pv.UnstructuredGrid(newcells, newcelltypes, newpoints)
-
-        # Populate with RF and illumination values
-        grid['RF'] = deepcopy(self.ccp[pos, :].T.ravel())
-        grid['illumination'] = deepcopy(self.hits[pos, :].T.ravel())
-
-        # If file name is set write unstructured grid to file!
-        if filename is not None:
-            writer = vtk.vtkXMLUnstructuredGridWriter()
-            writer.SetInputData(grid)
-            writer.SetFileName(filename)
-            writer.Write()
-
-        return grid
-
-    def explore(
-        self, qlon: np.ndarray or list = None, qlat: np.ndarray or list = None,
-            zmax: float = None):
-        """
-        Creates a volume exploration window set. One window is for all
-        plots, and the other window is generated with sliders such that one
-        can explore how future plots should be generated. It technically does
-        not require any inputs, as simply the binning size will be used to
-        create a meshgrid fitting to the bin distance distribution.
-        One can however fix the extent and size of the grid by defining the
-        grids coordinate vectors.
-
-        Parameters
-        ----------
-
-        qlon: np.ndarray, optional
-            Longitude gridpoints for the Grid. Defines longitudinal extent
-            and resolution. If None, it's determined automatically from
-            the CCPStacks resolution and grid extent.
-            Must be monotonically increasing.
-        qlat: np.ndarray, optional
-            Latitude gridpoints for the Grid. Defines latitudinal extent
-            and resolution. If None, it's determined automatically from
-            the CCPStacks resolution and grid extent.
-            Must be monotonically increasing.
-        zmax: float, optional
-            Maximum depth (km) that the CCP-exploration extends to.
-
-        Returns
-        -------
-
-        VolumeExploration
-
-        """
-        # Compute the volume max radius at depth is z*0.33
-        qlat, qlon, qz, qill, qccp, area = self.compute_kdtree_volume(
-            qlon, qlat, zmax=zmax)
-
-        # Launch plotting tool
-        return VolumeExploration(qlon, qlat, qz, qccp)
-
-    def plot_volume_sections(
-        self, qlon: np.ndarray, qlat: np.ndarray, zmax: float or None = None,
-        lonsl: float or None = None, latsl: float or None = None,
-        zsl: float or None = None, r: float or None = None,
-            minillum: int or None = None, show: bool = True):
-        """
-        Creates the same plot as the `explore` tool, but(!) statically and
-        with more options left to the user.
-
-        !!! IT IS IMPORTANT for the plotting function that the input arrays
-        are monotonically increasing!!!
-
-        Parameters
-        ----------
-        qlon : np.ndarray
-            Monotonically increasing ndarray. No failsafes implemented.
-        qlat : np.ndarray
-            Monotonically increasing ndarray. No failsafes implemented.
-        z : np.ndarray
-            Monotonically increasing ndarray. No failsafes implemented.
-        lonsl : float or None, optional
-            Slice location, if None, the center of lon is used,
-            by default None
-        latsl : float or None, optional
-            Slice location, if None, the center of lat is used,
-            by default None
-        zsl : float or None, optional
-            Slice location, if None, the center of depth is used,
-            by default None
-        r : float or None, optional
-            Max radius for interpolation values taken into account [km],
-            if None bingrid.edist * DEG2KM * 2.0, by default None
-        minillum: int or None, optional
-            Minimum number of illumation points use in the interpolation,
-            everything below is downweighted by the square reciprocal
-        show : bool, optional
-            whether to make figure window visible, default True
-
-        Returns
-        -------
-        VolumePlot
-            [description]
-        """
-
-        # Change distance to delete things
-        if r is None:
-            r = self.bingrid.edist * DEG2KM * 2.0
-
-        # Compute the volume max radius at depth is z*0.33
-        qlat, qlon, qz, qill, qccp, area = self.compute_kdtree_volume(
-            qlon, qlat, zmax=zmax)
-
-        return VolumePlot(qlon, qlat, qz, qccp, xl=lonsl, yl=latsl, zl=zsl,
-                          show=show)
-
-    def map_plot(
-        self, plot_stations: bool = False, plot_bins: bool = False,
-        plot_illum: bool = False, profile: list or tuple or None = None,
-        p_direct: bool = True, outputfile: str or None = None,
-        format: str = 'pdf', dpi: int = 300, geology: bool = False,
-            title: str or None = None):
-        """
-        Create a map plot of the CCP Stack containing user-defined information.
-
-        Parameters
-        ----------
-        plot_stations : bool, optional
-            Plot the station locations, by default False
-        plot_bins : bool, optional
-            Plot bin location, by default False
-        plot_illum : bool, optional
-            Plot bin location with colour depending on the depth-cumulative
-            illumination at bin b, by default False
-        profile : list or tupleor None, optional
-            Plot locations of cross sections into the plot. Information about
-            each cross section is given as a tuple (lon1, lon2, lat1, lat2),
-            several cross sections are given as a list of tuples in said
-            format, by default None.
-        p_direct : bool, optional
-            If true the list in profile decribes areas with coordinates of the
-            lower left and upper right corner, by default True
-        outputfile : str or None, optional
-            Save plot to file, by default None
-        format : str, optional
-            Format for the file to be saved as, by default 'pdf'
-        dpi : int, optional
-            DPI for none vector format plots, by default 300
-        geology : bool, optional
-            Plot a geological map. Requires internet connection
-        title : str, optional
-            Set title for plot.
-        """
-        if hasattr(self, 'coords_new') and self.coords_new[0].size:
-            bincoords = self.coords_new
-        else:
-            bincoords = self.coords
-        # Set boundaries for map:
-        lat = (
-            np.floor(min(bincoords[0][0]))-1, np.ceil(max(bincoords[0][0])+1))
-        lon = (np.floor(min(bincoords[1][0]))-1,
-               np.ceil(max(bincoords[1][0])+1))
-        plot_map_ccp(
-            lat, lon, plot_stations, self.bingrid.latitude,
-            self.bingrid.longitude, plot_bins, bincoords, self.bingrid.edist,
-            plot_illum, self.hits, profile, p_direct, outputfile=outputfile,
-            format=format, dpi=dpi, geology=geology, title=title)
-
-    def pick_phase(
-            self, pol: str = '+', depth: list = [None, None]) -> PhasePick:
-        """
-        Pick the strongest negative or strongest positive gradient from a
-        predefined depth-range.
-
-        Parameters
-        ----------
-        pol : str, optional
-            Either '+' for positive velocity gradient or '-' for negative
-            gradient, by default '+'
-        depth : list, optional
-            List with two elements [minz, maxz], defines in which depth window
-            the phase picker is gonna look for maxima and minima,
-            by default [None, None]
-
-        Returns
-        -------
-        PhasePick
-            A phasepick object, which subsequently can be plotted.
-
-        Raises
-        ------
-        ValueError
-            For errandeous inputs.
-        """
-        self.conclude_ccp(r=3)
-        # Find indices
-        for ii, d in enumerate(depth):
-            if d or d == 0:
-                depth[ii] = np.abs(self.z-d).argmin()
-        # Find minimum in vector
-        ccp_short = self.ccp[:, depth[0]:depth[1]]
-        # There should be a line here excluding insufficiently illuminated bins
-        illum_flat = np.sum(self.hits[:, depth[0]:depth[1]], axis=1)
-        id = np.where(illum_flat < ccp_short.shape[1]*10)  # delete those bins
-
-        ccp_short = np.delete(ccp_short, id, 0)
-        coords = (
-            np.delete(self.coords_new[0], id, 1),
-            np.delete(self.coords_new[1], id, 1))
-
-        if pol == '+':
-            # Amplitudes
-            a = ccp_short.max(axis=1)
-            # Depths
-            z = self.z[depth[0]:depth[1]][ccp_short.argmax(axis=1)]
-        elif pol == '-':
-            a = ccp_short.min(axis=1)
-            z = self.z[depth[0]:depth[1]][ccp_short.argmin(axis=1)]
-        else:
-            raise ValueError(
-                'Choose either \'+\' to return the highest '
-                + 'positive velocity gradient or \'-\' to return the '
-                + 'highest negative velocity gradient.')
-
-        p_phase = PhasePick(coords, a, pol, z, depth)
-        return p_phase
-
-
-def read_ccp(filename: str, fmt: str = None) -> CCPStack:
-    """
-    Read CCP-Stack class file from input folder.
-
-    :param filename: Filename of the input file with file ending.
-        The default is 'ccp.pkl'.
-    :type filename: str, optional
-    :param fmt: File format, can be none if the filename has an ending,
-        possible options are `"pickle"` or `"npz"`. The default is None.
-    :type fmt: str, optional
-    :raises ValueError: For unknown formats
-    :return: CCPStack object
-    :rtype: :class:`~pyglimer.ccp.ccp.CCPStack`
-
-    .. note::
-
-        Loading Files from numpy format will take a while as some
-        recomputations are necessary.
-    """
-
-    # Trying to identify filetype from ending:
-    if not fmt:
-        x = filename.split('.')
-        if len(x) == 1:
-            raise ValueError(
-                "Could not determine format, please provide a valid format")
-        if x[-1] == 'pkl':
-            fmt = 'pickle'
-        elif x[-1] == 'npz':
-            fmt = 'npz'
-        else:
-            raise ValueError(
-                "Could not determine format, please provide a valid format")
-    else:
-        fmt = fmt.lower()
-
-    # Open provided file
-    if fmt == "pickle":
-        with open(filename, 'rb') as infile:
-            ccp = pickle.load(infile)
-    elif fmt == 'npz':
-        ccp = CCPStack(None, None, None, None, _load=filename)
-    else:
-        raise ValueError("Unknown format ", fmt)
-
-    return ccp
-
-
-def _load_ccp_npz(ccp: CCPStack, filename: str) -> CCPStack:
-    """
-    Load a file from numpy format. For that We will do some recomputations
-    and will also have to unpack the used arrays.
-
-    :param ccp: The initialised :class:`~pyglimer.ccp.ccp.CCPStack` object.
-    :type ccp: CCPStack
-    :param filename: path to load from.
-    :type filename: str
-    :return: The loaded :class:`~pyglimer.ccp.ccp.CCPStack` object.
-    :rtype: CCPStack
-    """
-    loaded = dict(np.load(filename))
-    for k in loaded.pop('attrs_pkl'):
-        loaded[k] = loaded[k][0]
-    ccp.bingrid = BinGrid(
-        loaded.pop('statlat'), loaded.pop('statlon'), loaded.pop('edist'),
-        loaded.pop('phase'))
-    # Compute bins
-    ccp.bingrid.compute_bins()
-
-    # Initialize kdTree for Bins
-    ccp.bingrid.bin_tree()
-    ccp.coords = ccp.bingrid.bins
-    for k in loaded:
-        ccp.__dict__[k] = loaded[k]
-    return ccp
-
 
 def init_ccp(
     rfloc: str, spacing: float, vel_model: str, phase: str,
@@ -1901,32 +821,42 @@ def init_ccp(
     lons = list(subset['lon'])
 
     # Filter
+    # All branches keep the database order of codes (like fnmatch.filter
+    # does) so that the bingrid point order is deterministic -- a plain
+    # set intersection would order the stations arbitrarily.
     if isinstance(network, str) and not isinstance(station, list):
-        codef = fnmatch.filter(codes, '%s.%s' % (network, '*' or station))
+        codef = fnmatch.filter(codes, '%s.%s' % (network, station or '*'))
     elif isinstance(network, str) and isinstance(station, list):
-        codef = list(set(codes).intersection([
-            '%s.%s' % (network, stat) for stat in station]))
+        wanted = {'%s.%s' % (network, stat) for stat in station}
+        codef = [c for c in dict.fromkeys(codes) if c in wanted]
     elif isinstance(network, list):
         if station is not None and not isinstance(station, list):
             raise TypeError(
                 """Provide a list of stations, when using a list of
                 networks as parameter.""")
         elif not station:
-            codef = list(set(codes).intersection([
-                '%s.*' % net for net in network]))
+            patterns = ['%s.*' % net for net in network]
+            codef = [c for c in dict.fromkeys(codes)
+                     if any(fnmatch.fnmatch(c, p) for p in patterns)]
         elif isinstance(station, list):
             if len(station) != len(network):
                 raise ValueError(
                     'Length of network and station list have to be equal.')
-            codef = list(set(codes).intersection([
-                '%s.%s' % (net, stat) for net, stat in zip(network, station)]))
+            wanted = {'%s.%s' % (net, stat)
+                      for net, stat in zip(network, station)}
+            codef = [c for c in dict.fromkeys(codes) if c in wanted]
 
     if (network and station) is None:
         codef = codes
 
     else:
-        # Find indices
-        ind = [codes.index(cf) for cf in codef]
+        # Find indices (first occurrence, like list.index, but O(1) lookups
+        # instead of a linear scan per requested station)
+        index_of = {}
+        for i, c in enumerate(codes):
+            if c not in index_of:
+                index_of[c] = i
+        ind = [index_of[cf] for cf in codef]
         net = np.array(net)[ind]
         stat = np.array(stat)[ind]
         lats = np.array(lats)[ind]
@@ -1951,33 +881,3 @@ def init_ccp(
             pattern=pattern, append_pp=append_pp, binrad=binrad, rfloc=rfloc,
             in_format=format, mc_backend=mc_backend)
     return ccp
-
-
-def _save_ccp_npz(ccp: CCPStack, oloc: str):
-    """
-    The point of this function is that, in contrast to pickling,
-    the data is stil accessible after PyGLImER has been upgraded.
-    For this, we will have to recompute some objects when loading.
-    (in particular, the bingrid object)
-    """
-    # Save the important things from the bingrid object
-    d = deepcopy(ccp.__dict__)
-    d['phase'] = deepcopy(ccp.bingrid.phase)
-    d['statlat'] = deepcopy(ccp.bingrid.latitude)
-    d['statlon'] = deepcopy(ccp.bingrid.longitude)
-    d['edist'] = deepcopy(ccp.bingrid.edist)
-    d.pop('coords')
-    d.pop('bingrid')
-
-    # Attributes that need to be changed to arrays
-    apkl = []
-    for k in d.keys():
-        if isinstance(d[k], np.ndarray):
-            continue
-        elif isinstance(d[k], list):
-            d[k] = np.array(d[k])
-            continue
-        d[k] = np.array([d[k]])
-        apkl.append(k)
-    d['attrs_pkl'] = np.array(apkl)
-    np.savez_compressed(oloc, **d)

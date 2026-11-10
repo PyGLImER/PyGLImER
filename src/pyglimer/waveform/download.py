@@ -36,6 +36,7 @@ from pyglimer.database.raw import RawDatabase, mseed_to_hdf5, statxml_to_hdf5
 from pyglimer import tmp
 from pyglimer.utils.roundhalf import roundhalf
 from pyglimer.utils import utils as pu
+from pyglimer.utils.log import file_handler
 from pyglimer.utils.utils import download_full_inventory
 from pyglimer.waveform.preprocessh5 import compute_toa
 
@@ -44,7 +45,8 @@ def ____check_times_small_db_event(
         rawloc: str, tz: float, ta: float, phase: str, model: TauPyModel,
         logger: logging.Logger, saveh5: bool, mintime: float, maxtime: float,
         inv: Inventory, net: str, stat: str, channels: tp.List[str],
-        evt: Event, av_data_manual: tp.Union[dict, None] = None) \
+        evt: Event, av_data_manual: tp.Union[dict, None] = None,
+        av_data: tp.Union[dict, None] = None) \
         -> tp.Tuple[UTCDateTime, tp.Union[tp.List[str]], bool]:
 
     """Checks whether event already in database and if not compute toa and
@@ -82,6 +84,9 @@ def ____check_times_small_db_event(
         event to check arrivals from
     av_data_manual : dict | None, optional
         if not None the events are checked in parallel, by default None
+    av_data : dict | None, optional
+        cache dictionary holding the available data of the hdf5 database;
+        required if ``av_data_manual`` is None, by default None
 
     Returns
     -------
@@ -92,11 +97,6 @@ def ____check_times_small_db_event(
 
     # Get origin
     o = (evt.preferred_origin() or evt.origins[0])
-
-    # Make the evt id a global variable for the sub functions if the stations
-    # are parallelized
-    if not av_data_manual:
-        global evt_id
 
     # Get evt_id
     evt_id = pu.utc_save_str(o.time)
@@ -122,7 +122,8 @@ def ____check_times_small_db_event(
 
             # For event parallelism to separate functions.
             if av_data_manual is None:
-                indb = wav_in_hdf5(rawloc, net, stat, '*', _channel)
+                indb = wav_in_hdf5(
+                    rawloc, net, stat, '*', _channel, av_data, evt_id)
             else:
                 indb = evt_id in av_data_manual[net][stat][_channel]
 
@@ -142,11 +143,11 @@ def ____check_times_small_db_event(
         ot_loc = pu.utc_save_str(o.time)
         evtlat_loc = str(roundhalf(o.latitude))
         evtlon_loc = str(roundhalf(o.longitude))
-        tmp.folder = os.path.join(
+        evt_folder = os.path.join(
             rawloc, '%s_%s_%s' % (ot_loc, evtlat_loc, evtlon_loc))
 
         # create folder for each event
-        os.makedirs(tmp.folder, exist_ok=True)
+        os.makedirs(evt_folder, exist_ok=True)
 
         # Check if all expected channels are in saved already
         checklist = []
@@ -155,7 +156,7 @@ def ____check_times_small_db_event(
             # Here we don't need a separate function because each event just
             # checks the existence of a file, which requires
             # no parallel access.
-            checklist.append(wav_in_db(net, stat, '*', _channel))
+            checklist.append(wav_in_db(net, stat, '*', _channel, evt_folder))
 
         if all(checklist):
             logger.info(
@@ -265,25 +266,7 @@ def __check_times_small_db_sub(
             net, stat))
 
         # Check available data from this station
-        av_data_manual = {}
-        av_data_manual.setdefault(net, {})
-        av_data_manual[net].setdefault(stat, {})
-
-        if not os.path.isfile(h5_file):
-            logging.debug(f'{h5_file} not found')
-            for _cha in channels:
-                av_data_manual[net][stat][_cha] = list()
-        else:
-            # The file exists, so we will have to open it and get
-            # the dictionary
-            with RawDatabase(h5_file) as rdb:
-                av_data_manual[net][stat] = rdb._get_table_of_contents()
-
-                # Safety net for when the channel list is empty for some
-                # reason.
-                if not av_data_manual[net][stat]:
-                    for _cha in channels:
-                        av_data_manual[net][stat][_cha] = list()
+        av_data_manual = {net: {stat: _read_toc(h5_file, channels)}}
 
         # Get number of cores available
         NCPU = psutil.cpu_count(logical=False) - 2
@@ -319,7 +302,6 @@ def __check_times_small_db_sub(
     else:
 
         # Information on available data for hdf5
-        global av_data
         av_data = {}
 
         # Loop over events (probably because station loop is parallelized.)
@@ -327,7 +309,7 @@ def __check_times_small_db_sub(
 
             out = ____check_times_small_db_event(
                 rawloc, tz, ta, phase, model, logger, saveh5, mintime, maxtime,
-                inv, net, stat, channels, evt)
+                inv, net, stat, channels, evt, av_data=av_data)
 
             if not out:
                 continue
@@ -378,6 +360,27 @@ def __check_times_small_db_sub(
     return dd
 
 
+def _read_toc(h5_file: str, channels: tp.List[str]) -> dict:
+    """Reads the table of contents of the hdf5 database ``h5_file``.
+
+    If the file does not exist or its table of contents is empty, the
+    returned dictionary maps every channel in ``channels`` to an empty
+    list (safety net for empty channel lists).
+    """
+    if not os.path.isfile(h5_file):
+        logging.debug(f'{h5_file} not found')
+        return {_cha: list() for _cha in channels}
+
+    with RawDatabase(h5_file) as rdb:
+        toc = rdb._get_table_of_contents()
+
+    # Safety net for when the channel list is empty for some reason.
+    if not toc:
+        toc = {_cha: list() for _cha in channels}
+
+    return toc
+
+
 def filter_overlapping_times(d):
     """Filters the found dictionary for overlapping windows.
     Dictionary looks as follows:
@@ -389,13 +392,8 @@ def filter_overlapping_times(d):
     checkoverlap = pu.check_UTC_overlap(d['startt'], d['endt'])
 
     # Create filtered dictionary
-    dfilt = dict()
-    dfilt['event'] = list(compress(d['event'], checkoverlap))
-    dfilt['net'] = list(compress(d['net'], checkoverlap))
-    dfilt['stat'] = list(compress(d['stat'], checkoverlap))
-    dfilt['chan'] = list(compress(d['chan'], checkoverlap))
-    dfilt['startt'] = list(compress(d['startt'], checkoverlap))
-    dfilt['endt'] = list(compress(d['endt'], checkoverlap))
+    dfilt = {key: list(compress(values, checkoverlap))
+             for key, values in d.items()}
 
     return dfilt
 
@@ -411,18 +409,11 @@ def inv2uniqlists(inv: Inventory):
 
     for net in inv:
         # If not in dictionary add network to dictionary
-        if net.code in dinv:
-            pass
-        else:
-            dinv[net.code] = dict()
+        dinv.setdefault(net.code, dict())
 
         # If not in dictionary add station to dictionary
         for stat in net:
-
-            if stat.code in dinv[net.code]:
-                pass
-            else:
-                dinv[net.code][stat.code] = set()
+            dinv[net.code].setdefault(stat.code, set())
 
             # If not in dictionary add station to dictionary
             for _channel in stat:
@@ -605,7 +596,7 @@ def download_small_db(
     networks, stations, channels, subinvs, netsta_str = inv2uniqlists(inv)
 
     # Multiple stations
-    MULT = True if len(set(netsta_str)) > 1 else False
+    MULT = len(set(netsta_str)) > 1
 
     # Get bulk string for a single station
     if not MULT:
@@ -787,11 +778,10 @@ def downloadwav(
 
     """
 
-    # needed to check whether data is already in the asdf
-    global asdfsave
-    asdfsave = saveasdf
+    # Register the data centres so that the error handlers can retry
+    # failed downloads with other clients.
+    tmp.set_clients(clients)
 
-    global av_data
     # Dictionary holding available data - needed in download functions
     # Keys are {network}{station}
     av_data = {}
@@ -815,12 +805,7 @@ def downloadwav(
 
     # # Create handler to the log
     if log_fh is None:
-        fh = logging.FileHandler(os.path.join('logs', 'download.log'))
-        fh.setLevel(loglvl)
-        # Create Formatter
-        fmt = logging.Formatter(
-            fmt='%(asctime)s - %(levelname)s - %(message)s')
-        fh.setFormatter(fmt)
+        fh = file_handler(os.path.join('logs', 'download.log'), level=loglvl)
     else:
         fh = log_fh
 
@@ -830,9 +815,6 @@ def downloadwav(
     # counter how many events are written only for h5
     jj = 0
     # Loop over each event
-    global event
-    global evt_id
-
     for ii, event in enumerate(tqdm(event_cat)):
         # fetch event-data
         origin = event.preferred_origin() or event.origins[0]
@@ -845,11 +827,34 @@ def downloadwav(
         evt_id = pu.utc_save_str(origin_time)
         evtlat_loc = str(roundhalf(origin.latitude))
         evtlon_loc = str(roundhalf(origin.longitude))
-        tmp.folder = os.path.join(
+        evt_folder = os.path.join(
             rawloc, '%s_%s_%s' % (evt_id, evtlat_loc, evtlon_loc))
 
         # create folder for each event
-        os.makedirs(tmp.folder, exist_ok=True)
+        os.makedirs(evt_folder, exist_ok=True)
+
+        # The MassDownloader calls back into this function for every chunk
+        # it considers. It is defined here as a closure so that it can
+        # access the current event's folder without module-level globals.
+        def get_mseed_storage(
+            network: str, station: str, location: str, channel: str,
+                starttime: UTCDateTime, endtime: UTCDateTime) -> str:
+            """Stores the files and checks if files are already downloaded"""
+            # Returning True means that neither the data nor the StationXML
+            # file will be downloaded.
+            if saveasdf:
+                if wav_in_hdf5(
+                        os.path.join(evt_folder, os.pardir),
+                        network, station, location, channel, av_data, evt_id):
+                    return True
+            else:
+                if wav_in_db(
+                        network, station, location, channel, evt_folder):
+                    return True
+
+            # If a string is returned the file will be saved in that
+            # location.
+            return os.path.join(evt_folder, "%s.%s.mseed" % (network, station))
 
         # Circular domain around the epicenter. This module also offers
         # rectangular and global domains. More complex domains can be
@@ -910,7 +915,8 @@ def downloadwav(
             except IncompleteRead:
                 continue  # Just retry for poor connection
             except Exception as e:
-                fdsn_mass_logger.info(e)
+                fdsn_mass_logger.exception(
+                    'Download failed for event %s: %s', evt_id, e)
                 incomplete = False  # Any other error: continue
 
         # 2021.02.15 Here, we write everything to hdf5
@@ -921,58 +927,34 @@ def downloadwav(
             mseed_to_hdf5(rawloc, False)
             jj = ii
             fdsn_mass_logger.info('...Done')
-        if fast_redownload:
+        # Rewrite the remaining event catalog as a resume checkpoint, but
+        # not for every single event (same reasoning as for the hdf5
+        # checkpoint above): already-downloaded waveforms are skipped on a
+        # re-run, so a crash costs at most the re-iteration of one
+        # checkpoint interval.
+        if fast_redownload and ii % 100 == 0:
             event_cat[ii:].write(evtfile, format="QUAKEML")
 
     # Always issues with the massdownlaoder inventory, so lets fix it here
     fdsn_mass_logger.info('Downloading all response files.....')
     download_full_inventory(statloc, clients)
+    if fast_redownload and len(event_cat):
+        # Final resume checkpoint so that the last < 100 events are
+        # recorded as done, too.
+        event_cat[ii:].write(evtfile, format="QUAKEML")
     if saveasdf:
         fdsn_mass_logger.info('Rewriting mseed and xmls to hdf5.....')
         mseed_to_hdf5(rawloc, save_statxml=True, statloc=statloc)
         fdsn_mass_logger.info('...Done')
         statxml_to_hdf5(rawloc, statloc)
-    tmp.folder = "finished"  # removes the restriction for preprocess.py
-
-
-def get_mseed_storage(
-    network: str, station: str, location: str, channel: str,
-        starttime: UTCDateTime, endtime: UTCDateTime) -> str:
-    """Stores the files and checks if files are already downloaded"""
-    # Returning True means that neither the data nor the StationXML file
-    # will be downloaded.
-
-    if asdfsave:
-        if wav_in_hdf5(
-                os.path.join(tmp.folder, os.pardir),
-                network, station, location, channel):
-            return True
-    else:
-        if wav_in_db(network, station, location, channel):
-            return True
-
-    # If a string is returned the file will be saved in that location.
-    return os.path.join(tmp.folder, "%s.%s.mseed" % (network, station))
-
-
-def get_stationxml_storage(network: str, station: str, statloc: str):
-
-    filename = os.path.join(statloc, "%s.%s.xml" % (network, station))
-
-    return {
-
-        "available_channels": [],
-
-        "missing_channels": '*',
-
-        "filename": filename}
 
 
 def wav_in_db(
-        network: str, station: str, location: str, channel: str) -> bool:
+        network: str, station: str, location: str, channel: str,
+        folder: str) -> bool:
 
     """Checks if waveform is already downloaded."""
-    path = os.path.join(tmp.folder, "%s.%s.mseed" % (network, station))
+    path = os.path.join(folder, "%s.%s.mseed" % (network, station))
 
     if os.path.isfile(path):
         st = read(path)
@@ -993,8 +975,27 @@ def wav_in_db(
 
 def wav_in_hdf5(
         rawloc: str, network: str, station: str, location: str,
-        channel: str) -> bool:
-    """Is the waveform already in the Raw hdf5 database?"""
+        channel: str, av_data: dict, evt_id: str) -> bool:
+    """Is the waveform already in the Raw hdf5 database?
+
+    Parameters
+    ----------
+    rawloc : str
+        path to waveform folder in the database
+    network : str
+        network name
+    station : str
+        station name
+    location : str
+        location code (unused, kept for call-signature compatibility)
+    channel : str
+        channel to check
+    av_data : dict
+        cache dictionary holding the available data per network/station/
+        channel; filled on first access
+    evt_id : str
+        save-string of the current event's origin time
+    """
 
     fdsn_mass_logger = logging.getLogger("obspy.clients.fdsn.mass_downloader")
     # fdsn_mass_logger.setLevel('DEBUG')
@@ -1030,33 +1031,12 @@ def wav_in_hdf5(
     # The file exists, so we will have to open it and get the dictionary
     fdsn_mass_logger.debug("   ... file found, checking content.")
 
-    with RawDatabase(h5_file) as rdb:
-        #
-        av_data[network][station] = rdb._get_table_of_contents()
+    av_data[network][station] = _read_toc(h5_file, [channel])
 
-        # Safety net for when the channel list is empty for some reason.
-        if not av_data[network][station]:
-            fdsn_mass_logger.debug("   ... channel list empty, adding list.")
-            av_data[network][station][channel] = []
-
-        # Maybe the channel is just not in there...
-        if channel not in av_data[network][station]:
-            av_data[network][station][channel] = []
+    # Maybe the channel is just not in there...
+    if channel not in av_data[network][station]:
+        av_data[network][station][channel] = []
 
     # execute this again to check
     return wav_in_hdf5(
-        rawloc, network, station, location, channel)
-
-
-def wav_in_hdf5_no_global(
-        av_data: dict, network: str, station: str, channel: str,
-        evt_id) -> bool:
-    """Is the waveform already in the Raw hdf5 database?"""
-
-    if channel not in av_data[network][station]:
-        return False
-
-    if evt_id in av_data[network][station][channel]:
-        return True
-    else:
-        return False
+        rawloc, network, station, location, channel, av_data, evt_id)

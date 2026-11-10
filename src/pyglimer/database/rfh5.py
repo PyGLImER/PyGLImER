@@ -11,27 +11,26 @@ Created: Wednesday, 11th August 2021 03:20:09 pm
 Last Modified: Friday, 20th January 2023 03:50:29 pm
 '''
 
-import fnmatch
 import os
-import re
 from typing import Iterable, List, Tuple
-import logging
 import warnings
 
 import numpy as np
-# from numpy.core.fromnumeric import compress
 from obspy.core.utcdatetime import UTCDateTime
-from obspy.core import Stats
 import h5py
 
+from pyglimer.database import h5common
+from pyglimer.database.h5common import (
+    DBHandlerBase, all_traces_recursive as _all_traces_recursive,
+    convert_header_to_hdf5, read_hdf5_header)
 from pyglimer.rf.create import RFStream, RFTrace
 
 
 hierarchy = "/{tag}/{network}/{station}/{phase}/{pol}/{evt_time}"
-h5_FMTSTR = os.path.join("{dir}", "{network}.{station}.h5")
+h5_FMTSTR = h5common.h5_FMTSTR
 
 
-class DBHandler(h5py.File):
+class DBHandler(DBHandlerBase):
     """
     The actual file handler of the hdf5 receiver function files.
 
@@ -43,31 +42,10 @@ class DBHandler(h5py.File):
     Child object of :class:`h5py.File` and inherets all its attributes and
     functions in addition to functions that are particularly useful for
     receiver functions.
-    """
-    def __init__(self, path, mode, compression):
-        super(DBHandler, self).__init__(path, mode=mode)
-        if isinstance(compression, str):
-            self.compression = re.findall(r'(\w+?)(\d+)', compression)[0][0]
-            if self.compression != 'gzip':
-                raise ValueError(
-                    'Compression of type %s is not supported.'
-                    % self.compression)
-            self.compression_opts = int(
-                re.findall(r'(\w+?)(\d+)', compression)[0][1])
-            if self.compression_opts not in np.arange(1, 10, 1, dtype=int):
-                ii = np.argmin(abs(
-                    np.arange(1, 10, 1, dtype=int) - self.compression_opts))
-                self.compression_opts = np.arange(1, 10, 1, dtype=int)[ii]
-                warnings.warn(
-                    'Chosen compression level is not available for %s. \
-%s Has been chosen instead (closest)' % (
-                        self.compression, str(self.compression_opts)))
-        else:
-            self.compression = None
-            self.compression_opts = None
 
-    def _close(self):
-        self.close()
+    Compression parsing and closing are provided by
+    :class:`~pyglimer.database.h5common.DBHandlerBase`.
+    """
 
     def _add_known_waveform_data(self, ret: List[str], rej: List[str]):
         """
@@ -128,8 +106,9 @@ class DBHandler(h5py.File):
 omitted." % path, category=UserWarning)
 
     def get_data(
-        self, network: str, station: str, phase: str, evt_time: UTCDateTime,
-            tag: str = 'rf', pol: str = 'v') -> RFStream:
+        self, network: str, station: str, phase: str,
+            evt_time: UTCDateTime = None, tag: str = 'rf',
+            pol: str = 'v') -> RFStream:
         """
         Returns a :class:`~pyglimer.rf.create.RFStream` holding
         all the requested data.
@@ -263,6 +242,59 @@ class RFDataBase(object):
     """
     Base class to handle the hdf5 files that contain receiver functions.
     """
+
+    @classmethod
+    def filename(cls, directory: str, network: str, station: str) -> str:
+        """
+        Full path of the hdf5 database file of a single station.
+
+        :param directory: Directory that holds the database files
+        :type directory: str
+        :param network: Network code, e.g., IU
+        :type network: str
+        :param station: Station code, e.g., HRV
+        :type station: str
+        :return: Path of the form ``<directory>/<network>.<station>.h5``
+        :rtype: str
+        """
+        return h5_FMTSTR.format(
+            dir=directory, network=network, station=station)
+
+    @classmethod
+    def contains(
+            cls, directory: str, network: str, station: str, phase: str,
+            evt_time: str, tag: str = 'rf', pol: str = 'v') -> bool:
+        """
+        Whether the database file of the station exists and already
+        holds a receiver function for the given event.
+
+        :param directory: Directory that holds the database files
+        :type directory: str
+        :param network: Network code, e.g., IU
+        :type network: str
+        :param station: Station code, e.g., HRV
+        :type station: str
+        :param phase: Teleseismic phase
+        :type phase: str
+        :param evt_time: Event origin time in FDSN/SEED format (as
+            produced by ``UTCDateTime.format_fissures()``)
+        :type evt_time: str
+        :param tag: Data tag, defaults to 'rf'
+        :type tag: str, optional
+        :param pol: RF polarisation, defaults to 'v'
+        :type pol: str, optional
+        :return: True if the receiver function is already saved
+        :rtype: bool
+        """
+        fn = cls.filename(directory, network, station)
+        if not os.path.isfile(fn):
+            return False
+        path = hierarchy.format(
+            tag=tag, network=network, station=station, phase=phase,
+            pol=pol, evt_time=evt_time)
+        with h5py.File(fn, 'r') as f:
+            return path in f
+
     def __init__(
             self, path: str, mode: str = 'a', compression: str = 'gzip3'):
         """
@@ -340,73 +372,4 @@ def all_traces_recursive(
     :return: Stream with appended traces
     :rtype: Stream
     """
-    for v in group.values():
-        if isinstance(v, h5py._hl.group.Group):
-            all_traces_recursive(v, stream, pattern)
-        elif not fnmatch.fnmatch(v.name, pattern) and v.name not in pattern:
-            continue
-        else:
-            # try:
-            stream.append(
-                RFTrace(np.array(v), header=read_hdf5_header(v)))
-            # except ValueError:
-            #     warnings.warn(
-            #         'Header could not be converted. Attributes are: %s' % (
-            #             str(v.attrs)))
-    return stream
-
-
-def convert_header_to_hdf5(dataset: h5py.Dataset, header: Stats):
-    """
-    Convert an :class:`~obspy.core.Stats` object and adds it to the provided
-    hdf5 dataset.
-
-    :param dataset: the dataset that the header should be added to
-    :type dataset: h5py.Dataset
-    :param header: The trace's header
-    :type header: Stats
-    """
-    header = dict(header)
-    for key in header:
-        try:
-            if isinstance(header[key], UTCDateTime):
-                # convert time to string
-                header[key] = header[key].format_fissures()
-            dataset.attrs[key] = header[key]
-        except TypeError:
-            logging.debug(
-                f'The header contains an item of type {type(header[key])}.'
-                + 'Information of this type cannot be written to hdf5.')
-            continue
-
-
-def read_hdf5_header(dataset: h5py.Dataset) -> Stats:
-    """
-    Takes an hdf5 dataset as input and returns the header of the Trace.
-
-    :param dataset: The dataset to be read from
-    :type dataset: h5py.Dataset
-    :return: The trace's header
-    :rtype: Stats
-    """
-    attrs = dataset.attrs
-    time_keys = ['starttime', 'endtime', 'onset', 'event_time']
-    header = {}
-    for key in attrs:
-        if key in time_keys:
-            try:
-                header[key] = UTCDateTime(attrs[key])
-            except ValueError as e:
-                # temporary fix of obspy's UTCDateTime issue. SHould be removed
-                # as soon as they release version 1.23
-                if attrs[key][4:8] == '360T':
-                    new = list(attrs[key])
-                    new[6] = '1'
-                    header[key] = UTCDateTime(''.join(new)) - 86400
-                else:
-                    raise e
-        elif key == 'processing':
-            header[key] = list(attrs[key])
-        else:
-            header[key] = attrs[key]
-    return Stats(header)
+    return _all_traces_recursive(group, stream, pattern, RFTrace)
