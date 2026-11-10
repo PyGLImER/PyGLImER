@@ -14,11 +14,9 @@ Created: Tuesday, 6th September 2022 10:37:12 am
 Last Modified: Tuesday, 8th August 2023 02:54:35 pm
 '''
 
-import fnmatch
-from io import BytesIO
 import logging
 import os
-import re
+from io import BytesIO
 from typing import Iterable
 import warnings
 import glob
@@ -27,11 +25,14 @@ import typing as tp
 import numpy as np
 import obspy
 from obspy.core.utcdatetime import UTCDateTime
-from obspy.core import Stats, Stream, Trace, read
+from obspy.core import Stream, Trace, read
 from obspy.core.event.event import Event
 from obspy import Inventory, read_inventory
 import h5py
 
+from pyglimer.database.h5common import (
+    DBHandlerBase, all_traces_recursive as _all_traces_recursive,
+    convert_header_to_hdf5, read_hdf5_header)
 from pyglimer.utils import utils as pu
 from pyglimer.utils.signalproc import resample_or_decimate
 
@@ -41,7 +42,7 @@ hierarchy_xml = '/{tag}/{network}/{station}'
 h5_FMTSTR = os.path.join("{dir}", "{network}.{station}.h5")
 
 
-class DBHandler(h5py.File):
+class DBHandler(DBHandlerBase):
     """
     The actual file handler of the hdf5 receiver function files.
 
@@ -53,31 +54,10 @@ class DBHandler(h5py.File):
     Child object of :class:`h5py.File` and inherets all its attributes and
     functions in addition to functions that are particularly useful for noise
     correlations.
-    """
-    def __init__(self, path, mode, compression):
-        super(DBHandler, self).__init__(path, mode=mode)
-        if isinstance(compression, str):
-            self.compression = re.findall(r'(\w+?)(\d+)', compression)[0][0]
-            if self.compression != 'gzip':
-                raise ValueError(
-                    'Compression of type %s is not supported.'
-                    % self.compression)
-            self.compression_opts = int(
-                re.findall(r'(\w+?)(\d+)', compression)[0][1])
-            if self.compression_opts not in np.arange(1, 10, 1, dtype=int):
-                ii = np.argmin(abs(
-                    np.arange(1, 10, 1, dtype=int) - self.compression_opts))
-                self.compression_opts = np.arange(1, 10, 1, dtype=int)[ii]
-                warnings.warn(
-                    'Chosen compression level is not available for %s. \
-%s Has been chosen instead (closest)' % (
-                        self.compression, str(self.compression_opts)))
-        else:
-            self.compression = None
-            self.compression_opts = None
 
-    def _close(self):
-        self.close()
+    Compression parsing and closing are provided by
+    :class:`~pyglimer.database.h5common.DBHandlerBase`.
+    """
 
     def _define_content(self, content: dict):
         """
@@ -442,71 +422,7 @@ def all_traces_recursive(
     :return: Stream with appended traces
     :rtype: Stream
     """
-    for v in group.values():
-        if isinstance(v, h5py._hl.group.Group):
-            all_traces_recursive(v, stream, pattern)
-        elif not fnmatch.fnmatch(v.name, pattern) and v.name not in pattern:
-            continue
-        else:
-            stream.append(
-                Trace(np.array(v), header=read_hdf5_header(v)))
-    return stream
-
-
-def convert_header_to_hdf5(dataset: h5py.Dataset, header: Stats):
-    """
-    Convert an :class:`~obspy.core.Stats` object and adds it to the provided
-    hdf5 dataset.
-
-    :param dataset: the dataset that the header should be added to
-    :type dataset: h5py.Dataset
-    :param header: The trace's header
-    :type header: Stats
-    """
-    header = dict(header)
-    for key in header:
-        try:
-            if isinstance(header[key], UTCDateTime):
-                # convert time to string
-                header[key] = header[key].format_fissures()
-            dataset.attrs[key] = header[key]
-        except TypeError:
-            logging.debug(
-                f'The header contains an item of type {type(header[key])}.'
-                + 'Information of this type cannot be written to hdf5.')
-            continue
-
-
-def read_hdf5_header(dataset: h5py.Dataset) -> Stats:
-    """
-    Takes an hdf5 dataset as input and returns the header of the Trace.
-
-    :param dataset: The dataset to be read from
-    :type dataset: h5py.Dataset
-    :return: The trace's header
-    :rtype: Stats
-    """
-    attrs = dataset.attrs
-    time_keys = ['starttime', 'endtime', 'onset', 'event_time']
-    header = {}
-    for key in attrs:
-        if key in time_keys:
-            try:
-                header[key] = UTCDateTime(attrs[key])
-            except ValueError as e:
-                # temporary fix of obspy's UTCDateTime issue. SHould be removed
-                # as soon as they release version 1.23
-                if attrs[key][4:8] == '360T':
-                    new = list(attrs[key])
-                    new[6] = '1'
-                    header[key] = UTCDateTime(''.join(new)) - 86400
-                else:
-                    raise e
-        elif key == 'processing':
-            header[key] = list(attrs[key])
-        else:
-            header[key] = attrs[key]
-    return Stats(header)
+    return _all_traces_recursive(group, stream, pattern, Trace)
 
 
 def mseed_to_hdf5(
