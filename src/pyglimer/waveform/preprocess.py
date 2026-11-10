@@ -20,7 +20,6 @@ import itertools
 from typing import Tuple
 
 import numpy as np
-import h5py
 from joblib import Parallel, delayed, cpu_count
 import obspy
 from obspy import read, read_inventory, Stream, UTCDateTime
@@ -28,7 +27,7 @@ from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 from tqdm.std import tqdm
 
 from pyglimer import tmp
-from pyglimer.database.rfh5 import RFDataBase, hierarchy, h5_FMTSTR
+from pyglimer.database.rfh5 import RFDataBase
 from pyglimer.utils.log import create_mpi_logger
 from pyglimer.waveform.preprocessh5 import preprocessh5
 from pyglimer.utils.signalproc import resample_or_decimate
@@ -551,8 +550,7 @@ def __waveform_loop(
                     method=deconmeth)
 
         # Write RF
-            rf_filename = h5_FMTSTR.format(
-                dir=rfloc, network=network, station=station)
+            rf_filename = RFDataBase.filename(rfloc, network, station)
             os.makedirs(rfloc, exist_ok=True)
             with RFDataBase(rf_filename) as rfdb:
                 rfdb.add_rf(RF)
@@ -721,14 +719,8 @@ def __rf_in_db(
         pol: str) -> bool:
     """Checks if the receiver function for the given event is already
     saved in the station's hdf5 database file."""
-    rf_file = h5_FMTSTR.format(dir=rfloc, network=network, station=station)
-    if not os.path.isfile(rf_file):
-        return False
-    path = hierarchy.format(
-        tag='rf', network=network, station=station, phase=phase, pol=pol,
-        evt_time=ot_fiss)
-    with h5py.File(rf_file, 'r') as f:
-        return path in f
+    return RFDataBase.contains(
+        rfloc, network, station, phase, ot_fiss, pol=pol)
 
 
 def write_info(network: str, station: str, dictionary: dict, preproloc: str):

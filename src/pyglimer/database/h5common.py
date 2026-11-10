@@ -16,6 +16,7 @@ Created: Monday, 10th November 2026
 '''
 import fnmatch
 import logging
+import os
 import re
 import warnings
 
@@ -23,6 +24,13 @@ import numpy as np
 import h5py
 from obspy.core import Stats
 from obspy.core.utcdatetime import UTCDateTime
+
+
+# Filename layout of the per-station hdf5 database files (shared by the
+# raw-waveform and receiver-function databases). The dataset hierarchy
+# inside the files differs between the two databases and is defined in
+# their respective modules.
+h5_FMTSTR = os.path.join("{dir}", "{network}.{station}.h5")
 
 
 class DBHandlerBase(h5py.File):

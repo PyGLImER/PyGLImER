@@ -30,6 +30,7 @@ from obspy.core.event.event import Event
 from obspy import Inventory, read_inventory
 import h5py
 
+from pyglimer.database import h5common
 from pyglimer.database.h5common import (
     DBHandlerBase, all_traces_recursive as _all_traces_recursive,
     convert_header_to_hdf5, read_hdf5_header)
@@ -39,7 +40,7 @@ from pyglimer.utils.signalproc import resample_or_decimate
 
 hierarchy = "/{tag}/{network}/{station}/{evt_id}/{channel}"
 hierarchy_xml = '/{tag}/{network}/{station}'
-h5_FMTSTR = os.path.join("{dir}", "{network}.{station}.h5")
+h5_FMTSTR = h5common.h5_FMTSTR
 
 
 class DBHandler(DBHandlerBase):
