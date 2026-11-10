@@ -388,8 +388,11 @@ def __waveform_loop(
 
     # If the file hasn't been downloaded and preprocessed
     # in an earlier iteration of the program
-    if not __file_in_db(outdir, 'info.dat') or ot_fiss not in \
-            shelve.open(infof, flag='r')['ot_all']:
+    already_done = False
+    if __file_in_db(outdir, 'info.dat'):
+        with shelve.open(infof, flag='r') as info_db:
+            already_done = ot_fiss in info_db['ot_all']
+    if not already_done:
         crit = False  # criterion to retain
 
         try:  # From here on, all exceptions are logged
@@ -535,10 +538,10 @@ def __waveform_loop(
                 trim = False
 
             if not infodict:
-                info = shelve.open(infof, flag='r')
-
-                RF = createRF(
-                    st, phase, pol=pol, info=info, trim=trim, method=deconmeth)
+                with shelve.open(infof, flag='r') as info:
+                    RF = createRF(
+                        st, phase, pol=pol, info=info, trim=trim,
+                        method=deconmeth)
 
             else:
                 RF = createRF(

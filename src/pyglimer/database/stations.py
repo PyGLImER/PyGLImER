@@ -302,13 +302,19 @@ class StationDB(object):
                         'No S-waveforms obtaimed for station %s.%s' % (
                             info['network'], info['station']))
 
-        # Merge the two dictionaries
+        # Merge the two dictionaries (index of the first occurrence per
+        # code, so lookups stay O(1) instead of a linear scan per station)
+        p_index = {}
+        for j, c in enumerate(dataP['code']):
+            if c not in p_index:
+                p_index[c] = j
         for i, c in enumerate(dataS['code']):
-            if c in dataP['code']:
-                j = dataP['code'].index(c)
+            if c in p_index:
+                j = p_index[c]
                 dataP['NS'][j] = dataS['NS'][i]
                 dataP['NSret'][j] = dataS['NSret'][i]
             else:
+                p_index[c] = len(dataP['code'])
                 dataP['code'].append(c)
                 dataP['network'].append(dataS['network'][i])
                 dataP['station'].append(dataS['station'][i])

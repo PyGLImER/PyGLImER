@@ -871,8 +871,13 @@ def init_ccp(
         codef = codes
 
     else:
-        # Find indices
-        ind = [codes.index(cf) for cf in codef]
+        # Find indices (first occurrence, like list.index, but O(1) lookups
+        # instead of a linear scan per requested station)
+        index_of = {}
+        for i, c in enumerate(codes):
+            if c not in index_of:
+                index_of[c] = i
+        ind = [index_of[cf] for cf in codef]
         net = np.array(net)[ind]
         stat = np.array(stat)[ind]
         lats = np.array(lats)[ind]
