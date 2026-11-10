@@ -30,6 +30,6 @@ jobs:
         run: |
             pytest tests -p no:logging --cov=./src --cov-report=xml
       - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: coverage.xml
