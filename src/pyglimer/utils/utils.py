@@ -30,7 +30,6 @@ from obspy.core.stream import Stream, Trace
 from obspy.core.utcdatetime import UTCDateTime
 
 from pyglimer.database.raw import save_raw_DB_single_station, write_st
-from pyglimer.rf.create import RFStream, RFTrace
 # from pyglimer.database.asdf import save_raw_single_station_asdf
 
 from .roundhalf import roundhalf
@@ -318,23 +317,6 @@ def __download_sub__(client: str, saved: dict) -> Stream:
     # Get full bulk list
     for _b in saved['bulk']:
         bulk.extend(_b)
-
-    # ## The Block here is to debug the actual request made #####
-    #  But for code and output purposes it is unecessary to log.
-    #  I would just keep it for future debugging
-    # for _net, _sta, _cha, _st, _et, _event, _b in zip(
-    #         saved['net'], saved['stat'], saved['chan'],
-    #         saved['startt'], saved['endt'], saved['event'], saved['bulk']):
-
-    #     # Get event id
-    #     origin = (_event.preferred_origin() or _event.origins[0])
-    #     e_id = utc_save_str(origin.time)
-
-    #     # Print relevant debugging information
-    #     print(f"{_net}.{_sta}..{_cha}: {_st} -- {_et} --> {e_id}")
-    #     for __b in _b:
-    #         print(f"^-->{__b}")
-    # #############################################################
 
     # Sort bulk request.
     bulk.sort()
@@ -649,74 +631,44 @@ def create_bulk_str(
         All parameters accept wildcards.
     """
 
-    # request object
-    bulk = []
-    if isinstance(t0, str) and t0 != '*':
-        t0 = UTCDateTime(t0)
-    elif isinstance(t0, list):
-        t0 = [UTCDateTime(t) for t in t0]
-    if isinstance(t1, str) and t1 != '*':
-        t1 = UTCDateTime(t1)
-    elif isinstance(t1, list):
-        t1 = [UTCDateTime(t) for t in t1]
-
+    # Normalize network/station to one (net, stat) pair per request
     if isinstance(networks, list) and isinstance(stations, list):
         if len(networks) != len(stations):
             raise ValueError(
                 'If network and station are provided as lists, they have to\
  have the same length!')
-        if (isinstance(t1, list) and isinstance(t0, list)) \
-                or type(t1) is not type(t0):
-            if len(stations) != len(t1) or len(t1) != len(t0) \
-                    or type(t1) is not type(t0):
-                raise ValueError('Time Lists have to have same length!')
-            for net, stat, st, et in zip(networks, stations, t0, t1):
-                bulk.append((net, stat, location, channel, st, et))
-            return bulk
-        elif isinstance(t0, (str, UTCDateTime)) and isinstance(
-                t1, (str, UTCDateTime)):
-            for net, stat in zip(networks, stations):
-                bulk.append((net, stat, location, channel, t0, t1))
+        pairs = list(zip(networks, stations))
     elif isinstance(networks, list) and stations == '*':
-        if (isinstance(t1, list) and isinstance(t0, list)) \
-                or type(t1) is not type(t0):
-            if len(networks) != len(t1) or len(t1) != len(t0) \
-                    or type(t1) is not type(t0):
-                raise ValueError('Time Lists have to have same length!')
-            for net, st, et in zip(networks, t0, t1):
-                bulk.append((net, stations, location, channel, st, et))
-            return bulk
-        elif isinstance(t0, (str, UTCDateTime)) and isinstance(
-                t1, (str, UTCDateTime)):
-            for net in networks:
-                bulk.append((net, stations, location, channel, t0, t1))
+        pairs = [(net, stations) for net in networks]
     elif isinstance(stations, list) and isinstance(networks, str):
-        if (isinstance(t1, list) and isinstance(t0, list)) \
-                or type(t0) is not type(t1):
-            if len(stations) != len(t1) or len(t1) != len(t0) \
-                    or type(t0) is not type(t1):
-                raise ValueError('Time Lists have to have same length!')
-            for stat, st, et in zip(stations, t0, t1):
-                bulk.append((networks, stat, location, channel, st, et))
-        elif isinstance(t0, (str, UTCDateTime)) and isinstance(
-                t1, (str, UTCDateTime)):
-            for stat in stations:
-                bulk.append((networks, stat, location, channel, t0, t1))
-    elif isinstance(stations, str) and isinstance(networks, str):
-        if (isinstance(t1, list) and isinstance(t0, list)) \
-                or type(t1) is not type(t0):
-            if len(t1) != len(t0) or type(t1) is not type(t0):
-                raise ValueError('Time Lists have to have same length!')
-            for st, et in zip(t0, t1):
-                bulk.append((networks, stations, location, channel, st, et))
-        elif isinstance(t0, (str, UTCDateTime)) and isinstance(
-                t1, (str, UTCDateTime)):
-            bulk.append((networks, stations, location, channel, t0, t1))
+        pairs = [(networks, stat) for stat in stations]
+    elif isinstance(networks, str) and isinstance(stations, str):
+        pairs = [(networks, stations)]
     else:
         raise ValueError('Invalid combination of input types or input length.\
 \nCheck the following:\n\t1. If all inputs are lists, do they have the same \
 length?\n\t2. If stations is a string and not a wildcard (i.e., *), networks \
 has to be a string as well.')
+
+    bulk = []
+    if isinstance(t0, list) or isinstance(t1, list) \
+            or type(t1) is not type(t0):
+        # Individual time windows per request
+        if type(t1) is not type(t0) or len(t1) != len(t0):
+            raise ValueError('Time Lists have to have same length!')
+        if isinstance(networks, str) and isinstance(stations, str):
+            # Both scalars: repeat the same pair for every time window
+            for st, et in zip(t0, t1):
+                bulk.append((networks, stations, location, channel, st, et))
+        else:
+            if len(pairs) != len(t0):
+                raise ValueError('Time Lists have to have same length!')
+            for (net, stat), st, et in zip(pairs, t0, t1):
+                bulk.append((net, stat, location, channel, st, et))
+    elif isinstance(t0, (str, UTCDateTime)) and isinstance(
+            t1, (str, UTCDateTime)):
+        for net, stat in pairs:
+            bulk.append((net, stat, location, channel, t0, t1))
     return bulk
 
 
@@ -742,8 +694,6 @@ def cos_taper_st(
     """
     if isinstance(st, Trace):
         st = Stream([st])
-    elif isinstance(st, RFTrace):
-        st = RFStream([st])
     for ii, _ in enumerate(st):
         try:
             st[ii] = cos_taper(st[ii], taper_len, taper_at_masked, side)
