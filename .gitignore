@@ -22,4 +22,5 @@ examples/tutorials/database_sac
 **/tmp/**
 docs/_build
 docs/tutorials
+docs/sg_execution_times.rst
 dist
