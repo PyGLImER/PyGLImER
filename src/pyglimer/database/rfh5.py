@@ -105,8 +105,9 @@ class DBHandler(DBHandlerBase):
 omitted." % path, category=UserWarning)
 
     def get_data(
-        self, network: str, station: str, phase: str, evt_time: UTCDateTime,
-            tag: str = 'rf', pol: str = 'v') -> RFStream:
+        self, network: str, station: str, phase: str,
+            evt_time: UTCDateTime = None, tag: str = 'rf',
+            pol: str = 'v') -> RFStream:
         """
         Returns a :class:`~pyglimer.rf.create.RFStream` holding
         all the requested data.

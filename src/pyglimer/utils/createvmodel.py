@@ -148,10 +148,8 @@ class ComplexModel(object):
         """
         folder = os.path.join(finddir(), 'velocity_models')
         # Remove filetype identifier if provided
-        x = filename.split('.')
-        if len(x) > 1:
-            if x[-1] == 'pkl':
-                filename = ''.join(x[:-1])
+        if filename.endswith('.pkl'):
+            filename = filename[:-4]
         oloc = os.path.join(folder, filename)
         with open(oloc + ".pkl", 'wb') as output:
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
